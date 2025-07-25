@@ -91,6 +91,12 @@ export function AITableEntry({
         e.preventDefault()
         onClick()
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       {...props}
     >
       <AIEntryLabel

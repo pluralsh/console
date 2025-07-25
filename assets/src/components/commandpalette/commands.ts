@@ -63,6 +63,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
+import { useChatbot } from 'components/ai/AIContext.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -390,6 +391,7 @@ export function useHistory({
   loading: boolean
   history: Array<CommandGroup>
 } {
+  const { goToThread } = useChatbot()
   // TODO: this should support pagination
   const { loading, data } = useChatThreadsQuery({
     pollInterval: 120_000,
@@ -413,7 +415,7 @@ export function useHistory({
       label: thread?.summary ?? 'Untitled',
       icon: ChatOutlineIcon,
       callback: () => {
-        // TODO: Implement thread navigation
+        if (thread?.id) goToThread(thread.id)
       },
       deps: [],
       disabled: false,

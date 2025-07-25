@@ -3,28 +3,25 @@ import { useHotkeys } from '@saas-ui/use-hotkeys'
 import { usePlatform } from 'components/hooks/usePlatform'
 
 import { Body2BoldP } from 'components/utils/typography/Text'
-import { useCallback, useState } from 'react'
+import { use } from 'react'
 import CommandHotkeys from './CommandHotkeys'
-import CommandPaletteDialog from './CommandPaletteDialog'
+import { CommandPaletteContext } from './CommandPaletteContext.tsx'
+import { CommandPaletteDialog } from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands.ts'
 
 export default function CommandPaletteLauncher() {
   const { modKeyString, keyCombinerString } = usePlatform()
   const commands = useCommandsWithHotkeys()
-  const [open, setOpen] = useState(false)
-  const openCommandPalette = useCallback(
-    () => setOpen((open) => !open),
-    [setOpen]
-  )
+  const { setCmdkOpen } = use(CommandPaletteContext)
 
-  useHotkeys(['cmd K', 'ctrl K'], openCommandPalette)
+  useHotkeys(['cmd K', 'ctrl K'], () => setCmdkOpen(true))
 
   return (
     <>
       <Chip
         clickable
         inactive
-        onClick={openCommandPalette}
+        onClick={() => setCmdkOpen(true)}
         size="small"
         userSelect="none"
         whiteSpace="nowrap"
@@ -34,10 +31,7 @@ export default function CommandPaletteLauncher() {
           <Body2BoldP $color="text-xlight">{keyCombinerString}K</Body2BoldP>
         </Flex>
       </Chip>
-      <CommandPaletteDialog
-        open={open}
-        setOpen={setOpen}
-      />
+      <CommandPaletteDialog />
       {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
           key={`${label}-${hotkeys[0]}`}

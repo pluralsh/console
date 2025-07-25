@@ -2,22 +2,21 @@ import { ModalWrapper } from '@pluralsh/design-system'
 
 import chroma from 'chroma-js'
 import { Command } from 'cmdk'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
+import { CommandPaletteContext } from './CommandPaletteContext'
 
-export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
+export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
   position: 'relative',
-  top: '-96px',
   '[cmdk-root]': {
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.large,
-    boxShadow: theme.boxShadows.modal,
     display: 'flex',
     flexDirection: 'column',
-    width: 880,
-    maxHeight: 800,
+    width: 840,
+    maxHeight: '100%',
 
     '#cmdk-input-wrapper': {
       backgroundColor: theme.colors['fill-zero'],
@@ -143,34 +142,22 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
   },
 }))
 
-export default function CommandPaletteDialog({
-  open,
-  setOpen,
-}: {
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
-}) {
+export function CommandPaletteDialog() {
   const theme = useTheme()
-  const [value, setValue] = useState('')
-
-  useEffect(() => setValue(''), [open])
+  const { cmdkOpen, setCmdkOpen } = use(CommandPaletteContext)
 
   return (
-    <Wrapper
+    <WrapperModal
       overlayStyles={{
         background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
       }}
-      open={open}
-      onOpenChange={setOpen}
+      open={cmdkOpen}
+      onOpenChange={setCmdkOpen}
       title="Command Palette"
     >
       <Command>
-        <CommandPalette
-          value={value}
-          setValue={setValue}
-          close={() => setOpen(false)}
-        />
+        <CommandPalette />
       </Command>
-    </Wrapper>
+    </WrapperModal>
   )
 }

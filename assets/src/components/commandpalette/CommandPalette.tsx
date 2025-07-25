@@ -7,10 +7,9 @@ import {
 } from '@pluralsh/design-system'
 import { Command, useCommandState } from 'cmdk'
 import {
-  Dispatch,
   KeyboardEvent,
   ReactElement,
-  SetStateAction,
+  use,
   useCallback,
   useMemo,
   useState,
@@ -25,11 +24,10 @@ import { CaptionP } from '../utils/typography/Text.tsx'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
 import { CommandGroup, useCommands, useHistory } from './commands.ts'
-
-enum CommandPaletteTab {
-  History = 'History',
-  Commands = 'Commands',
-}
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from './CommandPaletteContext.tsx'
 
 const directory = [
   { path: CommandPaletteTab.History, label: CommandPaletteTab.History },
@@ -40,18 +38,10 @@ const directory = [
   },
 ]
 
-const defaultTab = CommandPaletteTab.History
-
-export default function CommandPalette({
-  value,
-  setValue,
-  close,
-}: {
-  value: string
-  setValue: Dispatch<SetStateAction<string>>
-  close: () => void
-}) {
+export default function CommandPalette() {
   const theme = useTheme()
+  const { setCmdkOpen, initialTab, setInitialTab } = use(CommandPaletteContext)
+  const [value, setValue] = useState('')
   // only show hidden commands if the user has typed something
   const commands = useCommands({ showHidden: value.length > 0, filter: value })
   const { history } = useHistory({
@@ -68,7 +58,16 @@ export default function CommandPalette({
   })
   const isEmpty = useCommandState((state) => state.filtered.count === 0)
   const reset = useCallback(() => setValue(''), [setValue])
-  const [tab, setTab] = useState<CommandPaletteTab>(defaultTab)
+
+  const [tab, setTabState] = useState<CommandPaletteTab>(initialTab)
+  // helps persist tab state while still allowing override to launch a specific tab
+  const setTab = useCallback(
+    (tab: CommandPaletteTab) => {
+      setTabState(tab)
+      setInitialTab(tab)
+    },
+    [setInitialTab]
+  )
 
   const items: Array<CommandGroup> = useMemo(() => {
     switch (tab) {
@@ -148,7 +147,7 @@ export default function CommandPalette({
                   disabled={command.disabled}
                   onSelect={() => {
                     command.callback()
-                    close()
+                    setCmdkOpen(false)
                   }}
                 >
                   {command.component ? (
@@ -236,7 +235,6 @@ interface HistoryItemProps {
   thread: ChatThreadTinyFragment
 }
 
-// TODO: add support for onClick to navigate to the thread
 function HistoryItem({ thread }: HistoryItemProps): ReactElement {
   const timestamp = getThreadOrPinTimestamp(thread)
 

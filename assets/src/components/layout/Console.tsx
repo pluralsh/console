@@ -29,6 +29,7 @@ import Header from './Header'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 
 export default function Console() {
   return (
@@ -44,7 +45,9 @@ export default function Console() {
                       <DeploymentSettingsProvider>
                         <AIContextProvider>
                           <FeatureFlagProvider>
-                            <ConsoleContent />
+                            <CommandPaletteProvider>
+                              <ConsoleContent />
+                            </CommandPaletteProvider>
                           </FeatureFlagProvider>
                         </AIContextProvider>
                       </DeploymentSettingsProvider>

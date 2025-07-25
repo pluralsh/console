@@ -14,14 +14,16 @@ import {
   Toast,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from 'components/commandpalette/CommandPaletteContext.tsx'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useUpdateChatThreadMutation } from 'generated/graphql'
-import { useCallback, useRef, useState } from 'react'
+import { use, useCallback, useRef, useState } from 'react'
 import { useChatbot } from '../AIContext'
 import { useAiPin } from '../AIPinButton'
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
-import { useNavigate } from 'react-router-dom'
-import { AI_THREADS_ABS_PATH } from '../../../routes/aiRoutesConsts.tsx'
 
 enum MenuItemKey {
   KnowledgeGraph = 'knowledgeGraph',
@@ -38,9 +40,9 @@ export function ChatbotThreadMoreMenu() {
     mutationLoading: forkLoading,
     currentThread,
   } = useChatbot()
+  const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
-  const navigate = useNavigate()
 
   // need a ref instead of state because state doesn't update before onOpenChange fires
   const blockClose = useRef(false)
@@ -73,7 +75,8 @@ export function ChatbotThreadMoreMenu() {
         break
       case MenuItemKey.History:
         closeMenu()
-        navigate(AI_THREADS_ABS_PATH)
+        setCmdkOpen(true)
+        setInitialTab(CommandPaletteTab.History)
         break
       default:
         blockClose.current = false

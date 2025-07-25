@@ -2,7 +2,6 @@ import {
   CloseIcon,
   ComposeIcon,
   HamburgerMenuCollapseIcon,
-  HistoryIcon,
   IconFrame,
   Spinner,
   Toast,
@@ -31,13 +30,8 @@ export function ChatbotHeader({
 }) {
   const { colors, spacing } = useTheme()
 
-  const {
-    closeChatbot,
-    createNewThread,
-    mutationLoading,
-    mutationError,
-    goToThreadList,
-  } = useChatbot()
+  const { closeChatbot, createNewThread, mutationLoading, mutationError } =
+    useChatbot()
 
   const { data: cloudConnections, loading: cloudConnectionsLoading } =
     useCloudConnectionsQuery()
@@ -103,18 +97,6 @@ export function ChatbotHeader({
                 }),
               })
             }
-          />
-        )}
-        {currentThread && (
-          <IconFrame
-            clickable
-            tooltip="View all threads"
-            type="tertiary"
-            icon={<HistoryIcon />}
-            onClick={() => {
-              goToThreadList()
-              setIsActionsPanelOpen(false)
-            }}
           />
         )}
         <ChatbotThreadMoreMenu />
