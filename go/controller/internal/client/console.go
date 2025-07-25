@@ -1,7 +1,10 @@
 package client
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"io"
 	"net/http"
 
 	console "github.com/pluralsh/console/go/client"
@@ -16,8 +19,47 @@ type authedTransport struct {
 }
 
 func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Set auth header
 	req.Header.Set("Authorization", "Token "+t.token)
-	return t.wrapped.RoundTrip(req)
+
+	// Set Accept-Encoding to support gzip response
+	req.Header.Set("Accept-Encoding", "gzip")
+
+	// Gzip the request body if present
+	if req.Body != nil && req.ContentLength != 0 {
+		var buf bytes.Buffer
+		gzipWriter := gzip.NewWriter(&buf)
+		_, err := io.Copy(gzipWriter, req.Body)
+		if err != nil {
+			return nil, err
+		}
+		err = gzipWriter.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		req.Body = io.NopCloser(&buf)
+		req.ContentLength = int64(buf.Len())
+		req.Header.Set("Content-Encoding", "gzip")
+	}
+
+	// Do the request
+	resp, err := t.wrapped.RoundTrip(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// If response is gzipped, wrap it with a gzip reader
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		resp.Body, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		// You may also want to delete the gzip header so downstream code doesn't try to decompress again
+		resp.Header.Del("Content-Encoding")
+	}
+
+	return resp, nil
 }
 
 type client struct {
