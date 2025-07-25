@@ -33,10 +33,9 @@ import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
 import { ChatMessage } from '../ChatMessage.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
-import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
-import { ChatInputAgentSelect } from './ChatInputAgentSelect.tsx'
-import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
+import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
+import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 
 export function ChatInput({
   currentThread,
@@ -182,16 +181,10 @@ export function ChatInput({
                 onClick={() => setShowMcpServers(!showMcpServers)}
               />
             )}
-            <>
-              {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
-              {!hideClusterSelector && (
-                <ChatInputClusterSelect currentThread={currentThread} />
-              )}
-              <ChatInputAgentSelect
-                prompt={newMessage}
-                currentThread={currentThread}
-              />
-            </>
+            {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
+            {!hideClusterSelector && (
+              <ChatInputClusterSelect currentThread={currentThread} />
+            )}
           </Flex>
           <Button
             disabled={!newMessage.trim()}

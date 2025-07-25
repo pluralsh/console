@@ -1,6 +1,7 @@
 import {
   CloseIcon,
   ComposeIcon,
+  Flex,
   HamburgerMenuCollapseIcon,
   IconFrame,
   Spinner,
@@ -18,6 +19,7 @@ import { useChatbot } from '../AIContext'
 import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
+import { ChatInputAgentSelect } from './input/ChatInputAgentSelect.tsx'
 
 export function ChatbotHeader({
   currentThread,
@@ -44,8 +46,8 @@ export function ChatbotHeader({
   }
 
   return (
-    <>
-      <WrapperSC>
+    <Flex direction="column">
+      <MainHeaderSC>
         {currentThread && (
           <div
             css={{
@@ -66,48 +68,56 @@ export function ChatbotHeader({
             />
           </div>
         )}
-        <Body2BoldP
-          css={{ color: colors['text-light'], marginRight: spacing.xxsmall }}
-        >
+        <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
           Copilot
         </Body2BoldP>
-        <StackedText
-          truncate
-          first={currentThread?.summary}
-          second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
-          firstPartialType="body2"
-          firstColor={insightPathInfo || flowPath ? 'text' : 'text-xlight'}
-          secondPartialType="caption"
-          css={{ flex: 1, marginRight: spacing.small }}
-        />
-        {!cloudConnectionsLoading && (
+        {currentThread && <ChatInputAgentSelect />}
+        {/* icons */}
+        <Flex gap="xsmall">
+          {!cloudConnectionsLoading && (
+            <IconFrame
+              clickable
+              icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+              type="tertiary"
+              tooltip="Start a new chat"
+              onClick={() =>
+                createNewThread({
+                  summary: 'New chat with Plural Copilot',
+                  ...(connectionId && {
+                    session: {
+                      connectionId,
+                      done: true,
+                    },
+                  }),
+                })
+              }
+            />
+          )}
+          <ChatbotThreadMoreMenu />
           <IconFrame
             clickable
-            icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+            tooltip="Close"
             type="tertiary"
-            tooltip="Start a new chat"
-            onClick={() =>
-              createNewThread({
-                summary: 'New chat with Plural Copilot',
-                ...(connectionId && {
-                  session: {
-                    connectionId,
-                    done: true,
-                  },
-                }),
-              })
-            }
+            icon={<CloseIcon css={{ width: 16 }} />}
+            onClick={() => closeChatbot()}
           />
-        )}
-        <ChatbotThreadMoreMenu />
-        <IconFrame
-          clickable
-          tooltip="Close"
-          type="tertiary"
-          icon={<CloseIcon css={{ width: 16 }} />}
-          onClick={() => closeChatbot()}
-        />
-      </WrapperSC>
+        </Flex>
+      </MainHeaderSC>
+      {currentThread && (
+        <SubHeaderSC>
+          <StackedText
+            truncate
+            first={currentThread?.summary}
+            second={
+              <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
+            }
+            firstPartialType="body2Bold"
+            firstColor="text"
+            secondPartialType="caption"
+            css={{ flex: 1, paddingRight: spacing.large }}
+          />
+        </SubHeaderSC>
+      )}
       <Toast
         show={!!mutationError}
         closeTimeout={5000}
@@ -117,13 +127,21 @@ export function ChatbotHeader({
       >
         <strong>Error creating new thread:</strong> {mutationError?.message}
       </Toast>
-    </>
+    </Flex>
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const SubHeaderSC = styled.div(({ theme }) => ({
+  height: 48,
   display: 'flex',
-  gap: theme.spacing.xxsmall,
+  alignItems: 'center',
+  padding: `0 ${theme.spacing.medium}px`,
+  borderBottom: theme.borders.default,
+}))
+
+const MainHeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.small,
   alignItems: 'center',
   padding: theme.spacing.medium,
   borderBottom: theme.borders.default,

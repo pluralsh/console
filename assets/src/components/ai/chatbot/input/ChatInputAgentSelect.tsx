@@ -1,24 +1,26 @@
-import { useChatbot } from '../../AIContext.tsx'
-import { useCallback, useMemo } from 'react'
 import {
-  AgentSessionType,
-  ChatThreadTinyFragment,
-  useCreateAgentSessionMutation,
-} from '../../../../generated/graphql.ts'
-import {
+  Button,
+  CloseIcon,
   CloudIcon,
   KubernetesIcon,
   ListBoxFooterPlus,
   ListBoxItem,
+  PlusIcon,
   RobotIcon,
   Select,
   TerraformLogoIcon,
   Toast,
+  Tooltip,
 } from '@pluralsh/design-system'
+import { capitalize } from 'lodash'
+import { useCallback, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { lowerCase } from 'lodash'
-import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
+import {
+  AgentSessionType,
+  useCreateAgentSessionMutation,
+} from '../../../../generated/graphql.ts'
 import { TRUNCATE } from '../../../utils/truncate.ts'
+import { useChatbot } from '../../AIContext.tsx'
 
 function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   switch (type) {
@@ -41,17 +43,11 @@ function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   }
 }
 
-export function ChatInputAgentSelect({
-  prompt,
-  currentThread,
-}: {
-  prompt: string
-  currentThread: ChatThreadTinyFragment
-}) {
+export function ChatInputAgentSelect() {
   const theme = useTheme()
-  const { createNewThread, goToThread } = useChatbot()
+  const { currentThread, goToThread, goToThreadList } = useChatbot()
   const agent = currentThread?.session?.type
-  const icon = useMemo(() => getIcon(agent, 12), [agent])
+  const icon = useMemo(() => getIcon(agent, 16), [agent])
 
   const [createAgentSession, { loading, error: agentSessionError }] =
     useCreateAgentSessionMutation({
@@ -62,38 +58,27 @@ export function ChatInputAgentSelect({
 
   const onAgentChange = useCallback(
     (newAgent: Nullable<AgentSessionType>) => {
-      // If the selected agent is the same as the current one or if there is an
-      // ongoing change, do nothing.
-      if (newAgent === agent || loading) {
-        return
-      }
+      if (newAgent === agent || loading) return
 
-      // If a new agent is selected, create a new agent session.
       if (newAgent) {
         createAgentSession({
           variables: {
             attributes: {
-              prompt,
               type: newAgent,
-              connectionId: currentThread.session?.connection?.id,
+              connectionId: currentThread?.session?.connection?.id,
             },
           },
         })
       }
 
-      // If the agent is deselected, go back to the previous thread.
-      if (!newAgent) {
-        // TODO: Instead of creating a new thread, we should go back to the previous one.
-        createNewThread({ summary: 'New chat with Plural Copilot' })
-      }
+      if (!newAgent) goToThreadList()
     },
     [
       agent,
       createAgentSession,
-      createNewThread,
-      currentThread.session?.connection?.id,
+      currentThread?.session?.connection?.id,
+      goToThreadList,
       loading,
-      prompt,
     ]
   )
 
@@ -127,10 +112,28 @@ export function ChatInputAgentSelect({
           ) : undefined
         }
         triggerButton={
-          <ChatInputSelectButton tooltip="Use our coding agent to run background task">
-            {icon}
-            <span css={{ ...TRUNCATE }}>{agent && lowerCase(agent)} agent</span>
-          </ChatInputSelectButton>
+          // wrapper div prevents tooltip from interfering with trigger
+          <div>
+            <Tooltip label="Use our coding agent to run a background task">
+              <Button
+                loading={loading}
+                startIcon={icon}
+                endIcon={
+                  agent ? (
+                    <CloseIcon color="icon-xlight" />
+                  ) : (
+                    <PlusIcon color="icon-xlight" />
+                  )
+                }
+                secondary
+                small
+              >
+                <span css={{ ...TRUNCATE }}>
+                  {capitalize(agent ?? '')} Agent
+                </span>
+              </Button>
+            </Tooltip>
+          </div>
         }
       >
         <ListBoxItem
