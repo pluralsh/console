@@ -32,15 +32,16 @@ defmodule ConsoleWeb.IngestController do
     opts = ReverseProxyPlug.init(upstream: upstream, response_mode: :stream)
     {body, conn} = ReverseProxyPlug.read_body(conn)
     if meter do
-      Console.Prom.Meter.incr(meter, byte_size(body))
+      Console.Prom.Meter.incr(byte_size(body))
     end
 
-    Req.request_stream(%ReverseProxyPlug.HTTPClient.Request{
+    %ReverseProxyPlug.HTTPClient.Request{
       method: to_method(conn.method),
       url: upstream,
       headers: convert_headers(conn, upstream),
       body: body
-    })
+    }
+    |> Req.request_stream()
     |> ReverseProxyPlug.response(conn, opts)
     |> halt()
   end
