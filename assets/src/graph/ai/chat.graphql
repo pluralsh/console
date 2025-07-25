@@ -104,6 +104,11 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  connection {
+    id
+    name
+    provider
+  }
   cluster {
     id
   }

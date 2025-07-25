@@ -63,9 +63,9 @@ export function ChatInput({
     'currentAiChatMessage',
     ''
   )
-  const [cloudConnectionId, setCloudConnectionId] = useState<
-    string | undefined
-  >()
+  // const [cloudConnectionId, setCloudConnectionId] = useState<
+  //   string | undefined
+  // >()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
@@ -183,18 +183,13 @@ export function ChatInput({
               />
             )}
             <>
-              <ChatInputCloudSelect
-                currentThread={currentThread}
-                cloudConnectionId={cloudConnectionId}
-                setCloudConnectionId={setCloudConnectionId}
-              />
+              <ChatInputCloudSelect currentThread={currentThread} />
               {!hideClusterSelector && (
                 <ChatInputClusterSelect currentThread={currentThread} />
               )}
               <ChatInputAgentSelect
                 prompt={newMessage}
                 currentThread={currentThread}
-                connectionId={cloudConnectionId}
               />
             </>
           </Flex>

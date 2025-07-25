@@ -44,11 +44,9 @@ function getIcon(type: Nullable<AgentSessionType>, size = 16) {
 export function ChatInputAgentSelect({
   prompt,
   currentThread,
-  connectionId,
 }: {
   prompt: string
   currentThread: ChatThreadTinyFragment
-  connectionId: string | undefined
 }) {
   const theme = useTheme()
   const { createNewThread, goToThread } = useChatbot()
@@ -73,7 +71,13 @@ export function ChatInputAgentSelect({
       // If a new agent is selected, create a new agent session.
       if (newAgent) {
         createAgentSession({
-          variables: { attributes: { connectionId, prompt, type: newAgent } },
+          variables: {
+            attributes: {
+              prompt,
+              type: newAgent,
+              connectionId: currentThread.session?.connection?.id,
+            },
+          },
         })
       }
 
@@ -83,7 +87,14 @@ export function ChatInputAgentSelect({
         createNewThread({ summary: 'New chat with Plural Copilot' })
       }
     },
-    [agent, connectionId, createAgentSession, createNewThread, loading, prompt]
+    [
+      agent,
+      createAgentSession,
+      createNewThread,
+      currentThread.session?.connection?.id,
+      loading,
+      prompt,
+    ]
   )
 
   return (
