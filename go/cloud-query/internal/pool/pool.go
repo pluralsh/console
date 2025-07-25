@@ -68,13 +68,11 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		-- Create the schema
 		DROP SCHEMA IF EXISTS %[1]s CASCADE;
 		CREATE SCHEMA %[1]s;
-		COMMENT ON SCHEMA %[1]s IS 'steampipe aws fdw';
-		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA %[1]s;
 
 		-- Create the user
 		CREATE USER %[1]s WITH PASSWORD %[2]s;
 		ALTER USER %[1]s WITH NOSUPERUSER;
-		ALTER USER %[1]s SET SEARCH_PATH = %[1]s;
+		ALTER USER %[1]s SET SEARCH_PATH = %[1]s, extensions;
 
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE %[4]s FROM PUBLIC;
@@ -87,6 +85,9 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		-- Allow accessing tables
 		REVOKE ALL ON ALL TABLES IN SCHEMA %[1]s FROM PUBLIC;
 		GRANT  ALL ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
+
+		-- Allow accessing to shared extensions
+		GRANT ALL ON SCHEMA extensions TO %[1]s; 
 
 		-- Grant usage on foreign data wrapper and servers
 		GRANT USAGE ON FOREIGN DATA WRAPPER %[3]s TO %[1]s;
@@ -113,7 +114,6 @@ func (c *ConnectionPool) cleanup(connection string) error {
 
 	_, err := c.admin.Exec(query)
 	if err != nil {
-		klog.ErrorS(err, "failed to cleanup connection", "connection", connection)
 		return fmt.Errorf("failed to cleanup connection '%s': %w", connection, err)
 	}
 
