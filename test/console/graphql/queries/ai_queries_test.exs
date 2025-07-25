@@ -51,6 +51,37 @@ defmodule Console.GraphQl.AiQueriesTest do
              |> ids_equal(chats)
     end
 
+    test "it can fetch sideloads of an agent session" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      session = insert(:agent_session, connection: insert(:cloud_connection), thread: thread)
+                |> IO.inspect()
+      chats = insert_list(3, :chat, thread: thread)
+      insert_list(4, :chat)
+
+      {:ok, %{data: %{"chatThread" => found}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            session {
+              connection {
+                id
+              }
+            }
+            chats(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert found["id"] == thread.id
+      assert from_connection(found["chats"])
+             |> ids_equal(chats)
+
+      assert found["session"]["connection"]["id"] == session.connection_id
+    end
+
     test "you cannot view other users threads" do
       user = insert(:user)
       thread = insert(:chat_thread)

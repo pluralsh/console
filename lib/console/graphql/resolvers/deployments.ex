@@ -93,7 +93,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PreviewEnvironmentInstance,
     PreviewEnvironmentTemplate,
     TemplateContext,
-    NodeStatistic
+    NodeStatistic,
+    CloudConnection
   }
 
   def query(Project, _), do: Project
@@ -176,6 +177,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(PreviewEnvironmentTemplate, _), do: PreviewEnvironmentTemplate
   def query(TemplateContext, _), do: TemplateContext
   def query(NodeStatistic, _), do: NodeStatistic
+  def query(CloudConnection, _), do: CloudConnection
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
