@@ -1,5 +1,4 @@
 import { Button, Card, Code, Flex, Modal } from '@pluralsh/design-system'
-import { useChatbot } from 'components/ai/AIContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpToolFragment } from 'generated/graphql'
 import { Link } from 'react-router-dom'
@@ -17,8 +16,6 @@ export function ToolDetailsModal({
   open: boolean
   onClose: () => void
 }) {
-  const { closeChatbot } = useChatbot()
-
   if (!tool) return null
 
   return (
@@ -43,10 +40,7 @@ export function ToolDetailsModal({
               as={Link}
               secondary
               to={AI_MCP_SERVERS_ABS_PATH}
-              onClick={() => {
-                onClose()
-                closeChatbot()
-              }}
+              onClick={() => onClose()}
               style={{ textTransform: 'none' }}
             >
               View all MCP servers

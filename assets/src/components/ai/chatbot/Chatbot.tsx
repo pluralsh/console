@@ -1,7 +1,7 @@
 import {
+  Accordion,
+  AccordionItem,
   ChatOutlineIcon,
-  FillLevelProvider,
-  ModalWrapper,
 } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
@@ -14,7 +14,7 @@ import {
   useChatThreadsQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentPropsWithRef, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
@@ -23,83 +23,68 @@ import { AITable } from '../AITable.tsx'
 import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import {
   ChatbotMessagesWrapperSC,
   ChatbotPanelThread,
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
+import { useResizablePane } from './useResizeableChatPane.tsx'
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 
-type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
-  fullscreen: boolean
-}
+const MIN_WIDTH = 400
+const MAX_WIDTH_VW = 40
+const HANDLE_THICKNESS = 20
+export const CHATBOT_HEADER_HEIGHT = 57
 
-export function Chatbot() {
-  const { open, setOpen, fullscreen } = useChatbotContext()
+export function ChatbotLauncher() {
+  const { open, setOpen } = useChatbotContext()
   const settings = useDeploymentSettings()
 
-  if (!settings.ai?.enabled) return null
+  if (!settings.ai?.enabled || open) return null
 
   return (
-    <div css={{ position: 'relative' }}>
-      <ChatbotIconButton
-        active={open}
-        onClick={() => setOpen(true)}
-      >
-        <ChatOutlineIcon />
-      </ChatbotIconButton>
-      <ChatbotPanel
-        fullscreen={fullscreen}
-        open={open}
-      />
-    </div>
-  )
-}
-
-export function ChatbotPanel({
-  open,
-  fullscreen = false,
-  ...props
-}: {
-  open: boolean
-} & ChatbotPanelInnerProps) {
-  const theme = useTheme()
-  const { closeChatbot } = useChatbot()
-  return (
-    <ModalWrapper
-      overlayStyles={
-        fullscreen
-          ? {}
-          : {
-              background: 'none',
-              padding: theme.spacing.medium,
-              top: theme.spacing.xxxxlarge,
-              left: 'unset',
-            }
-      }
-      css={{ height: '100%' }}
-      open={open}
-      onOpenChange={closeChatbot}
-      title="Ask Plural AI"
+    <ChatbotIconButton
+      active={open}
+      onClick={() => setOpen(true)}
     >
-      <ChatbotPanelInner
-        fullscreen={fullscreen}
-        {...props}
-      />
-    </ModalWrapper>
+      <ChatOutlineIcon />
+    </ChatbotIconButton>
   )
 }
 
-function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
+export function ChatbotPanel() {
+  const { open } = useChatbotContext()
+  return (
+    <Accordion
+      type="single"
+      value={`${open}`}
+      orientation="horizontal"
+      css={{ border: 'none', zIndex: 1 }} // corresponds with zIndex={0} over main console content in Console.tsx
+    >
+      <AccordionItem
+        value={`${true}`}
+        caret="none"
+        padding="none"
+        trigger={null}
+        css={{ height: '100%', width: '100%' }}
+        additionalContentStyles={{ overflow: 'visible' }}
+      >
+        <ChatbotPanelInner />
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+function ChatbotPanelInner() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const { currentThread, currentInsight, detailsLoading, detailsError } =
-    useChatbot()
+  const { currentThread, detailsLoading, detailsError } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
+  const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const threadsQuery = useFetchPaginatedData({
-    skip: !!currentThread || !!currentInsight,
+    skip: !!currentThread,
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
   })
@@ -136,108 +121,106 @@ function ChatbotPanelInner({ fullscreen, ...props }: ChatbotPanelInnerProps) {
     return [...curPageThreads, ...otherThreads]
   }, [threadsQuery.data, pathname])
 
+  const { calculatedPanelWidth, dragHandleProps, isDragging } =
+    useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
   return (
-    <ChatbotFrameSC
-      $fullscreen={fullscreen}
-      {...props}
+    <div
+      css={{ position: 'relative', height: '100%' }}
+      style={{ '--chatbot-panel-width': `${calculatedPanelWidth}px` }}
     >
       {!isEmpty(tools) && (
         <McpServerShelf
+          zIndex={2}
           isOpen={showMcpServers}
-          setIsOpen={setShowMcpServers}
-          fullscreen={fullscreen}
+          onClose={() => setShowMcpServers(false)}
           tools={tools}
         />
       )}
-      <FillLevelProvider value={1}>
-        <RightSideSC
-          $showMcpServers={showMcpServers}
-          $fullscreen={fullscreen}
-        >
-          <ChatbotHeader
-            fullscreen={fullscreen}
+      {currentThread && (
+        <ChatbotActionsPanel
+          zIndex={1}
+          isOpen={showActionsPanel}
+          currentThread={currentThread}
+        />
+      )}
+      <MainContentWrapperSC>
+        <ChatbotHeader
+          currentThread={currentThread}
+          isActionsPanelOpen={showActionsPanel}
+          setIsActionsPanelOpen={setShowActionsPanel}
+        />
+        {detailsError && <GqlError error={detailsError} />}
+        {!currentThread && detailsLoading ? (
+          <ChatbotMessagesWrapperSC>
+            <LoadingIndicator />
+          </ChatbotMessagesWrapperSC>
+        ) : currentThread ? (
+          <ChatbotPanelThread
             currentThread={currentThread}
-            currentInsight={currentInsight}
+            threadDetailsQuery={threadDetailsQuery}
+            showMcpServers={showMcpServers}
+            setShowMcpServers={setShowMcpServers}
+            showExamplePrompts={showPrompts}
+            setShowExamplePrompts={setShowPrompts}
           />
-          {detailsError && <GqlError error={detailsError} />}
-          {!currentThread && !currentInsight && detailsLoading ? (
-            <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
-              <LoadingIndicator />
-            </ChatbotMessagesWrapperSC>
-          ) : currentThread ? (
-            <ChatbotPanelThread
-              currentThread={currentThread}
-              threadDetailsQuery={threadDetailsQuery}
-              fullscreen={fullscreen}
-              showMcpServers={showMcpServers}
-              setShowMcpServers={setShowMcpServers}
-              showExamplePrompts={showPrompts}
-              setShowExamplePrompts={setShowPrompts}
+        ) : (
+          <ChatbotTableWrapperSC>
+            <AITable
+              modal
+              query={threadsQuery}
+              rowData={rows}
+              borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
+              border="none"
+              borderRadius={0}
             />
-          ) : currentInsight ? (
-            <ChatbotPanelInsight
-              currentInsight={currentInsight}
-              fullscreen={fullscreen}
-            />
-          ) : (
-            <ChatbotTableWrapperSC $fullscreen={fullscreen}>
-              <AITable
-                modal
-                query={threadsQuery}
-                rowData={rows}
-                borderBottom={
-                  isEmpty(rows) ? 'none' : theme.borders['fill-two']
-                }
-                border="none"
-                fillLevel={1}
-                borderRadius={0}
-              />
-            </ChatbotTableWrapperSC>
-          )}
-        </RightSideSC>
-      </FillLevelProvider>
-    </ChatbotFrameSC>
+          </ChatbotTableWrapperSC>
+        )}
+      </MainContentWrapperSC>
+      <DragHandleSC
+        tabIndex={0}
+        {...dragHandleProps}
+        $isDragging={isDragging}
+      />
+    </div>
   )
 }
 
-const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    ...($fullscreen
-      ? { '& > *': { boxShadow: theme.boxShadows.modal } }
-      : {
-          border: theme.borders['fill-two'],
-          borderRadius: theme.borderRadiuses.large,
-        }),
-    display: 'flex',
-    overflow: 'auto hidden',
-    height: '100%',
-    width: '100%',
-    maxWidth: $fullscreen ? '80vw' : 1096,
-  })
-)
+const ChatbotTableWrapperSC = styled.div(() => ({
+  height: '100%',
+  overflow: 'hidden',
+}))
 
-const ChatbotTableWrapperSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    height: '100%',
-    overflow: 'hidden',
-    backgroundColor: theme.colors['fill-one'],
-    ...($fullscreen && {
-      border: theme.borders['fill-two'],
-      borderRadius: theme.borderRadiuses.large,
-    }),
-  })
-)
-
-const RightSideSC = styled.div<{
-  $fullscreen?: boolean
-  $showMcpServers?: boolean
-}>(({ $fullscreen, theme, $showMcpServers }) => ({
+const MainContentWrapperSC = styled.div(({ theme }) => ({
+  position: 'relative',
+  zIndex: theme.zIndexes.modal,
   display: 'flex',
   flexDirection: 'column',
-  flex: 1,
-  width: 768,
-  minWidth: 768,
-  ...($fullscreen
-    ? { gap: theme.spacing.medium, marginLeft: theme.spacing.medium }
-    : { borderLeft: $showMcpServers ? theme.borders['fill-three'] : 'none' }),
+  height: '100%',
+  width: 'var(--chatbot-panel-width)',
+  borderLeft: theme.borders.default,
+  background: theme.colors['fill-accent'],
 }))
+
+const DragHandleSC = styled.div<{ $isDragging: boolean }>(
+  ({ theme, $isDragging }) => ({
+    position: 'absolute',
+    zIndex: theme.zIndexes.modal,
+    left: -HANDLE_THICKNESS / 2,
+    top: 0,
+    width: HANDLE_THICKNESS,
+    height: '100%',
+    cursor: 'ew-resize',
+    background: 'transparent',
+    display: 'flex',
+    justifyContent: 'center',
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
+    // make the part the highlights while dragging a little thinner than full drag area
+    '&::before': {
+      content: '""',
+      pointerEvents: 'none',
+      width: HANDLE_THICKNESS / 4,
+      background: $isDragging ? theme.colors['icon-primary'] : 'transparent',
+      transition: 'background 0.2s ease-in-out',
+    },
+  })
+)

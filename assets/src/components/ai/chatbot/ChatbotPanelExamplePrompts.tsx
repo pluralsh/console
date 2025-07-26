@@ -18,12 +18,13 @@ function Prompt({ children, ...props }: ChipProps) {
 
   return (
     <Chip
+      size="large"
       clickable
       css={{
         borderRadius: 16,
-        height: 32,
+        padding: theme.spacing.large,
+        width: 'fit-content',
       }}
-      width="max-content"
       {...props}
     >
       <MagicWandIcon size={12} />
@@ -111,7 +112,8 @@ export function ChatbotPanelExamplePrompts({
         flexDirection: 'column',
         justifyContent: 'flex-end',
         maxHeight: '100%',
-        overflowY: 'auto',
+        width: '100%',
+        overflow: 'hidden auto',
         zIndex: 1,
       }}
     >
@@ -127,7 +129,8 @@ export function ChatbotPanelExamplePrompts({
             flexDirection: 'column',
             gap: theme.spacing.xsmall,
             padding: theme.spacing.medium,
-            width: 'max-content',
+            width: '100%',
+            overflow: 'hidden',
           }}
           ref={ref}
         >

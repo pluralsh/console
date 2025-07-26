@@ -1,22 +1,22 @@
 import {
+  AiSparkleFilledIcon,
   Button,
   Chip,
   Flex,
-  IconFrame,
-  MagicWandIcon,
   PlusIcon,
+  RobotIcon,
   SendMessageIcon,
   ServersIcon,
-  Tooltip,
 } from '@pluralsh/design-system'
-import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-import { GqlError } from 'components/utils/Alert'
-import { EditableDiv } from 'components/utils/EditableDiv'
+import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import {
+  AgentSessionType,
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
-} from 'generated/graphql'
+} from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -25,18 +25,21 @@ import {
   SetStateAction,
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
-import { ChatMessage } from './ChatMessage'
-import { useCurrentPageChatContext } from './useCurrentPageChatContext'
+import { ChatMessage } from '../ChatMessage.tsx'
+import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
+import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
+import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
+import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 
-export function SendMessageForm({
+export function ChatInput({
   currentThread,
   sendMessage,
-  fullscreen,
   serverNames,
   showMcpServers,
   setShowMcpServers,
@@ -46,14 +49,12 @@ export function SendMessageForm({
 }: {
   currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
-  fullscreen: boolean
   serverNames: string[]
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
   showPrompts: boolean
   setShowPrompts: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
-  const theme = useTheme()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -61,6 +62,9 @@ export function SendMessageForm({
     'currentAiChatMessage',
     ''
   )
+  // const [cloudConnectionId, setCloudConnectionId] = useState<
+  //   string | undefined
+  // >()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
@@ -101,10 +105,19 @@ export function SendMessageForm({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
+  const agent = useMemo(
+    () =>
+      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
+        (type) => type === currentThread.session?.type
+      ),
+    [currentThread.session?.type]
+  )
+
+  const hideClusterSelector = agent || !currentThread?.session?.id
+
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
-      $fullscreen={fullscreen}
       ref={formRef}
     >
       {!isEmpty(serverNames) && (
@@ -129,114 +142,104 @@ export function SendMessageForm({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC $fullscreen={fullscreen}>
+      <EditableContentWrapperSC $agent={!!agent}>
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder="Start typing..."
           setValue={setNewMessage}
           initialValue={newMessage}
           onEnter={() => formRef.current?.requestSubmit()}
-          css={{ maxHeight: 176 }}
+          css={{ maxHeight: 130 }}
           {...props}
           ref={contentEditableRef}
         />
         <Flex justifyContent="space-between">
           <Flex
-            gap="small"
-            height="100%"
+            gap="xxsmall"
+            align="flex-end"
+            overflow="hidden"
           >
-            <IconFrame
-              icon={<MagicWandIcon />}
-              type="secondary"
-              clickable
-              tooltip={
-                showPrompts ? 'Hide example prompts' : 'Show example prompts'
-              }
+            {showContextBtn && (
+              <ChatInputIconFrame
+                disabled={contextBtnClicked}
+                loading={contextLoading}
+                icon={<PlusIcon />}
+                onClick={handleAddPageContext}
+                tooltip={`Append prompts and files related to the ${source.toLowerCase()} currently being viewed`}
+              />
+            )}
+            <ChatInputIconFrame
+              active={showPrompts}
+              icon={<AiSparkleFilledIcon />}
+              tooltip={`${showPrompts ? 'Hide' : 'Show'} example prompts`}
               onClick={() => setShowPrompts(!showPrompts)}
-              css={{
-                borderColor: showPrompts
-                  ? theme.colors['border-primary']
-                  : undefined,
-              }}
             />
             {!isEmpty(serverNames) && (
-              <IconFrame
+              <ChatInputIconFrame
                 icon={<ServersIcon />}
-                type="secondary"
-                clickable
-                tooltip={
-                  showMcpServers ? 'Collapse MCP servers' : 'Expand MCP servers'
-                }
+                tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
                 onClick={() => setShowMcpServers(!showMcpServers)}
               />
             )}
-            {showContextBtn && (
-              <Tooltip
-                label={`Appends prompts and files related to the ${source.toLowerCase()} currently being viewed`}
-                placement="top"
-              >
-                <Button
-                  small
-                  secondary
-                  disabled={contextBtnClicked}
-                  loading={contextLoading}
-                  onClick={handleAddPageContext}
-                  startIcon={<PlusIcon />}
-                >
-                  Add page context
-                </Button>
-              </Tooltip>
+            {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
+            {!hideClusterSelector && (
+              <ChatInputClusterSelect currentThread={currentThread} />
             )}
           </Flex>
-          <IconFrame
-            icon={<SendMessageIcon />}
-            clickable
-            type="secondary"
-            css={{ '&:disabled': { opacity: 0.5 } }}
+          <Button
             disabled={!newMessage.trim()}
-            onClick={() => {
-              formRef.current?.requestSubmit()
-            }}
-          />
+            endIcon={<SendMessageIcon />}
+            onClick={() => formRef.current?.requestSubmit()}
+            secondary={!agent}
+            small
+            startIcon={agent ? <RobotIcon /> : undefined}
+          >
+            {agent ? 'Agent' : 'Copilot'}
+          </Button>
         </Flex>
       </EditableContentWrapperSC>
     </SendMessageFormSC>
   )
 }
 
-const SendMessageFormSC = styled.form<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-    position: 'relative',
-    borderRadius: $fullscreen ? theme.borderRadiuses.large : '0px',
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-one']
-      : theme.colors['fill-two'],
-    borderTop: $fullscreen ? undefined : theme.borders['fill-two'],
-    padding: theme.spacing.medium,
-    ...($fullscreen && {
-      border: theme.borders.input,
-    }),
-  })
-)
+const SendMessageFormSC = styled.form(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  position: 'relative',
+  padding: theme.spacing.medium,
+}))
 
-const EditableContentWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
+const EditableContentWrapperSC = styled.div<{ $agent: boolean }>(
+  ({ theme, $agent: agent }) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.small,
     padding: theme.spacing.small,
     borderRadius: theme.borderRadiuses.large,
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-two']
-      : theme.colors['fill-three'],
+    backgroundColor: theme.colors['fill-zero'],
+    border: theme.borders.input,
+    outline: '1px solid transparent',
+
     '&:has(div:focus)': {
-      outline: theme.borders['outline-focused'],
+      backgroundColor: theme.colors['fill-zero-selected'],
+      transition: 'box-shadow 0.16s ease-in-out, outline 0.16s ease-in-out',
+      boxShadow: agent
+        ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
+        : undefined,
+      outline: agent
+        ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
+        : theme.borders['outline-focused'],
     },
   })
 )
+
+const ChipListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  maxWidth: 256,
+  minWidth: 0,
+}))
 
 export function GeneratingResponseMessage() {
   const theme = useTheme()
@@ -259,10 +262,3 @@ export function GeneratingResponseMessage() {
     />
   )
 }
-
-const ChipListSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  maxWidth: 256,
-  minWidth: 0,
-}))

@@ -2,8 +2,6 @@ import { ApolloCache, ApolloError } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
-  AiInsightFragment,
-  AiInsightSummaryFragment,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
   ChatThreadFragment,
@@ -44,14 +42,8 @@ type ExplainWithAIContextT = {
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
-  fullscreen: boolean
-  setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThreadId: (threadId: Nullable<string>) => void
-  currentInsight: Nullable<AiInsightSummaryFragment>
-  setCurrentInsight: Dispatch<
-    SetStateAction<Nullable<AiInsightSummaryFragment>>
-  >
   threadLoading: boolean
   threadError: ApolloError | undefined
   setShowForkToast: (show: boolean) => void
@@ -73,11 +65,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
-  const [currentInsight, setCurrentInsight] =
-    useState<Nullable<AiInsightSummaryFragment>>()
   const [showForkToast, setShowForkToast] = useState(false)
 
   const {
@@ -98,10 +87,6 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         setOpen,
         currentThread: threadData?.chatThread,
         setCurrentThreadId,
-        fullscreen,
-        setFullscreen,
-        currentInsight,
-        setCurrentInsight,
         threadLoading,
         threadError,
         setShowForkToast,
@@ -156,10 +141,6 @@ export function useChatbot() {
     setOpen,
     currentThread,
     setCurrentThreadId,
-    fullscreen,
-    setFullscreen,
-    currentInsight,
-    setCurrentInsight,
     threadLoading,
     threadError,
     setShowForkToast,
@@ -176,7 +157,6 @@ export function useChatbot() {
         variables: { attributes },
         onCompleted: (data) => {
           setCurrentThreadId(data.createThread?.id)
-          setCurrentInsight(null)
           setOpen(true)
         },
         update: (cache, { data }) =>
@@ -194,7 +174,6 @@ export function useChatbot() {
         variables: { id, seq },
         onCompleted: (data) => {
           setCurrentThreadId(data.cloneThread?.id)
-          setCurrentInsight(null)
           setOpen(true)
           setShowForkToast(true)
           onCompleted?.(data)
@@ -204,24 +183,14 @@ export function useChatbot() {
     },
     goToThread: (threadId: string) => {
       setCurrentThreadId(threadId)
-      setCurrentInsight(null)
-      setOpen(true)
-    },
-    goToInsight: (insight: AiInsightFragment) => {
-      setCurrentThreadId(null)
-      setCurrentInsight(insight)
       setOpen(true)
     },
     goToThreadList: () => {
       setCurrentThreadId(null)
-      setCurrentInsight(null)
       setOpen(true)
     },
     closeChatbot: () => setOpen(false),
     currentThread,
-    currentInsight,
-    fullscreen,
-    setFullscreen,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,

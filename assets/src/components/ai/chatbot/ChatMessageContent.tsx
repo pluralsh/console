@@ -15,13 +15,11 @@ import {
   PrQueueIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
-
-import isJson from 'is-json'
-
-import styled, { useTheme } from 'styled-components'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
+import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AiRole,
@@ -32,11 +30,14 @@ import {
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
-import { ChatMessageActions } from './ChatMessage'
+
+import isJson from 'is-json'
+import { ReactElement, useMemo, useState } from 'react'
+
+import styled, { useTheme } from 'styled-components'
 import { iconUrl } from 'utils/icon'
-import { StackedText } from 'components/utils/table/StackedText'
-import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { ChatMessageActions } from './ChatMessage'
+import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -71,7 +72,7 @@ export function ChatMessageContent({
   serverName,
   highlightToolContent = true,
 }: ChatMessageContentProps) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -117,8 +118,11 @@ export function ChatMessageContent({
           condition={!(role === AiRole.Assistant || role === AiRole.System)}
           wrapper={
             <Card
-              css={{ padding: spacing.medium }}
-              fillLevel={2}
+              css={{
+                backgroundColor: theme.colors['fill-zero'],
+                border: theme.borders.default,
+                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+              }}
             />
           }
         >
@@ -136,10 +140,13 @@ function FileMessageContent({
   content,
   attributes,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
+  const theme = useTheme()
   const fileName = attributes?.file?.name ?? ''
   return (
-    <Accordion type="single">
+    <Accordion
+      type="single"
+      css={{ border: theme.borders.default }}
+    >
       <AccordionItem
         padding="compact"
         caret="right"
@@ -148,7 +155,7 @@ function FileMessageContent({
             gap="small"
             align="center"
             wordBreak="break-word"
-            marginRight={spacing.small}
+            marginRight={theme.spacing.small}
           >
             <FileIcon
               size={12}
@@ -166,8 +173,12 @@ function FileMessageContent({
             />
           </Flex>
         }
+        css={{
+          background: theme.colors['fill-zero'],
+          borderRadius: theme.borderRadiuses.large,
+        }}
       >
-        <Code css={{ background: colors['fill-three'], maxWidth: '100%' }}>
+        <Code css={{ background: theme.colors['fill-one'], maxWidth: '100%' }}>
           {content}
         </Code>
       </AccordionItem>
@@ -454,16 +465,21 @@ function ToolMessageContent({
           </Flex>
         )}
       </ToolMessageWrapperSC>
+      <ToolMessageDetails
+        content={content}
+        attributes={attributes}
+      />
     </Flex>
   )
 }
 const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   width: 480,
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  background: 'none',
-  border: theme.borders.input,
+  background: theme.colors['fill-one'],
+  border: theme.borders.default,
   padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
 }))
@@ -475,3 +491,34 @@ const ToolMessageContentSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
+
+enum ToolCall {
+  CloudQuery = '__plrl__cloud_query',
+}
+
+function ToolMessageDetails({ content, attributes }): ReactElement | null {
+  const toolCallName = useMemo(() => {
+    switch (attributes?.tool?.name) {
+      case ToolCall.CloudQuery:
+        return ToolCall.CloudQuery
+      default:
+        return undefined
+    }
+  }, [attributes?.tool?.name])
+
+  if (!toolCallName || !content) {
+    return null
+  }
+
+  switch (toolCallName) {
+    case ToolCall.CloudQuery:
+      return (
+        <CloudObjectsCard
+          content={content}
+          query={attributes?.tool?.arguments?.query}
+        />
+      )
+    default:
+      return null
+  }
+}

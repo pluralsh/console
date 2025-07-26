@@ -9,15 +9,10 @@ import {
   GitHubLogoIcon,
   IconFrame,
   IconFrameProps,
-  PluralLogoMark,
   Spinner,
   TrashCanIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
-
-import { ComponentPropsWithRef, useState } from 'react'
-import styled, { CSSObject, useTheme } from 'styled-components'
-import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -28,7 +23,10 @@ import {
   PullRequestFragment,
   useDeleteChatMutation,
 } from 'generated/graphql'
+
+import { ComponentPropsWithRef, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import styled, { CSSObject, useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
@@ -86,7 +84,6 @@ export function ChatMessage({
         gap="medium"
         justify={rightAlign ? 'flex-end' : 'flex-start'}
       >
-        {role !== AiRole.User && <PluralAssistantIcon />}
         <div
           onMouseEnter={() => setShowActions(true)}
           onMouseLeave={() => setShowActions(false)}
@@ -301,6 +298,8 @@ const ActionsWrapperSC = styled.div<{
 }))
 
 const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
+  containerType: 'inline-size',
+  containerName: 'chat-message',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
@@ -309,26 +308,4 @@ const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   paddingBottom: $role === AiRole.Assistant ? theme.spacing.small : 0,
   width: '100%',
   justifySelf: $role === AiRole.User ? 'flex-end' : 'flex-start',
-}))
-
-function PluralAssistantIcon() {
-  return (
-    <AssistantIconWrapperSC>
-      <PluralLogoMark
-        width={16}
-        height={16}
-      />
-    </AssistantIconWrapperSC>
-  )
-}
-
-const AssistantIconWrapperSC = styled.div(({ theme }) => ({
-  ...aiGradientBorderStyles(theme, 'fill-two'),
-  width: theme.spacing.xlarge,
-  height: theme.spacing.xlarge,
-  borderRadius: theme.borderRadiuses.large,
-  padding: theme.spacing.xsmall,
-  svg: {
-    transform: 'translateY(-1px) translateX(-1px)',
-  },
 }))

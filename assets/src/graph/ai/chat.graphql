@@ -96,6 +96,7 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
 
 fragment AgentSession on AgentSession {
@@ -103,6 +104,11 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  connection {
+    id
+    name
+    provider
+  }
   cluster {
     id
   }
@@ -167,8 +173,15 @@ query CloudConnections(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }

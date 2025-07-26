@@ -1,4 +1,4 @@
-import { EmptyState, usePrevious } from '@pluralsh/design-system'
+import { usePrevious } from '@pluralsh/design-system'
 
 import {
   Dispatch,
@@ -33,16 +33,13 @@ import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
-import {
-  GeneratingResponseMessage,
-  SendMessageForm,
-} from './ChatbotSendMessageForm.tsx'
+import { ChatInput, GeneratingResponseMessage } from './input/ChatInput.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
 import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { Body1P } from '../../utils/typography/Text.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
-  fullscreen,
   threadDetailsQuery: { data, loading, error },
   showMcpServers,
   setShowMcpServers,
@@ -50,7 +47,6 @@ export function ChatbotPanelThread({
   setShowExamplePrompts,
 }: {
   currentThread: ChatThreadFragment
-  fullscreen: boolean
   threadDetailsQuery: ChatThreadDetailsQueryResult
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
@@ -149,16 +145,15 @@ export function ChatbotPanelThread({
 
   return (
     <>
-      <ChatbotMessagesWrapper
-        messageListRef={messageListRef}
-        fullscreen={fullscreen}
-      >
+      <ChatbotMessagesWrapper messageListRef={messageListRef}>
         {isEmpty(messages) &&
           !currentThread.session?.type &&
           (error ? (
             <GqlError error={error} />
           ) : (
-            <EmptyState message="No messages yet." />
+            <Body1P css={{ color: theme.colors['text-long-form'] }}>
+              How can I help you?
+            </Body1P>
           ))}
         {messages.map((msg) => (
           <Fragment key={msg.id}>
@@ -203,10 +198,9 @@ export function ChatbotPanelThread({
           />
         )}
       </ChatbotMessagesWrapper>
-      <SendMessageForm
+      <ChatInput
         currentThread={currentThread}
         sendMessage={sendMessage}
-        fullscreen={fullscreen}
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
@@ -218,11 +212,9 @@ export function ChatbotPanelThread({
 }
 
 export const ChatbotMessagesWrapper = ({
-  fullscreen,
   messageListRef,
   children,
 }: {
-  fullscreen: boolean
   messageListRef?: RefObject<HTMLDivElement | null>
   children: ReactNode
 }) => {
@@ -231,7 +223,7 @@ export const ChatbotMessagesWrapper = ({
   const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
 
   return (
-    <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
+    <ChatbotMessagesWrapperSC>
       <ScrollGradientSC
         $show={canScrollUp}
         $position="top"
@@ -249,27 +241,20 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    position: 'relative',
-    ...($fullscreen && {
-      borderRadius: theme.borderRadiuses.large,
-      border: theme.borders.input,
-    }),
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.colors['fill-one'],
-    overflow: 'hidden',
-    padding: `0 ${theme.spacing.xsmall}px`,
-    flex: 1,
-  })
-)
+export const ChatbotMessagesWrapperSC = styled.div({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  flex: 1,
+})
 
 const ChatbotMessagesListSC = styled.div(({ theme }) => ({
   ...theme.partials.reset.list,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: theme.spacing.xsmall,
+  padding: theme.spacing.medium,
+  height: '100%',
 }))
 
 const ScrollGradientSC = styled.div<{
@@ -284,6 +269,6 @@ const ScrollGradientSC = styled.div<{
   left: 0,
   right: 0,
   height: theme.spacing.xxlarge,
-  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, rgba(42, 46, 55, 0.90) 0%, rgba(42, 46, 55, 0.20) 75%, transparent 100%)`,
+  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%, transparent 100%)`,
   pointerEvents: 'none',
 }))
