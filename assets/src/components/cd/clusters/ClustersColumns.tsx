@@ -46,6 +46,7 @@ import { ClusterUpgradeButton } from './ClusterUpgradeButton.tsx'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { ClusterInfoFlyoverTab } from './info-flyover/ClusterInfoFlyover.tsx'
 import { ClustersTableMeta } from './Clusters.tsx'
+import { roundTo } from 'components/cluster/utils.tsx'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -205,16 +206,18 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
   header: 'CPU',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const display = `${cpuFormat(cluster?.metricsSummary?.cpuTotal)} / ${cpuFormat(cluster?.metricsSummary?.cpuAvailable)}`
+    const percentage = (cluster?.cpuUtil ?? 0) / 100
+    const total = (cluster?.cpuTotal ?? 0) / 100
+    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)}`
 
-    return cluster?.metricsSummary?.cpuUsed !== undefined ? (
+    return percentage > 0 ? (
       <Tooltip
         label={display}
         placement="top"
       >
         <TableText>
           <UsageBar
-            usage={(cluster?.metricsSummary?.cpuUsed ?? 0) / 100}
+            usage={percentage}
             width={120}
           />
         </TableText>
@@ -226,23 +229,25 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
 })
 
 const memFormat = (memory: Nullable<number>) =>
-  memory ? filesize(memory * 1_000_000) : '—'
+  memory ? filesize(memory) : '—'
 
 export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
   header: 'Memory',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const display = `${memFormat(cluster?.metricsSummary?.memoryTotal)} / ${memFormat(cluster?.metricsSummary?.memoryAvailable)}`
+    const percentage = (cluster?.memoryUtil ?? 0) / 100
+    const total = cluster?.memoryTotal ?? 0
+    const display = `${memFormat(percentage * total)} / ${memFormat(total)}`
 
-    return cluster?.metricsSummary?.memoryUsed !== undefined ? (
+    return percentage > 0 ? (
       <Tooltip
         label={display}
         placement="top"
       >
         <TableText>
           <UsageBar
-            usage={(cluster?.metricsSummary?.memoryUsed ?? 0) / 100}
+            usage={percentage}
             width={120}
           />
         </TableText>
