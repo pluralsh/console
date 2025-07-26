@@ -737,6 +737,12 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.0.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -746,6 +752,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.2.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.1.3-eksbuild.3
     compatibilities:
     - '1.33'
@@ -3700,18 +3712,28 @@
     - '1.31'
   - version: v1.31.2-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
   - version: v1.31.2-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
   - version: v1.31.1-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
   - version: v1.31.0-eksbuild.5
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
   - version: v1.31.0-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
   - version: v1.30.14-eksbuild.2
     compatibilities:
@@ -3739,38 +3761,57 @@
     - '1.30'
   - version: v1.30.7-eksbuild.2
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.6-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.6-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.5-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.3-eksbuild.9
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.3-eksbuild.5
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.3-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
   - version: v1.30.0-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
   - version: v1.30.0-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
   - version: v1.29.15-eksbuild.10
     compatibilities:
@@ -3804,102 +3845,133 @@
     - '1.29'
   - version: v1.29.10-eksbuild.3
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.10-eksbuild.2
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.9-eksbuild.1
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.7-eksbuild.9
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.7-eksbuild.5
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.7-eksbuild.2
     compatibilities:
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.3-eksbuild.5
     compatibilities:
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.3-eksbuild.2
     compatibilities:
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.29.1-eksbuild.2
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
     - '1.29'
   - version: v1.29.0-eksbuild.3
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
     - '1.29'
   - version: v1.29.0-eksbuild.2
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
     - '1.29'
   - version: v1.29.0-eksbuild.1
     compatibilities:
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.28.15-eksbuild.25
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.22
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.20
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.9
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.4
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.3
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.15-eksbuild.2
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.12-eksbuild.9
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.12-eksbuild.5
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.12-eksbuild.2
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -3911,26 +3983,39 @@
     - '1.28'
   - version: v1.28.8-eksbuild.2
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.6-eksbuild.2
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.4-eksbuild.4
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.4-eksbuild.1
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
   - version: v1.28.2-eksbuild.2
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
   - version: v1.28.1-eksbuild.1
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
   - version: v1.27.16-eksbuild.35
     compatibilities:
@@ -4000,35 +4085,51 @@
     - '1.27'
   - version: v1.27.10-eksbuild.2
     compatibilities:
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.27.8-eksbuild.4
     compatibilities:
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.27.8-eksbuild.1
     compatibilities:
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.27.6-eksbuild.2
     compatibilities:
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.27.4-eksbuild.2
     compatibilities:
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.27.3-eksbuild.2
     compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
     - '1.27'
   - version: v1.27.3-eksbuild.1
     compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
     - '1.27'
   - version: v1.27.1-eksbuild.1
     compatibilities:
+    - '1.30'
+    - '1.29'
+    - '1.28'
     - '1.27'
   - version: v1.26.15-eksbuild.35
     compatibilities:
@@ -4098,28 +4199,39 @@
     - '1.26'
   - version: v1.26.9-eksbuild.2
     compatibilities:
+    - '1.29'
     - '1.28'
     - '1.27'
     - '1.26'
   - version: v1.26.7-eksbuild.2
     compatibilities:
+    - '1.29'
     - '1.28'
     - '1.27'
     - '1.26'
   - version: v1.26.6-eksbuild.2
     compatibilities:
+    - '1.29'
+    - '1.28'
     - '1.27'
     - '1.26'
   - version: v1.26.6-eksbuild.1
     compatibilities:
+    - '1.29'
+    - '1.28'
     - '1.27'
     - '1.26'
   - version: v1.26.4-eksbuild.1
     compatibilities:
+    - '1.29'
+    - '1.28'
     - '1.27'
     - '1.26'
   - version: v1.26.2-eksbuild.1
     compatibilities:
+    - '1.29'
+    - '1.28'
+    - '1.27'
     - '1.26'
   - version: v1.25.16-eksbuild.38
     compatibilities:
@@ -4207,19 +4319,26 @@
     - '1.25'
   - version: v1.25.11-eksbuild.1
     compatibilities:
+    - '1.28'
+    - '1.27'
     - '1.26'
     - '1.25'
   - version: v1.25.9-eksbuild.1
     compatibilities:
+    - '1.28'
+    - '1.27'
     - '1.26'
     - '1.25'
   - version: v1.25.6-eksbuild.2
     compatibilities:
+    - '1.28'
     - '1.27'
     - '1.26'
     - '1.25'
   - version: v1.25.6-eksbuild.1
     compatibilities:
+    - '1.28'
+    - '1.27'
     - '1.25'
   - version: v1.24.17-eksbuild.19
     compatibilities:
@@ -4272,6 +4391,7 @@
     - '1.24'
   - version: v1.24.7-eksbuild.2
     compatibilities:
+    - '1.25'
     - '1.24'
   - version: v1.23.17-eksbuild.20
     compatibilities:
@@ -4329,6 +4449,7 @@
     - '1.23'
   - version: v1.23.8-eksbuild.2
     compatibilities:
+    - '1.25'
     - '1.24'
     - '1.23'
   - version: v1.23.7-eksbuild.1
