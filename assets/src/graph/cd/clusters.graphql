@@ -177,14 +177,10 @@ fragment ClustersRow on Cluster {
   name
   handle
   distro
-  metricsSummary {
-    cpuUsed
-    cpuAvailable
-    cpuTotal
-    memoryUsed
-    memoryAvailable
-    memoryTotal
-  }
+  cpuTotal
+  memoryTotal
+  cpuUtil
+  memoryUtil
   installed
   pingedAt
   deletedAt
