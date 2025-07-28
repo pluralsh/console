@@ -180,6 +180,9 @@ fragment ClustersRow on Cluster {
   cpuTotal
   memoryTotal
   cpuUtil
+  nodeCount
+  namespaceCount
+  podCount
   memoryUtil
   installed
   pingedAt
