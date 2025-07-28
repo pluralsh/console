@@ -3,10 +3,10 @@ import {
   ClusterIcon,
   Flex,
   GearTrainIcon,
+  KubernetesIcon,
   ListBoxItem,
   NamespaceIcon,
   PeopleIcon,
-  PodContainerIcon,
   ReturnIcon,
   SemanticColorKey,
   TrashCanIcon,
@@ -299,7 +299,7 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
           {`${cluster?.namespaceCount} ns`}
         </SizeTextSc>
         <SizeTextSc>
-          <PodContainerIcon size={16} />
+          <KubernetesIcon size={16} />
           {`${cluster?.podCount} pods`}
         </SizeTextSc>
       </SizeSc>

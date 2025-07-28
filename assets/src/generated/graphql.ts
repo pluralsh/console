@@ -1089,6 +1089,7 @@ export type ChatThreadChatsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** basic user-supplied input for creating an AI chat thread */
@@ -8345,6 +8346,7 @@ export type RootQueryTypeChatsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 

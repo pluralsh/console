@@ -450,7 +450,20 @@ type RootQueryType {
   chatThread(id: ID!): ChatThread
 
   "gets the chat history from prior AI chat sessions"
-  chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    threadId: ID
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
@@ -8300,7 +8313,18 @@ type ChatThread {
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
-  chats(after: String, first: Int, before: String, last: Int): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   insertedAt: DateTime
 
