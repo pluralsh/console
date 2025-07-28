@@ -44,6 +44,7 @@ type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
   currentThread: Nullable<ChatThreadFragment>
+  currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
   lastNonAgentThreadId: Nullable<string>
   threadLoading: boolean
@@ -68,7 +69,9 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = useState(true)
-  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
+  const [currentThreadId, setCurrentThreadId] = usePersistedState<
+    Nullable<string>
+  >('plural-ai-current-thread-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
     useState<Nullable<string>>()
   const [showForkToast, setShowForkToast] = useState(false)
@@ -102,6 +105,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         open,
         setOpen,
         currentThread: threadData?.chatThread,
+        currentThreadId,
         setCurrentThreadId,
         lastNonAgentThreadId,
         threadLoading,
@@ -157,6 +161,7 @@ export function useChatbot() {
   const {
     setOpen,
     currentThread,
+    currentThreadId,
     setCurrentThreadId,
     lastNonAgentThreadId,
     threadLoading,
@@ -214,6 +219,7 @@ export function useChatbot() {
     },
     closeChatbot: () => setOpen(false),
     currentThread,
+    currentThreadId,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,
