@@ -9,7 +9,6 @@ import { ReactElement, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { ClusterDistro } from '../../../../../generated/graphql.ts'
 import { DistroProviderIconFrame } from '../../../../utils/ClusterDistro.tsx'
-import CopyButton from '../../../../utils/CopyButton.tsx'
 import { ARBITRARY_VALUE_NAME } from '../../../../utils/IconExpander.tsx'
 import { TRUNCATE } from '../../../../utils/truncate.ts'
 
@@ -72,11 +71,6 @@ export default function CloudObject({
                 {type}
                 {id ? ` [${id}]` : ''}
               </span>
-              <CopyButton
-                text={json}
-                tooltip={`Copy ${type} JSON`}
-                type="tertiary"
-              />
             </div>
             <CaretRightIcon
               color="icon-light"

@@ -21,6 +21,7 @@ import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { AITable } from '../AITable.tsx'
 import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import {
@@ -29,9 +30,8 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
-import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 
-const MIN_WIDTH = 400
+const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
 const HANDLE_THICKNESS = 20
 export const CHATBOT_HEADER_HEIGHT = 57

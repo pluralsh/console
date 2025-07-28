@@ -162,9 +162,34 @@ query ChatThreads(
   }
 }
 
-query ChatThreadDetails($id: ID!) {
+query ChatThreadDetails(
+  $id: ID!
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
   chatThread(id: $id) {
-    ...ChatThread
+    ...ChatThreadTiny
+    chats(first: $first, last: $last, after: $after, before: $before) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Chat
+        }
+      }
+    }
+    insight {
+      ...AiInsight
+    }
+    flow {
+      ...FlowBasic
+    }
+    tools {
+      ...McpServerTool
+    }
   }
 }
 

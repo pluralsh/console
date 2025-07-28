@@ -2,9 +2,8 @@ import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { ChatThreadFragment, ChatType } from 'generated/graphql'
 import styled from 'styled-components'
-import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 import { mapExistingNodes } from 'utils/graphql'
-import { Flex } from '@pluralsh/design-system'
+import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -24,16 +23,17 @@ export function ChatbotActionsPanel({
       <HeaderSC>
         <Body2BoldP>Actions panel</Body2BoldP>
       </HeaderSC>
-      <Flex
-        direction="column"
-        overflow="hidden auto"
+      <div
+        css={{
+          overflow: 'auto',
+        }}
       >
         {messages.map((message) =>
           message.type !== ChatType.Text ? (
             <ActionItemSC key={message.id}>{message.content}</ActionItemSC>
           ) : null
         )}
-      </Flex>
+      </div>
     </SimpleFlyover>
   )
 }
@@ -41,6 +41,10 @@ export function ChatbotActionsPanel({
 const ActionItemSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   borderBottom: theme.borders.default,
+  wordBreak: 'break-word',
+  height: 'fit-content',
+  maxHeight: 324,
+  overflow: 'auto',
 }))
 
 const HeaderSC = styled.div(({ theme }) => ({

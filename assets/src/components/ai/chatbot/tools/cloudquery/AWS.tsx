@@ -114,6 +114,7 @@ function AwsObjects({ type, objects }: AwsObjectsProps): ReactElement | null {
     >
       {objectList.map(({ type, id, icon, object }) => (
         <CloudObject
+          key={id}
           type={type}
           id={id}
           json={JSON.stringify(object, null, 1)}
