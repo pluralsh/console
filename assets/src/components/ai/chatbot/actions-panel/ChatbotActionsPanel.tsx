@@ -28,11 +28,12 @@ export function ChatbotActionsPanel({
           overflow: 'auto',
         }}
       >
-        {messages.map((message) =>
-          message.type !== ChatType.Text ? (
-            <ActionItemSC key={message.id}>{message.content}</ActionItemSC>
-          ) : null
-        )}
+        {isOpen &&
+          messages.map((message) =>
+            message.type !== ChatType.Text ? (
+              <ActionItemSC key={message.id}>{message.content}</ActionItemSC>
+            ) : null
+          )}
       </div>
     </SimpleFlyover>
   )
