@@ -19,7 +19,7 @@ import { useChatbot } from '../AIContext'
 import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
-import { ChatInputAgentSelect } from './input/ChatInputAgentSelect.tsx'
+import { AgentSelect } from './AgentSelect.tsx'
 
 export function ChatbotHeader({
   currentThread,
@@ -71,7 +71,7 @@ export function ChatbotHeader({
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
           Copilot
         </Body2BoldP>
-        {currentThread && <ChatInputAgentSelect />}
+        {currentThread && <AgentSelect />}
         {/* icons */}
         <Flex gap="xsmall">
           {!cloudConnectionsLoading && (

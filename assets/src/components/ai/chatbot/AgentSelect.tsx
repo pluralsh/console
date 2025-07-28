@@ -1,11 +1,11 @@
 import {
   Button,
-  CloseIcon,
+  CaretDownIcon,
+  CaretUpIcon,
   CloudIcon,
   KubernetesIcon,
   ListBoxFooterPlus,
   ListBoxItem,
-  PlusIcon,
   RobotIcon,
   Select,
   TerraformLogoIcon,
@@ -13,14 +13,14 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { capitalize } from 'lodash'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import {
   AgentSessionType,
   useCreateAgentSessionMutation,
-} from '../../../../generated/graphql.ts'
-import { TRUNCATE } from '../../../utils/truncate.ts'
-import { useChatbot } from '../../AIContext.tsx'
+} from '../../../generated/graphql.ts'
+import { TRUNCATE } from '../../utils/truncate.ts'
+import { useChatbot } from '../AIContext.tsx'
 
 function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   switch (type) {
@@ -43,10 +43,19 @@ function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   }
 }
 
-export function ChatInputAgentSelect() {
+export function AgentSelect() {
   const theme = useTheme()
   const { currentThread, goToThread, goToThreadList } = useChatbot()
-  const agent = currentThread?.session?.type
+  const [open, setOpen] = useState(false)
+
+  const agent = useMemo(
+    () =>
+      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
+        (type) => type === currentThread?.session?.type
+      ),
+    [currentThread?.session?.type]
+  )
+
   const icon = useMemo(() => getIcon(agent, 16), [agent])
 
   const [createAgentSession, { loading, error: agentSessionError }] =
@@ -85,6 +94,8 @@ export function ChatInputAgentSelect() {
   return (
     <>
       <Select
+        isOpen={open}
+        onOpenChange={setOpen}
         selectedKey={agent ?? ''}
         onSelectionChange={(key) =>
           onAgentChange(key as Nullable<AgentSessionType>)
@@ -118,18 +129,12 @@ export function ChatInputAgentSelect() {
               <Button
                 loading={loading}
                 startIcon={icon}
-                endIcon={
-                  agent ? (
-                    <CloseIcon color="icon-xlight" />
-                  ) : (
-                    <PlusIcon color="icon-xlight" />
-                  )
-                }
+                endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
                 secondary
                 small
               >
                 <span css={{ ...TRUNCATE }}>
-                  {capitalize(agent ?? '')} Agent
+                  {capitalize(`${agent ?? ''} agent`.trim())}
                 </span>
               </Button>
             </Tooltip>
