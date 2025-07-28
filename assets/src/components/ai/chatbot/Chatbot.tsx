@@ -93,6 +93,7 @@ function ChatbotPanelInner() {
   useEffect(() => {
     // If a thread is already selected, nothing needs to be done.
     // The context handles loading the last value from the persisted state.
+    // TODO: Handle the case where the thread is deleted and the currentThreadId is no longer valid.
     if (currentThreadId) return
 
     // If there are no threads, create a new one.
