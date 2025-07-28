@@ -15,6 +15,9 @@ export enum ProviderObjectType {
   VPCSubnet = 'vpc_subnet',
   Account = 'account',
   EKS = 'eks_cluster',
+  S3 = 's3_bucket',
+  EC2 = 'ec2_instance',
+  RDS = 'rds_db_instance',
 }
 
 interface CloudObjectsCardProps {
@@ -82,6 +85,8 @@ const CloudObjectsCardSC = styled.div(({ theme }) => ({
     width: '100cqw',
   },
 
+  maxHeight: 324,
+  overflow: 'auto',
   width: '100%',
   display: 'flex',
   flexDirection: 'column',

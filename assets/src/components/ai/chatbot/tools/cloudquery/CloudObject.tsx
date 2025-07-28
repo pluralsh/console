@@ -15,7 +15,7 @@ import { TRUNCATE } from '../../../../utils/truncate.ts'
 
 interface CloudObjectProps {
   type: string
-  id: string
+  id?: string
   json?: string
   icon?: ReactElement
 }
@@ -62,14 +62,15 @@ export default function CloudObject({
                 minWidth: 0,
               }}
             >
-              {icon}
+              <span>{icon}</span>
               <span
                 css={{
                   ...theme.partials.text['body2'],
                   ...TRUNCATE,
                 }}
               >
-                {type} [{id}]
+                {type}
+                {id ? ` [${id}]` : ''}
               </span>
               <CopyButton
                 text={json}

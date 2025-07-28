@@ -27,12 +27,25 @@ interface AwsObjectsProps {
   objects: Array<any>
 }
 
+interface AwsS3 {
+  name: string
+  arn: string
+}
+
+interface AwsEC2 {
+  instance_id: string
+}
+
+interface AwsRDS {
+  db_instance_identifier: string
+}
+
 function AwsObjects({ type, objects }: AwsObjectsProps): ReactElement | null {
   const theme = useTheme()
 
   const objectList: Array<{
     type: string
-    id: string
+    id?: string
     icon?: ReactElement
     object: any
   }> = useMemo(() => {
@@ -63,6 +76,27 @@ function AwsObjects({ type, objects }: AwsObjectsProps): ReactElement | null {
           type: 'EKS',
           id: item.name,
           icon: <AWSIcon name={AWSIconName.EKS} />,
+          object: item,
+        }))
+      case ProviderObjectType.S3:
+        return objects.map((item: AwsS3) => ({
+          type: 'S3',
+          id: item.name ?? item.arn,
+          icon: <AWSIcon name={AWSIconName.S3} />,
+          object: item,
+        }))
+      case ProviderObjectType.EC2:
+        return objects.map((item: AwsEC2) => ({
+          type: 'EC2',
+          id: item.instance_id,
+          icon: <AWSIcon name={AWSIconName.EC2Instance} />,
+          object: item,
+        }))
+      case ProviderObjectType.RDS:
+        return objects.map((item: AwsRDS) => ({
+          type: 'RDS',
+          id: item.db_instance_identifier,
+          icon: <AWSIcon name={AWSIconName.Database} />,
           object: item,
         }))
       default:
