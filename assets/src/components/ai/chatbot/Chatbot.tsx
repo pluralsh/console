@@ -9,19 +9,15 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
-  ChatThreadFragment,
   useChatThreadDetailsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import { useEffect, useState } from 'react'
+import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
-import { AITable } from '../AITable.tsx'
-import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
-import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
+
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import {
@@ -30,6 +26,7 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -76,18 +73,42 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
-  const theme = useTheme()
-  const { pathname } = useLocation()
-  const { currentThread, detailsLoading, detailsError } = useChatbot()
+  const {
+    currentThread,
+    currentThreadId,
+    goToThread,
+    createNewThread,
+    detailsLoading,
+    detailsError,
+  } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
   const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
-  const threadsQuery = useFetchPaginatedData({
-    skip: !!currentThread,
+  const { data } = useFetchPaginatedData({
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
   })
+
+  useEffect(() => {
+    // If a thread is already selected, nothing needs to be done.
+    // The context handles loading the last value from the persisted state.
+    // TODO: Handle the case where the thread is deleted and the currentThreadId is no longer valid.
+    if (currentThreadId) return
+
+    // If there are no threads, create a new one.
+    if (isEmpty(data?.chatThreads?.edges)) {
+      createNewThread({ summary: 'New chat with Plural Copilot' })
+      return
+    }
+
+    // If there is at least one thread, select the first one.
+    if (data?.chatThreads?.edges?.[0]?.node?.id) {
+      goToThread(data.chatThreads.edges[0].node.id)
+    }
+
+    return
+  }, [createNewThread, currentThreadId, data?.chatThreads?.edges, goToThread])
 
   // optimistically updating when a user sends a message relies on using cache-first (default) fetch policy here
   // fresh data is fetched by the network in AIContext provider, where Apollo will populate the cache
@@ -102,24 +123,6 @@ function ChatbotPanelInner() {
   })
   const tools =
     threadDetailsQuery.data?.chatThread?.tools?.filter(isNonNullable) ?? []
-
-  const rows = useMemo(() => {
-    const threads =
-      threadsQuery.data?.chatThreads?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is ChatThreadFragment => Boolean(node))
-        .sort(sortThreadsOrPins) ?? []
-    // move all threads with a "current page" chip to the top
-    const curPageThreads: ChatThreadFragment[] = []
-    const otherThreads: ChatThreadFragment[] = []
-    threads.forEach((thread) => {
-      const insightUrl = getInsightPathInfo(thread.insight)?.url
-      if (insightUrl && pathname?.includes(insightUrl))
-        curPageThreads.push(thread)
-      else otherThreads.push(thread)
-    })
-    return [...curPageThreads, ...otherThreads]
-  }, [threadsQuery.data, pathname])
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
@@ -164,16 +167,7 @@ function ChatbotPanelInner() {
             setShowExamplePrompts={setShowPrompts}
           />
         ) : (
-          <ChatbotTableWrapperSC>
-            <AITable
-              modal
-              query={threadsQuery}
-              rowData={rows}
-              borderBottom={isEmpty(rows) ? 'none' : theme.borders['fill-two']}
-              border="none"
-              borderRadius={0}
-            />
-          </ChatbotTableWrapperSC>
+          'tbd'
         )}
       </MainContentWrapperSC>
       <DragHandleSC
@@ -184,11 +178,6 @@ function ChatbotPanelInner() {
     </div>
   )
 }
-
-const ChatbotTableWrapperSC = styled.div(() => ({
-  height: '100%',
-  overflow: 'hidden',
-}))
 
 const MainContentWrapperSC = styled.div(({ theme }) => ({
   position: 'relative',

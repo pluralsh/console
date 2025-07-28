@@ -2,6 +2,7 @@ import { ApolloCache, ApolloError } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
+  AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
   ChatThreadFragment,
@@ -43,7 +44,9 @@ type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
   currentThread: Nullable<ChatThreadFragment>
+  currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
+  lastNonAgentThreadId: Nullable<string>
   threadLoading: boolean
   threadError: ApolloError | undefined
   setShowForkToast: (show: boolean) => void
@@ -66,7 +69,11 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = useState(true)
-  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
+  const [currentThreadId, setCurrentThreadId] = usePersistedState<
+    Nullable<string>
+  >('plural-ai-current-thread-id', null)
+  const [lastNonAgentThreadId, setLastNonAgentThreadId] =
+    useState<Nullable<string>>()
   const [showForkToast, setShowForkToast] = useState(false)
 
   const {
@@ -80,13 +87,27 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     pollInterval: POLL_INTERVAL,
   })
 
+  useEffect(() => {
+    if (!threadData?.chatThread?.id) return
+
+    if (
+      ![AgentSessionType.Kubernetes, AgentSessionType.Terraform].includes(
+        threadData?.chatThread?.session?.type as AgentSessionType
+      )
+    ) {
+      setLastNonAgentThreadId(threadData?.chatThread?.id)
+    }
+  }, [threadData?.chatThread?.id, threadData?.chatThread?.session?.type])
+
   return (
     <ChatbotContext
       value={{
         open,
         setOpen,
         currentThread: threadData?.chatThread,
+        currentThreadId,
         setCurrentThreadId,
+        lastNonAgentThreadId,
         threadLoading,
         threadError,
         setShowForkToast,
@@ -140,7 +161,9 @@ export function useChatbot() {
   const {
     setOpen,
     currentThread,
+    currentThreadId,
     setCurrentThreadId,
+    lastNonAgentThreadId,
     threadLoading,
     threadError,
     setShowForkToast,
@@ -151,18 +174,19 @@ export function useChatbot() {
   const [forkThread, { loading: forkLoading, error: forkError }] =
     useCloneChatThreadMutation()
 
+  const createNewThread = (attributes: ChatThreadAttributes) => {
+    createThread({
+      variables: { attributes },
+      onCompleted: (data) => {
+        setCurrentThreadId(data.createThread?.id)
+        setOpen(true)
+      },
+      update: (cache, { data }) => addThreadToCache(cache, data?.createThread),
+    })
+  }
+
   return {
-    createNewThread: (attributes: ChatThreadAttributes) => {
-      createThread({
-        variables: { attributes },
-        onCompleted: (data) => {
-          setCurrentThreadId(data.createThread?.id)
-          setOpen(true)
-        },
-        update: (cache, { data }) =>
-          addThreadToCache(cache, data?.createThread),
-      })
-    },
+    createNewThread,
     forkThread: ({
       id,
       seq,
@@ -185,12 +209,17 @@ export function useChatbot() {
       setCurrentThreadId(threadId)
       setOpen(true)
     },
-    goToThreadList: () => {
-      setCurrentThreadId(null)
-      setOpen(true)
+    goToLastNonAgentThread: () => {
+      if (!lastNonAgentThreadId) {
+        createNewThread({ summary: 'New chat with Plural Copilot' })
+        return
+      }
+
+      setCurrentThreadId(lastNonAgentThreadId)
     },
     closeChatbot: () => setOpen(false),
     currentThread,
+    currentThreadId,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,

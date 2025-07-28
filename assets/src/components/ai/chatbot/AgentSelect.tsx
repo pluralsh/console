@@ -1,11 +1,10 @@
 import {
   Button,
-  CloseIcon,
-  CloudIcon,
+  CaretDownIcon,
+  CaretUpIcon,
   KubernetesIcon,
   ListBoxFooterPlus,
   ListBoxItem,
-  PlusIcon,
   RobotIcon,
   Select,
   TerraformLogoIcon,
@@ -13,14 +12,15 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { capitalize } from 'lodash'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import {
   AgentSessionType,
   useCreateAgentSessionMutation,
-} from '../../../../generated/graphql.ts'
-import { TRUNCATE } from '../../../utils/truncate.ts'
-import { useChatbot } from '../../AIContext.tsx'
+} from '../../../generated/graphql.ts'
+import { TRUNCATE } from '../../utils/truncate.ts'
+import { useChatbot } from '../AIContext.tsx'
+import { CaptionP } from '../../utils/typography/Text.tsx'
 
 function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   switch (type) {
@@ -43,10 +43,19 @@ function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   }
 }
 
-export function ChatInputAgentSelect() {
+export function AgentSelect() {
   const theme = useTheme()
-  const { currentThread, goToThread, goToThreadList } = useChatbot()
-  const agent = currentThread?.session?.type
+  const { currentThread, goToThread, goToLastNonAgentThread } = useChatbot()
+  const [open, setOpen] = useState(false)
+
+  const agent = useMemo(
+    () =>
+      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
+        (type) => type === currentThread?.session?.type
+      ),
+    [currentThread?.session?.type]
+  )
+
   const icon = useMemo(() => getIcon(agent, 16), [agent])
 
   const [createAgentSession, { loading, error: agentSessionError }] =
@@ -61,7 +70,9 @@ export function ChatInputAgentSelect() {
       if (newAgent === agent || loading) return
 
       if (newAgent) {
+        setOpen(false)
         createAgentSession({
+          // TODO: This should be done after user provides input.
           variables: {
             attributes: {
               type: newAgent,
@@ -71,13 +82,16 @@ export function ChatInputAgentSelect() {
         })
       }
 
-      if (!newAgent) goToThreadList()
+      if (!newAgent) {
+        setOpen(false)
+        goToLastNonAgentThread()
+      }
     },
     [
       agent,
       createAgentSession,
       currentThread?.session?.connection?.id,
-      goToThreadList,
+      goToLastNonAgentThread,
       loading,
     ]
   )
@@ -85,12 +99,14 @@ export function ChatInputAgentSelect() {
   return (
     <>
       <Select
+        isOpen={open}
+        onOpenChange={setOpen}
         selectedKey={agent ?? ''}
         onSelectionChange={(key) =>
           onAgentChange(key as Nullable<AgentSessionType>)
         }
         label="agent"
-        width={270}
+        width={300}
         dropdownHeaderFixed={
           <div
             css={{
@@ -105,9 +121,10 @@ export function ChatInputAgentSelect() {
           agent ? (
             <ListBoxFooterPlus
               onClick={() => onAgentChange(undefined)}
-              leftContent={<CloudIcon />}
+              leftContent={<RobotIcon />}
             >
               Deselect agent
+              <CaptionP>Go to the last non-agent or a new chat</CaptionP>
             </ListBoxFooterPlus>
           ) : undefined
         }
@@ -118,18 +135,12 @@ export function ChatInputAgentSelect() {
               <Button
                 loading={loading}
                 startIcon={icon}
-                endIcon={
-                  agent ? (
-                    <CloseIcon color="icon-xlight" />
-                  ) : (
-                    <PlusIcon color="icon-xlight" />
-                  )
-                }
-                secondary
+                endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
+                tertiary
                 small
               >
                 <span css={{ ...TRUNCATE }}>
-                  {capitalize(agent ?? '')} Agent
+                  {capitalize(`${agent ?? ''} agent`.trim())}
                 </span>
               </Button>
             </Tooltip>
@@ -140,13 +151,11 @@ export function ChatInputAgentSelect() {
           key={AgentSessionType.Terraform}
           leftContent={getIcon(AgentSessionType.Terraform)}
           label="Terraform agent"
-          description="Descriptive sentence here" // TODO
         />
         <ListBoxItem
           key={AgentSessionType.Kubernetes}
           leftContent={getIcon(AgentSessionType.Kubernetes)}
           label="Kubernetes agent"
-          description="Descriptive sentence here" // TODO
         />
       </Select>
       <Toast
