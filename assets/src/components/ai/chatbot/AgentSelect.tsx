@@ -72,6 +72,7 @@ export function AgentSelect() {
       if (newAgent) {
         setOpen(false)
         createAgentSession({
+          // TODO: This should be done after user provides input.
           variables: {
             attributes: {
               type: newAgent,
