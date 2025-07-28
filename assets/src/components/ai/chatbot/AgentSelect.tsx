@@ -130,7 +130,7 @@ export function AgentSelect() {
                 loading={loading}
                 startIcon={icon}
                 endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
-                secondary
+                tertiary
                 small
               >
                 <span css={{ ...TRUNCATE }}>
