@@ -96,37 +96,20 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, r.handleDelete(ctx, notificationRouter)
 	}
 
-	ro, err := r.isReadOnly(ctx, notificationRouter)
-	if err != nil {
-		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, fmt.Errorf("could not check if notification router is existing resource, got error: %+v", err)
-	}
-
-	if ro {
-		logger.V(9).Info("Notification Router already exists in the API, running in read-only mode")
-		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExisting(ctx, notificationRouter)
-	}
-
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
+	attr, res, err := r.genNotificationRouterAttr(ctx, notificationRouter)
+	if res != nil || err != nil {
+		return handleRequeue(res, err, notificationRouter.SetCondition)
+	}
 
-	sha, err := utils.HashObject(notificationRouter.Spec)
+	sha, err := utils.HashObject(attr)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, notificationRouter)
-	if err != nil {
-		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-	if !exists || !notificationRouter.Status.IsSHAEqual(sha) {
-		logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
-		attr, res, err := r.genNotificationRouterAttr(ctx, notificationRouter)
-		if res != nil || err != nil {
-			return handleRequeue(res, err, notificationRouter.SetCondition)
-		}
+
+	if !notificationRouter.Status.IsSHAEqual(sha) {
 		ns, err := r.ConsoleClient.UpsertNotificationRouter(ctx, *attr)
 		if err != nil {
 			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -266,60 +249,4 @@ func (r *NotificationRouterReconciler) handleDelete(ctx context.Context, router 
 		controllerutil.RemoveFinalizer(router, NotificationRouterFinalizer)
 	}
 	return nil
-}
-
-func (r *NotificationRouterReconciler) isReadOnly(ctx context.Context, router *v1alpha1.NotificationRouter) (bool, error) {
-	if router.Status.HasReadonlyCondition() {
-		return router.Status.IsReadonly(), nil
-	}
-
-	if controllerutil.ContainsFinalizer(router, NotificationRouterFinalizer) {
-		return false, nil
-	}
-
-	if !router.Spec.HasName() {
-		return false, nil
-	}
-
-	_, err := r.ConsoleClient.GetNotificationRouterByName(ctx, *router.Spec.Name)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (r *NotificationRouterReconciler) handleExisting(ctx context.Context, router *v1alpha1.NotificationRouter) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-	logger.Info("handle existing notification router", "name", *router.Spec.Name)
-	existing, err := r.ConsoleClient.GetNotificationRouterByName(ctx, *router.Spec.Name)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			router.Status.ID = nil
-		}
-		return handleRequeue(nil, err, router.SetCondition)
-	}
-	router.Status.ID = &existing.ID
-	utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
-	return requeue, nil
-}
-
-func (r *NotificationRouterReconciler) isAlreadyExists(ctx context.Context, router *v1alpha1.NotificationRouter) (bool, error) {
-	if !router.Status.HasID() {
-		return false, nil
-	}
-
-	_, err := r.ConsoleClient.GetNotificationRouter(ctx, router.Status.GetID())
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
 }

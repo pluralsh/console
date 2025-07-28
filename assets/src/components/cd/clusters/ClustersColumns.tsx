@@ -207,7 +207,7 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
   cell: ({ getValue }) => {
     const cluster = getValue()
     const percentage = (cluster?.cpuUtil ?? 0) / 100
-    const total = (cluster?.cpuTotal ?? 0) / 100
+    const total = (cluster?.cpuTotal ?? 0) / 1000
     const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)}`
 
     return percentage > 0 ? (
