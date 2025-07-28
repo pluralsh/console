@@ -2,7 +2,6 @@ import {
   Button,
   CaretDownIcon,
   CaretUpIcon,
-  CloudIcon,
   KubernetesIcon,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -116,7 +115,7 @@ export function AgentSelect() {
           agent ? (
             <ListBoxFooterPlus
               onClick={() => onAgentChange(undefined)}
-              leftContent={<CloudIcon />}
+              leftContent={<RobotIcon />}
             >
               Deselect agent
             </ListBoxFooterPlus>
@@ -145,13 +144,11 @@ export function AgentSelect() {
           key={AgentSessionType.Terraform}
           leftContent={getIcon(AgentSessionType.Terraform)}
           label="Terraform agent"
-          description="Descriptive sentence here" // TODO
         />
         <ListBoxItem
           key={AgentSessionType.Kubernetes}
           leftContent={getIcon(AgentSessionType.Kubernetes)}
           label="Kubernetes agent"
-          description="Descriptive sentence here" // TODO
         />
       </Select>
       <Toast
