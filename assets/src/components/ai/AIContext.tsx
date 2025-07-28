@@ -17,6 +17,7 @@ import {
   ReactNode,
   SetStateAction,
   use,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -44,6 +45,7 @@ type ChatbotContextT = {
   setOpen: (open: boolean) => void
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThreadId: (threadId: Nullable<string>) => void
+  previousThreadId: Nullable<string>
   threadLoading: boolean
   threadError: ApolloError | undefined
   setShowForkToast: (show: boolean) => void
@@ -67,7 +69,18 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = useState(true)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
+  const [previousThreadId, setPreviousThreadId] = useState<Nullable<string>>()
   const [showForkToast, setShowForkToast] = useState(false)
+
+  const setThreadId = useCallback(
+    (threadId: Nullable<string>) => {
+      if (threadId === currentThreadId) return
+
+      setPreviousThreadId(currentThreadId)
+      setCurrentThreadId(threadId)
+    },
+    [currentThreadId]
+  )
 
   const {
     data: threadData,
@@ -86,7 +99,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         open,
         setOpen,
         currentThread: threadData?.chatThread,
-        setCurrentThreadId,
+        setCurrentThreadId: setThreadId,
+        previousThreadId,
         threadLoading,
         threadError,
         setShowForkToast,
