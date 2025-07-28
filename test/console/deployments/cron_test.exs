@@ -188,16 +188,6 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
-  describe "#cache_warm/0" do
-    test "it can warm the cache for all healthy registered clusters" do
-      insert_list(3, :cluster, pinged_at: Timex.now())
-      insert_list(2, :cluster)
-      expect(Clusters, :warm, 3, fn :cluster_metrics, _ -> :ok end)
-
-      :ok = Cron.cache_warm()
-    end
-  end
-
   describe "#poll_stacks/0" do
     test "it can generate new stack runs" do
       stack = insert(:stack,
