@@ -20,6 +20,7 @@ import {
 } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
 import { useChatbot } from '../AIContext.tsx'
+import { CaptionP } from '../../utils/typography/Text.tsx'
 
 function getIcon(type: Nullable<AgentSessionType>, size = 16) {
   switch (type) {
@@ -44,7 +45,7 @@ function getIcon(type: Nullable<AgentSessionType>, size = 16) {
 
 export function AgentSelect() {
   const theme = useTheme()
-  const { currentThread, goToThread, goToThreadList } = useChatbot()
+  const { currentThread, goToThread, goToLastNonAgentThread } = useChatbot()
   const [open, setOpen] = useState(false)
 
   const agent = useMemo(
@@ -69,6 +70,7 @@ export function AgentSelect() {
       if (newAgent === agent || loading) return
 
       if (newAgent) {
+        setOpen(false)
         createAgentSession({
           variables: {
             attributes: {
@@ -79,13 +81,16 @@ export function AgentSelect() {
         })
       }
 
-      if (!newAgent) goToThreadList()
+      if (!newAgent) {
+        setOpen(false)
+        goToLastNonAgentThread()
+      }
     },
     [
       agent,
       createAgentSession,
       currentThread?.session?.connection?.id,
-      goToThreadList,
+      goToLastNonAgentThread,
       loading,
     ]
   )
@@ -100,7 +105,7 @@ export function AgentSelect() {
           onAgentChange(key as Nullable<AgentSessionType>)
         }
         label="agent"
-        width={270}
+        width={300}
         dropdownHeaderFixed={
           <div
             css={{
@@ -118,6 +123,7 @@ export function AgentSelect() {
               leftContent={<RobotIcon />}
             >
               Deselect agent
+              <CaptionP>Go to the last non-agent or a new chat</CaptionP>
             </ListBoxFooterPlus>
           ) : undefined
         }
