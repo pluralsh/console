@@ -101,6 +101,7 @@ type ConsoleClient interface {
 	GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error)
 	CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error)
 	DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error)
 	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
 	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
 	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
@@ -14958,6 +14959,31 @@ func (t *DeleteFederatedCredential_DeleteFederatedCredential) GetID() string {
 	return t.ID
 }
 
+type UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
 type DeleteFlow_DeleteFlow struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -19550,6 +19576,17 @@ func (t *DeleteFederatedCredential) GetDeleteFederatedCredential() *DeleteFedera
 		t = &DeleteFederatedCredential{}
 	}
 	return t.DeleteFederatedCredential
+}
+
+type UpdateFederatedCredential struct {
+	UpdateFederatedCredential *FederatedCredentialFragment "json:\"updateFederatedCredential,omitempty\" graphql:\"updateFederatedCredential\""
+}
+
+func (t *UpdateFederatedCredential) GetUpdateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &UpdateFederatedCredential{}
+	}
+	return t.UpdateFederatedCredential
 }
 
 type GetFlow struct {
@@ -29297,6 +29334,44 @@ func (c *Client) DeleteFederatedCredential(ctx context.Context, id string, inter
 	return &res, nil
 }
 
+const UpdateFederatedCredentialDocument = `mutation UpdateFederatedCredential ($id: ID!, $attributes: FederatedCredentialAttributes!) {
+	updateFederatedCredential(id: $id, attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateFederatedCredential
+	if err := c.Client.Post(ctx, "UpdateFederatedCredential", UpdateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetFlowDocument = `query GetFlow ($id: ID!) {
 	flow(id: $id) {
 		... FlowFragment
@@ -38745,6 +38820,7 @@ var DocumentOperationNames = map[string]string{
 	GetFederatedCredentialDocument:                    "GetFederatedCredential",
 	CreateFederatedCredentialDocument:                 "CreateFederatedCredential",
 	DeleteFederatedCredentialDocument:                 "DeleteFederatedCredential",
+	UpdateFederatedCredentialDocument:                 "UpdateFederatedCredential",
 	GetFlowDocument:                                   "GetFlow",
 	UpsertFlowDocument:                                "UpsertFlow",
 	DeleteFlowDocument:                                "DeleteFlow",
