@@ -149,8 +149,15 @@ query ChatThreads(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+  chatThreads(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -189,6 +196,24 @@ query ChatThreadDetails(
     }
     tools {
       ...McpServerTool
+    }
+  }
+}
+
+query AgentSessions(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  agentSessions(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentSession
+      }
     }
   }
 }
