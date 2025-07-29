@@ -43,7 +43,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def create(%PrAutomation{} = pr, branch, ctx) when is_binary(branch) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection, :repository])
     pr = put_in(pr.identifier, resolve_repo(pr.identifier))
-    with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
+    with {:ok, conn} <- setup(%{conn | branch: template_branch(pr.branch, ctx)}, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, ext} <- external_git(pr),
          {:ok, _} <- Plural.template(f, conn.dir, ext),
@@ -111,6 +111,14 @@ defmodule Console.Deployments.Pr.Dispatcher do
     end
   end
   defp resolve_repo(identifier), do: identifier
+
+  defp template_branch(branch, %{} = ctx) when is_binary(branch) do
+    case render_solid(branch, ctx) do
+      {:ok, branch} -> branch
+      _ -> branch
+    end
+  end
+  defp template_branch(branch, _), do: branch
 
   def dispatcher(%{type: :github}), do: Github
   def dispatcher(%{type: :gitlab}), do: Gitlab

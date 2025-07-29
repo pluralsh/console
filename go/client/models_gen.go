@@ -497,9 +497,10 @@ type AWSCloudAttributes struct {
 }
 
 type AWSCloudConnectionAttributes struct {
-	AccessKeyID     string `json:"accessKeyId"`
-	SecretAccessKey string `json:"secretAccessKey"`
-	Region          string `json:"region"`
+	AccessKeyID     string    `json:"accessKeyId"`
+	SecretAccessKey string    `json:"secretAccessKey"`
+	Region          *string   `json:"region,omitempty"`
+	Regions         []*string `json:"regions,omitempty"`
 }
 
 // aws specific cloud configuration
@@ -514,7 +515,9 @@ type AWSConnectionAttributes struct {
 	// the secret access key for aws
 	SecretAccessKey string `json:"secretAccessKey"`
 	// the region for aws
-	Region string `json:"region"`
+	Region *string `json:"region,omitempty"`
+	// the regions for aws
+	Regions []*string `json:"regions,omitempty"`
 }
 
 type AWSNodeCloudAttributes struct {
@@ -2481,6 +2484,7 @@ type Flow struct {
 	Alerts                      *AlertConnection                      `json:"alerts,omitempty"`
 	PreviewEnvironmentTemplates *PreviewEnvironmentTemplateConnection `json:"previewEnvironmentTemplates,omitempty"`
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
+	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
