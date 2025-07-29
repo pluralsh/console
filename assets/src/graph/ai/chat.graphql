@@ -104,6 +104,11 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  thread {
+    id
+    summary
+    lastMessageAt
+  }
   connection {
     id
     name
