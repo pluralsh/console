@@ -83,6 +83,10 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.list_preview_environment_instances/3
     end
 
+    connection field :vulnerability_reports, node_type: :vulnerability_report do
+      resolve &Deployments.list_vulnerability_reports_for_flow/3
+    end
+
     timestamps()
   end
 
