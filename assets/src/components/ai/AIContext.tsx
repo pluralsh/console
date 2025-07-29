@@ -89,10 +89,9 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(
-    () => setPersistedThreadId(currentThreadId),
-    [currentThreadId, setPersistedThreadId]
-  )
+  useEffect(() => {
+    if (currentThreadId) setPersistedThreadId(currentThreadId)
+  }, [currentThreadId, setPersistedThreadId])
 
   useEffect(() => {
     if (!threadData?.chatThread?.id) return

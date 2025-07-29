@@ -99,9 +99,12 @@ function ChatbotPanelInner() {
 
   useEffect(() => {
     // If a thread is already selected, nothing needs to be done.
-    if (currentThreadId) return
+    if (!isEmpty(currentThreadId)) return
 
-    // If there are no threads, create a new one.
+    // If data is not yet loaded, do nothing.
+    if (!data) return
+
+    // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
       createNewThread({ summary: 'New chat with Plural Copilot' })
       return
@@ -113,11 +116,19 @@ function ChatbotPanelInner() {
       threads?.find((thread) => thread?.id === persistedThreadId)
     ) {
       goToThread(persistedThreadId)
+      return
     }
 
     // Otherwise, select the first available thread.
     goToThread(threads[0]?.id)
-  }, [createNewThread, currentThreadId, goToThread, persistedThreadId, threads])
+  }, [
+    createNewThread,
+    currentThreadId,
+    data,
+    goToThread,
+    persistedThreadId,
+    threads,
+  ])
 
   // optimistically updating when a user sends a message relies on using cache-first (default) fetch policy here
   // fresh data is fetched by the network in AIContext provider, where Apollo will populate the cache
