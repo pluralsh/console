@@ -108,14 +108,15 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
-    field :openshift_version, :string
-    field :node_count,        :integer
-    field :pod_count,         :integer
-    field :namespace_count,   :integer
-    field :cpu_total,         :float
-    field :memory_total,      :float
-    field :cpu_util,          :float
-    field :memory_util,       :float
+    field :openshift_version,  :string
+    field :node_count,         :integer
+    field :pod_count,          :integer
+    field :namespace_count,    :integer
+    field :cpu_total,          :float
+    field :memory_total,       :float
+    field :cpu_util,           :float
+    field :memory_util,        :float
+    field :availability_zones, {:array, :string}
 
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
@@ -469,7 +470,7 @@ defmodule Console.Schema.Cluster do
       attrs,
       ~w(pinged_at distro health_score kubelet_version current_version
          installed openshift_version node_count pod_count namespace_count
-         cpu_total memory_total cpu_util memory_util)a
+         cpu_total memory_total cpu_util memory_util availability_zones)a
     )
     |> cast_assoc(:insight_components)
     |> cast_assoc(:node_statistics)
