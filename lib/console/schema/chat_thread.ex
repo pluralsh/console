@@ -29,7 +29,7 @@ defmodule Console.Schema.ChatThread do
   end
 
   def search(query \\ __MODULE__, q) do
-    from(t in query, where: ilike(t.summary, ^"%#{q}%"))
+    from(t in query, where: fragment("encode(?, 'escape') ILIKE ?", t.summary, ^"%#{q}%"))
   end
 
   def settings(%__MODULE__{settings: %{memory: m}}, :memory) when is_boolean(m), do: m
