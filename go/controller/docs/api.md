@@ -19,6 +19,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ComplianceReportGenerator](#compliancereportgenerator)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
+- [FederatedCredential](#federatedcredential)
 - [Flow](#flow)
 - [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
@@ -1106,6 +1107,43 @@ _Appears in:_
 
 
 
+
+
+#### FederatedCredential
+
+
+
+FederatedCredential is a way to authenticate users from an external identity provider.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `FederatedCredential` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[FederatedCredentialSpec](#federatedcredentialspec)_ |  |  |  |
+
+
+#### FederatedCredentialSpec
+
+
+
+FederatedCredentialSpec defines the desired state of FederatedCredential.
+
+
+
+_Appears in:_
+- [FederatedCredential](#federatedcredential)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `issuer` _string_ | Issuer is the URL of the identity provider that issues the tokens. |  | Required: {} <br /> |
+| `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: {} <br /> |
+| `claimsLike` _string_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />TODO: describe the syntax of this expression. |  | Optional: {} <br /> |
+| `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Optional: {} <br /> |
 
 
 #### Flow
