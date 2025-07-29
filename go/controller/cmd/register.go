@@ -424,8 +424,12 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.FederatedCredentialReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, _ credentials.NamespaceCredentialsCache) types.Controller {
+	types.RegisterController(types.FederatedCredentialReconciler, func(
+		mgr ctrl.Manager,
+		consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache,
+		_ credentials.NamespaceCredentialsCache,
+	) types.Controller {
 		return &controller.FederatedCredentialReconciler{
 			Client:         mgr.GetClient(),
 			ConsoleClient:  consoleClient,
