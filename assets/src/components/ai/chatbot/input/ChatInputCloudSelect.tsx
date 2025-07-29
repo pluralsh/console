@@ -82,7 +82,7 @@ export function ChatInputCloudSelect({
     <>
       <Select
         selectedKey={currentThread.session?.connection?.id ?? ''}
-        onSelectionChange={(key) => onCloudChange(key as string | null)}
+        onSelectionChange={(key) => onCloudChange(key ? (key as string) : null)}
         label="cloud"
         width={270}
         dropdownHeaderFixed={
