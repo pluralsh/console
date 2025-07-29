@@ -13,7 +13,7 @@ import {
   useChatThreadsQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
@@ -27,6 +27,7 @@ import {
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
+import { mapExistingNodes } from '../../../utils/graphql.ts'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -76,6 +77,7 @@ function ChatbotPanelInner() {
   const {
     currentThread,
     currentThreadId,
+    persistedThreadId,
     goToThread,
     createNewThread,
     detailsLoading,
@@ -90,25 +92,32 @@ function ChatbotPanelInner() {
     keyPath: ['chatThreads'],
   })
 
+  const threads = useMemo(
+    () => mapExistingNodes(data?.chatThreads),
+    [data?.chatThreads]
+  )
+
   useEffect(() => {
     // If a thread is already selected, nothing needs to be done.
-    // The context handles loading the last value from the persisted state.
-    // TODO: Handle the case where the thread is deleted and the currentThreadId is no longer valid.
     if (currentThreadId) return
 
     // If there are no threads, create a new one.
-    if (isEmpty(data?.chatThreads?.edges)) {
+    if (isEmpty(threads)) {
       createNewThread({ summary: 'New chat with Plural Copilot' })
       return
     }
 
-    // If there is at least one thread, select the first one.
-    if (data?.chatThreads?.edges?.[0]?.node?.id) {
-      goToThread(data.chatThreads.edges[0].node.id)
+    // If there is a persisted thread, and it exists in the fetched threads, go to that thread.
+    if (
+      persistedThreadId &&
+      threads?.find((thread) => thread?.id === persistedThreadId)
+    ) {
+      goToThread(persistedThreadId)
     }
 
-    return
-  }, [createNewThread, currentThreadId, data?.chatThreads?.edges, goToThread])
+    // Otherwise, select the first available thread.
+    goToThread(threads[0]?.id)
+  }, [createNewThread, currentThreadId, goToThread, persistedThreadId, threads])
 
   // optimistically updating when a user sends a message relies on using cache-first (default) fetch policy here
   // fresh data is fetched by the network in AIContext provider, where Apollo will populate the cache

@@ -46,6 +46,7 @@ type ChatbotContextT = {
   currentThread: Nullable<ChatThreadFragment>
   currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
+  persistedThreadId: Nullable<string>
   lastNonAgentThreadId: Nullable<string>
   threadLoading: boolean
   threadError: ApolloError | undefined
@@ -69,7 +70,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = useState(true)
-  const [currentThreadId, setCurrentThreadId] = usePersistedState<
+  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
+  const [persistedThreadId, setPersistedThreadId] = usePersistedState<
     Nullable<string>
   >('plural-ai-current-thread-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
@@ -86,6 +88,11 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+
+  useEffect(
+    () => setPersistedThreadId(currentThreadId),
+    [currentThreadId, setPersistedThreadId]
+  )
 
   useEffect(() => {
     if (!threadData?.chatThread?.id) return
@@ -107,6 +114,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         currentThread: threadData?.chatThread,
         currentThreadId,
         setCurrentThreadId,
+        persistedThreadId,
         lastNonAgentThreadId,
         threadLoading,
         threadError,
@@ -163,6 +171,7 @@ export function useChatbot() {
     currentThread,
     currentThreadId,
     setCurrentThreadId,
+    persistedThreadId,
     lastNonAgentThreadId,
     threadLoading,
     threadError,
@@ -220,6 +229,7 @@ export function useChatbot() {
     closeChatbot: () => setOpen(false),
     currentThread,
     currentThreadId,
+    persistedThreadId,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,
