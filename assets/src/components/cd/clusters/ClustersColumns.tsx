@@ -1,11 +1,11 @@
 import {
   Chip,
-  CpuIcon,
   Flex,
   GearTrainIcon,
   ListBoxItem,
-  NamespaceIcon,
-  PackageIcon,
+  SmallNamespaceIcon,
+  SmallPodIcon,
+  SmallNodeIcon,
   PeopleIcon,
   ReturnIcon,
   SemanticColorKey,
@@ -291,15 +291,15 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
     return (
       <SizeSc>
         <SizeTextSc>
-          <CpuIcon size={16} />
+          <SmallNodeIcon size={16} />
           {`${cluster?.nodeCount} nodes`}
         </SizeTextSc>
         <SizeTextSc>
-          <NamespaceIcon size={16} />
+          <SmallNamespaceIcon size={16} />
           {`${cluster?.namespaceCount} ns`}
         </SizeTextSc>
         <SizeTextSc>
-          <PackageIcon size={16} />
+          <SmallPodIcon size={16} />
           {`${cluster?.podCount} pods`}
         </SizeTextSc>
       </SizeSc>
