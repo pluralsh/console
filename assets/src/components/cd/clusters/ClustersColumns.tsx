@@ -209,7 +209,7 @@ export const ColVersion = columnHelper.accessor(
   }
 )
 
-const cpuFormat = (cpu: Nullable<number>) => (cpu ? `${cpu} vCPU` : '—')
+const cpuFormat = (cpu: Nullable<number>) => (cpu ? cpu : '—')
 
 export const ColCpu = columnHelper.accessor(({ node }) => node, {
   id: 'cpu',
@@ -218,7 +218,7 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
     const cluster = getValue()
     const percentage = (cluster?.cpuUtil ?? 0) / 100
     const total = (cluster?.cpuTotal ?? 0) / 1000
-    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)}`
+    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)} vCPU`
 
     return percentage > 0 ? (
       <>
@@ -235,7 +235,7 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
 })
 
 const memFormat = (memory: Nullable<number>) =>
-  memory ? filesize(memory) : '—'
+  memory ? filesize(memory, { standard: 'jedec' }) : '—'
 
 export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
