@@ -45,10 +45,17 @@ func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, er
 }
 
 func (in *FederatedCredential) Attributes() console.FederatedCredentialAttributes {
+	claimsLike := in.Spec.ClaimsLike
+	if claimsLike == nil || len(*claimsLike) == 0 {
+		// If claimsLike is not set, we default to an empty JSON object.
+		// This is to ensure that the API can handle it gracefully.
+		claimsLike = lo.ToPtr("{}")
+	}
+
 	return console.FederatedCredentialAttributes{
 		Issuer:     in.Spec.Issuer,
 		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
-		ClaimsLike: in.Spec.ClaimsLike,
+		ClaimsLike: claimsLike,
 	}
 }
 

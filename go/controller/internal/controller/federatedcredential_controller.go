@@ -6,10 +6,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	consoleapi "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -29,7 +31,6 @@ type FederatedCredentialReconciler struct {
 	client.Client
 
 	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
 	UserGroupCache cache.UserGroupCache
 }
 
@@ -82,6 +83,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 			return requeue, nil
 		}
 
+		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -97,8 +99,8 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Context, credential *v1alpha1.FederatedCredential) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if credential.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(credential, BootstrapTokenProtectionFinalizerName) {
-		controllerutil.AddFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+	if credential.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(credential, FederatedCredentialProtectionFinalizerName) {
+		controllerutil.AddFinalizer(credential, FederatedCredentialProtectionFinalizerName)
 	}
 
 	// If object is not being deleted, do nothing
@@ -110,12 +112,12 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 	// remove the finalizer and stop reconciliation
 	if !credential.Status.HasID() {
 		// stop reconciliation as there is no console ID available to delete the resource
-		controllerutil.RemoveFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+		controllerutil.RemoveFinalizer(credential, FederatedCredentialProtectionFinalizerName)
 		return &ctrl.Result{}
 	}
 
 	// try to delete the resource
-	if err := in.ConsoleClient.DeleteBootstrapToken(ctx, credential.Status.GetID()); err != nil {
+	if _, err := in.ConsoleClient.DeleteFederatedCredential(ctx, credential.Status.GetID()); err != nil {
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -123,7 +125,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 	}
 
 	// stop reconciliation as the item has been deleted
-	controllerutil.RemoveFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+	controllerutil.RemoveFinalizer(credential, FederatedCredentialProtectionFinalizerName)
 	return &ctrl.Result{}
 }
 
@@ -167,4 +169,12 @@ func (in *FederatedCredentialReconciler) createFederatedCredential(ctx context.C
 	}
 
 	return apiCredential, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (in *FederatedCredentialReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		For(&v1alpha1.FederatedCredential{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Complete(in)
 }

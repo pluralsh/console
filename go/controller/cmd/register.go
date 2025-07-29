@@ -416,7 +416,7 @@ func init() {
 	)
 
 	types.RegisterController(types.PrGovernanceReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		_ cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.PrGovernanceReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
@@ -424,7 +424,12 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.FederatedCredentialReconciler, func() types.Controller {
-
+	types.RegisterController(types.FederatedCredentialReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache, _ credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.FederatedCredentialReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			UserGroupCache: userGroupCache,
+		}
 	})
 }
