@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -29,6 +30,10 @@ type FederatedCredential struct {
 
 	Spec   FederatedCredentialSpec `json:"spec,omitempty"`
 	Status Status                  `json:"status,omitempty"`
+}
+
+func (in *FederatedCredential) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
 // FederatedCredentialSpec defines the desired state of FederatedCredential.

@@ -423,4 +423,8 @@ func init() {
 			Scheme:        mgr.GetScheme(),
 		}
 	})
+
+	types.RegisterController(types.FederatedCredentialReconciler, func() types.Controller {
+
+	})
 }
