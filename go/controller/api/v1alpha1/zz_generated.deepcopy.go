@@ -2146,8 +2146,8 @@ func (in *FederatedCredentialSpec) DeepCopyInto(out *FederatedCredentialSpec) {
 	}
 	if in.ClaimsLike != nil {
 		in, out := &in.ClaimsLike, &out.ClaimsLike
-		*out = new(string)
-		**out = **in
+		*out = new(runtime.RawExtension)
+		(*in).DeepCopyInto(*out)
 	}
 }
 

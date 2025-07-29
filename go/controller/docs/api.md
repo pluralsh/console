@@ -1142,7 +1142,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `issuer` _string_ | Issuer is the URL of the identity provider that issues the tokens. |  | Required: {} <br /> |
 | `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: {} <br /> |
-| `claimsLike` _string_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />TODO: describe the syntax of this expression. |  | Optional: {} <br /> |
+| `claimsLike` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />TODO: describe the syntax of this expression. |  | Optional: {} <br /> |
 | `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Required: {} <br /> |
 
 

@@ -4,6 +4,7 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	console "github.com/pluralsh/console/go/client"
 )
@@ -45,11 +46,13 @@ func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, er
 }
 
 func (in *FederatedCredential) Attributes() console.FederatedCredentialAttributes {
-	claimsLike := in.Spec.ClaimsLike
-	if claimsLike == nil || len(*claimsLike) == 0 {
+	var claimsLike *string
+	if in.Spec.ClaimsLike == nil || len(in.Spec.ClaimsLike.Raw) == 0 {
 		// If claimsLike is not set, we default to an empty JSON object.
 		// This is to ensure that the API can handle it gracefully.
 		claimsLike = lo.ToPtr("{}")
+	} else {
+		claimsLike = lo.ToPtr(string(in.Spec.ClaimsLike.Raw))
 	}
 
 	return console.FederatedCredentialAttributes{
@@ -77,7 +80,7 @@ type FederatedCredentialSpec struct {
 	// ClaimsLike is a JSON expression that matches the claims in the token.
 	// TODO: describe the syntax of this expression.
 	// +kubebuilder:validation:Optional
-	ClaimsLike *string `json:"claimsLike,omitempty"`
+	ClaimsLike *runtime.RawExtension `json:"claimsLike,omitempty"`
 
 	// User is the user email address that will be authenticated by this credential.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
