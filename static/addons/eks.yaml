@@ -3389,6 +3389,15 @@
   publisher: eks
 - name: elastic_elastic-agent
   versions:
+  - version: v9.0.4-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v9.0.3-eksbuild.1
     compatibilities:
     - '1.32'
@@ -3415,6 +3424,15 @@
     - '1.27'
   - version: v9.0.0-eksbuild.1
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v8.18.4-eksbuild.1
+    compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
@@ -5700,6 +5718,7 @@
     - '1.25'
   - version: v1.19.4-eksbuild.1
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
@@ -5721,6 +5740,7 @@
     - '1.25'
   - version: v1.19.2-eksbuild.5
     compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
@@ -5744,6 +5764,8 @@
     - '1.24'
   - version: v1.19.0-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5766,6 +5788,8 @@
     - '1.24'
   - version: v1.18.5-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5777,6 +5801,8 @@
     - '1.23'
   - version: v1.18.4-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5788,6 +5814,8 @@
     - '1.23'
   - version: v1.18.3-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5800,6 +5828,8 @@
     - '1.22'
   - version: v1.18.3-eksbuild.2
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -5812,6 +5842,9 @@
     - '1.22'
   - version: v1.18.3-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -5823,6 +5856,9 @@
     - '1.22'
   - version: v1.18.2-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -5835,6 +5871,9 @@
     - '1.21'
   - version: v1.18.1-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -5845,6 +5884,9 @@
     - '1.23'
   - version: v1.18.1-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -5855,6 +5897,9 @@
     - '1.23'
   - version: v1.18.0-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
@@ -5893,6 +5938,8 @@
     - '1.21'
   - version: v1.16.3-eksbuild.2
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
@@ -5902,6 +5949,8 @@
     - '1.23'
   - version: v1.16.2-eksbuild.1
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
@@ -5911,6 +5960,7 @@
     - '1.23'
   - version: v1.16.0-eksbuild.1
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
