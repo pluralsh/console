@@ -55,14 +55,14 @@ export function ChatInputCloudSelect({
   )
 
   const onCloudChange = useCallback(
-    (connectionId: string | undefined) => {
+    (connectionId: string | null) => {
       if (connectionId !== currentConnection?.id) {
         updateThread({
           variables: {
             id: currentThread.id,
             attributes: {
               summary: currentThread.summary,
-              session: { connectionId }, // TODO: How to properly handle cloud updates? Does it work only with agent?
+              session: { connectionId },
             },
           },
         })
@@ -82,7 +82,7 @@ export function ChatInputCloudSelect({
     <>
       <Select
         selectedKey={currentThread.session?.connection?.id ?? ''}
-        onSelectionChange={(key) => onCloudChange(key as string | undefined)}
+        onSelectionChange={(key) => onCloudChange(key as string | null)}
         label="cloud"
         width={270}
         dropdownHeaderFixed={
@@ -126,7 +126,7 @@ export function ChatInputCloudSelect({
         dropdownFooterFixed={
           currentThread.session?.connection?.id ? (
             <ListBoxFooterPlus
-              onClick={() => onCloudChange(undefined)}
+              onClick={() => onCloudChange(null)}
               leftContent={<CloudIcon />}
             >
               Deselect cloud connection
