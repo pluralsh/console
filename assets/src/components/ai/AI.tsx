@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
+  AI_AGENT_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
@@ -18,6 +19,7 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { AIDisabledState } from './AIThreads'
 
 const directory: SubtabDirectory = [
+  { label: 'Agent', path: AI_AGENT_REL_PATH },
   { label: 'Threads', path: AI_THREADS_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
 ]
