@@ -340,6 +340,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
 			LuaScript:   service.Spec.Helm.LuaScript,
 			LuaFile:     service.Spec.Helm.LuaFile,
+			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
 		if service.Spec.Helm.Repository != nil {

@@ -2896,6 +2896,7 @@ type HelmConfigAttributes struct {
 	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	LuaScript   *string              `json:"luaScript,omitempty"`
 	LuaFile     *string              `json:"luaFile,omitempty"`
+	LuaFolder   *string              `json:"luaFolder,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2991,6 +2992,8 @@ type HelmSpec struct {
 	LuaScript *string `json:"luaScript,omitempty"`
 	// a lua file to use for helm applies
 	LuaFile *string `json:"luaFile,omitempty"`
+	// a folder of lua files to include in the final script used
+	LuaFolder *string `json:"luaFolder,omitempty"`
 }
 
 // a (possibly nested) helm value pair

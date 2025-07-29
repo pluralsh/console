@@ -171,6 +171,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			IgnoreCrds:  srv.Helm.IgnoreCrds,
 			LuaScript:   srv.Helm.LuaScript,
 			LuaFile:     srv.Helm.LuaFile,
+			LuaFolder:   srv.Helm.LuaFolder,
 			Git:         srv.Helm.Git.Attributes(),
 		}
 		if srv.Helm.Repository != nil {
