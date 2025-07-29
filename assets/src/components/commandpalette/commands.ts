@@ -392,23 +392,17 @@ export function useHistory({
   history: Array<CommandGroup>
 } {
   const { goToThread } = useChatbot()
-  // TODO: this should support pagination
   const { loading, data } = useChatThreadsQuery({
+    // TODO: this should support pagination
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
-    variables: { first: 100 },
+    variables: { first: 100, q: isEmpty(filter) ? undefined : filter },
   })
 
-  const threads = useMemo(() => {
-    const threads = data?.chatThreads?.edges?.map((edge) => edge?.node) ?? []
-    const fuse = new Fuse(threads, {
-      keys: ['summary'],
-      threshold: 0.3,
-    })
-    return filter?.length > 0
-      ? (fuse.search(filter).map((result) => result.item) ?? [])
-      : threads
-  }, [data?.chatThreads?.edges, filter])
+  const threads = useMemo(
+    () => mapExistingNodes(data?.chatThreads),
+    [data?.chatThreads]
+  )
 
   const history = threads.map((thread) => {
     return {
