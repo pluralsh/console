@@ -9,7 +9,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -449,7 +448,7 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 }
 
 func OwnedByEventHandler() handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
 		if !HasAnnotation(obj, OwnedByAnnotationName) {
 			return nil
 		}
@@ -465,7 +464,7 @@ func OwnedByEventHandler() handler.EventHandler {
 	})
 }
 
-func HasAnnotation(obj client.Object, annotation string) bool {
+func HasAnnotation(obj runtimeclient.Object, annotation string) bool {
 	if obj.GetAnnotations() == nil {
 		return false
 	}
@@ -486,7 +485,7 @@ func NamespacedNameFromAnnotation(annotation string) (*types.NamespacedName, err
 	}, nil
 }
 
-func TryAddOwnedByAnnotation(ctx context.Context, client client.Client, obj client.Object) error {
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, obj runtimeclient.Object) error {
 	annotations := obj.GetAnnotations()
 	annotations[OwnedByAnnotationName] = types.NamespacedName{
 		Namespace: obj.GetNamespace(),
