@@ -22,7 +22,13 @@ import { TRUNCATE } from '../../utils/truncate.ts'
 import { useChatbot } from '../AIContext.tsx'
 import { CaptionP } from '../../utils/typography/Text.tsx'
 
-function getIcon(type: Nullable<AgentSessionType>, size = 16) {
+export function AgentIcon({
+  type,
+  size = 16,
+}: {
+  type: Nullable<AgentSessionType>
+  size?: number
+}) {
   switch (type) {
     case AgentSessionType.Terraform:
       return (
@@ -56,7 +62,7 @@ export function AgentSelect() {
     [currentThread?.session?.type]
   )
 
-  const icon = useMemo(() => getIcon(agent, 16), [agent])
+  const icon = useMemo(() => <AgentIcon type={agent} />, [agent])
 
   const [createAgentSession, { loading, error: agentSessionError }] =
     useCreateAgentSessionMutation({
@@ -149,12 +155,16 @@ export function AgentSelect() {
       >
         <ListBoxItem
           key={AgentSessionType.Terraform}
-          leftContent={getIcon(AgentSessionType.Terraform)}
+          leftContent={
+            <AgentIcon type={AgentSessionType.Terraform}></AgentIcon>
+          }
           label="Terraform agent"
         />
         <ListBoxItem
           key={AgentSessionType.Kubernetes}
-          leftContent={getIcon(AgentSessionType.Kubernetes)}
+          leftContent={
+            <AgentIcon type={AgentSessionType.Kubernetes}></AgentIcon>
+          }
           label="Kubernetes agent"
         />
       </Select>

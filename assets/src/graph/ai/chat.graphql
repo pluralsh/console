@@ -107,6 +107,7 @@ fragment AgentSession on AgentSession {
   thread {
     id
     summary
+    insertedAt
     lastMessageAt
   }
   connection {

@@ -1,10 +1,10 @@
-import { Flex, RobotIcon, Table } from '@pluralsh/design-system'
+import { Flex, IconFrame, RobotIcon, Table } from '@pluralsh/design-system'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../utils/table/useFetchPaginatedData.tsx'
 import {
-  ChatThreadTinyFragment,
+  AgentSessionFragment,
   useAgentSessionsQuery,
 } from '../../generated/graphql.ts'
 import { isEmpty } from 'lodash'
@@ -15,6 +15,14 @@ import { GqlError } from '../utils/Alert.tsx'
 import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
+import { Body2P, CaptionP } from '../utils/typography/Text.tsx'
+import { AgentIcon } from './chatbot/AgentSelect.tsx'
+import {
+  dayjsExtended as dayjs,
+  fromNow,
+  isAfter,
+} from '../../utils/datetime.ts'
+import { useChatbot } from './AIContext.tsx'
 
 export function AIAgent() {
   const theme = useTheme()
@@ -95,14 +103,23 @@ export function AIAgent() {
   )
 }
 
-const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
+const columnHelper = createColumnHelper<AgentSessionFragment>()
 
 const columns = [
   columnHelper.accessor((item) => item, {
     id: 'row',
     cell: function Cell({ getValue }) {
       const theme = useTheme()
-      const item = getValue()
+      const { goToThread } = useChatbot()
+
+      const agentSession = getValue()
+
+      const timestamp =
+        agentSession?.thread?.lastMessageAt ??
+        agentSession?.thread?.insertedAt ??
+        new Date()
+
+      const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
       return (
         <div
@@ -120,8 +137,36 @@ const columns = [
               },
             },
           }}
+          onClick={() => {
+            if (agentSession?.thread) {
+              goToThread(agentSession.thread.id)
+            }
+          }}
         >
-          {JSON.stringify(item)}
+          <Flex
+            alignItems="center"
+            justifyContent="space-between"
+            gap="small"
+            flex={1}
+          >
+            <Flex
+              gap="small"
+              alignItems="center"
+            >
+              <IconFrame
+                size="medium"
+                type="floating"
+                css={{ flexShrink: 0 }}
+                icon={<AgentIcon type={agentSession.type} />}
+              />
+              <Body2P css={{ opacity: isStale ? 0.6 : 1 }}>
+                {agentSession.thread?.summary}
+              </Body2P>
+            </Flex>
+            <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
+              Last updated {fromNow(timestamp)}
+            </CaptionP>
+          </Flex>
         </div>
       )
     },
