@@ -4,10 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -31,6 +36,11 @@ import (
 const (
 	requeueDefault          = 30 * time.Second
 	requeueWaitForResources = 5 * time.Second
+
+	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
+	// It is used instead of the standard owner reference to avoid garbage collection of resources
+	// but still be able to reconcile them.
+	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
 )
 
 var (
@@ -436,4 +446,53 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	}
 
 	return project, nil, nil
+}
+
+func OwnedByEventHandler() handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+		if !HasAnnotation(obj, OwnedByAnnotationName) {
+			return nil
+		}
+
+		ownedBy := obj.GetAnnotations()[OwnedByAnnotationName]
+		namespacedName, err := NamespacedNameFromAnnotation(ownedBy)
+		if err != nil {
+			klog.ErrorS(err, "failed to parse owned-by annotation", "annotation", ownedBy)
+			return nil
+		}
+
+		return []reconcile.Request{{NamespacedName: *namespacedName}}
+	})
+}
+
+func HasAnnotation(obj client.Object, annotation string) bool {
+	if obj.GetAnnotations() == nil {
+		return false
+	}
+
+	_, ok := obj.GetAnnotations()[annotation]
+	return ok
+}
+
+func NamespacedNameFromAnnotation(annotation string) (*types.NamespacedName, error) {
+	parts := strings.Split(annotation, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("the annotation has wrong format %s", annotation)
+	}
+
+	return &types.NamespacedName{
+		Name:      parts[1],
+		Namespace: parts[0],
+	}, nil
+}
+
+func TryAddOwnedByAnnotation(ctx context.Context, client client.Client, obj client.Object) error {
+	annotations := obj.GetAnnotations()
+	annotations[OwnedByAnnotationName] = types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}.String()
+	obj.SetAnnotations(annotations)
+
+	return utils.TryToUpdate(ctx, client, obj)
 }

@@ -43,7 +43,7 @@ const (
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=scmconnections,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=scmconnections/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=scmconnections/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.ScmConnection closer to the desired state
@@ -99,6 +99,10 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+
+	if err := TryAddOwnedByAnnotation(ctx, r.Client, scm); err != nil {
+		return handleRequeue(nil, err, scm.SetCondition)
+	}
 
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject)
@@ -276,6 +280,6 @@ func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Watches(&corev1.Secret{}, OwnedByEventHandler()).
 		Complete(r)
 }
