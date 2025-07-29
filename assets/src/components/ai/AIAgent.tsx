@@ -5,9 +5,13 @@ import { isEmpty } from 'lodash'
 import { EmptyStateCompact } from './AIThreads.tsx'
 import { useMemo } from 'react'
 import { mapExistingNodes } from '../../utils/graphql.ts'
+import { GqlError } from '../utils/Alert.tsx'
+import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
+import { useTheme } from 'styled-components'
 
 export function AIAgent() {
-  const { data } = useFetchPaginatedData({
+  const theme = useTheme()
+  const { data, error } = useFetchPaginatedData({
     queryHook: useAgentSessionsQuery,
     keyPath: ['agentSessions'],
   })
@@ -16,6 +20,24 @@ export function AIAgent() {
     () => mapExistingNodes(data?.agentSessions),
     [data]
   )
+
+  if (error) return <GqlError error={error} />
+
+  if (!data)
+    return (
+      <TableSkeleton
+        numColumns={1}
+        height={70}
+        centered={true}
+        styles={{
+          height: '100%',
+          padding: theme.spacing.xlarge,
+          '> svg': {
+            width: '100%',
+          },
+        }}
+      />
+    )
 
   if (data && isEmpty(agentSessions)) {
     return (
