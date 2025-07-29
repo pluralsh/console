@@ -1,11 +1,14 @@
 import {
   Chip,
+  ClusterIcon,
   Flex,
   GearTrainIcon,
+  KubernetesIcon,
   ListBoxItem,
+  NamespaceIcon,
   PeopleIcon,
   ReturnIcon,
-  Tooltip,
+  SemanticColorKey,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -46,6 +49,9 @@ import { ClusterUpgradeButton } from './ClusterUpgradeButton.tsx'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { ClusterInfoFlyoverTab } from './info-flyover/ClusterInfoFlyover.tsx'
 import { ClustersTableMeta } from './Clusters.tsx'
+import { roundTo } from 'components/cluster/utils.tsx'
+import { TRUNCATE } from 'components/utils/truncate.ts'
+import { DefaultTheme } from 'styled-components/dist/types'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -176,6 +182,7 @@ export const ColVersion = columnHelper.accessor(
         <div>
           {node?.currentVersion && (
             <StackedText
+              truncate={true}
               first={
                 <div css={{ display: 'flex', flexDirection: 'column' }}>
                   <TabularNumbers>
@@ -188,7 +195,11 @@ export const ColVersion = columnHelper.accessor(
                   </TabularNumbers>
                 </div>
               }
-              second={`Kubelet: ${toNiceVersion(node?.kubeletVersion)}`}
+              second={
+                <span style={{ ...TRUNCATE }}>
+                  {`Kubelet: ${toNiceVersion(node?.kubeletVersion)}`}
+                </span>
+              }
             />
           )}
           {!node?.currentVersion && <>-</>}
@@ -205,20 +216,18 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
   header: 'CPU',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const display = `${cpuFormat(cluster?.metricsSummary?.cpuTotal)} / ${cpuFormat(cluster?.metricsSummary?.cpuAvailable)}`
+    const percentage = (cluster?.cpuUtil ?? 0) / 100
+    const total = (cluster?.cpuTotal ?? 0) / 1000
+    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)}`
 
-    return cluster?.metricsSummary?.cpuUsed !== undefined ? (
-      <Tooltip
-        label={display}
-        placement="top"
-      >
-        <TableText>
-          <UsageBar
-            usage={(cluster?.metricsSummary?.cpuUsed ?? 0) / 100}
-            width={120}
-          />
-        </TableText>
-      </Tooltip>
+    return percentage > 0 ? (
+      <>
+        <SizeTextSc>{display}</SizeTextSc>
+        <UsageBar
+          usage={percentage}
+          width={120}
+        />
+      </>
     ) : (
       display
     )
@@ -226,29 +235,74 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
 })
 
 const memFormat = (memory: Nullable<number>) =>
-  memory ? filesize(memory * 1_000_000) : '—'
+  memory ? filesize(memory) : '—'
 
 export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
   header: 'Memory',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const display = `${memFormat(cluster?.metricsSummary?.memoryTotal)} / ${memFormat(cluster?.metricsSummary?.memoryAvailable)}`
+    const percentage = (cluster?.memoryUtil ?? 0) / 100
+    const total = cluster?.memoryTotal ?? 0
+    const display = `${memFormat(percentage * total)} / ${memFormat(total)}`
 
-    return cluster?.metricsSummary?.memoryUsed !== undefined ? (
-      <Tooltip
-        label={display}
-        placement="top"
-      >
+    return percentage > 0 ? (
+      <>
+        <SizeTextSc>{display}</SizeTextSc>
         <TableText>
           <UsageBar
-            usage={(cluster?.metricsSummary?.memoryUsed ?? 0) / 100}
+            usage={percentage}
             width={120}
           />
         </TableText>
-      </Tooltip>
+      </>
     ) : (
       display
+    )
+  },
+})
+
+type PartialType = keyof DefaultTheme['partials']['text']
+
+const SizeSc = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  color: theme.colors['text-light'],
+  gap: theme.spacing.xxsmall,
+}))
+
+const SizeTextSc = styled.div<{
+  $partialType?: PartialType
+  $color?: SemanticColorKey
+}>(({ theme, $partialType = 'caption', $color = 'text-xlight' }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  color: theme.colors[$color],
+  ...theme.partials.text[$partialType],
+}))
+
+export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
+  id: 'size',
+  header: 'Cluster Size',
+  cell: ({ getValue }) => {
+    const cluster = getValue()
+    return (
+      <SizeSc>
+        <SizeTextSc>
+          <ClusterIcon size={16} />
+          {`${cluster?.nodeCount} nodes`}
+        </SizeTextSc>
+        <SizeTextSc>
+          <NamespaceIcon size={16} />
+          {`${cluster?.namespaceCount} ns`}
+        </SizeTextSc>
+        <SizeTextSc>
+          <KubernetesIcon size={16} />
+          {`${cluster?.podCount} pods`}
+        </SizeTextSc>
+      </SizeSc>
     )
   },
 })
@@ -475,6 +529,7 @@ export const cdClustersColumns = [
   ColVersion,
   ColCpu,
   ColMemory,
+  ColClusterSize,
   ColHealthScore,
   ColUpgradeable,
   ColCdTableActions,
@@ -485,6 +540,7 @@ export const homeClustersColumns = [
   ColAgentHealth,
   ColProvider,
   ColVersion,
+  ColClusterSize,
   ColHealthScore,
   ColUpgradeable,
   ColHomeTableActions,

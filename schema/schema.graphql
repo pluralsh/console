@@ -450,7 +450,20 @@ type RootQueryType {
   chatThread(id: ID!): ChatThread
 
   "gets the chat history from prior AI chat sessions"
-  chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    threadId: ID
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
@@ -1218,6 +1231,8 @@ type Flow {
 
   previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
 
+  vulnerabilityReports(after: String, first: Int, before: String, last: Int): VulnerabilityReportConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1695,7 +1710,8 @@ input CloudConnectionConfigurationAttributes {
 input AwsCloudConnectionAttributes {
   accessKeyId: String!
   secretAccessKey: String!
-  region: String!
+  region: String
+  regions: [String]
 }
 
 input GcpCloudConnectionAttributes {
@@ -2025,7 +2041,10 @@ type AwsConnectionAttributes {
   secretAccessKey: String!
 
   "the region for aws"
-  region: String!
+  region: String
+
+  "the regions for aws"
+  regions: [String]
 }
 
 "The configuration for a cloud provider"
@@ -8300,7 +8319,18 @@ type ChatThread {
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
-  chats(after: String, first: Int, before: String, last: Int): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   insertedAt: DateTime
 

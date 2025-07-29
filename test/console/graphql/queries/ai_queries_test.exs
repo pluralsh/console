@@ -55,7 +55,6 @@ defmodule Console.GraphQl.AiQueriesTest do
       user = insert(:user)
       thread = insert(:chat_thread, user: user)
       session = insert(:agent_session, connection: insert(:cloud_connection), thread: thread)
-                |> IO.inspect()
       chats = insert_list(3, :chat, thread: thread)
       insert_list(4, :chat)
 

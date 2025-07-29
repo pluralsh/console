@@ -42,7 +42,14 @@ type CloudConnectionSpec struct {
 type AWSCloudConnection struct {
 	AccessKeyId     string             `json:"accessKeyId"`
 	SecretAccessKey ObjectKeyReference `json:"secretAccessKey"`
-	Region          string             `json:"region"`
+
+	// The region this connection applies to
+	// +kubebuilder:validation:Optional
+	Region *string `json:"region"`
+
+	// A list of regions this connection can query
+	// +kubebuilder:validation:Optional
+	Regions []string `json:"regions"`
 }
 
 type GCPCloudConnection struct {
@@ -69,7 +76,8 @@ type CloudConnectionConfiguration struct {
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
 
-// CloudConnection is the Schema for the cloudconnections API
+// CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+// queries against cloud configuration data.
 type CloudConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

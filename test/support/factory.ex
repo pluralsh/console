@@ -773,6 +773,13 @@ defmodule Console.Factory do
     }
   end
 
+  def service_vuln_factory do
+    %Schema.ServiceVuln{
+      service: build(:service),
+      report: build(:vulnerability_report)
+    }
+  end
+
   def vulnerability_factory do
     %Schema.Vulnerability{
       report: build(:vulnerability_report)
