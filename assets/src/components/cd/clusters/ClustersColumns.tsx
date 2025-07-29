@@ -52,7 +52,6 @@ import { ClustersTableMeta } from './Clusters.tsx'
 import { roundTo } from 'components/cluster/utils.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
 import { DefaultTheme } from 'styled-components/dist/types'
-import { cpus } from 'os'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
