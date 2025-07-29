@@ -10,7 +10,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     McpServerAudit,
     Alert,
     PreviewEnvironmentTemplate,
-    PreviewEnvironmentInstance
+    PreviewEnvironmentInstance,
+    VulnerabilityReport
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
@@ -66,6 +67,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   def list_preview_environment_instances(flow, args, _) do
     PreviewEnvironmentInstance.for_flow(flow.id)
     |> PreviewEnvironmentInstance.ordered()
+    |> paginate(args)
+  end
+
+  def list_vulnerability_reports_for_flow(flow, args, _) do
+    VulnerabilityReport.for_flow(flow.id)
+    |> VulnerabilityReport.ordered()
     |> paginate(args)
   end
 

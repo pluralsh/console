@@ -114,7 +114,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `accessKeyId` _string_ |  |  |  |
 | `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
-| `region` _string_ |  |  |  |
+| `region` _string_ | The region this connection applies to |  | Optional: {} <br /> |
+| `regions` _string array_ | A list of regions this connection can query |  | Optional: {} <br /> |
 
 
 
@@ -365,7 +366,8 @@ _Appears in:_
 
 
 
-CloudConnection is the Schema for the cloudconnections API
+CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+queries against cloud configuration data.
 
 
 

@@ -9,6 +9,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 )
 
 func (r *CloudConnectionReconciler) getProviderSettingsSecretRef(spec v1alpha1.CloudConnectionSpec) v1alpha1.ObjectKeyReference {
@@ -95,6 +96,7 @@ func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx c
 				AccessKeyID:     aws.AccessKeyId,
 				SecretAccessKey: string(secretAccessKey),
 				Region:          aws.Region,
+				Regions:         lo.ToSlicePtr(aws.Regions),
 			},
 		},
 	}, nil
