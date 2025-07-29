@@ -698,7 +698,8 @@ export type AwsCloudAttributes = {
 
 export type AwsCloudConnectionAttributes = {
   accessKeyId: Scalars['String']['input'];
-  region: Scalars['String']['input'];
+  region?: InputMaybe<Scalars['String']['input']>;
+  regions?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   secretAccessKey: Scalars['String']['input'];
 };
 
@@ -714,7 +715,9 @@ export type AwsConnectionAttributes = {
   /** the access key id for aws */
   accessKeyId: Scalars['String']['output'];
   /** the region for aws */
-  region: Scalars['String']['output'];
+  region?: Maybe<Scalars['String']['output']>;
+  /** the regions for aws */
+  regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the secret access key for aws */
   secretAccessKey: Scalars['String']['output'];
 };
@@ -3046,6 +3049,7 @@ export type Flow = {
   servers?: Maybe<Array<Maybe<McpServer>>>;
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   /** write policy for this flow */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -3092,6 +3096,14 @@ export type FlowPullRequestsArgs = {
 
 
 export type FlowServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowVulnerabilityReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

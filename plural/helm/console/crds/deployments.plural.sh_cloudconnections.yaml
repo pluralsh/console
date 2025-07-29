@@ -26,7 +26,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CloudConnection is the Schema for the cloudconnections API
+        description: |-
+          CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+          queries against cloud configuration data.
         properties:
           apiVersion:
             description: |-
@@ -56,7 +58,13 @@ spec:
                       accessKeyId:
                         type: string
                       region:
+                        description: The region this connection applies to
                         type: string
+                      regions:
+                        description: A list of regions this connection can query
+                        items:
+                          type: string
+                        type: array
                       secretAccessKey:
                         description: |-
                           ObjectKeyReference is a reference to an object in a specific namespace.
@@ -80,7 +88,6 @@ spec:
                         type: object
                     required:
                     - accessKeyId
-                    - region
                     - secretAccessKey
                     type: object
                   azure:
