@@ -170,13 +170,13 @@ export function DeleteAiThreadModal({
   open: boolean
   onClose: Nullable<() => void>
 }) {
-  const { setCurrentThreadId } = useChatbotContext()
+  const { currentThreadId, setCurrentThreadId } = useChatbotContext()
   const [mutation, { loading, error }] = useDeleteChatThreadMutation({
     variables: { id: thread.id },
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreads', 'AiPins'],
     onCompleted: () => {
-      setCurrentThreadId(null)
+      if (thread.id === currentThreadId) setCurrentThreadId(undefined)
       onClose?.()
     },
   })
