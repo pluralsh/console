@@ -81,7 +81,7 @@ export function ChatInputCloudSelect({
   return (
     <>
       <Select
-        selectedKey={currentThread.session?.connection?.id ?? ''}
+        selectedKey={currentConnection?.id ?? ''}
         onSelectionChange={(key) => onCloudChange(key ? (key as string) : null)}
         label="cloud"
         width={270}

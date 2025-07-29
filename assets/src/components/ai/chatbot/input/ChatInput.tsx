@@ -113,8 +113,6 @@ export function ChatInput({
     [currentThread.session?.type]
   )
 
-  const hideClusterSelector = agent || !currentThread?.session?.id
-
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -182,7 +180,7 @@ export function ChatInput({
               />
             )}
             {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
-            {!hideClusterSelector && (
+            {!agent && !!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />
             )}
           </Flex>
