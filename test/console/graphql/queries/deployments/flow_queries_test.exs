@@ -103,6 +103,31 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
              |> ids_equal(prs)
     end
 
+    test "it can fetch vulnerability reports within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      svc = insert(:service, flow: flow)
+      reports = insert_list(3, :vulnerability_report)
+      for report <- reports,
+        do: insert(:service_vuln, service: svc, report: report)
+      insert_list(3, :vulnerability_report)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            vulnerabilityReports(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert from_connection(found["vulnerabilityReports"])
+             |> ids_equal(reports)
+    end
+
     test "it can fetch preview environment templates within a flow" do
       user = insert(:user)
       flow = insert(:flow, read_bindings: [%{user_id: user.id}])

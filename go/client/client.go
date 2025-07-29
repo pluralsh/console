@@ -98,6 +98,10 @@ type ConsoleClient interface {
 	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
+	GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error)
+	CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error)
+	DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error)
 	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
 	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
 	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
@@ -1200,6 +1204,59 @@ func (t *ClusterIsoImageFragment) GetRegistry() string {
 func (t *ClusterIsoImageFragment) GetUser() *string {
 	if t == nil {
 		t = &ClusterIsoImageFragment{}
+	}
+	return t.User
+}
+
+type FederatedCredentialFragment struct {
+	ID         string                            "json:\"id\" graphql:\"id\""
+	ClaimsLike map[string]any                    "json:\"claimsLike,omitempty\" graphql:\"claimsLike\""
+	Issuer     string                            "json:\"issuer\" graphql:\"issuer\""
+	Scopes     []*string                         "json:\"scopes,omitempty\" graphql:\"scopes\""
+	InsertedAt *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	User       *FederatedCredentialFragment_User "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *FederatedCredentialFragment) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment) GetClaimsLike() map[string]any {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ClaimsLike
+}
+func (t *FederatedCredentialFragment) GetIssuer() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Issuer
+}
+func (t *FederatedCredentialFragment) GetScopes() []*string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Scopes
+}
+func (t *FederatedCredentialFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *FederatedCredentialFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *FederatedCredentialFragment) GetUser() *FederatedCredentialFragment_User {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
 	}
 	return t.User
 }
@@ -6088,6 +6145,31 @@ func (t *ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentFor
 		t = &ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
+}
+
+type FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Email
 }
 
 type PipelineGateIDsEdgeFragment_Node_ struct {
@@ -14816,6 +14898,92 @@ func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterR
 	return t.Edges
 }
 
+type GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type DeleteFederatedCredential_DeleteFederatedCredential struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteFederatedCredential_DeleteFederatedCredential) GetID() string {
+	if t == nil {
+		t = &DeleteFederatedCredential_DeleteFederatedCredential{}
+	}
+	return t.ID
+}
+
+type UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
 type DeleteFlow_DeleteFlow struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -19375,6 +19543,50 @@ func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
 		t = &GetClusterIsoImage{}
 	}
 	return t.ClusterIsoImage
+}
+
+type GetFederatedCredential struct {
+	FederatedCredential *FederatedCredentialFragment "json:\"federatedCredential,omitempty\" graphql:\"federatedCredential\""
+}
+
+func (t *GetFederatedCredential) GetFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &GetFederatedCredential{}
+	}
+	return t.FederatedCredential
+}
+
+type CreateFederatedCredential struct {
+	CreateFederatedCredential *FederatedCredentialFragment "json:\"createFederatedCredential,omitempty\" graphql:\"createFederatedCredential\""
+}
+
+func (t *CreateFederatedCredential) GetCreateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &CreateFederatedCredential{}
+	}
+	return t.CreateFederatedCredential
+}
+
+type DeleteFederatedCredential struct {
+	DeleteFederatedCredential *DeleteFederatedCredential_DeleteFederatedCredential "json:\"deleteFederatedCredential,omitempty\" graphql:\"deleteFederatedCredential\""
+}
+
+func (t *DeleteFederatedCredential) GetDeleteFederatedCredential() *DeleteFederatedCredential_DeleteFederatedCredential {
+	if t == nil {
+		t = &DeleteFederatedCredential{}
+	}
+	return t.DeleteFederatedCredential
+}
+
+type UpdateFederatedCredential struct {
+	UpdateFederatedCredential *FederatedCredentialFragment "json:\"updateFederatedCredential,omitempty\" graphql:\"updateFederatedCredential\""
+}
+
+func (t *UpdateFederatedCredential) GetUpdateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &UpdateFederatedCredential{}
+	}
+	return t.UpdateFederatedCredential
 }
 
 type GetFlow struct {
@@ -29024,6 +29236,142 @@ func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *stri
 	return &res, nil
 }
 
+const GetFederatedCredentialDocument = `query GetFederatedCredential ($id: ID!) {
+	federatedCredential(id: $id) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetFederatedCredential
+	if err := c.Client.Post(ctx, "GetFederatedCredential", GetFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateFederatedCredentialDocument = `mutation CreateFederatedCredential ($attributes: FederatedCredentialAttributes!) {
+	createFederatedCredential(attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateFederatedCredential
+	if err := c.Client.Post(ctx, "CreateFederatedCredential", CreateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteFederatedCredentialDocument = `mutation DeleteFederatedCredential ($id: ID!) {
+	deleteFederatedCredential(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteFederatedCredential
+	if err := c.Client.Post(ctx, "DeleteFederatedCredential", DeleteFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateFederatedCredentialDocument = `mutation UpdateFederatedCredential ($id: ID!, $attributes: FederatedCredentialAttributes!) {
+	updateFederatedCredential(id: $id, attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateFederatedCredential
+	if err := c.Client.Post(ctx, "UpdateFederatedCredential", UpdateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetFlowDocument = `query GetFlow ($id: ID!) {
 	flow(id: $id) {
 		... FlowFragment
@@ -38469,6 +38817,10 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
+	GetFederatedCredentialDocument:                    "GetFederatedCredential",
+	CreateFederatedCredentialDocument:                 "CreateFederatedCredential",
+	DeleteFederatedCredentialDocument:                 "DeleteFederatedCredential",
+	UpdateFederatedCredentialDocument:                 "UpdateFederatedCredential",
 	GetFlowDocument:                                   "GetFlow",
 	UpsertFlowDocument:                                "UpsertFlow",
 	DeleteFlowDocument:                                "DeleteFlow",

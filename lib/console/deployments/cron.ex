@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  import Console, only: [clamp: 1, clamp: 3]
+  import Console, only: [clamp: 1]
   alias Console.Deployments.{Services, Clusters, Global, Stacks, Git}
   alias Console.Services.Users
   alias Console.Schema.{
@@ -65,33 +65,8 @@ defmodule Console.Deployments.Cron do
     |> Repo.delete_all()
   end
 
-  @opts [
-    ordered: false,
-    timeout: :timer.seconds(120),
-    on_timeout: :kill_task
-  ]
-
   def cache_warm() do
-    Task.async(fn -> Git.warm_helm_cache() end)
-
-    Cluster.ordered()
-    |> Cluster.healthy()
-    |> Cluster.with_limit(100)
-    |> Repo.all()
-    |> Task.async_stream(fn cluster ->
-      Logger.info "warming node caches for cluster #{cluster.handle}"
-      try do
-        Clusters.warm(:cluster_metrics, cluster)
-        # Clusters.warm(:nodes, cluster)
-        # Clusters.warm(:node_metrics, cluster)
-        # Clusters.warm(:api_discovery, cluster)
-      rescue
-        e ->
-          Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
-          Logger.error(Exception.format(:error, e, __STACKTRACE__))
-      end
-    end, [max_concurrency: clamp(Clusters.count(), 5, 25)] ++ @opts)
-    |> Stream.run()
+    Git.warm_helm_cache()
   end
 
   def install_clusters() do

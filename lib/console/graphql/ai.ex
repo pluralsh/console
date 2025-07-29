@@ -127,6 +127,7 @@ defmodule Console.GraphQl.AI do
     end
 
     connection field :chats, node_type: :chat do
+      arg :reverse, :boolean, description: "reverse the order of the chats"
       resolve &AI.list_chats/3
     end
 
@@ -337,6 +338,7 @@ defmodule Console.GraphQl.AI do
     connection field :chats, node_type: :chat do
       middleware Authenticated
       arg :thread_id, :id
+      arg :reverse,   :boolean, description: "reverse the order of the chats"
 
       resolve &AI.chats/2
     end

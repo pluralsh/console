@@ -69,7 +69,8 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 								Namespace: namespace,
 								Key:       "applicationCredentials",
 							},
-							Region: "test",
+							Region:  lo.ToPtr("test"),
+							Regions: []string{"test", "test2"},
 						},
 					},
 				},
@@ -135,7 +136,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(connection.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(connectionConsoleID),
-				SHA: lo.ToPtr("S7JXVDB6THH7LNQJJR3AKWBTJZ54IU5D2DBGYFUBSPBVXE6NEOVA===="),
+				SHA: lo.ToPtr("7K5Q3Y4AUAKHS7RBQNI2FZP7H7QZQCLCQJEG73Y2GBEQHWJDHVOQ===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.ReadonlyConditionType.String(),
@@ -187,7 +188,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(connection.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(connectionConsoleID),
-				SHA: lo.ToPtr("S7JXVDB6THH7LNQJJR3AKWBTJZ54IU5D2DBGYFUBSPBVXE6NEOVA===="),
+				SHA: lo.ToPtr("7K5Q3Y4AUAKHS7RBQNI2FZP7H7QZQCLCQJEG73Y2GBEQHWJDHVOQ===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.ReadyConditionType.String(),

@@ -190,7 +190,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :aws_cloud_connection_attributes do
     field :access_key_id,     non_null(:string)
     field :secret_access_key, non_null(:string)
-    field :region,            non_null(:string)
+    field :region,            :string
+    field :regions,           list_of(:string)
   end
 
   input_object :gcp_cloud_connection_attributes do
@@ -397,7 +398,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :aws_connection_attributes do
     field :access_key_id,     non_null(:string), description: "the access key id for aws"
     field :secret_access_key, non_null(:string), description: "the secret access key for aws"
-    field :region,            non_null(:string), description: "the region for aws"
+    field :region,            :string, description: "the region for aws"
+    field :regions,           list_of(:string), description: "the regions for aws"
   end
 
   @desc "The configuration for a cloud provider"

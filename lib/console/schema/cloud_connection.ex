@@ -13,8 +13,9 @@ defmodule Console.Schema.CloudConnection do
 
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :aws, Aws, on_replace: :update do
-        field :region, :string
-        field :access_key_id, :string
+        field :region,            :string
+        field :regions,           {:array, :string}
+        field :access_key_id,     :string
         field :secret_access_key, EncryptedString
       end
 
@@ -76,8 +77,8 @@ defmodule Console.Schema.CloudConnection do
 
   defp aws_changeset(model, attrs) do
     model
-    |> cast(attrs, [:region, :access_key_id, :secret_access_key])
-    |> validate_required([:region, :access_key_id, :secret_access_key])
+    |> cast(attrs, [:region, :regions, :access_key_id, :secret_access_key])
+    |> validate_required([:access_key_id, :secret_access_key])
   end
 
   defp gcp_changeset(model, attrs) do
