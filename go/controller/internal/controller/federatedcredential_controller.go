@@ -4,11 +4,14 @@ import (
 	"context"
 	goerrors "errors"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	consoleapi "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
@@ -65,7 +68,14 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 		return *result, nil
 	}
 
-	apiCredential, err := in.sync(ctx, credential)
+	// Get ObservabilityProvider SHA that can be saved back in the status to check for changes
+	changed, sha, err := credential.Diff(utils.HashObject)
+	if err != nil {
+		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	apiCredential, err := in.sync(ctx, credential, changed)
 	if err != nil {
 		if goerrors.Is(err, operrors.ErrRetriable) {
 			utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -76,9 +86,85 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	credential.Status.ID = &apiCredential.ID
+	credential.Status.SHA = &sha
 
 	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Context, credential *v1alpha1.FederatedCredential) *ctrl.Result {
+	// If object is not being deleted and if it does not have our finalizer,
+	// then lets add the finalizer. This is equivalent to registering our finalizer.
+	if credential.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(credential, BootstrapTokenProtectionFinalizerName) {
+		controllerutil.AddFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+	}
+
+	// If object is not being deleted, do nothing
+	if credential.GetDeletionTimestamp().IsZero() {
+		return nil
+	}
+
+	// if object is being deleted but there is no console ID available to delete the resource
+	// remove the finalizer and stop reconciliation
+	if !credential.Status.HasID() {
+		// stop reconciliation as there is no console ID available to delete the resource
+		controllerutil.RemoveFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+		return &ctrl.Result{}
+	}
+
+	// try to delete the resource
+	if err := in.ConsoleClient.DeleteBootstrapToken(ctx, credential.Status.GetID()); err != nil {
+		// If it fails to delete the external dependency here, return with error
+		// so that it can be retried.
+		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return &requeue
+	}
+
+	// stop reconciliation as the item has been deleted
+	controllerutil.RemoveFinalizer(credential, BootstrapTokenProtectionFinalizerName)
+	return &ctrl.Result{}
+}
+
+func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
+	if !credential.Status.HasID() {
+		return in.createFederatedCredential(ctx, credential)
+	}
+
+	exists, err := in.ConsoleClient.IsFederatedCredentialExists(ctx, credential.Status.GetID())
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return in.createFederatedCredential(ctx, credential)
+	}
+
+	if !changed {
+		return in.ConsoleClient.GetFederatedCredential(ctx, credential.Status.GetID())
+	}
+
+	return in.ConsoleClient.UpdateFederatedCredential(ctx, credential.Status.GetID(), credential.Attributes())
+}
+
+func (in *FederatedCredentialReconciler) createFederatedCredential(ctx context.Context, credential *v1alpha1.FederatedCredential) (*consoleapi.FederatedCredentialFragment, error) {
+	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
+	if errors.IsNotFound(err) {
+		return nil, operrors.ErrRetriable
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	attributes := credential.Attributes()
+	attributes.UserID = userID
+
+	apiCredential, err := in.ConsoleClient.CreateFederatedCredential(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiCredential, nil
 }

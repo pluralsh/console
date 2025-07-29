@@ -9,7 +9,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.22.1
 	github.com/onsi/gomega v1.36.2
 	github.com/orcaman/concurrent-map/v2 v2.0.1
-	github.com/pluralsh/console/go/client v1.47.0
+	github.com/pluralsh/console/go/client v1.48.0
 	github.com/pluralsh/polly v0.2.0
 	github.com/samber/lo v1.49.1
 	github.com/stretchr/testify v1.10.0

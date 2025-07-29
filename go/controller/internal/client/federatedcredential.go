@@ -18,15 +18,6 @@ func (c *client) CreateFederatedCredential(ctx context.Context, attributes conso
 	return response.CreateFederatedCredential, nil
 }
 
-func (c *client) DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error) {
-	response, err := c.consoleClient.DeleteFederatedCredential(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	return response.DeleteFederatedCredential, nil
-}
-
 func (c *client) GetFederatedCredential(ctx context.Context, id string) (*console.FederatedCredentialFragment, error) {
 	response, err := c.consoleClient.GetFederatedCredential(ctx, id)
 	if err != nil {
@@ -38,6 +29,24 @@ func (c *client) GetFederatedCredential(ctx context.Context, id string) (*consol
 	}
 
 	return response.FederatedCredential, nil
+}
+
+func (c *client) UpdateFederatedCredential(ctx context.Context, id string, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error) {
+	response, err := c.consoleClient.UpdateFederatedCredential(ctx, id, attributes)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.UpdateFederatedCredential, nil
+}
+
+func (c *client) DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error) {
+	response, err := c.consoleClient.DeleteFederatedCredential(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.DeleteFederatedCredential, nil
 }
 
 func (c *client) IsFederatedCredentialExists(ctx context.Context, id string) (bool, error) {

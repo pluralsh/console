@@ -1,8 +1,11 @@
 package v1alpha1
 
 import (
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -32,6 +35,23 @@ type FederatedCredential struct {
 	Status Status                  `json:"status,omitempty"`
 }
 
+func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(in.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
+func (in *FederatedCredential) Attributes() console.FederatedCredentialAttributes {
+	return console.FederatedCredentialAttributes{
+		Issuer:     in.Spec.Issuer,
+		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
+		ClaimsLike: in.Spec.ClaimsLike,
+	}
+}
+
 func (in *FederatedCredential) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
@@ -54,6 +74,6 @@ type FederatedCredentialSpec struct {
 
 	// User is the user email address that will be authenticated by this credential.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	User string `json:"user"`
 }
