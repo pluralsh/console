@@ -1058,6 +1058,8 @@ type Cluster struct {
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// The memory utilization of the cluster
 	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
+	// The availability zones this cluster is running in
+	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1409,18 +1411,19 @@ type ClusterNodeMetrics struct {
 }
 
 type ClusterPing struct {
-	CurrentVersion   string         `json:"currentVersion"`
-	KubeletVersion   *string        `json:"kubeletVersion,omitempty"`
-	Distro           *ClusterDistro `json:"distro,omitempty"`
-	HealthScore      *int64         `json:"healthScore,omitempty"`
-	OpenshiftVersion *string        `json:"openshiftVersion,omitempty"`
-	NodeCount        *int64         `json:"nodeCount,omitempty"`
-	PodCount         *int64         `json:"podCount,omitempty"`
-	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
-	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
-	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
-	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
-	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
+	CurrentVersion    string         `json:"currentVersion"`
+	KubeletVersion    *string        `json:"kubeletVersion,omitempty"`
+	Distro            *ClusterDistro `json:"distro,omitempty"`
+	HealthScore       *int64         `json:"healthScore,omitempty"`
+	OpenshiftVersion  *string        `json:"openshiftVersion,omitempty"`
+	NodeCount         *int64         `json:"nodeCount,omitempty"`
+	PodCount          *int64         `json:"podCount,omitempty"`
+	NamespaceCount    *int64         `json:"namespaceCount,omitempty"`
+	CPUTotal          *float64       `json:"cpuTotal,omitempty"`
+	MemoryTotal       *float64       `json:"memoryTotal,omitempty"`
+	CPUUtil           *float64       `json:"cpuUtil,omitempty"`
+	MemoryUtil        *float64       `json:"memoryUtil,omitempty"`
+	AvailabilityZones []*string      `json:"availabilityZones,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
