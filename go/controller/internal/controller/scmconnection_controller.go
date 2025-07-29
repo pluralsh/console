@@ -100,11 +100,6 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	err = r.tryAddControllerRef(ctx, scm)
-	if err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
-	}
-
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject)
 	if err != nil {
@@ -269,19 +264,6 @@ func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v
 		return nil, fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
 	}
 	return lo.ToPtr(string(token)), nil
-}
-
-func (r *ScmConnectionReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ScmConnection) error {
-	if scm.Spec.TokenSecretRef == nil {
-		return nil
-	}
-
-	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
-	if err != nil {
-		return err
-	}
-
-	return utils.TryAddControllerRef(ctx, r.Client, scm, secret, r.Scheme)
 }
 
 func (r *ScmConnectionReconciler) shouldMarkAsReadonly(scm *v1alpha1.ScmConnection) bool {
