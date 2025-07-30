@@ -49,7 +49,7 @@ export function ChatInput({
 }: {
   currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
-  serverNames: string[]
+  serverNames?: string[]
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
   showPrompts: boolean
@@ -62,9 +62,6 @@ export function ChatInput({
     'currentAiChatMessage',
     ''
   )
-  // const [cloudConnectionId, setCloudConnectionId] = useState<
-  //   string | undefined
-  // >()
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
@@ -118,7 +115,7 @@ export function ChatInput({
       onSubmit={handleSubmit}
       ref={formRef}
     >
-      {!isEmpty(serverNames) && (
+      {serverNames && serverNames.length > 0 && (
         <Flex
           justify="space-between"
           align="center"
@@ -199,33 +196,6 @@ export function ChatInput({
     </SendMessageFormSC>
   )
 }
-
-//  // const [createAgentSession, { loading, error: agentSessionError }] =
-//   //   useCreateAgentSessionMutation({
-//   //     onCompleted: (data) => {
-//   //       if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
-//   //     },
-//   //   })
-
-// createAgentSession({
-//   // TODO: This should be done after user provides input.
-//   variables: {
-//     attributes: {
-//       type: newAgent,
-//       connectionId: currentThread?.session?.connection?.id,
-//     },
-//   },
-// })
-
-// {/*<Toast*/}
-// {/*  show={!!agentSessionError}*/}
-// {/*  severity="danger"*/}
-// {/*  position="bottom"*/}
-// {/*  marginBottom="medium"*/}
-// {/*>*/}
-// {/*  <strong>Error creating agent session:</strong>{' '}*/}
-// {/*  {agentSessionError?.message}*/}
-// {/*</Toast>*/}
 
 const SendMessageFormSC = styled.form(({ theme }) => ({
   display: 'flex',

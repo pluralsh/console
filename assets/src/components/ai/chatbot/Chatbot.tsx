@@ -24,6 +24,7 @@ import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
+import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -170,7 +171,7 @@ function ChatbotPanelInner() {
         />
         {detailsError && <GqlError error={detailsError} />}
         {agentInitMode ? (
-          <div>TODO</div>
+          <ChatbotAgentInit />
         ) : (
           currentThread && (
             <ChatbotPanelThread
