@@ -31,6 +31,7 @@ export function ChatbotAgentInit() {
         </Body1P>
       </ChatbotMessagesWrapperSC>
       <ChatInput
+        enableExamplePrompts={false}
         sendMessage={(prompt) =>
           createAgentSession({
             variables: {

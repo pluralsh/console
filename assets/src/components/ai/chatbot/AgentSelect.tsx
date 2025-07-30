@@ -65,7 +65,6 @@ export function AgentSelect() {
         setAgentInitMode(newAgent)
       } else {
         setOpen(false)
-        setAgentInitMode(null)
         goToLastNonAgentThread()
       }
     },

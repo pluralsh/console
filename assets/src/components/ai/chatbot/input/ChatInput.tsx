@@ -42,6 +42,7 @@ export function ChatInput({
   serverNames,
   showMcpServers,
   setShowMcpServers,
+  enableExamplePrompts = true,
   showPrompts,
   setShowPrompts,
   ...props
@@ -51,6 +52,7 @@ export function ChatInput({
   serverNames?: string[]
   showMcpServers?: boolean
   setShowMcpServers?: Dispatch<SetStateAction<boolean>>
+  enableExamplePrompts?: boolean
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
@@ -155,12 +157,14 @@ export function ChatInput({
                 tooltip={`Append prompts and files related to the ${source.toLowerCase()} currently being viewed`}
               />
             )}
-            <ChatInputIconFrame
-              active={showPrompts}
-              icon={<AiSparkleFilledIcon />}
-              tooltip={`${showPrompts ? 'Hide' : 'Show'} example prompts`}
-              onClick={() => setShowPrompts?.(!showPrompts)}
-            />
+            {enableExamplePrompts && (
+              <ChatInputIconFrame
+                active={showPrompts}
+                icon={<AiSparkleFilledIcon />}
+                tooltip={`${showPrompts ? 'Hide' : 'Show'} example prompts`}
+                onClick={() => setShowPrompts?.(!showPrompts)}
+              />
+            )}
             {!isEmpty(serverNames) && (
               <ChatInputIconFrame
                 icon={<ServersIcon />}

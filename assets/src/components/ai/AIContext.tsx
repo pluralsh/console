@@ -277,7 +277,7 @@ export function useChatbot() {
         return
       }
 
-      setCurrentThreadId(lastNonAgentThreadId)
+      goToThread(lastNonAgentThreadId)
     },
     closeChatbot: () => setOpen(false),
     currentThread,
