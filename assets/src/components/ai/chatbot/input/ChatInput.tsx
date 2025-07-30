@@ -50,10 +50,10 @@ export function ChatInput({
   currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
   serverNames?: string[]
-  showMcpServers: boolean
-  setShowMcpServers: Dispatch<SetStateAction<boolean>>
-  showPrompts: boolean
-  setShowPrompts: Dispatch<SetStateAction<boolean>>
+  showMcpServers?: boolean
+  setShowMcpServers?: Dispatch<SetStateAction<boolean>>
+  showPrompts?: boolean
+  setShowPrompts?: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
@@ -167,13 +167,13 @@ export function ChatInput({
               active={showPrompts}
               icon={<AiSparkleFilledIcon />}
               tooltip={`${showPrompts ? 'Hide' : 'Show'} example prompts`}
-              onClick={() => setShowPrompts(!showPrompts)}
+              onClick={() => setShowPrompts?.(!showPrompts)}
             />
             {!isEmpty(serverNames) && (
               <ChatInputIconFrame
                 icon={<ServersIcon />}
                 tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
-                onClick={() => setShowMcpServers(!showMcpServers)}
+                onClick={() => setShowMcpServers?.(!showMcpServers)}
               />
             )}
             {!agent && <ChatInputCloudSelect currentThread={currentThread} />}

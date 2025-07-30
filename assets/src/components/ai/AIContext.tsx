@@ -40,19 +40,38 @@ type ExplainWithAIContextT = {
   system: string
 }
 
+export type AgentSessionT =
+  | AgentSessionType.Terraform
+  | AgentSessionType.Kubernetes
+  | undefined
+
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
+
+  setShowForkToast: (show: boolean) => void
+
   currentThread: Nullable<ChatThreadFragment>
-  currentThreadId: Nullable<string>
-  setCurrentThreadId: (threadId: Nullable<string>) => void
-  persistedThreadId: Nullable<string>
-  lastNonAgentThreadId: Nullable<string>
-  agentInitMode: Nullable<AgentSessionType>
-  setAgentInitMode: Dispatch<SetStateAction<Nullable<AgentSessionType>>>
   threadLoading: boolean
   threadError: ApolloError | undefined
-  setShowForkToast: (show: boolean) => void
+
+  currentThreadId: Nullable<string>
+  setCurrentThreadId: (threadId: Nullable<string>) => void
+
+  // The thread ID that is persisted in local storage, used to restore the last thread when the user returns.
+  // Separate from the currentThreadId to check first if the thread still exists before redirecting to it.
+  persistedThreadId: Nullable<string>
+
+  // The last non-agent thread ID, used to navigate back to the last non-agent thread when the agent is deselected.
+  lastNonAgentThreadId: Nullable<string>
+
+  // The agent session type that is currently selected in the UI.
+  // Coming from the current thread or the agent init mode.
+  selectedAgent: AgentSessionT
+
+  // The agent session type that is currently selected in the UI but not yet applied to the current thread.
+  agentInitMode: AgentSessionT
+  setAgentInitMode: Dispatch<SetStateAction<AgentSessionT>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -78,9 +97,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   >('plural-ai-current-thread-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
     useState<Nullable<string>>()
-  const [agentInitMode, setAgentInitMode] = usePersistedState<
-    Nullable<AgentSessionType>
-  >('plural-ai-agent-init-mode', null)
+  const [agentInitMode, setAgentInitMode] = usePersistedState<AgentSessionT>(
+    'plural-ai-agent-init-mode',
+    undefined
+  )
   const [showForkToast, setShowForkToast] = useState(false)
 
   const {
@@ -93,6 +113,23 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+
+  const currentThread = useMemo(() => threadData?.chatThread, [threadData])
+
+  const selectedAgent = useMemo(() => {
+    if (agentInitMode) {
+      return agentInitMode
+    }
+
+    if (
+      currentThread?.session?.type === AgentSessionType.Kubernetes ||
+      currentThread?.session?.type === AgentSessionType.Terraform
+    ) {
+      return currentThread?.session?.type
+    }
+
+    return undefined
+  }, [agentInitMode, currentThread?.session?.type])
 
   useEffect(() => {
     if (currentThreadId) setPersistedThreadId(currentThreadId)
@@ -118,6 +155,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         currentThread: threadData?.chatThread,
         currentThreadId,
         setCurrentThreadId,
+        selectedAgent,
         agentInitMode,
         setAgentInitMode,
         persistedThreadId,
@@ -179,6 +217,7 @@ export function useChatbot() {
     setCurrentThreadId,
     persistedThreadId,
     lastNonAgentThreadId,
+    selectedAgent,
     agentInitMode,
     setAgentInitMode,
     threadLoading,
@@ -195,6 +234,7 @@ export function useChatbot() {
     createThread({
       variables: { attributes },
       onCompleted: (data) => {
+        setAgentInitMode(undefined)
         setCurrentThreadId(data.createThread?.id)
         setOpen(true)
       },
@@ -238,6 +278,7 @@ export function useChatbot() {
     currentThread,
     currentThreadId,
     persistedThreadId,
+    selectedAgent,
     agentInitMode,
     setAgentInitMode,
     detailsLoading: threadLoading,

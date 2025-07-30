@@ -45,10 +45,6 @@ export function ChatbotAgentInit() {
 
           setAgentInitMode(undefined)
         }}
-        showMcpServers={false} // TODO
-        setShowMcpServers={(_) => {}} // TODO
-        showPrompts={false} // TODO
-        setShowPrompts={(_) => {}} // TODO
       />
       <Toast
         show={!!error}

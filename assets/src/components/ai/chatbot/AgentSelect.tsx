@@ -15,7 +15,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
-import { useChatbot } from '../AIContext.tsx'
+import { AgentSessionT, useChatbot } from '../AIContext.tsx'
 import { CaptionP } from '../../utils/typography/Text.tsx'
 
 export function AgentIcon({
@@ -47,53 +47,37 @@ export function AgentIcon({
 
 export function AgentSelect() {
   const theme = useTheme()
-  const {
-    currentThread,
-    goToLastNonAgentThread,
-    agentInitMode,
-    setAgentInitMode,
-  } = useChatbot()
+  const { goToLastNonAgentThread, selectedAgent, setAgentInitMode } =
+    useChatbot()
   const [open, setOpen] = useState(false)
 
-  const agent = useMemo(() => {
-    if (agentInitMode) return agentInitMode
-
-    if (
-      currentThread?.session?.type === AgentSessionType.Terraform ||
-      currentThread?.session?.type === AgentSessionType.Kubernetes
-    ) {
-      return currentThread?.session?.type
-    }
-
-    return undefined
-  }, [agentInitMode, currentThread?.session?.type])
-
-  const icon = useMemo(() => <AgentIcon type={agent} />, [agent])
+  const icon = useMemo(
+    () => <AgentIcon type={selectedAgent} />,
+    [selectedAgent]
+  )
 
   const onAgentChange = useCallback(
-    (newAgent: Nullable<AgentSessionType>) => {
-      if (newAgent === agent) return
+    (newAgent: AgentSessionT) => {
+      if (newAgent === selectedAgent) return
 
       if (newAgent) {
         setOpen(false)
         setAgentInitMode(newAgent)
       } else {
         setOpen(false)
-        setAgentInitMode(null)
+        setAgentInitMode(undefined)
         goToLastNonAgentThread()
       }
     },
-    [agent, goToLastNonAgentThread, setAgentInitMode]
+    [selectedAgent, goToLastNonAgentThread, setAgentInitMode]
   )
 
   return (
     <Select
       isOpen={open}
       onOpenChange={setOpen}
-      selectedKey={agent ?? ''}
-      onSelectionChange={(key) =>
-        onAgentChange(key as Nullable<AgentSessionType>)
-      }
+      selectedKey={selectedAgent ?? ''}
+      onSelectionChange={(key) => onAgentChange(key as AgentSessionT)}
       label="agent"
       width={300}
       dropdownHeaderFixed={
@@ -107,7 +91,7 @@ export function AgentSelect() {
         </div>
       }
       dropdownFooterFixed={
-        agent ? (
+        selectedAgent ? (
           <ListBoxFooterPlus
             onClick={() => onAgentChange(undefined)}
             leftContent={<RobotIcon />}
@@ -128,7 +112,7 @@ export function AgentSelect() {
               small
             >
               <span css={{ ...TRUNCATE }}>
-                {capitalize(`${agent ?? ''} agent`.trim())}
+                {capitalize(`${selectedAgent ?? ''} agent`.trim())}
               </span>
             </Button>
           </Tooltip>
