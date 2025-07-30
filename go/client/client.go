@@ -5937,6 +5937,7 @@ type ServiceDeploymentForAgent_Helm struct {
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -5980,6 +5981,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -7020,6 +7027,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -7063,6 +7071,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -13712,6 +13726,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -13755,6 +13770,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -14204,6 +14225,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -14247,6 +14269,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -27440,6 +27468,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
@@ -27932,6 +27961,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
