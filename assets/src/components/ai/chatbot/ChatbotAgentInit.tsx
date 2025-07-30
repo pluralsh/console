@@ -37,6 +37,7 @@ export function ChatbotAgentInit() {
       </Flex>
       <ChatInput
         enableExamplePrompts={false}
+        placeholder="Start a background task..."
         sendMessage={(prompt) =>
           createAgentSession({
             variables: {

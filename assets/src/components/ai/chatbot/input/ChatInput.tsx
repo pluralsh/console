@@ -45,6 +45,7 @@ export function ChatInput({
   enableExamplePrompts = true,
   showPrompts,
   setShowPrompts,
+  placeholder = 'Start typing...',
   ...props
 }: {
   sendMessage: (newMessage: string) => void
@@ -55,6 +56,7 @@ export function ChatInput({
   enableExamplePrompts?: boolean
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
+  placeholder?: string
 } & ComponentPropsWithoutRef<'div'>) {
   const { selectedAgent } = useChatbot()
   const { sourceId, source } = useCurrentPageChatContext()
@@ -134,7 +136,7 @@ export function ChatInput({
       <EditableContentWrapperSC $agent={!!selectedAgent}>
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
-          placeholder="Start typing..."
+          placeholder={placeholder}
           setValue={setNewMessage}
           initialValue={newMessage}
           onEnter={() => formRef.current?.requestSubmit()}
