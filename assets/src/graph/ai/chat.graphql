@@ -177,14 +177,21 @@ query ChatThreads(
 
 query ChatThreadDetails(
   $id: ID!
-  $first: Int = 100
+  $first: Int = 25
   $last: Int
   $after: String
   $before: String
+  $reverse: Boolean = true
 ) {
   chatThread(id: $id) {
     ...ChatThreadTiny
-    chats(first: $first, last: $last, after: $after, before: $before) {
+    chats(
+      first: $first
+      last: $last
+      after: $after
+      before: $before
+      reverse: $reverse
+    ) {
       pageInfo {
         ...PageInfo
       }

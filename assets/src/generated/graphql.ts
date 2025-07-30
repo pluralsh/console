@@ -1,7 +1,8 @@
 /* eslint-disable */
 /* prettier-ignore */
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import * as Apollo from '@apollo/client'
+import { gql } from '@apollo/client'
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -11397,6 +11398,7 @@ export type ChatThreadDetailsQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -18580,10 +18582,16 @@ export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLaz
 export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
 export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
 export const ChatThreadDetailsDocument = gql`
-    query ChatThreadDetails($id: ID!, $first: Int = 100, $last: Int, $after: String, $before: String) {
+    query ChatThreadDetails($id: ID!, $first: Int = 25, $last: Int, $after: String, $before: String, $reverse: Boolean = true) {
   chatThread(id: $id) {
     ...ChatThreadTiny
-    chats(first: $first, last: $last, after: $after, before: $before) {
+    chats(
+      first: $first
+      last: $last
+      after: $after
+      before: $before
+      reverse: $reverse
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -18628,6 +18636,7 @@ ${McpServerToolFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      reverse: // value for 'reverse'
  *   },
  * });
  */
