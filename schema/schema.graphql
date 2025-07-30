@@ -4666,6 +4666,8 @@ input HelmConfigAttributes {
 
   luaFile: String
 
+  luaFolder: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -5088,6 +5090,9 @@ type HelmSpec {
 
   "a lua file to use for helm applies"
   luaFile: String
+
+  "a folder of lua files to include in the final script used"
+  luaFolder: String
 }
 
 "a configuration item k\/v pair"
@@ -5521,6 +5526,8 @@ input ClusterPing {
   cpuUtil: Float
 
   memoryUtil: Float
+
+  availabilityZones: [String]
 
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
@@ -6073,6 +6080,9 @@ type Cluster {
 
   "The memory utilization of the cluster"
   memoryUtil: Float
+
+  "The availability zones this cluster is running in"
+  availabilityZones: [String]
 
   "The helm values for the agent installation"
   agentHelmValues: String
