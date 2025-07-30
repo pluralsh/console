@@ -188,7 +188,7 @@ const columns = [
                     size={8}
                     color={theme.colors['icon-info']}
                   />
-                  <div>Running</div>
+                  Running
                 </Flex>
               </Chip>
             )}

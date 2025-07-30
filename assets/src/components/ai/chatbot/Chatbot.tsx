@@ -6,7 +6,6 @@ import {
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   useChatThreadDetailsQuery,
@@ -20,10 +19,7 @@ import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import {
-  ChatbotMessagesWrapperSC,
-  ChatbotPanelThread,
-} from './ChatbotPanelThread.tsx'
+import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
@@ -78,9 +74,9 @@ function ChatbotPanelInner() {
     currentThread,
     currentThreadId,
     persistedThreadId,
+    agentInitMode,
     goToThread,
     createNewThread,
-    detailsLoading,
     detailsError,
   } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
@@ -173,21 +169,19 @@ function ChatbotPanelInner() {
           setIsActionsPanelOpen={setShowActionsPanel}
         />
         {detailsError && <GqlError error={detailsError} />}
-        {!currentThread && detailsLoading ? (
-          <ChatbotMessagesWrapperSC>
-            <LoadingIndicator />
-          </ChatbotMessagesWrapperSC>
-        ) : currentThread ? (
-          <ChatbotPanelThread
-            currentThread={currentThread}
-            threadDetailsQuery={threadDetailsQuery}
-            showMcpServers={showMcpServers}
-            setShowMcpServers={setShowMcpServers}
-            showExamplePrompts={showPrompts}
-            setShowExamplePrompts={setShowPrompts}
-          />
+        {agentInitMode ? (
+          <div>TODO</div>
         ) : (
-          'tbd'
+          currentThread && (
+            <ChatbotPanelThread
+              currentThread={currentThread}
+              threadDetailsQuery={threadDetailsQuery}
+              showMcpServers={showMcpServers}
+              setShowMcpServers={setShowMcpServers}
+              showExamplePrompts={showPrompts}
+              setShowExamplePrompts={setShowPrompts}
+            />
+          )
         )}
       </MainContentWrapperSC>
       <DragHandleSC

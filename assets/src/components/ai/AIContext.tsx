@@ -48,6 +48,8 @@ type ChatbotContextT = {
   setCurrentThreadId: (threadId: Nullable<string>) => void
   persistedThreadId: Nullable<string>
   lastNonAgentThreadId: Nullable<string>
+  agentInitMode: Nullable<AgentSessionType>
+  setAgentInitMode: Dispatch<SetStateAction<Nullable<AgentSessionType>>>
   threadLoading: boolean
   threadError: ApolloError | undefined
   setShowForkToast: (show: boolean) => void
@@ -76,6 +78,9 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   >('plural-ai-current-thread-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
     useState<Nullable<string>>()
+  const [agentInitMode, setAgentInitMode] = usePersistedState<
+    Nullable<AgentSessionType>
+  >('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
 
   const {
@@ -113,6 +118,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         currentThread: threadData?.chatThread,
         currentThreadId,
         setCurrentThreadId,
+        agentInitMode,
+        setAgentInitMode,
         persistedThreadId,
         lastNonAgentThreadId,
         threadLoading,
@@ -172,6 +179,8 @@ export function useChatbot() {
     setCurrentThreadId,
     persistedThreadId,
     lastNonAgentThreadId,
+    agentInitMode,
+    setAgentInitMode,
     threadLoading,
     threadError,
     setShowForkToast,
@@ -229,6 +238,8 @@ export function useChatbot() {
     currentThread,
     currentThreadId,
     persistedThreadId,
+    agentInitMode,
+    setAgentInitMode,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,

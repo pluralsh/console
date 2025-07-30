@@ -200,6 +200,33 @@ export function ChatInput({
   )
 }
 
+//  // const [createAgentSession, { loading, error: agentSessionError }] =
+//   //   useCreateAgentSessionMutation({
+//   //     onCompleted: (data) => {
+//   //       if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
+//   //     },
+//   //   })
+
+// createAgentSession({
+//   // TODO: This should be done after user provides input.
+//   variables: {
+//     attributes: {
+//       type: newAgent,
+//       connectionId: currentThread?.session?.connection?.id,
+//     },
+//   },
+// })
+
+// {/*<Toast*/}
+// {/*  show={!!agentSessionError}*/}
+// {/*  severity="danger"*/}
+// {/*  position="bottom"*/}
+// {/*  marginBottom="medium"*/}
+// {/*>*/}
+// {/*  <strong>Error creating agent session:</strong>{' '}*/}
+// {/*  {agentSessionError?.message}*/}
+// {/*</Toast>*/}
+
 const SendMessageFormSC = styled.form(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
