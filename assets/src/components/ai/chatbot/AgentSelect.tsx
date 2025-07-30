@@ -87,7 +87,7 @@ export function AgentSelect() {
             padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
           }}
         >
-          Select agent
+          Start a new agent session
         </div>
       }
       dropdownFooterFixed={
