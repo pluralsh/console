@@ -152,13 +152,13 @@ const columns = [
         >
           <Flex
             alignItems="center"
-            justifyContent="space-between"
             gap="small"
             flex={1}
           >
             <Flex
               gap="small"
               alignItems="center"
+              flex={1}
             >
               <IconFrame
                 size="medium"
