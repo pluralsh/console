@@ -31,7 +31,6 @@ export function ChatbotAgentInit() {
         </Body1P>
       </ChatbotMessagesWrapperSC>
       <ChatInput
-        currentThread={currentThread} // TODO
         sendMessage={(prompt) =>
           createAgentSession({
             variables: {

@@ -37,8 +37,8 @@ import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { useChatbot } from '../../AIContext.tsx'
 
 export function ChatInput({
-  currentThread,
   sendMessage,
+  currentThread,
   serverNames,
   showMcpServers,
   setShowMcpServers,
@@ -46,8 +46,8 @@ export function ChatInput({
   setShowPrompts,
   ...props
 }: {
-  currentThread: ChatThreadTinyFragment
   sendMessage: (newMessage: string) => void
+  currentThread?: ChatThreadTinyFragment
   serverNames?: string[]
   showMcpServers?: boolean
   setShowMcpServers?: Dispatch<SetStateAction<boolean>>
@@ -96,11 +96,11 @@ export function ChatInput({
 
   const handleAddPageContext = useCallback(() => {
     setContextBtnClicked(true)
-    if (showContextBtn)
+    if (showContextBtn && currentThread)
       addChatContext({
         variables: { source, sourceId, threadId: currentThread.id },
       })
-  }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
+  }, [addChatContext, currentThread, showContextBtn, source, sourceId])
 
   return (
     <SendMessageFormSC
@@ -168,7 +168,7 @@ export function ChatInput({
                 onClick={() => setShowMcpServers?.(!showMcpServers)}
               />
             )}
-            {!selectedAgent && (
+            {!selectedAgent && currentThread && (
               <ChatInputCloudSelect currentThread={currentThread} />
             )}
             {!selectedAgent && !!currentThread?.session?.id && (
