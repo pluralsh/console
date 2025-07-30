@@ -492,6 +492,10 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 	}
 
 	annotations := child.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
 	annotations[OwnedByAnnotationName] = types.NamespacedName{
 		Namespace: owner.GetNamespace(),
 		Name:      owner.GetName(),
