@@ -765,11 +765,13 @@ defmodule Console.Deployments.ServicesTest do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)
       dependencies = for _ <- 1..3 do
-        insert(:service_dependency, service: build(:service, cluster: service.cluster), name: service.name)
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster), name: service.name)
       end
       ignore = [
         insert(:service_dependency, name: service.name),
-        insert(:service_dependency, service: build(:service, cluster: service.cluster))
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster)),
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster), status: :stale),
+        insert(:service_dependency, name: service.name, service: insert(:service), status: :stale)
       ]
 
       {:ok, service} = Services.update_components(%{

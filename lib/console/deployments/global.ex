@@ -240,7 +240,7 @@ defmodule Console.Deployments.Global do
         |> ServiceTemplate.load_contexts()
         |> ServiceTemplate.attributes()
         |> Map.put(:owner_id, gid)
-        |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
+        |> Map.put(:dependencies, svc_deps(tpl.dependencies, []))
         |> Services.create_service(cid, user)
       {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
         Services.clone_service(%{owner_id: gid}, sid, cid, user)
@@ -620,12 +620,12 @@ defmodule Console.Deployments.Global do
     Enum.any?(~w(repository_id namespace templated protect)a, & Map.get(svc1, &1) != Map.get(svc2, &1))
   end
 
-  @spec svc_deps([ServiceDependency.t], [ServiceDependency.t]) :: [ServiceDependency.t]
+  @spec svc_deps([ServiceDependency.t], [ServiceDependency.t]) :: [map]
   defp svc_deps(dependencies, existing) do
     existing_by_name = Map.new(existing, & {&1.name, &1})
     Enum.map(dependencies, fn dep ->
       case Map.get(existing_by_name, dep.name) do
-        %ServiceDependency{status: s} -> %{name: dep.name, status: s}
+        %ServiceDependency{id: id, name: n, status: s} -> %{name: n, id: id, status: s}
         _ -> %{name: dep.name}
       end
     end)

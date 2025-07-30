@@ -4,6 +4,7 @@ import {
   GearTrainIcon,
   ListBoxItem,
   SmallNamespaceIcon,
+  SmallAZIcon,
   SmallPodIcon,
   SmallNodeIcon,
   PeopleIcon,
@@ -318,7 +319,7 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
           <Chip
             size="small"
             tooltip={`${cluster?.availabilityZones?.join(', ')} availability zones`}
-            icon={<SmallNamespaceIcon />}
+            icon={<SmallAZIcon />}
           >
             {cluster?.availabilityZones?.length}
           </Chip>
