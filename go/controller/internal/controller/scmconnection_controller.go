@@ -105,6 +105,8 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return handleRequeue(nil, err, scm.SetCondition)
 	}
 
+	// This is just a temporary cleanup step to remove the owner reference from the secret.
+	// We can probably remove this in the future.
 	if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
 		return handleRequeue(nil, err, scm.SetCondition)
 	}
