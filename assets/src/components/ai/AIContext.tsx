@@ -18,6 +18,7 @@ import {
   ReactNode,
   SetStateAction,
   use,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -43,7 +44,7 @@ type ExplainWithAIContextT = {
 export type AgentSessionT =
   | AgentSessionType.Terraform
   | AgentSessionType.Kubernetes
-  | undefined
+  | null
 
 type ChatbotContextT = {
   open: boolean
@@ -99,7 +100,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     useState<Nullable<string>>()
   const [agentInitMode, setAgentInitMode] = usePersistedState<AgentSessionT>(
     'plural-ai-agent-init-mode',
-    undefined
+    null
   )
   const [showForkToast, setShowForkToast] = useState(false)
 
@@ -128,7 +129,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
       return currentThread?.session?.type
     }
 
-    return undefined
+    return null
   }, [agentInitMode, currentThread?.session?.type])
 
   useEffect(() => {
@@ -230,13 +231,20 @@ export function useChatbot() {
   const [forkThread, { loading: forkLoading, error: forkError }] =
     useCloneChatThreadMutation()
 
+  const goToThread = useCallback(
+    (threadId: string) => {
+      setCurrentThreadId(threadId)
+      setAgentInitMode(null)
+      setOpen(true)
+    },
+    [setAgentInitMode, setCurrentThreadId, setOpen]
+  )
+
   const createNewThread = (attributes: ChatThreadAttributes) => {
     createThread({
       variables: { attributes },
-      onCompleted: (data) => {
-        setAgentInitMode(undefined)
-        setCurrentThreadId(data.createThread?.id)
-        setOpen(true)
+      onCompleted: ({ createThread }) => {
+        if (createThread?.id) goToThread(createThread?.id)
       },
       update: (cache, { data }) => addThreadToCache(cache, data?.createThread),
     })
@@ -262,10 +270,7 @@ export function useChatbot() {
         update: (cache, { data }) => addThreadToCache(cache, data?.cloneThread),
       })
     },
-    goToThread: (threadId: string) => {
-      setCurrentThreadId(threadId)
-      setOpen(true)
-    },
+    goToThread,
     goToLastNonAgentThread: () => {
       if (!lastNonAgentThreadId) {
         createNewThread({ summary: 'New chat with Plural Copilot' })

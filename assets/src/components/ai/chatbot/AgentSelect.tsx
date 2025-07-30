@@ -65,7 +65,7 @@ export function AgentSelect() {
         setAgentInitMode(newAgent)
       } else {
         setOpen(false)
-        setAgentInitMode(undefined)
+        setAgentInitMode(null)
         goToLastNonAgentThread()
       }
     },
@@ -93,7 +93,7 @@ export function AgentSelect() {
       dropdownFooterFixed={
         selectedAgent ? (
           <ListBoxFooterPlus
-            onClick={() => onAgentChange(undefined)}
+            onClick={() => onAgentChange(null)}
             leftContent={<RobotIcon />}
           >
             Deselect agent

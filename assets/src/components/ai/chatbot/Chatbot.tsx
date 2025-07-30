@@ -95,6 +95,9 @@ function ChatbotPanelInner() {
   )
 
   useEffect(() => {
+    // If the agent is initializing, a thread doesn't need to be selected.
+    if (agentInitMode) return
+
     // If a thread is already selected, nothing needs to be done.
     if (!isEmpty(currentThreadId)) return
 
@@ -119,6 +122,7 @@ function ChatbotPanelInner() {
     // Otherwise, select the first available thread.
     goToThread(threads[0]?.id)
   }, [
+    agentInitMode,
     createNewThread,
     currentThreadId,
     data,

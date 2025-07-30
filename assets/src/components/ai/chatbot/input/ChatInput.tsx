@@ -12,7 +12,6 @@ import usePersistedSessionState from 'components/hooks/usePersistedSessionState.
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import {
-  AgentSessionType,
   AiRole,
   ChatThreadTinyFragment,
   useAddChatContextMutation,
@@ -25,7 +24,6 @@ import {
   SetStateAction,
   useCallback,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -36,6 +34,7 @@ import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { useChatbot } from '../../AIContext.tsx'
 
 export function ChatInput({
   currentThread,
@@ -55,6 +54,7 @@ export function ChatInput({
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
 } & ComponentPropsWithoutRef<'div'>) {
+  const { selectedAgent } = useChatbot()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -102,14 +102,6 @@ export function ChatInput({
       })
   }, [addChatContext, currentThread.id, showContextBtn, source, sourceId])
 
-  const agent = useMemo(
-    () =>
-      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
-        (type) => type === currentThread.session?.type
-      ),
-    [currentThread.session?.type]
-  )
-
   return (
     <SendMessageFormSC
       onSubmit={handleSubmit}
@@ -137,7 +129,7 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC $agent={!!agent}>
+      <EditableContentWrapperSC $agent={!!selectedAgent}>
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder="Start typing..."
@@ -176,8 +168,10 @@ export function ChatInput({
                 onClick={() => setShowMcpServers?.(!showMcpServers)}
               />
             )}
-            {!agent && <ChatInputCloudSelect currentThread={currentThread} />}
-            {!agent && !!currentThread?.session?.id && (
+            {!selectedAgent && (
+              <ChatInputCloudSelect currentThread={currentThread} />
+            )}
+            {!selectedAgent && !!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />
             )}
           </Flex>
@@ -185,11 +179,11 @@ export function ChatInput({
             disabled={!newMessage.trim()}
             endIcon={<SendMessageIcon />}
             onClick={() => formRef.current?.requestSubmit()}
-            secondary={!agent}
+            secondary={!selectedAgent}
             small
-            startIcon={agent ? <RobotIcon /> : undefined}
+            startIcon={selectedAgent ? <RobotIcon /> : undefined}
           >
-            {agent ? 'Agent' : 'Copilot'}
+            {selectedAgent ? 'Agent' : 'Copilot'}
           </Button>
         </Flex>
       </EditableContentWrapperSC>
