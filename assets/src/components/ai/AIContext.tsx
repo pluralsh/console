@@ -126,7 +126,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
       currentThread?.session?.type === AgentSessionType.Kubernetes ||
       currentThread?.session?.type === AgentSessionType.Terraform
     ) {
-      return currentThread?.session?.type
+      return currentThread.session.type
     }
 
     return null

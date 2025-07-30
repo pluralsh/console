@@ -77,7 +77,7 @@ export function ChatbotHeader({
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
           Copilot
         </Body2BoldP>
-        {currentThread && <AgentSelect />}
+        <AgentSelect />
         <Flex gap="xsmall">
           {!cloudConnectionsLoading && (
             <IconFrame
@@ -108,25 +108,21 @@ export function ChatbotHeader({
           />
         </Flex>
       </MainHeaderSC>
-      {currentThread && (
-        <SubHeaderSC>
-          <StackedText
-            truncate
-            first={
-              agentInitMode
-                ? `New ${capitalize(agentInitMode)} agent session`
-                : currentThread?.summary
-            }
-            second={
-              <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
-            }
-            firstPartialType="body2Bold"
-            firstColor="text"
-            secondPartialType="caption"
-            css={{ flex: 1, paddingRight: spacing.large }}
-          />
-        </SubHeaderSC>
-      )}
+      <SubHeaderSC>
+        <StackedText
+          truncate
+          first={
+            agentInitMode
+              ? `New ${capitalize(agentInitMode)} agent session`
+              : currentThread?.summary
+          }
+          second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
+          firstPartialType="body2Bold"
+          firstColor="text"
+          secondPartialType="caption"
+          css={{ flex: 1, paddingRight: spacing.large }}
+        />
+      </SubHeaderSC>
       <Toast
         show={!!mutationError}
         closeTimeout={5000}
