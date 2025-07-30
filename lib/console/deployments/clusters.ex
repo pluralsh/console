@@ -950,17 +950,21 @@ defmodule Console.Deployments.Clusters do
 
   def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    Service.agent()
-    |> Service.stream()
-    |> Repo.stream(method: :keyset)
-    |> Stream.each(fn svc ->
-      Logger.info "applying agent migration #{id} for #{svc.id}"
-      AgentMigration.updates(migration, svc)
-      |> Services.update_service(svc.id, bot)
+    start_transaction()
+    |> add_operation(:svc, fn _ ->
+      Service.agent()
+      |> Service.stream()
+      |> Repo.stream(method: :keyset)
+      |> Stream.each(fn svc ->
+        Logger.info "applying agent migration #{id} for #{svc.id}"
+        AgentMigration.updates(migration, svc)
+        |> Services.update_service(svc.id, bot)
+      end)
+      |> Enum.count()
+      |> ok()
     end)
-    |> Stream.run()
-
-    complete_migration(migration)
+    |> add_operation(:complete, fn _ -> complete_migration(migration) end)
+    |> execute(extract: :complete, timeout: :timer.minutes(5))
   end
   def apply_migration(_), do: :ok
 
