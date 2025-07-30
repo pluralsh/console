@@ -73,6 +73,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_total,       :float
     field :cpu_util,           :float
     field :memory_util,        :float
+    field :availability_zones, list_of(:string)
     field :insight_components, list_of(:cluster_insight_component_attributes),
       description: "scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval"
     field :node_statistics,    list_of(:node_statistic_attributes)
@@ -450,6 +451,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_total,       :float, description: "The total memory capacity of the cluster"
     field :cpu_util,           :float, description: "The CPU utilization of the cluster"
     field :memory_util,        :float, description: "The memory utilization of the cluster"
+    field :availability_zones, list_of(:string), description: "The availability zones this cluster is running in"
 
     field :agent_helm_values, :string, description: "The helm values for the agent installation",
       resolve: &Deployments.agent_helm_values_for_cluster/3

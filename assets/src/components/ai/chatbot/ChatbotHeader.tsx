@@ -20,6 +20,7 @@ import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 import { AgentSelect } from './AgentSelect.tsx'
+import { capitalize } from 'lodash'
 
 export function ChatbotHeader({
   currentThread,
@@ -32,8 +33,13 @@ export function ChatbotHeader({
 }) {
   const { colors, spacing } = useTheme()
 
-  const { closeChatbot, createNewThread, mutationLoading, mutationError } =
-    useChatbot()
+  const {
+    agentInitMode,
+    closeChatbot,
+    createNewThread,
+    mutationLoading,
+    mutationError,
+  } = useChatbot()
 
   const { data: cloudConnections, loading: cloudConnectionsLoading } =
     useCloudConnectionsQuery()
@@ -72,7 +78,6 @@ export function ChatbotHeader({
           Copilot
         </Body2BoldP>
         {currentThread && <AgentSelect />}
-        {/* icons */}
         <Flex gap="xsmall">
           {!cloudConnectionsLoading && (
             <IconFrame
@@ -107,7 +112,11 @@ export function ChatbotHeader({
         <SubHeaderSC>
           <StackedText
             truncate
-            first={currentThread?.summary}
+            first={
+              agentInitMode
+                ? `New ${capitalize(agentInitMode)} agent session`
+                : currentThread?.summary
+            }
             second={
               <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
             }

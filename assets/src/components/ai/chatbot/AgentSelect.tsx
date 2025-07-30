@@ -8,18 +8,14 @@ import {
   RobotIcon,
   Select,
   TerraformLogoIcon,
-  Toast,
   Tooltip,
 } from '@pluralsh/design-system'
 import { capitalize } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
-import {
-  AgentSessionType,
-  useCreateAgentSessionMutation,
-} from '../../../generated/graphql.ts'
+import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
-import { useChatbot } from '../AIContext.tsx'
+import { AgentSessionT, useChatbot } from '../AIContext.tsx'
 import { CaptionP } from '../../utils/typography/Text.tsx'
 
 export function AgentIcon({
@@ -51,132 +47,88 @@ export function AgentIcon({
 
 export function AgentSelect() {
   const theme = useTheme()
-  const { currentThread, goToThread, goToLastNonAgentThread } = useChatbot()
+  const { goToLastNonAgentThread, selectedAgent, setAgentInitMode } =
+    useChatbot()
   const [open, setOpen] = useState(false)
 
-  const agent = useMemo(
-    () =>
-      [AgentSessionType.Kubernetes, AgentSessionType.Terraform].find(
-        (type) => type === currentThread?.session?.type
-      ),
-    [currentThread?.session?.type]
+  const icon = useMemo(
+    () => <AgentIcon type={selectedAgent} />,
+    [selectedAgent]
   )
 
-  const icon = useMemo(() => <AgentIcon type={agent} />, [agent])
-
-  const [createAgentSession, { loading, error: agentSessionError }] =
-    useCreateAgentSessionMutation({
-      onCompleted: (data) => {
-        if (data.createAgentSession?.id) goToThread(data.createAgentSession.id)
-      },
-    })
-
   const onAgentChange = useCallback(
-    (newAgent: Nullable<AgentSessionType>) => {
-      if (newAgent === agent || loading) return
+    (newAgent: AgentSessionT) => {
+      if (newAgent === selectedAgent) return
 
       if (newAgent) {
         setOpen(false)
-        createAgentSession({
-          // TODO: This should be done after user provides input.
-          variables: {
-            attributes: {
-              type: newAgent,
-              connectionId: currentThread?.session?.connection?.id,
-            },
-          },
-        })
-      }
-
-      if (!newAgent) {
+        setAgentInitMode(newAgent)
+      } else {
         setOpen(false)
+        setAgentInitMode(undefined)
         goToLastNonAgentThread()
       }
     },
-    [
-      agent,
-      createAgentSession,
-      currentThread?.session?.connection?.id,
-      goToLastNonAgentThread,
-      loading,
-    ]
+    [selectedAgent, goToLastNonAgentThread, setAgentInitMode]
   )
 
   return (
-    <>
-      <Select
-        isOpen={open}
-        onOpenChange={setOpen}
-        selectedKey={agent ?? ''}
-        onSelectionChange={(key) =>
-          onAgentChange(key as Nullable<AgentSessionType>)
-        }
-        label="agent"
-        width={300}
-        dropdownHeaderFixed={
-          <div
-            css={{
-              color: theme.colors['text-xlight'],
-              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-            }}
+    <Select
+      isOpen={open}
+      onOpenChange={setOpen}
+      selectedKey={selectedAgent ?? ''}
+      onSelectionChange={(key) => onAgentChange(key as AgentSessionT)}
+      label="agent"
+      width={300}
+      dropdownHeaderFixed={
+        <div
+          css={{
+            color: theme.colors['text-xlight'],
+            padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          }}
+        >
+          Select agent
+        </div>
+      }
+      dropdownFooterFixed={
+        selectedAgent ? (
+          <ListBoxFooterPlus
+            onClick={() => onAgentChange(undefined)}
+            leftContent={<RobotIcon />}
           >
-            Select agent
-          </div>
-        }
-        dropdownFooterFixed={
-          agent ? (
-            <ListBoxFooterPlus
-              onClick={() => onAgentChange(undefined)}
-              leftContent={<RobotIcon />}
+            Deselect agent
+            <CaptionP>Go to the last non-agent or a new chat</CaptionP>
+          </ListBoxFooterPlus>
+        ) : undefined
+      }
+      triggerButton={
+        // wrapper div prevents tooltip from interfering with trigger
+        <div>
+          <Tooltip label="Use our coding agent to run a background task">
+            <Button
+              startIcon={icon}
+              endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
+              tertiary
+              small
             >
-              Deselect agent
-              <CaptionP>Go to the last non-agent or a new chat</CaptionP>
-            </ListBoxFooterPlus>
-          ) : undefined
-        }
-        triggerButton={
-          // wrapper div prevents tooltip from interfering with trigger
-          <div>
-            <Tooltip label="Use our coding agent to run a background task">
-              <Button
-                loading={loading}
-                startIcon={icon}
-                endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
-                tertiary
-                small
-              >
-                <span css={{ ...TRUNCATE }}>
-                  {capitalize(`${agent ?? ''} agent`.trim())}
-                </span>
-              </Button>
-            </Tooltip>
-          </div>
-        }
-      >
-        <ListBoxItem
-          key={AgentSessionType.Terraform}
-          leftContent={
-            <AgentIcon type={AgentSessionType.Terraform}></AgentIcon>
-          }
-          label="Terraform agent"
-        />
-        <ListBoxItem
-          key={AgentSessionType.Kubernetes}
-          leftContent={
-            <AgentIcon type={AgentSessionType.Kubernetes}></AgentIcon>
-          }
-          label="Kubernetes agent"
-        />
-      </Select>
-      <Toast
-        show={!!agentSessionError}
-        severity="danger"
-        position="bottom"
-        marginBottom="medium"
-      >
-        <strong>Error creating agent session:</strong>{' '}
-        {agentSessionError?.message}
-      </Toast>
-    </>
+              <span css={{ ...TRUNCATE }}>
+                {capitalize(`${selectedAgent ?? ''} agent`.trim())}
+              </span>
+            </Button>
+          </Tooltip>
+        </div>
+      }
+    >
+      <ListBoxItem
+        key={AgentSessionType.Terraform}
+        leftContent={<AgentIcon type={AgentSessionType.Terraform}></AgentIcon>}
+        label="Terraform agent"
+      />
+      <ListBoxItem
+        key={AgentSessionType.Kubernetes}
+        leftContent={<AgentIcon type={AgentSessionType.Kubernetes}></AgentIcon>}
+        label="Kubernetes agent"
+      />
+    </Select>
   )
 }

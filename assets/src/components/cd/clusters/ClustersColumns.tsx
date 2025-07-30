@@ -1,11 +1,11 @@
 import {
   Chip,
-  ClusterIcon,
   Flex,
   GearTrainIcon,
-  KubernetesIcon,
   ListBoxItem,
-  NamespaceIcon,
+  SmallNamespaceIcon,
+  SmallPodIcon,
+  SmallNodeIcon,
   PeopleIcon,
   ReturnIcon,
   SemanticColorKey,
@@ -209,7 +209,7 @@ export const ColVersion = columnHelper.accessor(
   }
 )
 
-const cpuFormat = (cpu: Nullable<number>) => (cpu ? `${cpu} vCPU` : '—')
+const cpuFormat = (cpu: Nullable<number>) => (cpu ? cpu : '—')
 
 export const ColCpu = columnHelper.accessor(({ node }) => node, {
   id: 'cpu',
@@ -218,14 +218,14 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
     const cluster = getValue()
     const percentage = (cluster?.cpuUtil ?? 0) / 100
     const total = (cluster?.cpuTotal ?? 0) / 1000
-    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)}`
+    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)} vCPU`
 
     return percentage > 0 ? (
       <>
         <SizeTextSc>{display}</SizeTextSc>
         <UsageBar
           usage={percentage}
-          width={120}
+          width={100}
         />
       </>
     ) : (
@@ -235,7 +235,7 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
 })
 
 const memFormat = (memory: Nullable<number>) =>
-  memory ? filesize(memory) : '—'
+  memory ? filesize(memory, { standard: 'jedec' }) : '—'
 
 export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
@@ -252,7 +252,7 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
         <TableText>
           <UsageBar
             usage={percentage}
-            width={120}
+            width={100}
           />
         </TableText>
       </>
@@ -263,14 +263,6 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
 })
 
 type PartialType = keyof DefaultTheme['partials']['text']
-
-const SizeSc = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  color: theme.colors['text-light'],
-  gap: theme.spacing.xxsmall,
-}))
 
 const SizeTextSc = styled.div<{
   $partialType?: PartialType
@@ -289,20 +281,39 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
   cell: ({ getValue }) => {
     const cluster = getValue()
     return (
-      <SizeSc>
-        <SizeTextSc>
-          <ClusterIcon size={16} />
-          {`${cluster?.nodeCount} nodes`}
-        </SizeTextSc>
-        <SizeTextSc>
-          <NamespaceIcon size={16} />
-          {`${cluster?.namespaceCount} ns`}
-        </SizeTextSc>
-        <SizeTextSc>
-          <KubernetesIcon size={16} />
-          {`${cluster?.podCount} pods`}
-        </SizeTextSc>
-      </SizeSc>
+      <Flex
+        direction="column"
+        gap="xxsmall"
+      >
+        <Flex
+          gap="xxsmall"
+          direction="row"
+        >
+          <Chip
+            size="small"
+            icon={<SmallNodeIcon />}
+          >
+            {cluster?.nodeCount} nodes
+          </Chip>
+          <Chip
+            size="small"
+            icon={<SmallPodIcon />}
+          >
+            {cluster?.podCount} pods
+          </Chip>
+        </Flex>
+        <Flex
+          gap="xxsmall"
+          direction="row"
+        >
+          <Chip
+            size="small"
+            icon={<SmallNamespaceIcon />}
+          >
+            {cluster?.namespaceCount} namespaces
+          </Chip>
+        </Flex>
+      </Flex>
     )
   },
 })
@@ -311,7 +322,7 @@ export const ColAgentHealth = columnHelper.accessor(
   ({ node }) => node?.pingedAt,
   {
     id: 'agentHealth',
-    header: 'Agent health',
+    header: 'Agent',
     meta: {
       tooltip: 'Whether your agent has pinged within the last 15 minutes',
     },
@@ -326,7 +337,7 @@ export const ColHealthScore = columnHelper.accessor(
   ({ node }) => node?.healthScore,
   {
     id: 'healthScore',
-    header: 'Health score',
+    header: 'Health',
     meta: {
       tooltip: 'A holistic view of Kubernetes API configuration health',
     },

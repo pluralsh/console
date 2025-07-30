@@ -1,4 +1,11 @@
-import { Flex, IconFrame, RobotIcon, Table } from '@pluralsh/design-system'
+import {
+  Chip,
+  Flex,
+  IconFrame,
+  RobotIcon,
+  Spinner,
+  Table,
+} from '@pluralsh/design-system'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
@@ -145,13 +152,13 @@ const columns = [
         >
           <Flex
             alignItems="center"
-            justifyContent="space-between"
             gap="small"
             flex={1}
           >
             <Flex
               gap="small"
               alignItems="center"
+              flex={1}
             >
               <IconFrame
                 size="medium"
@@ -166,6 +173,25 @@ const columns = [
             <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
               Last updated {fromNow(timestamp)}
             </CaptionP>
+            {agentSession?.done ? (
+              <Chip size="small">Complete</Chip>
+            ) : (
+              <Chip
+                size="small"
+                severity="info"
+              >
+                <Flex
+                  alignItems="center"
+                  gap="xsmall"
+                >
+                  <Spinner
+                    size={8}
+                    color={theme.colors['icon-info']}
+                  />
+                  Running
+                </Flex>
+              </Chip>
+            )}
           </Flex>
         </div>
       )

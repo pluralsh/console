@@ -1285,6 +1285,8 @@ export type Cluster = {
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   auditLogs?: Maybe<ClusterAuditLogConnection>;
+  /** The availability zones this cluster is running in */
+  availabilityZones?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** any upgrade insights provided by your cloud provider that have been discovered by our agent */
   cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
@@ -1790,6 +1792,7 @@ export type ClusterNodeMetrics = {
 };
 
 export type ClusterPing = {
+  availabilityZones?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cpuTotal?: InputMaybe<Scalars['Float']['input']>;
   cpuUtil?: InputMaybe<Scalars['Float']['input']>;
   currentVersion: Scalars['String']['input'];
@@ -3578,6 +3581,7 @@ export type HelmConfigAttributes = {
   ignoreCrds?: InputMaybe<Scalars['Boolean']['input']>;
   ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
   luaFile?: InputMaybe<Scalars['String']['input']>;
+  luaFolder?: InputMaybe<Scalars['String']['input']>;
   luaScript?: InputMaybe<Scalars['String']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
@@ -3668,6 +3672,8 @@ export type HelmSpec = {
   ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
   /** a lua file to use for helm applies */
   luaFile?: Maybe<Scalars['String']['output']>;
+  /** a folder of lua files to include in the final script used */
+  luaFolder?: Maybe<Scalars['String']['output']>;
   /** a lua script to use for helm applies */
   luaScript?: Maybe<Scalars['String']['output']>;
   release?: Maybe<Scalars['String']['output']>;

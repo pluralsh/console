@@ -3463,6 +3463,7 @@ _Appears in:_
 | `ignoreCrds` _boolean_ | whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster) |  | Optional: {} <br /> |
 | `luaScript` _string_ | a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
 | `luaFile` _string_ | a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
+| `luaFolder` _string_ | a folder of lua files to include in the final script used |  | Optional: {} <br /> |
 
 
 #### ServiceImport
