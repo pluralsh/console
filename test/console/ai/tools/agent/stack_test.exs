@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Agent.StackTest do
       )
       stack = insert(:stack, status: :successful)
 
-      expect(Console.AI.VectorStore, :fetch, fn "aws vpc", [filters: [datatype: {:raw, :stack_state}], count: 3] ->
+      expect(Console.AI.VectorStore, :fetch, fn "aws vpc", [filters: [datatype: {:raw, :stack_state}], count: 10] ->
         {:ok, [
           %Console.AI.VectorStore.Response{
             type: :stack,

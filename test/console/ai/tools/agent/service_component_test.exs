@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Agent.ServiceComponentTest do
       service = insert(:service)
       insert(:service_component, service: service)
 
-      expect(Console.AI.VectorStore, :fetch, fn "cert manager", [filters: [datatype: {:raw, :service_component}], count: 3] ->
+      expect(Console.AI.VectorStore, :fetch, fn "cert manager", [filters: [datatype: {:raw, :service_component}], count: 10] ->
         {:ok, [
           %Console.AI.VectorStore.Response{
             type: :service,

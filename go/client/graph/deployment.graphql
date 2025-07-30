@@ -163,6 +163,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         ignoreCrds
         luaScript
         luaFile
+        luaFolder
     }
     configuration {
         name

@@ -62,7 +62,7 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
-    |> Chat.ordered()
+    |> Chat.ordered(chat_order(args))
     |> paginate(args)
   end
 
