@@ -100,7 +100,16 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	if err := TryAddOwnedByAnnotation(ctx, r.Client, scm); err != nil {
+	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
+	if err != nil {
+		return handleRequeue(nil, err, scm.SetCondition)
+	}
+
+	if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
+		return handleRequeue(nil, err, scm.SetCondition)
+	}
+
+	if err := TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil {
 		return handleRequeue(nil, err, scm.SetCondition)
 	}
 

@@ -485,13 +485,17 @@ func NamespacedNameFromAnnotation(annotation string) (*types.NamespacedName, err
 	}, nil
 }
 
-func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, obj runtimeclient.Object) error {
-	annotations := obj.GetAnnotations()
-	annotations[OwnedByAnnotationName] = types.NamespacedName{
-		Namespace: obj.GetNamespace(),
-		Name:      obj.GetName(),
-	}.String()
-	obj.SetAnnotations(annotations)
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object, child runtimeclient.Object) error {
+	if HasAnnotation(child, OwnedByAnnotationName) {
+		return nil
+	}
 
-	return utils.TryToUpdate(ctx, client, obj)
+	annotations := child.GetAnnotations()
+	annotations[OwnedByAnnotationName] = types.NamespacedName{
+		Namespace: owner.GetNamespace(),
+		Name:      owner.GetName(),
+	}.String()
+	child.SetAnnotations(annotations)
+
+	return utils.TryToUpdate(ctx, client, child)
 }

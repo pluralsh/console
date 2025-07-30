@@ -315,3 +315,32 @@ func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ct
 	})
 
 }
+
+func TryRemoveOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
+	if has, err := controllerutil.HasOwnerReference(controlled.GetOwnerReferences(), owner, scheme); !has || err != nil {
+		return err
+	}
+
+	key := ctrlruntimeclient.ObjectKeyFromObject(controlled)
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := client.Get(ctx, key, controlled); err != nil {
+			return err
+		}
+
+		if owner.GetDeletionTimestamp() != nil || controlled.GetDeletionTimestamp() != nil {
+			return nil
+		}
+
+		original := controlled.DeepCopyObject().(ctrlruntimeclient.Object)
+
+		if err := controllerutil.RemoveOwnerReference(owner, controlled, scheme); err != nil {
+			return fmt.Errorf("failed to remove owner reference: %w", err)
+		}
+
+		if reflect.DeepEqual(original.GetOwnerReferences(), controlled.GetOwnerReferences()) {
+			return nil
+		}
+
+		return client.Patch(ctx, controlled, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
+	})
+}
