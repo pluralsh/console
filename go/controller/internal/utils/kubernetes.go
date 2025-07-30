@@ -13,10 +13,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/klog/v2"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/log"
 )
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
@@ -318,6 +320,7 @@ func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ct
 
 func TryRemoveOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
 	if has, err := controllerutil.HasOwnerReference(controlled.GetOwnerReferences(), owner, scheme); !has || err != nil {
+		klog.V(log.LogLevelDebug).InfoS("owner reference not found, skipping removal", "owner", owner.GetName(), "controlled", controlled.GetName(), "has", has, "err", err)
 		return err
 	}
 
@@ -341,6 +344,7 @@ func TryRemoveOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, own
 			return nil
 		}
 
+		klog.V(log.LogLevelDebug).InfoS("removing owner reference", "owner", owner.GetName(), "controlled", controlled.GetName())
 		return client.Patch(ctx, controlled, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
 	})
 }
