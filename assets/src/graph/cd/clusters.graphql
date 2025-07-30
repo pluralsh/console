@@ -182,6 +182,7 @@ fragment ClustersRow on Cluster {
   cpuUtil
   nodeCount
   namespaceCount
+  availabilityZones
   podCount
   memoryUtil
   installed

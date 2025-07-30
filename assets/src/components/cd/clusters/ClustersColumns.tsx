@@ -310,7 +310,14 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
             size="small"
             icon={<SmallNamespaceIcon />}
           >
-            {cluster?.namespaceCount} namespaces
+            {cluster?.namespaceCount} ns
+          </Chip>
+          <Chip
+            size="small"
+            tooltip={cluster?.availabilityZones?.join(', ')}
+            icon={<SmallNamespaceIcon />}
+          >
+            {cluster?.availabilityZones?.length} azs
           </Chip>
         </Flex>
       </Flex>
