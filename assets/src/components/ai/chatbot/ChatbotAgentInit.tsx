@@ -6,16 +6,16 @@ import { Body1BoldP, Body2P } from '../../utils/typography/Text.tsx'
 import { useChatbot } from '../AIContext.tsx'
 import { Chip, Flex, Toast } from '@pluralsh/design-system'
 import { useCreateAgentSessionMutation } from '../../../generated/graphql.ts'
+import { useCallback } from 'react'
 
 const examplePrompts = [
-  'Double the instance size of a specific database',
-  'Suggest a fix for a specific bug in the codebase',
-  'Create a pull request to update a specific library version',
-]
+  'How you can help me with my coding tasks?',
+  'Can you create a PR to fix the bug in my code?',
+] // TODO: Update these.
 
 export function ChatbotAgentInit() {
   const theme = useTheme()
-  const { goToThread, agentInitMode } = useChatbot()
+  const { goToThread, agentInitMode: type } = useChatbot()
 
   const [createAgentSession, { error }] = useCreateAgentSessionMutation({
     onCompleted: ({ createAgentSession }) => {
@@ -24,6 +24,12 @@ export function ChatbotAgentInit() {
       }
     },
   })
+
+  const send = useCallback(
+    (prompt: string) =>
+      createAgentSession({ variables: { attributes: { type, prompt } } }),
+    [createAgentSession, type]
+  )
 
   return (
     <>
@@ -52,6 +58,8 @@ export function ChatbotAgentInit() {
         >
           {examplePrompts.map((prompt) => (
             <Chip
+              onClick={() => send(prompt)}
+              clickable
               size="small"
               fillLevel={0}
               css={{ borderRadius: 16 }}
@@ -64,16 +72,7 @@ export function ChatbotAgentInit() {
       <ChatInput
         enableExamplePrompts={false}
         placeholder="Start a background task..."
-        sendMessage={(prompt) =>
-          createAgentSession({
-            variables: {
-              attributes: {
-                type: agentInitMode,
-                prompt,
-              },
-            },
-          })
-        }
+        sendMessage={send}
       />
       <Toast
         show={!!error}
