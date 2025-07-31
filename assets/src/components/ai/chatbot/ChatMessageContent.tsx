@@ -242,7 +242,7 @@ function ImplementationPlanMessageContent({
           css={{ margin: `0 ${spacing.medium}px` }}
           backgroundColor={colors['border']}
         />
-        {session?.planConfirmed ? (
+        {!session?.planConfirmed ? (
           <Button
             small
             css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
