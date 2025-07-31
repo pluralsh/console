@@ -1,20 +1,21 @@
 import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { Body2BoldP } from 'components/utils/typography/Text'
-import { ChatThreadFragment, ChatType } from 'generated/graphql'
+import { ChatType } from 'generated/graphql'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
+import { useChatbot } from '../../AIContext.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
-  currentThread,
   zIndex,
 }: {
   isOpen: boolean
-  currentThread: ChatThreadFragment
   zIndex?: number
 }) {
-  const messages = mapExistingNodes(currentThread.chats)
+  const { currentThread } = useChatbot()
+
+  const messages = mapExistingNodes(currentThread?.chats)
   return (
     <SimpleFlyover
       isOpen={isOpen}

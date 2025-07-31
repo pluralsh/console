@@ -175,6 +175,89 @@ query ChatThreads(
   }
 }
 
+query AgentSessionPRs(
+  $id: ID!
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  chatThread(id: $id) {
+    session {
+      pullRequest {
+        ...PullRequest # TODO
+      }
+      pullRequests(first: $first, last: $last, after: $after, before: $before) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...PullRequest
+          }
+        }
+      }
+    }
+  }
+}
+
+query AgentSessionServices(
+  $id: ID!
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  chatThread(id: $id) {
+    session {
+      service {
+        ...ServiceDeploymentTiny # TODO
+      }
+      serviceDeployments(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+      ) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...ServiceDeploymentTiny
+          }
+        }
+      }
+    }
+  }
+}
+
+query AgentSessionStacks(
+  $id: ID!
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  chatThread(id: $id) {
+    session {
+      stack {
+        ...StackTiny # TODO
+      }
+      stacks(first: $first, last: $last, after: $after, before: $before) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...StackTiny
+          }
+        }
+      }
+    }
+  }
+}
+
 query ChatThreadDetails(
   $id: ID!
   $first: Int = 25
