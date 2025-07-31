@@ -4,7 +4,7 @@ defmodule Console.Schema.ServiceDependency do
 
   schema "service_dependencies" do
     field :name,   :string
-    field :status, Service.Status
+    field :status, Service.Status, default: :stale
 
     belongs_to :service,  Service
     belongs_to :template, ServiceTemplate

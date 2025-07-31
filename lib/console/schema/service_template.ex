@@ -39,7 +39,7 @@ defmodule Console.Schema.ServiceTemplate do
     Map.new([:configuration | __schema__(:fields)] -- [:id], & {&1, Map.get(tpl, &1) |> Console.mapify()})
     |> Console.remove_ids()
     |> Map.put(:context_bindings, Enum.map(tpl.inferred_contexts || [], & %{context_id: &1}))
-    |> Map.drop(~w(updated_at inserted_at revision_id id)a)
+    |> Map.drop(~w(updated_at inserted_at revision_id id dependencies)a)
   end
 
   def attributes(%__MODULE__{} = tpl, namespace, name) do
