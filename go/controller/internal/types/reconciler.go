@@ -31,6 +31,7 @@ const (
 	ComplianceReportGeneratorReconciler  Reconciler = "compliancereportgenerator"
 	CustomStackRunReconciler             Reconciler = "customstackrun"
 	DeploymentSettingsReconciler         Reconciler = "deploymentsettings"
+	FederatedCredentialReconciler        Reconciler = "federatedcredential"
 	FlowReconciler                       Reconciler = "flow"
 	GeneratedSecretReconciler            Reconciler = "generatedsecret"
 	GitRepositoryReconciler              Reconciler = "gitrepository"

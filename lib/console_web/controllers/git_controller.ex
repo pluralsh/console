@@ -66,7 +66,7 @@ defmodule ConsoleWeb.GitController do
   def tarball(conn, %{"id" => service_id} = params) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
-         svc <- Console.Repo.preload(svc, [:revision]),
+         svc <- Console.Repo.preload(svc, [:revision, :dependencies]),
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {get_digest(params, svc), svc},
          {{:ok, path, sha}, _} <- {FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end), svc} do

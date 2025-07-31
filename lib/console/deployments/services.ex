@@ -383,8 +383,8 @@ defmodule Console.Deployments.Services do
   @spec dependencies_ready(Service.t) :: service_resp
   def dependencies_ready(%Service{} = svc) do
     with %{dependencies: [_ | _] = deps} <- Repo.preload(svc, [:dependencies]),
-         dep when not is_nil(dep) <- Enum.find(deps, & &1.status != :healthy) do
-      {:error, "dependency #{dep.name} is not ready"}
+         %ServiceDependency{name: name} <- Enum.find(deps, & &1.status != :healthy) do
+      {:error, "dependency #{name} is not ready"}
     else
       _ -> {:ok, svc}
     end

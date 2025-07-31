@@ -262,6 +262,65 @@ func (_c *ConsoleClientMock_CreateCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// CreateFederatedCredential provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateFederatedCredential(ctx context.Context, attributes client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateFederatedCredential")
+	}
+
+	var r0 *client.FederatedCredentialFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.FederatedCredentialAttributes) *client.FederatedCredentialFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.FederatedCredentialFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.FederatedCredentialAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateFederatedCredential_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateFederatedCredential'
+type ConsoleClientMock_CreateFederatedCredential_Call struct {
+	*mock.Call
+}
+
+// CreateFederatedCredential is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.FederatedCredentialAttributes
+func (_e *ConsoleClientMock_Expecter) CreateFederatedCredential(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateFederatedCredential_Call {
+	return &ConsoleClientMock_CreateFederatedCredential_Call{Call: _e.mock.On("CreateFederatedCredential", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateFederatedCredential_Call) Run(run func(ctx context.Context, attributes client.FederatedCredentialAttributes)) *ConsoleClientMock_CreateFederatedCredential_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.FederatedCredentialAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateFederatedCredential_Call) Return(_a0 *client.FederatedCredentialFragment, _a1 error) *ConsoleClientMock_CreateFederatedCredential_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateFederatedCredential_Call) RunAndReturn(run func(context.Context, client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error)) *ConsoleClientMock_CreateFederatedCredential_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateGitRepository provides a mock function with given fields: attrs
 func (_m *ConsoleClientMock) CreateGitRepository(attrs client.GitAttributes) (*client.CreateGitRepository, error) {
 	ret := _m.Called(attrs)
@@ -1620,6 +1679,65 @@ func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) Return(_a0 error) *Consol
 }
 
 func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteCustomStackRun_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteFederatedCredential provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteFederatedCredential(ctx context.Context, id string) (*client.DeleteFederatedCredential_DeleteFederatedCredential, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteFederatedCredential")
+	}
+
+	var r0 *client.DeleteFederatedCredential_DeleteFederatedCredential
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.DeleteFederatedCredential_DeleteFederatedCredential, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.DeleteFederatedCredential_DeleteFederatedCredential); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.DeleteFederatedCredential_DeleteFederatedCredential)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_DeleteFederatedCredential_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteFederatedCredential'
+type ConsoleClientMock_DeleteFederatedCredential_Call struct {
+	*mock.Call
+}
+
+// DeleteFederatedCredential is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteFederatedCredential(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteFederatedCredential_Call {
+	return &ConsoleClientMock_DeleteFederatedCredential_Call{Call: _e.mock.On("DeleteFederatedCredential", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteFederatedCredential_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteFederatedCredential_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteFederatedCredential_Call) Return(_a0 *client.DeleteFederatedCredential_DeleteFederatedCredential, _a1 error) *ConsoleClientMock_DeleteFederatedCredential_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteFederatedCredential_Call) RunAndReturn(run func(context.Context, string) (*client.DeleteFederatedCredential_DeleteFederatedCredential, error)) *ConsoleClientMock_DeleteFederatedCredential_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3334,6 +3452,65 @@ func (_c *ConsoleClientMock_GetDeploymentSettings_Call) Return(_a0 *client.Deplo
 }
 
 func (_c *ConsoleClientMock_GetDeploymentSettings_Call) RunAndReturn(run func(context.Context) (*client.DeploymentSettingsFragment, error)) *ConsoleClientMock_GetDeploymentSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetFederatedCredential provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetFederatedCredential(ctx context.Context, id string) (*client.FederatedCredentialFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFederatedCredential")
+	}
+
+	var r0 *client.FederatedCredentialFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.FederatedCredentialFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.FederatedCredentialFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.FederatedCredentialFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetFederatedCredential_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFederatedCredential'
+type ConsoleClientMock_GetFederatedCredential_Call struct {
+	*mock.Call
+}
+
+// GetFederatedCredential is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetFederatedCredential(ctx interface{}, id interface{}) *ConsoleClientMock_GetFederatedCredential_Call {
+	return &ConsoleClientMock_GetFederatedCredential_Call{Call: _e.mock.On("GetFederatedCredential", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetFederatedCredential_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetFederatedCredential_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFederatedCredential_Call) Return(_a0 *client.FederatedCredentialFragment, _a1 error) *ConsoleClientMock_GetFederatedCredential_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFederatedCredential_Call) RunAndReturn(run func(context.Context, string) (*client.FederatedCredentialFragment, error)) *ConsoleClientMock_GetFederatedCredential_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5731,6 +5908,63 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func
 	return _c
 }
 
+// IsFederatedCredentialExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsFederatedCredentialExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsFederatedCredentialExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsFederatedCredentialExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsFederatedCredentialExists'
+type ConsoleClientMock_IsFederatedCredentialExists_Call struct {
+	*mock.Call
+}
+
+// IsFederatedCredentialExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsFederatedCredentialExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsFederatedCredentialExists_Call {
+	return &ConsoleClientMock_IsFederatedCredentialExists_Call{Call: _e.mock.On("IsFederatedCredentialExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsFederatedCredentialExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsFederatedCredentialExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsFederatedCredentialExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsFederatedCredentialExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsFederatedCredentialExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsFederatedCredentialExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsHelmRepositoryExists provides a mock function with given fields: ctx, url
 func (_m *ConsoleClientMock) IsHelmRepositoryExists(ctx context.Context, url string) (bool, error) {
 	ret := _m.Called(ctx, url)
@@ -7204,6 +7438,66 @@ func (_c *ConsoleClientMock_UpdateDeploymentSettings_Call) Return(_a0 *client.Up
 }
 
 func (_c *ConsoleClientMock_UpdateDeploymentSettings_Call) RunAndReturn(run func(context.Context, client.DeploymentSettingsAttributes) (*client.UpdateDeploymentSettings, error)) *ConsoleClientMock_UpdateDeploymentSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateFederatedCredential provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateFederatedCredential(ctx context.Context, id string, attributes client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateFederatedCredential")
+	}
+
+	var r0 *client.FederatedCredentialFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.FederatedCredentialAttributes) *client.FederatedCredentialFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.FederatedCredentialFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.FederatedCredentialAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateFederatedCredential_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateFederatedCredential'
+type ConsoleClientMock_UpdateFederatedCredential_Call struct {
+	*mock.Call
+}
+
+// UpdateFederatedCredential is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.FederatedCredentialAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateFederatedCredential(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateFederatedCredential_Call {
+	return &ConsoleClientMock_UpdateFederatedCredential_Call{Call: _e.mock.On("UpdateFederatedCredential", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateFederatedCredential_Call) Run(run func(ctx context.Context, id string, attributes client.FederatedCredentialAttributes)) *ConsoleClientMock_UpdateFederatedCredential_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.FederatedCredentialAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateFederatedCredential_Call) Return(_a0 *client.FederatedCredentialFragment, _a1 error) *ConsoleClientMock_UpdateFederatedCredential_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateFederatedCredential_Call) RunAndReturn(run func(context.Context, string, client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error)) *ConsoleClientMock_UpdateFederatedCredential_Call {
 	_c.Call.Return(run)
 	return _c
 }
