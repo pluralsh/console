@@ -3,6 +3,7 @@ import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   useAgentSessionPRsQuery,
   useAgentSessionServicesQuery,
+  useAgentSessionStacksQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -19,6 +20,7 @@ import {
   GitHubLogoIcon,
   GitPullIcon,
   IconFrame,
+  StackIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
 import { useNavigate } from 'react-router-dom'
@@ -27,6 +29,8 @@ import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ComponentIcon } from '../../../cd/services/service/component/misc.tsx'
 import { isEmpty } from 'lodash'
+import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
+import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -39,7 +43,7 @@ export function ChatbotActionsPanel({
   const theme = useTheme()
   const { currentThread } = useChatbot()
 
-  const prsQuery = useFetchPaginatedData(
+  const prq = useFetchPaginatedData(
     {
       skip: !currentThread?.id,
       queryHook: useAgentSessionPRsQuery,
@@ -47,15 +51,13 @@ export function ChatbotActionsPanel({
     },
     { id: currentThread?.id ?? '' }
   )
-
-  const pullRequest = prsQuery.data?.chatThread?.session?.pullRequest
-
+  const pullRequest = prq.data?.chatThread?.session?.pullRequest
   const pullRequests = useMemo(
-    () => mapExistingNodes(prsQuery.data?.chatThread?.session?.pullRequests),
-    [prsQuery.data?.chatThread?.session?.pullRequests]
+    () => mapExistingNodes(prq.data?.chatThread?.session?.pullRequests),
+    [prq.data?.chatThread?.session?.pullRequests]
   )
 
-  const servicesQuery = useFetchPaginatedData(
+  const sdq = useFetchPaginatedData(
     {
       skip: !currentThread?.id,
       queryHook: useAgentSessionServicesQuery,
@@ -63,16 +65,27 @@ export function ChatbotActionsPanel({
     },
     { id: currentThread?.id ?? '' }
   )
-
-  const service = servicesQuery.data?.chatThread?.session?.service
-
+  const service = sdq.data?.chatThread?.session?.service
   const services = useMemo(
-    () =>
-      mapExistingNodes(
-        servicesQuery.data?.chatThread?.session?.serviceDeployments
-      ),
-    [servicesQuery.data?.chatThread?.session?.serviceDeployments]
+    () => mapExistingNodes(sdq.data?.chatThread?.session?.serviceDeployments),
+    [sdq.data?.chatThread?.session?.serviceDeployments]
   )
+
+  const isq = useFetchPaginatedData(
+    {
+      skip: !currentThread?.id,
+      queryHook: useAgentSessionStacksQuery,
+      keyPath: ['chatThread', 'session', 'stacks'],
+    },
+    { id: currentThread?.id ?? '' }
+  )
+  const stack = isq.data?.chatThread?.session?.stack
+  const stacks = useMemo(
+    () => mapExistingNodes(isq.data?.chatThread?.session?.stacks),
+    [isq.data?.chatThread?.session?.stacks]
+  )
+
+  // TODO: Handle loading and error states for queries.
 
   return (
     <SimpleFlyover
@@ -149,7 +162,7 @@ export function ChatbotActionsPanel({
               </Flex>
             </SubheaderSC>
             <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-              {service.name} on {service.cluster?.name}
+              {service.name}
             </CaptionP>
             <Flex justifyContent="flex-end">
               <Button
@@ -164,14 +177,48 @@ export function ChatbotActionsPanel({
           </EntrySC>
         )}
 
+        {/* Stack */}
+        {stack && (
+          <EntrySC>
+            <SubheaderSC>
+              <IconFrame
+                icon={<StackIcon />}
+                size="small"
+              />
+              Stack
+              <Flex
+                flex={1}
+                justifyContent="flex-end"
+              >
+                <StackStatusChip
+                  status={stack.status}
+                  deleting={!!stack.deletedAt}
+                  size="small"
+                />
+              </Flex>
+            </SubheaderSC>
+            <CaptionP css={{ color: theme.colors['text-xlight'] }}>
+              {stack.name}
+            </CaptionP>
+            <Flex justifyContent="flex-end">
+              <Button
+                small
+                onClick={() => navigate(getStacksAbsPath(stack.id))}
+              >
+                View stack
+              </Button>
+            </Flex>
+          </EntrySC>
+        )}
+
         {/* Accordion */}
         <AccordionSC type="multiple">
           <>
             {/* TODO: Pull requests. */}
             {!isEmpty(pullRequests) && (
               <AccordionItem
-                key="pullRequest"
-                value={'Pull request'}
+                key="prs"
+                value="prs"
                 trigger={
                   <SubheaderSC>
                     <IconFrame
@@ -189,8 +236,8 @@ export function ChatbotActionsPanel({
             {/* TODO: Services. */}
             {!isEmpty(services) && (
               <AccordionItem
-                key="pullRequest"
-                value={'Pull request'}
+                key="services"
+                value="services"
                 trigger={
                   <SubheaderSC>
                     <IconFrame
@@ -198,6 +245,25 @@ export function ChatbotActionsPanel({
                       size="small"
                     />
                     Services
+                  </SubheaderSC>
+                }
+              >
+                ...
+              </AccordionItem>
+            )}
+
+            {/* TODO: Stacks. */}
+            {!isEmpty(stacks) && (
+              <AccordionItem
+                key="stacks"
+                value="stacks"
+                trigger={
+                  <SubheaderSC>
+                    <IconFrame
+                      icon={<GitPullIcon />}
+                      size="small"
+                    />
+                    Stacks
                   </SubheaderSC>
                 }
               >
