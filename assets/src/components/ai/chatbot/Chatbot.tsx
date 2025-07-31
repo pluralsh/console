@@ -79,6 +79,7 @@ function ChatbotPanelInner() {
     agentInitMode,
     goToThread,
     createNewThread,
+    mutationLoading,
     detailsError,
   } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
@@ -103,7 +104,7 @@ function ChatbotPanelInner() {
     if (!isEmpty(currentThreadId)) return
 
     // If data is not yet loaded, do nothing.
-    if (!data) return
+    if (!data || mutationLoading) return
 
     // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
