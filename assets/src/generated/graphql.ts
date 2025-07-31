@@ -11397,6 +11397,39 @@ export type ChatThreadsQueryVariables = Exact<{
 
 export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null } | null };
 
+export type AgentSessionPRsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AgentSessionPRsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', session?: { __typename?: 'AgentSession', pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null> | null } | null } | null } | null };
+
+export type AgentSessionServicesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AgentSessionServicesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', session?: { __typename?: 'AgentSession', service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null, serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null } | null } | null } | null };
+
+export type AgentSessionStacksQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AgentSessionStacksQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', session?: { __typename?: 'AgentSession', stack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, stacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null } | null };
+
 export type ChatThreadDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18586,6 +18619,183 @@ export type ChatThreadsQueryHookResult = ReturnType<typeof useChatThreadsQuery>;
 export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLazyQuery>;
 export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
 export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
+export const AgentSessionPRsDocument = gql`
+    query AgentSessionPRs($id: ID!, $first: Int = 100, $last: Int, $after: String, $before: String) {
+  chatThread(id: $id) {
+    session {
+      pullRequest {
+        ...PullRequest
+      }
+      pullRequests(first: $first, last: $last, after: $after, before: $before) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...PullRequest
+          }
+        }
+      }
+    }
+  }
+}
+    ${PullRequestFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useAgentSessionPRsQuery__
+ *
+ * To run a query within a React component, call `useAgentSessionPRsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentSessionPRsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentSessionPRsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useAgentSessionPRsQuery(baseOptions: Apollo.QueryHookOptions<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>(AgentSessionPRsDocument, options);
+      }
+export function useAgentSessionPRsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>(AgentSessionPRsDocument, options);
+        }
+export function useAgentSessionPRsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>(AgentSessionPRsDocument, options);
+        }
+export type AgentSessionPRsQueryHookResult = ReturnType<typeof useAgentSessionPRsQuery>;
+export type AgentSessionPRsLazyQueryHookResult = ReturnType<typeof useAgentSessionPRsLazyQuery>;
+export type AgentSessionPRsSuspenseQueryHookResult = ReturnType<typeof useAgentSessionPRsSuspenseQuery>;
+export type AgentSessionPRsQueryResult = Apollo.QueryResult<AgentSessionPRsQuery, AgentSessionPRsQueryVariables>;
+export const AgentSessionServicesDocument = gql`
+    query AgentSessionServices($id: ID!, $first: Int = 100, $last: Int, $after: String, $before: String) {
+  chatThread(id: $id) {
+    session {
+      service {
+        ...ServiceDeploymentTiny
+      }
+      serviceDeployments(first: $first, last: $last, after: $after, before: $before) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...ServiceDeploymentTiny
+          }
+        }
+      }
+    }
+  }
+}
+    ${ServiceDeploymentTinyFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useAgentSessionServicesQuery__
+ *
+ * To run a query within a React component, call `useAgentSessionServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentSessionServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentSessionServicesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useAgentSessionServicesQuery(baseOptions: Apollo.QueryHookOptions<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>(AgentSessionServicesDocument, options);
+      }
+export function useAgentSessionServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>(AgentSessionServicesDocument, options);
+        }
+export function useAgentSessionServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>(AgentSessionServicesDocument, options);
+        }
+export type AgentSessionServicesQueryHookResult = ReturnType<typeof useAgentSessionServicesQuery>;
+export type AgentSessionServicesLazyQueryHookResult = ReturnType<typeof useAgentSessionServicesLazyQuery>;
+export type AgentSessionServicesSuspenseQueryHookResult = ReturnType<typeof useAgentSessionServicesSuspenseQuery>;
+export type AgentSessionServicesQueryResult = Apollo.QueryResult<AgentSessionServicesQuery, AgentSessionServicesQueryVariables>;
+export const AgentSessionStacksDocument = gql`
+    query AgentSessionStacks($id: ID!, $first: Int = 100, $last: Int, $after: String, $before: String) {
+  chatThread(id: $id) {
+    session {
+      stack {
+        ...StackTiny
+      }
+      stacks(first: $first, last: $last, after: $after, before: $before) {
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...StackTiny
+          }
+        }
+      }
+    }
+  }
+}
+    ${StackTinyFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useAgentSessionStacksQuery__
+ *
+ * To run a query within a React component, call `useAgentSessionStacksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentSessionStacksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentSessionStacksQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useAgentSessionStacksQuery(baseOptions: Apollo.QueryHookOptions<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>(AgentSessionStacksDocument, options);
+      }
+export function useAgentSessionStacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>(AgentSessionStacksDocument, options);
+        }
+export function useAgentSessionStacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>(AgentSessionStacksDocument, options);
+        }
+export type AgentSessionStacksQueryHookResult = ReturnType<typeof useAgentSessionStacksQuery>;
+export type AgentSessionStacksLazyQueryHookResult = ReturnType<typeof useAgentSessionStacksLazyQuery>;
+export type AgentSessionStacksSuspenseQueryHookResult = ReturnType<typeof useAgentSessionStacksSuspenseQuery>;
+export type AgentSessionStacksQueryResult = Apollo.QueryResult<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>;
 export const ChatThreadDetailsDocument = gql`
     query ChatThreadDetails($id: ID!, $first: Int = 25, $last: Int, $after: String, $before: String, $reverse: Boolean = true) {
   chatThread(id: $id) {
@@ -31378,6 +31588,9 @@ export const namedOperations = {
     AIPins: 'AIPins',
     AIPin: 'AIPin',
     ChatThreads: 'ChatThreads',
+    AgentSessionPRs: 'AgentSessionPRs',
+    AgentSessionServices: 'AgentSessionServices',
+    AgentSessionStacks: 'AgentSessionStacks',
     ChatThreadDetails: 'ChatThreadDetails',
     AgentSessions: 'AgentSessions',
     CloudConnections: 'CloudConnections',
