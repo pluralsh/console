@@ -14,6 +14,7 @@ export function ChatbotActionsPanel({
   zIndex?: number
 }) {
   const { currentThread } = useChatbot()
+
   const messages = mapExistingNodes(currentThread?.chats)
   return (
     <SimpleFlyover

@@ -55,7 +55,7 @@ export function ChatbotHeader({
   return (
     <Flex direction="column">
       <MainHeaderSC>
-        {selectedAgent && (
+        {selectedAgent && !agentInitMode && (
           <div
             css={{
               transition: 'transform 0.16s ease-in-out',

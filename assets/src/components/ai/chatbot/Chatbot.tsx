@@ -161,7 +161,7 @@ function ChatbotPanelInner() {
           tools={tools}
         />
       )}
-      {selectedAgent && (
+      {selectedAgent && !agentInitMode && (
         <ChatbotActionsPanel
           zIndex={1}
           isOpen={showActionsPanel}
