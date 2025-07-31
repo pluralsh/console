@@ -6,14 +6,14 @@ import {
   Stepper,
   StepperSteps,
 } from '@pluralsh/design-system'
-import { ComponentProps, useState } from 'react'
-
-import { PrAutomationFragment } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { PrAutomationFragment, PullRequestFragment } from 'generated/graphql'
+
 import { isEmpty } from 'lodash'
+import { ComponentProps, Dispatch, useState } from 'react'
 import { usePrAutomationForm } from './prConfigurationUtils'
 import { CreatePrActions } from './wizard/CreatePrActions'
 import {
@@ -40,11 +40,13 @@ function CreatePrModalBase({
   open,
   threadId,
   onClose,
+  onSuccess,
 }: {
   prAutomation: PrAutomationFragment
   open: boolean
   threadId?: string
   onClose: Nullable<() => void>
+  onSuccess?: Nullable<Dispatch<PullRequestFragment>>
 }) {
   const { configuration, confirmation } = prAutomation
   const hasConfiguration = !isEmpty(configuration)
@@ -87,7 +89,13 @@ function CreatePrModalBase({
       }}
       size="large"
       open={open}
-      onClose={onClose || undefined}
+      onClose={() => {
+        if (!!successPr) {
+          onSuccess?.(successPr)
+        }
+
+        onClose?.()
+      }}
       header={
         currentStep === 'success'
           ? `Successfully created PR`

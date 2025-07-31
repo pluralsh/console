@@ -2,6 +2,7 @@ import { usePrevious, useResizeObserver } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
+  AgentSession,
   AiDeltaFragment,
   AiRole,
   ChatThreadDetailsQueryResult,
@@ -187,6 +188,7 @@ export function ChatbotPanelThread({
                 {...msg}
                 threadId={currentThread.id}
                 serverName={msg.server?.name}
+                session={currentThread.session as AgentSession}
               />
               {!isEmpty(evidence) && // only attaches evidence to the initial insight
                 msg.seq === 0 &&

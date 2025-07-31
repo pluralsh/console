@@ -16,6 +16,7 @@ import {
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentSession,
   AiRole,
   ChatType,
   ChatTypeAttributes,
@@ -48,6 +49,7 @@ export function ChatMessage({
   highlightToolContent,
   contentStyles,
   updatedAt,
+  session,
   ...props
 }: {
   id?: string
@@ -66,6 +68,7 @@ export function ChatMessage({
   contentStyles?: CSSObject
   highlightToolContent?: boolean
   updatedAt?: Nullable<string>
+  session?: Nullable<AgentSession>
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const rightAlign = role === AiRole.User
@@ -108,6 +111,7 @@ export function ChatMessage({
             serverName={serverName}
             highlightToolContent={highlightToolContent}
             prAutomation={prAutomation}
+            session={session}
           />
           {type !== ChatType.File && (
             <ChatMessageActions
