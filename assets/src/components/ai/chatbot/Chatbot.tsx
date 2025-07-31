@@ -75,6 +75,7 @@ function ChatbotPanelInner() {
     currentThread,
     currentThreadId,
     persistedThreadId,
+    selectedAgent,
     agentInitMode,
     goToThread,
     createNewThread,
@@ -160,11 +161,10 @@ function ChatbotPanelInner() {
           tools={tools}
         />
       )}
-      {currentThread && (
+      {selectedAgent && (
         <ChatbotActionsPanel
           zIndex={1}
           isOpen={showActionsPanel}
-          currentThread={currentThread}
         />
       )}
       <MainContentWrapperSC>
