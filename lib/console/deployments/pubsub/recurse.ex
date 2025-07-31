@@ -116,7 +116,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
         with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
               _ <- Discovery.kick(stack.repository),
           do: Stacks.poll(pr)
-      end, max: 3, pause: :timer.seconds(30))
+      end, max: 4, pause: :timer.seconds(30))
     end, ttl: :timer.minutes(2))
   end
 

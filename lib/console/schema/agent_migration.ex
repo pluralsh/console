@@ -27,6 +27,8 @@ defmodule Console.Schema.AgentMigration do
 
   def incomplete(query \\ __MODULE__), do: from(am in query, where: not am.completed)
 
+  def ordered(query \\ __MODULE__), do: from(am in query, order_by: [asc: am.inserted_at])
+
   @valid ~w(completed ref name helm_values)a
 
   def changeset(model, attrs \\ %{}) do

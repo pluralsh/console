@@ -4,6 +4,7 @@ import {
   GearTrainIcon,
   ListBoxItem,
   SmallNamespaceIcon,
+  SmallAZIcon,
   SmallPodIcon,
   SmallNodeIcon,
   PeopleIcon,
@@ -291,15 +292,17 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
         >
           <Chip
             size="small"
+            tooltip={`${cluster?.nodeCount} nodes`}
             icon={<SmallNodeIcon />}
           >
-            {cluster?.nodeCount} nodes
+            {cluster?.nodeCount}
           </Chip>
           <Chip
             size="small"
+            tooltip={`${cluster?.podCount} pods`}
             icon={<SmallPodIcon />}
           >
-            {cluster?.podCount} pods
+            {cluster?.podCount}
           </Chip>
         </Flex>
         <Flex
@@ -308,9 +311,17 @@ export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
         >
           <Chip
             size="small"
+            tooltip={`${cluster?.namespaceCount} namespaces`}
             icon={<SmallNamespaceIcon />}
           >
-            {cluster?.namespaceCount} namespaces
+            {cluster?.namespaceCount}
+          </Chip>
+          <Chip
+            size="small"
+            tooltip={`${cluster?.availabilityZones?.join(', ')} availability zones`}
+            icon={<SmallAZIcon />}
+          >
+            {cluster?.availabilityZones?.length}
           </Chip>
         </Flex>
       </Flex>
