@@ -4,8 +4,14 @@ import { ChatInput } from './input/ChatInput.tsx'
 
 import { Body1BoldP, Body2P } from '../../utils/typography/Text.tsx'
 import { useChatbot } from '../AIContext.tsx'
-import { Flex, Toast } from '@pluralsh/design-system'
+import { Chip, Flex, Toast } from '@pluralsh/design-system'
 import { useCreateAgentSessionMutation } from '../../../generated/graphql.ts'
+
+const examplePrompts = [
+  'Double the instance size of a specific database',
+  'Suggest a fix for a specific bug in the codebase',
+  'Create a pull request to update a specific library version',
+]
 
 export function ChatbotAgentInit() {
   const theme = useTheme()
@@ -23,17 +29,37 @@ export function ChatbotAgentInit() {
     <>
       <Flex
         direction="column"
-        gap="medium"
+        gap="large"
         css={{
           padding: theme.spacing.medium,
           paddingTop: theme.spacing.xxxxxlarge,
         }}
       >
-        <Body1BoldP>Copilot Agent</Body1BoldP>
-        <Body2P css={{ color: theme.colors['text-xlight'] }}>
-          Our agent is a background coding agent that can run background tasks
-          by writing terraform, finding code, suggest fixes, and creating PRs...
-        </Body2P>
+        <Flex
+          direction="column"
+          gap="xxsmall"
+        >
+          <Body1BoldP>Copilot Agent</Body1BoldP>
+          <Body2P css={{ color: theme.colors['text-xlight'] }}>
+            Our agent is a background coding agent that can run background tasks
+            by writing terraform, finding code, suggest fixes, and creating
+            PRs...
+          </Body2P>
+        </Flex>
+        <Flex
+          direction="column"
+          gap="small"
+        >
+          {examplePrompts.map((prompt) => (
+            <Chip
+              size="small"
+              fillLevel={0}
+              css={{ borderRadius: 16 }}
+            >
+              <b>{prompt}</b>
+            </Chip>
+          ))}
+        </Flex>
       </Flex>
       <ChatInput
         enableExamplePrompts={false}
