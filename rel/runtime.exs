@@ -132,7 +132,7 @@ pool_size =
        {val, _} <- Integer.parse(size) do
     val
   else
-    _ -> 20
+    _ -> 50
   end
 
 ssl_opts = case {get_env("PGROOTSSLCERT"), get_env("DB_CLOUD_PROVIDER")} do

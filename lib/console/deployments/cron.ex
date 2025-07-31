@@ -190,6 +190,7 @@ defmodule Console.Deployments.Cron do
 
   def migrate_agents() do
     AgentMigration.incomplete()
+    |> AgentMigration.ordered()
     |> Repo.all()
     |> Stream.each(&Clusters.apply_migration/1)
     |> Stream.run()

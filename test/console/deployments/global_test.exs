@@ -549,7 +549,8 @@ defmodule Console.Deployments.GlobalSyncTest do
           name: "source",
           namespace: "my-service",
           git: %{ref: "main", folder: "k8s"},
-          configuration: [%{name: "name", value: "value"}]
+          configuration: [%{name: "name", value: "value"}],
+          dependencies: [%{name: "cert-manager"}]
         ),
         cascade: %{delete: true},
         tags: [%{name: "sync", value: "test"}]
@@ -573,13 +574,19 @@ defmodule Console.Deployments.GlobalSyncTest do
 
       :ok = Global.sync_clusters(global)
 
-      svc = Services.get_service_by_name(sync.id, "source")
+      svc = Services.get_service_by_name(sync.id, "source") |> Repo.preload([:dependencies])
 
       assert svc.git.ref == "main"
       assert svc.git.folder == "k8s"
       assert svc.namespace == "my-service"
       assert svc.owner_id == global.id
       refute svc.deleted_at
+
+      %{dependencies: [dep]} = svc
+      assert dep.name == "cert-manager"
+      assert dep.status == :stale
+      refute dep.template_id
+      assert dep.service_id == svc.id
     end
 
     test "it can sync template global services with dynamic template overrides" do
