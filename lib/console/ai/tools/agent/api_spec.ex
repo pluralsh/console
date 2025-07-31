@@ -27,7 +27,7 @@ defmodule Console.AI.Tools.Agent.ApiSpec do
   def implement(%__MODULE__{group: group, version: version, query: query}) do
     with {:session, %AgentSession{cluster: %Cluster{} = cluster}} <- session(),
          {:ok, %{"components" => %{"schemas" => schemas}}} <- Clusters.api_spec(cluster, group, version) do
-      Enum.sort_by(schemas, fn {k, _} -> String.jaro_distance(k, query) end, :desc)
+      Enum.filter(schemas, fn {k, _} -> String.contains?(String.downcase(k), String.downcase(query)) end)
       |> Enum.take(5)
       |> Map.new()
       |> Jason.encode()

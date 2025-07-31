@@ -274,6 +274,15 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v4.3.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v4.2.1-eksbuild.1
     compatibilities:
     - '1.33'
@@ -2607,6 +2616,8 @@
     - '1.29'
   - version: v1.11.4-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
@@ -2626,37 +2637,59 @@
     - '1.29'
   - version: v1.11.3-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.13
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.11
     compatibilities:
+    - '1.33'
+    - '1.32'
     - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.9
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.8
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.6
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.4
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
     - '1.30'
     - '1.29'
   - version: v1.11.1-eksbuild.3
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
     - '1.29'
   - version: v1.10.1-eksbuild.35
     compatibilities:
@@ -2695,45 +2728,66 @@
     - '1.27'
   - version: v1.10.1-eksbuild.11
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.10
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.7
     compatibilities:
+    - '1.31'
     - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.6
     compatibilities:
+    - '1.31'
+    - '1.30'
     - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.5
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.4
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.3
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.2
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
     - '1.28'
     - '1.27'
   - version: v1.10.1-eksbuild.1
     compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
     - '1.27'
   - version: v1.9.3-eksbuild.39
     compatibilities:
@@ -2807,24 +2861,29 @@
     - '1.24'
   - version: v1.9.3-eksbuild.6
     compatibilities:
+    - '1.28'
     - '1.27'
     - '1.26'
     - '1.25'
     - '1.24'
   - version: v1.9.3-eksbuild.5
     compatibilities:
+    - '1.28'
     - '1.27'
     - '1.26'
     - '1.25'
     - '1.24'
   - version: v1.9.3-eksbuild.3
     compatibilities:
+    - '1.28'
     - '1.27'
     - '1.26'
     - '1.25'
     - '1.24'
   - version: v1.9.3-eksbuild.2
     compatibilities:
+    - '1.28'
+    - '1.27'
     - '1.26'
     - '1.25'
     - '1.24'

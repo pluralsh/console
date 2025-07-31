@@ -92,6 +92,10 @@ type ServiceHelm struct {
 	// based on git state or other metadata
 	// +kubebuilder:validation:Optional
 	LuaFile *string `json:"luaFile,omitempty"`
+
+	// a folder of lua files to include in the final script used
+	// +kubebuilder:validation:Optional
+	LuaFolder *string `json:"luaFolder,omitempty"`
 }
 
 type ServiceDependency struct {
