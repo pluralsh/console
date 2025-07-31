@@ -7,11 +7,13 @@ import (
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -19,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	console "github.com/pluralsh/console/go/client"
-
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -288,9 +289,17 @@ func (r *ScmConnectionReconciler) shouldMarkAsReadonly(scm *v1alpha1.ScmConnecti
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "scmconnection_reconciler")
+	gvk, err := apiutil.GVKForObject(&v1alpha1.ScmConnection{}, mgr.GetScheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GroupKind for ScmConnection: %w", err)
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Watches(&corev1.Secret{}, OwnedByEventHandler()).
+		Watches(&corev1.Secret{}, OwnedByEventHandler(&metav1.GroupKind{
+			Group: gvk.Group,
+			Kind:  gvk.Kind,
+		})).
 		Complete(r)
 }

@@ -449,29 +449,31 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	return project, nil, nil
 }
 
-func OwnedByEventHandler(filter func(gk metav1.GroupKind) bool) handler.EventHandler {
+func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
 		if !HasAnnotation(obj, OwnedByAnnotationName) {
 			return nil
 		}
 
 		ownedBy := obj.GetAnnotations()[OwnedByAnnotationName]
-		gk, namespacedName, err := fromAnnotation(ownedBy)
+		annotationGk, namespacedName, err := fromAnnotation(ownedBy)
 		if err != nil {
 			klog.ErrorS(err, "failed to parse owned-by annotation", "annotation", ownedBy)
 			return nil
 		}
 
-		if filter != nil && !filter(gk) {
+		if ownerGk != nil && strings.ToLower(annotationGk.String()) != strings.ToLower(ownerGk.String()) {
 			klog.V(log.LogLevelDebug).InfoS(
 				"owned-by annotation does not match expected group kind",
-				"annotation", ownedBy,
-				"group", gk.Group,
-				"kind", gk.Kind,
+				"ownerGk", ownerGk.String(),
+				"annotationGk", annotationGk.String(),
 			)
 			return nil
 		}
 
+		klog.V(log.LogLevelDebug).InfoS("enqueueing request for owned-by annotation",
+			"annotation", ownedBy,
+		)
 		return []reconcile.Request{{NamespacedName: namespacedName}}
 	})
 }
@@ -487,7 +489,7 @@ func HasAnnotation(obj runtimeclient.Object, annotation string) bool {
 }
 
 func toAnnotation(gk metav1.GroupKind, namespacedName types.NamespacedName) string {
-	return fmt.Sprintf("%s/%s/%s/%s", gk.Group, gk.Kind, namespacedName.Namespace, namespacedName.Name)
+	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", gk.Group, gk.Kind, namespacedName.Namespace, namespacedName.Name))
 }
 
 func fromAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
@@ -507,7 +509,7 @@ func fromAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, 
 	}, nil
 }
 
-func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object, child runtimeclient.Object, scheme *runtime.Scheme) error {
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object, child runtimeclient.Object) error {
 	if HasAnnotation(child, OwnedByAnnotationName) {
 		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists", "annotation", OwnedByAnnotationName, "owner", owner.GetName(), "child", child.GetName())
 		return nil
