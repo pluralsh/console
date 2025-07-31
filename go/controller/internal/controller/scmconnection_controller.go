@@ -8,7 +8,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -57,11 +56,11 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err := r.Get(ctx, req.NamespacedName, scm); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := NewDefaultScope(ctx, r.Client, scm)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -73,7 +72,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	}()
 
 	// Mark resource as not ready. This will be overridden in the end.
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, scm)
@@ -84,22 +83,22 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, scm)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if exists {
 		logger.V(9).Info("ScmConnection already exists in the API, running in read-only mode")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExistingScmConnection(ctx, scm)
 	}
 	if r.shouldMarkAsReadonly(scm) {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
 		return requeue, nil
 	}
 
 	// Mark resource as managed by this operator.
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
 	if err != nil {
@@ -120,7 +119,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	changed, sha, err := scm.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate scm SHA")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -133,8 +132,8 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	scm.Status.ID = &apiScmConnection.ID
 	scm.Status.SHA = &sha
 
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -146,7 +145,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 	}
 	if !exists {
 		scm.Status.ID = nil
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
 		return waitForResources, nil
 	}
 
@@ -168,8 +167,8 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 
 	scm.Status.ID = &apiScmConnection.ID
 
-	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }
@@ -214,7 +213,7 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 			if err = r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}, err
 			}
 

@@ -462,7 +462,7 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 			return nil
 		}
 
-		if ownerGk != nil && strings.ToLower(annotationGk.String()) != strings.ToLower(ownerGk.String()) {
+		if ownerGk != nil && !strings.EqualFold(annotationGk.String(), ownerGk.String()) {
 			klog.V(log.LogLevelDebug).InfoS(
 				"owned-by annotation does not match expected group kind",
 				"ownerGk", ownerGk.String(),
