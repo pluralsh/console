@@ -207,9 +207,6 @@ function ImplementationPlanMessageContent({
       <Accordion
         type="single"
         css={{
-          '&:has(:first-of-type button:hover)': {
-            background: colors['fill-two-hover'],
-          },
           background: colors['fill-zero'],
           border: borders.default,
         }}
