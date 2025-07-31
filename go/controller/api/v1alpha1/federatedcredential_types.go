@@ -78,7 +78,13 @@ type FederatedCredentialSpec struct {
 	Scopes []string `json:"scopes,omitempty"`
 
 	// ClaimsLike is a JSON expression that matches the claims in the token.
-	// TODO: describe the syntax of this expression.
+	// All the value strings should be a valid regular expression.
+	//
+	// Example:
+	// 	...
+	//	claimsLike:
+	//		sub: "repo:myaccount/myrepo:ref:refs/heads/.*"
+	//
 	// +kubebuilder:validation:Optional
 	ClaimsLike *runtime.RawExtension `json:"claimsLike,omitempty"`
 
