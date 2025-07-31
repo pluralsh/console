@@ -35,6 +35,7 @@ export function ChatbotHeader({
 
   const {
     agentInitMode,
+    selectedAgent,
     closeChatbot,
     createNewThread,
     mutationLoading,
@@ -54,7 +55,7 @@ export function ChatbotHeader({
   return (
     <Flex direction="column">
       <MainHeaderSC>
-        {currentThread && (
+        {selectedAgent && (
           <div
             css={{
               transition: 'transform 0.16s ease-in-out',
