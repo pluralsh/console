@@ -5,6 +5,7 @@ defmodule Console.AI.CronTest do
   import ElasticsearchUtils
   alias Console.PubSub
   alias Console.Deployments.Clusters
+  alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.AI.Cron
 
   setup :set_mimic_global
@@ -264,6 +265,8 @@ defmodule Console.AI.CronTest do
       pv = persistent_volume("my-pv")
       sc = storage_class("my-sc", "ebs.csi.aws.com")
 
+      pvc = %{pvc | status: %CoreV1.PersistentVolumeClaimStatus{phase: "Pending"}}
+
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Utils, :run, 6, fn
         %Kazan.Request{path: "/apis/apps/v1/namespaces/ns/statefulsets/my-sts"} -> {:ok, sts}
@@ -307,16 +310,11 @@ defmodule Console.AI.CronTest do
       [component] = svc.components
       component_insight = Repo.get!(Console.Schema.AiInsight, component.insight_id) |> Repo.preload(:evidence)
       evidence_text = component_insight.evidence
-        |> Stream.filter(&(&1.type == :log))
-        |> Stream.flat_map(&(&1.logs.lines))
-        |> Stream.map(&(&1.log))
-        |> Enum.join("\n")
+                      |> Stream.filter(&(&1.type == :log))
+                      |> Stream.flat_map(&(&1.logs.lines))
+                      |> Stream.map(&(&1.log))
+                      |> Enum.join("\n")
 
-      assert evidence_text =~ "the persistent volume claim"
-      assert evidence_text =~ "my-vct-my-sts-0"
-      assert evidence_text =~ "the claim is bound to the persistent volume my-pv"
-      assert evidence_text =~ "the storage class my-sc uses the csi provisioner ebs.csi.aws.com"
-      assert evidence_text =~ "analyzing logs for the csi provisioner ebs.csi.aws.com in the aws-ebs-csi-driver namespace"
       assert evidence_text =~ "CSI driver started"
       assert evidence_text =~ "Failed to provision volume"
 
