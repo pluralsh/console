@@ -24,7 +24,7 @@ defmodule Console.AI.Evidence.Logs do
   @spec with_logging(Provider.history, parent) :: Context.t
   def with_logging(history, parent, opts \\ []) do
     force = Keyword.get(opts, :force, false)
-    args  = Keyword.take(opts, ~w(lines q namespaces)a)
+    args  = Keyword.take(opts, ~w(lines query namespaces)a)
     with %DeploymentSettings{logging: %{enabled: true}} <- Settings.cached(),
          true <- use_logs?(history, force),
          {:ok, query} <- query(parent, args),
@@ -49,7 +49,9 @@ defmodule Console.AI.Evidence.Logs do
     %{cluster: cluster} = Repo.preload(comp, [:cluster])
     build_query(cluster, args ++ @base ++ [cluster_id: cluster.id, namespaces: [comp.namespace]])
   end
-  defp query(%Cluster{} = cluster, args), do: build_query(cluster, args ++ @base ++ [cluster_id: cluster.id])
+  defp query(%Cluster{} = cluster, args) do
+    build_query(cluster, args ++ @base ++ [cluster_id: cluster.id])
+  end
   defp query(_, _), do: {:error, :invalid_parent}
 
   defp build_query(resource, args), do: {:ok, %{Query.new(args) | resource: resource}}
