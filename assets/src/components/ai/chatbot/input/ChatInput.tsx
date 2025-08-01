@@ -29,12 +29,12 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useInterval } from 'usehooks-ts'
+import { useChatbot } from '../../AIContext.tsx'
 import { ChatMessage } from '../ChatMessage.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
-import { useChatbot } from '../../AIContext.tsx'
 
 export function ChatInput({
   sendMessage,
@@ -46,6 +46,7 @@ export function ChatInput({
   showPrompts,
   setShowPrompts,
   placeholder = 'Start typing...',
+  onValueChange,
   ...props
 }: {
   sendMessage: (newMessage: string) => void
@@ -57,6 +58,7 @@ export function ChatInput({
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
   placeholder?: string
+  onValueChange?: Dispatch<string>
 } & ComponentPropsWithoutRef<'div'>) {
   const { selectedAgent } = useChatbot()
   const { sourceId, source } = useCurrentPageChatContext()
@@ -108,6 +110,7 @@ export function ChatInput({
 
   return (
     <SendMessageFormSC
+      className="plrl-chat-input-form"
       onSubmit={handleSubmit}
       ref={formRef}
     >
@@ -137,7 +140,10 @@ export function ChatInput({
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder={placeholder}
-          setValue={setNewMessage}
+          setValue={(value) => {
+            setNewMessage(value)
+            onValueChange?.(value)
+          }}
           initialValue={newMessage}
           onEnter={() => formRef.current?.requestSubmit()}
           css={{ maxHeight: 130 }}

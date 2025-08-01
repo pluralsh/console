@@ -241,7 +241,7 @@ export function useChatbot() {
   )
 
   const createNewThread = (attributes: ChatThreadAttributes) => {
-    createThread({
+    return createThread({
       variables: { attributes },
       onCompleted: ({ createThread }) => {
         if (createThread?.id) goToThread(createThread?.id)

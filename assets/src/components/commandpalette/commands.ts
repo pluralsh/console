@@ -26,16 +26,18 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
+import { useChatbot } from 'components/ai/AIContext.tsx'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
 import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
-import { ComponentType, ReactElement, use, useMemo } from 'react'
+import { ComponentType, Dispatch, ReactElement, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import {
   ChatThreadTinyFragment,
+  PageInfoFragment,
   useChatThreadsQuery,
   useClustersTinyQuery,
 } from '../../generated/graphql'
@@ -63,7 +65,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
-import { useChatbot } from 'components/ai/AIContext.tsx'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -382,22 +384,32 @@ export function useCommands({
 }
 
 export function useHistory({
+  skip = false,
   filter,
   component,
 }: {
+  skip?: boolean
   filter: string
   component?: (thread: ChatThreadTinyFragment) => ReactElement
 }): {
   loading: boolean
   history: Array<CommandGroup>
+  fetchNextPage: Dispatch<void>
+  pageInfo: PageInfoFragment
 } {
   const { goToThread } = useChatbot()
-  const { loading, data } = useChatThreadsQuery({
-    // TODO: this should support pagination
-    pollInterval: 120_000,
-    fetchPolicy: 'cache-and-network',
-    variables: { first: 100, q: isEmpty(filter) ? undefined : filter },
-  })
+  const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
+    {
+      skip,
+      pollInterval: 60_000,
+      queryHook: useChatThreadsQuery,
+      keyPath: ['chatThreads'],
+    },
+    {
+      first: 25,
+      q: isEmpty(filter) ? undefined : filter,
+    }
+  )
 
   const threads = useMemo(
     () => mapExistingNodes(data?.chatThreads),
@@ -417,5 +429,5 @@ export function useHistory({
     } as Command
   })
 
-  return { loading, history: [{ commands: history }] }
+  return { loading, history: [{ commands: history }], fetchNextPage, pageInfo }
 }

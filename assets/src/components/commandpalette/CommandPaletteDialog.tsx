@@ -18,7 +18,14 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
     width: 840,
     maxHeight: '100%',
 
+    '.plrl-chat-input-form': {
+      padding: 0,
+    },
+
     '#cmdk-input-wrapper': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing.medium,
       backgroundColor: theme.colors['fill-zero'],
       borderBottom: theme.borders.input,
       borderTopLeftRadius: theme.borderRadiuses.large,
@@ -29,25 +36,6 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
     '#cmdk-input-tabs': {
       paddingTop: theme.spacing.small,
       display: 'flex',
-    },
-
-    '#cmdk-input': {
-      ...theme.partials.reset.input,
-      ...theme.partials.text.body2,
-      backgroundColor: theme.colors['fill-zero'],
-      border: theme.borders['input'],
-      borderRadius: theme.borderRadiuses.medium,
-      color: theme.colors.text,
-      padding: theme.spacing.small,
-      width: '100%',
-
-      '&:focus': {
-        border: theme.borders['outline-focused'],
-      },
-
-      '&::placeholder': {
-        color: theme.colors['text-xlight'],
-      },
     },
 
     '[cmdk-empty]': {
@@ -70,6 +58,13 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
       overflow: 'auto',
       padding: theme.spacing.small,
       transition: 'height 100ms ease',
+
+      '&.cmdk-history': {
+        overflow: 'hidden',
+        height: 500,
+        minHeight: 500,
+        padding: 0,
+      },
 
       '[cmdk-item]': {
         alignItems: 'center',
@@ -113,6 +108,11 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
 
         '&:hover': {
           backgroundColor: theme.colors['fill-one-hover'],
+        },
+
+        '&.cmdk-history-item': {
+          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          margin: `0 ${theme.spacing.small}px`,
         },
       },
 
