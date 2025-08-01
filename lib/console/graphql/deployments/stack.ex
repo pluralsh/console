@@ -30,7 +30,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :variables,      :json, description: "arbitrary variables to pass into the stack"
     field :policy_engine,  :policy_engine_attributes
     field :agent_id,       :string, description: "the agent id this stack is associated with"
-
+    field :interval,       :string, description: "the interval at which the stack will be reconciled, default is 5m"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -188,6 +188,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :job_spec,            :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"
     field :policy_engine,       :policy_engine
     field :agent_id,            :string, description: "the agent id this stack is associated with"
+    field :interval,            :string, description: "the interval at which the stack will be reconciled, default is 5m"
+    field :next_poll_at,        :datetime, description: "the next time the stack will be reconciled"
 
     @desc "version/image config for the tool you're using"
     field :configuration,       non_null(:stack_configuration), resolve: fn

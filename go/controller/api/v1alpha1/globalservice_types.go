@@ -62,6 +62,10 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Reparent *bool `json:"reparent,omitempty"`
 
+	// Interval specifies the interval at which the global service will be reconciled, default is 10m
+	// +kubebuilder:validation:Optional
+	Interval *string `json:"interval,omitempty"`
+
 	// Cascade deletion options for this global service
 	// +kubebuilder:validation:Optional
 	Cascade *Cascade `json:"cascade,omitempty"`
@@ -136,6 +140,7 @@ func (gs *GlobalService) Attributes(providerId, projectId *string) console.Globa
 		ProviderID: providerId,
 		ProjectID:  projectId,
 		Mgmt:       gs.Spec.Mgmt,
+		Interval:   gs.Spec.Interval,
 		Reparent:   gs.Spec.Reparent,
 		Cascade:    gs.Spec.Cascade.Attributes(),
 		Tags:       gs.Spec.TagsAttribute(),

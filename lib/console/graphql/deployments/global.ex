@@ -13,6 +13,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :parent_id,   :id, description: "the id of the service creating this"
     field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
     field :template,    :service_template_attributes
+    field :interval,    :string, description: "the interval at which the global service will be reconciled, default is 10m"
     field :cascade,     :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
     field :context,     :template_context_attributes, description: "additional context used to template service metadata during global service reconciliation"
   end
@@ -107,6 +108,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :target,         :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
     field :deleted_at,     :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
     field :cascade,        :cascade, description: "behavior for all owned resources when this global service is deleted"
+    field :interval,       :string, description: "the interval at which the global service will be reconciled, default is 10m"
 
     field :parent,       :service_deployment,
       resolve: dataloader(Deployments),

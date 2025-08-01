@@ -2752,6 +2752,8 @@ type GlobalServiceAttributes struct {
 	// whether you want the global service to take ownership of existing plural services
 	Reparent *bool                      `json:"reparent,omitempty"`
 	Template *ServiceTemplateAttributes `json:"template,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *CascadeAttributes `json:"cascade,omitempty"`
 	// additional context used to template service metadata during global service reconciliation
@@ -3045,6 +3047,10 @@ type InfrastructureStack struct {
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
 	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval *string `json:"interval,omitempty"`
+	// the next time the stack will be reconciled
+	NextPollAt *string `json:"nextPollAt,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -3378,6 +3384,8 @@ type ManagedNamespace struct {
 	DeletedAt *string `json:"deletedAt,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *Cascade `json:"cascade,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// the service which created this managed namespace
 	Parent *ServiceDeployment `json:"parent,omitempty"`
 	// a project this global service is bound to
@@ -6220,7 +6228,9 @@ type StackAttributes struct {
 	Variables    *string                 `json:"variables,omitempty"`
 	PolicyEngine *PolicyEngineAttributes `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
-	AgentID           *string                       `json:"agentId,omitempty"`
+	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval          *string                       `json:"interval,omitempty"`
 	ReadBindings      []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
 	WriteBindings     []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 	Tags              []*TagAttributes              `json:"tags,omitempty"`
