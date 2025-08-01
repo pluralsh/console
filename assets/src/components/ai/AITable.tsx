@@ -7,12 +7,9 @@ import {
   FetchPaginatedDataResult,
 } from 'components/utils/table/useFetchPaginatedData'
 import {
-  AiPinFragment,
   AiPinsQuery,
   ChatThreadsQuery,
   ChatThreadTinyFragment,
-  useCreateAiPinMutation,
-  useDeleteAiPinMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { AITableEntry } from './AITableEntry.tsx'
@@ -27,7 +24,7 @@ export function AITable({
   modal?: boolean
   hidePins?: boolean
   query: FetchPaginatedDataResult<AiPinsQuery | ChatThreadsQuery>
-  rowData: AiPinFragment[] | ChatThreadTinyFragment[]
+  rowData: ChatThreadTinyFragment[]
 } & Omit<TableProps, 'data' | 'columns'>) {
   const theme = useTheme()
 
@@ -44,7 +41,6 @@ export function AITable({
         height={70}
         centered={true}
         styles={{
-          background: theme.colors['fill-one'],
           height: '100%',
           padding: theme.spacing.xlarge,
           '> svg': {
@@ -56,6 +52,7 @@ export function AITable({
 
   return (
     <Table
+      rowBg="base"
       fullHeightWrap
       virtualizeRows
       padCells={false}
@@ -69,51 +66,22 @@ export function AITable({
       reactTableOptions={reactTableOptions}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       emptyStateProps={{ message: 'No entries found.' }}
-      border={theme.borders['fill-two']}
-      height={'100%'}
-      overflowX={'hidden'}
       {...props}
     />
   )
 }
 
-const columnHelper = createColumnHelper<
-  AiPinFragment | ChatThreadTinyFragment
->()
+const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
 // putting the whole row into a single column, easier to customize
 const TableRow = columnHelper.accessor((item) => item, {
   id: 'row',
   cell: function Cell({ getValue, table }) {
     const item = getValue()
-    const isPin = item.__typename === 'AiPin'
-    const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
-
-    const [pinThread, { loading: pinLoading }] = useCreateAiPinMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['AIPins', 'ChatThreads'],
-      variables: {
-        attributes: {
-          threadId: thread?.id,
-          insightId: thread?.insight?.id,
-          name: thread?.summary.substring(0, 250),
-        },
-      },
-    })
-
-    const [unpinThread, { loading: unpinLoading }] = useDeleteAiPinMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['AIPins', 'ChatThreads'],
-      variables: {
-        id: item.id,
-      },
-    })
 
     return (
       <AITableEntry
         item={item}
-        onClickPin={() => (isPin ? unpinThread() : pinThread())}
-        pinLoading={pinLoading || unpinLoading}
         modal={table.options.meta?.modal}
         hidePins={table.options.meta?.hidePins}
       />

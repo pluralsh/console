@@ -1,12 +1,4 @@
 import {
-  Dispatch,
-  Key,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import {
   Accordion,
   AccordionItem,
   FormField,
@@ -16,9 +8,17 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import {
+  Dispatch,
+  Key,
+  ReactElement,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useTheme } from 'styled-components'
 
-import { RegionsForProvider, disabledNumberInputArrows } from '../helpers'
+import { disabledNumberInputArrows, RegionsForProvider } from '../helpers'
 import { NodeGroup as NodeGroupType, ProviderCloud } from '../types'
 
 import { NodeGroupAWS } from './NodeGroupAWS'
@@ -41,7 +41,7 @@ function NodeGroup({
 }: NodeGroupProps): ReactElement<any> {
   const theme = useTheme()
   const regions = useMemo(() => RegionsForProvider[provider], [provider])
-  const [selectedRegion, setSelectedRegion] = useState<Key>(
+  const [selectedRegion, setSelectedRegion] = useState<Nullable<Key>>(
     initialNodeGroup.nodeType
   )
   const [nodeGroup, setNodeGroup] = useState<NodeGroupType>(initialNodeGroup)

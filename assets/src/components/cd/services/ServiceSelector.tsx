@@ -59,7 +59,7 @@ export function ServiceSelector() {
     )?.params['*'] ?? ''
 
   const switchService = useCallback(
-    (newKey: Key) => {
+    (newKey: Nullable<Key>) => {
       if (typeof newKey === 'string' && newKey !== serviceId) {
         const service = serviceList.find(
           (deployment) => deployment.id === newKey

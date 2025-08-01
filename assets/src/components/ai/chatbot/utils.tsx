@@ -1,12 +1,12 @@
 import { ApolloCache } from '@apollo/client'
 import {
   AiRole,
-  ChatType,
-  HybridChatMutation,
-  ChatMutation,
   ChatFragment,
+  ChatMutation,
   ChatThreadDetailsDocument,
   ChatThreadDetailsQuery,
+  ChatType,
+  HybridChatMutation,
 } from 'generated/graphql'
 import { produce } from 'immer'
 import { updateCache } from 'utils/graphql'
@@ -52,7 +52,7 @@ export function updateChatCache(
     variables: { id },
     update: (prev: ChatThreadDetailsQuery) => ({
       chatThread: produce(prev.chatThread, (thread) => {
-        thread?.chats?.edges?.push(
+        thread?.chats?.edges?.unshift?.(
           ...newMessages.filter(isNonNullable).map((chat) => ({
             __typename: 'ChatEdge' as const,
             node: chat,

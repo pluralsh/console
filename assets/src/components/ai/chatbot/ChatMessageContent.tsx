@@ -1,29 +1,28 @@
 import {
   Accordion,
   AccordionItem,
-  AppIcon,
   Button,
   Card,
   CaretRightIcon,
+  CheckIcon,
   Chip,
   Code,
   Divider,
   DocumentIcon,
   FileIcon,
   Flex,
+  IconFrame,
   Markdown,
-  PrQueueIcon,
+  PrOpenIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
-
-import isJson from 'is-json'
-
-import styled, { useTheme } from 'styled-components'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentSession,
   AiRole,
   ChatType,
   ChatTypeAttributes,
@@ -32,11 +31,14 @@ import {
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
-import { ChatMessageActions } from './ChatMessage'
+
+import isJson from 'is-json'
+import { ReactElement, useState } from 'react'
+
+import styled, { useTheme } from 'styled-components'
 import { iconUrl } from 'utils/icon'
-import { StackedText } from 'components/utils/table/StackedText'
-import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { ChatMessageActions } from './ChatMessage'
+import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -53,6 +55,7 @@ type ChatMessageContentProps = {
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
   highlightToolContent?: boolean
+  session?: Nullable<AgentSession>
 }
 
 export function ChatMessageContent({
@@ -70,8 +73,9 @@ export function ChatMessageContent({
   confirmedAt,
   serverName,
   highlightToolContent = true,
+  session,
 }: ChatMessageContentProps) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -101,6 +105,7 @@ export function ChatMessageContent({
         <ImplementationPlanMessageContent
           content={content}
           threadId={threadId}
+          session={session}
         />
       )
     case ChatType.PrCall:
@@ -108,6 +113,7 @@ export function ChatMessageContent({
         <PrCallContent
           prAutomation={prAutomation}
           threadId={threadId}
+          session={session}
         />
       )
     case ChatType.Text:
@@ -117,8 +123,11 @@ export function ChatMessageContent({
           condition={!(role === AiRole.Assistant || role === AiRole.System)}
           wrapper={
             <Card
-              css={{ padding: spacing.medium }}
-              fillLevel={2}
+              css={{
+                backgroundColor: theme.colors['fill-zero'],
+                border: theme.borders.default,
+                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+              }}
             />
           }
         >
@@ -136,10 +145,13 @@ function FileMessageContent({
   content,
   attributes,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
+  const theme = useTheme()
   const fileName = attributes?.file?.name ?? ''
   return (
-    <Accordion type="single">
+    <Accordion
+      type="single"
+      css={{ border: theme.borders.default }}
+    >
       <AccordionItem
         padding="compact"
         caret="right"
@@ -148,7 +160,7 @@ function FileMessageContent({
             gap="small"
             align="center"
             wordBreak="break-word"
-            marginRight={spacing.small}
+            marginRight={theme.spacing.small}
           >
             <FileIcon
               size={12}
@@ -166,8 +178,12 @@ function FileMessageContent({
             />
           </Flex>
         }
+        css={{
+          background: theme.colors['fill-zero'],
+          borderRadius: theme.borderRadiuses.large,
+        }}
       >
-        <Code css={{ background: colors['fill-three'], maxWidth: '100%' }}>
+        <Code css={{ background: theme.colors['fill-one'], maxWidth: '100%' }}>
           {content}
         </Code>
       </AccordionItem>
@@ -178,8 +194,9 @@ function FileMessageContent({
 function ImplementationPlanMessageContent({
   content,
   threadId,
+  session,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
+  const { spacing, colors, borders, partials } = useTheme()
   const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation()
 
   return (
@@ -190,46 +207,65 @@ function ImplementationPlanMessageContent({
       <Accordion
         type="single"
         css={{
-          '&:has(:first-of-type button:hover)': {
-            background: colors['fill-two-hover'],
-          },
+          background: colors['fill-zero'],
+          border: borders.default,
         }}
       >
         <AccordionItem
-          padding="compact"
+          padding="relaxed"
           caret="right"
           trigger={
             <Flex
-              gap="small"
+              gap="xsmall"
               align="center"
               wordBreak="break-word"
             >
-              <DocumentIcon
-                size={12}
-                color="icon-light"
+              <IconFrame
+                icon={
+                  <DocumentIcon
+                    size={12}
+                    color="icon-light"
+                  />
+                }
+                size="small"
               />
-              <CaptionP $color="text-light">Implementation Plan</CaptionP>
+              <Body2BoldP $color="text">Implementation Plan</Body2BoldP>
             </Flex>
           }
         >
-          <div css={{ padding: spacing.xsmall }}>
-            <Markdown text={content} />
-          </div>
+          <Markdown text={content} />
         </AccordionItem>
         <Divider
-          css={{ margin: `0 ${spacing.small}px` }}
-          backgroundColor={colors['border-fill-three']}
+          css={{ margin: `0 ${spacing.medium}px` }}
+          backgroundColor={colors['border']}
         />
-        <Button
-          small
-          css={{ margin: spacing.small, alignSelf: 'flex-start' }}
-          loading={loading}
-          onClick={() =>
-            confirmPlan({ variables: { threadId: threadId ?? '' } })
-          }
-        >
-          Confirm plan
-        </Button>
+        {!session?.planConfirmed ? (
+          <Button
+            small
+            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
+            loading={loading}
+            onClick={() =>
+              confirmPlan({ variables: { threadId: threadId ?? '' } })
+            }
+          >
+            Approve
+          </Button>
+        ) : (
+          <Flex
+            gap="small"
+            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
+          >
+            <span
+              css={{
+                ...partials.text.buttonSmall,
+                color: colors['text-light'],
+              }}
+            >
+              Approved
+            </span>
+            <CheckIcon />
+          </Flex>
+        )}
       </Accordion>
       {error && <GqlError error={error} />}
     </Flex>
@@ -239,52 +275,84 @@ function ImplementationPlanMessageContent({
 function PrCallContent({
   prAutomation,
   threadId,
-}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId'>) {
+  session,
+}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId' | 'session'>) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
+  const [created, setCreated] = useState(!!session?.pullRequest)
 
   if (!prAutomation) return <GqlError error="PR automation not found." />
 
-  const { icon, darkIcon, name, documentation } = prAutomation
+  const { icon, darkIcon, name } = prAutomation
 
   return (
-    <Flex
-      direction="column"
-      gap="xsmall"
-      align="flex-start"
-      width="fit-content"
-    >
-      <CaptionP $color="text-xlight">PR automation:</CaptionP>
-      <Card css={{ padding: theme.spacing.xsmall, minWidth: 150 }}>
+    <>
+      <Card
+        css={{
+          padding: theme.spacing.medium,
+          minWidth: 150,
+          background: theme.colors['fill-zero'],
+          border: theme.borders.default,
+        }}
+      >
         <Flex
           alignItems="center"
           gap="xsmall"
         >
-          <AppIcon
-            size="xxsmall"
-            url={iconUrl(icon, darkIcon, theme.mode)}
-            icon={<PrQueueIcon />}
+          <IconFrame
+            icon={<PrOpenIcon />}
+            size="small"
           />
-          <StackedText
-            first={name}
-            second={documentation}
+          <Body2BoldP $color="text">PR automation</Body2BoldP>
+          <IconFrame
+            icon={
+              <img
+                width={20}
+                height={20}
+                src={iconUrl(icon, darkIcon, theme.mode)}
+              />
+            }
+            size="small"
           />
+          <Body2P $color="text">{name}</Body2P>
+          <div css={{ flex: 1 }} />
+          {!created ? (
+            <Button
+              small
+              css={{ alignSelf: 'center' }}
+              onClick={() => setOpen(true)}
+            >
+              Create PR
+            </Button>
+          ) : (
+            <Flex
+              gap="small"
+              css={{
+                margin: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+                justifySelf: 'flex-end',
+              }}
+            >
+              <span
+                css={{
+                  ...theme.partials.text.buttonSmall,
+                  color: theme.colors['text-light'],
+                }}
+              >
+                Created
+              </span>
+              <CheckIcon />
+            </Flex>
+          )}
         </Flex>
       </Card>
-      <Button
-        small
-        css={{ alignSelf: 'flex-end' }}
-        onClick={() => setOpen(true)}
-      >
-        Create PR
-      </Button>
       <CreatePrModal
         prAutomation={prAutomation}
         threadId={threadId}
         open={open}
         onClose={() => setOpen(false)}
+        onSuccess={() => setCreated(true)}
       />
-    </Flex>
+    </>
   )
 }
 
@@ -454,16 +522,21 @@ function ToolMessageContent({
           </Flex>
         )}
       </ToolMessageWrapperSC>
+      <ToolMessageDetails
+        content={content}
+        attributes={attributes}
+      />
     </Flex>
   )
 }
 const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   width: 480,
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  background: 'none',
-  border: theme.borders.input,
+  background: theme.colors['fill-one'],
+  border: theme.borders.default,
   padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
 }))
@@ -475,3 +548,25 @@ const ToolMessageContentSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
+
+enum ToolCall {
+  CloudQuery = '__plrl__cloud_query',
+}
+
+function ToolMessageDetails({ content, attributes }): ReactElement | null {
+  if (!content) {
+    return null
+  }
+
+  switch (attributes?.tool?.name) {
+    case ToolCall.CloudQuery:
+      return (
+        <CloudObjectsCard
+          content={content}
+          query={attributes?.tool?.arguments?.query}
+        />
+      )
+    default:
+      return null
+  }
+}

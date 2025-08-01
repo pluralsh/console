@@ -2,8 +2,7 @@ import { ApolloCache, ApolloError } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
-  AiInsightFragment,
-  AiInsightSummaryFragment,
+  AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
   ChatThreadFragment,
@@ -19,6 +18,7 @@ import {
   ReactNode,
   SetStateAction,
   use,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -41,20 +41,38 @@ type ExplainWithAIContextT = {
   system: string
 }
 
+export type AgentSessionT =
+  | AgentSessionType.Terraform
+  | AgentSessionType.Kubernetes
+  | null
+
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
-  fullscreen: boolean
-  setFullscreen: Dispatch<SetStateAction<boolean>>
+
+  setShowForkToast: (show: boolean) => void
+
   currentThread: Nullable<ChatThreadFragment>
-  setCurrentThreadId: (threadId: Nullable<string>) => void
-  currentInsight: Nullable<AiInsightSummaryFragment>
-  setCurrentInsight: Dispatch<
-    SetStateAction<Nullable<AiInsightSummaryFragment>>
-  >
   threadLoading: boolean
   threadError: ApolloError | undefined
-  setShowForkToast: (show: boolean) => void
+
+  currentThreadId: Nullable<string>
+  setCurrentThreadId: (threadId: Nullable<string>) => void
+
+  // The thread ID that is persisted in local storage, used to restore the last thread when the user returns.
+  // Separate from the currentThreadId to check first if the thread still exists before redirecting to it.
+  persistedThreadId: Nullable<string>
+
+  // The last non-agent thread ID, used to navigate back to the last non-agent thread when the agent is deselected.
+  lastNonAgentThreadId: Nullable<string>
+
+  // The agent session type that is currently selected in the UI.
+  // Coming from the current thread or the agent init mode.
+  selectedAgent: AgentSessionT
+
+  // The agent session type that is currently selected in the UI but not yet applied to the current thread.
+  agentInitMode: AgentSessionT
+  setAgentInitMode: Dispatch<SetStateAction<AgentSessionT>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -73,11 +91,17 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
-  const [currentInsight, setCurrentInsight] =
-    useState<Nullable<AiInsightSummaryFragment>>()
+  const [persistedThreadId, setPersistedThreadId] = usePersistedState<
+    Nullable<string>
+  >('plural-ai-current-thread-id', null)
+  const [lastNonAgentThreadId, setLastNonAgentThreadId] =
+    useState<Nullable<string>>()
+  const [agentInitMode, setAgentInitMode] = usePersistedState<AgentSessionT>(
+    'plural-ai-agent-init-mode',
+    null
+  )
   const [showForkToast, setShowForkToast] = useState(false)
 
   const {
@@ -91,17 +115,52 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     pollInterval: POLL_INTERVAL,
   })
 
+  const currentThread = useMemo(() => threadData?.chatThread, [threadData])
+
+  const selectedAgent = useMemo(() => {
+    if (agentInitMode) {
+      return agentInitMode
+    }
+
+    if (
+      currentThread?.session?.type === AgentSessionType.Kubernetes ||
+      currentThread?.session?.type === AgentSessionType.Terraform
+    ) {
+      return currentThread.session.type
+    }
+
+    return null
+  }, [agentInitMode, currentThread?.session?.type])
+
+  useEffect(() => {
+    if (currentThreadId) setPersistedThreadId(currentThreadId)
+  }, [currentThreadId, setPersistedThreadId])
+
+  useEffect(() => {
+    if (!threadData?.chatThread?.id) return
+
+    if (
+      ![AgentSessionType.Kubernetes, AgentSessionType.Terraform].includes(
+        threadData?.chatThread?.session?.type as AgentSessionType
+      )
+    ) {
+      setLastNonAgentThreadId(threadData?.chatThread?.id)
+    }
+  }, [threadData?.chatThread?.id, threadData?.chatThread?.session?.type])
+
   return (
     <ChatbotContext
       value={{
         open,
         setOpen,
         currentThread: threadData?.chatThread,
+        currentThreadId,
         setCurrentThreadId,
-        fullscreen,
-        setFullscreen,
-        currentInsight,
-        setCurrentInsight,
+        selectedAgent,
+        agentInitMode,
+        setAgentInitMode,
+        persistedThreadId,
+        lastNonAgentThreadId,
         threadLoading,
         threadError,
         setShowForkToast,
@@ -155,11 +214,13 @@ export function useChatbot() {
   const {
     setOpen,
     currentThread,
+    currentThreadId,
     setCurrentThreadId,
-    fullscreen,
-    setFullscreen,
-    currentInsight,
-    setCurrentInsight,
+    persistedThreadId,
+    lastNonAgentThreadId,
+    selectedAgent,
+    agentInitMode,
+    setAgentInitMode,
     threadLoading,
     threadError,
     setShowForkToast,
@@ -170,19 +231,27 @@ export function useChatbot() {
   const [forkThread, { loading: forkLoading, error: forkError }] =
     useCloneChatThreadMutation()
 
-  return {
-    createNewThread: (attributes: ChatThreadAttributes) => {
-      createThread({
-        variables: { attributes },
-        onCompleted: (data) => {
-          setCurrentThreadId(data.createThread?.id)
-          setCurrentInsight(null)
-          setOpen(true)
-        },
-        update: (cache, { data }) =>
-          addThreadToCache(cache, data?.createThread),
-      })
+  const goToThread = useCallback(
+    (threadId: string) => {
+      setCurrentThreadId(threadId)
+      setAgentInitMode(null)
+      setOpen(true)
     },
+    [setAgentInitMode, setCurrentThreadId, setOpen]
+  )
+
+  const createNewThread = (attributes: ChatThreadAttributes) => {
+    return createThread({
+      variables: { attributes },
+      onCompleted: ({ createThread }) => {
+        if (createThread?.id) goToThread(createThread?.id)
+      },
+      update: (cache, { data }) => addThreadToCache(cache, data?.createThread),
+    })
+  }
+
+  return {
+    createNewThread,
     forkThread: ({
       id,
       seq,
@@ -194,7 +263,6 @@ export function useChatbot() {
         variables: { id, seq },
         onCompleted: (data) => {
           setCurrentThreadId(data.cloneThread?.id)
-          setCurrentInsight(null)
           setOpen(true)
           setShowForkToast(true)
           onCompleted?.(data)
@@ -202,26 +270,22 @@ export function useChatbot() {
         update: (cache, { data }) => addThreadToCache(cache, data?.cloneThread),
       })
     },
-    goToThread: (threadId: string) => {
-      setCurrentThreadId(threadId)
-      setCurrentInsight(null)
-      setOpen(true)
-    },
-    goToInsight: (insight: AiInsightFragment) => {
-      setCurrentThreadId(null)
-      setCurrentInsight(insight)
-      setOpen(true)
-    },
-    goToThreadList: () => {
-      setCurrentThreadId(null)
-      setCurrentInsight(null)
-      setOpen(true)
+    goToThread,
+    goToLastNonAgentThread: () => {
+      if (!lastNonAgentThreadId) {
+        createNewThread({ summary: 'New chat with Plural Copilot' })
+        return
+      }
+
+      goToThread(lastNonAgentThreadId)
     },
     closeChatbot: () => setOpen(false),
     currentThread,
-    currentInsight,
-    fullscreen,
-    setFullscreen,
+    currentThreadId,
+    persistedThreadId,
+    selectedAgent,
+    agentInitMode,
+    setAgentInitMode,
     detailsLoading: threadLoading,
     detailsError: threadError,
     mutationLoading: createLoading || forkLoading,

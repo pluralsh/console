@@ -2,6 +2,7 @@ import {
   ArrowTopRightIcon,
   Button,
   Chip,
+  ChipProps,
   Code,
   DownloadIcon,
   EditIcon,
@@ -90,7 +91,10 @@ export const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
   },
 })
 
-export function PrStatusChip({ status }: { status?: PrStatus | null }) {
+export function PrStatusChip({
+  status,
+  ...props
+}: { status?: PrStatus | null } & ChipProps) {
   if (!status) return null
 
   let severity: ComponentProps<typeof Chip>['severity'] = 'neutral'
@@ -100,14 +104,21 @@ export function PrStatusChip({ status }: { status?: PrStatus | null }) {
       severity = 'info'
       break
     case PrStatus.Closed:
-      severity = 'danger'
+      severity = 'critical'
       break
     case PrStatus.Merged:
       severity = 'success'
       break
   }
 
-  return <Chip severity={severity}>{capitalize(status)}</Chip>
+  return (
+    <Chip
+      severity={severity}
+      {...props}
+    >
+      {capitalize(status)}
+    </Chip>
+  )
 }
 
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
