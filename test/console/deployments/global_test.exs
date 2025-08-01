@@ -1042,4 +1042,15 @@ defmodule Console.Deployments.GlobalSyncTest do
              |> MapSet.equal?(MapSet.new([ctx3.id, ctx4.id]))
     end
   end
+
+  describe "#next_poll/1" do
+    test "it can set the next poll at" do
+      global = insert(:global_service, interval: "PT10M")
+
+      {:ok, updated} = Global.next_poll(global)
+
+      assert updated.next_poll_at
+      assert updated.interval == "PT10M"
+    end
+  end
 end

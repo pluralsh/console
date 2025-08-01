@@ -197,28 +197,20 @@ defmodule Console.Deployments.CronTest do
       expect(Console.Deployments.Git.Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
       expect(Console.Deployments.Git.Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
 
-      Cron.poll_stacks()
-
-      [run] = Console.Schema.StackRun.for_stack(stack.id)
-              |> Console.Repo.all()
-
-      assert run.status == :queued
-      assert run.stack_id == stack.id
-    end
-  end
-
-  describe "#dequeue_stacks/0" do
-    test "it can mark stack runs as pending" do
-      stack = insert(:stack)
       insert(:stack_run, stack: stack, status: :successful)
       :timer.sleep(1)
-      run = insert(:stack_run, stack: stack, status: :queued)
+      pending = insert(:stack_run, stack: stack, status: :queued)
 
-      Cron.dequeue_stacks()
+      Cron.poll_stacks()
 
-      dequeued = refetch(run)
-      assert dequeued.id == run.id
-      assert dequeued.status == :pending
+      assert refetch(stack).next_poll_at
+
+      runs = Console.Schema.StackRun.for_stack(stack.id)
+              |> Console.Repo.all()
+
+      assert length(runs) == 3
+
+      assert refetch(pending).status == :pending
     end
   end
 

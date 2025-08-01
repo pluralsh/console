@@ -1,5 +1,5 @@
 defmodule Console.Schema.PullRequest do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow, PrGovernance, AgentSession}
 
   defenum Status, open: 0, merged: 1, closed: 2
@@ -22,6 +22,7 @@ defmodule Console.Schema.PullRequest do
     field :agent_id,   :string
     field :approved,   :boolean, default: false
     field :governance_state, :map
+    field :next_poll_at, :utc_datetime_usec
 
     field :notifications_policy_id, :binary_id
 
@@ -40,6 +41,11 @@ defmodule Console.Schema.PullRequest do
       references: :notifications_policy_id
 
     timestamps()
+  end
+
+  def pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(pr in query, where: is_nil(pr.next_poll_at) or pr.next_poll_at < ^now)
   end
 
   def icon(%__MODULE__{status: :merged}), do: "✔"
@@ -109,6 +115,7 @@ defmodule Console.Schema.PullRequest do
     governance_id
     approved
     governance_state
+    next_poll_at
     session_id
   )a
 
@@ -124,4 +131,21 @@ defmodule Console.Schema.PullRequest do
     |> unique_constraint(:url)
     |> validate_required(~w(url title)a)
   end
+
+  def next_poll_changeset(model, interval) do
+    duration = poll_duration(interval)
+    jittered = Duration.add(duration, Duration.new!(second: jitter(duration)))
+
+    Ecto.Changeset.change(model, %{
+      next_poll_at: DateTime.shift(DateTime.utc_now(), jittered)
+    })
+  end
+
+  def poll_duration(interval) when is_binary(interval) do
+    case parse_duration(interval) do
+      {:ok, duration} -> duration
+      {:error, _} -> poll_duration(nil)
+    end
+  end
+  def poll_duration(_), do: Duration.new!(minute: 5)
 end

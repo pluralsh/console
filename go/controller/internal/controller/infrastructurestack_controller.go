@@ -315,6 +315,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		ObservableMetrics: lo.ToSlicePtr(attributes.observableMetrics),
 		ManageState:       stack.Spec.ManageState,
 		AgentID:           stack.Spec.AgentId,
+		Interval:          stack.Spec.Interval,
 		Workdir:           stack.Spec.Workdir,
 		Git: console.GitRefAttributes{
 			Ref:    stack.Spec.Git.Ref,

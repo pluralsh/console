@@ -142,11 +142,13 @@ defmodule Console.Deployments.Cron do
     Logger.info "backfilling global services into all clusters"
 
     GlobalService.stream()
+    |> GlobalService.pollable()
     |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Task.async_stream(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)
+      Global.next_poll(global)
     end, max_concurrency: 20)
     |> Stream.run()
   end
@@ -237,16 +239,10 @@ defmodule Console.Deployments.Cron do
       Logger.info "polling repository for stack #{stack.id}"
       Stacks.poll(stack)
       |> log("poll stack for a new run")
-    end, max_concurrency: clamp(Stacks.count()))
-    |> Stream.run()
-  end
 
-  def dequeue_stacks() do
-    Task.async_stream(stack_stream(), fn stack ->
-      Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
       |> log("dequeue a new stack run")
-    end, max_concurrency: clamp(Stacks.count()))
+    end, max_concurrency: 100)
     |> Stream.run()
   end
 
@@ -258,10 +254,12 @@ defmodule Console.Deployments.Cron do
 
   defp stack_stream() do
     Stack.stream()
+    |> Stack.pollable()
     |> Stack.unpaused()
     |> Repo.stream(method: :keyset)
     |> Stream.concat(
       PullRequest.stack()
+      |> PullRequest.pollable()
       |> PullRequest.open()
       |> PullRequest.stream()
       |> Repo.stream(method: :keyset)
