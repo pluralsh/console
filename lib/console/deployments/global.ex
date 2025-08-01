@@ -341,6 +341,8 @@ defmodule Console.Deployments.Global do
     |> (fn s -> MapSet.difference(service_ids, s) end).()
     |> MapSet.to_list()
     |> maybe_drain(global)
+    next_poll(global)
+    :ok
   end
 
   @doc """

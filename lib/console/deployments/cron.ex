@@ -148,7 +148,6 @@ defmodule Console.Deployments.Cron do
     |> Task.async_stream(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)
-      Global.next_poll(global)
     end, max_concurrency: 20)
     |> Stream.run()
   end

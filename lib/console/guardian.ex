@@ -2,7 +2,7 @@ defmodule Console.Guardian do
   use Guardian, otp_app: :console
   import Console.Schema.Stack, only: [is_terminal: 1]
   require Logger
-  alias Console.Schema.{User, StackRun}
+  alias Console.Schema.{User, StackRun, AccessToken.Scope}
   alias Console.Deployments.Stacks
   use Nebulex.Caching
 
@@ -25,7 +25,7 @@ defmodule Console.Guardian do
     case possibly_cached(id, claims) do
       %User{} = user ->
         Logger.info "user #{user.email} logged in"
-        {:ok, user}
+        {:ok, add_scopes(user, claims)}
       res ->
         Logger.info "got unexpected fetch_user result #{inspect(res)}"
         {:error, :not_found}
@@ -41,6 +41,11 @@ defmodule Console.Guardian do
     Console.Repo.get(User, id)
     |> Console.Services.Rbac.preload()
   end
+
+  def add_scopes(%User{} = user, %{"scopes" => [_ | _] = scopes}) do
+    %{user | scopes: Enum.map(scopes, & %Scope{api: &1})}
+  end
+  def add_scopes(user, _), do: user
 
   @decorate cacheable(cache: Console.Cache, key: {:login, id}, opts: [ttl: @ttl, match: &allow/1])
   def cached_fetch_user(id), do: fetch_user(id)
