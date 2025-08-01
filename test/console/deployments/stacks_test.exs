@@ -566,7 +566,9 @@ defmodule Console.Deployments.StacksTest do
       %{pull_request: sideload} = Console.Repo.preload(run, [:pull_request])
       assert sideload.id == pr.id
 
-      assert refetch(pr).sha == "new-sha"
+      pr = refetch(pr)
+      assert pr.sha == "new-sha"
+      assert pr.next_poll_at
     end
 
     test "it can create a new run an ansible stack" do

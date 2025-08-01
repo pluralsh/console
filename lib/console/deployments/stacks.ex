@@ -500,7 +500,6 @@ defmodule Console.Deployments.Stacks do
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
-            |> PullRequest.next_poll_changeset(stack.interval)
             |> Repo.update()
           end)
           |> execute(extract: :run)
@@ -509,9 +508,16 @@ defmodule Console.Deployments.Stacks do
           err
       end
     end)
+    |> polled(pr, stack.interval)
   end
 
   def poll(_), do: {:error, "invalid parent"}
+
+  defp polled(result, %schema{} = resource, interval) do
+    schema.next_poll_changeset(resource, interval)
+    |> Repo.update()
+    result
+  end
 
   defp on_new_sha(repo, ref, sha, ps, fun) do
     case Discovery.sha(repo, ref) do
