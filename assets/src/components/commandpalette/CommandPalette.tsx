@@ -335,6 +335,7 @@ interface CommandAdvancedInputProps {
   setCmdkOpen?: Dispatch<SetStateAction<boolean>>
 }
 
+// TODO: properly sync chat input with cmdk input
 function CommandAdvancedInput({
   placeholder,
   onValueChange,
@@ -350,6 +351,8 @@ function CommandAdvancedInput({
       createNewThread({
         summary: 'New Chat with Plural Copilot',
       }).then(({ data }) => {
+        // TODO: find a way to sync thread creation and chat mutation
+        // so that we do not miss the first message and part of response
         chatMutation({
           variables: {
             messages: [{ role: AiRole.User, content: message }],
