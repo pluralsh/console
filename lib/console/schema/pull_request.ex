@@ -45,7 +45,10 @@ defmodule Console.Schema.PullRequest do
 
   def pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(pr in query, where: is_nil(pr.next_poll_at) or pr.next_poll_at < ^now)
+    stale = Timex.shift(now, days: -7)
+    from(pr in query,
+      where: (is_nil(pr.next_poll_at) or pr.next_poll_at < ^now) and
+             coalesce(pr.updated_at, pr.inserted_at) >= ^stale)
   end
 
   def icon(%__MODULE__{status: :merged}), do: "✔"
