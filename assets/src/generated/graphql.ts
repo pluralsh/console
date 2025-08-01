@@ -3406,6 +3406,8 @@ export type GlobalServiceAttributes = {
   context?: InputMaybe<TemplateContextAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
+  /** the interval at which the global service will be reconciled, default is 10m */
+  interval?: InputMaybe<Scalars['String']['input']>;
   /** whether to include management clusters in the target set */
   mgmt?: InputMaybe<Scalars['Boolean']['input']>;
   /** name for this global service */
@@ -3761,12 +3763,16 @@ export type InfrastructureStack = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this stack */
   insight?: Maybe<AiInsight>;
+  /** the interval at which the stack will be reconciled, default is 5m */
+  interval?: Maybe<Scalars['String']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
   /** whether you want Plural to manage the state of this stack */
   manageState?: Maybe<Scalars['Boolean']['output']>;
   /** the name of the stack */
   name: Scalars['String']['output'];
+  /** the next time the stack will be reconciled */
+  nextPollAt?: Maybe<Scalars['DateTime']['output']>;
   /** a list of metrics to poll to determine if a stack run should be cancelled */
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
@@ -4156,6 +4162,8 @@ export type ManagedNamespace = {
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the interval at which the global service will be reconciled, default is 10m */
+  interval?: Maybe<Scalars['String']['output']>;
   /** labels for this namespace */
   labels?: Maybe<Scalars['Map']['output']>;
   /** the name of this namespace once its placed on a cluster */
@@ -10229,6 +10237,8 @@ export type StackAttributes = {
   files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
   /** reference w/in the repository where the IaC lives */
   git: GitRefAttributes;
+  /** the interval at which the stack will be reconciled, default is 5m */
+  interval?: InputMaybe<Scalars['String']['input']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: InputMaybe<GateJobAttributes>;
   /** whether you want Plural to manage your terraform state for this stack */

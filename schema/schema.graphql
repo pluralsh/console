@@ -2354,6 +2354,9 @@ input StackAttributes {
   "the agent id this stack is associated with"
   agentId: String
 
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2585,6 +2588,12 @@ type InfrastructureStack {
 
   "the agent id this stack is associated with"
   agentId: String
+
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
+  "the next time the stack will be reconciled"
+  nextPollAt: DateTime
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -3070,6 +3079,9 @@ input GlobalServiceAttributes {
 
   template: ServiceTemplateAttributes
 
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
+
   "behavior for all owned resources when this global service is deleted"
   cascade: CascadeAttributes
 
@@ -3253,6 +3265,9 @@ type ManagedNamespace {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
 
   "the service which created this managed namespace"
   parent: ServiceDeployment

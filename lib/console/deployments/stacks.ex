@@ -455,6 +455,7 @@ defmodule Console.Deployments.Stacks do
 
   defp unlock(%Stack{} = s) do
     Stack.lock_changeset(s, %{locked_at: nil})
+    |> Stack.next_poll_changeset(s.interval)
     |> Repo.update()
   end
 
@@ -499,6 +500,7 @@ defmodule Console.Deployments.Stacks do
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
+            |> PullRequest.next_poll_changeset(stack.interval)
             |> Repo.update()
           end)
           |> execute(extract: :run)

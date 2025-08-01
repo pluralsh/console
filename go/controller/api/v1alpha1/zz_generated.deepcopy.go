@@ -2653,6 +2653,11 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.Interval != nil {
+		in, out := &in.Interval, &out.Interval
+		*out = new(string)
+		**out = **in
+	}
 	if in.Cascade != nil {
 		in, out := &in.Cascade, &out.Cascade
 		*out = new(Cascade)
@@ -3133,6 +3138,11 @@ func (in *InfrastructureStackSpec) DeepCopyInto(out *InfrastructureStackSpec) {
 	*out = *in
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
+		*out = new(string)
+		**out = **in
+	}
+	if in.Interval != nil {
+		in, out := &in.Interval, &out.Interval
 		*out = new(string)
 		**out = **in
 	}
