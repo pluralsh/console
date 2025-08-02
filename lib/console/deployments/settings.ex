@@ -338,11 +338,13 @@ defmodule Console.Deployments.Settings do
       FederatedCredential.for_issuer(issuer)
       |> FederatedCredential.for_user(user.id)
       |> Console.Repo.all()
-      |> Enum.find(&FederatedCredential.allow?(&1, claims))
+      |> Enum.filter(&FederatedCredential.allow?(&1, claims))
       |> case do
-        %FederatedCredential{scopes: scopes} -> sign_token(user, scopes)
-        _ ->
-          {:error, "no federated credential for #{email} match jwt claims"}
+        [_ | _] = credentials ->
+          scopes = Enum.flat_map(credentials, & &1.scopes || [])
+                   |> Enum.uniq()
+          sign_token(user, scopes)
+        _ -> {:error, "no federated credential for #{email} match jwt claims"}
       end
     else
       {:token, _} -> {:error, "invalid jwt format"}

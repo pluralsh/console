@@ -101,22 +101,28 @@ end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
-  alias Console.Schema.{PullRequest, Stack}
-  alias Console.Deployments.{Stacks, Git.Discovery}
+  alias Console.Schema.{PullRequest, Stack, Service}
+  alias Console.Deployments.{Stacks, Git.Discovery, Services}
 
   def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
+    :timer.sleep(:timer.seconds(10))
     with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
          _ <- Discovery.kick(stack.repository),
       do: Stacks.poll(stack)
   end
 
+  def process(%@for{item: %PullRequest{status: :merged, service_id: id} = pr}) when is_binary(id) do
+    :timer.sleep(:timer.seconds(10))
+    with %PullRequest{service: %Service{} = service} <- Repo.preload(pr, [service: :repository]),
+      do: Services.kick(service)
+  end
+
   def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
+    :timer.sleep(:timer.seconds(5))
     Console.debounce({:stack_pr, pr.id}, fn ->
-      Console.Retrier.retry(fn ->
-        with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
-              _ <- Discovery.kick(stack.repository),
-          do: Stacks.poll(pr)
-      end, max: 4, pause: :timer.seconds(30))
+      with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
+            _ <- Discovery.kick(stack.repository),
+        do: Stacks.poll(pr)
     end, ttl: :timer.minutes(2))
   end
 
