@@ -409,6 +409,7 @@ defmodule Console.Deployments.StacksTest do
 
       stack = refetch(stack)
       assert stack.sha == "new-sha"
+      assert stack.next_poll_at
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()

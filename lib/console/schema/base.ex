@@ -6,6 +6,10 @@ defmodule Console.Schema.Base do
     quote do
       use Piazza.Ecto.Schema
       import Console.Schema.Base
+
+      def with_limit(query \\ __MODULE__, limit) do
+        from(q in query, limit: ^limit)
+      end
     end
   end
 
