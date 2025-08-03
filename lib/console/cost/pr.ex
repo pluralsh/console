@@ -54,6 +54,12 @@ defmodule Console.Cost.Pr do
   end
 
   defp cost_prompt(%ClusterScalingRecommendation{} = rec) do
+    requests = Console.drop_nils(%{
+                 memory: maybe_quote(memory(rec.memory_recommendation)),
+                 cpu: maybe_quote(cpu(rec.cpu_recommendation))
+               })
+               |> Jason.encode!()
+
     """
     The cost management system has recommended this service have the following scaling recommendations applied, which I'll list in json format:
 
@@ -63,10 +69,7 @@ defmodule Console.Cost.Pr do
       "namespace": "#{rec.namespace}",
       "name": "#{rec.name}",
       "container": "#{rec.container}",
-      "requests": {
-        "memory": #{maybe_quote(memory(rec.memory_recommendation))},
-        "cpu": #{maybe_quote(cpu(rec.cpu_recommendation))}
-      }
+      "requests": #{requests}
     }
     ```
 

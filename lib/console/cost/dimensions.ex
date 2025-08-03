@@ -2,10 +2,12 @@ defmodule Console.Cost.Dimensions do
   @kb 1024
   @mb @kb * @kb
 
+  def memory(nil), do: nil
   def memory(mem) when mem > @mb, do: "#{unit(mem, @mb)}Mi"
   def memory(mem) when mem > @kb, do: "#{unit(mem, @kb)}Ki"
   def memory(mem), do: mem
 
+  def cpu(nil), do: nil
   def cpu(cpu) when cpu > 1, do: cpu
   def cpu(cpu), do: "#{ceil(cpu * 1000, 10)}m"
 
