@@ -3605,6 +3605,22 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v4.0.5-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v4.0.4-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v4.0.3-eksbuild.1
     compatibilities:
     - '1.33'
