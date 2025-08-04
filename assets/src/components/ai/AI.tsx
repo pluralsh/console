@@ -15,7 +15,10 @@ import {
 } from 'routes/aiRoutesConsts'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled from 'styled-components'
-import { useAIEnabled } from '../contexts/DeploymentSettingsContext'
+import {
+  useAIEnabled,
+  useLoadingDeploymentSettings,
+} from '../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { AIDisabledState } from './AIThreads'
 
@@ -32,9 +35,10 @@ const getBreadcrumbs = (tab: string = '') => [
 export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
+  const loading = useLoadingDeploymentSettings()
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(tab), [tab]))
 
-  if (aiEnabled === undefined) return <LoadingIndicator />
+  if (loading) return <LoadingIndicator />
 
   return (
     <WrapperSC>
