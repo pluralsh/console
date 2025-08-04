@@ -260,7 +260,7 @@ query AgentSessionStacks(
 
 query ChatThreadDetails(
   $id: ID!
-  $first: Int = 25
+  $first: Int = 100
   $last: Int
   $after: String
   $before: String

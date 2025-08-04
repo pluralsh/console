@@ -1,11 +1,10 @@
 import { usePrevious, useResizeObserver } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
   AgentSession,
   AiDeltaFragment,
   AiRole,
-  ChatThreadDetailsQueryResult,
+  ChatThreadDetailsQuery,
   ChatThreadFragment,
   ChatType,
   EvidenceType,
@@ -29,32 +28,36 @@ import {
 } from 'react'
 import { VariableSizeList } from 'react-window'
 import styled, { useTheme } from 'styled-components'
-import { extendConnection, mapExistingNodes } from 'utils/graphql.ts'
+import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import SmoothScroller from '../../utils/SmoothScroller.tsx'
+import { FetchPaginatedDataResult } from '../../utils/table/useFetchPaginatedData.tsx'
+import TypingIndicator from '../../utils/TypingIndicator.tsx'
 import { Body1P } from '../../utils/typography/Text.tsx'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
-import { ChatInput, GeneratingResponseMessage } from './input/ChatInput.tsx'
-import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { ChatInput } from './input/ChatInput.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
-  threadDetailsQuery: { data, loading, error, fetchMore },
+  threadDetailsQuery: { data, loading, error, fetchNextPage },
   showMcpServers,
   setShowMcpServers,
   showExamplePrompts = false,
   setShowExamplePrompts,
 }: {
   currentThread: ChatThreadFragment
-  threadDetailsQuery: ChatThreadDetailsQueryResult
+  threadDetailsQuery: Partial<
+    FetchPaginatedDataResult<Nullable<ChatThreadDetailsQuery>>
+  >
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
   showExamplePrompts: boolean
   setShowExamplePrompts: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
   const [messageListRef, setMessageListRef] = useState<VariableSizeList>()
   const scrollToBottom = useCallback(
@@ -91,7 +94,7 @@ export function ChatbotPanelThread({
 
   const { messages, pageInfo } = useMemo(
     () => ({
-      messages: mapExistingNodes(data?.chatThread?.chats),
+      messages: mapExistingNodes(data?.chatThread?.chats).reverse(),
       pageInfo: data?.chatThread?.chats?.pageInfo,
     }),
     [data?.chatThread?.chats]
@@ -110,32 +113,19 @@ export function ChatbotPanelThread({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadDetails'],
     onCompleted: () => streaming && scrollToBottom(),
-    optimisticResponse: ({ messages }) =>
-      getChatOptimisticResponse({
-        mutation: 'hybridChat',
-        content: messages?.[0]?.content,
-      }),
-    update: (cache, { data }) =>
-      updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
+    // TODO: Investigate if we can use optimistic responses with paginated queries. It does not work currently.
+    // optimisticResponse: ({ messages }) =>
+    //   getChatOptimisticResponse({
+    //     mutation: 'hybridChat',
+    //     content: messages?.[0]?.content,
+    //   }),
+    // update: (cache, { data }) =>
+    //   updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
   })
-
-  // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
-  useEffect(() => {
-    reset()
-  }, [currentThread.id, reset])
-
-  // scroll to the bottom when number of messages increases
-  const length = messages.length
-  const prevLength = usePrevious(length) ?? 0
-  useEffect(() => {
-    if (length > prevLength) {
-      scrollToBottom()
-      setStreamedMessages([])
-    }
-  }, [length, prevLength, scrollToBottom])
 
   const sendMessage = useCallback(
     (newMessage: string) => {
+      setPendingMessage(newMessage)
       const variables = {
         messages: [{ role: AiRole.User, content: newMessage }],
         threadId: currentThread.id,
@@ -145,10 +135,24 @@ export function ChatbotPanelThread({
     [currentThread.id, mutateHybridChat]
   )
 
-  const reverseMessages = useMemo(() => [...messages].reverse(), [messages])
+  // scroll to bottom when new messages are added
+  const lastMessageId = messages[messages.length - 1]?.id
+  const prevLastMessageId = usePrevious(lastMessageId)
+  useEffect(() => {
+    if (!lastMessageId || lastMessageId === prevLastMessageId) return
 
-  if (!data && loading)
-    return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
+    scrollToBottom()
+    setStreaming(false)
+    setStreamedMessages([])
+    setPendingMessage(null)
+  }, [lastMessageId, prevLastMessageId, scrollToBottom])
+
+  // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
+  useEffect(() => {
+    setStreaming(false)
+    setStreamedMessages([])
+    reset()
+  }, [currentThread.id, reset])
 
   return (
     <>
@@ -169,9 +173,9 @@ export function ChatbotPanelThread({
         <ChatbotMessagesWrapper
           messageListRef={messageListRef}
           setMessageListRef={setMessageListRef}
-          loading={loading}
+          loading={!!loading}
           pageInfo={pageInfo}
-          fetchMore={fetchMore}
+          fetchNextPage={fetchNextPage}
         >
           {isEmpty(messages) &&
             !currentThread.session?.type &&
@@ -182,7 +186,7 @@ export function ChatbotPanelThread({
                 How can I help you?
               </Body1P>
             ))}
-          {reverseMessages.map((msg) => (
+          {messages.map((msg) => (
             <Fragment key={msg.id}>
               <ChatMessage
                 {...msg}
@@ -197,7 +201,17 @@ export function ChatbotPanelThread({
                 )}
             </Fragment>
           ))}
-          {!isEmpty(streamedMessages) ? (
+          {pendingMessage && (
+            <Fragment key="pending-message">
+              <ChatMessage
+                role={AiRole.User}
+                type={ChatType.Text}
+                content={pendingMessage}
+                disableActions
+              />
+            </Fragment>
+          )}
+          {streaming && !isEmpty(streamedMessages) ? (
             streamedMessages.map((message, i) => {
               const { tool, role } = message[0] ?? {}
               return (
@@ -215,8 +229,14 @@ export function ChatbotPanelThread({
                 />
               )
             })
-          ) : sendingMessage || currentThread.session?.done === false ? (
-            <GeneratingResponseMessage />
+          ) : sendingMessage ||
+            (currentThread.session?.done === false &&
+              !!currentThread.session?.type) ? (
+            <TypingIndicator
+              css={{
+                marginLeft: theme.spacing.small,
+              }}
+            />
           ) : null}
         </ChatbotMessagesWrapper>
         {showExamplePrompts && (
@@ -245,14 +265,14 @@ export const ChatbotMessagesWrapper = ({
   children,
   loading,
   pageInfo,
-  fetchMore,
+  fetchNextPage,
 }: {
   messageListRef: VariableSizeList | undefined
   setMessageListRef: Dispatch<SetStateAction<VariableSizeList | undefined>>
   children: ReactNode | Array<ReactNode>
   loading: boolean
   pageInfo: any
-  fetchMore: any
+  fetchNextPage?: Dispatch<void>
 }) => {
   const DEFAULT_ITEM_SIZE = 100
   const [itemHeights, setItemHeights] = useState<number[]>([])
@@ -298,24 +318,7 @@ export const ChatbotMessagesWrapper = ({
             {child}
           </ChatbotMessage>
         )}
-        loadNextPage={() =>
-          pageInfo?.hasNextPage &&
-          fetchMore({
-            variables: { after: pageInfo?.endCursor },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!prev.chatThread) return prev
-
-              return {
-                ...prev,
-                chatThread: extendConnection(
-                  prev.chatThread,
-                  fetchMoreResult.chatThread?.chats,
-                  'chats'
-                ),
-              }
-            },
-          })
-        }
+        loadNextPage={fetchNextPage}
         handleScroll={undefined}
         placeholder={undefined}
         refreshKey={undefined}

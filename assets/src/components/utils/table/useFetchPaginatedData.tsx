@@ -1,5 +1,6 @@
 import {
   ErrorPolicy,
+  FetchPolicy,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
@@ -37,6 +38,7 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
+  fetchPolicy?: FetchPolicy
   skip?: boolean
 }
 
@@ -76,7 +78,7 @@ export function useFetchPaginatedData<
     },
     skip: options.skip,
     errorPolicy: options.errorPolicy,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: options.fetchPolicy ?? 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
   })

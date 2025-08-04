@@ -1,13 +1,14 @@
 import { ApolloCache, ApolloError } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
   AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
+  ChatThreadDetailsQuery,
   ChatThreadFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
+  PageInfo,
   useChatThreadDetailsQuery,
   useCloneChatThreadMutation,
   useCreateChatThreadMutation,
@@ -26,6 +27,7 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -53,8 +55,14 @@ type ChatbotContextT = {
   setShowForkToast: (show: boolean) => void
 
   currentThread: Nullable<ChatThreadFragment>
-  threadLoading: boolean
-  threadError: ApolloError | undefined
+
+  threadDetailsQuery: {
+    data: Nullable<ChatThreadDetailsQuery>
+    loading: boolean
+    error: Nullable<ApolloError>
+    fetchNextPage: Dispatch<void>
+    pageInfo: PageInfo
+  }
 
   currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
@@ -108,12 +116,16 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     data: threadData,
     loading: threadLoading,
     error: threadError,
-  } = useChatThreadDetailsQuery({
-    variables: { id: currentThreadId ?? '' },
-    skip: !currentThreadId,
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
+    fetchNextPage: threadFetchNextPage,
+    pageInfo: threadPageInfo,
+  } = useFetchPaginatedData(
+    {
+      skip: !currentThreadId,
+      queryHook: useChatThreadDetailsQuery,
+      keyPath: ['chatThreadDetails'],
+    },
+    { id: currentThreadId ?? '' }
+  )
 
   const currentThread = useMemo(() => threadData?.chatThread, [threadData])
 
@@ -161,9 +173,14 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         setAgentInitMode,
         persistedThreadId,
         lastNonAgentThreadId,
-        threadLoading,
-        threadError,
         setShowForkToast,
+        threadDetailsQuery: {
+          loading: threadLoading,
+          error: threadError,
+          data: threadData,
+          fetchNextPage: threadFetchNextPage,
+          pageInfo: threadPageInfo,
+        },
       }}
     >
       {children}
@@ -221,9 +238,8 @@ export function useChatbot() {
     selectedAgent,
     agentInitMode,
     setAgentInitMode,
-    threadLoading,
-    threadError,
     setShowForkToast,
+    threadDetailsQuery,
   } = useChatbotContext()
 
   const [createThread, { loading: createLoading, error: createError }] =
@@ -286,10 +302,9 @@ export function useChatbot() {
     selectedAgent,
     agentInitMode,
     setAgentInitMode,
-    detailsLoading: threadLoading,
-    detailsError: threadError,
     mutationLoading: createLoading || forkLoading,
     mutationError: createError || forkError,
+    threadDetailsQuery,
   }
 }
 

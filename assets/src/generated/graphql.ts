@@ -18798,7 +18798,7 @@ export type AgentSessionStacksLazyQueryHookResult = ReturnType<typeof useAgentSe
 export type AgentSessionStacksSuspenseQueryHookResult = ReturnType<typeof useAgentSessionStacksSuspenseQuery>;
 export type AgentSessionStacksQueryResult = Apollo.QueryResult<AgentSessionStacksQuery, AgentSessionStacksQueryVariables>;
 export const ChatThreadDetailsDocument = gql`
-    query ChatThreadDetails($id: ID!, $first: Int = 25, $last: Int, $after: String, $before: String, $reverse: Boolean = true) {
+    query ChatThreadDetails($id: ID!, $first: Int = 100, $last: Int, $after: String, $before: String, $reverse: Boolean = true) {
   chatThread(id: $id) {
     ...ChatThreadTiny
     chats(
