@@ -176,6 +176,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
     syncConfig {
         createNamespace
         enforceNamespace
+        deleteNamespace
         namespaceMetadata {
             labels
             annotations
