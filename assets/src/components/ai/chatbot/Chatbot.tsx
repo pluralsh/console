@@ -114,12 +114,11 @@ function ChatbotPanelInner() {
     [data?.chatThreads]
   )
 
-  const tools = threadData?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
+  const tools = threadData?.chatThread?.tools?.filter(isNonNullable) ?? []
 
   const isThreadDetailsLoading =
-    (!threadData?.data?.chatThread?.chats && threadData?.loading) ||
-    (threadData?.loading &&
-      threadData?.data?.chatThread?.id !== currentThreadId)
+    (!threadData?.chatThread?.chats && threadLoading) ||
+    (threadLoading && threadData?.chatThread?.id !== currentThreadId)
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
