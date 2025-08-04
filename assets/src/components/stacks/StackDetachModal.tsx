@@ -31,6 +31,8 @@ export default function StackDetachModal({
       title="Detach stack"
       text={`Are you sure you want to detach ${stack.name} stack?`}
       close={onClose}
+      confirmationEnabled
+      confirmationText={stack.name}
       submit={() => mutation()}
       label="Detach"
       loading={loading}
