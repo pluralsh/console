@@ -120,6 +120,21 @@ fragment AgentSession on AgentSession {
   }
 }
 
+fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+
+fragment StackChat on InfrastructureStack {
+  ...StackTiny
+  insight {
+    ...AiInsightSummary
+  }
+}
+
 fragment AiDelta on AiDelta {
   seq
   message
@@ -175,7 +190,23 @@ query ChatThreads(
   }
 }
 
-query AgentSessionPRs(
+query ChatAgentSession($id: ID!) {
+  chatThread(id: $id) {
+    session {
+      pullRequest {
+        ...PullRequest
+      }
+      service {
+        ...ServiceDeploymentChat
+      }
+      stack {
+        ...StackChat
+      }
+    }
+  }
+}
+
+query ChatAgentSessionPRs(
   $id: ID!
   $first: Int = 100
   $last: Int
@@ -184,9 +215,6 @@ query AgentSessionPRs(
 ) {
   chatThread(id: $id) {
     session {
-      pullRequest {
-        ...PullRequest # TODO
-      }
       pullRequests(first: $first, last: $last, after: $after, before: $before) {
         pageInfo {
           ...PageInfo
@@ -201,7 +229,7 @@ query AgentSessionPRs(
   }
 }
 
-query AgentSessionServices(
+query ChatAgentSessionServices(
   $id: ID!
   $first: Int = 100
   $last: Int
@@ -210,9 +238,6 @@ query AgentSessionServices(
 ) {
   chatThread(id: $id) {
     session {
-      service {
-        ...ServiceDeploymentTiny # TODO
-      }
       serviceDeployments(
         first: $first
         last: $last
@@ -232,7 +257,7 @@ query AgentSessionServices(
   }
 }
 
-query AgentSessionStacks(
+query ChatAgentSessionStacks(
   $id: ID!
   $first: Int = 100
   $last: Int
@@ -241,9 +266,6 @@ query AgentSessionStacks(
 ) {
   chatThread(id: $id) {
     session {
-      stack {
-        ...StackTiny # TODO
-      }
       stacks(first: $first, last: $last, after: $after, before: $before) {
         pageInfo {
           ...PageInfo
