@@ -1,5 +1,5 @@
 import {
-  StackTinyFragment,
+  StackChatFragment,
   useChatAgentSessionStacksQuery,
 } from '../../../../generated/graphql.ts'
 import {
@@ -67,7 +67,7 @@ export function Stacks({ currentThreadId }: { currentThreadId: string }) {
   )
 }
 
-const columnHelper = createColumnHelper<StackTinyFragment>()
+const columnHelper = createColumnHelper<StackChatFragment>()
 
 const columns = [
   columnHelper.accessor((stack) => stack, {
