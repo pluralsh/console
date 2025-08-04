@@ -30,21 +30,19 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Governance,
   Console.AI.PubSub.Consumer,
   Console.AI.PubSub.Vector.Consumer,
-  Console.AI.PubSub.Agent.Consumer
+  Console.AI.PubSub.Agent.Consumer,
+  Console.Pipelines.Supervisor
 ]
 
 config :console, Console.Cron.Scheduler,
   # overlap: false,
   jobs: [
-    {"@daily",         {Console.Cron.Jobs, :prune_builds, []}},
     {"@daily",         {Console.Cron.Jobs, :prune_invites, []}},
     {"@daily",         {Console.Cron.Jobs, :prune_refresh_tokens, []}},
-    {"*/15 * * * *",   {Console.Cron.Jobs, :fail_builds, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_clusters, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_services, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :install_clusters, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :run_observers, []}},
-    {"* * * * *",      {Console.Deployments.Cron, :poll_stacks, []}},
     {"*/10 * * * *",   {Console.Deployments.Cron, :place_run_workers, []}},
     {"*/30 * * * *",   {Console.Deployments.Cron, :spawn_stack_crons, []}},
     {"*/4 * * * *",    {Console.Deployments.Cron, :scan_pipeline_stages, []}},
@@ -58,7 +56,6 @@ config :console, Console.Cron.Scheduler,
     {"*/5 * * * *",    {Console.AI.Cron, :alerts, []}},
     {"30 * * * *",     {Console.AI.Cron, :threads, []}},
     {"0 0 1-31/2 * *", {Console.Deployments.Cron, :backfill_deprecations, []}},
-    {"* * * * *",      {Console.Deployments.Cron, :backfill_global_services, []}},
     {"*/15 * * * *",   {Console.Deployments.Cron, :backfill_managed_namespaces, []}},
     {"35 * * * *",     {Console.Deployments.Cron, :drain_managed_namespaces, []}},
     {"30 * * * *",     {Console.Deployments.Cron, :migrate_agents, []}},

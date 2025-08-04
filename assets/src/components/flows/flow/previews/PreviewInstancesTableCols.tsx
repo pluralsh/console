@@ -8,7 +8,6 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ServiceDeprecations } from 'components/cd/services/ServiceDeprecations'
 import {
   ClusterNameAndIcon,
   DecoratedServiceDeployment,
@@ -146,7 +145,6 @@ export const ColErrors = columnHelper.accessor(
     cell: ({ row: { original } }) => (
       <div>
         <ServicesTableErrors service={original?.service} />
-        <ServiceDeprecations service={original?.service} />
       </div>
     ),
   }

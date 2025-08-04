@@ -1,0 +1,46 @@
+name: CI / Demo PR
+
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
+on:
+  push:
+    branches:
+    - master
+jobs:
+  pr:
+    permissions:
+      id-token: write
+      contents: read
+    name: Generate PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check Commit Type
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: 'Plural Flow: console'
+          error: 'The commit must include the annotation "Plural Flow: console".'
+      - name: setup plural
+        id: plural
+        uses: pluralsh/setup-plural@v1
+        with:
+          email: console@plural.sh
+          consoleUrl: https://console.plrldemo.onplural.sh
+      - name: Set outputs
+        id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Trigger PR
+        uses: pluralsh/trigger-pull-request@v1
+        with:
+          url: https://console.plrldemo.onplural.sh
+          token: ${{ steps.plural.outputs.consoleToken }}
+          branch: plrl/console/update-${{ steps.sha.outputs.sha_short }}
+          prAutomation: console-updater
+          context: |
+            {
+              "tag": "sha-${{ steps.sha.outputs.sha_short }}"
+            }

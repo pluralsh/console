@@ -48,7 +48,7 @@ defmodule Console.Services.Users do
   @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
 
-  @decorate cacheable(cache: Console.Cache, key: {:access, token}, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @cache_adapter, key: {:access, token}, opts: [ttl: @ttl])
   def get_by_token(token) do
     Repo.get_by(AccessToken, token: token)
     |> Repo.preload([:user])
@@ -71,6 +71,9 @@ defmodule Console.Services.Users do
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
   def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
+
+  @decorate cacheable(cache: @cache_adapter, key: {:user_by_email, email}, opts: [ttl: @ttl])
+  def cached_user_by_email!(email), do: get_user_by_email!(email)
 
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)

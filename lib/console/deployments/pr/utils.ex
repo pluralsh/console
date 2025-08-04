@@ -5,6 +5,8 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ttl :timer.hours(1)
 
+  @adapter Console.conf(:cache_adapter)
+
   @ansi_code ~r/\x1b\[[0-9;]*m/
 
   @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural [sS]tacks?:\s+([[:alnum:]_\-]+)/]
@@ -17,7 +19,7 @@ defmodule Console.Deployments.Pr.Utils do
 
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
-  def pr_associations(content, scopes \\ ~w(stack service cluster flow)a) do
+  def pr_associations(content, scopes \\ ~w(stack cluster service flow)a) do
     Enum.reduce(scopes, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
     |> Map.put(:preview, scrape(:preview, content))
   end
@@ -44,7 +46,7 @@ defmodule Console.Deployments.Pr.Utils do
   defp regexes(:flow), do: @flow_regex
   defp regexes(:preview), do: @preview_regex
 
-  @decorate cacheable(cache: Console.Cache, key: {:pr_fetch, scope, id}, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @adapter, key: {:pr_fetch, scope, id}, opts: [ttl: @ttl])
   def fetch(scope, id), do: do_fetch(scope, id)
 
   defp do_fetch(:stack, name), do: Stacks.get_stack_by_name(name)

@@ -4,6 +4,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
   alias Console.PubSub
+  alias Console.Services.Users
   alias Console.Deployments.{
     Secrets.Store,
     Settings,
@@ -518,6 +519,8 @@ defmodule Console.Deployments.Services do
     get_service!(service_id)
     |> kick(user)
   end
+
+  def kick(id), do: kick(id, %{Users.get_bot!("console") | roles: %{admin: true}})
 
   @doc """
   Updates the sha of a service if relevant

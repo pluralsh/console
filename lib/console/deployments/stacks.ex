@@ -342,7 +342,7 @@ defmodule Console.Deployments.Stacks do
       {%StackRun{stack: %{connection: %ScmConnection{} = conn}}, _} -> conn
       {_, %{stacks: %{connection_id: conn_id}}} when is_binary(conn_id) ->
         Git.get_scm_connection(conn_id)
-      _ -> nil
+      _ -> Git.default_scm_connection()
     end
   end
 

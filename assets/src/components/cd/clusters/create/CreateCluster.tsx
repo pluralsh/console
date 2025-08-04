@@ -272,7 +272,7 @@ function CreateClusterModal({
 
   return (
     <ModalAlt
-      header="Create a cluster"
+      header="Import an existing cluster"
       size="large"
       style={{ padding: 0, position: 'absolute' }}
       open={open}
@@ -311,7 +311,7 @@ export default function CreateCluster() {
         primary
         {...buttonProps}
       >
-        Create cluster
+        Import Cluster
       </Button>
       <ModalMountTransition open={isOpen}>
         <CreateClusterModal
