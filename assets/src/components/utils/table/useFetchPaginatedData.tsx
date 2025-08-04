@@ -54,7 +54,6 @@ export type FetchPaginatedDataResult<TQueryType> = {
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
   fetchNextPage: Dispatch<void>
-  fetchMore: Dispatch<any>
   setVirtualSlice: (slice: VirtualSlice) => void
 }
 
@@ -112,7 +111,7 @@ export function useFetchPaginatedData<
   const fetchNextPage = useCallback(() => {
     if (pageInfo?.hasNextPage) {
       fetchMore({
-        variables: { after: pageInfo.endCursor },
+        variables: { after: pageInfo?.endCursor },
         updateQuery: (prev, { fetchMoreResult }) => {
           const newConnection = extendConnection(
             reduceNestedData(options.keyPath, prev),
@@ -124,7 +123,13 @@ export function useFetchPaginatedData<
         },
       })
     }
-  }, [pageInfo, fetchMore, options.keyPath, queryKey])
+  }, [
+    pageInfo?.hasNextPage,
+    pageInfo?.endCursor,
+    fetchMore,
+    options.keyPath,
+    queryKey,
+  ])
 
   return {
     data,
@@ -133,7 +138,6 @@ export function useFetchPaginatedData<
     refetch,
     pageInfo,
     fetchNextPage,
-    fetchMore,
     setVirtualSlice,
   }
 }

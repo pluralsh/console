@@ -110,11 +110,20 @@ export function buildClient(
         ChatThread: {
           fields: {
             chats: {
-              // Custom merge for the paginated chats connection
-              merge(existing = { edges: [] }, incoming) {
+              merge(existing, incoming, { args }) {
+                // For paginated chats, merge properly based on cursor
+                if (!existing) return incoming
+                if (!incoming) return existing
+
+                // If it's a fresh fetch (no cursor args), replace entirely
+                if (!args?.after && !args?.before) {
+                  return incoming
+                }
+
+                // Otherwise merge the connections
                 return {
                   ...incoming,
-                  edges: [...existing.edges, ...incoming.edges],
+                  edges: [...(existing.edges || []), ...(incoming.edges || [])],
                 }
               },
             },

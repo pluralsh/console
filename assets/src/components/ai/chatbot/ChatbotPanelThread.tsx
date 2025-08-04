@@ -94,7 +94,7 @@ export function ChatbotPanelThread({
 
   const { messages, pageInfo } = useMemo(
     () => ({
-      messages: mapExistingNodes(data?.chatThread?.chats).reverse(),
+      messages: [...mapExistingNodes(data?.chatThread?.chats)].reverse(),
       pageInfo: data?.chatThread?.chats?.pageInfo,
     }),
     [data?.chatThread?.chats]

@@ -280,6 +280,48 @@ query ChatAgentSessionStacks(
   }
 }
 
+fragment ChatThreadChatsWithTools on ChatThread {
+  id
+  default
+  summary
+  insertedAt
+  updatedAt
+  lastMessageAt
+  settings {
+    ...ChatThreadSettings
+  }
+  insight {
+    ...AiInsightSummary
+  }
+  flow {
+    id
+    name
+    icon
+  }
+  session {
+    ...AgentSession
+  }
+  tools {
+    ...McpServerTool
+  }
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    reverse: $reverse
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Chat
+      }
+    }
+  }
+}
+
 query ChatThreadDetails(
   $id: ID!
   $first: Int = 25
@@ -289,32 +331,7 @@ query ChatThreadDetails(
   $reverse: Boolean = true
 ) {
   chatThread(id: $id) {
-    ...ChatThreadTiny
-    chats(
-      first: $first
-      last: $last
-      after: $after
-      before: $before
-      reverse: $reverse
-    ) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...Chat
-        }
-      }
-    }
-    insight {
-      ...AiInsight
-    }
-    flow {
-      ...FlowBasic
-    }
-    tools {
-      ...McpServerTool
-    }
+    ...ChatThreadChatsWithTools
   }
 }
 

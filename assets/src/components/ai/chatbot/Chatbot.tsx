@@ -93,18 +93,13 @@ function ChatbotPanelInner() {
     keyPath: ['chatThreads'],
   })
 
-  const {
-    data: threadData,
-    loading: threadLoading,
-    error: threadError,
-    fetchNextPage: threadFetchNextPage,
-    pageInfo: threadPageInfo,
-  } = useFetchPaginatedData(
+  const threadDetailsQuery = useFetchPaginatedData(
     {
       skip: !currentThreadId,
       queryHook: useChatThreadDetailsQuery,
       keyPath: ['chatThread', 'chats'],
       pageSize: 25,
+      pollInterval: 60_000,
     },
     { id: currentThreadId ?? '' }
   )
@@ -114,11 +109,14 @@ function ChatbotPanelInner() {
     [data?.chatThreads]
   )
 
-  const tools = threadData?.chatThread?.tools?.filter(isNonNullable) ?? []
+  const tools =
+    threadDetailsQuery?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
 
   const isThreadDetailsLoading =
-    (!threadData?.chatThread?.chats && threadLoading) ||
-    (threadLoading && threadData?.chatThread?.id !== currentThreadId)
+    (!threadDetailsQuery?.data?.chatThread?.chats &&
+      threadDetailsQuery?.loading) ||
+    (threadDetailsQuery?.loading &&
+      threadDetailsQuery?.data?.chatThread?.id !== currentThreadId)
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
@@ -186,7 +184,9 @@ function ChatbotPanelInner() {
           isActionsPanelOpen={showActionsPanel}
           setIsActionsPanelOpen={setShowActionsPanel}
         />
-        {threadError?.error && <GqlError error={threadError.error} />}
+        {threadDetailsQuery.error?.error && (
+          <GqlError error={threadDetailsQuery.error.error} />
+        )}
         {isThreadDetailsLoading && (
           <ChatbotMessagesWrapperSC>
             <LoadingIndicator />
@@ -199,13 +199,7 @@ function ChatbotPanelInner() {
           !isThreadDetailsLoading && (
             <ChatbotPanelThread
               currentThread={currentThread}
-              threadDetailsQuery={{
-                fetchNextPage: threadFetchNextPage,
-                loading: threadLoading,
-                data: threadData,
-                error: threadError,
-                pageInfo: threadPageInfo,
-              }}
+              threadDetailsQuery={threadDetailsQuery}
               showMcpServers={showMcpServers}
               setShowMcpServers={setShowMcpServers}
               showExamplePrompts={showPrompts}
