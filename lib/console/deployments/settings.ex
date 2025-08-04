@@ -7,6 +7,7 @@ defmodule Console.Deployments.Settings do
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
   alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection, FederatedCredential}
+  require Logger
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
@@ -327,27 +328,33 @@ defmodule Console.Deployments.Settings do
   """
   @spec exchange_token(binary, binary) :: {:ok, binary} | Console.error()
   def exchange_token(token, email) do
-    user = Users.get_user_by_email!(email)
+    user = Users.cached_user_by_email!(email)
 
-    with {:token, {:ok, %{"iss" => issuer}}} <- {:token, Joken.peek_claims(token)},
+    with {:token, {:ok, %{"iss" => issuer, "aud" => aud}}} <- {:token, Joken.peek_claims(token)},
          {:config, {:ok, {conf, jwks}}} <- {:config, issuer_configuration(issuer)},
          opts = %{client_jwks: JOSE.JWK.generate_key(16)},
-         ctx = Oidcc.ClientContext.from_manual(conf, jwks, "dummy_id", "dummy_secret", opts),
+         ctx = Oidcc.ClientContext.from_manual(conf, jwks, aud, "dummy_secret", opts),
          opts = %{signing_algs: ctx.provider_configuration.id_token_signing_alg_values_supported},
          {:validate, {:ok, claims}} <- {:validate, Oidcc.Token.validate_jwt(token, ctx, opts)} do
       FederatedCredential.for_issuer(issuer)
       |> FederatedCredential.for_user(user.id)
       |> Console.Repo.all()
-      |> Enum.find(&FederatedCredential.allow?(&1, claims))
+      |> Enum.filter(&FederatedCredential.allow?(&1, claims))
       |> case do
-        %FederatedCredential{scopes: scopes} -> sign_token(user, scopes)
-        _ ->
-          {:error, "no federated credential for #{email} match jwt claims"}
+        [_ | _] = credentials ->
+          scopes = Enum.flat_map(credentials, & &1.scopes || [])
+                   |> Enum.uniq()
+          sign_token(user, scopes)
+        _ -> {:error, "no federated credentials for #{email} match jwt claims"}
       end
     else
-      {:token, _} -> {:error, "invalid jwt format"}
-      {:config, _} -> {:error, "invalid issuer url from jwt"}
-      {:validate, _} -> {:error, "could not validate jwt"}
+      {:token, _} -> {:error, "invalid jwt format, must include iss and aud claims"}
+      {:config, _} = res ->
+        Logger.error("failed to fetch issuer configuration: #{inspect(res)}")
+        {:error, "invalid issuer url from jwt"}
+      {:validate, _} = res ->
+        Logger.error("failed to validate jwt: #{inspect(res)}")
+        {:error, "could not validate jwt"}
     end
   end
 
@@ -358,12 +365,22 @@ defmodule Console.Deployments.Settings do
     end
   end
 
+  @quirks %{
+    quirks: %{
+      allow_issuer_mismatch: true,
+      document_overrides: %{
+        # needed for atypical oidc implementations like Github's
+        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize",
+      }
+    }
+  }
+
   @doc """
   Fetches the issuer configuration from the issuer url
   """
   @decorate cacheable(cache: @cache_adapter, key: {:issuer_configuration, issuer}, opts: [ttl: :timer.minutes(60)])
   def issuer_configuration(issuer) do
-    with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, %{quirks: %{allow_issuer_mismatch: true}}),
+    with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, @quirks),
          {:ok, {jwks, _}} <- Oidcc.ProviderConfiguration.load_jwks(conf.jwks_uri),
       do: {:ok, {conf, jwks}}
   end

@@ -140,10 +140,7 @@ export const ColProvider = columnHelper.accessor(
             size="medium"
             type="secondary"
           />
-          <StackedText
-            first={getClusterDistroName(node?.distro, 'short')}
-            second={getProviderName(node?.provider?.cloud)}
-          />
+          {getClusterDistroName(node?.distro, 'short')}
         </ColClusterContentSC>
       )
     },
@@ -187,7 +184,7 @@ export const ColVersion = columnHelper.accessor(
               first={
                 <div css={{ display: 'flex', flexDirection: 'column' }}>
                   <TabularNumbers>
-                    Current: {toNiceVersion(node?.currentVersion)}
+                    Control Plane: {toNiceVersion(node?.currentVersion)}
                   </TabularNumbers>
                   <TabularNumbers>
                     {node?.self || !node?.version

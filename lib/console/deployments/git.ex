@@ -338,9 +338,15 @@ defmodule Console.Deployments.Git do
   Creates a pull request given a pr automation instance
   """
   @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
-  def create_pull_request(attrs \\ %{}, ctx, id, branch, identifier \\ nil, %User{} = user) do
-    pr = get_pr_automation!(id)
-         |> Repo.preload([:write_bindings, :create_bindings, :connection])
+  def create_pull_request(attrs \\ %{}, ctx, pra, branch, identifier \\ nil, user)
+
+  def create_pull_request(attrs, ctx, id, branch, identifier, user) when is_binary(id) do
+    pra = get_pr_automation!(id)
+    create_pull_request(attrs, ctx, pra, branch, identifier, user)
+  end
+
+  def create_pull_request(attrs, ctx, %PrAutomation{} = pr, branch, identifier, %User{} = user) do
+    pr = Repo.preload(pr, [:write_bindings, :create_bindings, :connection])
     with :ok <- Validation.validate(pr, ctx),
          {:ok, pr} <- allow(pr, user, :create),
          {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do

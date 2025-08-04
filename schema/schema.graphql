@@ -610,7 +610,10 @@ type RootMutationType {
 
   createPullRequest(
     "the id of the PR automation instance to use"
-    id: ID!
+    id: ID
+
+    "the name of the PR automation instance to use"
+    name: String
 
     identifier: String
 
