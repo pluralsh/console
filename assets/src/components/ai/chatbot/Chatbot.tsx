@@ -10,7 +10,10 @@ import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
-import { useChatThreadsQuery } from '../../../generated/graphql.ts'
+import {
+  useChatThreadDetailsQuery,
+  useChatThreadsQuery,
+} from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
@@ -80,7 +83,6 @@ function ChatbotPanelInner() {
     goToThread,
     createNewThread,
     mutationLoading,
-    threadDetailsQuery,
   } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
   const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
@@ -91,19 +93,33 @@ function ChatbotPanelInner() {
     keyPath: ['chatThreads'],
   })
 
+  const {
+    data: threadData,
+    loading: threadLoading,
+    error: threadError,
+    fetchNextPage: threadFetchNextPage,
+    pageInfo: threadPageInfo,
+  } = useFetchPaginatedData(
+    {
+      skip: !currentThreadId,
+      queryHook: useChatThreadDetailsQuery,
+      keyPath: ['chatThread', 'chats'],
+      pageSize: 25,
+    },
+    { id: currentThreadId ?? '' }
+  )
+
   const threads = useMemo(
     () => mapExistingNodes(data?.chatThreads),
     [data?.chatThreads]
   )
 
-  const tools =
-    threadDetailsQuery?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
+  const tools = threadData?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
 
   const isThreadDetailsLoading =
-    (!threadDetailsQuery?.data?.chatThread?.chats &&
-      threadDetailsQuery?.loading) ||
-    (threadDetailsQuery?.loading &&
-      threadDetailsQuery?.data?.chatThread?.id !== currentThreadId)
+    (!threadData?.data?.chatThread?.chats && threadData?.loading) ||
+    (threadData?.loading &&
+      threadData?.data?.chatThread?.id !== currentThreadId)
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
@@ -171,9 +187,7 @@ function ChatbotPanelInner() {
           isActionsPanelOpen={showActionsPanel}
           setIsActionsPanelOpen={setShowActionsPanel}
         />
-        {threadDetailsQuery?.error && (
-          <GqlError error={threadDetailsQuery.error} />
-        )}
+        {threadError?.error && <GqlError error={threadError.error} />}
         {isThreadDetailsLoading && (
           <ChatbotMessagesWrapperSC>
             <LoadingIndicator />
@@ -186,7 +200,13 @@ function ChatbotPanelInner() {
           !isThreadDetailsLoading && (
             <ChatbotPanelThread
               currentThread={currentThread}
-              threadDetailsQuery={threadDetailsQuery}
+              threadDetailsQuery={{
+                fetchNextPage: threadFetchNextPage,
+                loading: threadLoading,
+                data: threadData,
+                error: threadError,
+                pageInfo: threadPageInfo,
+              }}
               showMcpServers={showMcpServers}
               setShowMcpServers={setShowMcpServers}
               showExamplePrompts={showPrompts}

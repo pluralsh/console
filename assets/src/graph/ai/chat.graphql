@@ -282,7 +282,7 @@ query ChatAgentSessionStacks(
 
 query ChatThreadDetails(
   $id: ID!
-  $first: Int = 100
+  $first: Int = 25
   $last: Int
   $after: String
   $before: String

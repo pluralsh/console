@@ -1,14 +1,12 @@
-import { ApolloCache, ApolloError } from '@apollo/client'
+import { ApolloCache } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
 import {
   AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
-  ChatThreadDetailsQuery,
   ChatThreadFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
-  PageInfo,
   useChatThreadDetailsQuery,
   useCloneChatThreadMutation,
   useCreateChatThreadMutation,
@@ -27,7 +25,6 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -55,14 +52,6 @@ type ChatbotContextT = {
   setShowForkToast: (show: boolean) => void
 
   currentThread: Nullable<ChatThreadFragment>
-
-  threadDetailsQuery: {
-    data: Nullable<ChatThreadDetailsQuery>
-    loading: boolean
-    error: Nullable<ApolloError>
-    fetchNextPage: Dispatch<void>
-    pageInfo: PageInfo
-  }
 
   currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
@@ -112,20 +101,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   )
   const [showForkToast, setShowForkToast] = useState(false)
 
-  const {
-    data: threadData,
-    loading: threadLoading,
-    error: threadError,
-    fetchNextPage: threadFetchNextPage,
-    pageInfo: threadPageInfo,
-  } = useFetchPaginatedData(
-    {
-      skip: !currentThreadId,
-      queryHook: useChatThreadDetailsQuery,
-      keyPath: ['chatThreadDetails'],
-    },
-    { id: currentThreadId ?? '' }
-  )
+  const { data: threadData } = useChatThreadDetailsQuery({
+    skip: !currentThreadId,
+    variables: { id: currentThreadId ?? '' },
+  })
 
   const currentThread = useMemo(() => threadData?.chatThread, [threadData])
 
@@ -174,13 +153,6 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         persistedThreadId,
         lastNonAgentThreadId,
         setShowForkToast,
-        threadDetailsQuery: {
-          loading: threadLoading,
-          error: threadError,
-          data: threadData,
-          fetchNextPage: threadFetchNextPage,
-          pageInfo: threadPageInfo,
-        },
       }}
     >
       {children}
@@ -239,7 +211,6 @@ export function useChatbot() {
     agentInitMode,
     setAgentInitMode,
     setShowForkToast,
-    threadDetailsQuery,
   } = useChatbotContext()
 
   const [createThread, { loading: createLoading, error: createError }] =
@@ -304,7 +275,6 @@ export function useChatbot() {
     setAgentInitMode,
     mutationLoading: createLoading || forkLoading,
     mutationError: createError || forkError,
-    threadDetailsQuery,
   }
 }
 

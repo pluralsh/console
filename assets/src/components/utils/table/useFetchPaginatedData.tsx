@@ -13,7 +13,7 @@ import {
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, Dispatch, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
 export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
@@ -53,7 +53,8 @@ export type FetchPaginatedDataResult<TQueryType> = {
   error: any
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
-  fetchNextPage: () => void
+  fetchNextPage: Dispatch<void>
+  fetchMore: Dispatch<any>
   setVirtualSlice: (slice: VirtualSlice) => void
 }
 
@@ -109,10 +110,13 @@ export function useFetchPaginatedData<
   })
 
   const fetchNextPage = useCallback(() => {
-    if (pageInfo?.endCursor) {
+    if (pageInfo?.hasNextPage) {
       fetchMore({
         variables: { after: pageInfo.endCursor },
         updateQuery: (prev, { fetchMoreResult }) => {
+          console.log('Previous data:', prev)
+          console.log('Fetch more result:', fetchMoreResult)
+
           const newConnection = extendConnection(
             reduceNestedData(options.keyPath, prev),
             reduceNestedData(options.keyPath, fetchMoreResult)[queryKey],
@@ -132,6 +136,7 @@ export function useFetchPaginatedData<
     refetch,
     pageInfo,
     fetchNextPage,
+    fetchMore,
     setVirtualSlice,
   }
 }

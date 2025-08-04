@@ -274,7 +274,7 @@ export const ChatbotMessagesWrapper = ({
   pageInfo: any
   fetchNextPage?: Dispatch<void>
 }) => {
-  const DEFAULT_ITEM_SIZE = 100
+  const DEFAULT_ITEM_SIZE = 80
   const [itemHeights, setItemHeights] = useState<number[]>([])
   const handleHeightChange = useCallback(
     (idx: number, height: number) => {
