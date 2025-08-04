@@ -114,9 +114,6 @@ export function useFetchPaginatedData<
       fetchMore({
         variables: { after: pageInfo.endCursor },
         updateQuery: (prev, { fetchMoreResult }) => {
-          console.log('Previous data:', prev)
-          console.log('Fetch more result:', fetchMoreResult)
-
           const newConnection = extendConnection(
             reduceNestedData(options.keyPath, prev),
             reduceNestedData(options.keyPath, fetchMoreResult)[queryKey],
