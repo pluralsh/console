@@ -18,6 +18,12 @@ import { useMemo } from 'react'
 import { mapExistingNodes } from '../../../../utils/graphql.ts'
 import { isEmpty } from 'lodash'
 import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
+import { useTheme } from 'styled-components'
+import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
+import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
+import { StackTypeIcon } from '../../../stacks/common/StackTypeIcon.tsx'
+import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
 
 export function Stacks({ currentThreadId }: { currentThreadId: string }) {
   const { data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -52,7 +58,7 @@ export function Stacks({ currentThreadId }: { currentThreadId: string }) {
     >
       <Table
         hideHeader
-        rowBg="raised"
+        rowBg="base"
         fullHeightWrap
         virtualizeRows
         data={stacks}
@@ -70,17 +76,41 @@ export function Stacks({ currentThreadId }: { currentThreadId: string }) {
 const columnHelper = createColumnHelper<StackChatFragment>()
 
 const columns = [
-  columnHelper.accessor((stack) => stack, {
+  columnHelper.accessor((service) => service, {
     id: 'row',
+    meta: { gridTemplate: '300' },
     cell: function Cell({ getValue }) {
+      const theme = useTheme()
       const stack = getValue()
 
       return (
         <Flex
-          align="center"
+          direction="column"
           gap="xsmall"
+          padding="xxsmall"
+          width="100%"
         >
-          {stack.name}
+          <Flex
+            align="center"
+            gap="xsmall"
+            flex={1}
+          >
+            <IconFrame
+              icon={<StackTypeIcon stackType={stack.type} />}
+              size="small"
+            />
+            <Body2P css={{ maxWidth: 140, ...TRUNCATE }}>{stack.name}</Body2P>
+            <Flex flex={1} />
+            <AiInsightSummaryIcon insight={stack.insight} />
+            <StackStatusChip
+              size="small"
+              status={stack.status}
+              deleting={!!stack?.deletedAt}
+            />
+          </Flex>
+          <CaptionP css={{ color: theme.colors['text-xlight'] }}>
+            {stack.repository?.url}
+          </CaptionP>
         </Flex>
       )
     },

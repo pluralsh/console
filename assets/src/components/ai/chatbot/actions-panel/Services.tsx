@@ -84,7 +84,6 @@ const columns = [
   columnHelper.accessor((service) => service, {
     id: 'row',
     meta: { gridTemplate: '300' },
-
     cell: function Cell({ getValue }) {
       const theme = useTheme()
       const service = getValue()
