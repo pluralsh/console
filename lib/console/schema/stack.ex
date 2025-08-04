@@ -97,6 +97,8 @@ defmodule Console.Schema.Stack do
     field :name,            :string
     field :type,            Type
     field :status,          Status
+    field :interval,        :string
+    field :next_poll_at,    :utc_datetime_usec
     field :paused,          :boolean, default: false
     field :approval,        :boolean
     field :sha,             :string
@@ -156,6 +158,11 @@ defmodule Console.Schema.Stack do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(s in query, where: is_nil(s.next_poll_at) or s.next_poll_at < ^now)
   end
 
   def lock(query \\ __MODULE__), do: from(s in query, lock: "FOR UPDATE")
@@ -219,7 +226,7 @@ defmodule Console.Schema.Stack do
     )
   end
 
-  @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id)a
+  @valid ~w(name type paused interval actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 
 
@@ -243,6 +250,7 @@ defmodule Console.Schema.Stack do
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:actor_id)
     |> unique_constraint(:name)
+    |> duration(:interval)
     |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -260,6 +268,23 @@ defmodule Console.Schema.Stack do
       end
     end)
   end
+
+  def next_poll_changeset(model, interval) do
+    duration = poll_duration(interval)
+    jittered = Duration.add(duration, Duration.new!(second: jitter(duration)))
+
+    Ecto.Changeset.change(model, %{
+      next_poll_at: DateTime.shift(DateTime.utc_now(), jittered)
+    })
+  end
+
+  def poll_duration(interval) when is_binary(interval) do
+    case parse_duration(interval) do
+      {:ok, duration} -> duration
+      {:error, _} -> poll_duration(nil)
+    end
+  end
+  def poll_duration(_), do: Duration.new!(minute: 5)
 
   def complete_changeset(model, attrs) do
     model

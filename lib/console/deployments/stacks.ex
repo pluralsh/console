@@ -455,6 +455,7 @@ defmodule Console.Deployments.Stacks do
 
   defp unlock(%Stack{} = s) do
     Stack.lock_changeset(s, %{locked_at: nil})
+    |> Stack.next_poll_changeset(s.interval)
     |> Repo.update()
   end
 
@@ -507,9 +508,16 @@ defmodule Console.Deployments.Stacks do
           err
       end
     end)
+    |> polled(pr, stack.interval)
   end
 
   def poll(_), do: {:error, "invalid parent"}
+
+  defp polled(result, %schema{} = resource, interval) do
+    schema.next_poll_changeset(resource, interval)
+    |> Repo.update()
+    result
+  end
 
   defp on_new_sha(repo, ref, sha, ps, fun) do
     case Discovery.sha(repo, ref) do

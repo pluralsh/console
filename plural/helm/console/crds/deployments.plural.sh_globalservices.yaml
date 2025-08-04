@@ -75,6 +75,10 @@ spec:
                 - RKE
                 - K3S
                 type: string
+              interval:
+                description: Interval specifies the interval at which the global service
+                  will be reconciled, default is 10m
+                type: string
               mgmt:
                 description: Whether to include management clusters in the target
                   set
