@@ -182,6 +182,11 @@ type ConsoleClient interface {
 	UpsertPrGovernance(ctx context.Context, attributes console.PrGovernanceAttributes) (*console.PrGovernanceFragment, error)
 	DeletePrGovernance(ctx context.Context, id string) error
 	GetPrGovernance(ctx context.Context, id, name *string) (*console.PrGovernanceFragment, error)
+	CreateFederatedCredential(ctx context.Context, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error)
+	GetFederatedCredential(ctx context.Context, id string) (*console.FederatedCredentialFragment, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error)
+	DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error)
+	IsFederatedCredentialExists(ctx context.Context, id string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {

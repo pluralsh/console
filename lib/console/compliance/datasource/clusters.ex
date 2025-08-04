@@ -20,7 +20,9 @@ defmodule Console.Compliance.Datasource.Clusters do
         namespace_count: c.namespace_count,
         pod_count: c.pod_count,
         cpu_total: c.cpu_total,
-        memory_total: c.memory_total
+        memory_total: c.memory_total,
+        availability_zones: c.availability_zones,
+        created_at: c.inserted_at
       }
     end)
   end
