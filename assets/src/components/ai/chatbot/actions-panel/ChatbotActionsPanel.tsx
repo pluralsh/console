@@ -1,19 +1,12 @@
 import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import {
-  useAgentSessionPRsQuery,
-  useAgentSessionServicesQuery,
-  useAgentSessionStacksQuery,
-} from 'generated/graphql'
+import { useChatAgentSessionQuery } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 import { useChatbot } from '../../AIContext.tsx'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
-import { useMemo } from 'react'
+
 import {
   Accordion,
-  AccordionItem,
   ArrowTopRightIcon,
   Button,
   Flex,
@@ -28,9 +21,11 @@ import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
 import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ComponentIcon } from '../../../cd/services/service/component/misc.tsx'
-import { isEmpty } from 'lodash'
 import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
+import { Services } from './Services.tsx'
+import { Stacks } from './Stacks.tsx'
+import { PullRequests } from './PullRequests.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -43,47 +38,16 @@ export function ChatbotActionsPanel({
   const theme = useTheme()
   const { currentThread } = useChatbot()
 
-  const prq = useFetchPaginatedData(
-    {
-      skip: !currentThread?.id,
-      queryHook: useAgentSessionPRsQuery,
-      keyPath: ['chatThread', 'session', 'pullRequests'],
-    },
-    { id: currentThread?.id ?? '' }
-  )
-  const pullRequest = prq.data?.chatThread?.session?.pullRequest
-  const pullRequests = useMemo(
-    () => mapExistingNodes(prq.data?.chatThread?.session?.pullRequests),
-    [prq.data?.chatThread?.session?.pullRequests]
-  )
+  const { data } = useChatAgentSessionQuery({
+    skip: !currentThread?.id,
+    variables: { id: currentThread?.id ?? '' },
+  })
 
-  const sdq = useFetchPaginatedData(
-    {
-      skip: !currentThread?.id,
-      queryHook: useAgentSessionServicesQuery,
-      keyPath: ['chatThread', 'session', 'serviceDeployments'],
-    },
-    { id: currentThread?.id ?? '' }
-  )
-  const service = sdq.data?.chatThread?.session?.service
-  const services = useMemo(
-    () => mapExistingNodes(sdq.data?.chatThread?.session?.serviceDeployments),
-    [sdq.data?.chatThread?.session?.serviceDeployments]
-  )
+  const pullRequest = data?.chatThread?.session?.pullRequest
+  const service = data?.chatThread?.session?.service
+  const stack = data?.chatThread?.session?.stack
 
-  const isq = useFetchPaginatedData(
-    {
-      skip: !currentThread?.id,
-      queryHook: useAgentSessionStacksQuery,
-      keyPath: ['chatThread', 'session', 'stacks'],
-    },
-    { id: currentThread?.id ?? '' }
-  )
-  const stack = isq.data?.chatThread?.session?.stack
-  const stacks = useMemo(
-    () => mapExistingNodes(isq.data?.chatThread?.session?.stacks),
-    [isq.data?.chatThread?.session?.stacks]
-  )
+  if (!currentThread?.id) return null
 
   // TODO: Handle loading and error states for queries.
 
@@ -96,10 +60,9 @@ export function ChatbotActionsPanel({
         <Body2BoldP>Actions panel</Body2BoldP>
       </HeaderSC>
       <div css={{ overflow: 'auto' }}>
-        {/* Pull request */}
         {pullRequest && (
-          <EntrySC>
-            <SubheaderSC>
+          <ActionItemSC>
+            <ActionItemHeaderSC>
               <IconFrame
                 icon={<GitPullIcon />}
                 size="small"
@@ -114,7 +77,7 @@ export function ChatbotActionsPanel({
                   size="small"
                 />
               </Flex>
-            </SubheaderSC>
+            </ActionItemHeaderSC>
             <CaptionP css={{ color: theme.colors['text-xlight'] }}>
               {pullRequest.title}
             </CaptionP>
@@ -138,13 +101,12 @@ export function ChatbotActionsPanel({
                 View PR
               </Button>
             </Flex>
-          </EntrySC>
+          </ActionItemSC>
         )}
 
-        {/* Service */}
         {service && (
-          <EntrySC>
-            <SubheaderSC>
+          <ActionItemSC>
+            <ActionItemHeaderSC>
               <IconFrame
                 icon={<ComponentIcon kind="service" />}
                 size="small"
@@ -160,7 +122,7 @@ export function ChatbotActionsPanel({
                   size="small"
                 />
               </Flex>
-            </SubheaderSC>
+            </ActionItemHeaderSC>
             <CaptionP css={{ color: theme.colors['text-xlight'] }}>
               {service.name}
             </CaptionP>
@@ -174,13 +136,12 @@ export function ChatbotActionsPanel({
                 View service
               </Button>
             </Flex>
-          </EntrySC>
+          </ActionItemSC>
         )}
 
-        {/* Stack */}
         {stack && (
-          <EntrySC>
-            <SubheaderSC>
+          <ActionItemSC>
+            <ActionItemHeaderSC>
               <IconFrame
                 icon={<StackIcon />}
                 size="small"
@@ -196,7 +157,7 @@ export function ChatbotActionsPanel({
                   size="small"
                 />
               </Flex>
-            </SubheaderSC>
+            </ActionItemHeaderSC>
             <CaptionP css={{ color: theme.colors['text-xlight'] }}>
               {stack.name}
             </CaptionP>
@@ -208,70 +169,17 @@ export function ChatbotActionsPanel({
                 View stack
               </Button>
             </Flex>
-          </EntrySC>
+          </ActionItemSC>
         )}
 
-        {/* Accordion */}
-        <AccordionSC type="multiple">
-          <>
-            {/* TODO: Pull requests. */}
-            {!isEmpty(pullRequests) && (
-              <AccordionItem
-                key="prs"
-                value="prs"
-                trigger={
-                  <SubheaderSC>
-                    <IconFrame
-                      icon={<GitPullIcon />}
-                      size="small"
-                    />
-                    Pull requests
-                  </SubheaderSC>
-                }
-              >
-                ...
-              </AccordionItem>
-            )}
-
-            {/* TODO: Services. */}
-            {!isEmpty(services) && (
-              <AccordionItem
-                key="services"
-                value="services"
-                trigger={
-                  <SubheaderSC>
-                    <IconFrame
-                      icon={<GitPullIcon />}
-                      size="small"
-                    />
-                    Services
-                  </SubheaderSC>
-                }
-              >
-                ...
-              </AccordionItem>
-            )}
-
-            {/* TODO: Stacks. */}
-            {!isEmpty(stacks) && (
-              <AccordionItem
-                key="stacks"
-                value="stacks"
-                trigger={
-                  <SubheaderSC>
-                    <IconFrame
-                      icon={<GitPullIcon />}
-                      size="small"
-                    />
-                    Stacks
-                  </SubheaderSC>
-                }
-              >
-                ...
-              </AccordionItem>
-            )}
-          </>
-        </AccordionSC>
+        <Accordion
+          type="multiple"
+          css={{ border: 'none', background: theme.colors['fill-accent'] }}
+        >
+          <PullRequests currentThreadId={currentThread.id} />
+          <Services currentThreadId={currentThread.id} />
+          <Stacks currentThreadId={currentThread.id} />
+        </Accordion>
       </div>
     </SimpleFlyover>
   )
@@ -286,7 +194,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   minHeight: CHATBOT_HEADER_HEIGHT,
 }))
 
-const EntrySC = styled.div(({ theme }) => ({
+const ActionItemSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
@@ -298,15 +206,10 @@ const EntrySC = styled.div(({ theme }) => ({
   overflow: 'auto',
 }))
 
-const SubheaderSC = styled.div(({ theme }) => ({
+export const ActionItemHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2Bold,
   alignItems: 'center',
   display: 'flex',
   flex: 1,
   gap: theme.spacing.xsmall,
-}))
-
-const AccordionSC = styled(Accordion)(({ theme }) => ({
-  border: 'none',
-  background: theme.colors['fill-accent'],
 }))
