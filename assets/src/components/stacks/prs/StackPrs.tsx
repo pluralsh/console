@@ -70,26 +70,27 @@ export function StackPrs() {
 }
 
 const columnHelper = createColumnHelper<PullRequestEdge>()
-const ColAccordion = columnHelper.accessor((edge) => edge.node, {
-  id: 'accordion',
-  cell: function Cell({ getValue, table, row }) {
-    const pr = getValue()
-    const isOpen = table?.options?.meta?.openRowIdx === row.index
 
-    const toggleOpen = useCallback(
-      (open: boolean) =>
-        table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
-      [row.index, table?.options?.meta]
-    )
+const cols = [
+  columnHelper.accessor((edge) => edge.node, {
+    id: 'accordion',
+    cell: function Cell({ getValue, table, row }) {
+      const pr = getValue()
+      const isOpen = table?.options?.meta?.openRowIdx === row.index
 
-    return pr ? (
-      <PrStackRunsAccordion
-        isOpen={isOpen}
-        toggleOpen={toggleOpen}
-        pr={pr}
-      />
-    ) : null
-  },
-})
+      const toggleOpen = useCallback(
+        (open: boolean) =>
+          table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
+        [row.index, table?.options?.meta]
+      )
 
-const cols = [ColAccordion]
+      return pr ? (
+        <PrStackRunsAccordion
+          isOpen={isOpen}
+          toggleOpen={toggleOpen}
+          pr={pr}
+        />
+      ) : null
+    },
+  }),
+]

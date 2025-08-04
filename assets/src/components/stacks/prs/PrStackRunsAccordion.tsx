@@ -111,6 +111,8 @@ function PrStackRunsAccordionTrigger({
         icon={<ArrowTopRightIcon />}
         as={EndLinkSC}
         to={pr.url}
+        target="_blank"
+        rel="noopener noreferrer"
       />
     </TriggerWrapperSC>
   )
