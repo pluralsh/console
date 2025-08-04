@@ -11366,6 +11366,8 @@ export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: 
 
 export type AgentSessionFragment = { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null };
 
+export type ServiceDeploymentChatFragment = { __typename?: 'ServiceDeployment', protect?: boolean | null, id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null };
+
 export type AiDeltaFragment = { __typename?: 'AiDelta', seq: number, message?: number | null, role?: AiRole | null, content: string, tool?: { __typename?: 'ToolDelta', id?: string | null, name?: string | null } | null };
 
 export type AiPinsQueryVariables = Exact<{
@@ -14918,6 +14920,31 @@ export const CloudConnectionTinyFragmentDoc = gql`
   provider
 }
     `;
+export const ServiceDeploymentTinyFragmentDoc = gql`
+    fragment ServiceDeploymentTiny on ServiceDeployment {
+  id
+  name
+  cluster {
+    ...ClusterMinimal
+  }
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+}
+    ${ClusterMinimalFragmentDoc}`;
+export const ServiceDeploymentChatFragmentDoc = gql`
+    fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+    ${ServiceDeploymentTinyFragmentDoc}
+${AiInsightSummaryFragmentDoc}`;
 export const AiDeltaFragmentDoc = gql`
     fragment AiDelta on AiDelta {
   seq
@@ -16832,21 +16859,6 @@ export const FlowBasicWithBindingsFragmentDoc = gql`
 }
     ${FlowBasicFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
-export const ServiceDeploymentTinyFragmentDoc = gql`
-    fragment ServiceDeploymentTiny on ServiceDeployment {
-  id
-  name
-  cluster {
-    ...ClusterMinimal
-  }
-  componentStatus
-  status
-  errors {
-    message
-    source
-  }
-}
-    ${ClusterMinimalFragmentDoc}`;
 export const PreviewEnvironmentInstanceFragmentDoc = gql`
     fragment PreviewEnvironmentInstance on PreviewEnvironmentInstance {
   id
@@ -31965,6 +31977,7 @@ export const namedOperations = {
     ChatThreadSettings: 'ChatThreadSettings',
     CloudConnectionTiny: 'CloudConnectionTiny',
     AgentSession: 'AgentSession',
+    ServiceDeploymentChat: 'ServiceDeploymentChat',
     AiDelta: 'AiDelta',
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',

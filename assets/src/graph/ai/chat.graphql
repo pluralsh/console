@@ -120,6 +120,14 @@ fragment AgentSession on AgentSession {
   }
 }
 
+fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+
 fragment AiDelta on AiDelta {
   seq
   message
