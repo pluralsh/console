@@ -18,6 +18,10 @@ import { useMemo } from 'react'
 import { mapExistingNodes } from '../../../../utils/graphql.ts'
 import { isEmpty } from 'lodash'
 import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
+import { useTheme } from 'styled-components'
+import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
+import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
 
 export function PullRequests({ currentThreadId }: { currentThreadId: string }) {
   const { data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -70,17 +74,35 @@ export function PullRequests({ currentThreadId }: { currentThreadId: string }) {
 const columnHelper = createColumnHelper<PullRequestFragment>()
 
 const columns = [
-  columnHelper.accessor((pullRequest) => pullRequest, {
+  columnHelper.accessor((service) => service, {
     id: 'row',
+    meta: { gridTemplate: '300' },
     cell: function Cell({ getValue }) {
-      const pullRequest = getValue()
+      const theme = useTheme()
+      const pr = getValue()
 
       return (
         <Flex
-          align="center"
+          direction="column"
           gap="xsmall"
+          padding="xxsmall"
+          width="100%"
         >
-          {pullRequest.title}
+          <Flex
+            align="center"
+            gap="xsmall"
+            flex={1}
+          >
+            <Body2P css={{ maxWidth: 140, ...TRUNCATE }}>{pr.title}</Body2P>
+            <Flex flex={1} />
+            <PrStatusChip
+              size="small"
+              status={pr.status}
+            />
+          </Flex>
+          <CaptionP css={{ color: theme.colors['text-xlight'] }}>
+            {pr.url}
+          </CaptionP>
         </Flex>
       )
     },
