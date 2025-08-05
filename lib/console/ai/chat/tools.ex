@@ -32,12 +32,14 @@ defmodule Console.AI.Chat.Tools do
     Agent.Stack,
     Agent.Query,
     Agent.Schema,
-    Agent.Search
+    Agent.Search,
+    Agent.Role
   ]
 
   @agent_manifests_tools [
     Agent.Discovery,
-    Agent.ApiSpec
+    Agent.ApiSpec,
+    Agent.Role
   ]
 
   @agent_provisioning_tools [
@@ -49,7 +51,8 @@ defmodule Console.AI.Chat.Tools do
     Agent.ServiceComponent,
     # Agent.Search,
     Agent.Stack,
-    Agent.CallPr
+    Agent.CallPr,
+    Agent.Role
   ]
   @agent_planned_tools [Agent.CallPr]
 
