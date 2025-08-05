@@ -6856,6 +6856,8 @@ export type RootMutationType = {
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
+  /** Refreshes an insight, which will trigger a new AI insight generation in the background */
+  refreshInsight?: Maybe<AiInsight>;
   registerGithubApp?: Maybe<ScmConnection>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
@@ -7637,6 +7639,11 @@ export type RootMutationTypeProceedArgs = {
 export type RootMutationTypeReconfigureRenovateArgs = {
   repos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   serviceId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRefreshInsightArgs = {
+  insightId: Scalars['ID']['input'];
 };
 
 
@@ -11667,6 +11674,13 @@ export type AiFixPrMutationVariables = Exact<{
 
 
 export type AiFixPrMutation = { __typename?: 'RootMutationType', aiFixPr?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null };
+
+export type RefreshInsightMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RefreshInsightMutation = { __typename?: 'RootMutationType', refreshInsight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type McpServerFragment = { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null };
 
@@ -19819,6 +19833,39 @@ export function useAiFixPrMutation(baseOptions?: Apollo.MutationHookOptions<AiFi
 export type AiFixPrMutationHookResult = ReturnType<typeof useAiFixPrMutation>;
 export type AiFixPrMutationResult = Apollo.MutationResult<AiFixPrMutation>;
 export type AiFixPrMutationOptions = Apollo.BaseMutationOptions<AiFixPrMutation, AiFixPrMutationVariables>;
+export const RefreshInsightDocument = gql`
+    mutation RefreshInsight($id: ID!) {
+  refreshInsight(insightId: $id) {
+    ...AiInsight
+  }
+}
+    ${AiInsightFragmentDoc}`;
+export type RefreshInsightMutationFn = Apollo.MutationFunction<RefreshInsightMutation, RefreshInsightMutationVariables>;
+
+/**
+ * __useRefreshInsightMutation__
+ *
+ * To run a mutation, you first call `useRefreshInsightMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRefreshInsightMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [refreshInsightMutation, { data, loading, error }] = useRefreshInsightMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRefreshInsightMutation(baseOptions?: Apollo.MutationHookOptions<RefreshInsightMutation, RefreshInsightMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RefreshInsightMutation, RefreshInsightMutationVariables>(RefreshInsightDocument, options);
+      }
+export type RefreshInsightMutationHookResult = ReturnType<typeof useRefreshInsightMutation>;
+export type RefreshInsightMutationResult = Apollo.MutationResult<RefreshInsightMutation>;
+export type RefreshInsightMutationOptions = Apollo.BaseMutationOptions<RefreshInsightMutation, RefreshInsightMutationVariables>;
 export const McpServersDocument = gql`
     query McpServers($first: Int = 100, $after: String, $q: String) {
   mcpServers(first: $first, after: $after, q: $q) {
@@ -31892,6 +31939,7 @@ export const namedOperations = {
     AddChatContext: 'AddChatContext',
     CreateAgentSession: 'CreateAgentSession',
     AiFixPr: 'AiFixPr',
+    RefreshInsight: 'RefreshInsight',
     UpsertMcpServer: 'UpsertMcpServer',
     DeleteMcpServer: 'DeleteMcpServer',
     UpsertAlertResolution: 'UpsertAlertResolution',

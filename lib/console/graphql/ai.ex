@@ -445,6 +445,14 @@ defmodule Console.GraphQl.AI do
       resolve &AI.thread_pr/2
     end
 
+    @desc "Refreshes an insight, which will trigger a new AI insight generation in the background"
+    field :refresh_insight, :ai_insight do
+      middleware Authenticated
+      arg :insight_id, non_null(:id)
+
+      resolve &AI.refresh_insight/2
+    end
+
     @desc "it will add additional context to the given chat from a source object"
     field :add_chat_context, list_of(:chat) do
       middleware Authenticated

@@ -1,5 +1,5 @@
 defmodule Console.Schema.Alert do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Project,
     Cluster,
@@ -26,6 +26,8 @@ defmodule Console.Schema.Alert do
     field :annotations, :map
     field :url,         :string
 
+    field :ai_poll_at, :utc_datetime_usec
+
     belongs_to :insight, AiInsight, on_replace: :update
 
     belongs_to :project, Project
@@ -37,6 +39,14 @@ defmodule Console.Schema.Alert do
     has_many :tags, Tag, on_replace: :delete
 
     timestamps()
+  end
+
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
   end
 
   def firing(query \\ __MODULE__) do
@@ -89,7 +99,7 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.severity in ^severities)
   end
 
-  @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id insight_id service_id)a
+  @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id insight_id service_id ai_poll_at)a
 
   def changeset(model, attrs) do
     model

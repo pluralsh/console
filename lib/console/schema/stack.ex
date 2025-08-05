@@ -110,6 +110,7 @@ defmodule Console.Schema.Stack do
     field :polled_sha,      :string
     field :variables,       :map
     field :agent_id,        :string
+    field :ai_poll_at,      :utc_datetime_usec
 
     field :actor_changed, :boolean, virtual: true
     field :runnable,      :boolean, virtual: true
@@ -162,7 +163,7 @@ defmodule Console.Schema.Stack do
 
   def pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(s in query, where: is_nil(s.next_poll_at) or s.next_poll_at < ^now)
+    from(s in query, where: is_nil(s.next_poll_at) or s.next_poll_at < ^now, order_by: [asc: :next_poll_at])
   end
 
   def lock(query \\ __MODULE__), do: from(s in query, lock: "FOR UPDATE")
@@ -215,6 +216,11 @@ defmodule Console.Schema.Stack do
     from(s in query, where: s.status == ^status)
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query, where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now, order_by: [asc: :ai_poll_at])
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   def stats(query \\ __MODULE__) do
@@ -226,7 +232,7 @@ defmodule Console.Schema.Stack do
     )
   end
 
-  @valid ~w(name type paused interval actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id)a
+  @valid ~w(name type paused interval actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id ai_poll_at)a
   @immutable ~w(project_id)a
 
 

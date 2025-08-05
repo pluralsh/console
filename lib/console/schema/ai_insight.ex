@@ -19,6 +19,7 @@ defmodule Console.Schema.AiInsight do
     field :sha,     :string
     field :text,    :string
     field :summary, :string
+    field :force,   :boolean
 
     embeds_many :error, Error, on_replace: :delete do
       field :source,  :string
@@ -55,6 +56,7 @@ defmodule Console.Schema.AiInsight do
     from(i in query, where: coalesce(i.updated_at, i.inserted_at) <= ^too_old)
   end
 
+  def memoized?(%__MODULE__{force: true}), do: false
   def memoized?(%__MODULE__{text: nil}), do: false
   def memoized?(%__MODULE__{error: [_ | _]} = is, _), do: Timex.after?(ts(is), expiry(@fast))
   def memoized?(%__MODULE__{sha: sha} = is, sha), do: Timex.after?(ts(is), expiry(@slow))
@@ -67,7 +69,7 @@ defmodule Console.Schema.AiInsight do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(sha summary text)a)
+    |> cast(attrs, ~w(sha summary text force)a)
     |> cast_embed(:error, with: &error_changeset/2)
     |> cast_assoc(:evidence)
   end

@@ -247,4 +247,33 @@ defmodule Console.GraphQl.AIMutationsTest do
       assert clone["flow"]["id"] == thread.flow_id
     end
   end
+
+  describe "refresInsight" do
+    test "it can refresh an insight" do
+      user = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: user.id}])
+      insight = insert(:ai_insight, service: service)
+
+      {:ok, %{data: %{"refreshInsight" => refreshed}}} = run_query("""
+        mutation Refresh($id: ID!) {
+          refreshInsight(insightId: $id) { id }
+        }
+      """, %{"id" => insight.id}, %{current_user: user})
+
+      assert refreshed["id"] == insight.id
+      assert refetch(insight).force
+      assert refetch(service).ai_poll_at
+    end
+
+    test "non-readers cannot refresh" do
+      service = insert(:service)
+      insight = insert(:ai_insight, service: service)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Refresh($id: ID!) {
+          refreshInsight(insightId: $id) { id }
+        }
+      """, %{"id" => insight.id}, %{current_user: insert(:user)})
+    end
+  end
 end
