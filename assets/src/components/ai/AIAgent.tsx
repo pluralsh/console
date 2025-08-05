@@ -144,8 +144,10 @@ const columns = [
               },
             },
           }}
-          onClick={() => {
+          // this needs to be pointerDown instead of onclick to prevent closing the action panel (they need to use the same event type)
+          onPointerDown={(e) => {
             if (agentSession?.thread) {
+              e.stopPropagation()
               goToThread(agentSession.thread.id)
             }
           }}

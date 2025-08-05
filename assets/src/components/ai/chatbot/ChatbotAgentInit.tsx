@@ -48,10 +48,8 @@ export function ChatbotAgentInit() {
       <Flex
         direction="column"
         gap="large"
-        css={{
-          padding: theme.spacing.medium,
-          paddingTop: theme.spacing.xxxxxlarge,
-        }}
+        padding="medium"
+        paddingTop={theme.spacing.xxxxxlarge}
       >
         <Flex
           direction="column"

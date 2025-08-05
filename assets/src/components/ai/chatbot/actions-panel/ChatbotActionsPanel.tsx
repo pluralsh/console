@@ -130,7 +130,8 @@ export function ChatbotActionsPanel({
 
   useEffect(() => {
     if (hasData) setOpen(true)
-  }, [hasData, setOpen])
+    // want this to also recheck when the thread changes
+  }, [hasData, setOpen, currentThread?.id])
 
   if (!currentThread?.id) return null
 
@@ -138,6 +139,7 @@ export function ChatbotActionsPanel({
     <SimpleFlyover
       isOpen={isOpen}
       zIndex={zIndex}
+      css={{ width: 400 }}
     >
       <HeaderSC>
         <Body2BoldP>Actions panel</Body2BoldP>

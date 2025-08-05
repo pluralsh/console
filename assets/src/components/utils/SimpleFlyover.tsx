@@ -1,5 +1,6 @@
 // similar to our Flyover component, but more basic and doesn't do a modal lock on the screen
 import { usePrevious } from '@pluralsh/design-system'
+import { ComponentPropsWithRef } from '@react-spring/web'
 import styled from 'styled-components'
 
 const ANIMATION_SPEED = '300ms'
@@ -8,11 +9,12 @@ export function SimpleFlyover({
   isOpen,
   zIndex = 0,
   children,
+  ...props
 }: {
   children: React.ReactNode
   isOpen: boolean
   zIndex?: number
-}) {
+} & ComponentPropsWithRef<typeof SimpleFlyoverSC>) {
   const prevOpen = usePrevious(isOpen)
 
   return (
@@ -20,6 +22,7 @@ export function SimpleFlyover({
       $shouldAnimate={!!isOpen !== !!prevOpen}
       data-state={isOpen ? 'open' : 'closed'}
       $zIndex={zIndex}
+      {...props}
     >
       {children}
     </SimpleFlyoverSC>
@@ -28,7 +31,7 @@ export function SimpleFlyover({
 
 const SimpleFlyoverSC = styled.div<{
   $zIndex?: number
-  $shouldAnimate: boolean
+  $shouldAnimate?: boolean
 }>(({ theme, $shouldAnimate, $zIndex = 0 }) => {
   const openState = { transform: 'translateX(0%)', opacity: 1 }
   const closedState = { transform: 'translateX(100%)', opacity: 0 }
