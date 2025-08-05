@@ -233,7 +233,12 @@ export function ChatbotActionsPanel({
               <Button
                 small
                 onClick={() =>
-                  navigate(getServiceDetailsPath({ serviceId: service?.id }))
+                  navigate(
+                    getServiceDetailsPath({
+                      serviceId: service?.id,
+                      clusterId: service?.cluster?.id,
+                    })
+                  )
                 }
               >
                 View service
