@@ -5,17 +5,29 @@ import { ChatInput } from './input/ChatInput.tsx'
 import { Body1BoldP, Body2P } from '../../utils/typography/Text.tsx'
 import { useChatbot } from '../AIContext.tsx'
 import { Chip, Flex, Toast } from '@pluralsh/design-system'
-import { useCreateAgentSessionMutation } from '../../../generated/graphql.ts'
-import { useCallback } from 'react'
-
-const examplePrompts = [
-  'How you can help me with my coding tasks?',
-  'Can you create a PR to fix the bug in my code?',
-] // TODO: Update these.
+import {
+  AgentSessionType,
+  useCreateAgentSessionMutation,
+} from '../../../generated/graphql.ts'
+import { useCallback, useMemo } from 'react'
 
 export function ChatbotAgentInit() {
   const theme = useTheme()
   const { goToThread, agentInitMode: type } = useChatbot()
+
+  const examplePrompts = useMemo(
+    () =>
+      type === AgentSessionType.Terraform
+        ? [
+            'Double the size of the Grafana db for me',
+            'Use m5.large node types for the demo-dev cluster',
+          ]
+        : [
+            'Double the size of the Elasticsearch cluster for me',
+            'Add a "platform.plural.sh/role: metrics" node label selector to the vmstorage resource',
+          ],
+    [type]
+  )
 
   const [createAgentSession, { error }] = useCreateAgentSessionMutation({
     onCompleted: ({ createAgentSession }) => {
