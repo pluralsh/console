@@ -67,7 +67,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionPRsQuery,
       keyPath: ['chatThread', 'session', 'pullRequests'],
-      skip: !currentThread?.id || !isOpen,
+      skip: !currentThread?.id,
     },
     { id: currentThread?.id ?? '' }
   )
@@ -81,7 +81,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionServicesQuery,
       keyPath: ['chatThread', 'session', 'serviceDeployments'],
-      skip: !currentThread?.id || !isOpen,
+      skip: !currentThread?.id,
     },
     { id: currentThread?.id ?? '' }
   )
@@ -98,7 +98,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionStacksQuery,
       keyPath: ['chatThread', 'session', 'stacks'],
-      skip: !currentThread?.id || !isOpen,
+      skip: !currentThread?.id,
     },
     { id: currentThread?.id ?? '' }
   )
