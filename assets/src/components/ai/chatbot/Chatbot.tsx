@@ -179,8 +179,9 @@ function ChatbotPanelInner() {
       )}
       {currentThread?.session && (
         <ChatbotActionsPanel
-          zIndex={1}
           isOpen={showActionsPanel}
+          setOpen={setShowActionsPanel}
+          zIndex={1}
         />
       )}
       <MainContentWrapperSC>

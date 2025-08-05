@@ -26,12 +26,15 @@ import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 import { Services } from './Services.tsx'
 import { Stacks } from './Stacks.tsx'
 import { PullRequests } from './PullRequests.tsx'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 
 export function ChatbotActionsPanel({
   isOpen,
+  setOpen,
   zIndex,
 }: {
   isOpen: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
   zIndex?: number
 }) {
   const navigate = useNavigate()
@@ -46,6 +49,12 @@ export function ChatbotActionsPanel({
   const pullRequest = data?.chatThread?.session?.pullRequest
   const service = data?.chatThread?.session?.service
   const stack = data?.chatThread?.session?.stack
+
+  const isEmpty = !pullRequest && !service && !stack // TODO: Check lists as well.
+
+  useEffect(() => {
+    if (!isEmpty) setOpen(true)
+  }, [setOpen, isEmpty])
 
   if (!currentThread?.id) return null
 
