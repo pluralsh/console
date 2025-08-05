@@ -43,13 +43,13 @@ defmodule Console.AI.Chat.Tools do
   @agent_provisioning_tools [
     # Agent.Query,
     # Agent.Schema,
-    Agent.Plan,
     Agent.Catalogs,
     Agent.PrAutomations,
     Agent.Clusters,
     Agent.ServiceComponent,
     # Agent.Search,
-    Agent.Stack
+    Agent.Stack,
+    Agent.CallPr
   ]
   @agent_planned_tools [Agent.CallPr]
 
