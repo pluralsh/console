@@ -127,8 +127,8 @@ export function ChatbotActionsPanel({
   )
 
   useEffect(() => {
-    if (!isOpen && hasData) setOpen(true)
-  }, [hasData, isOpen, setOpen])
+    if (hasData) setOpen(true)
+  }, [hasData, setOpen])
 
   if (!currentThread?.id) return null
 
