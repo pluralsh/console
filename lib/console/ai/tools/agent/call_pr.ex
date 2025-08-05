@@ -26,7 +26,7 @@ defmodule Console.AI.Tools.Agent.CallPr do
         content: "Calling pr #{pra.name} (id=#{pra.id}), the user will be prompted for how to configure this PR in product (don't reiterate what configuration is necessary)",
         type: :pr_call,
         pr_automation_id: pra_id,
-        attributes: %{pr_call: %{context: model.context}}
+        attributes: %{pr_call: %{context: get_context(model)}}
       }}
     end)
   end
@@ -37,4 +37,12 @@ defmodule Console.AI.Tools.Agent.CallPr do
       pra -> fun.(pra)
     end
   end
+
+  defp get_context(%__MODULE__{context: ctx}) when is_binary(ctx) do
+    case Jason.decode(ctx) do
+      {:ok, %{} = map} -> map
+      _ -> nil
+    end
+  end
+  defp get_context(%__MODULE__{context: ctx}), do: nil
 end

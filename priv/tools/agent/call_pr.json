@@ -6,11 +6,8 @@
             "description": "The id of the pr automation to call.  Use this to actually provision some infrastructure."
         },
         "context": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            },
-            "description": "Pr Automation context for the given call, this should fill out the entries in the configuration field of the pr automation with decent initial configurations a user can modify."
+            "type": "string",
+            "description": "A json encoded string valued map for the given call, this should fill out the entries in the configuration field of the pr automation with decent initial configurations a user can modify, with keys being the name of each field and values being the expected value."
         }
     },
     "required": ["pr_automation_id"],
