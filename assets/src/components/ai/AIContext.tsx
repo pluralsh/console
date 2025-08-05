@@ -88,7 +88,7 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = usePersistedState('plural-ai-copilot-open', true)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [persistedThreadId, setPersistedThreadId] = usePersistedState<
     Nullable<string>
