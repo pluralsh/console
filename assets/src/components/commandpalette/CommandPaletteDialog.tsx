@@ -2,7 +2,7 @@ import { ModalWrapper } from '@pluralsh/design-system'
 
 import chroma from 'chroma-js'
 import { Command } from 'cmdk'
-import { use } from 'react'
+import { use, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
@@ -145,6 +145,12 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
 export function CommandPaletteDialog() {
   const theme = useTheme()
   const { cmdkOpen, setCmdkOpen } = use(CommandPaletteContext)
+  const [ready, setReady] = useState(false)
+
+  const onOpenChange = (open: boolean) => {
+    setCmdkOpen(open)
+    setReady(open)
+  }
 
   return (
     <WrapperModal
@@ -152,11 +158,12 @@ export function CommandPaletteDialog() {
         background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
       }}
       open={cmdkOpen}
-      onOpenChange={setCmdkOpen}
+      onOpenChange={onOpenChange}
       title="Command Palette"
+      onAnimationEnd={() => setReady(true)}
     >
       <Command>
-        <CommandPalette />
+        <CommandPalette modal={{ ready }} />
       </Command>
     </WrapperModal>
   )

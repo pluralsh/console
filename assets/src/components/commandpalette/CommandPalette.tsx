@@ -53,7 +53,11 @@ const directory = [
   },
 ]
 
-export default function CommandPalette() {
+export default function CommandPalette({
+  modal,
+}: {
+  modal: { ready: boolean }
+}) {
   const theme = useTheme()
   const { setCmdkOpen, initialTab, setInitialTab } = use(CommandPaletteContext)
   const [value, setValue] = useState('')
@@ -126,7 +130,6 @@ export default function CommandPalette() {
           tab === CommandPaletteTab.History ? 'cmdk-history' : 'cmdk-commands'
         }
       >
-        {loading && !hasItems && <LoadingIndicator />}
         {showEmptyState && (
           <Button
             tertiary
@@ -163,6 +166,7 @@ export default function CommandPalette() {
             setCmdkOpen={setCmdkOpen}
             pageInfo={pageInfo}
             fetchNextPage={fetchNextPage}
+            modalReady={modal.ready}
           />
         )}
         {tab === CommandPaletteTab.Commands && (
@@ -205,6 +209,7 @@ interface CommandPaletteHistoryProps {
   pageInfo: PageInfoFragment
   fetchNextPage: Dispatch<void>
   setCmdkOpen: Dispatch<SetStateAction<boolean>>
+  modalReady?: boolean
 }
 
 function CommandPaletteHistory({
@@ -213,20 +218,19 @@ function CommandPaletteHistory({
   pageInfo,
   fetchNextPage,
   setCmdkOpen,
+  modalReady = false,
 }: CommandPaletteHistoryProps): ReactElement {
-  // This is to avoid weird behavior with paginated list resizing when it
-  // starts rendering before modal is fully open.
-  // We should find a better way to handle this.
-  const DELAY_RENDER = 1_000
   const [shouldRender, setShouldRender] = useState(false)
   const ref = useRef<HTMLDivElement | null>(null)
   const [listRef, setListRef] = useState<VariableSizeList | null>(null)
   const commands = useMemo(() => items.flatMap((i) => i.commands), [items])
   const theme = useTheme()
 
+  // We need to delay rendering of the history commands until the modal is ready
+  // to avoid issues with the smooth scroller sizing the list before it is ready.
   useEffect(() => {
-    setTimeout(() => setShouldRender(true), DELAY_RENDER)
-  }, [])
+    setShouldRender(modalReady)
+  }, [modalReady])
 
   return shouldRender ? (
     <div
