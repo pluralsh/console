@@ -197,7 +197,10 @@ function ImplementationPlanMessageContent({
   session,
 }: ChatMessageContentProps) {
   const { spacing, colors, borders, partials } = useTheme()
-  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation()
+  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation({
+    awaitRefetchQueries: true,
+    refetchQueries: ['ChatThreadDetails'],
+  })
 
   return (
     <Flex
