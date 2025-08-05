@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Agent.CallPr do
   use Console.AI.Tools.Agent.Base
+  alias Console.Schema.PrAutomation
 
   embedded_schema do
     field :pr_automation_id, :string
@@ -20,11 +21,20 @@ defmodule Console.AI.Tools.Agent.CallPr do
   def description(), do: "Prompts a user to execute a pr automation by id, which should be discoverd by searching catalogs and pr automations within them."
 
   def implement(%__MODULE__{pr_automation_id: pra_id} = model) do
-    {:ok, %{
-      content: "Calling pr #{pra_id}, the user will be prompted for how to configure this PR in product (don't reiterate what configuration is necessary)",
-      type: :pr_call,
-      pr_automation_id: pra_id,
-      attributes: %{pr_call: %{context: model.context}}
-    }}
+    with_pra(pra_id, fn pra ->
+      {:ok, %{
+        content: "Calling pr #{pra.name} (id=#{pra.id}), the user will be prompted for how to configure this PR in product (don't reiterate what configuration is necessary)",
+        type: :pr_call,
+        pr_automation_id: pra_id,
+        attributes: %{pr_call: %{context: model.context}}
+      }}
+    end)
+  end
+
+  def with_pra(id, fun) do
+    case Console.Repo.get(PrAutomation, id) do
+      nil -> {:ok, "Pr automation #{id} not found"}
+      pra -> fun.(pra)
+    end
   end
 end
