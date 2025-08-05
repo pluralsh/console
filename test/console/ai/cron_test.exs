@@ -65,6 +65,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = svc = Console.Repo.preload(refetch(service), [:insight, components: :insight])
 
       assert svc.insight.text
+      assert svc.ai_poll_at
 
       %{components: [component]} = svc
 
@@ -345,6 +346,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = cluster = Console.Repo.preload(refetch(cluster), [:insight, insight_components: :insight])
 
       assert cluster.insight.text
+      assert cluster.ai_poll_at
 
       %{insight_components: [component]} = cluster
 
@@ -420,6 +422,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = stack = Console.Repo.preload(refetch(stack), [:insight])
 
       assert stack.insight.text
+      assert stack.ai_poll_at
 
       run = Console.Repo.preload(refetch(run), [:insight])
 
@@ -506,6 +509,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = alert = refetch(alert) |> Console.Repo.preload([insight: :evidence])
 
       assert alert.insight.text
+      assert alert.ai_poll_at
 
       %{evidence: evidence} = alert.insight
       %{log: [log], pr: [pr]} = Enum.group_by(evidence, & &1.type)
