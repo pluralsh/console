@@ -9,7 +9,7 @@ import {
   IconFrame,
   Table,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   FetchPaginatedDataResult,
@@ -22,6 +22,8 @@ import { TRUNCATE } from '../../../utils/truncate.ts'
 import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 import { StackTypeIcon } from '../../../stacks/common/StackTypeIcon.tsx'
 import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
+import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
+import { useNavigate } from 'react-router-dom'
 
 export function Stacks({
   stacks,
@@ -30,6 +32,8 @@ export function Stacks({
   stacks: StackChatFragment[]
   query: FetchPaginatedDataResult<ChatAgentSessionStacksQuery>
 }) {
+  const navigate = useNavigate()
+
   if (isEmpty(stacks)) return null
 
   return (
@@ -53,6 +57,9 @@ export function Stacks({
         virtualizeRows
         data={stacks}
         columns={columns}
+        onRowClick={(_e, { original }: Row<StackChatFragment>) =>
+          navigate(getStacksAbsPath(original.id))
+        }
         hasNextPage={query.pageInfo?.hasNextPage}
         fetchNextPage={query.fetchNextPage}
         isFetchingNextPage={query.loading}
