@@ -1,5 +1,5 @@
 defmodule Console.Schema.Cluster do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.{Policies.Rbac, Settings}
   alias Console.Schema.{
@@ -118,6 +118,8 @@ defmodule Console.Schema.Cluster do
     field :memory_util,        :float
     field :availability_zones, {:array, :string}
 
+    field :ai_poll_at, :utc_datetime_usec
+
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
 
@@ -183,10 +185,6 @@ defmodule Console.Schema.Cluster do
       where: not is_nil(ic.id),
       distinct: true
     )
-  end
-
-  def with_limit(query \\ __MODULE__, limit) do
-    from(c in query, limit: ^limit)
   end
 
   def with_backups(query \\ __MODULE__, enabled)
@@ -416,11 +414,19 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.pinged_at) and not is_nil(c.current_version))
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id ai_poll_at distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model

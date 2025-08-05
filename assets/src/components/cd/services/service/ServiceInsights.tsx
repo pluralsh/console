@@ -10,13 +10,13 @@ import {
   insightMessage,
 } from '../../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
-import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { useServiceContext } from './ServiceDetails'
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 
 export function ServiceInsights() {
   const theme = useTheme()
-  const { service, refetch, isRefetching } = useServiceContext()
+  const { service } = useServiceContext()
 
   return (
     <Flex
@@ -42,10 +42,7 @@ export function ServiceInsights() {
           align="center"
           gap="small"
         >
-          <IconFrameRefreshButton
-            loading={isRefetching}
-            refetch={refetch}
-          />
+          {service?.insight && <InsightRefresh insight={service?.insight} />}
           <AIPinButton insight={service?.insight as AiInsight} />
           <ChatWithAIButton
             floating

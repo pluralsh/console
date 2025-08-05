@@ -168,6 +168,8 @@ defmodule Console.Schema.Service do
     field :interval,         :string
     field :agent_id,         :string
 
+    field :ai_poll_at, :utc_datetime_usec
+
     field :norevise, :boolean, virtual: true, default: false
     field :kick,     :boolean, virtual: true, default: false
 
@@ -363,6 +365,14 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
+  end
+
   def tree(query \\ __MODULE__) do
     recursion_query = from(s in __MODULE__, join: d in "descendants", on: d.id == s.parent_id)
     cte_query = union_all(query, ^recursion_query)
@@ -381,7 +391,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message ai_poll_at)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do

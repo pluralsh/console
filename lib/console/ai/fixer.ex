@@ -5,7 +5,7 @@ defmodule Console.AI.Fixer do
   use Console.Services.Base
   import Console.AI.Evidence.Base, only: [prepend: 2, append: 2]
   import Console.AI.Policy
-  alias Console.Schema.{AiInsight, Alert, Service, Stack, User, PullRequest}
+  alias Console.Schema.{AiInsight, Alert, Service, Stack, Cluster, User, PullRequest}
   alias Console.AI.Fixer.Service, as: ServiceFixer
   alias Console.AI.Fixer.Stack, as: StackFixer
   alias Console.AI.Fixer.Alert, as: AlertFixer
@@ -28,6 +28,40 @@ defmodule Console.AI.Fixer do
   """
 
   @callback prompt(struct, binary) :: {:ok, Provider.history} | Console.error
+
+  @doc """
+  Spawns a pr given a fix recommendation
+  """
+  @spec refresh(binary, User.t) :: {:ok, AiInsight.t} | Console.error
+  def refresh(id, %User{} = user) do
+    Repo.get!(AiInsight, id)
+    |> Repo.preload([:service, :stack, :alert, :cluster])
+    |> AiInsight.changeset(%{force: true})
+    |> allow(user, :read)
+    |> when_ok(:update)
+    |> case do
+      {:ok, %AiInsight{service: %Service{} = svc} = insight} ->
+        do_refresh(svc, insight)
+      {:ok, %AiInsight{stack: %Stack{} = stack} = insight} ->
+        do_refresh(stack, insight)
+      {:ok, %AiInsight{alert: %Alert{} = alert} = insight} ->
+        do_refresh(alert, insight)
+      {:ok, %AiInsight{cluster: %Cluster{} = cluster} = insight} ->
+        do_refresh(cluster, insight)
+      {:ok, _} ->
+        {:error, "can only refresh service, stack, cluster, or alert insights, sub-insights are propagated downstream"}
+      err -> err
+    end
+  end
+
+  defp do_refresh(%{__struct__: model} = svc, insight) do
+    model.changeset(svc, %{ai_poll_at: DateTime.utc_now()})
+    |> Repo.update()
+    |> case do
+      {:ok, _} -> {:ok, insight}
+      err -> err
+    end
+  end
 
   @doc """
   Generate a fix recommendation from an ai insight struct

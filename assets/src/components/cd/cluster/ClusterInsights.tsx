@@ -33,9 +33,9 @@ import {
 } from '../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
-import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 
 const DIRECTORY: Array<DirectoryEntry> = [
   { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },
@@ -152,10 +152,7 @@ export function ClusterInsightsSummary(): ReactNode {
     useMemo(
       () => (
         <>
-          <IconFrameRefreshButton
-            loading={clusterLoading}
-            refetch={refetch}
-          />
+          {cluster?.insight && <InsightRefresh insight={cluster?.insight} />}
           <AIPinButton insight={cluster?.insight as AiInsight} />
           <ChatWithAIButton
             floating
