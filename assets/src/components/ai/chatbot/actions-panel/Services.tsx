@@ -10,7 +10,7 @@ import {
   ShieldOutlineIcon,
   Table,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   FetchPaginatedDataResult,
@@ -24,6 +24,8 @@ import { isEmpty } from 'lodash'
 import { TRUNCATE } from '../../../utils/truncate.ts'
 import { useTheme } from 'styled-components'
 import { DistroProviderIconFrame } from '../../../utils/ClusterDistro.tsx'
+import { useNavigate } from 'react-router-dom'
+import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 
 export function Services({
   services,
@@ -32,6 +34,8 @@ export function Services({
   services: ServiceDeploymentChatFragment[]
   query: FetchPaginatedDataResult<ChatAgentSessionServicesQuery>
 }) {
+  const navigate = useNavigate()
+
   if (isEmpty(services)) return null
 
   return (
@@ -55,6 +59,14 @@ export function Services({
         virtualizeRows
         data={services}
         columns={columns}
+        onRowClick={(_e, { original }: Row<ServiceDeploymentChatFragment>) =>
+          navigate(
+            getServiceDetailsPath({
+              serviceId: original?.id,
+              clusterId: original?.cluster?.id,
+            })
+          )
+        }
         hasNextPage={query.pageInfo?.hasNextPage}
         fetchNextPage={query.fetchNextPage}
         isFetchingNextPage={query.loading}
