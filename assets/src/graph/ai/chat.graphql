@@ -192,7 +192,9 @@ query ChatThreads(
 
 query ChatAgentSession($id: ID!) {
   chatThread(id: $id) {
+    id
     session {
+      id
       pullRequest {
         ...PullRequest
       }
@@ -214,7 +216,9 @@ query ChatAgentSessionPRs(
   $before: String
 ) {
   chatThread(id: $id) {
+    id
     session {
+      id
       pullRequests(first: $first, last: $last, after: $after, before: $before) {
         pageInfo {
           ...PageInfo
@@ -237,7 +241,9 @@ query ChatAgentSessionServices(
   $before: String
 ) {
   chatThread(id: $id) {
+    id
     session {
+      id
       serviceDeployments(
         first: $first
         last: $last
@@ -265,7 +271,9 @@ query ChatAgentSessionStacks(
   $before: String
 ) {
   chatThread(id: $id) {
+    id
     session {
+      id
       stacks(first: $first, last: $last, after: $after, before: $before) {
         pageInfo {
           ...PageInfo
