@@ -1,10 +1,4 @@
-import {
-  ArrowLeftIcon,
-  Button,
-  CommandIcon,
-  ReloadIcon,
-  ReturnIcon,
-} from '@pluralsh/design-system'
+import { ArrowLeftIcon, CommandIcon, ReturnIcon } from '@pluralsh/design-system'
 import { Command } from 'cmdk'
 import { isEmpty } from 'lodash'
 import {
@@ -14,7 +8,6 @@ import {
   SetStateAction,
   use,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -35,7 +28,7 @@ import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { StandardScroller } from '../utils/SmoothScroller.tsx'
-import { CaptionP } from '../utils/typography/Text.tsx'
+import { Body1BoldP, CaptionP } from '../utils/typography/Text.tsx'
 import {
   CommandPaletteContext,
   CommandPaletteTab,
@@ -86,7 +79,6 @@ export default function CommandPalette({
       />
     ),
   })
-  const reset = useCallback(() => setValue(''), [setValue])
 
   const items: Array<CommandGroup> = useMemo(() => {
     switch (tab) {
@@ -99,9 +91,8 @@ export default function CommandPalette({
     }
   }, [commands, history, tab])
 
-  const hasItems = !(
-    items.length === 0 || items.every((item) => item.commands?.length === 0)
-  )
+  const hasItems =
+    items.length > 0 && items.some((item) => item.commands?.length > 0)
 
   const showEmptyState = useMemo(
     () => !loading && !hasItems,
@@ -130,36 +121,32 @@ export default function CommandPalette({
           tab === CommandPaletteTab.History ? 'cmdk-history' : 'cmdk-commands'
         }
       >
+        {loading && !hasItems && <LoadingIndicator />}
         {showEmptyState && (
-          <Button
-            tertiary
+          <div
             css={{
-              width: '100%',
-              justifyContent: 'left',
+              alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xxsmall,
+              height: '100%',
+              justifyContent: 'center',
+              padding: theme.spacing.xlarge,
             }}
-            onClick={reset}
           >
-            <div
+            <Body1BoldP>No results found.</Body1BoldP>
+            <p
               css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: theme.spacing.xsmall,
+                color: theme.colors['text-xlight'],
+                maxWidth: 480,
+                textAlign: 'center',
               }}
             >
-              <ReloadIcon marginRight="xsmall" />
-              <span>Reset search</span>
-              <span
-                css={{
-                  ...theme.partials.text.caption,
-                  color: theme.colors['text-xlight'],
-                }}
-              >
-                (No results found)
-              </span>
-            </div>
-          </Button>
+              Could not find any results matching: {value}
+            </p>
+          </div>
         )}
-        {tab === CommandPaletteTab.History && (
+        {modal.ready && tab === CommandPaletteTab.History && (
           <CommandPaletteHistory
             items={items}
             loading={loading}
@@ -218,66 +205,58 @@ function CommandPaletteHistory({
   pageInfo,
   fetchNextPage,
   setCmdkOpen,
-  modalReady = false,
 }: CommandPaletteHistoryProps): ReactElement {
-  const [shouldRender, setShouldRender] = useState(false)
   const ref = useRef<HTMLDivElement | null>(null)
   const [listRef, setListRef] = useState<VariableSizeList | null>(null)
   const commands = useMemo(() => items.flatMap((i) => i.commands), [items])
   const theme = useTheme()
 
-  // We need to delay rendering of the history commands until the modal is ready
-  // to avoid issues with the smooth scroller sizing the list before it is ready.
-  useEffect(() => {
-    setShouldRender(modalReady)
-  }, [modalReady])
-
-  return shouldRender ? (
-    <div
-      ref={ref}
-      css={{
-        minHeight: 500,
-      }}
-    >
-      <StandardScroller
-        listRef={listRef}
-        setListRef={setListRef}
-        items={commands}
-        loading={loading}
-        placeholder={() => <div css={{ height: 50 }}></div>}
-        hasNextPage={pageInfo?.hasNextPage}
-        mapper={(command, { prev }, { index: idx }) => {
-          return (
-            <div
-              key={`${command?.prefix}${command?.label}${idx}`}
-              css={{
-                ...(isEmpty(prev) ? { marginTop: theme.spacing.small } : {}),
-              }}
-            >
-              <Command.Item
-                className="cmdk-history-item"
-                tabIndex={0}
+  return (
+    <>
+      <div
+        ref={ref}
+        css={{
+          minHeight: 500,
+        }}
+      >
+        <StandardScroller
+          listRef={listRef}
+          setListRef={setListRef}
+          items={commands}
+          loading={loading}
+          placeholder={() => <div css={{ height: 50 }}></div>}
+          hasNextPage={pageInfo?.hasNextPage}
+          mapper={(command, { prev }, { index: idx }) => {
+            return (
+              <div
                 key={`${command?.prefix}${command?.label}${idx}`}
-                value={`${command?.prefix}${command?.label}${idx}`}
-                disabled={command?.disabled}
-                onSelect={() => {
-                  command.callback()
-                  setCmdkOpen(false)
+                css={{
+                  ...(isEmpty(prev) ? { marginTop: theme.spacing.small } : {}),
                 }}
               >
-                {command?.component ? command?.component : null}
-              </Command.Item>
-            </div>
-          )
-        }}
-        loadNextPage={fetchNextPage}
-        handleScroll={undefined}
-        refreshKey={undefined}
-        setLoader={undefined}
-      />
-    </div>
-  ) : (
-    <LoadingIndicator />
+                <Command.Item
+                  className="cmdk-history-item"
+                  tabIndex={0}
+                  key={`${command?.prefix}${command?.label}${idx}`}
+                  value={`${command?.prefix}${command?.label}${idx}`}
+                  disabled={command?.disabled}
+                  onSelect={() => {
+                    command.callback()
+                    setCmdkOpen(false)
+                  }}
+                >
+                  {command?.component ? command?.component : null}
+                </Command.Item>
+              </div>
+            )
+          }}
+          loadNextPage={fetchNextPage}
+          handleScroll={undefined}
+          refreshKey={undefined}
+          setLoader={undefined}
+        />
+      </div>
+    </>
   )
 }
 
@@ -334,7 +313,7 @@ function CommandPaletteCommands({
 interface CommandAdvancedInputProps {
   placeholder: string
   value: string
-  onValueChange: (value: string) => void
+  onValueChange: Dispatch<SetStateAction<string>>
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
   setCmdkOpen?: Dispatch<SetStateAction<boolean>>
 }
