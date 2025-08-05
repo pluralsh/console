@@ -185,6 +185,7 @@ function ChatbotPanelInner() {
         />
       )}
       <MainContentWrapperSC>
+        <ResizeGripSC />
         <ChatbotHeader
           currentThread={currentThread}
           isActionsPanelOpen={showActionsPanel}
@@ -232,6 +233,25 @@ const MainContentWrapperSC = styled.div(({ theme }) => ({
   width: 'var(--chatbot-panel-width)',
   borderLeft: theme.borders.default,
   background: theme.colors['fill-accent'],
+}))
+
+const ResizeGripSC = styled.div(({ theme }) => ({
+  borderLeft: theme.borders.default,
+  height: 40,
+  left: 2,
+  position: 'absolute',
+  top: 'calc(50% - 20px)',
+  width: 5,
+
+  '&:after': {
+    borderLeft: theme.borders.default,
+    content: '""',
+    height: 30,
+    left: 2,
+    position: 'absolute',
+    top: 'calc(50% - 15px)',
+    width: 5,
+  },
 }))
 
 const DragHandleSC = styled.div<{ $isDragging: boolean }>(
