@@ -7,7 +7,7 @@ import {
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
@@ -29,6 +29,7 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
+import { useClickOutside } from '@react-hooks-library/core'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -75,6 +76,7 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
+  const ref = useRef<any>(undefined)
   const {
     currentThread,
     currentThreadId,
@@ -121,6 +123,8 @@ function ChatbotPanelInner() {
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
 
+  useClickOutside(ref, () => setShowActionsPanel(false))
+
   useEffect(() => {
     // If the agent is initializing, a thread doesn't need to be selected.
     if (agentInitMode) return
@@ -161,6 +165,7 @@ function ChatbotPanelInner() {
 
   return (
     <div
+      ref={ref}
       css={{ position: 'relative', height: '100%' }}
       style={{ '--chatbot-panel-width': `${calculatedPanelWidth}px` }}
     >
