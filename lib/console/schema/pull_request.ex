@@ -48,7 +48,8 @@ defmodule Console.Schema.PullRequest do
     stale = Timex.shift(now, days: -7)
     from(pr in query,
       where: (is_nil(pr.next_poll_at) or pr.next_poll_at < ^now) and
-             coalesce(pr.updated_at, pr.inserted_at) >= ^stale)
+             coalesce(pr.updated_at, pr.inserted_at) >= ^stale,
+      order_by: [asc: :next_poll_at])
   end
 
   def icon(%__MODULE__{status: :merged}), do: "✔"

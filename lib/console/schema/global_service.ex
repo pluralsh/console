@@ -50,7 +50,10 @@ defmodule Console.Schema.GlobalService do
 
   def pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(g in query, where: is_nil(g.next_poll_at) or g.next_poll_at < ^now)
+    from(g in query,
+      where: is_nil(g.next_poll_at) or g.next_poll_at < ^now,
+      order_by: [asc: :next_poll_at]
+    )
   end
 
   def preloaded(query \\ __MODULE__, preloads \\ [:context, template: :dependencies, service: :dependencies]) do

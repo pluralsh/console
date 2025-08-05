@@ -115,6 +115,9 @@ defmodule Console.GraphQl.Resolvers.AI do
     Fixer.pr(id, Enum.map(chat || [], fn %{role: r, content: c} -> {r, c} end), user)
   end
 
+  def refresh_insight(%{insight_id: id}, %{context: %{current_user: user}}),
+    do: Fixer.refresh(id, user)
+
   def save_chats(%{messages: msgs} = args, %{context: %{current_user: user}}),
     do: ChatSvc.save(msgs, args[:thread_id], user)
 
