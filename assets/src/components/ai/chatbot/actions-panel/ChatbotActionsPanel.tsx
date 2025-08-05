@@ -22,7 +22,7 @@ import {
   StackIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
 import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
@@ -38,6 +38,7 @@ import { mapExistingNodes } from '../../../../utils/graphql.ts'
 import { isEmpty } from 'lodash'
 import { GqlError } from '../../../utils/Alert.tsx'
 import { EmptyStateCompact } from '../../AIThreads.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -48,13 +49,14 @@ export function ChatbotActionsPanel({
   setOpen: Dispatch<SetStateAction<boolean>>
   zIndex?: number
 }) {
-  const navigate = useNavigate()
   const theme = useTheme()
   const { currentThread } = useChatbot()
 
   const query = useChatAgentSessionQuery({
     skip: !currentThread?.id,
     variables: { id: currentThread?.id ?? '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
   })
 
   const pr = query.data?.chatThread?.session?.pullRequest
@@ -65,7 +67,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionPRsQuery,
       keyPath: ['chatThread', 'session', 'pullRequests'],
-      skip: !currentThread?.id,
+      skip: !currentThread?.id || !isOpen,
     },
     { id: currentThread?.id ?? '' }
   )
@@ -79,7 +81,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionServicesQuery,
       keyPath: ['chatThread', 'session', 'serviceDeployments'],
-      skip: !currentThread?.id,
+      skip: !currentThread?.id || !isOpen,
     },
     { id: currentThread?.id ?? '' }
   )
@@ -96,7 +98,7 @@ export function ChatbotActionsPanel({
     {
       queryHook: useChatAgentSessionStacksQuery,
       keyPath: ['chatThread', 'session', 'stacks'],
-      skip: !currentThread?.id,
+      skip: !currentThread?.id || !isOpen,
     },
     { id: currentThread?.id ?? '' }
   )
@@ -188,7 +190,8 @@ export function ChatbotActionsPanel({
               <Button
                 secondary
                 small
-                onClick={() => navigate(PR_ABS_PATH)}
+                as={Link}
+                to={PR_ABS_PATH}
               >
                 View all PRs
               </Button>
@@ -232,14 +235,11 @@ export function ChatbotActionsPanel({
             <Flex justifyContent="flex-end">
               <Button
                 small
-                onClick={() =>
-                  navigate(
-                    getServiceDetailsPath({
-                      serviceId: service?.id,
-                      clusterId: service?.cluster?.id,
-                    })
-                  )
-                }
+                as={Link}
+                to={getServiceDetailsPath({
+                  serviceId: service?.id,
+                  clusterId: service?.cluster?.id,
+                })}
               >
                 View service
               </Button>
@@ -272,7 +272,8 @@ export function ChatbotActionsPanel({
             <Flex justifyContent="flex-end">
               <Button
                 small
-                onClick={() => navigate(getStacksAbsPath(stack.id))}
+                as={Link}
+                to={getStacksAbsPath(stack.id)}
               >
                 View stack
               </Button>

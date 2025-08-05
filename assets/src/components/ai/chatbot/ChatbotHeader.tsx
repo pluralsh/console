@@ -3,6 +3,7 @@ import {
   ComposeIcon,
   Flex,
   HamburgerMenuCollapseIcon,
+  HistoryIcon,
   IconFrame,
   Spinner,
   Toast,
@@ -21,6 +22,11 @@ import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 import { AgentSelect } from './AgentSelect.tsx'
 import { capitalize } from 'lodash'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from 'components/commandpalette/CommandPaletteContext.tsx'
+import { use } from 'react'
 
 export function ChatbotHeader({
   currentThread,
@@ -32,7 +38,7 @@ export function ChatbotHeader({
   setIsActionsPanelOpen: (isOpen: boolean) => void
 }) {
   const { colors, spacing } = useTheme()
-
+  const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const {
     agentInitMode,
     closeChatbot,
@@ -98,6 +104,16 @@ export function ChatbotHeader({
               }
             />
           )}
+          <IconFrame
+            clickable
+            icon={<HistoryIcon />}
+            type="tertiary"
+            tooltip="View chat history"
+            onClick={() => {
+              setCmdkOpen(true)
+              setInitialTab(CommandPaletteTab.History)
+            }}
+          />
           <ChatbotThreadMoreMenu />
           <IconFrame
             clickable

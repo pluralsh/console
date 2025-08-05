@@ -78,7 +78,7 @@ export function AgentSelect() {
       selectedKey={selectedAgent ?? ''}
       onSelectionChange={(key) => onAgentChange(key as AgentSessionT)}
       label="agent"
-      width={300}
+      width={330}
       dropdownHeaderFixed={
         <div
           css={{
@@ -101,21 +101,18 @@ export function AgentSelect() {
         ) : undefined
       }
       triggerButton={
-        // wrapper div prevents tooltip from interfering with trigger
-        <div>
+        <Button
+          startIcon={icon}
+          endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
+          tertiary
+          small
+        >
           <Tooltip label="Use our coding agent to run a background task">
-            <Button
-              startIcon={icon}
-              endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
-              tertiary
-              small
-            >
-              <span css={{ ...TRUNCATE }}>
-                {capitalize(`${selectedAgent ?? ''} agent`.trim())}
-              </span>
-            </Button>
+            <span css={{ ...TRUNCATE }}>
+              {capitalize(`${selectedAgent ?? ''} agent`.trim())}
+            </span>
           </Tooltip>
-        </div>
+        </Button>
       }
     >
       <ListBoxItem
