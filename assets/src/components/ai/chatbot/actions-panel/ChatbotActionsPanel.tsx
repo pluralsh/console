@@ -1,6 +1,11 @@
 import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { useChatAgentSessionQuery } from 'generated/graphql'
+import {
+  useChatAgentSessionPRsQuery,
+  useChatAgentSessionQuery,
+  useChatAgentSessionServicesQuery,
+  useChatAgentSessionStacksQuery,
+} from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 import { useChatbot } from '../../AIContext.tsx'
@@ -13,6 +18,7 @@ import {
   GitHubLogoIcon,
   GitPullIcon,
   IconFrame,
+  RobotIcon,
   StackIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
@@ -26,7 +32,12 @@ import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 import { Services } from './Services.tsx'
 import { Stacks } from './Stacks.tsx'
 import { PullRequests } from './PullRequests.tsx'
-import { Dispatch, SetStateAction, useEffect } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
+import { mapExistingNodes } from '../../../../utils/graphql.ts'
+import { isEmpty } from 'lodash'
+import { GqlError } from '../../../utils/Alert.tsx'
+import { EmptyStateCompact } from '../../AIThreads.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -41,24 +52,85 @@ export function ChatbotActionsPanel({
   const theme = useTheme()
   const { currentThread } = useChatbot()
 
-  const { data } = useChatAgentSessionQuery({
+  const query = useChatAgentSessionQuery({
     skip: !currentThread?.id,
     variables: { id: currentThread?.id ?? '' },
   })
 
-  const pullRequest = data?.chatThread?.session?.pullRequest
-  const service = data?.chatThread?.session?.service
-  const stack = data?.chatThread?.session?.stack
+  const pr = query.data?.chatThread?.session?.pullRequest
+  const service = query.data?.chatThread?.session?.service
+  const stack = query.data?.chatThread?.session?.stack
 
-  const isEmpty = !pullRequest && !service && !stack // TODO: Check lists as well.
+  const prsQuery = useFetchPaginatedData(
+    {
+      queryHook: useChatAgentSessionPRsQuery,
+      keyPath: ['chatThread', 'session', 'pullRequests'],
+      skip: !currentThread?.id,
+    },
+    { id: currentThread?.id ?? '' }
+  )
+
+  const prs = useMemo(
+    () => mapExistingNodes(prsQuery.data?.chatThread?.session?.pullRequests),
+    [prsQuery.data?.chatThread?.session?.pullRequests]
+  )
+
+  const servicesQuery = useFetchPaginatedData(
+    {
+      queryHook: useChatAgentSessionServicesQuery,
+      keyPath: ['chatThread', 'session', 'serviceDeployments'],
+      skip: !currentThread?.id,
+    },
+    { id: currentThread?.id ?? '' }
+  )
+
+  const services = useMemo(
+    () =>
+      mapExistingNodes(
+        servicesQuery.data?.chatThread?.session?.serviceDeployments
+      ),
+    [servicesQuery.data?.chatThread?.session?.serviceDeployments]
+  )
+
+  const stacksQuery = useFetchPaginatedData(
+    {
+      queryHook: useChatAgentSessionStacksQuery,
+      keyPath: ['chatThread', 'session', 'stacks'],
+      skip: !currentThread?.id,
+    },
+    { id: currentThread?.id ?? '' }
+  )
+
+  const stacks = useMemo(
+    () => mapExistingNodes(stacksQuery.data?.chatThread?.session?.stacks),
+    [stacksQuery.data?.chatThread?.session?.stacks]
+  )
+
+  const hasData = useMemo(
+    () =>
+      !!pr ||
+      !isEmpty(prs) ||
+      !!service ||
+      !isEmpty(services) ||
+      !!stack ||
+      !isEmpty(stacks),
+    [pr, prs, service, services, stack, stacks]
+  )
+
+  const hasErrors = useMemo(
+    () =>
+      !!query.error ||
+      !!prsQuery.error ||
+      !!servicesQuery.error ||
+      !!stacksQuery.error,
+    [query.error, prsQuery.error, servicesQuery.error, stacksQuery.error]
+  )
 
   useEffect(() => {
-    if (!isEmpty) setOpen(true)
-  }, [setOpen, isEmpty])
+    if (!isOpen && hasData) setOpen(true)
+  }, [hasData, isOpen, setOpen])
 
   if (!currentThread?.id) return null
-
-  // TODO: Handle loading and error states for queries.
 
   return (
     <SimpleFlyover
@@ -69,7 +141,29 @@ export function ChatbotActionsPanel({
         <Body2BoldP>Actions panel</Body2BoldP>
       </HeaderSC>
       <div css={{ overflow: 'auto' }}>
-        {pullRequest && (
+        {!hasData && !hasErrors && (
+          <EmptyStateCompact
+            cssProps={{ background: 'none', border: 'none' }}
+            icon={<RobotIcon size={24} />}
+            message="No data available"
+            description="Use our agent to run background tasks and get updates on your services, stacks, and pull requests."
+          />
+        )}
+
+        {hasErrors && (
+          <Flex
+            direction="column"
+            gap="small"
+            css={{ padding: theme.spacing.medium }}
+          >
+            {query.error && <GqlError error={query.error} />}
+            {prsQuery.error && <GqlError error={prsQuery.error} />}
+            {servicesQuery.error && <GqlError error={servicesQuery.error} />}
+            {stacksQuery.error && <GqlError error={stacksQuery.error} />}
+          </Flex>
+        )}
+
+        {pr && (
           <ActionItemSC>
             <ActionItemHeaderSC>
               <IconFrame
@@ -82,13 +176,13 @@ export function ChatbotActionsPanel({
                 justifyContent="flex-end"
               >
                 <PrStatusChip
-                  status={pullRequest.status}
+                  status={pr.status}
                   size="small"
                 />
               </Flex>
             </ActionItemHeaderSC>
             <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-              {pullRequest.title}
+              {pr.title}
             </CaptionP>
             <Flex justifyContent="space-between">
               <Button
@@ -103,7 +197,7 @@ export function ChatbotActionsPanel({
                 endIcon={<ArrowTopRightIcon />}
                 small
                 as="a"
-                href={pullRequest.url}
+                href={pr.url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -185,9 +279,18 @@ export function ChatbotActionsPanel({
           type="multiple"
           css={{ border: 'none', background: theme.colors['fill-accent'] }}
         >
-          <PullRequests currentThreadId={currentThread.id} />
-          <Services currentThreadId={currentThread.id} />
-          <Stacks currentThreadId={currentThread.id} />
+          <PullRequests
+            prs={prs}
+            query={prsQuery}
+          />
+          <Services
+            services={services}
+            query={servicesQuery}
+          />
+          <Stacks
+            stacks={stacks}
+            query={stacksQuery}
+          />
         </Accordion>
       </div>
     </SimpleFlyover>

@@ -1,6 +1,6 @@
 import {
+  ChatAgentSessionStacksQuery,
   StackChatFragment,
-  useChatAgentSessionStacksQuery,
 } from '../../../../generated/graphql.ts'
 import {
   AccordionItem,
@@ -12,10 +12,8 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
+  FetchPaginatedDataResult,
 } from '../../../utils/table/useFetchPaginatedData.tsx'
-import { useMemo } from 'react'
-import { mapExistingNodes } from '../../../../utils/graphql.ts'
 import { isEmpty } from 'lodash'
 import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 import { useTheme } from 'styled-components'
@@ -25,21 +23,13 @@ import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 import { StackTypeIcon } from '../../../stacks/common/StackTypeIcon.tsx'
 import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
 
-export function Stacks({ currentThreadId }: { currentThreadId: string }) {
-  const { data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: useChatAgentSessionStacksQuery,
-        keyPath: ['chatThread', 'session', 'stacks'],
-      },
-      { id: currentThreadId }
-    )
-
-  const stacks = useMemo(
-    () => mapExistingNodes(data?.chatThread?.session?.stacks),
-    [data?.chatThread?.session?.stacks]
-  )
-
+export function Stacks({
+  stacks,
+  query,
+}: {
+  stacks: StackChatFragment[]
+  query: FetchPaginatedDataResult<ChatAgentSessionStacksQuery>
+}) {
   if (isEmpty(stacks)) return null
 
   return (
@@ -63,10 +53,10 @@ export function Stacks({ currentThreadId }: { currentThreadId: string }) {
         virtualizeRows
         data={stacks}
         columns={columns}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        hasNextPage={query.pageInfo?.hasNextPage}
+        fetchNextPage={query.fetchNextPage}
+        isFetchingNextPage={query.loading}
+        onVirtualSliceChange={query.setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>

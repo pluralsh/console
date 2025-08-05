@@ -1,6 +1,6 @@
 import {
+  ChatAgentSessionServicesQuery,
   ServiceDeploymentChatFragment,
-  useChatAgentSessionServicesQuery,
 } from '../../../../generated/graphql.ts'
 import {
   AccordionItem,
@@ -13,7 +13,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
+  FetchPaginatedDataResult,
 } from '../../../utils/table/useFetchPaginatedData.tsx'
 
 import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
@@ -24,27 +24,14 @@ import { isEmpty } from 'lodash'
 import { TRUNCATE } from '../../../utils/truncate.ts'
 import { useTheme } from 'styled-components'
 import { DistroProviderIconFrame } from '../../../utils/ClusterDistro.tsx'
-import { GqlError } from '../../../utils/Alert.tsx'
-import { useMemo } from 'react'
-import { mapExistingNodes } from '../../../../utils/graphql.ts'
 
-export function Services({ currentThreadId }: { currentThreadId: string }) {
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: useChatAgentSessionServicesQuery,
-        keyPath: ['chatThread', 'session', 'serviceDeployments'],
-      },
-      { id: currentThreadId }
-    )
-
-  const services = useMemo(
-    () => mapExistingNodes(data?.chatThread?.session?.serviceDeployments),
-    [data?.chatThread?.session?.serviceDeployments]
-  )
-
-  if (error) return <GqlError error={error} />
-
+export function Services({
+  services,
+  query,
+}: {
+  services: ServiceDeploymentChatFragment[]
+  query: FetchPaginatedDataResult<ChatAgentSessionServicesQuery>
+}) {
   if (isEmpty(services)) return null
 
   return (
@@ -68,10 +55,10 @@ export function Services({ currentThreadId }: { currentThreadId: string }) {
         virtualizeRows
         data={services}
         columns={columns}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        hasNextPage={query.pageInfo?.hasNextPage}
+        fetchNextPage={query.fetchNextPage}
+        isFetchingNextPage={query.loading}
+        onVirtualSliceChange={query.setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>

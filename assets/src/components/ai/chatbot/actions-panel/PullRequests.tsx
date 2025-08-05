@@ -1,6 +1,6 @@
 import {
+  ChatAgentSessionPRsQuery,
   PullRequestFragment,
-  useChatAgentSessionPRsQuery,
 } from '../../../../generated/graphql.ts'
 import {
   AccordionItem,
@@ -12,10 +12,8 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
+  FetchPaginatedDataResult,
 } from '../../../utils/table/useFetchPaginatedData.tsx'
-import { useMemo } from 'react'
-import { mapExistingNodes } from '../../../../utils/graphql.ts'
 import { isEmpty } from 'lodash'
 import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 import { useTheme } from 'styled-components'
@@ -23,22 +21,14 @@ import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
 import { TRUNCATE } from '../../../utils/truncate.ts'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
 
-export function PullRequests({ currentThreadId }: { currentThreadId: string }) {
-  const { data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: useChatAgentSessionPRsQuery,
-        keyPath: ['chatThread', 'session', 'pullRequests'],
-      },
-      { id: currentThreadId }
-    )
-
-  const pullRequests = useMemo(
-    () => mapExistingNodes(data?.chatThread?.session?.pullRequests),
-    [data?.chatThread?.session?.pullRequests]
-  )
-
-  if (isEmpty(pullRequests)) return null
+export function PullRequests({
+  prs,
+  query,
+}: {
+  prs: PullRequestFragment[]
+  query: FetchPaginatedDataResult<ChatAgentSessionPRsQuery>
+}) {
+  if (isEmpty(prs)) return null
 
   return (
     <AccordionItem
@@ -59,12 +49,12 @@ export function PullRequests({ currentThreadId }: { currentThreadId: string }) {
         rowBg="raised"
         fullHeightWrap
         virtualizeRows
-        data={pullRequests}
+        data={prs}
         columns={columns}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        hasNextPage={query.pageInfo?.hasNextPage}
+        fetchNextPage={query.fetchNextPage}
+        isFetchingNextPage={query.loading}
+        onVirtualSliceChange={query.setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>
