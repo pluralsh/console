@@ -57,9 +57,10 @@ export function ChatbotAgentInit() {
         >
           <Body1BoldP>Copilot Agent</Body1BoldP>
           <Body2P css={{ color: theme.colors['text-xlight'] }}>
-            Our agent is a background coding agent that can run background tasks
-            by writing terraform, finding code, suggest fixes, and creating
-            PRs...
+            Our agent is a background coding agent that can make clear,
+            incremental changes to active Infrastructure as Code already managed
+            by Plural. Use it to burn down your backlog of infra configuration
+            changes, or offload tasks to a parallelizable AI.
           </Body2P>
         </Flex>
         <Flex
