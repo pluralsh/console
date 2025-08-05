@@ -44,5 +44,5 @@ defmodule Console.AI.Tools.Agent.CallPr do
       _ -> nil
     end
   end
-  defp get_context(%__MODULE__{context: ctx}), do: nil
+  defp get_context(%__MODULE__{context: _}), do: nil
 end
