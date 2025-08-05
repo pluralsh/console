@@ -9,7 +9,7 @@ import {
   IconFrame,
   Table,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   FetchPaginatedDataResult,
@@ -51,6 +51,9 @@ export function PullRequests({
         virtualizeRows
         data={prs}
         columns={columns}
+        onRowClick={(_e, { original }: Row<PullRequestFragment>) =>
+          window.open(original.url, '_blank', 'noopener,noreferrer')
+        }
         hasNextPage={query.pageInfo?.hasNextPage}
         fetchNextPage={query.fetchNextPage}
         isFetchingNextPage={query.loading}
