@@ -54,7 +54,7 @@ export function ChatbotHeader({
   return (
     <Flex direction="column">
       <MainHeaderSC>
-        {currentThread?.session && (
+        {currentThread?.session && !agentInitMode && (
           <div
             css={{
               transition: 'transform 0.16s ease-in-out',

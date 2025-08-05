@@ -177,7 +177,7 @@ function ChatbotPanelInner() {
           tools={tools}
         />
       )}
-      {currentThread?.session && (
+      {currentThread?.session && !agentInitMode && (
         <ChatbotActionsPanel
           isOpen={showActionsPanel}
           setOpen={setShowActionsPanel}
