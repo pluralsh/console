@@ -1,18 +1,24 @@
 import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+
+import { useLogin } from 'components/contexts'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { MakeInert } from 'components/utils/MakeInert'
+import { LinkTabWrap } from 'components/utils/Tabs'
 import {
-  ReactNode,
-  Suspense,
   createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  Suspense,
   useContext,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  Dispatch,
-  SetStateAction,
 } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 
 import {
   CD_ABS_PATH,
@@ -26,16 +32,10 @@ import {
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { LinkTabWrap } from 'components/utils/Tabs'
-import { MakeInert } from 'components/utils/MakeInert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import { useLogin } from 'components/contexts'
+import { useTheme } from 'styled-components'
+import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 import { useCDEnabled } from './utils/useCDEnabled'
-import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 export const POLL_INTERVAL = 10_000
 
@@ -279,7 +279,13 @@ export default function ContinuousDeployment() {
                 </LinkTabWrap>
               ))}
             </TabList>
-            {headerContent}
+            <div
+              css={{
+                flexShrink: 0,
+              }}
+            >
+              {headerContent}
+            </div>
           </div>
         </MakeInert>
       }

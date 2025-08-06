@@ -5,6 +5,10 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+
+import { useDebounce } from '@react-hooks-library/core'
+
+import { ServiceDeploymentStatus } from 'generated/graphql'
 import isNil from 'lodash/isNil'
 import {
   Dispatch,
@@ -16,10 +20,6 @@ import {
   useState,
 } from 'react'
 import styled from 'styled-components'
-
-import { ServiceDeploymentStatus } from 'generated/graphql'
-
-import { useDebounce } from '@react-hooks-library/core'
 
 import ClusterSelector from '../utils/ClusterSelector'
 
@@ -97,7 +97,7 @@ export function ServicesFilters({
   return (
     <ServiceFiltersSC>
       {setClusterId && (
-        <div css={{ width: 360 }}>
+        <div css={{ minWidth: 260, width: 360 }}>
           <ClusterSelector
             clusterId={clusterId}
             allowDeselect
@@ -105,7 +105,7 @@ export function ServicesFilters({
           />
         </div>
       )}
-      <div css={{ flex: 1 }}>
+      <div css={{ minWidth: 120, flex: 1 }}>
         {setQueryString && (
           <Input
             placeholder="Search"
@@ -117,6 +117,7 @@ export function ServicesFilters({
         )}
       </div>
       <TabList
+        scrollable
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

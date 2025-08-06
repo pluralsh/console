@@ -7,6 +7,11 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+
+import { useDebounce } from '@react-hooks-library/core'
+
+import { UpgradeStatistics } from 'generated/graphql'
+import { isNumber } from 'lodash'
 import isNil from 'lodash/isNil'
 import {
   type ComponentProps,
@@ -18,11 +23,6 @@ import {
   useState,
 } from 'react'
 import styled from 'styled-components'
-
-import { useDebounce } from '@react-hooks-library/core'
-
-import { UpgradeStatistics } from 'generated/graphql'
-import { isNumber } from 'lodash'
 import { TagsFilter } from './ClusterTagsFilter'
 import { serviceStatusToSeverity } from './ServiceStatusChip'
 
@@ -91,7 +91,7 @@ export function ClustersFilters({
 
   return (
     <ClustersFiltersSC>
-      <div css={{ flex: '1 1 50%' }}>
+      <div css={{ flex: '1 1 25%' }}>
         <TagsFilter
           selectedTagKeys={selectedTagKeys}
           setSelectedTagKeys={setSelectedTagKeys}
@@ -99,7 +99,7 @@ export function ClustersFilters({
           setSearchOp={setTagOp}
         />
       </div>
-      <div css={{ flex: '1 1 50%', minWidth: 120 }}>
+      <div css={{ flex: '1 1 25%', minWidth: 120 }}>
         <Input
           placeholder="Search"
           startIcon={<SearchIcon />}
@@ -109,35 +109,38 @@ export function ClustersFilters({
           }}
         />
       </div>
-      <TabList
-        stateRef={tabStateRef}
-        stateProps={{
-          orientation: 'horizontal',
-          selectedKey: statusFilter,
-          onSelectionChange: (key) => {
-            setStatusFilter(key as ClusterStatusTabKey)
-          },
-        }}
-      >
-        {statusTabs?.map(([key, { label }]) => (
-          <SubTab
-            key={key}
-            textValue={label}
-            className="statusTab"
-          >
-            {label}
-            {!isNil(statusCounts?.[key]) && (
-              <Chip
-                size="small"
-                severity={serviceStatusToSeverity(key as any)}
-                loading={isNil(statusCounts?.[key])}
-              >
-                {statusCounts?.[key]}
-              </Chip>
-            )}
-          </SubTab>
-        ))}
-      </TabList>
+      <div css={{ minWidth: 180 }}>
+        <TabList
+          scrollable
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: statusFilter,
+            onSelectionChange: (key) => {
+              setStatusFilter(key as ClusterStatusTabKey)
+            },
+          }}
+        >
+          {statusTabs?.map(([key, { label }]) => (
+            <SubTab
+              key={key}
+              textValue={label}
+              className="statusTab"
+            >
+              {label}
+              {!isNil(statusCounts?.[key]) && (
+                <Chip
+                  size="small"
+                  severity={serviceStatusToSeverity(key as any)}
+                  loading={isNil(statusCounts?.[key])}
+                >
+                  {statusCounts?.[key]}
+                </Chip>
+              )}
+            </SubTab>
+          ))}
+        </TabList>
+      </div>
       <div css={{ minWidth: 240 }}>
         <Select
           label={upgradeableFilter}
