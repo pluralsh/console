@@ -70,7 +70,6 @@ func (in *FederatedCredential) SetCondition(condition metav1.Condition) {
 // FederatedCredentialSpec defines the desired state of FederatedCredential.
 type FederatedCredentialSpec struct {
 	// Issuer is the URL of the identity provider that issues the tokens.
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Issuer is immutable"
 	// +kubebuilder:validation:Required
 	Issuer string `json:"issuer"`
 
@@ -90,7 +89,6 @@ type FederatedCredentialSpec struct {
 	ClaimsLike *runtime.RawExtension `json:"claimsLike,omitempty"`
 
 	// User is the user email address that will be authenticated by this credential.
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
 	// +kubebuilder:validation:Required
 	User string `json:"user"`
 }
