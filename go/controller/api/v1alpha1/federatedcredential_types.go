@@ -45,7 +45,7 @@ func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, er
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
-func (in *FederatedCredential) Attributes() console.FederatedCredentialAttributes {
+func (in *FederatedCredential) Attributes(userID string) console.FederatedCredentialAttributes {
 	var claimsLike *string
 	if in.Spec.ClaimsLike == nil || len(in.Spec.ClaimsLike.Raw) == 0 {
 		// If claimsLike is not set, we default to an empty JSON object.
@@ -59,6 +59,7 @@ func (in *FederatedCredential) Attributes() console.FederatedCredentialAttribute
 		Issuer:     in.Spec.Issuer,
 		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
 		ClaimsLike: claimsLike,
+		UserID:     userID,
 	}
 }
 
