@@ -1,4 +1,9 @@
-import { ArrowLeftIcon, CommandIcon, ReturnIcon } from '@pluralsh/design-system'
+import {
+  ArrowLeftIcon,
+  CommandIcon,
+  ReturnIcon,
+  useResizeObserver,
+} from '@pluralsh/design-system'
 import { Command } from 'cmdk'
 import { isEmpty } from 'lodash'
 import {
@@ -45,11 +50,7 @@ const directory = [
   },
 ]
 
-export default function CommandPalette({
-  modal,
-}: {
-  modal: { ready: boolean }
-}) {
+export default function CommandPalette() {
   const theme = useTheme()
   const { setCmdkOpen, initialTab, setInitialTab } = use(CommandPaletteContext)
   const [value, setValue] = useState('')
@@ -145,14 +146,13 @@ export default function CommandPalette({
             </p>
           </div>
         )}
-        {modal.ready && tab === CommandPaletteTab.History && (
+        {tab === CommandPaletteTab.History && (
           <CommandPaletteHistory
             items={items}
             loading={loading}
             setCmdkOpen={setCmdkOpen}
             pageInfo={pageInfo}
             fetchNextPage={fetchNextPage}
-            modalReady={modal.ready}
           />
         )}
         {tab === CommandPaletteTab.Commands && (
@@ -205,25 +205,33 @@ function CommandPaletteHistory({
   fetchNextPage,
   setCmdkOpen,
 }: CommandPaletteHistoryProps): ReactElement {
-  const ref = useRef<HTMLDivElement | null>(null)
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const [height, setHeight] = useState(0)
+  const [width, setWidth] = useState(0)
+
   const [listRef, setListRef] = useState<VariableSizeList | null>(null)
   const commands = useMemo(() => items.flatMap((i) => i.commands), [items])
   const theme = useTheme()
 
+  useResizeObserver(wrapperRef, (entry) => {
+    setHeight(entry.height)
+    setWidth(entry.width)
+  })
+
   return (
     <>
       <div
-        ref={ref}
-        css={{
-          minHeight: 500,
-        }}
+        ref={wrapperRef}
+        css={{ minHeight: 500 }}
       >
         <StandardScroller
+          customHeight={height}
+          customWidth={width}
           listRef={listRef}
           setListRef={setListRef}
           items={commands}
           loading={loading}
-          placeholder={() => <div css={{ height: 50 }}></div>}
+          placeholder={() => <div style={{ height: 50 }}></div>}
           hasNextPage={pageInfo?.hasNextPage}
           mapper={(command, { prev }, { index: idx }) => {
             return (
@@ -389,7 +397,7 @@ export const useCommandPaletteMessage = () => {
     processedRef.current = message
     setMessage('')
     return message
-  }, [message])
+  }, [message, setMessage])
 
   return { readValue, setMessage }
 }

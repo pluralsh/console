@@ -338,6 +338,8 @@ export function StandardScroller({
   handleScroll,
   refreshKey,
   setLoader,
+  customHeight = 0,
+  customWidth = 0,
   ...props
 }) {
   const sizeMap = useRef({})
@@ -371,40 +373,44 @@ export function StandardScroller({
     >
       {({ onItemsRendered, ref }) => (
         <Autosizer>
-          {({ height, width }) => (
-            <List
-              height={height}
-              width={width}
-              itemCount={itemCount}
-              itemSize={getSize}
-              itemKey={(index) => `${refreshKey}:${index}`}
-              itemData={buildItemData(
-                setSize,
-                mapper,
-                isItemLoaded,
-                items,
-                listRef,
-                width,
-                placeholder,
-                refreshKey,
-                props
-              )}
-              onScroll={({ scrollOffset }) =>
-                handleScroll && handleScroll(scrollOffset > height / 2)
-              }
-              onItemsRendered={(ctx) => {
-                if (props.onRendered) props.onRendered(ctx)
-                onItemsRendered(ctx)
-              }}
-              ref={(listRef) => {
-                if (setListRef) setListRef(listRef)
-                ref(listRef)
-              }}
-              {...props}
-            >
-              {ItemWrapper}
-            </List>
-          )}
+          {({ height: autoHeight, width: autoWidth }) => {
+            const height = customHeight || autoHeight
+            const width = customWidth || autoWidth
+            return (
+              <List
+                height={height}
+                width={width}
+                itemCount={itemCount}
+                itemSize={getSize}
+                itemKey={(index) => `${refreshKey}:${index}`}
+                itemData={buildItemData(
+                  setSize,
+                  mapper,
+                  isItemLoaded,
+                  items,
+                  listRef,
+                  width,
+                  placeholder,
+                  refreshKey,
+                  props
+                )}
+                onScroll={({ scrollOffset }) =>
+                  handleScroll && handleScroll(scrollOffset > height / 2)
+                }
+                onItemsRendered={(ctx) => {
+                  if (props.onRendered) props.onRendered(ctx)
+                  onItemsRendered(ctx)
+                }}
+                ref={(listRef) => {
+                  if (setListRef) setListRef(listRef)
+                  ref(listRef)
+                }}
+                {...props}
+              >
+                {ItemWrapper}
+              </List>
+            )
+          }}
         </Autosizer>
       )}
     </SmartLoader>
