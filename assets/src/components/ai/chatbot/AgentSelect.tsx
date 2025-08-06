@@ -1,7 +1,6 @@
 import {
   ArrowRightIcon,
   Button,
-  CaretDownIcon,
   CaretUpIcon,
   KubernetesIcon,
   ListBoxFooter,
@@ -14,13 +13,13 @@ import {
 } from '@pluralsh/design-system'
 import { capitalize } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AI_AGENT_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
-import { AgentSessionT, useChatbot } from '../AIContext.tsx'
 import { CaptionP } from '../../utils/typography/Text.tsx'
-import { useNavigate } from 'react-router-dom'
-import { AI_AGENT_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
+import { AgentSessionT, useChatbot } from '../AIContext.tsx'
 
 export function AgentIcon({
   type,
@@ -63,8 +62,6 @@ export function AgentSelect() {
 
   const onAgentChange = useCallback(
     (newAgent: AgentSessionT) => {
-      if (newAgent === selectedAgent) return
-
       if (newAgent) {
         setOpen(false)
         setAgentInitMode(newAgent)
@@ -73,7 +70,7 @@ export function AgentSelect() {
         goToLastNonAgentThread()
       }
     },
-    [selectedAgent, goToLastNonAgentThread, setAgentInitMode]
+    [goToLastNonAgentThread, setAgentInitMode]
   )
 
   return (
@@ -122,7 +119,15 @@ export function AgentSelect() {
       triggerButton={
         <Button
           startIcon={icon}
-          endIcon={open ? <CaretUpIcon /> : <CaretDownIcon />}
+          endIcon={
+            <CaretUpIcon
+              style={{
+                pointerEvents: 'none',
+                transition: 'transform 0.2s ease-in-out',
+                transform: open ? 'scaleY(-1)' : 'scaleY(1)',
+              }}
+            />
+          }
           tertiary
           small
         >
