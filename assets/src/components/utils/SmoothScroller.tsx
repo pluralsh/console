@@ -1,3 +1,4 @@
+// TODO: deprecate this, we should instead base this component off our DS Table
 import memoize from 'memoize-one'
 import {
   Component,
@@ -8,10 +9,7 @@ import {
   useState,
 } from 'react'
 import Autosizer from 'react-virtualized-auto-sizer'
-import {
-  FixedSizeList as FixedList,
-  VariableSizeList as List,
-} from 'react-window'
+import { VariableSizeList as List } from 'react-window'
 import * as rwr from 'react-window-reversed'
 
 import { CellMeasurer } from './CellMeasurer.js'
@@ -196,24 +194,6 @@ const ItemWrapper = memo(
     )
   },
   areEqual
-)
-
-const FixedItemWrapper = memo(
-  ({
-    data: { items, isItemLoaded, placeholder, mapper },
-    style,
-    index,
-  }: any) => (
-    <div style={style}>
-      <Item
-        index={index}
-        items={items}
-        isItemLoaded={isItemLoaded}
-        placeholder={placeholder}
-        mapper={mapper}
-      />
-    </div>
-  )
 )
 
 const buildItemData = memoize(
@@ -411,64 +391,6 @@ export function StandardScroller({
               </List>
             )
           }}
-        </Autosizer>
-      )}
-    </SmartLoader>
-  )
-}
-
-export function FixedScroller({
-  hasNextPage,
-  loading,
-  items,
-  loadNextPage,
-  mapper,
-  itemSize,
-  placeholder,
-  setLoader,
-}) {
-  const count = items.length
-  const itemCount = hasNextPage ? count + 7 : count
-  const loadMoreItems = loading ? () => {} : loadNextPage
-  const isItemLoaded = useCallback(
-    (index) => !hasNextPage || index < count,
-    [hasNextPage, count]
-  )
-
-  return (
-    <SmartLoader
-      ref={setLoader}
-      isItemLoaded={isItemLoaded}
-      itemCount={itemCount}
-      loadMoreItems={loadMoreItems}
-      minimumBatchSize={50}
-      threshold={75}
-    >
-      {({ onItemsRendered, ref }) => (
-        <Autosizer>
-          {({ height, width }) => (
-            <FixedList
-              height={height}
-              width={width}
-              itemSize={itemSize}
-              itemCount={itemCount}
-              itemData={buildItemData(
-                null,
-                mapper,
-                isItemLoaded,
-                items,
-                null,
-                width,
-                placeholder,
-                null,
-                null
-              )}
-              onItemsRendered={onItemsRendered}
-              ref={ref}
-            >
-              {FixedItemWrapper}
-            </FixedList>
-          )}
         </Autosizer>
       )}
     </SmartLoader>

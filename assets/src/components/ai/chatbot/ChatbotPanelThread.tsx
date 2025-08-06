@@ -17,7 +17,6 @@ import { isEmpty, uniq } from 'lodash'
 import {
   Dispatch,
   Fragment,
-  ReactElement,
   ReactNode,
   SetStateAction,
   useCallback,
@@ -273,20 +272,6 @@ export const ChatbotMessagesWrapper = ({
   pageInfo: any
   fetchNextPage?: Dispatch<void>
 }) => {
-  const DEFAULT_ITEM_SIZE = 80
-  const [itemHeights, setItemHeights] = useState<number[]>([])
-  const handleHeightChange = useCallback(
-    (idx: number, height: number) => {
-      setItemHeights((heights) => {
-        const next = [...heights]
-        next[idx] = height
-        return next
-      })
-      messageListRef?.resetAfterIndex(idx)
-    },
-    [messageListRef]
-  )
-
   const items = useMemo(() => {
     if (isEmpty(children)) return []
     if (!Array.isArray(children)) return [children]
@@ -306,12 +291,11 @@ export const ChatbotMessagesWrapper = ({
         listRef={messageListRef}
         setListRef={setMessageListRef}
         items={items}
-        itemSize={(index) => itemHeights[index] ?? DEFAULT_ITEM_SIZE}
         loading={loading}
         hasNextPage={pageInfo?.hasNextPage}
-        mapper={(child, _, { index }) => (
+        mapper={(child, _, { index, setSize }) => (
           <ChatbotMessage
-            handleHeightChange={handleHeightChange}
+            handleHeightChange={(height) => setSize(index, height)}
             idx={index}
           >
             {child}
@@ -327,7 +311,15 @@ export const ChatbotMessagesWrapper = ({
   )
 }
 
-function ChatbotMessage({ handleHeightChange, idx, children }): ReactElement {
+function ChatbotMessage({
+  handleHeightChange,
+  idx,
+  children,
+}: {
+  handleHeightChange: (idx: number, height: number) => void
+  idx: number
+  children: ReactNode
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const prevHeight = useRef<number | null>(null)
 
