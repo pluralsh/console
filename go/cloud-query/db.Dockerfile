@@ -61,5 +61,8 @@ COPY --from=libraries /workspace/lib//steampipe_postgres_*.control /usr/share/po
 # Copy gcloud CLI
 COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 
+# Switch to the postgres user
+USER postgres
+
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
 CMD ["postgres"]

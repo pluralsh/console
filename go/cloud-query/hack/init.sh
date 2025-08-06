@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+# Set default values if not provided
+POSTGRES_USER=${POSTGRES_USER:-postgres}
+POSTGRES_DB=${POSTGRES_DB:-postgres}
+
 # Start PostgreSQL in background
 /usr/local/bin/docker-entrypoint.sh "$@" &
 PG_PID=$!
