@@ -4,10 +4,10 @@ defmodule Console.AI.Tools.Agent.SwitchCluster do
   alias Console.Deployments.Clusters
 
   embedded_schema do
-    field :cluster, :string
+    field :handle, :string
   end
 
-  @valid ~w(cluster)a
+  @valid ~w(handle)a
 
   def changeset(model, attrs) do
     model
@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Agent.SwitchCluster do
   def name(), do: plrl_tool("switch_cluster")
   def description(), do: "Changes the current cluster in this session to the provided cluster handle"
 
-  def implement(%__MODULE__{cluster: handle}) do
+  def implement(%__MODULE__{handle: handle}) do
     with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
          %User{} = user <- Tool.actor(),
          {:ok, _} <- Policies.allow(cluster, user, :read),

@@ -10,7 +10,7 @@ defmodule Console.AI.Tools.Agent.SwitchClusterTest do
       session = insert(:agent_session)
       Console.AI.Tool.context(user: actor, session: session, thread: session.thread)
 
-      {:ok, result} = SwitchCluster.implement(%SwitchCluster{cluster: cluster.handle})
+      {:ok, result} = SwitchCluster.implement(%SwitchCluster{handle: cluster.handle})
       assert is_binary(result)
 
       assert refetch(session).cluster_id == cluster.id
@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Agent.SwitchClusterTest do
       session = insert(:agent_session)
       Console.AI.Tool.context(user: actor, session: session, thread: session.thread)
 
-      {:ok, result} = SwitchCluster.implement(%SwitchCluster{cluster: cluster.handle})
+      {:ok, result} = SwitchCluster.implement(%SwitchCluster{handle: cluster.handle})
       assert result =~ "failed to switch to cluster #{cluster.handle}"
     end
   end
