@@ -225,8 +225,9 @@ export function ServiceDetailsSidecar({
         )}
         {(serviceDeployment?.imports?.length ?? 0) > 0 && (
           <SidecarItem heading="Imported stacks">
-            {serviceDeployment.imports?.map((ref) => (
+            {serviceDeployment.imports?.map((ref, i) => (
               <div
+                key={ref?.stack?.id ?? i}
                 css={{
                   display: 'flex',
                   gap: theme.spacing.xsmall,

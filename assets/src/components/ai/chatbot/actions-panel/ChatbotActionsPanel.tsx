@@ -10,7 +10,6 @@ import { useChatbot } from '../../AIContext.tsx'
 import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 
 import {
-  Accordion,
   ArrowTopRightIcon,
   Button,
   Flex,
@@ -38,9 +37,7 @@ import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
 import { GqlError } from '../../../utils/Alert.tsx'
 import { EmptyStateCompact } from '../../AIThreads.tsx'
 import { ChatbotCreatePrButton } from '../ChatMessageContent.tsx'
-import { PullRequests } from './PullRequests.tsx'
-import { Services } from './Services.tsx'
-import { Stacks } from './Stacks.tsx'
+import { ActionsPanelResourceAccordion } from './ActionsPanelResourceAccordion.tsx'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -266,18 +263,12 @@ export function ChatbotActionsPanel({
           </ActionItemSC>
         )}
 
-        <Accordion
-          type="multiple"
-          css={{
-            border: 'none',
-            background: theme.colors['fill-accent'],
-            '& > *': { borderBottom: theme.borders.default },
-          }}
-        >
-          <PullRequests prs={prs} />
-          <Stacks stacks={stacks} />
-          <Services services={services} />
-        </Accordion>
+        <ActionsPanelResourceAccordion
+          prs={prs}
+          stacks={stacks}
+          services={services}
+          closePanel={() => setOpen(false)}
+        />
       </div>
     </SimpleFlyover>
   )
