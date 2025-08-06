@@ -48,7 +48,8 @@ ARG POSTGRES_MAJOR_VERSION
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
 
-COPY ./hack/init.sql /docker-entrypoint-initdb.d/
+COPY hack/init.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
 
 # Copy extension libraries
 COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /usr/lib/postgresql/${POSTGRES_MAJOR_VERSION}/lib/
@@ -59,3 +60,9 @@ COPY --from=libraries /workspace/lib//steampipe_postgres_*.control /usr/share/po
 
 # Copy gcloud CLI
 COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
+
+# Switch to the postgres user
+USER postgres
+
+ENTRYPOINT ["/usr/local/bin/startup.sh"]
+CMD ["postgres"]
