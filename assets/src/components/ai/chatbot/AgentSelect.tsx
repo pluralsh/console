@@ -1,8 +1,10 @@
 import {
+  ArrowRightIcon,
   Button,
   CaretDownIcon,
   CaretUpIcon,
   KubernetesIcon,
+  ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
   RobotIcon,
@@ -17,6 +19,8 @@ import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
 import { AgentSessionT, useChatbot } from '../AIContext.tsx'
 import { CaptionP } from '../../utils/typography/Text.tsx'
+import { useNavigate } from 'react-router-dom'
+import { AI_AGENT_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
 
 export function AgentIcon({
   type,
@@ -47,6 +51,7 @@ export function AgentIcon({
 
 export function AgentSelect() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { goToLastNonAgentThread, selectedAgent, setAgentInitMode } =
     useChatbot()
   const [open, setOpen] = useState(false)
@@ -90,15 +95,29 @@ export function AgentSelect() {
         </div>
       }
       dropdownFooterFixed={
-        selectedAgent ? (
-          <ListBoxFooterPlus
-            onClick={() => onAgentChange(null)}
-            leftContent={<RobotIcon />}
+        <>
+          <ListBoxFooter
+            css={{
+              borderBottom: theme.borders.input,
+            }}
+            onClick={() => {
+              navigate(AI_AGENT_ABS_PATH)
+              setOpen(false)
+            }}
+            rightContent={<ArrowRightIcon />}
           >
-            Deselect agent
-            <CaptionP>Go to the last non-agent or a new chat</CaptionP>
-          </ListBoxFooterPlus>
-        ) : undefined
+            View all agent sessions
+          </ListBoxFooter>
+          {selectedAgent ? (
+            <ListBoxFooterPlus
+              onClick={() => onAgentChange(null)}
+              leftContent={<RobotIcon />}
+            >
+              Deselect agent
+              <CaptionP>Go to the last non-agent or a new chat</CaptionP>
+            </ListBoxFooterPlus>
+          ) : undefined}
+        </>
       }
       triggerButton={
         <Button
