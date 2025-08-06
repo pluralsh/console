@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Agent.SwitchCluster do
     with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
          %User{} = user <- Tool.actor(),
          {:ok, _} <- Policies.allow(cluster, user, :read),
-         {:ok, _} <- update_session(%{cluster_id: cluster.id}) do
+         {:ok, _} <- update_session(%{cluster_id: cluster.id}, true) do
       {:ok, "Switched to cluster #{cluster.handle}"}
     else
       {:error, err} -> {:ok, "failed to switch to cluster #{handle}, reason: #{inspect(err)}"}

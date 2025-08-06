@@ -13,6 +13,10 @@ defmodule Console.AI.Tools.Agent.SwitchClusterTest do
       {:ok, result} = SwitchCluster.implement(%SwitchCluster{handle: cluster.handle})
       assert is_binary(result)
 
+      ctx = Console.AI.Tool.context()
+      assert ctx.session.cluster_id == cluster.id
+      assert ctx.session.cluster.id == cluster.id
+
       assert refetch(session).cluster_id == cluster.id
     end
 
