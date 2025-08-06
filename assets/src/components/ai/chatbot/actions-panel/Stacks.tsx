@@ -1,37 +1,24 @@
 import {
-  ChatAgentSessionStacksQuery,
-  StackChatFragment,
-} from '../../../../generated/graphql.ts'
-import {
   AccordionItem,
-  ChecklistIcon,
   Flex,
   IconFrame,
+  StackIcon,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  FetchPaginatedDataResult,
-} from '../../../utils/table/useFetchPaginatedData.tsx'
 import { isEmpty } from 'lodash'
-import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
-import { useTheme } from 'styled-components'
-import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
-import { TRUNCATE } from '../../../utils/truncate.ts'
-import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
-import { StackTypeIcon } from '../../../stacks/common/StackTypeIcon.tsx'
-import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
-import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { StackChatFragment } from '../../../../generated/graphql.ts'
+import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
+import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
+import { StackTypeIcon } from '../../../stacks/common/StackTypeIcon.tsx'
+import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
+import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 
-export function Stacks({
-  stacks,
-  query,
-}: {
-  stacks: StackChatFragment[]
-  query: FetchPaginatedDataResult<ChatAgentSessionStacksQuery>
-}) {
+export function Stacks({ stacks }: { stacks: StackChatFragment[] }) {
   const navigate = useNavigate()
 
   if (isEmpty(stacks)) return null
@@ -43,7 +30,7 @@ export function Stacks({
       trigger={
         <ActionItemHeaderSC>
           <IconFrame
-            icon={<ChecklistIcon />}
+            icon={<StackIcon />}
             size="small"
           />
           Stacks
@@ -60,11 +47,6 @@ export function Stacks({
         onRowClick={(_e, { original }: Row<StackChatFragment>) =>
           navigate(getStacksAbsPath(original.id))
         }
-        hasNextPage={query.pageInfo?.hasNextPage}
-        fetchNextPage={query.fetchNextPage}
-        isFetchingNextPage={query.loading}
-        onVirtualSliceChange={query.setVirtualSlice}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>
   )

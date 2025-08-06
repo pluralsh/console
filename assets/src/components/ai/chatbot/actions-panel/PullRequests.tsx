@@ -1,33 +1,20 @@
 import {
-  ChatAgentSessionPRsQuery,
-  PullRequestFragment,
-} from '../../../../generated/graphql.ts'
-import {
   AccordionItem,
-  ChecklistIcon,
   Flex,
   IconFrame,
+  PrOpenIcon,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  FetchPaginatedDataResult,
-} from '../../../utils/table/useFetchPaginatedData.tsx'
 import { isEmpty } from 'lodash'
-import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 import { useTheme } from 'styled-components'
-import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
-import { TRUNCATE } from '../../../utils/truncate.ts'
+import { PullRequestFragment } from '../../../../generated/graphql.ts'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
+import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 
-export function PullRequests({
-  prs,
-  query,
-}: {
-  prs: PullRequestFragment[]
-  query: FetchPaginatedDataResult<ChatAgentSessionPRsQuery>
-}) {
+export function PullRequests({ prs }: { prs: PullRequestFragment[] }) {
   if (isEmpty(prs)) return null
 
   return (
@@ -37,7 +24,7 @@ export function PullRequests({
       trigger={
         <ActionItemHeaderSC>
           <IconFrame
-            icon={<ChecklistIcon />}
+            icon={<PrOpenIcon />}
             size="small"
           />
           Pull requests
@@ -54,11 +41,6 @@ export function PullRequests({
         onRowClick={(_e, { original }: Row<PullRequestFragment>) =>
           window.open(original.url, '_blank', 'noopener,noreferrer')
         }
-        hasNextPage={query.pageInfo?.hasNextPage}
-        fetchNextPage={query.fetchNextPage}
-        isFetchingNextPage={query.loading}
-        onVirtualSliceChange={query.setVirtualSlice}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>
   )

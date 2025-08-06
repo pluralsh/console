@@ -1,8 +1,4 @@
 import {
-  ChatAgentSessionServicesQuery,
-  ServiceDeploymentChatFragment,
-} from '../../../../generated/graphql.ts'
-import {
   AccordionItem,
   ChecklistIcon,
   Flex,
@@ -11,28 +7,23 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  FetchPaginatedDataResult,
-} from '../../../utils/table/useFetchPaginatedData.tsx'
+import { ServiceDeploymentChatFragment } from '../../../../generated/graphql.ts'
 
-import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
-import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { isEmpty } from 'lodash'
+import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
-import { isEmpty } from 'lodash'
-import { TRUNCATE } from '../../../utils/truncate.ts'
-import { useTheme } from 'styled-components'
 import { DistroProviderIconFrame } from '../../../utils/ClusterDistro.tsx'
-import { useNavigate } from 'react-router-dom'
-import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
+import { TRUNCATE } from '../../../utils/truncate.ts'
+import { Body2P, CaptionP } from '../../../utils/typography/Text.tsx'
+import { ActionItemHeaderSC } from './ChatbotActionsPanel.tsx'
 
 export function Services({
   services,
-  query,
 }: {
   services: ServiceDeploymentChatFragment[]
-  query: FetchPaginatedDataResult<ChatAgentSessionServicesQuery>
 }) {
   const navigate = useNavigate()
 
@@ -67,11 +58,6 @@ export function Services({
             })
           )
         }
-        hasNextPage={query.pageInfo?.hasNextPage}
-        fetchNextPage={query.fetchNextPage}
-        isFetchingNextPage={query.loading}
-        onVirtualSliceChange={query.setVirtualSlice}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       />
     </AccordionItem>
   )

@@ -207,80 +207,21 @@ query ChatAgentSession($id: ID!) {
       stack {
         ...StackChat
       }
-    }
-  }
-}
-
-query ChatAgentSessionPRs(
-  $id: ID!
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-) {
-  chatThread(id: $id) {
-    id
-    session {
-      id
-      pullRequests(first: $first, last: $last, after: $after, before: $before) {
-        pageInfo {
-          ...PageInfo
-        }
+      pullRequests(first: 100) {
         edges {
           node {
             ...PullRequest
           }
         }
       }
-    }
-  }
-}
-
-query ChatAgentSessionServices(
-  $id: ID!
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-) {
-  chatThread(id: $id) {
-    id
-    session {
-      id
-      serviceDeployments(
-        first: $first
-        last: $last
-        after: $after
-        before: $before
-      ) {
-        pageInfo {
-          ...PageInfo
-        }
+      serviceDeployments(first: 100) {
         edges {
           node {
             ...ServiceDeploymentTiny
           }
         }
       }
-    }
-  }
-}
-
-query ChatAgentSessionStacks(
-  $id: ID!
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-) {
-  chatThread(id: $id) {
-    id
-    session {
-      id
-      stacks(first: $first, last: $last, after: $after, before: $before) {
-        pageInfo {
-          ...PageInfo
-        }
+      stacks(first: 100) {
         edges {
           node {
             ...StackTiny

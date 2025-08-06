@@ -16,6 +16,7 @@ import { PageInfoFragment } from 'generated/graphql'
 import { ComponentProps, Dispatch, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
+// TODO: remove this, it was added as the default in Table itself a while ago
 export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = { overscan: 10 }

@@ -3,10 +3,7 @@ import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   ChatFragment,
   ChatType,
-  useChatAgentSessionPRsQuery,
   useChatAgentSessionQuery,
-  useChatAgentSessionServicesQuery,
-  useChatAgentSessionStacksQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
@@ -25,9 +22,11 @@ import {
   StackIcon,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { isEmpty } from 'lodash'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { iconUrl } from 'utils/icon.ts'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
@@ -37,13 +36,11 @@ import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
 import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
 import { GqlError } from '../../../utils/Alert.tsx'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
 import { EmptyStateCompact } from '../../AIThreads.tsx'
+import { ChatbotCreatePrButton } from '../ChatMessageContent.tsx'
 import { PullRequests } from './PullRequests.tsx'
 import { Services } from './Services.tsx'
 import { Stacks } from './Stacks.tsx'
-import { ChatbotCreatePrButton } from '../ChatMessageContent.tsx'
-import { iconUrl } from 'utils/icon.ts'
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -57,62 +54,27 @@ export function ChatbotActionsPanel({
   messages: ChatFragment[]
 }) {
   const theme = useTheme()
-  const { currentThread } = useChatbot()
+  const { currentThreadId } = useChatbot()
 
-  const query = useChatAgentSessionQuery({
-    skip: !currentThread?.id,
-    variables: { id: currentThread?.id ?? '' },
+  const { data, error, loading } = useChatAgentSessionQuery({
+    variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
-  const pr = query.data?.chatThread?.session?.pullRequest
-  const service = query.data?.chatThread?.session?.service
-  const stack = query.data?.chatThread?.session?.stack
+  const curSession = data?.chatThread?.session
 
-  const prsQuery = useFetchPaginatedData(
-    {
-      queryHook: useChatAgentSessionPRsQuery,
-      keyPath: ['chatThread', 'session', 'pullRequests'],
-      skip: !currentThread?.id,
-    },
-    { id: currentThread?.id ?? '' }
-  )
+  const pr = curSession?.pullRequest
+  const service = curSession?.service
+  const stack = curSession?.stack
 
-  const prs = useMemo(
-    () => mapExistingNodes(prsQuery.data?.chatThread?.session?.pullRequests),
-    [prsQuery.data?.chatThread?.session?.pullRequests]
-  )
-
-  const servicesQuery = useFetchPaginatedData(
-    {
-      queryHook: useChatAgentSessionServicesQuery,
-      keyPath: ['chatThread', 'session', 'serviceDeployments'],
-      skip: !currentThread?.id,
-    },
-    { id: currentThread?.id ?? '' }
-  )
-
-  const services = useMemo(
-    () =>
-      mapExistingNodes(
-        servicesQuery.data?.chatThread?.session?.serviceDeployments
-      ),
-    [servicesQuery.data?.chatThread?.session?.serviceDeployments]
-  )
-
-  const stacksQuery = useFetchPaginatedData(
-    {
-      queryHook: useChatAgentSessionStacksQuery,
-      keyPath: ['chatThread', 'session', 'stacks'],
-      skip: !currentThread?.id,
-    },
-    { id: currentThread?.id ?? '' }
-  )
-
-  const stacks = useMemo(
-    () => mapExistingNodes(stacksQuery.data?.chatThread?.session?.stacks),
-    [stacksQuery.data?.chatThread?.session?.stacks]
+  const { prs, services, stacks } = useMemo(
+    () => ({
+      prs: mapExistingNodes(curSession?.pullRequests),
+      services: mapExistingNodes(curSession?.serviceDeployments),
+      stacks: mapExistingNodes(curSession?.stacks),
+    }),
+    [curSession]
   )
 
   const prCallMessages = useMemo(() => {
@@ -131,21 +93,13 @@ export function ChatbotActionsPanel({
     [pr, prCallMessages, prs, service, services, stack, stacks]
   )
 
-  const hasErrors = useMemo(
-    () =>
-      !!query.error ||
-      !!prsQuery.error ||
-      !!servicesQuery.error ||
-      !!stacksQuery.error,
-    [query.error, prsQuery.error, servicesQuery.error, stacksQuery.error]
-  )
-
   useEffect(() => {
     if (hasData) setOpen(true)
     // want this to also recheck when the thread changes
-  }, [hasData, setOpen, currentThread?.id])
+  }, [hasData, setOpen, currentThreadId])
 
-  if (!currentThread?.id) return null
+  if (!currentThreadId) return null
+  if (!data && loading) return <LoadingIndicator />
 
   return (
     <SimpleFlyover
@@ -157,7 +111,7 @@ export function ChatbotActionsPanel({
         <Body2BoldP>Actions panel</Body2BoldP>
       </HeaderSC>
       <div css={{ overflow: 'auto' }}>
-        {!hasData && !hasErrors && (
+        {!hasData && !error && (
           <EmptyStateCompact
             cssProps={{ background: 'none', border: 'none' }}
             icon={<RobotIcon size={24} />}
@@ -165,19 +119,7 @@ export function ChatbotActionsPanel({
             description="Use our agent to run background tasks and get updates on your services, stacks, and pull requests."
           />
         )}
-
-        {hasErrors && (
-          <Flex
-            direction="column"
-            gap="small"
-            css={{ padding: theme.spacing.medium }}
-          >
-            {query.error && <GqlError error={query.error} />}
-            {prsQuery.error && <GqlError error={prsQuery.error} />}
-            {servicesQuery.error && <GqlError error={servicesQuery.error} />}
-            {stacksQuery.error && <GqlError error={stacksQuery.error} />}
-          </Flex>
-        )}
+        {error && <GqlError error={error} />}
 
         {prCallMessages.map(({ id, prAutomation, attributes }) => (
           <ActionItemSC key={id}>
@@ -207,8 +149,8 @@ export function ChatbotActionsPanel({
             </CaptionP>
             <ChatbotCreatePrButton
               prAutomation={prAutomation}
-              threadId={currentThread.id}
-              session={currentThread.session}
+              threadId={currentThreadId}
+              session={curSession}
               context={attributes?.prCall?.context}
             />
           </ActionItemSC>
@@ -332,18 +274,9 @@ export function ChatbotActionsPanel({
             '& > *': { borderBottom: theme.borders.default },
           }}
         >
-          <PullRequests
-            prs={prs}
-            query={prsQuery}
-          />
-          <Stacks
-            stacks={stacks}
-            query={stacksQuery}
-          />
-          <Services
-            services={services}
-            query={servicesQuery}
-          />
+          <PullRequests prs={prs} />
+          <Stacks stacks={stacks} />
+          <Services services={services} />
         </Accordion>
       </div>
     </SimpleFlyover>
