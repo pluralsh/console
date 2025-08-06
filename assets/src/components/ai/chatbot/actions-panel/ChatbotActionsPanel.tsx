@@ -21,7 +21,7 @@ import {
   StackIcon,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { isEmpty } from 'lodash'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -38,6 +38,8 @@ import { GqlError } from '../../../utils/Alert.tsx'
 import { EmptyStateCompact } from '../../AIThreads.tsx'
 import { ChatbotCreatePrButton } from '../ChatMessageContent.tsx'
 import { ActionsPanelResourceAccordion } from './ActionsPanelResourceAccordion.tsx'
+
+const ACTIONS_PANEL_WIDTH = 400
 
 export function ChatbotActionsPanel({
   isOpen,
@@ -96,179 +98,189 @@ export function ChatbotActionsPanel({
   }, [hasData, setOpen, currentThreadId])
 
   if (!currentThreadId) return null
-  if (!data && loading) return <LoadingIndicator />
 
   return (
     <SimpleFlyover
       isOpen={isOpen}
       zIndex={zIndex}
-      css={{ width: 400 }}
+      css={{ width: ACTIONS_PANEL_WIDTH }}
     >
       <HeaderSC>
         <Body2BoldP>Actions panel</Body2BoldP>
       </HeaderSC>
       <div css={{ overflow: 'auto' }}>
-        {!hasData && !error && (
-          <EmptyStateCompact
-            cssProps={{ background: 'none', border: 'none' }}
-            icon={<RobotIcon size={24} />}
-            message="No data available"
-            description="Use our agent to run background tasks and get updates on your services, stacks, and pull requests."
-          />
-        )}
-        {error && <GqlError error={error} />}
-
-        {prCallMessages.map(({ id, prAutomation, attributes }) => (
-          <ActionItemSC key={id}>
-            <ActionItemHeaderSC>
-              <IconFrame
-                icon={
-                  prAutomation?.icon ? (
-                    <img
-                      width={20}
-                      height={20}
-                      src={iconUrl(
-                        prAutomation?.icon,
-                        prAutomation?.darkIcon,
-                        theme.mode
-                      )}
-                    />
-                  ) : (
-                    <PrOpenIcon />
-                  )
-                }
-                size="small"
-              />
-              {prAutomation?.name ?? 'PR automation'}
-            </ActionItemHeaderSC>
-            <CaptionP $color="text-xlight">
-              {prAutomation?.documentation ?? ''}
-            </CaptionP>
-            <ChatbotCreatePrButton
-              prAutomation={prAutomation}
-              threadId={currentThreadId}
-              session={curSession}
-              context={attributes?.prCall?.context}
+        {!hasData ? (
+          loading ? (
+            <TableSkeleton
+              width={ACTIONS_PANEL_WIDTH - 2 * theme.spacing.xlarge}
+              numColumns={1}
+              styles={{ padding: theme.spacing.xlarge }}
             />
-          </ActionItemSC>
-        ))}
-
-        {pr && (
-          <ActionItemSC>
-            <ActionItemHeaderSC>
-              <IconFrame
-                icon={<GitPullIcon />}
-                size="small"
-              />
-              Pull request
-              <Flex
-                flex={1}
-                justifyContent="flex-end"
-              >
-                <PrStatusChip
-                  status={pr.status}
-                  size="small"
+          ) : error ? (
+            <GqlError error={error} />
+          ) : (
+            <EmptyStateCompact
+              cssProps={{ background: 'none', border: 'none' }}
+              icon={<RobotIcon size={24} />}
+              message="No data available"
+              description="Use our agent to run background tasks and get updates on your services, stacks, and pull requests."
+            />
+          )
+        ) : (
+          <>
+            {prCallMessages.map(({ id, prAutomation, attributes }) => (
+              <ActionItemSC key={id}>
+                <ActionItemHeaderSC>
+                  <IconFrame
+                    icon={
+                      prAutomation?.icon ? (
+                        <img
+                          width={20}
+                          height={20}
+                          src={iconUrl(
+                            prAutomation?.icon,
+                            prAutomation?.darkIcon,
+                            theme.mode
+                          )}
+                        />
+                      ) : (
+                        <PrOpenIcon />
+                      )
+                    }
+                    size="small"
+                  />
+                  {prAutomation?.name ?? 'PR automation'}
+                </ActionItemHeaderSC>
+                <CaptionP $color="text-xlight">
+                  {prAutomation?.documentation ?? ''}
+                </CaptionP>
+                <ChatbotCreatePrButton
+                  prAutomation={prAutomation}
+                  threadId={currentThreadId}
+                  session={curSession}
+                  context={attributes?.prCall?.context}
                 />
-              </Flex>
-            </ActionItemHeaderSC>
-            <CaptionP $color="text-xlight">{pr.title}</CaptionP>
-            <Flex justifyContent="space-between">
-              <Button
-                secondary
-                small
-                as={Link}
-                to={PR_ABS_PATH}
-              >
-                View all PRs
-              </Button>
-              <Button
-                startIcon={<GitHubLogoIcon />}
-                endIcon={<ArrowTopRightIcon />}
-                small
-                as="a"
-                href={pr.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View PR
-              </Button>
-            </Flex>
-          </ActionItemSC>
-        )}
+              </ActionItemSC>
+            ))}
 
-        {stack && (
-          <ActionItemSC>
-            <ActionItemHeaderSC>
-              <IconFrame
-                icon={<StackIcon />}
-                size="small"
-              />
-              Stack
-              <Flex
-                flex={1}
-                justifyContent="flex-end"
-              >
-                <StackStatusChip
-                  status={stack.status}
-                  deleting={!!stack.deletedAt}
-                  size="small"
-                />
-              </Flex>
-            </ActionItemHeaderSC>
-            <CaptionP $color="text-xlight">{stack.name}</CaptionP>
-            <Flex justifyContent="flex-end">
-              <Button
-                small
-                as={Link}
-                to={getStacksAbsPath(stack.id)}
-              >
-                View stack
-              </Button>
-            </Flex>
-          </ActionItemSC>
-        )}
+            {pr && (
+              <ActionItemSC>
+                <ActionItemHeaderSC>
+                  <IconFrame
+                    icon={<GitPullIcon />}
+                    size="small"
+                  />
+                  Pull request
+                  <Flex
+                    flex={1}
+                    justifyContent="flex-end"
+                  >
+                    <PrStatusChip
+                      status={pr.status}
+                      size="small"
+                    />
+                  </Flex>
+                </ActionItemHeaderSC>
+                <CaptionP $color="text-xlight">{pr.title}</CaptionP>
+                <Flex justifyContent="space-between">
+                  <Button
+                    secondary
+                    small
+                    as={Link}
+                    to={PR_ABS_PATH}
+                  >
+                    View all PRs
+                  </Button>
+                  <Button
+                    startIcon={<GitHubLogoIcon />}
+                    endIcon={<ArrowTopRightIcon />}
+                    small
+                    as="a"
+                    href={pr.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View PR
+                  </Button>
+                </Flex>
+              </ActionItemSC>
+            )}
 
-        {service && (
-          <ActionItemSC>
-            <ActionItemHeaderSC>
-              <IconFrame
-                icon={<ComponentIcon kind="service" />}
-                size="small"
-              />
-              Service
-              <Flex
-                flex={1}
-                justifyContent="flex-end"
-              >
-                <ServiceStatusChip
-                  status={service.status}
-                  componentStatus={service.componentStatus}
-                  size="small"
-                />
-              </Flex>
-            </ActionItemHeaderSC>
-            <CaptionP $color="text-xlight">{service.name}</CaptionP>
-            <Flex justifyContent="flex-end">
-              <Button
-                small
-                as={Link}
-                to={getServiceDetailsPath({
-                  serviceId: service?.id,
-                  clusterId: service?.cluster?.id,
-                })}
-              >
-                View service
-              </Button>
-            </Flex>
-          </ActionItemSC>
-        )}
+            {stack && (
+              <ActionItemSC>
+                <ActionItemHeaderSC>
+                  <IconFrame
+                    icon={<StackIcon />}
+                    size="small"
+                  />
+                  Stack
+                  <Flex
+                    flex={1}
+                    justifyContent="flex-end"
+                  >
+                    <StackStatusChip
+                      status={stack.status}
+                      deleting={!!stack.deletedAt}
+                      size="small"
+                    />
+                  </Flex>
+                </ActionItemHeaderSC>
+                <CaptionP $color="text-xlight">{stack.name}</CaptionP>
+                <Flex justifyContent="flex-end">
+                  <Button
+                    small
+                    as={Link}
+                    to={getStacksAbsPath(stack.id)}
+                  >
+                    View stack
+                  </Button>
+                </Flex>
+              </ActionItemSC>
+            )}
 
-        <ActionsPanelResourceAccordion
-          prs={prs}
-          stacks={stacks}
-          services={services}
-          closePanel={() => setOpen(false)}
-        />
+            {service && (
+              <ActionItemSC>
+                <ActionItemHeaderSC>
+                  <IconFrame
+                    icon={<ComponentIcon kind="service" />}
+                    size="small"
+                  />
+                  Service
+                  <Flex
+                    flex={1}
+                    justifyContent="flex-end"
+                  >
+                    <ServiceStatusChip
+                      status={service.status}
+                      componentStatus={service.componentStatus}
+                      size="small"
+                    />
+                  </Flex>
+                </ActionItemHeaderSC>
+                <CaptionP $color="text-xlight">{service.name}</CaptionP>
+                <Flex justifyContent="flex-end">
+                  <Button
+                    small
+                    as={Link}
+                    to={getServiceDetailsPath({
+                      serviceId: service?.id,
+                      clusterId: service?.cluster?.id,
+                    })}
+                  >
+                    View service
+                  </Button>
+                </Flex>
+              </ActionItemSC>
+            )}
+
+            <ActionsPanelResourceAccordion
+              prs={prs}
+              stacks={stacks}
+              services={services}
+              closePanel={() => setOpen(false)}
+            />
+          </>
+        )}
       </div>
     </SimpleFlyover>
   )
