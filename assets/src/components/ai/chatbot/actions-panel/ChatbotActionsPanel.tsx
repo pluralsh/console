@@ -272,13 +272,15 @@ export function ChatbotActionsPanel({
                 </Flex>
               </ActionItemSC>
             )}
-
-            <ActionsPanelResourceAccordion
-              prs={prs}
-              stacks={stacks}
-              services={services}
-              closePanel={() => setOpen(false)}
-            />
+            {/* rerender on open so the default accordion logic resets */}
+            {isOpen && (
+              <ActionsPanelResourceAccordion
+                prs={prs}
+                stacks={stacks}
+                services={services}
+                closePanel={() => setOpen(false)}
+              />
+            )}
           </>
         )}
       </div>

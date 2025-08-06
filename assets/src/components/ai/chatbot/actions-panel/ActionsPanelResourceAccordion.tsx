@@ -11,6 +11,7 @@ import {
 import { AccessorFnColumnDef, Row } from '@tanstack/react-table'
 
 import {
+  PrStatus,
   PullRequestFragment,
   ServiceDeploymentChatFragment,
   StackChatFragment,
@@ -28,6 +29,12 @@ import {
 } from './ActionPanelResourceTablesCols'
 import { ActionItemHeaderSC } from './ChatbotActionsPanel'
 
+enum ResourceType {
+  PullRequests = 'Pull requests',
+  Stacks = 'Stacks',
+  Services = 'Services',
+}
+
 export function ActionsPanelResourceAccordion({
   prs,
   stacks,
@@ -41,9 +48,19 @@ export function ActionsPanelResourceAccordion({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+
+  const defaultOpens = [
+    ...(prs.some((pr) => pr.status === PrStatus.Open)
+      ? [ResourceType.PullRequests]
+      : []),
+    ResourceType.Stacks,
+    ResourceType.Services,
+  ]
+
   return (
     <Accordion
       type="multiple"
+      defaultValue={defaultOpens}
       css={{
         border: 'none',
         background: theme.colors['fill-accent'],
@@ -51,7 +68,7 @@ export function ActionsPanelResourceAccordion({
       }}
     >
       <ResourceAccordionItem
-        name="Pull Requests"
+        name={ResourceType.PullRequests}
         icon={<PrOpenIcon />}
         tableData={prs}
         columns={pullRequestsCol}
@@ -60,7 +77,7 @@ export function ActionsPanelResourceAccordion({
         }
       />
       <ResourceAccordionItem
-        name="Stacks"
+        name={ResourceType.Stacks}
         icon={<StackIcon />}
         tableData={stacks}
         columns={stacksCol}
@@ -70,7 +87,7 @@ export function ActionsPanelResourceAccordion({
         }}
       />
       <ResourceAccordionItem
-        name="Services"
+        name={ResourceType.Services}
         icon={<GitPullIcon />}
         tableData={services}
         columns={servicesCol}
