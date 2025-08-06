@@ -4,7 +4,7 @@ defmodule Console.AI.Tools.Agent.CallPr do
 
   embedded_schema do
     field :pr_automation_id, :string
-    field :context,          :map
+    field :context,          :string
   end
 
   @valid ~w(pr_automation_id context)a
