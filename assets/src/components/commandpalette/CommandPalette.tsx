@@ -15,16 +15,15 @@ import {
 import { VariableSizeList } from 'react-window'
 import { useTheme } from 'styled-components'
 import {
-  AiRole,
   ChatThreadTinyFragment,
   PageInfoFragment,
-  useChatMutation,
 } from '../../generated/graphql.ts'
 import { fromNow } from '../../utils/datetime.ts'
 import { useChatbot } from '../ai/AIContext.tsx'
 import { AITableActions } from '../ai/AITableActions.tsx'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
+import usePersistedSessionState from '../hooks/usePersistedSessionState.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { StandardScroller } from '../utils/SmoothScroller.tsx'
@@ -318,7 +317,6 @@ interface CommandAdvancedInputProps {
   setCmdkOpen?: Dispatch<SetStateAction<boolean>>
 }
 
-// TODO: properly sync chat input with cmdk input
 function CommandAdvancedInput({
   placeholder,
   onValueChange,
@@ -327,25 +325,18 @@ function CommandAdvancedInput({
   ...props
 }: CommandAdvancedInputProps): ReactElement {
   const { createNewThread } = useChatbot()
-  const [chatMutation] = useChatMutation()
+  const { setMessage: setPendingMessage } = useCommandPaletteMessage()
 
   const sendMessage = useCallback(
     (message: string) => {
       createNewThread({
         summary: 'New Chat with Plural Copilot',
-      }).then(({ data }) => {
-        // TODO: find a way to sync thread creation and chat mutation
-        // so that we do not miss the first message and part of response
-        chatMutation({
-          variables: {
-            messages: [{ role: AiRole.User, content: message }],
-            threadId: data?.createThread?.id,
-          },
-        })
+      }).then(() => {
+        setPendingMessage(message)
         setCmdkOpen?.(false)
       })
     },
-    [createNewThread, chatMutation, setCmdkOpen]
+    [createNewThread, setPendingMessage, setCmdkOpen]
   )
 
   return (
@@ -355,6 +346,7 @@ function CommandAdvancedInput({
       sendMessage={sendMessage}
       placeholder={placeholder}
       onValueChange={onValueChange}
+      stateless={true}
       {...props}
     />
   )
@@ -380,4 +372,24 @@ function HistoryItem({ thread }: HistoryItemProps): ReactElement {
       <AITableActions thread={thread} />
     </>
   )
+}
+
+export const useCommandPaletteMessage = () => {
+  const [message, setMessage] = usePersistedSessionState(
+    'commandPalettePendingChatMessage',
+    ''
+  )
+  const processedRef = useRef<string>('')
+
+  const readValue = useCallback(() => {
+    if (!message || processedRef.current === message) {
+      return ''
+    }
+
+    processedRef.current = message
+    setMessage('')
+    return message
+  }, [message])
+
+  return { readValue, setMessage }
 }

@@ -30,6 +30,7 @@ import { VariableSizeList } from 'react-window'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { useCommandPaletteMessage } from '../../commandpalette/CommandPalette.tsx'
 import SmoothScroller from '../../utils/SmoothScroller.tsx'
 import { FetchPaginatedDataResult } from '../../utils/table/useFetchPaginatedData.tsx'
 import TypingIndicator from '../../utils/TypingIndicator.tsx'
@@ -58,6 +59,7 @@ export function ChatbotPanelThread({
 }) {
   const theme = useTheme()
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
+  const { readValue } = useCommandPaletteMessage()
   const [streaming, setStreaming] = useState<boolean>(false)
   const [messageListRef, setMessageListRef] = useState<VariableSizeList>()
   const scrollToBottom = useCallback(
@@ -104,8 +106,6 @@ export function ChatbotPanelThread({
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
 
-  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
-  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
   const [
     mutateHybridChat,
     { loading: sendingMessage, error: messageError, reset },
@@ -113,14 +113,6 @@ export function ChatbotPanelThread({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadDetails'],
     onCompleted: () => streaming && scrollToBottom(),
-    // TODO: Investigate if we can use optimistic responses with paginated queries. It does not work currently.
-    // optimisticResponse: ({ messages }) =>
-    //   getChatOptimisticResponse({
-    //     mutation: 'hybridChat',
-    //     content: messages?.[0]?.content,
-    //   }),
-    // update: (cache, { data }) =>
-    //   updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
   })
 
   const sendMessage = useCallback(
@@ -153,6 +145,15 @@ export function ChatbotPanelThread({
     setStreamedMessages([])
     reset()
   }, [currentThread.id, reset])
+
+  useEffect(() => {
+    const commandPalettePendingMessage = readValue()
+    if (!commandPalettePendingMessage) {
+      return
+    }
+
+    sendMessage(commandPalettePendingMessage)
+  }, [readValue, sendMessage])
 
   return (
     <>
@@ -229,9 +230,7 @@ export function ChatbotPanelThread({
                 />
               )
             })
-          ) : sendingMessage ||
-            (currentThread.session?.done === false &&
-              !!currentThread.session?.type) ? (
+          ) : sendingMessage || currentThread.session?.done === false ? (
             <TypingIndicator
               css={{
                 marginLeft: theme.spacing.small,

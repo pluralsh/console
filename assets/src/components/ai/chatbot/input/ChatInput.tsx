@@ -47,6 +47,7 @@ export function ChatInput({
   setShowPrompts,
   placeholder = 'Start typing...',
   onValueChange,
+  stateless = false,
   ...props
 }: {
   sendMessage: (newMessage: string) => void
@@ -59,15 +60,18 @@ export function ChatInput({
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
   placeholder?: string
   onValueChange?: Dispatch<string>
+  stateless?: boolean
 } & ComponentPropsWithoutRef<'div'>) {
   const { selectedAgent } = useChatbot()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
-  const [newMessage, setNewMessage] = usePersistedSessionState<string>(
-    'currentAiChatMessage',
-    ''
-  )
+  const [localMessage, setLocalMessage] = useState<string>('')
+  const [persistedMessage, setPersistedMessage] =
+    usePersistedSessionState<string>('currentAiChatMessage', '')
+
+  const newMessage = stateless ? localMessage : persistedMessage
+  const setNewMessage = stateless ? setLocalMessage : setPersistedMessage
 
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
