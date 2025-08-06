@@ -1,4 +1,4 @@
-defmodule Console.AI.Tools.KubeResource do
+defmodule Console.AI.Tools.Agent.KubeResource do
   use Console.AI.Tools.Agent.Base
   import Console.AI.Tools.Utils
   alias Console.Schema.{AgentSession, Cluster, User}
@@ -26,6 +26,8 @@ defmodule Console.AI.Tools.KubeResource do
   def description() do
     """
     Fetches a service component from the given cluster and returns its full definition as a json object.  Can be used to provide the user with the current config in a cluster.
+
+    Only use this if you know the exact resource location in kubernetes, otherwise use one of the search tools to find the inputs for this.
     """
   end
 
