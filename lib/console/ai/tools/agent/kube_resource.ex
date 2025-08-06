@@ -44,7 +44,7 @@ defmodule Console.AI.Tools.Agent.KubeResource do
          {:ok, res} <- fetch(spec, cluster) do
       Jason.encode(prune(res))
     else
-      {:session, _} -> {:error, "No cluster bound to this session"}
+      {:session, _} -> {:ok, "No cluster bound to this session, use the switch_cluster tool to switch to the right cluster"}
       err -> error(err)
     end
   end
