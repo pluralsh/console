@@ -1,14 +1,16 @@
 import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
+  ChatFragment,
+  ChatType,
   useChatAgentSessionPRsQuery,
   useChatAgentSessionQuery,
   useChatAgentSessionServicesQuery,
   useChatAgentSessionStacksQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 import { useChatbot } from '../../AIContext.tsx'
+import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 
 import {
   Accordion,
@@ -18,36 +20,41 @@ import {
   GitHubLogoIcon,
   GitPullIcon,
   IconFrame,
+  PrOpenIcon,
   RobotIcon,
   StackIcon,
 } from '@pluralsh/design-system'
-import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { isEmpty } from 'lodash'
+import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
-import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
-import { ComponentIcon } from '../../../cd/services/service/component/misc.tsx'
-import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
+import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
+import { mapExistingNodes } from '../../../../utils/graphql.ts'
+import { ComponentIcon } from '../../../cd/services/service/component/misc.tsx'
+import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
+import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
+import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
+import { GqlError } from '../../../utils/Alert.tsx'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
+import { EmptyStateCompact } from '../../AIThreads.tsx'
+import { PullRequests } from './PullRequests.tsx'
 import { Services } from './Services.tsx'
 import { Stacks } from './Stacks.tsx'
-import { PullRequests } from './PullRequests.tsx'
-import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
-import { mapExistingNodes } from '../../../../utils/graphql.ts'
-import { isEmpty } from 'lodash'
-import { GqlError } from '../../../utils/Alert.tsx'
-import { EmptyStateCompact } from '../../AIThreads.tsx'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { ChatbotCreatePrButton } from '../ChatMessageContent.tsx'
+import { iconUrl } from 'utils/icon.ts'
 
 export function ChatbotActionsPanel({
   isOpen,
   setOpen,
   zIndex,
+  messages,
 }: {
   isOpen: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   zIndex?: number
+  messages: ChatFragment[]
 }) {
   const theme = useTheme()
   const { currentThread } = useChatbot()
@@ -108,15 +115,20 @@ export function ChatbotActionsPanel({
     [stacksQuery.data?.chatThread?.session?.stacks]
   )
 
+  const prCallMessages = useMemo(() => {
+    return messages.filter((message) => message.type === ChatType.PrCall)
+  }, [messages])
+
   const hasData = useMemo(
     () =>
+      !isEmpty(prCallMessages) ||
       !!pr ||
       !isEmpty(prs) ||
       !!service ||
       !isEmpty(services) ||
       !!stack ||
       !isEmpty(stacks),
-    [pr, prs, service, services, stack, stacks]
+    [pr, prCallMessages, prs, service, services, stack, stacks]
   )
 
   const hasErrors = useMemo(
@@ -167,6 +179,41 @@ export function ChatbotActionsPanel({
           </Flex>
         )}
 
+        {prCallMessages.map(({ id, prAutomation, attributes }) => (
+          <ActionItemSC key={id}>
+            <ActionItemHeaderSC>
+              <IconFrame
+                icon={
+                  prAutomation?.icon ? (
+                    <img
+                      width={20}
+                      height={20}
+                      src={iconUrl(
+                        prAutomation?.icon,
+                        prAutomation?.darkIcon,
+                        theme.mode
+                      )}
+                    />
+                  ) : (
+                    <PrOpenIcon />
+                  )
+                }
+                size="small"
+              />
+              {prAutomation?.name ?? 'PR automation'}
+            </ActionItemHeaderSC>
+            <CaptionP $color="text-xlight">
+              {prAutomation?.documentation ?? ''}
+            </CaptionP>
+            <ChatbotCreatePrButton
+              prAutomation={prAutomation}
+              threadId={currentThread.id}
+              session={currentThread.session}
+              context={attributes?.prCall?.context}
+            />
+          </ActionItemSC>
+        ))}
+
         {pr && (
           <ActionItemSC>
             <ActionItemHeaderSC>
@@ -185,9 +232,7 @@ export function ChatbotActionsPanel({
                 />
               </Flex>
             </ActionItemHeaderSC>
-            <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-              {pr.title}
-            </CaptionP>
+            <CaptionP $color="text-xlight">{pr.title}</CaptionP>
             <Flex justifyContent="space-between">
               <Button
                 secondary
@@ -212,43 +257,6 @@ export function ChatbotActionsPanel({
           </ActionItemSC>
         )}
 
-        {service && (
-          <ActionItemSC>
-            <ActionItemHeaderSC>
-              <IconFrame
-                icon={<ComponentIcon kind="service" />}
-                size="small"
-              />
-              Service
-              <Flex
-                flex={1}
-                justifyContent="flex-end"
-              >
-                <ServiceStatusChip
-                  status={service.status}
-                  componentStatus={service.componentStatus}
-                  size="small"
-                />
-              </Flex>
-            </ActionItemHeaderSC>
-            <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-              {service.name}
-            </CaptionP>
-            <Flex justifyContent="flex-end">
-              <Button
-                small
-                as={Link}
-                to={getServiceDetailsPath({
-                  serviceId: service?.id,
-                  clusterId: service?.cluster?.id,
-                })}
-              >
-                View service
-              </Button>
-            </Flex>
-          </ActionItemSC>
-        )}
-
         {stack && (
           <ActionItemSC>
             <ActionItemHeaderSC>
@@ -268,9 +276,7 @@ export function ChatbotActionsPanel({
                 />
               </Flex>
             </ActionItemHeaderSC>
-            <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-              {stack.name}
-            </CaptionP>
+            <CaptionP $color="text-xlight">{stack.name}</CaptionP>
             <Flex justifyContent="flex-end">
               <Button
                 small
@@ -283,21 +289,60 @@ export function ChatbotActionsPanel({
           </ActionItemSC>
         )}
 
+        {service && (
+          <ActionItemSC>
+            <ActionItemHeaderSC>
+              <IconFrame
+                icon={<ComponentIcon kind="service" />}
+                size="small"
+              />
+              Service
+              <Flex
+                flex={1}
+                justifyContent="flex-end"
+              >
+                <ServiceStatusChip
+                  status={service.status}
+                  componentStatus={service.componentStatus}
+                  size="small"
+                />
+              </Flex>
+            </ActionItemHeaderSC>
+            <CaptionP $color="text-xlight">{service.name}</CaptionP>
+            <Flex justifyContent="flex-end">
+              <Button
+                small
+                as={Link}
+                to={getServiceDetailsPath({
+                  serviceId: service?.id,
+                  clusterId: service?.cluster?.id,
+                })}
+              >
+                View service
+              </Button>
+            </Flex>
+          </ActionItemSC>
+        )}
+
         <Accordion
           type="multiple"
-          css={{ border: 'none', background: theme.colors['fill-accent'] }}
+          css={{
+            border: 'none',
+            background: theme.colors['fill-accent'],
+            '& > *': { borderBottom: theme.borders.default },
+          }}
         >
           <PullRequests
             prs={prs}
             query={prsQuery}
           />
-          <Services
-            services={services}
-            query={servicesQuery}
-          />
           <Stacks
             stacks={stacks}
             query={stacksQuery}
+          />
+          <Services
+            services={services}
+            query={servicesQuery}
           />
         </Accordion>
       </div>

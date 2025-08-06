@@ -10,7 +10,11 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { PrAutomationFragment, PullRequestFragment } from 'generated/graphql'
+import {
+  PrAutomationFragment,
+  PrCallAttributes,
+  PullRequestFragment,
+} from 'generated/graphql'
 
 import { isEmpty } from 'lodash'
 import { ComponentProps, Dispatch, useState } from 'react'
@@ -41,12 +45,14 @@ function CreatePrModalBase({
   threadId,
   onClose,
   onSuccess,
+  preFilledContext,
 }: {
   prAutomation: PrAutomationFragment
   open: boolean
   threadId?: string
   onClose: Nullable<() => void>
   onSuccess?: Nullable<Dispatch<PullRequestFragment>>
+  preFilledContext?: PrCallAttributes['context']
 }) {
   const { configuration, confirmation } = prAutomation
   const hasConfiguration = !isEmpty(configuration)
@@ -70,6 +76,7 @@ function CreatePrModalBase({
   } = usePrAutomationForm({
     prAutomation,
     threadId,
+    preFilledContext,
     onSuccess: () => setCurrentStep('success'),
   })
 

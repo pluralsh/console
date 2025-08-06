@@ -118,6 +118,9 @@ fragment AgentSession on AgentSession {
   cluster {
     id
   }
+  pullRequest {
+    id
+  }
 }
 
 fragment ServiceDeploymentChat on ServiceDeployment {

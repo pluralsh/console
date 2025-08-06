@@ -22,11 +22,12 @@ import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
-  AgentSession,
+  AgentSessionFragment,
   AiRole,
   ChatType,
   ChatTypeAttributes,
   PrAutomationFragment,
+  PrCallAttributes,
   useConfirmChatMutation,
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
@@ -55,7 +56,7 @@ type ChatMessageContentProps = {
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
   highlightToolContent?: boolean
-  session?: Nullable<AgentSession>
+  session?: Nullable<AgentSessionFragment>
 }
 
 export function ChatMessageContent({
@@ -114,6 +115,7 @@ export function ChatMessageContent({
           prAutomation={prAutomation}
           threadId={threadId}
           session={session}
+          context={attributes?.prCall?.context}
         />
       )
     case ChatType.Text:
@@ -275,87 +277,112 @@ function ImplementationPlanMessageContent({
   )
 }
 
-function PrCallContent({
+export function ChatbotCreatePrButton({
   prAutomation,
   threadId,
   session,
-}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId' | 'session'>) {
+  context,
+}: {
+  prAutomation?: Nullable<PrAutomationFragment>
+  threadId?: string
+  session?: Nullable<AgentSessionFragment>
+  context?: PrCallAttributes['context']
+}) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const [created, setCreated] = useState(!!session?.pullRequest)
+  const [created, setCreated] = useState<boolean>(!!session?.pullRequest)
 
-  if (!prAutomation) return <GqlError error="PR automation not found." />
+  if (!prAutomation) return null
 
-  const { icon, darkIcon, name } = prAutomation
-
-  return (
+  return !created ? (
     <>
-      <Card
-        css={{
-          padding: theme.spacing.medium,
-          minWidth: 150,
-          background: theme.colors['fill-zero'],
-          border: theme.borders.default,
-        }}
+      <Button
+        small
+        alignSelf="flex-end"
+        onClick={() => setOpen(true)}
       >
-        <Flex
-          alignItems="center"
-          gap="xsmall"
-        >
-          <IconFrame
-            icon={<PrOpenIcon />}
-            size="small"
-          />
-          <Body2BoldP $color="text">PR automation</Body2BoldP>
-          <IconFrame
-            icon={
-              <img
-                width={20}
-                height={20}
-                src={iconUrl(icon, darkIcon, theme.mode)}
-              />
-            }
-            size="small"
-          />
-          <Body2P $color="text">{name}</Body2P>
-          <div css={{ flex: 1 }} />
-          {!created ? (
-            <Button
-              small
-              css={{ alignSelf: 'center' }}
-              onClick={() => setOpen(true)}
-            >
-              Create PR
-            </Button>
-          ) : (
-            <Flex
-              gap="small"
-              css={{
-                margin: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
-                justifySelf: 'flex-end',
-              }}
-            >
-              <span
-                css={{
-                  ...theme.partials.text.buttonSmall,
-                  color: theme.colors['text-light'],
-                }}
-              >
-                Created
-              </span>
-              <CheckIcon />
-            </Flex>
-          )}
-        </Flex>
-      </Card>
+        Create PR
+      </Button>
       <CreatePrModal
         prAutomation={prAutomation}
         threadId={threadId}
         open={open}
         onClose={() => setOpen(false)}
         onSuccess={() => setCreated(true)}
+        preFilledContext={context}
       />
     </>
+  ) : (
+    <Flex
+      gap="small"
+      justifySelf="flex-end"
+      margin={`${theme.spacing.xxsmall}px ${theme.spacing.medium}px`}
+    >
+      <span
+        css={{
+          ...theme.partials.text.buttonSmall,
+          color: theme.colors['text-light'],
+        }}
+      >
+        Created
+      </span>
+      <CheckIcon />
+    </Flex>
+  )
+}
+
+function PrCallContent({
+  prAutomation,
+  threadId,
+  session,
+  context,
+}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId' | 'session'> & {
+  context?: PrCallAttributes['context']
+}) {
+  const theme = useTheme()
+
+  if (!prAutomation) return <GqlError error="PR automation not found." />
+
+  const { icon, darkIcon, name } = prAutomation
+
+  return (
+    <Card
+      css={{
+        padding: theme.spacing.medium,
+        minWidth: 150,
+        background: theme.colors['fill-zero'],
+        border: theme.borders.default,
+      }}
+    >
+      <Flex
+        alignItems="center"
+        gap="xsmall"
+      >
+        <IconFrame
+          icon={<PrOpenIcon />}
+          size="small"
+        />
+        <Body2BoldP $color="text">PR automation</Body2BoldP>
+        <IconFrame
+          icon={
+            <img
+              width={20}
+              height={20}
+              src={iconUrl(icon, darkIcon, theme.mode)}
+            />
+          }
+          size="small"
+        />
+        <Body2P $color="text">{name}</Body2P>
+        <div css={{ flex: 1 }} />
+        <ChatbotCreatePrButton
+          prAutomation={prAutomation}
+          threadId={threadId}
+          session={session}
+          context={context}
+        />
+      </Flex>
+    </Card>
   )
 }
 

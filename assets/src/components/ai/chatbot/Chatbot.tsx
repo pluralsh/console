@@ -163,6 +163,10 @@ function ChatbotPanelInner() {
     threads,
   ])
 
+  const messages = useMemo(() => {
+    return mapExistingNodes(currentThread?.chats)
+  }, [currentThread])
+
   return (
     <div
       ref={ref}
@@ -182,6 +186,7 @@ function ChatbotPanelInner() {
           isOpen={showActionsPanel}
           setOpen={setShowActionsPanel}
           zIndex={1}
+          messages={messages}
         />
       )}
       <MainContentWrapperSC>
