@@ -86,7 +86,7 @@ defmodule Console.AI.Chat.Tools do
 
   defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
 
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id}}) when is_binary(id),
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id, tf_booted: true}}) when is_binary(id),
     do: @kubernetes_code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
     do: @kubernetes_code_pre_tools
