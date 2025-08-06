@@ -5500,6 +5500,12 @@
   publisher: Splunk
 - name: sriov-network-metrics-exporter
   versions:
+  - version: v1.1.1-eksbuild.3
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.1.1-eksbuild.2
     compatibilities:
     - '1.33'

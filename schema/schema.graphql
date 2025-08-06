@@ -610,7 +610,10 @@ type RootMutationType {
 
   createPullRequest(
     "the id of the PR automation instance to use"
-    id: ID!
+    id: ID
+
+    "the name of the PR automation instance to use"
+    name: String
 
     identifier: String
 
@@ -1013,6 +1016,9 @@ type RootMutationType {
 
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
+
+  "Refreshes an insight, which will trigger a new AI insight generation in the background"
+  refreshInsight(insightId: ID!): AiInsight
 
   "it will add additional context to the given chat from a source object"
   addChatContext(source: ContextSource!, sourceId: ID, threadId: ID!): [Chat]

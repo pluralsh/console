@@ -4,6 +4,7 @@ import (
 	"context"
 	goerrors "errors"
 
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -130,8 +131,15 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 }
 
 func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
+	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
+	if err != nil {
+		return nil, lo.Ternary[error](errors.IsNotFound(err), operrors.ErrRetriable, err)
+	}
+
+	attributes := credential.Attributes(userID)
+
 	if !credential.Status.HasID() {
-		return in.createFederatedCredential(ctx, credential)
+		return in.createFederatedCredential(ctx, attributes)
 	}
 
 	exists, err := in.ConsoleClient.IsFederatedCredentialExists(ctx, credential.Status.GetID())
@@ -140,29 +148,17 @@ func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v
 	}
 
 	if !exists {
-		return in.createFederatedCredential(ctx, credential)
+		return in.createFederatedCredential(ctx, attributes)
 	}
 
 	if !changed {
 		return in.ConsoleClient.GetFederatedCredential(ctx, credential.Status.GetID())
 	}
 
-	return in.ConsoleClient.UpdateFederatedCredential(ctx, credential.Status.GetID(), credential.Attributes())
+	return in.ConsoleClient.UpdateFederatedCredential(ctx, credential.Status.GetID(), attributes)
 }
 
-func (in *FederatedCredentialReconciler) createFederatedCredential(ctx context.Context, credential *v1alpha1.FederatedCredential) (*consoleapi.FederatedCredentialFragment, error) {
-	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
-	if errors.IsNotFound(err) {
-		return nil, operrors.ErrRetriable
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	attributes := credential.Attributes()
-	attributes.UserID = userID
-
+func (in *FederatedCredentialReconciler) createFederatedCredential(ctx context.Context, attributes consoleapi.FederatedCredentialAttributes) (*consoleapi.FederatedCredentialFragment, error) {
 	apiCredential, err := in.ConsoleClient.CreateFederatedCredential(ctx, attributes)
 	if err != nil {
 		return nil, err

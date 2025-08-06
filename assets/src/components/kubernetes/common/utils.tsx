@@ -53,19 +53,7 @@ export function useDefaultColumns<
         id: 'namespace',
         header: 'Namespace',
         enableSorting: true,
-        cell: ({ getValue }) => {
-          const namespace = getValue()
-
-          return (
-            <ResourceLink
-              objectRef={{
-                kind: Kind.Namespace,
-                name: namespace,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          )
-        },
+        cell: ({ getValue }) => getValue(),
       }),
       colLabels: columnHelper.accessor((r) => r?.objectMeta.labels, {
         id: 'labels',
