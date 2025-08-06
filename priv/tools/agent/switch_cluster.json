@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "properties": {
+        "cluster": {
+            "type": "string",
+            "description": "The handle of the cluster to switch to."
+        }
+    },
+    "required": ["cluster"],
+    "additionalProperties": false
+}

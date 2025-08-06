@@ -33,6 +33,7 @@ defmodule Console.AI.Chat.Tools do
     # Agent.Query,
     # Agent.Schema,
     # Agent.Search,
+    Agent.SwitchCluster,
     Agent.Role,
     Agent.KubeResource
   ]
