@@ -1,12 +1,12 @@
 import { Card, EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 import { useStackRunsQuery } from '../../../generated/graphql'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 import { StackRunsScroller } from './StackRunsScroller'
 
@@ -39,6 +39,7 @@ export default function StackRuns() {
     <ScrollablePage
       scrollable={false}
       noPadding
+      minWidth={600}
     >
       <Card height="100%">
         <StackRunsScroller queryResult={queryResult} />
