@@ -45,7 +45,7 @@ func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, er
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
-func (in *FederatedCredential) Attributes() console.FederatedCredentialAttributes {
+func (in *FederatedCredential) Attributes(userID string) console.FederatedCredentialAttributes {
 	var claimsLike *string
 	if in.Spec.ClaimsLike == nil || len(in.Spec.ClaimsLike.Raw) == 0 {
 		// If claimsLike is not set, we default to an empty JSON object.
@@ -59,6 +59,7 @@ func (in *FederatedCredential) Attributes() console.FederatedCredentialAttribute
 		Issuer:     in.Spec.Issuer,
 		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
 		ClaimsLike: claimsLike,
+		UserID:     userID,
 	}
 }
 
@@ -69,7 +70,6 @@ func (in *FederatedCredential) SetCondition(condition metav1.Condition) {
 // FederatedCredentialSpec defines the desired state of FederatedCredential.
 type FederatedCredentialSpec struct {
 	// Issuer is the URL of the identity provider that issues the tokens.
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Issuer is immutable"
 	// +kubebuilder:validation:Required
 	Issuer string `json:"issuer"`
 
@@ -89,7 +89,6 @@ type FederatedCredentialSpec struct {
 	ClaimsLike *runtime.RawExtension `json:"claimsLike,omitempty"`
 
 	// User is the user email address that will be authenticated by this credential.
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="User is immutable"
 	// +kubebuilder:validation:Required
 	User string `json:"user"`
 }
