@@ -9,6 +9,7 @@ const ScrollablePageContent = styled.div<{
   $maxContentWidth?: number
   $fullWidth?: boolean
   $noPadding?: boolean
+  $minWidth?: number
 }>(
   ({
     theme,
@@ -17,6 +18,7 @@ const ScrollablePageContent = styled.div<{
     $maxContentWidth: maxContentWidth,
     $fullWidth: fullWidth,
     $noPadding: noPadding,
+    $minWidth: minWidth,
   }) => ({
     position: 'relative',
     height: '100%',
@@ -31,6 +33,7 @@ const ScrollablePageContent = styled.div<{
           paddingRight: theme.spacing.large - 6,
         }
       : {}),
+    ...(minWidth ? { minWidth: minWidth } : {}),
     '& > .widthLimiter': {
       width: '100%',
       height: '100%',
@@ -69,6 +72,7 @@ export function ScrollablePage({
   fullWidth,
   scrollRef,
   noPadding = false,
+  minWidth,
   ...props
 }: {
   heading?: ReactNode
@@ -80,6 +84,7 @@ export function ScrollablePage({
   fullWidth?: boolean
   scrollRef?: RefObject<HTMLDivElement>
   noPadding?: boolean
+  minWidth?: number
 } & PageTitleProps) {
   return (
     <>
@@ -101,6 +106,7 @@ export function ScrollablePage({
         $extraStyles={contentStyles}
         $maxContentWidth={maxContentWidth}
         $fullWidth={fullWidth}
+        $minWidth={minWidth}
         ref={scrollRef}
         $noPadding={noPadding}
       >

@@ -1,5 +1,6 @@
 import {
   ErrorPolicy,
+  FetchPolicy,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
@@ -12,9 +13,10 @@ import {
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, Dispatch, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
+// TODO: remove this, it was added as the default in Table itself a while ago
 export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = { overscan: 10 }
@@ -37,6 +39,7 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
+  fetchPolicy?: FetchPolicy
   skip?: boolean
 }
 
@@ -51,7 +54,7 @@ export type FetchPaginatedDataResult<TQueryType> = {
   error: any
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
-  fetchNextPage: () => void
+  fetchNextPage: Dispatch<void>
   setVirtualSlice: (slice: VirtualSlice) => void
 }
 
@@ -76,7 +79,7 @@ export function useFetchPaginatedData<
     },
     skip: options.skip,
     errorPolicy: options.errorPolicy,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: options.fetchPolicy ?? 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
   })
@@ -107,9 +110,9 @@ export function useFetchPaginatedData<
   })
 
   const fetchNextPage = useCallback(() => {
-    if (pageInfo?.endCursor) {
+    if (pageInfo?.hasNextPage) {
       fetchMore({
-        variables: { after: pageInfo.endCursor },
+        variables: { after: pageInfo?.endCursor },
         updateQuery: (prev, { fetchMoreResult }) => {
           const newConnection = extendConnection(
             reduceNestedData(options.keyPath, prev),
@@ -121,7 +124,13 @@ export function useFetchPaginatedData<
         },
       })
     }
-  }, [pageInfo, fetchMore, options.keyPath, queryKey])
+  }, [
+    pageInfo?.hasNextPage,
+    pageInfo?.endCursor,
+    fetchMore,
+    options.keyPath,
+    queryKey,
+  ])
 
   return {
     data,

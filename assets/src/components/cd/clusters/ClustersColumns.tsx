@@ -3,13 +3,13 @@ import {
   Flex,
   GearTrainIcon,
   ListBoxItem,
-  SmallNamespaceIcon,
-  SmallAZIcon,
-  SmallPodIcon,
-  SmallNodeIcon,
   PeopleIcon,
   ReturnIcon,
   SemanticColorKey,
+  SmallAZIcon,
+  SmallNamespaceIcon,
+  SmallNodeIcon,
+  SmallPodIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -19,6 +19,7 @@ import {
   TableText,
   TabularNumbers,
 } from 'components/cluster/TableElements'
+import { roundTo } from 'components/cluster/utils.tsx'
 import {
   DistroProviderIconFrame,
   getClusterDistroName,
@@ -26,33 +27,32 @@ import {
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { getProviderName } from 'components/utils/Provider'
 import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { filesize } from 'filesize'
 
 import { ClusterBasicFragment, ClustersRowFragment } from 'generated/graphql'
-import { useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import semver from 'semver'
 import styled, { useTheme } from 'styled-components'
+import { DefaultTheme } from 'styled-components/dist/types'
 import { Edge } from 'utils/graphql'
 
 import { isUpgrading, toNiceVersion } from 'utils/semver'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts.tsx'
 import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
-import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
-import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
 import { UsageBar } from '../../utils/UsageBar.tsx'
+import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
+import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
 import { ClusterHealth, ClusterHealthScoreChip } from './ClusterHealthChip'
+import { ClustersTableMeta } from './Clusters.tsx'
 import { ClusterUpgradeButton } from './ClusterUpgradeButton.tsx'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { ClusterInfoFlyoverTab } from './info-flyover/ClusterInfoFlyover.tsx'
-import { ClustersTableMeta } from './Clusters.tsx'
-import { roundTo } from 'components/cluster/utils.tsx'
-import { TRUNCATE } from 'components/utils/truncate.ts'
-import { DefaultTheme } from 'styled-components/dist/types'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -216,7 +216,7 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
     const cluster = getValue()
     const percentage = (cluster?.cpuUtil ?? 0) / 100
     const total = (cluster?.cpuTotal ?? 0) / 1000
-    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)} vCPU`
+    const display = `${cpuFormat(roundTo(percentage * total, 2))} / ${cpuFormat(total)} ${total > 0 ? 'vCPU' : ''}`
 
     return percentage > 0 ? (
       <>
@@ -273,57 +273,73 @@ const SizeTextSc = styled.div<{
   ...theme.partials.text[$partialType],
 }))
 
+function ColClusterSizeContent({ cluster }): ReactElement {
+  const theme = useTheme()
+  const isEmpty = useMemo(() => {
+    return (
+      !cluster?.nodeCount &&
+      !cluster?.podCount &&
+      !cluster?.namespaceCount &&
+      !cluster?.availabilityZones
+    )
+  }, [cluster])
+
+  return isEmpty ? (
+    <>—</>
+  ) : (
+    <div
+      css={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, min-content)',
+        gap: theme.spacing.xxsmall,
+      }}
+    >
+      {cluster?.nodeCount ? (
+        <Chip
+          size="small"
+          tooltip={`${cluster?.nodeCount} nodes`}
+          icon={<SmallNodeIcon />}
+        >
+          {cluster?.nodeCount}
+        </Chip>
+      ) : null}
+      {cluster?.podCount ? (
+        <Chip
+          size="small"
+          tooltip={`${cluster?.podCount} pods`}
+          icon={<SmallPodIcon />}
+        >
+          {cluster?.podCount}
+        </Chip>
+      ) : null}
+      {cluster?.namespaceCount ? (
+        <Chip
+          size="small"
+          tooltip={`${cluster?.namespaceCount} namespaces`}
+          icon={<SmallNamespaceIcon />}
+        >
+          {cluster?.namespaceCount}
+        </Chip>
+      ) : null}
+      {cluster?.availabilityZones ? (
+        <Chip
+          size="small"
+          tooltip={`${cluster?.availabilityZones?.join(', ')} availability zones`}
+          icon={<SmallAZIcon />}
+        >
+          {cluster?.availabilityZones?.length}
+        </Chip>
+      ) : null}
+    </div>
+  )
+}
+
 export const ColClusterSize = columnHelper.accessor(({ node }) => node, {
   id: 'size',
   header: 'Cluster Size',
-  cell: ({ getValue }) => {
-    const cluster = getValue()
-    return (
-      <Flex
-        direction="column"
-        gap="xxsmall"
-      >
-        <Flex
-          gap="xxsmall"
-          direction="row"
-        >
-          <Chip
-            size="small"
-            tooltip={`${cluster?.nodeCount} nodes`}
-            icon={<SmallNodeIcon />}
-          >
-            {cluster?.nodeCount}
-          </Chip>
-          <Chip
-            size="small"
-            tooltip={`${cluster?.podCount} pods`}
-            icon={<SmallPodIcon />}
-          >
-            {cluster?.podCount}
-          </Chip>
-        </Flex>
-        <Flex
-          gap="xxsmall"
-          direction="row"
-        >
-          <Chip
-            size="small"
-            tooltip={`${cluster?.namespaceCount} namespaces`}
-            icon={<SmallNamespaceIcon />}
-          >
-            {cluster?.namespaceCount}
-          </Chip>
-          <Chip
-            size="small"
-            tooltip={`${cluster?.availabilityZones?.join(', ')} availability zones`}
-            icon={<SmallAZIcon />}
-          >
-            {cluster?.availabilityZones?.length}
-          </Chip>
-        </Flex>
-      </Flex>
-    )
-  },
+  cell: ({ row: { original } }) => (
+    <ColClusterSizeContent cluster={original.node} />
+  ),
 })
 
 export const ColAgentHealth = columnHelper.accessor(

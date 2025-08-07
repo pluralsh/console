@@ -1,11 +1,12 @@
-import { Flex, SubTab } from '@pluralsh/design-system'
+import { SubTab, TabList } from '@pluralsh/design-system'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { ReactNode, useMemo, useState } from 'react'
-import { Outlet, useNavigate, useParams } from 'react-router-dom'
+import { ReactNode, useMemo, useRef, useState } from 'react'
+import { Outlet, useMatch } from 'react-router-dom'
 import {
   COMPLIANCE_REPORTS_REL_PATH,
   POLICIES_REL_PATH,
+  SECURITY_ABS_PATH,
   SECURITY_OVERVIEW_REL_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from 'routes/securityRoutesConsts'
@@ -19,8 +20,8 @@ const directory = [
 ]
 
 export function Security() {
-  const navigate = useNavigate()
-  const route = useParams()['*']
+  const tabStateRef = useRef<any>(null)
+  const { tab } = useMatch(`${SECURITY_ABS_PATH}/:tab?/*`)?.params ?? {}
   const [headerContent, setHeaderContent] = useState<ReactNode>(null)
   const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
 
@@ -28,25 +29,27 @@ export function Security() {
     <PageHeaderContext value={ctx}>
       <WrapperSC>
         <HeaderWrapperSC>
-          <Flex>
+          <TabList
+            scrollable
+            stateRef={tabStateRef}
+            stateProps={{ orientation: 'horizontal', selectedKey: tab }}
+          >
             {directory.map(({ path, label }) => (
               <LinkTabWrap
+                subTab
                 key={path}
-                to={path}
                 textValue={label}
-                active={route?.includes(path)}
+                to={path}
               >
                 <SubTab
-                  css={{ width: 'max-content' }}
-                  onClick={() => {
-                    if (!route?.includes(path)) navigate(`${path}`)
-                  }}
+                  key={path}
+                  textValue={label}
                 >
                   {label}
                 </SubTab>
               </LinkTabWrap>
             ))}
-          </Flex>
+          </TabList>
           {headerContent}
         </HeaderWrapperSC>
         <Outlet />
@@ -61,6 +64,7 @@ const HeaderWrapperSC = styled.div(({ theme }) => ({
   minHeight: 'fit-content',
   alignItems: 'center',
   gap: theme.spacing.medium,
+  overflow: 'hidden',
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({

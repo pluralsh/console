@@ -1,19 +1,19 @@
 import { ApolloClient, InMemoryCache, split } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
-import { createLink } from 'apollo-absinthe-upload-link'
-import { Socket as PhoenixSocket } from 'phoenix'
 import { RetryLink } from '@apollo/client/link/retry'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { hasSubscription } from '@jumpn/utils-graphql'
+import { createLink } from 'apollo-absinthe-upload-link'
+import { createClient } from 'graphql-ws'
+import { Socket as PhoenixSocket } from 'phoenix'
 
 import fragments from '../generated/fragments.json'
+import { fetchToken } from './auth'
 
 import { onErrorHandler } from './refreshToken'
 
 import customFetch from './uploadLink'
-import { fetchToken } from './auth'
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
-import { createClient } from 'graphql-ws'
 
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
@@ -102,6 +102,29 @@ export function buildClient(
                 if (code || code === 0) return code
 
                 return incoming
+              },
+            },
+          },
+        },
+        // Only configure specific merge behavior for the problematic connection
+        ChatThread: {
+          fields: {
+            chats: {
+              merge(existing, incoming, { args }) {
+                // For paginated chats, merge properly based on cursor
+                if (!existing) return incoming
+                if (!incoming) return existing
+
+                // If it's a fresh fetch (no cursor args), replace entirely
+                if (!args?.after && !args?.before) {
+                  return incoming
+                }
+
+                // Otherwise merge the connections
+                return {
+                  ...incoming,
+                  edges: [...(existing.edges || []), ...(incoming.edges || [])],
+                }
               },
             },
           },

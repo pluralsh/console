@@ -15,7 +15,6 @@ import {
 } from 'styled-components'
 
 import DocSearchStyles from 'components/help/DocSearchStyles'
-import { OverlayContextProvider } from 'components/layout/Overlay'
 
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
@@ -43,13 +42,11 @@ function ThemeProviders({ children }: { children: ReactNode }) {
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <StyledThemeProvider theme={styledTheme}>
-        <OverlayContextProvider>
-          <HonorableThemeProvider>
-            <GlobalStyle />
-            <DocSearchStyles />
-            <PluralErrorBoundary>{children}</PluralErrorBoundary>
-          </HonorableThemeProvider>
-        </OverlayContextProvider>
+        <HonorableThemeProvider>
+          <GlobalStyle />
+          <DocSearchStyles />
+          <PluralErrorBoundary>{children}</PluralErrorBoundary>
+        </HonorableThemeProvider>
       </StyledThemeProvider>
     </StyleSheetManager>
   )

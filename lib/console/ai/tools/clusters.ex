@@ -51,6 +51,7 @@ defmodule Console.AI.Tools.Clusters do
       name: cluster.name,
       handle: cluster.handle,
       kubernetes_distribution: cluster.distro,
+      metadata: cluster.metadata,
       tags: Enum.map(cluster.tags, fn tag -> %{name: tag.name, value: tag.value} end),
       project: cluster.project.name,
     } end)

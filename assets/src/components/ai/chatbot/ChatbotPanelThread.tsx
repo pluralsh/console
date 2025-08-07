@@ -1,25 +1,10 @@
-import { EmptyState, usePrevious } from '@pluralsh/design-system'
-
-import {
-  Dispatch,
-  Fragment,
-  ReactNode,
-  RefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import styled, { useTheme } from 'styled-components'
-
-import { useCanScroll } from 'components/hooks/useCanScroll.ts'
+import { usePrevious, useResizeObserver } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
+  AgentSession,
   AiDeltaFragment,
   AiRole,
-  ChatThreadDetailsQueryResult,
+  ChatThreadDetailsQuery,
   ChatThreadFragment,
   ChatType,
   EvidenceType,
@@ -28,44 +13,58 @@ import {
 } from 'generated/graphql'
 import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
-import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
+
+import {
+  Dispatch,
+  Fragment,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { VariableSizeList } from 'react-window'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { useCommandPaletteMessage } from '../../commandpalette/CommandPalette.tsx'
+import SmoothScroller from '../../utils/SmoothScroller.tsx'
+import { FetchPaginatedDataResult } from '../../utils/table/useFetchPaginatedData.tsx'
+import TypingIndicator from '../../utils/TypingIndicator.tsx'
+import { Body1P } from '../../utils/typography/Text.tsx'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
-import {
-  GeneratingResponseMessage,
-  SendMessageForm,
-} from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
-import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { ChatInput } from './input/ChatInput.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
-  fullscreen,
-  threadDetailsQuery: { data, loading, error },
+  threadDetailsQuery: { data, loading, error, fetchNextPage },
   showMcpServers,
   setShowMcpServers,
   showExamplePrompts = false,
   setShowExamplePrompts,
 }: {
   currentThread: ChatThreadFragment
-  fullscreen: boolean
-  threadDetailsQuery: ChatThreadDetailsQueryResult
+  threadDetailsQuery: Partial<
+    FetchPaginatedDataResult<Nullable<ChatThreadDetailsQuery>>
+  >
   showMcpServers: boolean
   setShowMcpServers: Dispatch<SetStateAction<boolean>>
   showExamplePrompts: boolean
   setShowExamplePrompts: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null)
+  const { readValue } = useCommandPaletteMessage()
   const [streaming, setStreaming] = useState<boolean>(false)
-  const messageListRef = useRef<HTMLDivElement>(null)
-  const scrollToBottom = useCallback(() => {
-    messageListRef.current?.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: 'smooth',
-    })
-  }, [messageListRef])
+  const [messageListRef, setMessageListRef] = useState<VariableSizeList>()
+  const scrollToBottom = useCallback(
+    () => messageListRef?.scrollToItem(0),
+    [messageListRef]
+  )
   const evidence = currentThread.insight?.evidence
     ?.filter(isNonNullable)
     .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
@@ -94,14 +93,18 @@ export function ChatbotPanelThread({
     },
   })
 
-  const messages = mapExistingNodes(data?.chatThread?.chats)
+  const { messages, pageInfo } = useMemo(
+    () => ({
+      messages: [...mapExistingNodes(data?.chatThread?.chats)].reverse(),
+      pageInfo: data?.chatThread?.chats?.pageInfo,
+    }),
+    [data?.chatThread?.chats]
+  )
 
   const serverNames = uniq(
     data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
   )
 
-  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
-  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
   const [
     mutateHybridChat,
     { loading: sendingMessage, error: messageError, reset },
@@ -109,32 +112,11 @@ export function ChatbotPanelThread({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadDetails'],
     onCompleted: () => streaming && scrollToBottom(),
-    optimisticResponse: ({ messages }) =>
-      getChatOptimisticResponse({
-        mutation: 'hybridChat',
-        content: messages?.[0]?.content,
-      }),
-    update: (cache, { data }) =>
-      updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
   })
-
-  // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
-  useEffect(() => {
-    reset()
-  }, [currentThread.id, reset])
-
-  // scroll to the bottom when number of messages increases
-  const length = messages.length
-  const prevLength = usePrevious(length) ?? 0
-  useEffect(() => {
-    if (length > prevLength) {
-      scrollToBottom()
-      setStreamedMessages([])
-    }
-  }, [length, prevLength, scrollToBottom])
 
   const sendMessage = useCallback(
     (newMessage: string) => {
+      setPendingMessage(newMessage)
       const variables = {
         messages: [{ role: AiRole.User, content: newMessage }],
         threadId: currentThread.id,
@@ -144,69 +126,127 @@ export function ChatbotPanelThread({
     [currentThread.id, mutateHybridChat]
   )
 
-  if (!data && loading)
-    return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
+  // scroll to bottom when new messages are added
+  const lastMessageId = messages[messages.length - 1]?.id
+  const prevLastMessageId = usePrevious(lastMessageId)
+  useEffect(() => {
+    if (!lastMessageId || lastMessageId === prevLastMessageId) return
+
+    scrollToBottom()
+    setStreaming(false)
+    setStreamedMessages([])
+    setPendingMessage(null)
+  }, [lastMessageId, prevLastMessageId, scrollToBottom])
+
+  // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
+  useEffect(() => {
+    setStreaming(false)
+    setStreamedMessages([])
+    reset()
+  }, [currentThread.id, reset])
+
+  useEffect(() => {
+    const commandPalettePendingMessage = readValue()
+    if (!commandPalettePendingMessage) {
+      return
+    }
+
+    sendMessage(commandPalettePendingMessage)
+  }, [readValue, sendMessage])
 
   return (
     <>
-      <ChatbotMessagesWrapper
-        messageListRef={messageListRef}
-        fullscreen={fullscreen}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          height: '100%',
+        }}
       >
-        {isEmpty(messages) &&
-          !currentThread.session?.type &&
-          (error ? (
-            <GqlError error={error} />
-          ) : (
-            <EmptyState message="No messages yet." />
-          ))}
-        {messages.map((msg) => (
-          <Fragment key={msg.id}>
-            <ChatMessage
-              {...msg}
-              threadId={currentThread.id}
-              serverName={msg.server?.name}
-            />
-            {!isEmpty(evidence) && // only attaches evidence to the initial insight
-              msg.seq === 0 &&
-              msg.role === AiRole.Assistant && (
-                <ChatbotPanelEvidence evidence={evidence ?? []} />
-              )}
-          </Fragment>
-        ))}
-        {!isEmpty(streamedMessages) ? (
-          streamedMessages.map((message, i) => {
-            const { tool, role } = message[0] ?? {}
-            return (
+        {messageError && (
+          <GqlError
+            css={{ margin: theme.spacing.small }}
+            error={messageError}
+          />
+        )}
+        <ChatbotMessagesWrapper
+          messageListRef={messageListRef}
+          setMessageListRef={setMessageListRef}
+          loading={!!loading}
+          pageInfo={pageInfo}
+          fetchNextPage={fetchNextPage}
+        >
+          {isEmpty(messages) &&
+            !currentThread.session?.type &&
+            (error ? (
+              <GqlError error={error} />
+            ) : (
+              <Body1P css={{ color: theme.colors['text-long-form'] }}>
+                How can I help you?
+              </Body1P>
+            ))}
+          {messages.map((msg) => (
+            <Fragment key={msg.id}>
               <ChatMessage
-                key={i}
-                disableActions
-                role={role ?? AiRole.Assistant}
-                type={!!tool ? ChatType.Tool : ChatType.Text}
-                attributes={tool ? { tool: { name: tool.name } } : undefined}
-                highlightToolContent={false}
-                content={message
-                  .toSorted((a, b) => a.seq - b.seq)
-                  .map((delta) => delta.content)
-                  .join('')}
+                {...msg}
+                threadId={currentThread.id}
+                serverName={msg.server?.name}
+                session={currentThread.session as AgentSession}
               />
-            )
-          })
-        ) : sendingMessage || currentThread.session?.done === false ? (
-          <GeneratingResponseMessage />
-        ) : null}
-        {messageError && <GqlError error={messageError} />}
+              {!isEmpty(evidence) && // only attaches evidence to the initial insight
+                msg.seq === 0 &&
+                msg.role === AiRole.Assistant && (
+                  <ChatbotPanelEvidence evidence={evidence ?? []} />
+                )}
+            </Fragment>
+          ))}
+          {pendingMessage && (
+            <Fragment key="pending-message">
+              <ChatMessage
+                role={AiRole.User}
+                type={ChatType.Text}
+                content={pendingMessage}
+                disableActions
+              />
+            </Fragment>
+          )}
+          {streaming && !isEmpty(streamedMessages) ? (
+            streamedMessages.map((message, i) => {
+              const { tool, role } = message[0] ?? {}
+              return (
+                <ChatMessage
+                  key={i}
+                  disableActions
+                  role={role ?? AiRole.Assistant}
+                  type={!!tool ? ChatType.Tool : ChatType.Text}
+                  attributes={tool ? { tool: { name: tool.name } } : undefined}
+                  highlightToolContent={false}
+                  content={message
+                    .toSorted((a, b) => a.seq - b.seq)
+                    .map((delta) => delta.content)
+                    .join('')}
+                />
+              )
+            })
+          ) : sendingMessage || currentThread.session?.done === false ? (
+            <TypingIndicator
+              css={{
+                marginLeft: theme.spacing.small,
+              }}
+            />
+          ) : null}
+        </ChatbotMessagesWrapper>
         {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
             setShowPrompts={setShowExamplePrompts}
             sendMessage={sendMessage}
           />
         )}
-      </ChatbotMessagesWrapper>
-      <SendMessageForm
+      </div>
+      <ChatInput
         currentThread={currentThread}
         sendMessage={sendMessage}
-        fullscreen={fullscreen}
         serverNames={serverNames}
         showMcpServers={showMcpServers}
         setShowMcpServers={setShowMcpServers}
@@ -218,72 +258,89 @@ export function ChatbotPanelThread({
 }
 
 export const ChatbotMessagesWrapper = ({
-  fullscreen,
   messageListRef,
+  setMessageListRef,
   children,
+  loading,
+  pageInfo,
+  fetchNextPage,
 }: {
-  fullscreen: boolean
-  messageListRef?: RefObject<HTMLDivElement | null>
-  children: ReactNode
+  messageListRef: VariableSizeList | undefined
+  setMessageListRef: Dispatch<SetStateAction<VariableSizeList | undefined>>
+  children: ReactNode | Array<ReactNode>
+  loading: boolean
+  pageInfo: any
+  fetchNextPage?: Dispatch<void>
 }) => {
-  const internalRef = useRef<HTMLDivElement>(null)
+  const items = useMemo(() => {
+    if (isEmpty(children)) return []
+    if (!Array.isArray(children)) return [children]
 
-  const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
+    return children
+      .filter((child) => !isEmpty(child))
+      .flatMap((child) => {
+        if (Array.isArray(child)) return child
+        return [child]
+      })
+      .reverse()
+  }, [children])
 
   return (
-    <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
-      <ScrollGradientSC
-        $show={canScrollUp}
-        $position="top"
+    <ChatbotMessagesWrapperSC>
+      <SmoothScroller
+        listRef={messageListRef}
+        setListRef={setMessageListRef}
+        items={items}
+        loading={loading}
+        hasNextPage={pageInfo?.hasNextPage}
+        mapper={(child, _, { index, setSize }) => (
+          <ChatbotMessage
+            handleHeightChange={(height) => setSize(index, height)}
+            idx={index}
+          >
+            {child}
+          </ChatbotMessage>
+        )}
+        loadNextPage={fetchNextPage}
+        handleScroll={undefined}
+        placeholder={undefined}
+        refreshKey={undefined}
+        setLoader={undefined}
       />
-      <ScrollGradientSC
-        $show={canScrollDown}
-        $position="bottom"
-      />
-      <ChatbotMessagesListSC
-        ref={(node) => applyNodeToRefs([messageListRef, internalRef], node)}
-      >
-        {children}
-      </ChatbotMessagesListSC>
     </ChatbotMessagesWrapperSC>
   )
 }
 
-export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    position: 'relative',
-    ...($fullscreen && {
-      borderRadius: theme.borderRadiuses.large,
-      border: theme.borders.input,
-    }),
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.colors['fill-one'],
-    overflow: 'hidden',
-    padding: `0 ${theme.spacing.xsmall}px`,
-    flex: 1,
-  })
-)
+function ChatbotMessage({
+  handleHeightChange,
+  idx,
+  children,
+}: {
+  handleHeightChange: (idx: number, height: number) => void
+  idx: number
+  children: ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const prevHeight = useRef<number | null>(null)
 
-const ChatbotMessagesListSC = styled.div(({ theme }) => ({
-  ...theme.partials.reset.list,
+  useResizeObserver(ref, (entry) => {
+    const height = entry.height
+    if (prevHeight.current !== height) {
+      prevHeight.current = height
+      handleHeightChange(idx, height)
+    }
+  })
+
+  return <div ref={ref}>{children}</div>
+}
+
+export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  flex: 1,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: theme.spacing.xsmall,
-}))
-
-const ScrollGradientSC = styled.div<{
-  $show?: boolean
-  $position: 'top' | 'bottom'
-}>(({ theme, $show = true, $position }) => ({
-  position: 'absolute',
-  opacity: $show ? 1 : 0,
-  zIndex: 1,
-  [$position]: '0',
-  transition: 'opacity 0.16s ease-in-out',
-  left: 0,
-  right: 0,
-  height: theme.spacing.xxlarge,
-  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, rgba(42, 46, 55, 0.90) 0%, rgba(42, 46, 55, 0.20) 75%, transparent 100%)`,
-  pointerEvents: 'none',
+  padding: theme.spacing.medium,
+  height: '100%',
 }))

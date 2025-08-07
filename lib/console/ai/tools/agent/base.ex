@@ -2,6 +2,7 @@ defmodule Console.AI.Tools.Agent.Base do
   @moduledoc false
   import Ecto.Changeset
   alias Console.AI.Tool
+  alias Console.Repo
   alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
   alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
 
@@ -37,16 +38,21 @@ defmodule Console.AI.Tools.Agent.Base do
     end
   end
 
-  def update_session(attrs) do
+  @preloads [:cluster, :connection]
+
+  def update_session(attrs, preload \\ false) do
     with {:session, %AgentSession{} = session} <- session(),
-         {:ok, session} <- AgentSession.changeset(session, attrs) |> Console.Repo.update(),
-         _ <- Tool.upsert(%{session: session}) do
+         {:ok, session} <- AgentSession.changeset(session, attrs) |> Repo.update(),
+         _ <- Tool.upsert(%{session: maybe_preload(session, preload)}) do
       {:ok, session}
     else
       {:error, err} ->
         {:error, "failed to update session, reason: #{inspect(err)}"}
     end
   end
+
+  defp maybe_preload(session, true), do: Repo.preload(session, @preloads, force: true)
+  defp maybe_preload(session, _), do: session
 
   def to_pb(%CloudConnection{provider: :aws} = connection) do
     %Connection{

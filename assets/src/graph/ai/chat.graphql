@@ -96,6 +96,7 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
 
 fragment AgentSession on AgentSession {
@@ -103,8 +104,37 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  thread {
+    id
+    summary
+    insertedAt
+    lastMessageAt
+  }
+  connection {
+    id
+    name
+    provider
+  }
   cluster {
     id
+  }
+  pullRequest {
+    id
+  }
+}
+
+fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+
+fragment StackChat on InfrastructureStack {
+  ...StackTiny
+  insight {
+    ...AiInsightSummary
   }
 }
 
@@ -143,8 +173,15 @@ query ChatThreads(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+  chatThreads(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -156,9 +193,115 @@ query ChatThreads(
   }
 }
 
-query ChatThreadDetails($id: ID!) {
+query ChatAgentSession($id: ID!) {
   chatThread(id: $id) {
-    ...ChatThread
+    id
+    session {
+      id
+      pullRequest {
+        ...PullRequest
+      }
+      service {
+        ...ServiceDeploymentChat
+      }
+      stack {
+        ...StackChat
+      }
+      pullRequests(first: 100) {
+        edges {
+          node {
+            ...PullRequest
+          }
+        }
+      }
+      serviceDeployments(first: 100) {
+        edges {
+          node {
+            ...ServiceDeploymentTiny
+          }
+        }
+      }
+      stacks(first: 100) {
+        edges {
+          node {
+            ...StackTiny
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment ChatThreadChatsWithTools on ChatThread {
+  id
+  default
+  summary
+  insertedAt
+  updatedAt
+  lastMessageAt
+  settings {
+    ...ChatThreadSettings
+  }
+  insight {
+    ...AiInsightSummary
+  }
+  flow {
+    id
+    name
+    icon
+  }
+  session {
+    ...AgentSession
+  }
+  tools {
+    ...McpServerTool
+  }
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    reverse: $reverse
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Chat
+      }
+    }
+  }
+}
+
+query ChatThreadDetails(
+  $id: ID!
+  $first: Int = 25
+  $last: Int
+  $after: String
+  $before: String
+  $reverse: Boolean = true
+) {
+  chatThread(id: $id) {
+    ...ChatThreadChatsWithTools
+  }
+}
+
+query AgentSessions(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  agentSessions(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentSession
+      }
+    }
   }
 }
 
@@ -167,8 +310,15 @@ query CloudConnections(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }

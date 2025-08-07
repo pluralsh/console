@@ -1,5 +1,6 @@
 defmodule Console.AI.Agents.Kubernetes do
   use Console.AI.Agents.Base
+  alias Console.AI.Tool
   alias Console.Schema.AgentSession
 
   def handle_cast(
@@ -8,6 +9,7 @@ defmodule Console.AI.Agents.Kubernetes do
   ) when is_binary(id) do
     Logger.info "handling booted kubernetes agent, proceeding to pr generation #{session.id}"
     {thread, session} = setup_context(session)
+    Tool.upsert(%{session: %{session | tf_booted: true}})
     Logger.info "context resetup for #{session.id}"
     drive(thread, [
       {:user, """

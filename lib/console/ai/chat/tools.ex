@@ -30,26 +30,31 @@ defmodule Console.AI.Chat.Tools do
   @agent_search_tools [
     Agent.ServiceComponent,
     Agent.Stack,
-    Agent.Query,
-    Agent.Schema,
-    Agent.Search
+    # Agent.Query,
+    # Agent.Schema,
+    # Agent.Search,
+    Agent.SwitchCluster,
+    Agent.Role,
+    Agent.KubeResource
   ]
 
   @agent_manifests_tools [
     Agent.Discovery,
-    Agent.ApiSpec
+    Agent.ApiSpec,
+    Agent.Role
   ]
 
   @agent_provisioning_tools [
     # Agent.Query,
     # Agent.Schema,
-    Agent.Plan,
     Agent.Catalogs,
     Agent.PrAutomations,
     Agent.Clusters,
     Agent.ServiceComponent,
     # Agent.Search,
-    Agent.Stack
+    Agent.Stack,
+    Agent.CallPr,
+    Agent.Role
   ]
   @agent_planned_tools [Agent.CallPr]
 
@@ -81,7 +86,7 @@ defmodule Console.AI.Chat.Tools do
 
   defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
 
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id}}) when is_binary(id),
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id, tf_booted: true}}) when is_binary(id),
     do: @kubernetes_code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
     do: @kubernetes_code_pre_tools

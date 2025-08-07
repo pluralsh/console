@@ -5,8 +5,6 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import styled from 'styled-components'
-import { Key, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@react-hooks-library/core'
 import {
   FluxHelmRepositoriesQuery,
@@ -14,6 +12,8 @@ import {
   GitRepositoriesQuery,
   HelmRepositoriesQuery,
 } from 'generated/graphql'
+import { Key, useEffect, useRef, useState } from 'react'
+import styled from 'styled-components'
 
 import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
 
@@ -120,6 +120,7 @@ export function RepositoriesFilters({
         css={{ flexGrow: 1 }}
       />
       <TabList
+        scrollable
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
