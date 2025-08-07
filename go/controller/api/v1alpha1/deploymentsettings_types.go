@@ -36,20 +36,64 @@ func init() {
 	SchemeBuilder.Register(&DeploymentSettings{}, &DeploymentSettingsList{})
 }
 
-// DeploymentSettingsList contains a list of DeploymentSettings
-//
 // +kubebuilder:object:root=true
+
+// DeploymentSettingsList contains a list of DeploymentSettings resources.
 type DeploymentSettingsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []DeploymentSettings `json:"items"`
 }
 
-// DeploymentSettings is the Schema for the deploymentsettings API
-//
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
+
+// DeploymentSettings provides global configuration settings for
+// Continuous Deployment (CD) operations. This resource defines
+// cluster-wide settings that control how the Plural deployment
+// system operates, including access policies, repository configuration,
+// monitoring integrations, and AI-powered features.
+//
+// Example usage:
+//
+//	apiVersion: deployments.plural.sh/v1alpha1
+//	kind: DeploymentSettings
+//	metadata:
+//	  name: global-deployment-settings
+//	  namespace: plrl-deploy-operator
+//	spec:
+//	  agentHelmValues:
+//	    annotations:
+//	      company.com/team: "platform"
+//	  managementRepo: "https://github.com/company/infrastructure"
+//	  bindings:
+//	    read:
+//	      - user:
+//	          email: "dev-team@company.com"
+//	    write:
+//	      - group:
+//	          name: "platform-engineers"
+//	  deploymentRepositoryRef:
+//	    name: "main-deployment-repo"
+//	    namespace: "plrl-deploy-operator"
+//	  prometheusConnection:
+//	    host: "https://prometheus.company.com"
+//	    user: "monitoring"
+//	    passwordSecretRef:
+//	      name: "prometheus-creds"
+//	      key: "password"
+//	  ai:
+//	    enabled: true
+//	    provider: OPENAI
+//	    openAI:
+//	      model: "gpt-4"
+//	      tokenSecretRef:
+//	        name: "openai-secret"
+//	        key: "token"
+//	  cost:
+//	    recommendationCushion: 20
+//	    recommendationThreshold: 100
 type DeploymentSettings struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -64,22 +108,26 @@ func (in *DeploymentSettings) SetCondition(condition metav1.Condition) {
 
 // DeploymentSettingsSpec defines the desired state of DeploymentSettings
 type DeploymentSettingsSpec struct {
-	// AgentHelmValues custom helm values to apply to all agents (useful for things like adding customary annotations/labels)
+	// AgentHelmValues custom helm values to apply
+	// to all agents (useful for things like adding
+	// customary annotations/labels)
 	//
 	// +kubebuilder:validation:Optional
 	AgentHelmValues *runtime.RawExtension `json:"agentHelmValues,omitempty"`
 
-	// The root repo for setting up your infrastructure with Plural.  Usually this will be your `plural up repo`
+	// ManagementRepo is the root repo for setting up
+	// your infrastructure with Plural. Usually this
+	// will be your `plural up repo`
 	//
 	// +kubebuilder:validation:Optional
 	ManagementRepo *string `json:"managementRepo,omitempty"`
 
-	// Stacks global configuration for stack execution
+	// Stacks global configuration for stack execution.
 	//
 	// +kubebuilder:validation:Optional
 	Stacks *StackSettings `json:"stacks,omitempty"`
 
-	// Bindings
+	// Bindings global configuration for access control.
 	//
 	// +kubebuilder:validation:Optional
 	Bindings *DeploymentSettingsBindings `json:"bindings,omitempty"`
@@ -99,65 +147,73 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	AI *AISettings `json:"ai,omitempty"`
 
-	// Settings for connections to log aggregation datastores
+	// Logging settings for connections to log aggregation datastores
 	//
 	// +kubebuilder:validation:Optional
 	Logging *LoggingSettings `json:"logging,omitempty"`
 
-	// Settings for managing Plural's cost management features
+	// Cost settings for managing Plural's cost management features
 	//
 	// +kubebuilder:validation:Optional
 	Cost *CostSettings `json:"cost,omitempty"`
 
-	// pointer to the deployment GIT repository to use
+	// DeploymentRepositoryRef is a pointer to the deployment GIT repository to use
+	//
 	// +kubebuilder:validation:Optional
 	DeploymentRepositoryRef *NamespacedName `json:"deploymentRepositoryRef,omitempty"`
 
-	// pointer to the Scaffolds GIT repository to use
+	// ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use
+	//
 	// +kubebuilder:validation:Optional
 	ScaffoldsRepositoryRef *NamespacedName `json:"scaffoldsRepositoryRef,omitempty"`
 }
 
 type LoggingSettings struct {
+	// Enabled defines whether to enable the logging integration or not.
+	//
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
-	// The type of log aggregation solution you wish to use
+	// Driver is the type of log aggregation solution you wish to use.
+	//
 	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH
 	// +kubebuilder:default=VICTORIA
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
 
-	// Configures a connection to victoria metrics
+	// Victoria configures a connection to VictoriaMetrics
+	//
 	// +kubebuilder:validation:Optional
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
 
-	// Configures a connection to elasticsearch
+	// Elastic configures a connection to elasticsearch
+	//
 	// +kubebuilder:validation:Optional
 	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
 
-	// Configures a connection to opensearch
+	// Opensearch configures a connection to opensearch
+	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
 }
 
 type ElasticsearchConnection struct {
-	// Host ...
+	// Host is the elasticsearch host to connect to.
 	//
 	// +kubebuilder:validation:Required
 	Host string `json:"host"`
 
-	// Index to query in elasticsearch
+	// Index to query in elasticsearch.
 	//
 	// +kubebuilder:validation:Optional
 	Index string `json:"index"`
 
-	// User to connect with basic auth
+	// User to connect with basic auth.
 	//
 	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty"`
 
-	// PasswordSecretRef selects a key of a password Secret
+	// PasswordSecretRef is a reference to a secret containing the password to connect with basic auth.
 	//
 	// +kubebuilder:validation:Optional
 	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
@@ -180,27 +236,27 @@ func (r *ElasticsearchConnection) Attributes(ctx context.Context, c client.Clien
 }
 
 type OpensearchConnection struct {
-	// Host ...
+	// Host is the opensearch host to connect to.
 	//
 	// +kubebuilder:validation:Required
 	Host string `json:"host"`
 
-	// Index to query in opensearch
+	// Index to query in opensearch.
 	//
 	// +kubebuilder:validation:Optional
 	Index string `json:"index"`
 
-	// AWS Access Key ID to use, can also use IRSA to acquire credentials
+	// AWS Access Key ID to use, can also use IRSA to acquire credentials.
 	//
 	// +kubebuilder:validation:Optional
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 
-	// AWS Secret Access Key to use, can also use IRSA to acquire credentials
+	// AWS Secret Access Key to use, can also use IRSA to acquire credentials.
 	//
 	// +kubebuilder:validation:Optional
 	AwsSecretAccessKeySecretRef *corev1.SecretKeySelector `json:"awsSecretAccessKeySecretRef,omitempty"`
 
-	// AWS Region to use
+	// AWS Region to use.
 	//
 	// +kubebuilder:validation:Optional
 	AWSRegion *string `json:"awsRegion,omitempty"`
@@ -223,22 +279,22 @@ func (r *OpensearchConnection) Attributes(ctx context.Context, c client.Client, 
 }
 
 type HTTPConnection struct {
-	// Host ...
+	// Host is the host to connect to.
 	//
 	// +kubebuilder:validation:Required
 	Host string `json:"host"`
 
-	// User to connect with basic auth
+	// User to connect with basic auth.
 	//
 	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty"`
 
-	// Password to connect w/ for basic auth
+	// Password to connect w/ for basic auth.
 	//
 	// +kubebuilder:validation:Optional
 	Password *string `json:"password,omitempty"`
 
-	// PasswordSecretRef selects a key of a password Secret
+	// PasswordSecretRef is a reference to a secret containing the password to connect with basic auth.
 	//
 	// +kubebuilder:validation:Optional
 	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
@@ -283,25 +339,27 @@ type DeploymentSettingsBindings struct {
 }
 
 type StackSettings struct {
-	// JobSpec optional k8s job configuration for the job that will apply this stack
+	// JobSpec optional k8s job configuration for the job that will apply this stack.
 	//
 	// +kubebuilder:validation:Optional
 	JobSpec *JobSpec `json:"jobSpec,omitempty"`
 
-	// ConnectionRef reference to ScmConnection
+	// ConnectionRef reference to ScmConnection.
 	//
 	// +kubebuilder:validation:Optional
 	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
 }
 
 type CostSettings struct {
-	// A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,
-	// should be between 1-99.
+	// RecommendationCushion is a percentage amount of cushion
+	// to give over the average discovered utilization to generate
+	// a scaling recommendation, should be between 1-99.
 	//
 	// +kubebuilder:validation:Optional
 	RecommendationCushion *int64 `json:"recommendationCushion,omitempty"`
 
-	// The minimal monthly cost for a recommendation to be covered by a controller
+	// RecommendationThreshold is the minimal monthly cost for
+	// a recommendation to be covered by a controller.
 	//
 	// +kubebuilder:validation:Optional
 	RecommendationThreshold *int64 `json:"recommendationThreshold,omitempty"`
@@ -326,6 +384,8 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
+	// Tools holds the configuration for the tools that can be used with the AI integration.
+	//
 	// +kubebuilder:validation:Optional
 	Tools *Tools `json:"tools,omitempty"`
 
@@ -336,13 +396,14 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
 
-	// Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
+	// ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
 	//
 	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
-	// Provider to use for generating embeddings. Oftentimes foundational model providers do not have embeddings models, and it's better to simply use OpenAI.
+	// EmbeddingProvider to use for generating embeddings. Oftentimes foundational
+	// model providers do not have embeddings models, and it's better to simply use OpenAI.
 	//
 	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:validation:Optional
@@ -358,7 +419,8 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Anthropic *AIProviderSettings `json:"anthropic,omitempty"`
 
-	// Ollama holds configuration for a self-hosted Ollama deployment, more details available at https://github.com/ollama/ollama
+	// Ollama holds configuration for a self-hosted Ollama deployment,
+	// more details available at https://github.com/ollama/ollama
 	//
 	// +kubebuilder:validation:Optional
 	Ollama *OllamaSettings `json:"ollama,omitempty"`
@@ -378,20 +440,28 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Vertex *VertexSettings `json:"vertex,omitempty"`
 
+	// VectorStore holds configuration for using a vector store to store embeddings.
+	//
 	// +kubebuilder:validation:Optional
 	VectorStore *VectorStore `json:"vectorStore,omitempty"`
 
-	// Configuration for the cloud graph store, which uses similar datastores to the vector store
+	// Configuration for the cloud graph store, which uses similar datastores to the vector store.
+	//
 	// +kubebuilder:validation:Optional
 	Graph *GraphStore `json:"graph,omitempty"`
 }
 
 type Tools struct {
+	// CreatePr holds the configuration for the pr automation tool.
+	//
+	// +kubebuilder:validation:Optional
 	CreatePr *CreatePr `json:"createPr,omitempty"`
 }
 
 type CreatePr struct {
 	// ScmConnectionRef the SCM connection to use for pr automations
+	//
+	// +kubebuilder:validation:Optional
 	ScmConnectionRef *corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
 }
 
@@ -575,17 +645,18 @@ type AIProviderSettings struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
-	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
-	// Model to use for generating embeddings
+	// EmbeddingModel to use for generating embeddings
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
-	// A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec)
+	// BaseUrl is a custom base url to use, for reimplementations
+	// of the same API scheme (for instance Together.ai uses the OpenAI API spec)
 	//
 	// +kubebuilder:validation:Optional
 	BaseUrl *string `json:"baseUrl,omitempty"`
@@ -597,7 +668,7 @@ type AIProviderSettings struct {
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
-// Settings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
+// OllamaSettings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
 type OllamaSettings struct {
 	// URL is the url this model is queryable on
 	//
@@ -609,12 +680,12 @@ type OllamaSettings struct {
 	// +kubebuilder:validation:Required
 	Model string `json:"model"`
 
-	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
-	// TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
+	// AuthorizationSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
 	// to send to your ollama api in case authorization is required (eg for an instance hosted on a public network)
 	//
 	// +kubebuilder:validation:Optional
@@ -622,27 +693,29 @@ type OllamaSettings struct {
 }
 
 type AzureOpenAISettings struct {
-	// Your Azure OpenAI endpoint, should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
+	// Endpoint is your Azure OpenAI endpoint,
+	// should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
 	//
 	// +kubebuilder:validation:Required
 	Endpoint string `json:"endpoint"`
 
-	// The azure openai Data plane - inference api version to use, defaults to 2024-10-01-preview or the latest available
+	// The azure openai Data plane - inference api version to use,
+	// defaults to 2024-10-01-preview or the latest available
 	//
 	// +kubebuilder:validation:Optional
 	ApiVersion *string `json:"apiVersion,omitempty"`
 
-	// The OpenAi Model you wish to use.  If not specified, Plural will provide a default
+	// Model - the OpenAi model you wish to use. If not specified, Plural will provide a default.
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
-	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning.
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
-	// Model to use for generating embeddings
+	// EmbeddingModel to use for generating embeddings.
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
@@ -655,54 +728,54 @@ type AzureOpenAISettings struct {
 }
 
 type BedrockSettings struct {
-	// The AWS Bedrock Model ID to use
+	// ModelID is the AWS Bedrock Model ID to use.
 	//
 	// +kubebuilder:validation:Required
 	ModelID string `json:"modelId"`
 
-	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//
 	// +kubebuilder:validation:Optional
 	ToolModelId *string `json:"toolModelId,omitempty"`
 
-	// An AWS Access Key ID to use, can also use IRSA to acquire credentials
+	// AccessKeyId is an AWS Access Key ID to use, can also use IRSA to acquire credentials
 	//
 	// +kubebuilder:validation:Optional
 	AccessKeyId *string `json:"accessKeyId,omitempty"`
 
-	// An AWS Secret Access Key to use, can also use IRSA to acquire credentials
+	// SecretAccessKeyRef is an AWS Secret Access Key to use, can also use IRSA to acquire credentials
 	//
 	// +kubebuilder:validation:Optional
 	SecretAccessKeyRef *corev1.SecretKeySelector `json:"secretAccessKeyRef"`
 }
 
 type VertexSettings struct {
-	// The Vertex AI model to use
+	// Model is the Vertex AI model to use
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
-	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
-	// The GCP project you'll be using
+	// Project is the GCP project you'll be using
 	//
 	// +kubebuilder:validation:Required
 	Project string `json:"project"`
 
-	// The GCP region Vertex is queried from
+	// Location is the GCP region Vertex is queried from
 	//
 	// +kubebuilder:validation:Required
 	Location string `json:"location"`
 
-	// A custom endpoint for self-deployed models
+	// Endpoint is a custom endpoint for self-deployed models
 	//
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
 
-	// An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
+	// ServiceAccountJsonSecretRef is a Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
 	//
 	// +kubebuilder:validation:Optional
 	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef,omitempty"`
@@ -764,15 +837,20 @@ func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Clien
 }
 
 type GraphStore struct {
+	// Enabled controls whether the graph store is enabled or not.
+	//
 	// +kubebuilder:default=false
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
+	// Store is the type of the graph store to use.
+	//
 	// +kubebuilder:validation:Enum=ELASTIC
 	// +kubebuilder:validation:Optional
 	Store *console.VectorStore `json:"store,omitempty"`
 
-	// elastic configuration for the graph store
+	// Elastic configuration for the graph store.
+	//
 	// +kubebuilder:validation:Optional
 	Elastic *ElasticsearchConnectionSettings `json:"elastic,omitempty"`
 }
@@ -813,17 +891,25 @@ func (in *GraphStore) Attributes(ctx context.Context, c client.Client, namespace
 }
 
 type VectorStore struct {
+	// Enabled controls whether the vector store is enabled or not..
+	//
 	// +kubebuilder:default=false
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
+	// VectorStore is the type of the vector store to use.
+	//
 	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
 
+	// Elastic configuration for the vector store.
+	//
 	// +kubebuilder:validation:Optional
 	Elastic *ElasticsearchConnectionSettings `json:"elastic,omitempty"`
 
+	// Opensearch configuration for the vector store.
+	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnectionSettings `json:"opensearch,omitempty"`
 }
@@ -881,15 +967,23 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 }
 
 type ElasticsearchConnectionSettings struct {
+	// Host is the host of the elasticsearch cluster.
+	//
 	// +kubebuilder:validation:Required
 	Host string `json:"host"`
 
+	// Index is the index of the elasticsearch cluster.
+	//
 	// +kubebuilder:validation:Required
 	Index string `json:"index"`
 
+	// User is the user to authenticate with.
+	//
 	// +kubebuilder:validation:Optional
 	User *string `json:"user,omitempty"`
 
+	// PasswordSecretRef is a reference to the local secret holding the password to authenticate with.
+	//
 	// +kubebuilder:validation:Optional
 	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
 }
@@ -908,15 +1002,29 @@ func (in *ElasticsearchConnectionSettings) Password(ctx context.Context, c clien
 }
 
 type OpensearchConnectionSettings struct {
-	Host  string `json:"host"`
+	// Host is the host of the opensearch cluster.
+	//
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// Index is the index of the opensearch cluster.
+	//
+	// +kubebuilder:validation:Required
 	Index string `json:"index"`
 
+	// AWSAccessKeyID is the AWS Access Key ID to use, can also use IRSA to acquire credentials.
+	//
 	// +kubebuilder:validation:Optional
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 
+	// AWSSecretAccessKeyRef is a reference to the local secret holding the AWS Secret Access Key to use,
+	// can also use IRSA to acquire credentials.
+	//
 	// +kubebuilder:validation:Optional
 	AWSSecretAccessKeyRef *corev1.SecretKeySelector `json:"awsSecretAccessKeyRef,omitempty"`
 
+	// AwsRegion is the AWS region to use, defaults to us-east-1
+	//
 	// +kubebuilder:validation:Optional
 	AwsRegion *string `json:"awsRegion,omitempty"`
 }
