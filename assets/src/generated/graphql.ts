@@ -3729,6 +3729,17 @@ export type HttpIngressRule = {
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
 
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyAttributes = {
+  url: Scalars['String']['input'];
+};
+
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyConfiguration = {
+  __typename?: 'HttpProxyConfiguration';
+  url: Scalars['String']['output'];
+};
+
 export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
   /** the actor of this stack (defaults to root console user) */
@@ -9556,6 +9567,8 @@ export type ScmConnection = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   type: ScmType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   username?: Maybe<Scalars['String']['output']>;
@@ -9570,6 +9583,7 @@ export type ScmConnectionAttributes = {
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
   owner?: InputMaybe<Scalars['String']['input']>;
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;

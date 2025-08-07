@@ -268,3 +268,8 @@ if is_set("CONSOLE_GITHUB_APP_ID") and is_set("CONSOLE_GITHUB_APP_PEM") do
     github_app_id: get_env("CONSOLE_GITHUB_APP_ID"),
     github_app_pem: get_env("CONSOLE_GITHUB_APP_PEM")
 end
+
+if is_set("CONSOLE_GITHUB_HTTP_PROXY") do
+  config :tentacat,
+    request_options: [proxy: to_charlist(get_env("CONSOLE_GITHUB_HTTP_PROXY"))]
+end
