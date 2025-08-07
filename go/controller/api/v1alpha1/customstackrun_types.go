@@ -89,11 +89,15 @@ type CustomStackRunSpec struct {
 }
 
 type CommandAttributes struct {
-	// the command this hook will execute
+	// Cmd is the command to execute
+	// +kubebuilder:validation:Required
 	Cmd string `json:"cmd"`
-	// optional arguments to pass to the command
+
+	// Args are the arguments to pass to the command.
 	// +kubebuilder:validation:Optional
 	Args []string `json:"args,omitempty"`
+
+	// Dir is the working directory for the command.
 	// +kubebuilder:validation:Optional
 	Dir *string `json:"dir,omitempty"`
 }

@@ -67,18 +67,26 @@ func (in *ClusterSync) SetCondition(condition metav1.Condition) {
 
 // ClusterSyncSpec defines the desired state of ClusterSync
 type ClusterSyncSpec struct {
+	// ProjectRef references project to sync clusters from.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
+	// Tags used to filter clusters.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
+	// ClusterSpec contains specifications of the cluster.
+	// +kubebuilder:validation:Required
 	ClusterSpec ClusterSpecTemplate `json:"clusterSpec"`
 }
 
 type ClusterSpecTemplate struct {
+	// Metadata for the cluster.
+	// +kubebuilder:validation:Required
 	Metadata MetadataTemplate `json:"metadata"`
 
+	// Spec for the cluster.
+	// +kubebuilder:validation:Required
 	Spec SpecTemplate `json:"spec,omitempty"`
 }
 
@@ -133,6 +141,8 @@ type SpecTemplate struct {
 }
 
 type MetadataTemplate struct {
+	// Name is a short, unique human-readable name used to identify this cluster.
+	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
 	// Namespace specifies an optional namespace for categorizing or scoping related resources.
@@ -142,6 +152,7 @@ type MetadataTemplate struct {
 }
 
 type ObjectReferenceTemplate struct {
+	// +kubebuilder:validation:Required
 	MetadataTemplate `json:",inline"`
 }
 
