@@ -177,3 +177,9 @@ mutation AiFixPr($insightId: ID!, $messages: [ChatMessage]) {
     ...PullRequest
   }
 }
+
+mutation RefreshInsight($id: ID!) {
+  refreshInsight(insightId: $id) {
+    ...AiInsight
+  }
+}

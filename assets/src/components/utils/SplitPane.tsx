@@ -117,6 +117,7 @@ export function SplitPane({
   const [split, setSplit] = usePersistedState(
     `split-pane-amt-${id}`,
     0.5,
+    1000,
     (val) => (typeof val === 'number' ? Math.min(1, Math.max(0, val)) : 0.5)
   )
 

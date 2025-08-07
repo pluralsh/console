@@ -45,7 +45,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			namespace   = "default"
 			id          = "123"
 			repoUrl     = "https://test"
-			sha         = "TO6UV6AVUGFXETYC4GY3ESV5KIW3P2Z23Y45K4YGAIKCBGTMJP7Q===="
+			sha         = "PY7TB2EGHMVDISEPCA45WYS2AMPW7XW76WJ2IDG5DHBZHGJIB6EA===="
 		)
 
 		ctx := context.Background()
@@ -253,7 +253,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				expectedStatus: v1alpha1.ServiceStatus{
 					Status: v1alpha1.Status{
 						ID:  lo.ToPtr(id),
-						SHA: lo.ToPtr("TVKRAPX6MJUTISGIOTQVFXIC6P4RH57IZXGAXGJX6HFB5JF4GFFQ===="),
+						SHA: lo.ToPtr("O3OWFQ7MULGY6EL5UY2EEXTMWDR3NOX7QYV6JHYIQWCXBSIWGOWA===="),
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -654,7 +654,7 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 			namespace   = "default"
 			id          = "123"
 			repoUrl     = "https://test"
-			sha         = "U3JLLBUQEQXQIUFCGKVNSW3OGRXRETO5N26ZE7ZKNAQWCSRUI5BA===="
+			sha         = "ABR4ZK4S2XAFJ24VZF5RFF3JPDT6NWBTPIJ3QDVW2I6GC2XB6GNQ===="
 		)
 
 		ctx := context.Background()

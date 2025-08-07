@@ -5,6 +5,7 @@ defmodule Console.AI.CronTest do
   import ElasticsearchUtils
   alias Console.PubSub
   alias Console.Deployments.Clusters
+  alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.AI.Cron
 
   setup :set_mimic_global
@@ -64,6 +65,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = svc = Console.Repo.preload(refetch(service), [:insight, components: :insight])
 
       assert svc.insight.text
+      assert svc.ai_poll_at
 
       %{components: [component]} = svc
 
@@ -147,11 +149,10 @@ defmodule Console.AI.CronTest do
       )
       expect(Clusters, :control_plane, 2, fn _ -> %Kazan.Server{} end)
       expect(Clusters, :api_discovery, fn  _ -> %{} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, es_cluster("ns")} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, stateful_set("ns")} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Kube.Utils, :run, 2, fn
+        %Kazan.Request{path: "/apis/elasticsearch.k8s.elastic.com/v1/namespaces/ns/elasticsearches/name"} -> {:ok, es_cluster("ns")}
+        _ -> {:ok, %{items: []}}
+      end)
       expect(Console.AI.OpenAI, :completion, 6, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
@@ -235,6 +236,91 @@ defmodule Console.AI.CronTest do
       assert svc.insight.text
       assert svc.insight_id == insight.id
     end
+
+    test "it will gather evidence from a statefulset and its pvcs" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: %{host: "localhost", index: "test"}},
+        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+      )
+
+      cluster = insert(:cluster,
+        operational_layout: build(:operational_layout,
+          namespaces: %{ebs_csi_driver: "aws-ebs-csi-driver"}
+        )
+      )
+
+      service = insert(:service, cluster: cluster, status: :failed, errors: [%{source: "manifests", error: "some error"}])
+      insert(:service_component,
+        service: service,
+        state: :pending,
+        group: "apps",
+        version: "v1",
+        kind: "StatefulSet",
+        namespace: "ns",
+        name: "my-sts"
+      )
+
+      vct = volume_claim_template("my-vct", "my-sc")
+      sts = stateful_set("my-sts", "ns", 1, [vct])
+      pvc = persistent_volume_claim("my-vct-my-sts-0", "ns", "my-sc", "my-pv")
+      pv = persistent_volume("my-pv")
+      sc = storage_class("my-sc", "ebs.csi.aws.com")
+
+      pvc = %{pvc | status: %CoreV1.PersistentVolumeClaimStatus{phase: "Pending"}}
+
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, 6, fn
+        %Kazan.Request{path: "/apis/apps/v1/namespaces/ns/statefulsets/my-sts"} -> {:ok, sts}
+        %Kazan.Request{path: "/api/v1/namespaces/ns/persistentvolumeclaims/my-vct-my-sts-0"} -> {:ok, pvc}
+        %Kazan.Request{path: "/api/v1/persistentvolumes/my-pv"} -> {:ok, pv}
+        %Kazan.Request{path: "/apis/storage.k8s.io/v1/storageclasses/my-sc"} -> {:ok, sc}
+        _ -> {:ok, %{items: []}}
+      end)
+
+      expect(Console.Logs.Provider, :query, 1, fn
+        # Updated to expect the specific CSI driver query
+        %Console.Logs.Query{
+          query: "ebs.csi.aws.com",  # <-- Changed from generic error terms
+          namespaces: ["aws-ebs-csi-driver"],
+          cluster_id: _
+        } ->
+          {:ok, [
+            %Console.Logs.Line{
+              log: "2024-01-01 10:00:00 INFO: CSI driver started",
+              timestamp: ~U[2024-01-01 10:00:00Z],
+              facets: []
+            },
+            %Console.Logs.Line{
+              log: "2024-01-01 10:01:00 ERROR: Failed to provision volume",
+              timestamp: ~U[2024-01-01 10:01:00Z],
+              facets: []
+            }
+          ]}
+      end)
+
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+        {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
+      end)
+
+      Cron.services()
+
+      %{id: id} = svc = refetch(service) |> Console.Repo.preload([:insight, :components])
+      assert svc.insight.text
+
+      [component] = svc.components
+      component_insight = Repo.get!(Console.Schema.AiInsight, component.insight_id) |> Repo.preload(:evidence)
+      evidence_text = component_insight.evidence
+                      |> Stream.filter(&(&1.type == :log))
+                      |> Stream.flat_map(&(&1.logs.lines))
+                      |> Stream.map(&(&1.log))
+                      |> Enum.join("\n")
+
+      assert evidence_text =~ "CSI driver started"
+      assert evidence_text =~ "Failed to provision volume"
+
+      assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
+    end
   end
 
   describe "#clusters/0" do
@@ -260,6 +346,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = cluster = Console.Repo.preload(refetch(cluster), [:insight, insight_components: :insight])
 
       assert cluster.insight.text
+      assert cluster.ai_poll_at
 
       %{insight_components: [component]} = cluster
 
@@ -335,6 +422,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = stack = Console.Repo.preload(refetch(stack), [:insight])
 
       assert stack.insight.text
+      assert stack.ai_poll_at
 
       run = Console.Repo.preload(refetch(run), [:insight])
 
@@ -421,6 +509,7 @@ defmodule Console.AI.CronTest do
       %{id: id} = alert = refetch(alert) |> Console.Repo.preload([insight: :evidence])
 
       assert alert.insight.text
+      assert alert.ai_poll_at
 
       %{evidence: evidence} = alert.insight
       %{log: [log], pr: [pr]} = Enum.group_by(evidence, & &1.type)

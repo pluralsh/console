@@ -497,9 +497,10 @@ type AWSCloudAttributes struct {
 }
 
 type AWSCloudConnectionAttributes struct {
-	AccessKeyID     string `json:"accessKeyId"`
-	SecretAccessKey string `json:"secretAccessKey"`
-	Region          string `json:"region"`
+	AccessKeyID     string    `json:"accessKeyId"`
+	SecretAccessKey string    `json:"secretAccessKey"`
+	Region          *string   `json:"region,omitempty"`
+	Regions         []*string `json:"regions,omitempty"`
 }
 
 // aws specific cloud configuration
@@ -514,7 +515,9 @@ type AWSConnectionAttributes struct {
 	// the secret access key for aws
 	SecretAccessKey string `json:"secretAccessKey"`
 	// the region for aws
-	Region string `json:"region"`
+	Region *string `json:"region,omitempty"`
+	// the regions for aws
+	Regions []*string `json:"regions,omitempty"`
 }
 
 type AWSNodeCloudAttributes struct {
@@ -1055,6 +1058,8 @@ type Cluster struct {
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// The memory utilization of the cluster
 	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
+	// The availability zones this cluster is running in
+	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1406,18 +1411,19 @@ type ClusterNodeMetrics struct {
 }
 
 type ClusterPing struct {
-	CurrentVersion   string         `json:"currentVersion"`
-	KubeletVersion   *string        `json:"kubeletVersion,omitempty"`
-	Distro           *ClusterDistro `json:"distro,omitempty"`
-	HealthScore      *int64         `json:"healthScore,omitempty"`
-	OpenshiftVersion *string        `json:"openshiftVersion,omitempty"`
-	NodeCount        *int64         `json:"nodeCount,omitempty"`
-	PodCount         *int64         `json:"podCount,omitempty"`
-	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
-	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
-	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
-	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
-	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
+	CurrentVersion    string         `json:"currentVersion"`
+	KubeletVersion    *string        `json:"kubeletVersion,omitempty"`
+	Distro            *ClusterDistro `json:"distro,omitempty"`
+	HealthScore       *int64         `json:"healthScore,omitempty"`
+	OpenshiftVersion  *string        `json:"openshiftVersion,omitempty"`
+	NodeCount         *int64         `json:"nodeCount,omitempty"`
+	PodCount          *int64         `json:"podCount,omitempty"`
+	NamespaceCount    *int64         `json:"namespaceCount,omitempty"`
+	CPUTotal          *float64       `json:"cpuTotal,omitempty"`
+	MemoryTotal       *float64       `json:"memoryTotal,omitempty"`
+	CPUUtil           *float64       `json:"cpuUtil,omitempty"`
+	MemoryUtil        *float64       `json:"memoryUtil,omitempty"`
+	AvailabilityZones []*string      `json:"availabilityZones,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
@@ -2443,6 +2449,25 @@ type Event struct {
 	Type          *string `json:"type,omitempty"`
 }
 
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredential struct {
+	ID         string         `json:"id"`
+	Issuer     string         `json:"issuer"`
+	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
+	Scopes     []*string      `json:"scopes,omitempty"`
+	User       *User          `json:"user,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+// A federated credential is a way to authenticate users from an external identity provider
+type FederatedCredentialAttributes struct {
+	Issuer     string    `json:"issuer"`
+	ClaimsLike *string   `json:"claimsLike,omitempty"`
+	Scopes     []*string `json:"scopes,omitempty"`
+	UserID     string    `json:"userId"`
+}
+
 type Flow struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -2462,6 +2487,7 @@ type Flow struct {
 	Alerts                      *AlertConnection                      `json:"alerts,omitempty"`
 	PreviewEnvironmentTemplates *PreviewEnvironmentTemplateConnection `json:"previewEnvironmentTemplates,omitempty"`
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
+	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
@@ -2726,6 +2752,8 @@ type GlobalServiceAttributes struct {
 	// whether you want the global service to take ownership of existing plural services
 	Reparent *bool                      `json:"reparent,omitempty"`
 	Template *ServiceTemplateAttributes `json:"template,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *CascadeAttributes `json:"cascade,omitempty"`
 	// additional context used to template service metadata during global service reconciliation
@@ -2870,6 +2898,7 @@ type HelmConfigAttributes struct {
 	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	LuaScript   *string              `json:"luaScript,omitempty"`
 	LuaFile     *string              `json:"luaFile,omitempty"`
+	LuaFolder   *string              `json:"luaFolder,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2965,6 +2994,8 @@ type HelmSpec struct {
 	LuaScript *string `json:"luaScript,omitempty"`
 	// a lua file to use for helm applies
 	LuaFile *string `json:"luaFile,omitempty"`
+	// a folder of lua files to include in the final script used
+	LuaFolder *string `json:"luaFolder,omitempty"`
 }
 
 // a (possibly nested) helm value pair
@@ -3016,6 +3047,10 @@ type InfrastructureStack struct {
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
 	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval *string `json:"interval,omitempty"`
+	// the next time the stack will be reconciled
+	NextPollAt *string `json:"nextPollAt,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -3349,6 +3384,8 @@ type ManagedNamespace struct {
 	DeletedAt *string `json:"deletedAt,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *Cascade `json:"cascade,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// the service which created this managed namespace
 	Parent *ServiceDeployment `json:"parent,omitempty"`
 	// a project this global service is bound to
@@ -6191,7 +6228,9 @@ type StackAttributes struct {
 	Variables    *string                 `json:"variables,omitempty"`
 	PolicyEngine *PolicyEngineAttributes `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
-	AgentID           *string                       `json:"agentId,omitempty"`
+	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval          *string                       `json:"interval,omitempty"`
 	ReadBindings      []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
 	WriteBindings     []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 	Tags              []*TagAttributes              `json:"tags,omitempty"`
@@ -6605,6 +6644,8 @@ type StatusCondition struct {
 type SyncConfig struct {
 	// whether the agent should auto-create the namespace for this service
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
+	// whether the agent should delete the namespace for this service upon deletion
+	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
 	// Whether to require all resources are placed in the same namespace
 	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
@@ -6615,6 +6656,7 @@ type SyncConfig struct {
 type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
+	DeleteNamespace   *bool               `json:"deleteNamespace,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`
@@ -7625,12 +7667,13 @@ func (e ChatType) MarshalGQL(w io.Writer) {
 type ClusterDistro string
 
 const (
-	ClusterDistroGeneric ClusterDistro = "GENERIC"
-	ClusterDistroEks     ClusterDistro = "EKS"
-	ClusterDistroAks     ClusterDistro = "AKS"
-	ClusterDistroGke     ClusterDistro = "GKE"
-	ClusterDistroRke     ClusterDistro = "RKE"
-	ClusterDistroK3s     ClusterDistro = "K3S"
+	ClusterDistroGeneric   ClusterDistro = "GENERIC"
+	ClusterDistroEks       ClusterDistro = "EKS"
+	ClusterDistroAks       ClusterDistro = "AKS"
+	ClusterDistroGke       ClusterDistro = "GKE"
+	ClusterDistroRke       ClusterDistro = "RKE"
+	ClusterDistroK3s       ClusterDistro = "K3S"
+	ClusterDistroOpenshift ClusterDistro = "OPENSHIFT"
 )
 
 var AllClusterDistro = []ClusterDistro{
@@ -7640,11 +7683,12 @@ var AllClusterDistro = []ClusterDistro{
 	ClusterDistroGke,
 	ClusterDistroRke,
 	ClusterDistroK3s,
+	ClusterDistroOpenshift,
 }
 
 func (e ClusterDistro) IsValid() bool {
 	switch e {
-	case ClusterDistroGeneric, ClusterDistroEks, ClusterDistroAks, ClusterDistroGke, ClusterDistroRke, ClusterDistroK3s:
+	case ClusterDistroGeneric, ClusterDistroEks, ClusterDistroAks, ClusterDistroGke, ClusterDistroRke, ClusterDistroK3s, ClusterDistroOpenshift:
 		return true
 	}
 	return false

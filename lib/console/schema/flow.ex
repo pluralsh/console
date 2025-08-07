@@ -64,6 +64,7 @@ defmodule Console.Schema.Flow do
     |> cast_assoc(:write_bindings)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
+    |> foreign_key_constraint(:preview_environment_instances, name: :preview_environment, match: :prefix, message: "Cannot delete as there are preview environments using this flow still deployed")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :project_id])

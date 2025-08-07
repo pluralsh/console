@@ -18,13 +18,6 @@ defmodule Console.Application do
       Console.MultilevelCache,
       Console.TestCache,
       Console.LocalCache,
-      ConsoleWeb.Endpoint,
-      Console.Plural.Config,
-      Console.Features,
-      Console.Cron.Scheduler,
-      Console.Buffers.ClusterAudit,
-      Console.Deployments.Local.Server,
-      Console.Prom.Meter,
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
@@ -40,6 +33,13 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Observer.Supervisor,
+      ConsoleWeb.Endpoint,
+      Console.Plural.Config,
+      Console.Features,
+      Console.Cron.Scheduler,
+      Console.Buffers.ClusterAudit,
+      Console.Deployments.Local.Server,
+      Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
       Console.Deployments.Git.Kick,
@@ -56,9 +56,7 @@ defmodule Console.Application do
       Console.AI.Graph.Indexer.Supervisor,
     ] ++ consumers()
       ++ oidc_providers()
-      ++ [
-      Piazza.GracefulShutdown
-    ]
+      ++ [Piazza.GracefulShutdown]
 
     opts = [strategy: :one_for_one, name: Console.Supervisor]
     Supervisor.start_link(children, opts)

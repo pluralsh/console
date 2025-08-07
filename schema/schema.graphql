@@ -407,7 +407,9 @@ type RootQueryType {
 
   cloudConnection(id: ID, name: String): CloudConnection
 
-  cloudConnections(after: String, first: Int, before: String, last: Int): CloudConnectionConnection
+  cloudConnections(after: String, first: Int, before: String, last: Int, q: String): CloudConnectionConnection
+
+  federatedCredential(id: ID!): FederatedCredential
 
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
@@ -448,7 +450,20 @@ type RootQueryType {
   chatThread(id: ID!): ChatThread
 
   "gets the chat history from prior AI chat sessions"
-  chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    threadId: ID
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
@@ -463,6 +478,8 @@ type RootQueryType {
 
     "only show threads for this flow"
     flowId: ID
+
+    q: String
   ): ChatThreadConnection
 
   agentSessions(after: String, first: Int, before: String, last: Int): AgentSessionConnection
@@ -593,7 +610,10 @@ type RootMutationType {
 
   createPullRequest(
     "the id of the PR automation instance to use"
-    id: ID!
+    id: ID
+
+    "the name of the PR automation instance to use"
+    name: String
 
     identifier: String
 
@@ -941,6 +961,12 @@ type RootMutationType {
 
   dismissOnboarding: DeploymentSettings
 
+  createFederatedCredential(attributes: FederatedCredentialAttributes!): FederatedCredential
+
+  updateFederatedCredential(id: ID!, attributes: FederatedCredentialAttributes!): FederatedCredential
+
+  deleteFederatedCredential(id: ID!): FederatedCredential
+
   createOidcProvider(type: OidcProviderType!, attributes: OidcProviderAttributes!): OidcProvider
 
   updateOidcProvider(type: OidcProviderType!, id: ID!, attributes: OidcProviderAttributes!): OidcProvider
@@ -990,6 +1016,9 @@ type RootMutationType {
 
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
+
+  "Refreshes an insight, which will trigger a new AI insight generation in the background"
+  refreshInsight(insightId: ID!): AiInsight
 
   "it will add additional context to the given chat from a source object"
   addChatContext(source: ContextSource!, sourceId: ID, threadId: ID!): [Chat]
@@ -1207,6 +1236,8 @@ type Flow {
   previewEnvironmentTemplates(after: String, first: Int, before: String, last: Int): PreviewEnvironmentTemplateConnection
 
   previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
+
+  vulnerabilityReports(after: String, first: Int, before: String, last: Int): VulnerabilityReportConnection
 
   insertedAt: DateTime
 
@@ -1685,7 +1716,8 @@ input CloudConnectionConfigurationAttributes {
 input AwsCloudConnectionAttributes {
   accessKeyId: String!
   secretAccessKey: String!
-  region: String!
+  region: String
+  regions: [String]
 }
 
 input GcpCloudConnectionAttributes {
@@ -1698,6 +1730,14 @@ input AzureCloudConnectionAttributes {
   tenantId: String!
   clientId: String!
   clientSecret: String!
+}
+
+"A federated credential is a way to authenticate users from an external identity provider"
+input FederatedCredentialAttributes {
+  issuer: String!
+  claimsLike: Json
+  scopes: [String]
+  userId: ID!
 }
 
 "A unit of organization to control permissions for a set of objects within your Console instance"
@@ -2007,7 +2047,10 @@ type AwsConnectionAttributes {
   secretAccessKey: String!
 
   "the region for aws"
-  region: String!
+  region: String
+
+  "the regions for aws"
+  regions: [String]
 }
 
 "The configuration for a cloud provider"
@@ -2032,6 +2075,17 @@ type AzureConnectionAttributes {
 
   "the client secret for azure"
   clientSecret: String!
+}
+
+"A federated credential is a way to authenticate users from an external identity provider"
+type FederatedCredential {
+  id: ID!
+  issuer: String!
+  claimsLike: Map
+  scopes: [String]
+  user: User
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ProjectConnection {
@@ -2306,6 +2360,9 @@ input StackAttributes {
   "the agent id this stack is associated with"
   agentId: String
 
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2537,6 +2594,12 @@ type InfrastructureStack {
 
   "the agent id this stack is associated with"
   agentId: String
+
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
+  "the next time the stack will be reconciled"
+  nextPollAt: DateTime
 
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
@@ -3022,6 +3085,9 @@ input GlobalServiceAttributes {
 
   template: ServiceTemplateAttributes
 
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
+
   "behavior for all owned resources when this global service is deleted"
   cascade: CascadeAttributes
 
@@ -3205,6 +3271,9 @@ type ManagedNamespace {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
 
   "the service which created this managed namespace"
   parent: ServiceDeployment
@@ -4575,6 +4644,8 @@ input SyncConfigAttributes {
 
   enforceNamespace: Boolean
 
+  deleteNamespace: Boolean
+
   namespaceMetadata: MetadataAttributes
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -4615,6 +4686,8 @@ input HelmConfigAttributes {
   luaScript: String
 
   luaFile: String
+
+  luaFolder: String
 
   set: HelmValueAttributes
 
@@ -5038,6 +5111,9 @@ type HelmSpec {
 
   "a lua file to use for helm applies"
   luaFile: String
+
+  "a folder of lua files to include in the final script used"
+  luaFolder: String
 }
 
 "a configuration item k\/v pair"
@@ -5224,6 +5300,9 @@ type SyncConfig {
   "whether the agent should auto-create the namespace for this service"
   createNamespace: Boolean
 
+  "whether the agent should delete the namespace for this service upon deletion"
+  deleteNamespace: Boolean
+
   "Whether to require all resources are placed in the same namespace"
   enforceNamespace: Boolean
 
@@ -5338,6 +5417,7 @@ enum ClusterDistro {
   GKE
   RKE
   K3S
+  OPENSHIFT
 }
 
 enum UpgradeInsightStatus {
@@ -5467,6 +5547,8 @@ input ClusterPing {
   cpuUtil: Float
 
   memoryUtil: Float
+
+  availabilityZones: [String]
 
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
@@ -6019,6 +6101,9 @@ type Cluster {
 
   "The memory utilization of the cluster"
   memoryUtil: Float
+
+  "The availability zones this cluster is running in"
+  availabilityZones: [String]
 
   "The helm values for the agent installation"
   agentHelmValues: String
@@ -8265,7 +8350,18 @@ type ChatThread {
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
-  chats(after: String, first: Int, before: String, last: Int): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   insertedAt: DateTime
 

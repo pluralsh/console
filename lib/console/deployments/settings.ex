@@ -6,7 +6,8 @@ defmodule Console.Deployments.Settings do
   alias Console.Commands.Plural
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection}
+  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection, FederatedCredential}
+  require Logger
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
@@ -17,6 +18,7 @@ defmodule Console.Deployments.Settings do
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
   @type project_resp :: {:ok, Project.t} | Console.error
   @type cloud_connection_resp :: {:ok, CloudConnection.t} | Console.error
+  @type federated_credential_resp :: {:ok, FederatedCredential.t} | Console.error
 
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
@@ -37,6 +39,9 @@ defmodule Console.Deployments.Settings do
 
   @spec get_cloud_connection_by_name!(binary) :: CloudConnection.t
   def get_cloud_connection_by_name!(name), do: Repo.get_by!(CloudConnection, name: name)
+
+  @spec get_federated_credential!(binary) :: FederatedCredential.t
+  def get_federated_credential!(id), do: Repo.get!(FederatedCredential, id)
 
   @doc """
   same as `fetch/0` but caches in the process dict
@@ -284,6 +289,100 @@ defmodule Console.Deployments.Settings do
     get_cloud_connection!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Creates a new federated credential, fails if a user isn't an admin
+  """
+  @spec create_federated_credential(map, User.t) :: federated_credential_resp
+  def create_federated_credential(attrs, %User{} = user) do
+    %FederatedCredential{}
+    |> FederatedCredential.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Updates a federated credential, fails if a user isn't an admin
+  """
+  @spec update_federated_credential(map, binary, User.t) :: federated_credential_resp
+  def update_federated_credential(attrs, id, %User{} = user) do
+    get_federated_credential!(id)
+    |> FederatedCredential.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Deletes a federated credential, fails if a user isn't an admin
+  """
+  @spec delete_federated_credential(binary, User.t) :: federated_credential_resp
+  def delete_federated_credential(id, %User{} = user) do
+    get_federated_credential!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+  Validates a given jwt and verifies if a federated credential exists for the specified user to exchange for a console-validated jwt
+  """
+  @spec exchange_token(binary, binary) :: {:ok, binary} | Console.error()
+  def exchange_token(token, email) do
+    user = Users.cached_user_by_email!(email)
+
+    with {:token, {:ok, %{"iss" => issuer, "aud" => aud}}} <- {:token, Joken.peek_claims(token)},
+         {:config, {:ok, {conf, jwks}}} <- {:config, issuer_configuration(issuer)},
+         opts = %{client_jwks: JOSE.JWK.generate_key(16)},
+         ctx = Oidcc.ClientContext.from_manual(conf, jwks, aud, "dummy_secret", opts),
+         opts = %{signing_algs: ctx.provider_configuration.id_token_signing_alg_values_supported},
+         {:validate, {:ok, claims}} <- {:validate, Oidcc.Token.validate_jwt(token, ctx, opts)} do
+      FederatedCredential.for_issuer(issuer)
+      |> FederatedCredential.for_user(user.id)
+      |> Console.Repo.all()
+      |> Enum.filter(&FederatedCredential.allow?(&1, claims))
+      |> case do
+        [_ | _] = credentials ->
+          scopes = Enum.flat_map(credentials, & &1.scopes || [])
+                   |> Enum.uniq()
+          sign_token(user, scopes)
+        _ -> {:error, "no federated credentials for #{email} match jwt claims"}
+      end
+    else
+      {:token, _} -> {:error, "invalid jwt format, must include iss and aud claims"}
+      {:config, _} = res ->
+        Logger.error("failed to fetch issuer configuration: #{inspect(res)}")
+        {:error, "invalid issuer url from jwt"}
+      {:validate, _} = res ->
+        Logger.error("failed to validate jwt: #{inspect(res)}")
+        {:error, "could not validate jwt"}
+    end
+  end
+
+  defp sign_token(user, scopes) do
+    case Console.Guardian.encode_and_sign(user, %{"scopes" => scopes}, ttl: {1, :hour}) do
+      {:ok, token, _} -> {:ok, token}
+      {:error, _} -> {:error, "failed to generate jwt for #{user.email}"}
+    end
+  end
+
+  @quirks %{
+    quirks: %{
+      allow_issuer_mismatch: true,
+      document_overrides: %{
+        # needed for atypical oidc implementations like Github's
+        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize",
+      }
+    }
+  }
+
+  @doc """
+  Fetches the issuer configuration from the issuer url
+  """
+  @decorate cacheable(cache: @cache_adapter, key: {:issuer_configuration, issuer}, opts: [ttl: :timer.minutes(60)])
+  def issuer_configuration(issuer) do
+    with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, @quirks),
+         {:ok, {jwks, _}} <- Oidcc.ProviderConfiguration.load_jwks(conf.jwks_uri),
+      do: {:ok, {conf, jwks}}
   end
 
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)

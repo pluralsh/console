@@ -773,6 +773,13 @@ defmodule Console.Factory do
     }
   end
 
+  def service_vuln_factory do
+    %Schema.ServiceVuln{
+      service: build(:service),
+      report: build(:vulnerability_report)
+    }
+  end
+
   def vulnerability_factory do
     %Schema.Vulnerability{
       report: build(:vulnerability_report)
@@ -1019,6 +1026,15 @@ defmodule Console.Factory do
     %Schema.PrGovernance{
       name: sequence(:pr_governance, & "pr-governance-#{&1}"),
       connection: build(:scm_connection)
+    }
+  end
+
+  def federated_credential_factory do
+    %Schema.FederatedCredential{
+      issuer: "https://oidc.plural.sh",
+      claims_like: %{"sub" => ".*@example.com"},
+      scopes: ["createPullRequest"],
+      user: build(:user)
     }
   end
 

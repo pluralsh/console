@@ -277,7 +277,7 @@ defmodule Console.Deployments.Stacks do
   """
   @spec restart_run(StackRun.t | binary, User.t) :: run_resp
   def restart_run(%StackRun{dry_run: true}, _), do: {:error, "you cannot restart dry runs"}
-  def restart_run(%StackRun{git: %{ref: ref}, message: msg} = run, %User{} = user) do
+  def restart_run(%StackRun{git: %{ref: ref}, message: msg, pull_request_id: nil} = run, %User{} = user) do
     with {:ok, run} <- allow(run, user, :write) do
       case Repo.preload(run, [:stack]) do
         %{stack: %Stack{sha: ^ref} = stack} ->
@@ -286,6 +286,8 @@ defmodule Console.Deployments.Stacks do
       end
     end
   end
+  def restart_run(%StackRun{}, _),
+    do: {:error, "you cannot restart a run that is not associated with a pull request"}
   def restart_run(id, %User{} = user) when is_binary(id) do
     get_run!(id)
     |> restart_run(user)
@@ -340,7 +342,7 @@ defmodule Console.Deployments.Stacks do
       {%StackRun{stack: %{connection: %ScmConnection{} = conn}}, _} -> conn
       {_, %{stacks: %{connection_id: conn_id}}} when is_binary(conn_id) ->
         Git.get_scm_connection(conn_id)
-      _ -> nil
+      _ -> Git.default_scm_connection()
     end
   end
 
@@ -453,6 +455,7 @@ defmodule Console.Deployments.Stacks do
 
   defp unlock(%Stack{} = s) do
     Stack.lock_changeset(s, %{locked_at: nil})
+    |> Stack.next_poll_changeset(s.interval)
     |> Repo.update()
   end
 
@@ -505,9 +508,16 @@ defmodule Console.Deployments.Stacks do
           err
       end
     end)
+    |> polled(pr, stack.interval)
   end
 
   def poll(_), do: {:error, "invalid parent"}
+
+  defp polled(result, %schema{} = resource, interval) do
+    schema.next_poll_changeset(resource, interval)
+    |> Repo.update()
+    result
+  end
 
   defp on_new_sha(repo, ref, sha, ps, fun) do
     case Discovery.sha(repo, ref) do

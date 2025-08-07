@@ -250,7 +250,9 @@ export function PodLogs(): ReactElement<any> {
     ],
     [pod]
   )
-  const [selected, setSelected] = useState<Key>(containers.at(0) ?? '')
+  const [selected, setSelected] = useState<Nullable<Key>>(
+    containers.at(0) ?? ''
+  )
 
   const { data, loading, refetch, error } = usePodLogsQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -261,7 +263,7 @@ export function PodLogs(): ReactElement<any> {
     },
     fetchPolicy: 'no-cache',
   })
-  const [sinceSeconds, setSinceSeconds] = useState<Key>(
+  const [sinceSeconds, setSinceSeconds] = useState<Nullable<Key>>(
     SinceSecondsOptions.HalfHour
   )
 

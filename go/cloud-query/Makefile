@@ -90,6 +90,6 @@ update-dependencies: ## update dependencies
 
 .PHONY: --download-extensions
 --download-extensions: ## INTERNAL: download postgres extensions
-	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.16.1
-	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.8.0
+	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.20.0
+	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.10.0
 	@./hack/postgres.sh -p azure -d $(DIST_DIR) -v 1.4.0

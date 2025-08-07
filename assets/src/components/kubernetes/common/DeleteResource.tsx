@@ -56,7 +56,8 @@ export default function DeleteResourceButton({
           refetch={refetch}
           confirmationEnabled={
             customResource ||
-            resource.typeMeta.kind === Kind.CustomResourceDefinition
+            resource.typeMeta.kind === Kind.CustomResourceDefinition ||
+            resource.typeMeta.kind === Kind.Namespace
           }
           confirmationText={resource.objectMeta.name}
         />

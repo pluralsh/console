@@ -357,6 +357,10 @@ spec:
                 - folder
                 - ref
                 type: object
+              interval:
+                description: Interval specifies the interval at which the stack will
+                  be reconciled, default is 5m
+                type: string
               jobSpec:
                 description: JobSpec contains an optional configuration for the job
                   that will apply this stack.

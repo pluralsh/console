@@ -8,7 +8,10 @@ defmodule Console.AI.Tools.Agent.CallPrTest do
       pr_automation = insert(:pr_automation)
       thread = insert(:chat_thread)
 
-      {:ok, result} = CallPr.implement(%CallPr{pr_automation_id: pr_automation.id, context: %{"blah" => "blah"}})
+      {:ok, result} = CallPr.implement(%CallPr{
+        pr_automation_id: pr_automation.id,
+        context: Jason.encode!(%{"blah" => "blah"})
+      })
 
       assert result.type == :pr_call
       assert result.pr_automation_id == pr_automation.id
@@ -19,8 +22,12 @@ defmodule Console.AI.Tools.Agent.CallPrTest do
         |> Chat.changeset(DeepMerge.deep_merge(%{
           role: :assistant,
           attributes: %{
-            tool: %{call_id: "123", name: CallPr.name(), arguments: %{}
-          }}
+            tool: %{
+              call_id: "123",
+              name: CallPr.name(),
+              arguments: %{}
+            }
+          }
         }, result))
         |> Console.Repo.insert() # simulate saving in thread
 

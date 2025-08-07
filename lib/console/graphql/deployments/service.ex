@@ -42,6 +42,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :sync_config_attributes do
     field :create_namespace,   :boolean
     field :enforce_namespace,  :boolean
+    field :delete_namespace,   :boolean
     field :namespace_metadata, :metadata_attributes
     field :diff_normalizers,   list_of(:diff_normalizer_attributes), description: "A list of diff normalizers to apply to the service which controls how drift detection works"
   end
@@ -65,6 +66,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :ignore_crds,   :boolean
     field :lua_script,    :string
     field :lua_file,      :string
+    field :lua_folder,    :string
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -357,6 +359,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values_files,  list_of(:string), description: "a list of relative paths to values files to use for helm applies"
     field :lua_script,    :string, description: "a lua script to use for helm applies"
     field :lua_file,      :string, description: "a lua file to use for helm applies"
+    field :lua_folder,    :string, description: "a folder of lua files to include in the final script used"
   end
 
   @desc "a configuration item k/v pair"
@@ -475,6 +478,7 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "Advanced configuration of how to sync resources"
   object :sync_config do
     field :create_namespace,   :boolean, description: "whether the agent should auto-create the namespace for this service"
+    field :delete_namespace,   :boolean, description: "whether the agent should delete the namespace for this service upon deletion"
     field :enforce_namespace,  :boolean, description: "Whether to require all resources are placed in the same namespace"
     field :namespace_metadata, :namespace_metadata
     field :diff_normalizers,   list_of(:diff_normalizer), description: "A list of diff normalizers to apply to the service which controls how drift detection works"

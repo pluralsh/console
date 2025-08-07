@@ -2,10 +2,7 @@ import { Flex, severityToColor } from '@pluralsh/design-system'
 import { healthScoreToSeverity } from 'components/cd/clusters/ClusterHealthChip'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { TreeMap, TreeMapData } from 'components/utils/TreeMap'
-import {
-  ClusterHealthScoreFragment,
-  ClustersRowFragment,
-} from 'generated/graphql'
+import { ClusterHealthScoreFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
@@ -13,6 +10,7 @@ import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { truncatedGraphLabel } from 'components/utils/UtilizationHeatmap'
 import { isEmpty } from 'lodash'
 import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
+import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 
 export type HealthScoreFilterLabel = keyof typeof healthScoreLabelToRange
 
@@ -20,7 +18,7 @@ export function ClusterHealthScoresHeatmap({
   clusters,
   onClick,
 }: {
-  clusters: ClustersRowFragment[]
+  clusters: ClusterHealthScoreFragment[]
   onClick: (clusterName: string) => void
 }) {
   const { colors } = useTheme()
@@ -39,6 +37,7 @@ export function ClusterHealthScoresHeatmap({
 
   return (
     <TreeMap
+      rounded
       data={data}
       colors={getColor}
       label={truncatedGraphLabel}
@@ -76,10 +75,7 @@ export function ClusterHealthScoresFilterBtns({
   values: Record<HealthScoreFilterLabel, number>
 }) {
   return (
-    <Flex
-      gap="small"
-      flexWrap="wrap"
-    >
+    <Flex gap="xsmall">
       {selectableFilterOptions.map((filter) => (
         <HomeFilterOptionCard
           key={filter}
@@ -137,14 +133,16 @@ const healthScoreLabelToBaseColor: Record<
   Exclude<HealthScoreFilterLabel, 'All'>,
   string
 > = {
-  '>80': '#17E8A0',
-  '61 - 80': '#17DEE8',
-  '41 - 60': '#FFD346',
-  '20 - 40': '#FD984A',
-  '<20': '#EB5F7D',
+  '>80': HOME_CHARTS_COLORS.green,
+  '61 - 80': HOME_CHARTS_COLORS.blue,
+  '41 - 60': HOME_CHARTS_COLORS.yellow,
+  '20 - 40': HOME_CHARTS_COLORS.orange,
+  '<20': HOME_CHARTS_COLORS.red,
 }
 
-const getHeatmapData = (clusters: ClustersRowFragment[]): TreeMapData => {
+const getHeatmapData = (
+  clusters: ClusterHealthScoreFragment[]
+): TreeMapData => {
   return {
     name: 'Clusters',
     children: clusters.map((cluster) => ({

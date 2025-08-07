@@ -32,6 +32,7 @@ defmodule Console.AI.VectorStore do
   @callback insert(store, struct, keyword) :: :ok | error
   @callback fetch(store, [float], keyword) :: {:ok, [data]} | error
   @callback delete(store, keyword) :: :ok | error
+  @callback expire(store, keyword) :: :ok | error
 
   @spec enabled?() :: boolean
   def enabled?() do
@@ -65,6 +66,12 @@ defmodule Console.AI.VectorStore do
     settings = Settings.cached()
     with {:ok, %{__struct__: mod} = store} <- store(settings),
       do: mod.delete(store, opts)
+  end
+
+  def expire(opts \\ []) do
+    settings = Settings.cached()
+    with {:ok, %{__struct__: mod} = store} <- store(settings),
+      do: mod.expire(store, opts)
   end
 
   defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true}}}, _), do: :ok

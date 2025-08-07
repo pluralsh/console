@@ -21,14 +21,15 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
 import { AIContextProvider } from 'components/ai/AIContext'
+import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useTheme } from 'styled-components'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import Header from './Header'
-import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 
 export default function Console() {
   return (
@@ -44,7 +45,9 @@ export default function Console() {
                       <DeploymentSettingsProvider>
                         <AIContextProvider>
                           <FeatureFlagProvider>
-                            <ConsoleContent />
+                            <CommandPaletteProvider>
+                              <ConsoleContent />
+                            </CommandPaletteProvider>
                           </FeatureFlagProvider>
                         </AIContextProvider>
                       </DeploymentSettingsProvider>
@@ -67,62 +70,69 @@ function ConsoleContent() {
 
   return (
     <Flex
-      position="relative"
-      height="100%"
-      minHeight="0"
-      maxHeight="100vh"
-      overflow="hidden"
-      flexDirection="column"
+      height="100vh"
       flexGrow={1}
+      minHeight={0}
+      alignItems="stretch"
     >
-      {isProduction && (
-        <WithApplicationUpdate>
-          {({ reloadApplication }) => (
-            <Toast
-              severity="info"
-              marginBottom="medium"
-              marginRight="xxxxlarge"
-            >
-              <span css={{ marginRight: theme.spacing.small }}>
-                Time for a new update!
-              </span>
-              <a
-                onClick={() => reloadApplication()}
-                style={{
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  color: theme.colors['action-link-inline'],
-                }}
-              >
-                Update now
-              </a>
-            </Toast>
-          )}
-        </WithApplicationUpdate>
-      )}
-      {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
-      <Header />
       <Flex
-        width="100%"
-        minWidth={0}
-        minHeight={0}
+        position="relative"
+        height="100%"
+        overflow="hidden"
+        flexDirection="column"
         flexGrow={1}
-        alignItems="stretch"
+        container="console / inline-size"
+        zIndex={0} // needed so chatbot flyovers render over main console content
       >
-        <Sidebar />
+        {isProduction && (
+          <WithApplicationUpdate>
+            {({ reloadApplication }) => (
+              <Toast
+                severity="info"
+                marginBottom="medium"
+                marginRight="xxxxlarge"
+              >
+                <span css={{ marginRight: theme.spacing.small }}>
+                  Time for a new update!
+                </span>
+                <a
+                  onClick={() => reloadApplication()}
+                  style={{
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    color: theme.colors['action-link-inline'],
+                  }}
+                >
+                  Update now
+                </a>
+              </Toast>
+            )}
+          </WithApplicationUpdate>
+        )}
+        {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
+        <Header />
         <Flex
-          direction="column"
+          width="100%"
+          minWidth={0}
+          minHeight={0}
           flexGrow={1}
-          overflowX="hidden"
-          position="relative"
+          alignItems="stretch"
         >
-          <ContentOverlay />
-          <Subheader />
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
+          <Sidebar />
+          <Flex
+            direction="column"
+            flexGrow={1}
+            overflowX="hidden"
+            position="relative"
+          >
+            <Subheader />
+            <Suspense fallback={<LoadingIndicator />}>
+              <Outlet />
+            </Suspense>
+          </Flex>
         </Flex>
       </Flex>
+      <ChatbotPanel />
     </Flex>
   )
 }

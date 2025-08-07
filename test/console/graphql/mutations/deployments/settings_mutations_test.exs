@@ -178,4 +178,80 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
       """, %{"id" => conn.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "createFederatedCredential" do
+    test "admins can create a federated credential" do
+      user = insert(:user)
+      {:ok, %{data: %{"createFederatedCredential" => created}}} = run_query("""
+        mutation createFederatedCredential($attrs: FederatedCredentialAttributes!) {
+          createFederatedCredential(attributes: $attrs) {
+            id
+            issuer
+            claimsLike
+            scopes
+            user { id }
+          }
+        }
+      """, %{"attrs" => %{
+        "issuer" => "https://oidc.plural.sh",
+        "claimsLike" => Jason.encode!(%{"sub" => ".*@plural.sh"}),
+        "scopes" => ["createPullRequest"],
+        "user_id" => user.id
+      }}, %{current_user: admin_user()})
+
+      assert created["id"]
+      assert created["issuer"] == "https://oidc.plural.sh"
+      assert created["claimsLike"] == %{"sub" => ".*@plural.sh"}
+      assert created["scopes"] == ["createPullRequest"]
+      assert created["user"]["id"] == user.id
+    end
+  end
+
+  describe "updateFederatedCredential" do
+    test "admins can update a federated credential" do
+      credential = insert(:federated_credential)
+      user = insert(:user)
+      {:ok, %{data: %{"updateFederatedCredential" => updated}}} = run_query("""
+        mutation updateFederatedCredential($id: ID!, $attrs: FederatedCredentialAttributes!) {
+          updateFederatedCredential(id: $id, attributes: $attrs) {
+            id
+            issuer
+            claimsLike
+            scopes
+            user { id }
+          }
+        }
+      """, %{
+        "id" => credential.id,
+        "attrs" => %{
+          "issuer" => "https://oidc.plural.sh",
+          "claimsLike" => Jason.encode!(%{"sub" => ".*@plural.sh"}),
+          "scopes" => ["createPullRequest"],
+          "user_id" => user.id
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == credential.id
+      assert updated["issuer"] == "https://oidc.plural.sh"
+      assert updated["claimsLike"] == %{"sub" => ".*@plural.sh"}
+      assert updated["scopes"] == ["createPullRequest"]
+      assert updated["user"]["id"] == user.id
+    end
+  end
+
+  describe "deleteFederatedCredential" do
+    test "admins can delete a federated credential" do
+      credential = insert(:federated_credential)
+      {:ok, %{data: %{"deleteFederatedCredential" => deleted}}} = run_query("""
+        mutation deleteFederatedCredential($id: ID!) {
+          deleteFederatedCredential(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => credential.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == credential.id
+      refute refetch(credential)
+    end
+  end
 end

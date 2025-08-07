@@ -7,15 +7,11 @@ import { homeClustersColumns } from 'components/cd/clusters/ClustersColumns.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { useProjectId } from 'components/contexts/ProjectsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
-import {
-  ButtonGroup,
-  ButtonGroupDirectory,
-} from 'components/utils/ButtonGroup.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ClustersQueryVariables,
   ClustersRowFragment,
-  useClusterHealthScoresSuspenseQuery,
+  useClusterHealthScoresQuery,
   useClustersQuery,
   useUpgradeStatisticsQuery,
   VersionCompliance,
@@ -41,35 +37,43 @@ import {
   GettingStartedContentHomeVariant,
   GettingStartedPopup,
 } from './GettingStarted.tsx'
-
-enum HomeScreenTab {
-  HealthScores = 'Health scores',
-  Upgrades = 'Upgrades',
-}
+import { isNil } from 'lodash'
+import { Body1BoldP } from 'components/utils/typography/Text.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
-  const { spacing } = useTheme()
+  const { borders } = useTheme()
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
   // we don't want a double popup, and cloud setup would come first if relevant
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const onboarded = useOnboarded()
 
-  const [tab, setTab] = useState(HomeScreenTab.HealthScores)
-  const [healthScoreRange, setHealthScoreRange] =
+  const [healthScoreOption, setHealthScoreLabelOption] =
     useState<HealthScoreFilterLabel>('All')
-  const [upgradeFilterOption, setUpgradeFilterOption] = useState(
+  const [upgradeFilterOption, setUpgradeFilterOptionState] = useState(
     UpgradeChartFilter.All
   )
+  // only select one filter at a time
+  const setHealthScoreOption = (filter: HealthScoreFilterLabel) => {
+    setHealthScoreLabelOption(filter)
+    setUpgradeFilterOptionState(UpgradeChartFilter.All)
+  }
+  const setUpgradeFilterOption = (filter: UpgradeChartFilter) => {
+    setUpgradeFilterOptionState(filter)
+    setHealthScoreLabelOption('All')
+  }
+
   const [selectedCluster, setSelectedCluster] =
     useState<Nullable<ClustersRowFragment>>(null)
 
-  const { data: healthScoresData } = useClusterHealthScoresSuspenseQuery({
+  const { data: healthScoresData } = useClusterHealthScoresQuery({
     variables: { projectId },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
   })
+
   const {
     data: tableData,
     loading: tableLoading,
@@ -82,12 +86,8 @@ export function Home() {
     { queryHook: useClustersQuery, keyPath: ['clusters'] },
     {
       projectId,
-      ...(tab === HomeScreenTab.HealthScores && {
-        healthRange: healthScoreLabelToRange[healthScoreRange],
-      }),
-      ...(tab === HomeScreenTab.Upgrades && {
-        ...getUpgradesFilterArgs(upgradeFilterOption),
-      }),
+      healthRange: healthScoreLabelToRange[healthScoreOption],
+      ...getUpgradesFilterArgs(upgradeFilterOption),
     }
   )
   const {
@@ -100,17 +100,29 @@ export function Home() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const { aggregatedHealthScores, aggregatedUpgradeStats } = useMemo(
-    () => ({
-      aggregatedHealthScores: aggregateHealthScoreStats(
-        mapExistingNodes(healthScoresData?.clusters)
-      ),
-      aggregatedUpgradeStats: aggregateUpgradeStats(
-        upgradeData?.upgradeStatistics ?? {}
-      ),
-    }),
-    [healthScoresData, upgradeData]
-  )
+  const { aggregatedHealthScores, aggregatedUpgradeStats, heatmapList } =
+    useMemo(() => {
+      const clusters = mapExistingNodes(healthScoresData?.clusters)
+      return {
+        aggregatedHealthScores: aggregateHealthScoreStats(clusters),
+        aggregatedUpgradeStats: aggregateUpgradeStats(
+          upgradeData?.upgradeStatistics ?? {}
+        ),
+        heatmapList: clusters.filter(({ healthScore }) => {
+          const range = healthScoreLabelToRange[healthScoreOption]
+          return (
+            !range ||
+            (!isNil(healthScore) &&
+              healthScore <= range.max &&
+              healthScore >= range.min)
+          )
+        }),
+      }
+    }, [
+      healthScoreOption,
+      healthScoresData?.clusters,
+      upgradeData?.upgradeStatistics,
+    ])
 
   const clusters = useMemo(
     () => mapExistingNodes(tableData?.clusters),
@@ -128,55 +140,40 @@ export function Home() {
       height="100%"
     >
       <ChartSectionSC>
-        <WidthLimiterSC css={{ display: 'flex', gap: spacing.large }}>
-          <Flex
-            flex={tab === HomeScreenTab.HealthScores ? 0.8 : 1}
-            gap="medium"
-            direction="column"
-          >
-            <ButtonGroup
-              directory={tabDirectory}
-              tab={tab}
-              onClick={(path) => setTab(path)}
+        <WidthLimiterSC $type="charts">
+          <ChartAndFilterWrapperSC css={{ borderRight: borders.default }}>
+            <Body1BoldP>Health scores</Body1BoldP>
+            <ClusterHealthScoresHeatmap
+              clusters={heatmapList}
+              onClick={(name) =>
+                setSelectedCluster(clusters.find((c) => c.name === name))
+              }
             />
-            {tab === HomeScreenTab.HealthScores && (
-              <ClusterHealthScoresFilterBtns
-                selectedFilter={healthScoreRange}
-                onSelect={setHealthScoreRange}
-                values={aggregatedHealthScores}
-              />
-            )}
-            {tab === HomeScreenTab.Upgrades && (
-              <ClusterUpgradesFilterBtns
-                selectedFilter={upgradeFilterOption}
-                onSelect={setUpgradeFilterOption}
-                values={aggregatedUpgradeStats}
-              />
-            )}
-          </Flex>
-          <ChartWrapperSC>
-            {tab === HomeScreenTab.Upgrades && (
-              <ClusterUpgradesChart
-                data={upgradeData}
-                loading={upgradeLoading}
-                error={upgradeError}
-                selectedFilter={upgradeFilterOption}
-                onClick={setUpgradeFilterOption}
-              />
-            )}
-            {tab === HomeScreenTab.HealthScores && (
-              <ClusterHealthScoresHeatmap
-                clusters={clusters}
-                onClick={(name) =>
-                  setSelectedCluster(clusters.find((c) => c.name === name))
-                }
-              />
-            )}
-          </ChartWrapperSC>
+            <ClusterHealthScoresFilterBtns
+              selectedFilter={healthScoreOption}
+              onSelect={setHealthScoreOption}
+              values={aggregatedHealthScores}
+            />
+          </ChartAndFilterWrapperSC>
+          <ChartAndFilterWrapperSC>
+            <Body1BoldP>Upgrades</Body1BoldP>
+            <ClusterUpgradesChart
+              data={upgradeData}
+              loading={upgradeLoading}
+              error={upgradeError}
+              selectedFilter={upgradeFilterOption}
+              onClick={setUpgradeFilterOption}
+            />
+            <ClusterUpgradesFilterBtns
+              selectedFilter={upgradeFilterOption}
+              onSelect={setUpgradeFilterOption}
+              values={aggregatedUpgradeStats}
+            />
+          </ChartAndFilterWrapperSC>
         </WidthLimiterSC>
       </ChartSectionSC>
       <TableSectionSC>
-        <WidthLimiterSC>
+        <WidthLimiterSC $type="table">
           {tableError ? (
             <GqlError error={tableError} />
           ) : noClustersYet ? (
@@ -208,18 +205,25 @@ export function Home() {
   )
 }
 
-const ChartWrapperSC = styled.div(({ theme }) => ({
+const ChartAndFilterWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px ${theme.spacing.large}px`,
   flex: 1,
-  borderRadius: theme.borderRadiuses.large,
-  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  height: '100%',
   '& g:first-of-type, & canvas': { cursor: 'pointer' },
 }))
 
 const ChartSectionSC = styled.div(({ theme }) => ({
+  minHeight: 350,
+  [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
+    minHeight: 700,
+  },
+  width: '100%',
   display: 'flex',
   justifyContent: 'center',
-  width: '100%',
-  padding: theme.spacing.large,
   backgroundColor: theme.colors['fill-accent'],
 }))
 
@@ -234,19 +238,19 @@ const TableSectionSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
 }))
 
-const WidthLimiterSC = styled.div(({ theme }) => ({
+const WidthLimiterSC = styled.div<{
+  $type?: 'charts' | 'table'
+}>(({ theme, $type = 'table' }) => ({
   maxWidth: theme.breakpoints.desktopLarge,
   height: '100%',
   width: '100%',
+  ...($type === 'charts' && {
+    display: 'flex',
+    [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
+      flexDirection: 'column',
+    },
+  }),
 }))
-
-const tabDirectory: ButtonGroupDirectory = [
-  {
-    path: HomeScreenTab.HealthScores,
-    label: HomeScreenTab.HealthScores,
-  },
-  { path: HomeScreenTab.Upgrades, label: HomeScreenTab.Upgrades },
-]
 
 const getUpgradesFilterArgs = (
   filterOption: UpgradeChartFilter

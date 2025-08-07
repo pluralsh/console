@@ -126,6 +126,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
     namespace
     name
     kind
+    backfill
     jsonPointers
 }
 
@@ -162,6 +163,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         ignoreCrds
         luaScript
         luaFile
+        luaFolder
     }
     configuration {
         name
@@ -174,6 +176,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
     syncConfig {
         createNamespace
         enforceNamespace
+        deleteNamespace
         namespaceMetadata {
             labels
             annotations

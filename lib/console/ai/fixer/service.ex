@@ -140,7 +140,7 @@ defmodule Console.AI.Fixer.Service do
         details: "#{git_details(svc)}#{multisource}",
         files: file_prompts(contents)
                |> Enum.map(fn %{file: p} = file ->
-                  Map.merge(file, %{git_location: Path.join(path, p), dest_location: p})
+                  Map.put(file, :git_location, Path.join(path, p))
                   |> Map.delete(:file)
                end)
       })

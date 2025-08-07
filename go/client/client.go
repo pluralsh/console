@@ -98,6 +98,10 @@ type ConsoleClient interface {
 	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
+	GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error)
+	CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error)
+	DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error)
 	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
 	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
 	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
@@ -926,6 +930,7 @@ type DiffNormalizerFragment struct {
 	Namespace    *string   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	Name         *string   "json:\"name,omitempty\" graphql:\"name\""
 	Kind         *string   "json:\"kind,omitempty\" graphql:\"kind\""
+	Backfill     *bool     "json:\"backfill,omitempty\" graphql:\"backfill\""
 	JSONPointers []*string "json:\"jsonPointers,omitempty\" graphql:\"jsonPointers\""
 }
 
@@ -946,6 +951,12 @@ func (t *DiffNormalizerFragment) GetKind() *string {
 		t = &DiffNormalizerFragment{}
 	}
 	return t.Kind
+}
+func (t *DiffNormalizerFragment) GetBackfill() *bool {
+	if t == nil {
+		t = &DiffNormalizerFragment{}
+	}
+	return t.Backfill
 }
 func (t *DiffNormalizerFragment) GetJSONPointers() []*string {
 	if t == nil {
@@ -1193,6 +1204,59 @@ func (t *ClusterIsoImageFragment) GetRegistry() string {
 func (t *ClusterIsoImageFragment) GetUser() *string {
 	if t == nil {
 		t = &ClusterIsoImageFragment{}
+	}
+	return t.User
+}
+
+type FederatedCredentialFragment struct {
+	ID         string                            "json:\"id\" graphql:\"id\""
+	ClaimsLike map[string]any                    "json:\"claimsLike,omitempty\" graphql:\"claimsLike\""
+	Issuer     string                            "json:\"issuer\" graphql:\"issuer\""
+	Scopes     []*string                         "json:\"scopes,omitempty\" graphql:\"scopes\""
+	InsertedAt *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	User       *FederatedCredentialFragment_User "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *FederatedCredentialFragment) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment) GetClaimsLike() map[string]any {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ClaimsLike
+}
+func (t *FederatedCredentialFragment) GetIssuer() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Issuer
+}
+func (t *FederatedCredentialFragment) GetScopes() []*string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Scopes
+}
+func (t *FederatedCredentialFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *FederatedCredentialFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *FederatedCredentialFragment) GetUser() *FederatedCredentialFragment_User {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
 	}
 	return t.User
 }
@@ -5873,6 +5937,7 @@ type ServiceDeploymentForAgent_Helm struct {
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -5916,6 +5981,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -5975,6 +6046,7 @@ func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations(
 type ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                   "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -5990,6 +6062,12 @@ func (t *ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
 		t = &ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -6081,6 +6159,31 @@ func (t *ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentFor
 		t = &ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
+}
+
+type FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Email
 }
 
 type PipelineGateIDsEdgeFragment_Node_ struct {
@@ -6931,6 +7034,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -6974,6 +7078,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -7033,6 +7143,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                              "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                              "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                          "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -7048,6 +7159,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -13623,6 +13740,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -13666,6 +13784,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -13725,6 +13849,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                  "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                                  "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                              "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -13740,6 +13865,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -14115,6 +14246,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -14158,6 +14290,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -14217,6 +14355,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                                                                                      "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -14232,6 +14371,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -14807,6 +14952,92 @@ func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterR
 		t = &GetClusterRegistrations_ClusterRegistrations{}
 	}
 	return t.Edges
+}
+
+type GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type DeleteFederatedCredential_DeleteFederatedCredential struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteFederatedCredential_DeleteFederatedCredential) GetID() string {
+	if t == nil {
+		t = &DeleteFederatedCredential_DeleteFederatedCredential{}
+	}
+	return t.ID
+}
+
+type UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
 }
 
 type DeleteFlow_DeleteFlow struct {
@@ -19370,6 +19601,50 @@ func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
 	return t.ClusterIsoImage
 }
 
+type GetFederatedCredential struct {
+	FederatedCredential *FederatedCredentialFragment "json:\"federatedCredential,omitempty\" graphql:\"federatedCredential\""
+}
+
+func (t *GetFederatedCredential) GetFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &GetFederatedCredential{}
+	}
+	return t.FederatedCredential
+}
+
+type CreateFederatedCredential struct {
+	CreateFederatedCredential *FederatedCredentialFragment "json:\"createFederatedCredential,omitempty\" graphql:\"createFederatedCredential\""
+}
+
+func (t *CreateFederatedCredential) GetCreateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &CreateFederatedCredential{}
+	}
+	return t.CreateFederatedCredential
+}
+
+type DeleteFederatedCredential struct {
+	DeleteFederatedCredential *DeleteFederatedCredential_DeleteFederatedCredential "json:\"deleteFederatedCredential,omitempty\" graphql:\"deleteFederatedCredential\""
+}
+
+func (t *DeleteFederatedCredential) GetDeleteFederatedCredential() *DeleteFederatedCredential_DeleteFederatedCredential {
+	if t == nil {
+		t = &DeleteFederatedCredential{}
+	}
+	return t.DeleteFederatedCredential
+}
+
+type UpdateFederatedCredential struct {
+	UpdateFederatedCredential *FederatedCredentialFragment "json:\"updateFederatedCredential,omitempty\" graphql:\"updateFederatedCredential\""
+}
+
+func (t *UpdateFederatedCredential) GetUpdateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &UpdateFederatedCredential{}
+	}
+	return t.UpdateFederatedCredential
+}
+
 type GetFlow struct {
 	Flow *FlowFragment "json:\"flow,omitempty\" graphql:\"flow\""
 }
@@ -22084,6 +22359,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22312,6 +22588,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22550,6 +22827,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22687,6 +22965,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -22825,6 +23104,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23058,6 +23338,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23302,6 +23583,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23535,6 +23817,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -23827,6 +24110,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24056,6 +24340,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24245,6 +24530,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24382,6 +24668,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -24566,6 +24853,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -24783,6 +25071,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -25300,6 +25589,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25507,6 +25797,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25622,6 +25913,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25736,6 +26028,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -25942,6 +26235,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26149,6 +26443,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26265,6 +26560,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26381,6 +26677,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26498,6 +26795,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26613,6 +26911,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -26731,6 +27030,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27108,6 +27408,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27195,6 +27496,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
@@ -27207,6 +27509,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	syncConfig {
 		createNamespace
 		enforceNamespace
+		deleteNamespace
 		namespaceMetadata {
 			labels
 			annotations
@@ -27242,6 +27545,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment RendererFragment on Renderer {
@@ -27460,6 +27764,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -27685,6 +27990,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
@@ -27697,6 +28003,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	syncConfig {
 		createNamespace
 		enforceNamespace
+		deleteNamespace
 		namespaceMetadata {
 			labels
 			annotations
@@ -27732,6 +28039,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment RendererFragment on Renderer {
@@ -28308,6 +28616,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -28514,6 +28823,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 `
@@ -28976,6 +29286,142 @@ func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *stri
 
 	var res GetClusterIsoImage
 	if err := c.Client.Post(ctx, "GetClusterIsoImage", GetClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetFederatedCredentialDocument = `query GetFederatedCredential ($id: ID!) {
+	federatedCredential(id: $id) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetFederatedCredential
+	if err := c.Client.Post(ctx, "GetFederatedCredential", GetFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateFederatedCredentialDocument = `mutation CreateFederatedCredential ($attributes: FederatedCredentialAttributes!) {
+	createFederatedCredential(attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateFederatedCredential
+	if err := c.Client.Post(ctx, "CreateFederatedCredential", CreateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteFederatedCredentialDocument = `mutation DeleteFederatedCredential ($id: ID!) {
+	deleteFederatedCredential(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteFederatedCredential
+	if err := c.Client.Post(ctx, "DeleteFederatedCredential", DeleteFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateFederatedCredentialDocument = `mutation UpdateFederatedCredential ($id: ID!, $attributes: FederatedCredentialAttributes!) {
+	updateFederatedCredential(id: $id, attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateFederatedCredential
+	if err := c.Client.Post(ctx, "UpdateFederatedCredential", UpdateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -33975,6 +34421,7 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	namespace
 	name
 	kind
+	backfill
 	jsonPointers
 }
 fragment ProviderCredentialFragment on ProviderCredential {
@@ -38430,6 +38877,10 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
+	GetFederatedCredentialDocument:                    "GetFederatedCredential",
+	CreateFederatedCredentialDocument:                 "CreateFederatedCredential",
+	DeleteFederatedCredentialDocument:                 "DeleteFederatedCredential",
+	UpdateFederatedCredentialDocument:                 "UpdateFederatedCredential",
 	GetFlowDocument:                                   "GetFlow",
 	UpsertFlowDocument:                                "UpsertFlow",
 	DeleteFlowDocument:                                "DeleteFlow",

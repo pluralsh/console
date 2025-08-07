@@ -46,7 +46,7 @@ defmodule Console.Plural.Config do
 
   def config_file() do
     case System.get_env("PLURAL_TOKEN") do
-      token when is_binary(token) -> %{"token" => token}
+      token when is_binary(token) -> maybe_add_token(%{"token" => token})
       _ -> config_file_inner()
     end
   end
@@ -63,5 +63,12 @@ defmodule Console.Plural.Config do
   defp from_config_file() do
     with %{"token" => token} <- config_file(),
       do: token
+  end
+
+  defp maybe_add_token(config) do
+    case System.get_env("PLURAL_ENDPOINT") do
+      host when is_binary(host) -> Map.put(config, "endpoint", host)
+      _ -> config
+    end
   end
 end

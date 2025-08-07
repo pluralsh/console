@@ -1,5 +1,7 @@
 import {
   ArrowRightIcon,
+  BrainIcon,
+  DiffColumnIcon,
   EditIcon,
   GitForkIcon,
   IconFrame,
@@ -9,27 +11,41 @@ import {
   PushPinFilledIcon,
   PushPinOutlineIcon,
   Spinner,
+  Toast,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from 'components/commandpalette/CommandPaletteContext.tsx'
 import { MoreMenu } from 'components/utils/MoreMenu'
-import { useState } from 'react'
+import { useUpdateChatThreadMutation } from 'generated/graphql'
+import { use, useCallback, useRef, useState } from 'react'
 import { useChatbot } from '../AIContext'
 import { useAiPin } from '../AIPinButton'
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
 
 enum MenuItemKey {
+  KnowledgeGraph = 'knowledgeGraph',
   Pin = 'pin',
   Rename = 'rename',
   Fork = 'fork',
   Delete = 'delete',
+  History = 'history',
 }
 
-export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
-  const { forkThread, mutationLoading, currentThread } = useChatbot()
+export function ChatbotThreadMoreMenu() {
+  const {
+    forkThread,
+    mutationLoading: forkLoading,
+    currentThread,
+  } = useChatbot()
+  const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
-  const [pinHovered, setPinHovered] = useState(false)
-  const [forkHovered, setForkHovered] = useState(false)
+
+  // need a ref instead of state because state doesn't update before onOpenChange fires
+  const blockClose = useRef(false)
 
   const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
     thread: currentThread,
@@ -38,11 +54,16 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
 
   const closeMenu = () => {
     setIsOpen(false)
+    blockClose.current = false
     setMenuKey('')
   }
 
   const handleSelectionChange = (selectedKey: MenuItemKey) => {
+    blockClose.current = true
     switch (selectedKey) {
+      case MenuItemKey.KnowledgeGraph:
+        toggleKnowledgeGraph()
+        break
       case MenuItemKey.Pin:
         handlePin()
         break
@@ -52,11 +73,34 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
           onCompleted: () => closeMenu(),
         })
         break
+      case MenuItemKey.History:
+        closeMenu()
+        setCmdkOpen(true)
+        setInitialTab(CommandPaletteTab.History)
+        break
       default:
+        blockClose.current = false
         setMenuKey(selectedKey)
         break
     }
   }
+
+  const [
+    updateThread,
+    { loading: knowledgeGraphLoading, error: knowledgeGraphError },
+  ] = useUpdateChatThreadMutation()
+
+  const toggleKnowledgeGraph = useCallback(() => {
+    updateThread({
+      variables: {
+        id: currentThread?.id ?? '',
+        attributes: {
+          summary: currentThread?.summary ?? '',
+          settings: { memory: !currentThread?.settings?.memory },
+        },
+      },
+    })
+  }, [currentThread, updateThread])
 
   if (!currentThread) return null
 
@@ -64,25 +108,43 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
     <>
       <MoreMenu
         isOpen={isOpen}
-        // a bit hacky but basically just blocks closing menu if pin or fork options are hovered, so we can see their loading states
-        onOpenChange={(newOpen) =>
-          (newOpen || !(pinHovered || forkHovered)) && setIsOpen(newOpen)
-        }
+        // a bit hacky but basically just blocks closing menu if mutations are running, so we can see their loading states
+        onOpenChange={(newOpen) => {
+          if (!newOpen && blockClose.current)
+            blockClose.current = false // unblock it so user can still manually close menu
+          else setIsOpen(newOpen)
+        }}
         onSelectionChange={handleSelectionChange}
-        size={fullscreen ? 'large' : 'medium'}
         triggerButton={
           <IconFrame
             clickable
-            type="secondary"
-            size={fullscreen ? 'large' : 'medium'}
+            type="tertiary"
             icon={<MoreIcon css={{ width: 16 }} />}
           />
         }
         width={256}
       >
         <ListBoxItem
-          onMouseEnter={() => setPinHovered(true)}
-          onMouseLeave={() => setPinHovered(false)}
+          key={MenuItemKey.KnowledgeGraph}
+          leftContent={
+            knowledgeGraphLoading ? (
+              <Spinner />
+            ) : (
+              <BrainIcon
+                color={
+                  currentThread?.settings?.memory ? 'icon-info' : 'icon-default'
+                }
+              />
+            )
+          }
+          label={
+            currentThread?.settings?.memory
+              ? 'Disable knowledge graph'
+              : 'Enable knowledge graph'
+          }
+          disabled={knowledgeGraphLoading}
+        />
+        <ListBoxItem
           key={MenuItemKey.Pin}
           leftContent={
             pinLoading ? (
@@ -104,12 +166,16 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
           label="Rename thread"
         />
         <ListBoxItem
-          onMouseEnter={() => setForkHovered(true)}
-          onMouseLeave={() => setForkHovered(false)}
           key={MenuItemKey.Fork}
-          leftContent={mutationLoading ? <Spinner /> : <GitForkIcon />}
+          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
           rightContent={<ArrowRightIcon color="icon-default" />}
           label="Fork thread"
+        />
+        <ListBoxItem
+          key={MenuItemKey.History}
+          leftContent={<DiffColumnIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
+          label="View history"
         />
         <ListBoxItem
           destructive
@@ -132,6 +198,14 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
         open={menuKey === MenuItemKey.Delete}
         onClose={closeMenu}
       />
+      <Toast
+        show={!!knowledgeGraphError}
+        severity="danger"
+        position="bottom"
+        marginBottom="medium"
+      >
+        Error updating thread settings.
+      </Toast>
     </>
   )
 }

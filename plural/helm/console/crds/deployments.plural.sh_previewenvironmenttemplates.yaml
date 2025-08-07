@@ -320,6 +320,10 @@ spec:
                           a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
                           based on git state or other metadata
                         type: string
+                      luaFolder:
+                        description: a folder of lua files to include in the final
+                          script used
+                        type: string
                       luaScript:
                         description: |-
                           a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
@@ -627,6 +631,13 @@ spec:
                           type: string
                         type: object
                       createNamespace:
+                        description: Whether to auto-create the namespace for this
+                          service (specifying labels and annotations will also add
+                          those to the created namespace)
+                        type: boolean
+                      deleteNamespace:
+                        description: Whether to delete the namespace for this service
+                          upon deletion
                         type: boolean
                       diffNormalizers:
                         description: DiffNormalizers a list of diff normalizers to
@@ -654,6 +665,8 @@ spec:
                           type: object
                         type: array
                       enforceNamespace:
+                        description: Whether to enforce all created resources are
+                          placed in the service namespace
                         type: boolean
                       labels:
                         additionalProperties:

@@ -52,7 +52,10 @@ function CopyButton({
             <CopyIcon color={iconColor} />
           )
         }
-        onClick={() => handleCopy()}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
         textValue={text ?? undefined}
         type={type}
       />

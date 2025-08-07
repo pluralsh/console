@@ -2,6 +2,7 @@ import {
   ConfigurationType,
   Operation,
   PrAutomationFragment,
+  PrCallAttributes,
   PrConfiguration,
   PrConfigurationCondition,
   PullRequestFragment,
@@ -83,11 +84,19 @@ export function validateAndFilterConfig(
 export function usePrAutomationForm({
   prAutomation,
   onSuccess,
+  threadId,
+  preFilledContext,
 }: {
   prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
+  threadId?: string
+  preFilledContext?: PrCallAttributes['context']
 }) {
-  const defaults = useMemo(() => getStateDefaults(prAutomation), [prAutomation])
+  const defaults = useMemo(
+    () => getStateDefaults(prAutomation, preFilledContext),
+    [prAutomation, preFilledContext]
+  )
+
   const [curConfigVals, setCurConfigVals] = useState(defaults.curConfigVals)
   const [reviewFormState, setReviewFormState] = useState<ReviewPrFormState>(
     defaults.reviewFormState
@@ -109,6 +118,7 @@ export function usePrAutomationForm({
   const [mutation, { loading, error }] = useCreatePullRequestMutation({
     variables: {
       id: prAutomation?.id ?? '',
+      threadId: threadId,
       branch: reviewFormState.branch,
       identifier: reviewFormState.identifier,
       context: JSON.stringify(
@@ -140,11 +150,19 @@ export function usePrAutomationForm({
   }
 }
 
-const getStateDefaults = (prAutomation: Nullable<PrAutomationFragment>) => {
+const getStateDefaults = (
+  prAutomation: Nullable<PrAutomationFragment>,
+  preFilledContext?: PrCallAttributes['context']
+) => {
   const { configuration, confirmation } = prAutomation ?? {}
   return {
     curConfigVals: Object.fromEntries(
-      configuration?.map((cfg) => [cfg?.name, cfg?.default || '']) ?? []
+      configuration
+        ?.filter(isNonNullable)
+        .map((cfg) => [
+          cfg.name,
+          `${preFilledContext?.[cfg.name] || cfg.default || ''}`,
+        ]) ?? []
     ),
     reviewFormState: {
       branch: '',

@@ -1,6 +1,4 @@
 import {
-  AiSparkleFilledIcon,
-  AiSparkleOutlineIcon,
   AppIcon,
   ArrowTopRightIcon,
   ChatFilledIcon,
@@ -38,10 +36,10 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts.tsx'
 import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
-import { MoreMenuTrigger } from '../utils/MoreMenu.tsx'
 import { ClusterProviderIcon } from '../utils/Provider.tsx'
 import { useChatbot } from './AIContext.tsx'
 import { AITableActions } from './AITableActions.tsx'
+import { useAiPin } from './AIPinButton.tsx'
 
 const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -49,11 +47,10 @@ const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   gap: theme.spacing.xlarge,
   height: '100%',
   width: '100%',
-  background: theme.colors['fill-one'],
   padding: theme.spacing.medium,
   '&:not(:has(button:hover)):not(:has(a:hover))': {
     '&:hover': {
-      background: theme.colors['fill-two-selected'],
+      background: theme.colors['fill-zero-hover'],
       cursor: 'pointer',
     },
   },
@@ -61,39 +58,32 @@ const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
 
 export function AITableEntry({
   item,
-  onClickPin,
-  pinLoading,
   modal,
   hidePins,
   ...props
 }: {
-  item: ChatThreadTinyFragment | AiPinFragment
-  onClickPin?: () => void
-  pinLoading?: boolean
+  item: ChatThreadTinyFragment
   modal?: boolean | null
   hidePins?: boolean | null
 } & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
   const theme = useTheme()
-  const { pathname } = useLocation()
-  const { goToThread, goToInsight } = useChatbot()
+  const { goToThread } = useChatbot()
 
-  const isPin = item.__typename === 'AiPin'
-  const isInsight = isPin && !item.thread
+  const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
+    thread: item,
+  })
 
-  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
   const insight = item.insight
-  const insightPathUrl = getInsightPathInfo(insight)?.url
 
   const timestamp = getThreadOrPinTimestamp(item)
 
   const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
   const onClick = useCallback(() => {
-    if (isInsight && insight) goToInsight(insight)
-    if (!isInsight && thread) goToThread(thread.id)
-  }, [isInsight, insight, goToInsight, thread, goToThread])
+    if (item) goToThread(item.id)
+  }, [item, goToThread])
 
-  if ((isInsight && !insight) || (!isInsight && !thread)) return null
+  if (!item) return null
 
   return (
     <AIThreadsTableEntrySC
@@ -101,29 +91,29 @@ export function AITableEntry({
         e.preventDefault()
         onClick()
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       {...props}
     >
       <AIEntryLabel
         insight={insight}
-        isInsight={isInsight}
         isStale={isStale}
-        thread={thread}
+        thread={item}
         opacity={isStale ? 0.6 : 1}
       />
-      {insightPathUrl && pathname?.includes(insightPathUrl) && (
-        <Chip
-          css={{ minWidth: 'fit-content' }}
-          severity="info"
-        >
-          Current page
-        </Chip>
-      )}
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
         {fromNow(timestamp)}
       </CaptionP>
       {!modal && (
         <>
-          <Chip severity={isStale ? 'neutral' : 'success'}>
+          <Chip
+            size="small"
+            severity={isStale ? 'neutral' : 'success'}
+          >
             {isStale ? 'Stale' : 'Active'}
           </Chip>
           {!hidePins && (
@@ -131,13 +121,13 @@ export function AITableEntry({
               clickable
               onClick={(e) => {
                 e.stopPropagation()
-                if (pinLoading) return
-                onClickPin?.()
+                if (pinCreating || pinDeleting) return
+                handlePin()
               }}
               icon={
-                pinLoading ? (
+                pinCreating || pinDeleting ? (
                   <Spinner />
-                ) : isPin ? (
+                ) : isPinned ? (
                   <PushPinFilledIcon color={theme.colors['icon-info']} />
                 ) : (
                   <PushPinOutlineIcon />
@@ -147,14 +137,7 @@ export function AITableEntry({
           )}
         </>
       )}
-      {isInsight ? (
-        <MoreMenuTrigger
-          disabled
-          css={{ cursor: 'default' }}
-        />
-      ) : (
-        <AITableActions thread={thread} />
-      )}
+      <AITableActions thread={item} />
     </AIThreadsTableEntrySC>
   )
 }
@@ -162,15 +145,14 @@ export function AITableEntry({
 export function AIEntryLabel({
   thread,
   insight,
-  isInsight,
   isStale,
   ...props
 }: {
   thread?: Nullable<ChatThreadTinyFragment>
   insight?: Nullable<AiInsightSummaryFragment>
-  isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
+  const { pathname } = useLocation()
   const insightPathInfo = getInsightPathInfo(insight)
   const flowPath = thread?.flow && {
     path: [thread.flow.name],
@@ -190,7 +172,6 @@ export function AIEntryLabel({
         css={{ flexShrink: 0 }}
         icon={
           <TableEntryIcon
-            isInsight={isInsight}
             isStale={isStale}
             thread={thread}
             insight={insight}
@@ -198,10 +179,19 @@ export function AIEntryLabel({
         }
       />
       <StackedText
-        first={
-          isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
+        first={truncate(thread?.summary)}
+        second={
+          <Flex
+            gap="small"
+            align="center"
+          >
+            <TableEntryResourceLink {...(insightPathInfo || flowPath)} />{' '}
+            {insightPathInfo?.url &&
+              pathname?.includes(insightPathInfo.url) && (
+                <CaptionP $color="icon-info">Current page</CaptionP>
+              )}
+          </Flex>
         }
-        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
         firstPartialType="body2"
         firstColor="text"
         secondPartialType="caption"
@@ -211,12 +201,10 @@ export function AIEntryLabel({
 }
 
 function TableEntryIcon({
-  isInsight,
   isStale,
   insight,
   thread,
 }: {
-  isInsight: boolean
   isStale: boolean
   insight: Nullable<AiInsightSummaryFragment>
   thread?: Nullable<ChatThreadTinyFragment>
@@ -266,19 +254,6 @@ function TableEntryIcon({
     )
 
   // TODO: Add handler for insight?.clusterInsightComponent once we have a page for it
-
-  if (isInsight)
-    return isStale ? (
-      <AiSparkleOutlineIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-light']}
-      />
-    ) : (
-      <AiSparkleFilledIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-info']}
-      />
-    )
 
   if (thread?.flow)
     return (
@@ -365,7 +340,7 @@ export function getInsightPathInfo(
   return null
 }
 
-function TableEntryResourceLink({
+export function TableEntryResourceLink({
   path,
   url,
 }: {
@@ -374,7 +349,6 @@ function TableEntryResourceLink({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { closeChatbot } = useChatbot()
 
   if (!path) return null
 
@@ -382,10 +356,7 @@ function TableEntryResourceLink({
     <a
       onClick={(e) => {
         e.stopPropagation()
-        if (url) {
-          navigate(url)
-          closeChatbot()
-        }
+        if (url) navigate(url)
       }}
       css={{
         display: 'flex',

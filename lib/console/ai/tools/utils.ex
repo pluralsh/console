@@ -35,6 +35,8 @@ defmodule Console.AI.Tools.Utils do
     errors = Helpers.resolve_changeset(changeset)
     {:ok, "Encountered errors:\n #{Enum.join(errors, "\n")}"}
   end
+  def error({:error, {:http_error, _, %{"message" => msg}}}), do: {:ok, msg}
+  def error({:error, {:http_error, _, err}}) when is_binary(err), do: {:ok, err}
   def error({:error, error}) when is_binary(error), do: {:ok, "Encountered error: #{error}"}
   def error({:error, error}), do: {:ok, "internal error: #{inspect(error)}"}
   def error(v), do: v

@@ -4,6 +4,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
   alias Console.PubSub
+  alias Console.Services.Users
   alias Console.Deployments.{
     Secrets.Store,
     Settings,
@@ -383,8 +384,8 @@ defmodule Console.Deployments.Services do
   @spec dependencies_ready(Service.t) :: service_resp
   def dependencies_ready(%Service{} = svc) do
     with %{dependencies: [_ | _] = deps} <- Repo.preload(svc, [:dependencies]),
-         dep when not is_nil(dep) <- Enum.find(deps, & &1.status != :healthy) do
-      {:error, "dependency #{dep.name} is not ready"}
+         %ServiceDependency{name: name} <- Enum.find(deps, & &1.status != :healthy) do
+      {:error, "dependency #{name} is not ready"}
     else
       _ -> {:ok, svc}
     end
@@ -518,6 +519,8 @@ defmodule Console.Deployments.Services do
     get_service!(service_id)
     |> kick(user)
   end
+
+  def kick(id), do: kick(id, %{Users.get_bot!("console") | roles: %{admin: true}})
 
   @doc """
   Updates the sha of a service if relevant

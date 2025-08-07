@@ -69,6 +69,10 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
+	// Interval specifies the interval at which the stack will be reconciled, default is 5m
+	// +kubebuilder:validation:Optional
+	Interval *string `json:"interval,omitempty"`
+
 	// RepositoryRef references the GitRepository containing the IaC source code.
 	// +kubebuilder:validation:Required
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`

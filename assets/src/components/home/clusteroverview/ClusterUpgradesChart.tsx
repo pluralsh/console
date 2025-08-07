@@ -1,9 +1,6 @@
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
-import {
-  CHART_COLOR_MAP,
-  createCenteredMetric,
-} from 'components/utils/RadialBarChart'
+import { createCenteredMetric } from 'components/utils/RadialBarChart'
 import {
   UpgradeStatisticsFragment,
   UpgradeStatisticsQuery,
@@ -15,9 +12,10 @@ import { ApolloError } from '@apollo/client'
 import { Flex } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
 import { GqlError } from 'components/utils/Alert.tsx'
+import { isEmpty } from 'lodash'
+import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { ClusterUpgradesChartEmpty } from './ClusterUpgradesChartEmpty'
-import { isEmpty } from 'lodash'
 
 export enum UpgradeChartFilter {
   All = 'all',
@@ -82,10 +80,10 @@ export function ClusterUpgradesChart({
           )
         }
         endAngle={360}
-        cornerRadius={5}
-        padAngle={2}
-        padding={0.3}
-        innerRadius={0.35}
+        cornerRadius={3}
+        padAngle={1}
+        padding={0.32}
+        innerRadius={0.38}
         onClick={(bar) =>
           onClick(
             bar.data.x === selectedFilter ? UpgradeChartFilter.All : bar.data.x
@@ -115,10 +113,7 @@ export function ClusterUpgradesFilterBtns({
   values: Record<UpgradeChartFilter, number>
 }) {
   return (
-    <Flex
-      gap="small"
-      flexWrap="wrap"
-    >
+    <Flex gap="xsmall">
       {selectableFilterOptions.map((filter) => (
         <HomeFilterOptionCard
           key={filter}
@@ -149,12 +144,12 @@ export const aggregateUpgradeStats = (
 }
 
 const filterToColor: Record<UpgradeChartFilter, string> = {
-  [UpgradeChartFilter.All]: CHART_COLOR_MAP.green,
-  [UpgradeChartFilter.Upgradeable]: CHART_COLOR_MAP.green,
-  [UpgradeChartFilter.NotUpgradeable]: CHART_COLOR_MAP.red,
-  [UpgradeChartFilter.Latest]: CHART_COLOR_MAP['blue-light'],
-  [UpgradeChartFilter.Compliant]: CHART_COLOR_MAP['purple-light'],
-  [UpgradeChartFilter.NonCompliant]: CHART_COLOR_MAP['yellow-light'],
+  [UpgradeChartFilter.All]: HOME_CHARTS_COLORS.green,
+  [UpgradeChartFilter.Upgradeable]: HOME_CHARTS_COLORS.green,
+  [UpgradeChartFilter.NotUpgradeable]: HOME_CHARTS_COLORS.red,
+  [UpgradeChartFilter.Latest]: HOME_CHARTS_COLORS.blue,
+  [UpgradeChartFilter.Compliant]: HOME_CHARTS_COLORS.purple,
+  [UpgradeChartFilter.NonCompliant]: HOME_CHARTS_COLORS.yellow,
 }
 
 const getChartData = (data: UpgradeStatisticsFragment) => {

@@ -16,6 +16,7 @@ defmodule ConsoleWeb.Router do
   scope "/v1", ConsoleWeb do
     pipe_through [:api]
 
+    post "/token/exchange", JWTController, :exchange
     get "/dashboard/cluster", WebhookController, :cluster
   end
 

@@ -18,6 +18,12 @@ export function useDeploymentSettings(): Partial<DeploymentSettingsFragment> {
   return data || ({} as Partial<DeploymentSettingsFragment>)
 }
 
+export function useLoadingDeploymentSettings() {
+  const { loading, data } = use(DeploymentSettingsContext)
+
+  return loading && !data
+}
+
 export function useLogsEnabled() {
   const ctx = useDeploymentSettings()
 

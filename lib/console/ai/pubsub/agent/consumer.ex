@@ -1,7 +1,7 @@
 defmodule Console.AI.PubSub.Agent.Consumer do
   use Piazza.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
-    max_demand: 10
+    max_demand: 100
   alias Console.AI.PubSub.Agent.Actionable
   alias Console.AI.Cron
 

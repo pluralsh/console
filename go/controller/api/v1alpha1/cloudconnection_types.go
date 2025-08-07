@@ -28,10 +28,8 @@ type CloudConnectionList struct {
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
 
-// CloudConnection securely stores cloud provider credentials for resource discovery and querying.
-// Used by i.e. cloud-query service to read and analyze cloud infrastructure, enabling visibility into
-// cloud resources. Credentials are stored as references to Kubernetes secrets for security,
-// and access is controlled through read bindings for multi-tenancy.
+// CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+// queries against cloud configuration data.
 type CloudConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -70,17 +68,15 @@ func (c *CloudConnection) CloudConnectionName() string {
 	return c.Name
 }
 
-// CloudConnectionSpec defines the desired state of CloudConnection.
-// This specification configures secure cloud provider authentication for cloud resource discovery and querying,
-// enabling the Console to read and analyze cloud infrastructure without requiring provisioning permissions.
+// CloudConnectionSpec defines the desired state of CloudConnection
 type CloudConnectionSpec struct {
 	// Name of this CloudConnection. If not provided CloudConnection's own name
 	// from CloudConnection.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Provider specifies the cloud service provider for this connection.
-	// Determines which cloud APIs this connection can authenticate with for resource discovery.
+	// Provider is the name of the cloud service for the Provider.
+	// One of (CloudProvider): [gcp, aws, azure]
 	// +kubebuilder:example:=aws
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
@@ -88,13 +84,12 @@ type CloudConnectionSpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Provider is immutable"
 	Provider CloudProvider `json:"provider"`
 
-	// Configuration holds the provider-specific authentication credentials and settings.
-	// Contains references to secrets storing cloud provider credentials for read-only access.
+	// Configuration contains the cloud connection configuration.
 	// +kubebuilder:validation:Required
 	Configuration CloudConnectionConfiguration `json:"configuration"`
 
-	// ReadBindings defines which users and groups can use this CloudConnection.
-	// Controls access to cloud resource discovery and querying capabilities.
+	// ReadBindings is a list of bindings that defines
+	// who can use this CloudConnection.
 	// +kubebuilder:validation:Optional
 	ReadBindings []Binding `json:"readBindings,omitempty"`
 }
@@ -112,9 +107,15 @@ type CloudConnectionConfiguration struct {
 type AWSCloudConnection struct {
 	AccessKeyId     string             `json:"accessKeyId"`
 	SecretAccessKey ObjectKeyReference `json:"secretAccessKey"`
-	Region          string             `json:"region"`
-}
 
+	// The region this connection applies to
+	// +kubebuilder:validation:Optional
+	Region *string `json:"region"`
+
+	// A list of regions this connection can query
+	// +kubebuilder:validation:Optional
+	Regions []string `json:"regions"`
+}
 // GCPCloudConnection contains Google Cloud Platform authentication configuration.
 // Enables cloud resource discovery and analysis across GCP projects.
 type GCPCloudConnection struct {

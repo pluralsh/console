@@ -1,6 +1,7 @@
 import {
   Button,
   CloseIcon,
+  Divider,
   EmptyState,
   FiltersIcon,
   IconFrame,
@@ -199,7 +200,8 @@ export default function Stacks() {
   const deleting = !!fullStack?.deletedAt
 
   useEffect(() => {
-    if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
+    if (!isEmpty(stacks) && !stackId)
+      navigate(getStacksAbsPath(stacks[0]?.id), { replace: true })
   }, [stacks, stackId, navigate])
 
   useSetBreadcrumbs(
@@ -361,6 +363,7 @@ export default function Stacks() {
             display: 'flex',
             flexDirection: 'column',
             flex: 1,
+            gap: theme.spacing.medium,
             overflow: 'hidden',
           }}
         >
@@ -369,9 +372,6 @@ export default function Stacks() {
               alignItems: 'start',
               display: 'flex',
               gap: theme.spacing.medium,
-              borderBottom: theme.borders.default,
-              marginBottom: theme.spacing.medium,
-              paddingBottom: theme.spacing.medium,
             }}
           >
             <div css={{ flexGrow: 1 }}>
@@ -485,40 +485,49 @@ export default function Stacks() {
               </>
             )}
           </div>
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-            marginRight="medium"
-            paddingBottom="medium"
-            minHeight={56}
-          >
-            {directory
-              .filter(({ enabled }) => enabled)
-              .map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  to={`${getStacksAbsPath(stackId)}/${path}`}
-                >
-                  <SubTab key={path}>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-          </TabList>
+          <Divider backgroundColor={theme.colors.border} />
+          <div>
+            <TabList
+              scrollable
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {directory
+                .filter(({ enabled }) => enabled)
+                .map(({ label, path }) => (
+                  <LinkTabWrap
+                    subTab
+                    key={path}
+                    to={`${getStacksAbsPath(stackId)}/${path}`}
+                  >
+                    <SubTab key={path}>{label}</SubTab>
+                  </LinkTabWrap>
+                ))}
+            </TabList>
+          </div>
           {!fullStack ? (
             <LoopingLogo css={{ flex: 1 }} />
           ) : (
-            <Outlet
-              context={
-                {
-                  stack: fullStack,
-                  refetch,
-                  loading,
-                } satisfies StackOutletContextT
-              }
-            />
+            <div
+              css={{
+                width: '100%',
+                height: '100%',
+                overflowX: 'auto',
+              }}
+            >
+              <Outlet
+                context={
+                  {
+                    stack: fullStack,
+                    refetch,
+                    loading,
+                  } satisfies StackOutletContextT
+                }
+              />
+            </div>
           )}
         </div>
       )}

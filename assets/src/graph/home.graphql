@@ -47,6 +47,7 @@ fragment ClusterOverviewDetails on Cluster {
 
 fragment ClusterHealthScore on Cluster {
   id
+  name
   healthScore
 }
 

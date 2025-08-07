@@ -127,6 +127,7 @@ defmodule Console.GraphQl.AI do
     end
 
     connection field :chats, node_type: :chat do
+      arg :reverse, :boolean, description: "reverse the order of the chats"
       resolve &AI.list_chats/3
     end
 
@@ -337,6 +338,7 @@ defmodule Console.GraphQl.AI do
     connection field :chats, node_type: :chat do
       middleware Authenticated
       arg :thread_id, :id
+      arg :reverse,   :boolean, description: "reverse the order of the chats"
 
       resolve &AI.chats/2
     end
@@ -351,6 +353,7 @@ defmodule Console.GraphQl.AI do
     connection field :chat_threads, node_type: :chat_thread do
       middleware Authenticated
       arg :flow_id, :id, description: "only show threads for this flow"
+      arg :q,       :string
 
       resolve &AI.threads/2
     end
@@ -440,6 +443,14 @@ defmodule Console.GraphQl.AI do
       arg :thread_id, non_null(:id)
 
       resolve &AI.thread_pr/2
+    end
+
+    @desc "Refreshes an insight, which will trigger a new AI insight generation in the background"
+    field :refresh_insight, :ai_insight do
+      middleware Authenticated
+      arg :insight_id, non_null(:id)
+
+      resolve &AI.refresh_insight/2
     end
 
     @desc "it will add additional context to the given chat from a source object"

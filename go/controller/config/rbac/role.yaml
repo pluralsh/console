@@ -22,6 +22,7 @@ rules:
   - get
   - list
   - patch
+  - update
   - watch
 - apiGroups:
   - deployments.plural.sh
@@ -36,6 +37,7 @@ rules:
   - complianceReportGenerators
   - customstackruns
   - deploymentsettings
+  - federatedcredentials
   - flows
   - generatedsecrets
   - gitrepositories
@@ -85,6 +87,7 @@ rules:
   - complianceReportGenerators/finalizers
   - customstackruns/finalizers
   - deploymentsettings/finalizers
+  - federatedcredentials/finalizers
   - flows/finalizers
   - generatedsecrets/finalizers
   - gitrepositories/finalizers
@@ -128,6 +131,7 @@ rules:
   - complianceReportGenerators/status
   - customstackruns/status
   - deploymentsettings/status
+  - federatedcredentials/status
   - flows/status
   - generatedsecrets/status
   - gitrepositories/status

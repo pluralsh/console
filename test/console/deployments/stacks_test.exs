@@ -409,6 +409,7 @@ defmodule Console.Deployments.StacksTest do
 
       stack = refetch(stack)
       assert stack.sha == "new-sha"
+      assert stack.next_poll_at
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
@@ -566,7 +567,9 @@ defmodule Console.Deployments.StacksTest do
       %{pull_request: sideload} = Console.Repo.preload(run, [:pull_request])
       assert sideload.id == pr.id
 
-      assert refetch(pr).sha == "new-sha"
+      pr = refetch(pr)
+      assert pr.sha == "new-sha"
+      assert pr.next_poll_at
     end
 
     test "it can create a new run an ansible stack" do

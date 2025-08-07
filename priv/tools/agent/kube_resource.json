@@ -1,0 +1,23 @@
+{
+    "type": "object",
+    "properties": {
+        "api_version": {
+            "type": "string",
+            "description": "The kubernetes api group + version of this specific resource. For core resources like Pod and ServiceAccount, this will just be a version string like v1, otherwise it will be {group}/{version}"
+        },
+        "kind": {
+            "type": "string",
+            "description": "The kubernetes resource kind"
+        },
+        "namespace": {
+            "description": "the kubernetes namespace this resource is in, ignore if this is a cluster scoped resource",
+            "type": "string"
+        },
+        "name": {
+            "type": "string",
+            "description": "The kubernetes resource name"
+        }
+    },
+    "required": ["api_version", "kind", "name"],
+    "additionalProperties": false
+}

@@ -1,18 +1,16 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  import Console, only: [clamp: 1, clamp: 3]
+  import Console, only: [clamp: 1]
   alias Console.Deployments.{Services, Clusters, Global, Stacks, Git}
   alias Console.Services.Users
   alias Console.Schema.{
     Cluster,
     Service,
     ServiceComponent,
-    GlobalService,
     PipelineStage,
     PipelinePromotion,
     AgentMigration,
     ManagedNamespace,
-    Stack,
     StackRun,
     StackCron,
     PullRequest,
@@ -45,7 +43,7 @@ defmodule Console.Deployments.Cron do
   end
 
   def prune_clusters() do
-    Logger.info "attempting to prune dangling deleted services"
+    Logger.info "attempting to prune dangling deleted clusters"
     Cluster.deleted()
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
@@ -65,34 +63,7 @@ defmodule Console.Deployments.Cron do
     |> Repo.delete_all()
   end
 
-  @opts [
-    ordered: false,
-    timeout: :timer.seconds(120),
-    on_timeout: :kill_task
-  ]
-
-  def cache_warm() do
-    Task.async(fn -> Git.warm_helm_cache() end)
-
-    Cluster.ordered()
-    |> Cluster.healthy()
-    |> Cluster.with_limit(100)
-    |> Repo.all()
-    |> Task.async_stream(fn cluster ->
-      Logger.info "warming node caches for cluster #{cluster.handle}"
-      try do
-        Clusters.warm(:cluster_metrics, cluster)
-        # Clusters.warm(:nodes, cluster)
-        # Clusters.warm(:node_metrics, cluster)
-        # Clusters.warm(:api_discovery, cluster)
-      rescue
-        e ->
-          Logger.error "hit error trying to warm node caches for cluster=#{cluster.handle}"
-          Logger.error(Exception.format(:error, e, __STACKTRACE__))
-      end
-    end, [max_concurrency: clamp(Clusters.count(), 5, 25)] ++ @opts)
-    |> Stream.run()
-  end
+  def cache_warm(), do: Git.warm_helm_cache()
 
   def install_clusters() do
     Logger.info "attempting to install operator on dangling clusters"
@@ -163,19 +134,6 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
-  def backfill_global_services() do
-    Logger.info "backfilling global services into all clusters"
-
-    GlobalService.stream()
-    |> GlobalService.preloaded()
-    |> Repo.stream(method: :keyset)
-    |> Task.async_stream(fn global ->
-      Logger.info "syncing global service #{global.id}"
-      Global.sync_clusters(global)
-    end, max_concurrency: 20)
-    |> Stream.run()
-  end
-
   def backfill_managed_namespaces() do
     Logger.info "backfilling managed namespaces across clusters"
 
@@ -215,6 +173,7 @@ defmodule Console.Deployments.Cron do
 
   def migrate_agents() do
     AgentMigration.incomplete()
+    |> AgentMigration.ordered()
     |> Repo.all()
     |> Stream.each(&Clusters.apply_migration/1)
     |> Stream.run()
@@ -256,39 +215,10 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
-  def poll_stacks() do
-    Task.async_stream(stack_stream(), fn stack ->
-      Logger.info "polling repository for stack #{stack.id}"
-      Stacks.poll(stack)
-      |> log("poll stack for a new run")
-    end, max_concurrency: clamp(Stacks.count()))
-    |> Stream.run()
-  end
-
-  def dequeue_stacks() do
-    Task.async_stream(stack_stream(), fn stack ->
-      Logger.info "dequeuing eligible stack runs #{stack.id}"
-      Stacks.dequeue(stack)
-      |> log("dequeue a new stack run")
-    end, max_concurrency: clamp(Stacks.count()))
-    |> Stream.run()
-  end
-
   def prune_logs() do
     Logger.info "deleting old run logs"
     RunLog.expired()
     |> Repo.delete_all()
-  end
-
-  defp stack_stream() do
-    Stack.stream()
-    |> Stack.unpaused()
-    |> Repo.stream(method: :keyset)
-    |> Stream.concat(
-      PullRequest.stack()
-      |> PullRequest.stream()
-      |> Repo.stream(method: :keyset)
-    )
   end
 
   def place_run_workers() do
@@ -361,8 +291,4 @@ defmodule Console.Deployments.Cron do
     end, max_concurrency: 20)
     |> Stream.run()
   end
-
-  defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
-  defp log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
-  defp log(_, _), do: :ok
 end

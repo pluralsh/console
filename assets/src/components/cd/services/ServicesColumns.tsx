@@ -40,7 +40,6 @@ import DecoratedName from './DecoratedName'
 import { DeleteGlobalService } from './DeleteGlobalService'
 import { DeleteService } from './DeleteService'
 import { DetachService } from './DetachService'
-import { ServiceDeprecations } from './ServiceDeprecations'
 import { ServicePermissions } from './ServicePermissions'
 import { ServiceSettings } from './ServiceSettings'
 import { ServiceStatusChip } from './ServiceStatusChip'
@@ -247,7 +246,6 @@ export const ColErrors = columnHelper.accessor(
         gap="xsmall"
       >
         <ServicesTableErrors service={node} />
-        <ServiceDeprecations service={node} />
       </Flex>
     ),
   }

@@ -19,6 +19,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ComplianceReportGenerator](#compliancereportgenerator)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
+- [FederatedCredential](#federatedcredential)
 - [Flow](#flow)
 - [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
@@ -113,7 +114,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `accessKeyId` _string_ |  |  |  |
 | `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
-| `region` _string_ |  |  |  |
+| `region` _string_ | The region this connection applies to |  | Optional: {} <br /> |
+| `regions` _string array_ | A list of regions this connection can query |  | Optional: {} <br /> |
 
 
 
@@ -364,7 +366,8 @@ _Appears in:_
 
 
 
-CloudConnection is the Schema for the cloudconnections API
+CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+queries against cloud configuration data.
 
 
 
@@ -1108,6 +1111,43 @@ _Appears in:_
 
 
 
+#### FederatedCredential
+
+
+
+FederatedCredential is a way to authenticate users from an external identity provider.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `FederatedCredential` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[FederatedCredentialSpec](#federatedcredentialspec)_ |  |  |  |
+
+
+#### FederatedCredentialSpec
+
+
+
+FederatedCredentialSpec defines the desired state of FederatedCredential.
+
+
+
+_Appears in:_
+- [FederatedCredential](#federatedcredential)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `issuer` _string_ | Issuer is the URL of the identity provider that issues the tokens. |  | Required: {} <br /> |
+| `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: {} <br /> |
+| `claimsLike` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />All the value strings should be a valid regular expression.<br /><br />Example:<br />	...<br />	claimsLike:<br />		sub: "repo:myaccount/myrepo:ref:refs/heads/.*" |  | Optional: {} <br /> |
+| `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Required: {} <br /> |
+
+
 #### Flow
 
 
@@ -1358,6 +1398,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `tags` _object (keys:string, values:string)_ | Tags a set of tags to select clusters for this global service |  | Optional: {} <br /> |
 | `reparent` _boolean_ | Whether you'd want this global service to take ownership of existing Plural services |  | Optional: {} <br /> |
+| `interval` _string_ | Interval specifies the interval at which the global service will be reconciled, default is 10m |  | Optional: {} <br /> |
 | `cascade` _[Cascade](#cascade)_ | Cascade deletion options for this global service |  | Optional: {} <br /> |
 | `context` _[TemplateContext](#templatecontext)_ | Context to be used for dynamic template overrides of things like helm chart, version or values files |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro of kubernetes this cluster is running |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: {} <br /> |
@@ -1609,23 +1650,24 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ | Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. |  | Required: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Required: {} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references a project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
-| `git` _[GitRef](#gitref)_ | Git contains reference within the repository where the IaC manifests are located. |  |  |
-| `manageState` _boolean_ | ManageState indicates whether Plural should manage the Terraform state of this stack. |  | Optional: {} <br /> |
-| `workdir` _string_ | Workdir specifies the working directory within the Git repository to execute commands in.<br />It is useful for projects with external modules or nested folder structures. |  | Optional: {} <br /> |
-| `jobSpec` _[JobSpec](#jobspec)_ | JobSpec contains an optional configuration for the job that will apply this stack. |  | Optional: {} <br /> |
-| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration specifies version/image config for the IaC tool being used. |  | Optional: {} <br /> |
-| `cron` _[StackCron](#stackcron)_ | Cron configuration for automated, scheduled generation of stack runs. |  | Optional: {} <br /> |
-| `approval` _boolean_ | Approval when set to true, requires human approval before Terraform apply triggers,<br />ensuring verification of the plan to reduce misconfiguration risk. |  | Optional: {} <br /> |
-| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this stack. |  | Optional: {} <br /> |
-| `environment` _[StackEnvironment](#stackenvironment) array_ | Environment variables to inject into the stack execution environment. |  | Optional: {} <br /> |
-| `files` _[StackFile](#stackfile) array_ | Files to mount from Secrets into the stack execution environment,<br />commonly used for cloud credentials (though IRSA/Workload Identity is preferred). |  | Optional: {} <br /> |
-| `detach` _boolean_ | Detach indicates whether to detach the stack on deletion instead of destroying it.<br />This leaves all cloud resources in place. |  | Optional: {} <br /> |
-| `actor` _string_ | Actor is a user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
+| `name` _string_ | Name of this Stack. If not provided InfrastructureStack's own name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the tool to use to apply it |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: {} <br /> |
+| `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef to source IaC from |  | Required: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+| `git` _[GitRef](#gitref)_ | Git reference w/in the repository where the IaC lives |  |  |
+| `manageState` _boolean_ | ManageState - whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
+| `workdir` _string_ | Workdir - the working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
+| `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  | Optional: {} <br /> |
+| `cron` _[StackCron](#stackcron)_ | Configuration for cron generation of stack runs |  | Optional: {} <br /> |
+| `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
+| `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
+| `files` _[StackFile](#stackfile) array_ | Files reference to Secret with a key as a part of mount path and value as a content |  | Optional: {} <br /> |
+| `detach` _boolean_ | Detach if true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
+| `actor` _string_ | Actor - user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `observableMetrics` _[ObservableMetric](#observablemetric) array_ | ObservableMetrics is a list of metrics to poll to determine if a stack run should be canceled. |  | Optional: {} <br /> |
@@ -3473,6 +3515,7 @@ _Appears in:_
 | `ignoreCrds` _boolean_ | whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster) |  | Optional: {} <br /> |
 | `luaScript` _string_ | a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
 | `luaFile` _string_ | a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically<br />based on git state or other metadata |  | Optional: {} <br /> |
+| `luaFolder` _string_ | a folder of lua files to include in the final script used |  | Optional: {} <br /> |
 
 
 #### ServiceImport
@@ -3857,8 +3900,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `createNamespace` _boolean_ |  |  | Optional: {} <br /> |
-| `enforceNamespace` _boolean_ |  |  | Optional: {} <br /> |
+| `createNamespace` _boolean_ | Whether to auto-create the namespace for this service (specifying labels and annotations will also add those to the created namespace) |  | Optional: {} <br /> |
+| `deleteNamespace` _boolean_ | Whether to delete the namespace for this service upon deletion |  | Optional: {} <br /> |
+| `enforceNamespace` _boolean_ | Whether to enforce all created resources are placed in the service namespace |  | Optional: {} <br /> |
 | `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `diffNormalizers` _[DiffNormalizers](#diffnormalizers) array_ | DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works |  | Optional: {} <br /> |

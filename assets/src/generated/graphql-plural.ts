@@ -526,11 +526,29 @@ export type ClusterInformationAttributes = {
   version?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ClusterPingAttributes = {
+  /** the cluster to ping */
+  cluster: ClusterAttributes;
+  /** the usage of the cluster */
+  usage: ClusterUsageAttributes;
+};
+
+export type ClusterUsageAttributes = {
+  /** the number of bytes ingested by the cluster */
+  bytesIngested?: InputMaybe<Scalars['Int']['input']>;
+  /** the number of clusters in the cluster */
+  clusters?: InputMaybe<Scalars['Int']['input']>;
+  /** the number of services deployed on the cluster */
+  services?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** A record of the utilization in a given cluster */
 export type ClusterUsageHistory = {
   __typename?: 'ClusterUsageHistory';
   account?: Maybe<Account>;
+  bytesIngested?: Maybe<Scalars['Int']['output']>;
   cluster?: Maybe<Cluster>;
+  clusters?: Maybe<Scalars['Int']['output']>;
   cpu?: Maybe<Scalars['Int']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   memory?: Maybe<Scalars['Int']['output']>;
@@ -581,6 +599,8 @@ export type ConsoleInstance = {
   console?: Maybe<Cluster>;
   /** the time this instance was deleted on */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the domain of this instance */
+  domain?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this instance (globally unique) */
@@ -2952,6 +2972,7 @@ export type RootMutationType = {
   oauthCallback?: Maybe<User>;
   oauthConsent?: Maybe<OauthResponse>;
   passwordlessLogin?: Maybe<User>;
+  pingCluster?: Maybe<Cluster>;
   pingWebhook?: Maybe<WebhookResponse>;
   /** moves up the upgrade waterline for a user */
   promote?: Maybe<User>;
@@ -3520,6 +3541,11 @@ export type RootMutationTypeOauthConsentArgs = {
 
 export type RootMutationTypePasswordlessLoginArgs = {
   token: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypePingClusterArgs = {
+  attributes: ClusterPingAttributes;
 };
 
 
