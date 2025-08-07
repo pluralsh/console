@@ -29,7 +29,6 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
-import { useClickOutside } from '@react-hooks-library/core'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -87,7 +86,6 @@ function ChatbotPanelInner() {
     mutationLoading,
   } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
-  const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const { data } = useFetchPaginatedData({
@@ -122,8 +120,6 @@ function ChatbotPanelInner() {
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
-
-  useClickOutside(ref, () => setShowActionsPanel(false))
 
   useEffect(() => {
     // If the agent is initializing, a thread doesn't need to be selected.
@@ -183,19 +179,13 @@ function ChatbotPanelInner() {
       )}
       {currentThread?.session && !agentInitMode && (
         <ChatbotActionsPanel
-          isOpen={showActionsPanel}
-          setOpen={setShowActionsPanel}
           zIndex={1}
           messages={messages}
         />
       )}
       <MainContentWrapperSC>
         <ResizeGripSC />
-        <ChatbotHeader
-          currentThread={currentThread}
-          isActionsPanelOpen={showActionsPanel}
-          setIsActionsPanelOpen={setShowActionsPanel}
-        />
+        <ChatbotHeader currentThread={currentThread} />
         {threadDetailsQuery.error?.error && (
           <GqlError error={threadDetailsQuery.error.error} />
         )}

@@ -1,5 +1,5 @@
 import { Flex, MarkdocContextProvider, Toast } from '@pluralsh/design-system'
-import { Suspense } from 'react'
+import { Suspense, useRef } from 'react'
 
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -20,16 +20,18 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
-import { AIContextProvider } from 'components/ai/AIContext'
+import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgent'
+import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
 import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
+import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
+import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { useTheme } from 'styled-components'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
-import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 
 export default function Console() {
   return (
@@ -67,6 +69,13 @@ function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
   const theme = useTheme()
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
+  const { setActionsPanelOpen } = useChatbot()
+
+  // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, () => {
+    setActionsPanelOpen(false)
+  })
 
   return (
     <Flex
@@ -76,6 +85,7 @@ function ConsoleContent() {
       alignItems="stretch"
     >
       <Flex
+        ref={wrapperRef}
         position="relative"
         height="100%"
         overflow="hidden"

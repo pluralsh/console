@@ -124,7 +124,7 @@ export function AgentSelect() {
               style={{
                 pointerEvents: 'none',
                 transition: 'transform 0.2s ease-in-out',
-                transform: open ? 'scaleY(-1)' : 'scaleY(1)',
+                transform: open ? 'scaleY(1)' : 'scaleY(-1)',
               }}
             />
           }
