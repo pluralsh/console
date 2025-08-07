@@ -27,13 +27,14 @@ import {
   CommandPaletteTab,
 } from 'components/commandpalette/CommandPaletteContext.tsx'
 import { use } from 'react'
+import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 
 export function ChatbotHeader({
   currentThread,
 }: {
   currentThread?: Nullable<ChatThreadTinyFragment>
 }) {
-  const { colors, spacing } = useTheme()
+  const { colors } = useTheme()
   const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const {
     actionsPanelOpen,
@@ -129,8 +130,8 @@ export function ChatbotHeader({
           firstPartialType="body2Bold"
           firstColor="text"
           secondPartialType="caption"
-          css={{ flex: 1, paddingRight: spacing.large }}
         />
+        <AgentSessionTypeSelect />
       </SubHeaderSC>
       <Toast
         show={!!mutationError}
@@ -149,6 +150,8 @@ const SubHeaderSC = styled.div(({ theme }) => ({
   height: 48,
   display: 'flex',
   alignItems: 'center',
+  gap: theme.spacing.large,
+  justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
 }))
