@@ -6,6 +6,65 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func init() {
+	SchemeBuilder.Register(&ClusterSync{}, &ClusterSyncList{})
+}
+
+//+kubebuilder:object:root=true
+
+// ClusterSyncList contains a list of ClusterSync resources.
+type ClusterSyncList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []ClusterSync `json:"items"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
+
+// ClusterSync enables automatic synchronization of clusters from the Plural Console
+// into Kubernetes cluster CRDs. It polls the Console clusters API endpoint and creates
+// or updates cluster resources based on the discovered infrastructure, making it ideal
+// for scenarios where clusters are provisioned externally (e.g., via Terraform) without
+// direct CRD creation capability.
+//
+// The resource supports optional filtering by project and tags, and uses templatable
+// specifications that are populated with data from the discovered clusters.
+//
+// Example usage:
+//
+//	apiVersion: deployments.plural.sh/v1alpha1
+//	kind: ClusterSync
+//	metadata:
+//	  name: my-cluster-sync
+//	  namespace: default
+//	spec:
+//	  projectRef:
+//	    name: my-project  # optional: only sync clusters from this project
+//	  tags:
+//	    environment: production  # optional: filter clusters by tags
+//	  clusterSpec:
+//	    metadata:
+//	      name: "{{ .cluster.name }}"  # templated from discovered cluster
+//	      namespace: clusters
+//	    spec:
+//	      handle: "{{ .cluster.handle }}"
+//	      version: "{{ .cluster.version }}"
+//	      cloud: "{{ .cluster.cloud }}"
+type ClusterSync struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   ClusterSyncSpec `json:"spec,omitempty"`
+	Status Status          `json:"status,omitempty"`
+}
+
+func (in *ClusterSync) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
 // ClusterSyncSpec defines the desired state of ClusterSync
 type ClusterSyncSpec struct {
 	// +kubebuilder:validation:Optional
@@ -21,19 +80,6 @@ type ClusterSpecTemplate struct {
 	Metadata MetadataTemplate `json:"metadata"`
 
 	Spec SpecTemplate `json:"spec,omitempty"`
-}
-
-type MetadataTemplate struct {
-	Name string `json:"name"`
-
-	// Namespace specifies an optional namespace for categorizing or scoping related resources.
-	// If empty then the ClusterSync's namespace will be used.
-	// +kubebuilder:validation:Optional
-	Namespace *string `json:"namespace,omitempty"`
-}
-
-type ObjectReferenceTemplate struct {
-	MetadataTemplate `json:",inline"`
 }
 
 type SpecTemplate struct {
@@ -86,6 +132,19 @@ type SpecTemplate struct {
 	NodePools *string `json:"nodePools,omitempty"`
 }
 
+type MetadataTemplate struct {
+	Name string `json:"name"`
+
+	// Namespace specifies an optional namespace for categorizing or scoping related resources.
+	// If empty then the ClusterSync's namespace will be used.
+	// +kubebuilder:validation:Optional
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+type ObjectReferenceTemplate struct {
+	MetadataTemplate `json:",inline"`
+}
+
 type BindingsTemplate struct {
 	// Read bindings.
 	// +kubebuilder:validation:Optional
@@ -94,35 +153,4 @@ type BindingsTemplate struct {
 	// Write bindings.
 	// +kubebuilder:validation:Optional
 	Write *string `json:"write,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Namespaced
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
-
-// ClusterSync is the Schema for the clustersyncs API
-type ClusterSync struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ClusterSyncSpec `json:"spec,omitempty"`
-	Status Status          `json:"status,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-
-// ClusterSyncList contains a list of ClusterSync
-type ClusterSyncList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterSync `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&ClusterSync{}, &ClusterSyncList{})
-}
-
-func (in *ClusterSync) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
