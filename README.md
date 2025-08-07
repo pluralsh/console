@@ -30,7 +30,6 @@ Checklist for creating a new component:
 
 - Does it have proper type definitions?
 - Does it have prop types?
-- Can it pass a ref with forwardRef?
 - Does it have a story in the Storybook?
 
 ## Contributing

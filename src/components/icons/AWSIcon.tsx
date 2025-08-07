@@ -1,4 +1,4 @@
-import { forwardRef, ReactElement } from 'react'
+import { ComponentPropsWithRef, ReactElement } from 'react'
 import { useTheme } from 'styled-components'
 
 enum AWSIconName {
@@ -470,28 +470,29 @@ interface AWSIconProps {
   size?: number
 }
 
-const AWSIcon = forwardRef<HTMLImageElement, AWSIconProps>(
-  ({ name, size = 24, ...props }, ref) => {
-    const theme = useTheme()
-    const icon = AWSIcons[name]?.(size) ?? null
+function AWSIcon({
+  name,
+  size = 24,
+  ...props
+}: AWSIconProps & ComponentPropsWithRef<'div'>) {
+  const theme = useTheme()
+  const icon = AWSIcons[name]?.(size) ?? null
 
-    return icon ? (
-      <div
-        ref={ref}
-        style={{
-          display: 'block',
-          borderRadius: theme.borderRadiuses.medium,
-          overflow: 'hidden',
-          width: size,
-          height: size,
-        }}
-        {...props}
-      >
-        {icon}
-      </div>
-    ) : null
-  }
-)
+  return icon ? (
+    <div
+      style={{
+        display: 'block',
+        borderRadius: theme.borderRadiuses.medium,
+        overflow: 'hidden',
+        width: size,
+        height: size,
+      }}
+      {...props}
+    >
+      {icon}
+    </div>
+  ) : null
+}
 
 export default AWSIcon
 

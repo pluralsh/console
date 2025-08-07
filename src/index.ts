@@ -8,8 +8,12 @@ export * from './icons'
 export * from './plural-logos'
 
 // Components
-export { default as Accordion, AccordionItem } from './components/Accordion'
-export type { AccordionProps } from './components/Accordion'
+export {
+  default as Accordion,
+  AccordionItem,
+  type AccordionProps,
+} from './components/Accordion'
+export { default as AWSIcon, AWSIconName } from './components/icons/AWSIcon'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'
 export { default as ArrowScroll } from './components/ArrowScroll'
