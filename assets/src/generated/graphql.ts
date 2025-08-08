@@ -12410,6 +12410,7 @@ export type GlobalServicesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -22889,8 +22890,8 @@ export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteG
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
 export const GlobalServicesDocument = gql`
-    query GlobalServices($first: Int, $after: String, $projectId: ID) {
-  globalServices(first: $first, after: $after, projectId: $projectId) {
+    query GlobalServices($first: Int, $after: String, $projectId: ID, $q: String) {
+  globalServices(first: $first, after: $after, projectId: $projectId, q: $q) {
     pageInfo {
       ...PageInfo
     }
@@ -22919,6 +22920,7 @@ ${GlobalServiceFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      projectId: // value for 'projectId'
+ *      q: // value for 'q'
  *   },
  * });
  */
