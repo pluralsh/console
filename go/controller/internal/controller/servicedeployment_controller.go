@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/iancoleman/orderedmap"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -343,6 +344,11 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
+
+		sort.Slice(attr.Helm.ValuesFiles, func(i, j int) bool {
+			return *attr.Helm.ValuesFiles[i] < *attr.Helm.ValuesFiles[j]
+		})
+
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
 				Name:      service.Spec.Helm.Repository.Name,
@@ -513,7 +519,13 @@ func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secre
 	}
 
 	result := algorithms.Merge(valuesMap, valuesFromMap)
-	out, err := yaml.Marshal(result)
+
+	ordered, err := toOrderedMap(result)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := yaml.Marshal(ordered)
 	if err != nil {
 		return nil, err
 	}
@@ -721,4 +733,38 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 
 		return requests
 	})
+}
+
+func toOrderedMap(data interface{}) (interface{}, error) {
+	switch v := data.(type) {
+	case map[string]interface{}:
+		omap := orderedmap.New()
+		keys := make([]string, 0, len(v))
+		for k := range v {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			val, err := toOrderedMap(v[k])
+			if err != nil {
+				return nil, err
+			}
+			omap.Set(k, val)
+		}
+		return omap, nil
+
+	case []interface{}:
+		result := make([]interface{}, len(v))
+		for i, item := range v {
+			val, err := toOrderedMap(item)
+			if err != nil {
+				return nil, err
+			}
+			result[i] = val
+		}
+		return result, nil
+
+	default:
+		return v, nil
+	}
 }
