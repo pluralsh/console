@@ -17,16 +17,50 @@ limitations under the License.
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
-// ClusterRestoreSpec defines the desired state of ClusterRestore
+func init() {
+	SchemeBuilder.Register(&ClusterRestore{}, &ClusterRestoreList{})
+}
+
+//+kubebuilder:object:root=true
+
+// ClusterRestoreList contains a list of ClusterRestore resources.
+type ClusterRestoreList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []ClusterRestore `json:"items"`
+}
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Namespaced
+
+// ClusterRestore manages the restoration of cluster data from backup snapshots.
+// Orchestrates the recovery process for Kubernetes resources.
+type ClusterRestore struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   ClusterRestoreSpec   `json:"spec,omitempty"`
+	Status ClusterRestoreStatus `json:"status,omitempty"`
+}
+
+func (s *ClusterRestore) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
+// ClusterRestoreSpec defines the desired state of ClusterRestore.
+// It specifies the backup to restore from, including the backup ID, name, namespace, and cluster reference.
 type ClusterRestoreSpec struct {
 	// BackupID is an ID of the backup to restore.
-	// If BackupID is specified, then BackupName, BackupNamespace and BackupClusterRef are not needed.
+	// If BackupID is specified, then BackupName, BackupNamespace, and BackupClusterRef are not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupID is immutable"
@@ -34,7 +68,7 @@ type ClusterRestoreSpec struct {
 
 	// BackupName is a name of the backup to restore.
 	// BackupNamespace and BackupClusterRef have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
+	// If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupName is immutable"
@@ -42,7 +76,7 @@ type ClusterRestoreSpec struct {
 
 	// BackupNamespace is a namespace of the backup to restore.
 	// BackupName and BackupClusterRef have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
+	// If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupNamespace is immutable"
@@ -50,25 +84,14 @@ type ClusterRestoreSpec struct {
 
 	// BackupClusterID is an ID of a cluster where the backup to restore is located.
 	// BackupName and BackupNamespace have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed.
+	// If BackupName, BackupNamespace, and BackupClusterRef are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupClusterRef is immutable"
 	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
 }
 
-func (p *ClusterRestoreSpec) HasBackupID() bool {
-	return p.BackupID != nil && len(*p.BackupID) > 0
-}
-
-func (p *ClusterRestoreSpec) GetBackupID() string {
-	if !p.HasBackupID() {
-		return ""
-	}
-
-	return *p.BackupID
-}
-
-// ClusterRestoreStatus defines the observed state of ClusterRestore
+// ClusterRestoreStatus represents the observed state of a ClusterRestore operation.
+// Tracks the progress, completion status, and any issues encountered during the restoration process.
 type ClusterRestoreStatus struct {
 	// ID of the cluster restore in the Console API.
 	// +kubebuilder:validation:Optional
@@ -96,33 +119,4 @@ func (p *ClusterRestoreStatus) GetID() string {
 
 func (p *ClusterRestoreStatus) HasID() bool {
 	return p.ID != nil && len(*p.ID) > 0
-}
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
-// ClusterRestore is the Schema for the clusterrestores API
-type ClusterRestore struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ClusterRestoreSpec   `json:"spec,omitempty"`
-	Status ClusterRestoreStatus `json:"status,omitempty"`
-}
-
-func (s *ClusterRestore) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&s.Status.Conditions, condition)
-}
-
-//+kubebuilder:object:root=true
-
-// ClusterRestoreList contains a list of ClusterRestore
-type ClusterRestoreList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterRestore `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&ClusterRestore{}, &ClusterRestoreList{})
 }

@@ -1,9 +1,10 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -12,6 +13,7 @@ func init() {
 
 // +kubebuilder:object:root=true
 
+// ComplianceReportGeneratorList contains a list of ComplianceReportGenerator resources.
 type ComplianceReportGeneratorList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -23,11 +25,13 @@ type ComplianceReportGeneratorList struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="Compliance Report Generator ID"
 
+// ComplianceReportGenerator represents a resource that generates compliance reports.
 type ComplianceReportGenerator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ComplianceReportGeneratorSpec `json:"spec,omitempty"`
-	Status            Status                        `json:"status,omitempty"`
+
+	Spec   ComplianceReportGeneratorSpec `json:"spec,omitempty"`
+	Status Status                        `json:"status,omitempty"`
 }
 
 func (in *ComplianceReportGenerator) ComplianceReportGeneratorName() string {

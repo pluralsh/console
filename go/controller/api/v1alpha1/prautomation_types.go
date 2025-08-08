@@ -16,7 +16,7 @@ func init() {
 	SchemeBuilder.Register(&PrAutomation{}, &PrAutomationList{})
 }
 
-// PrAutomationBindings ...
+// PrAutomationBindings defines access control for PR automation resources.
 type PrAutomationBindings struct {
 	// Create bindings.
 	// +kubebuilder:validation:Optional
@@ -27,8 +27,9 @@ type PrAutomationBindings struct {
 	Write []Binding `json:"write,omitempty"`
 }
 
-// PrAutomationList ...
 // +kubebuilder:object:root=true
+
+// PrAutomationList contains a list of PrAutomation resources.
 type PrAutomationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -36,20 +37,26 @@ type PrAutomationList struct {
 	Items []PrAutomation `json:"items"`
 }
 
-// PrAutomation ...
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the pr automation in the Console API."
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the PrAutomation in the Console API."
+
+// PrAutomation provides a self-service mechanism for generating pull requests against IaC repositories.
+// It enables teams to create standardized, templated PRs for common operations like cluster
+// upgrades, service deployments, and configuration changes. Each automation defines the files to modify,
+// the changes to make (via regex replacement, YAML overlays, or file creation), and provides a UI wizard
+// for users to configure parameters before generating the PR.
 type PrAutomation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec ...
+	// Spec defines the desired state of the PrAutomation, including the operations
+	// to perform, target repository, and user interface configuration.
 	// +kubebuilder:validation:Required
 	Spec PrAutomationSpec `json:"spec"`
 
-	// Status ...
+	// Status represents the current state of this PrAutomation resource.
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
 }
@@ -118,107 +125,124 @@ func (in *PrAutomation) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-// PrAutomationSpec ...
+// PrAutomationSpec defines the desired state of the PrAutomation.
 type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=CLUSTER;SERVICE;PIPELINE;UPDATE;UPGRADE;COST
 	Role *console.PrRole `json:"role,omitempty"`
 
-	// Addon is a link to an addon name
+	// Addon links this automation to a specific add-on name.
 	// +kubebuilder:validation:Optional
 	Addon *string `json:"addon,omitempty"`
 
-	// The base branch this pr will be based on (defaults to the repo's main branch)
+	// Branch specifies the base branch this PR will be created from. If not provided,
+	// defaults to the repository's main branch (usually 'main' or 'master').
 	// +kubebuilder:validation:Optional
 	Branch *string `json:"branch,omitempty"`
 
-	// An icon url to annotate this pr automation
+	// Icon provides a URL to an icon image to visually represent this automation
+	// in the user interface and catalogs.
 	// +kubebuilder:validation:Optional
 	Icon *string `json:"icon,omitempty"`
 
-	// An darkmode icon url to annotate this pr automation
+	// DarkIcon provides a URL to a dark-mode variant of the icon for improved
+	// visibility in dark-themed user interfaces.
 	// +kubebuilder:validation:Optional
 	DarkIcon *string `json:"darkIcon,omitempty"`
 
-	// Documentation ...
+	// Documentation provides detailed explanation of what this automation does,
+	// when to use it, and any prerequisites or considerations.
 	// +kubebuilder:validation:Optional
 	Documentation *string `json:"documentation,omitempty"`
 
-	// Identifier is a string referencing the repository, i.e. for GitHub it would be "organization/repositoryName"
+	// Identifier specifies the target repository in the format "organization/repository-name"
+	// for GitHub, or equivalent formats for other SCM providers.
 	// +kubebuilder:validation:Optional
 	Identifier *string `json:"identifier,omitempty"`
 
-	// Message the commit message this pr will incorporate
+	// Message defines the commit message template that will be used in the generated PR.
+	// Can include templated variables from user input.
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 
-	// Name name of the automation in the console api (defaults to metadata.name)
+	// Name specifies the display name for this automation in the Console API.
+	// If not provided, defaults to the Kubernetes resource name.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Title the title of the generated pr
+	// Title defines the template for the pull request title. Can include variables
+	// that will be replaced with user-provided configuration values.
 	// +kubebuilder:validation:Optional
 	Title *string `json:"title,omitempty"`
 
-	// Patch whether to generate a patch for this pr instead of a full pr
+	// Patch determines whether to generate a patch for this PR instead of
+	// creating a full pull request.
 	// +kubebuilder:validation:Optional
 	Patch *bool `json:"patch,omitempty"`
 
-	// ClusterRef a cluster this pr works on
+	// ClusterRef references a specific cluster that this PR operates on.
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
-	// ScmConnectionRef the SCM connection to use for generating this PR
+	// ScmConnectionRef references the SCM connection to use for authentication when creating pull requests.
 	// +kubebuilder:validation:Required
 	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef"`
 
-	// RepositoryRef the repository this automation uses.
+	// RepositoryRef references a Git repository resource this automation uses.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// ServiceRef the service this PR acts on.
+	// ServiceRef references a specific service that this PR automation acts upon.
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
-	// ProjectRef the project this automation belongs to.
+	// ProjectRef references the project this automation belongs to, enabling
+	// project-scoped organization and access control.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// CatalogRef the catalog this automation will belong to
+	// CatalogRef references the catalog this automation belongs to for
+	// organizational purposes and discoverability in the service catalog.
 	// +kubebuilder:validation:Optional
 	CatalogRef *corev1.ObjectReference `json:"catalogRef,omitempty"`
 
-	// Bindings contain read and write policies of pr automation
+	// Bindings containing read and write policies of PR automation.
 	// +kubebuilder:validation:Optional
 	Bindings *PrAutomationBindings `json:"bindings,omitempty"`
 
-	// Configuration self-service configuration for the UI wizard generating this PR
+	// Configuration defines the self-service UI form fields that users fill out
+	// to customize the generated PR. Each field can be templated into the PR content.
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
 
-	// Additional details to verify all prerequisites are satisfied before generating this pr
+	// Confirmation specifies additional verification steps or information to present
+	// to users before they can generate the PR, ensuring prerequisites are met.
 	// +kubebuilder:validation:Optional
 	Confirmation *PrAutomationConfirmation `json:"confirmation,omitempty"`
 
-	// Specs for files to be templated and created
+	// Creates defines specifications for generating new files from templates,
+	// allowing the automation to add new configuration files to the repository.
 	// +kubebuilder:validation:Optional
 	Creates *PrAutomationCreateConfiguration `json:"creates,omitempty"`
 
-	// Spec for files to be updated, using regex replacement
+	// Updates specifies how to modify existing files using regex replacements
+	// or YAML overlays, enabling precise changes to infrastructure code.
 	// +kubebuilder:validation:Optional
 	Updates *PrAutomationUpdateConfiguration `json:"updates,omitempty"`
 
-	// Spec for files and folders to be deleted
+	// Deletes specifies files and folders to remove from the repository as part
+	// of the PR, useful for cleanup or migration scenarios.
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
 }
 
+// PrAutomationDeleteConfiguration specifies files and folders to delete as part of the PR operation.
 type PrAutomationDeleteConfiguration struct {
-	// Individual files to delete
+	// Individual files to delete.
 	// +kubebuilder:validation:Optional
 	Files []string `json:"files"`
 
-	// Entire folders to delete
+	// Entire folders to delete.
 	// +kubebuilder:validation:Optional
 	Folders []string `json:"folders"`
 }
@@ -234,9 +258,9 @@ func (in *PrAutomationDeleteConfiguration) Attributes() *console.PrAutomationDel
 	}
 }
 
-// PrAutomationCreateConfiguration ...
+// PrAutomationCreateConfiguration defines how to generate new files from templates during PR creation.
 type PrAutomationCreateConfiguration struct {
-	// Git Location to source external files from
+	// Git location to source external files from.
 	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 
@@ -258,7 +282,7 @@ func (in *PrAutomationCreateConfiguration) Attributes() *console.PrAutomationCre
 	}
 }
 
-// PrAutomationTemplate ...
+// PrAutomationTemplate defines a single file template for creating new files in the target repository.
 type PrAutomationTemplate struct {
 	// The destination to write the file to
 	// +kubebuilder:validation:Required
@@ -300,13 +324,13 @@ func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttrib
 	}
 }
 
-// PrAutomationUpdateConfiguration ...
+// PrAutomationUpdateConfiguration defines how to modify existing files in the target repository.
 type PrAutomationUpdateConfiguration struct {
-	// Files to update
+	// Files to update.
 	// +kubebuilder:validation:Optional
 	Files []*string `json:"files,omitempty"`
 
-	// MatchStrategy, see enum for behavior
+	// MatchStrategy, see enum for behavior.
 	// +kubebuilder:validation:Optional
 	MatchStrategy *console.MatchStrategy `json:"matchStrategy,omitempty"`
 
@@ -318,15 +342,15 @@ type PrAutomationUpdateConfiguration struct {
 	// +kubebuilder:validation:Optional
 	YamlOverlays []YamlOverlay `json:"yamlOverlays,omitempty"`
 
-	// The regexes to apply on each file
+	// Regexes to apply on each file.
 	// +kubebuilder:validation:Optional
 	Regexes []*string `json:"regexes,omitempty"`
 
-	// The template to use when replacing a regex
+	// ReplaceTemplate is a template to use when replacing a regex.
 	// +kubebuilder:validation:Optional
 	ReplaceTemplate *string `json:"replaceTemplate,omitempty"`
 
-	// (Unused so far)
+	// Yq (unused so far)
 	// +kubebuilder:validation:Optional
 	Yq *string `json:"yq,omitempty"`
 }
@@ -351,21 +375,21 @@ func (in *PrAutomationUpdateConfiguration) Attributes() *console.PrAutomationUpd
 	}
 }
 
-// RegexReplacement ...
+// RegexReplacement defines a specific find-and-replace operation using regular expressions.
 type RegexReplacement struct {
-	// The regex to match a substring on
+	// Regex to match a substring on.
 	// +kubebuilder:validation:Required
 	Regex string `json:"regex"`
 
-	// The file this replacement will work on
+	// File this replacement will work on.
 	// +kubebuilder:validation:Required
 	File string `json:"file"`
 
-	// Replacement to be substituted for the match in the regex
+	// Replacement to be substituted for the match in the regex.
 	// +kubebuilder:validation:Required
 	Replacement string `json:"replacement"`
 
-	// Whether you want to apply templating to the regex before compiling
+	// Templated indicates whether you want to apply templating to the regex before compiling.
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated"`
 }
@@ -379,21 +403,21 @@ func (in *RegexReplacement) Attributes() *console.RegexReplacementAttributes {
 	}
 }
 
-// YamlOverlay ...
+// YamlOverlay defines a YAML merge operation to modify existing YAML files.
 type YamlOverlay struct {
-	// the file to execute the overlay on
+	// File to execute the overlay on.
 	// +kubebuilder:validation:Required
 	File string `json:"file"`
 
-	// the (possibly templated) yaml to use as the overlayed yaml blob written to the file
+	// Yaml (possibly templated) to use as the overlayed YAML blob written to the file.
 	// +kubebuilder:validation:Required
 	Yaml string `json:"yaml"`
 
-	// Whether you want to apply templating to the yaml blob before overlaying
+	// Templated indicates whether you want to apply templating to the YAML blob before overlaying.
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated,omitempty"`
 
-	// How you want list merge to be performed, defaults to OVERWRITE
+	// ListMerge defines how you want list merge to be performed, defaults to OVERWRITE.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=OVERWRITE;APPEND
 	ListMerge *console.ListMerge `json:"listMerge,omitempty"`
@@ -408,13 +432,13 @@ func (in *YamlOverlay) Attributes() *console.YamlOverlayAttributes {
 	}
 }
 
-// Additional details to verify all prerequisites are satisfied before generating this pr
+// PrAutomationConfirmation defines additional verification steps before PR generation.
 type PrAutomationConfirmation struct {
-	// Markdown text to explain this pr
+	// Text in Markdown to explain this PR.
 	// +kubebuilder:validation:Optional
 	Text *string `json:"text,omitempty"`
 
-	// An itemized checklist to present to confirm each prerequisite is satisfied
+	// Checklist to present to confirm each prerequisite is satisfied.
 	// +kubebuilder:validation:Optional
 	Checklist []PrConfirmationChecklist `json:"checklist,omitempty"`
 }
@@ -438,47 +462,60 @@ func (in *PrAutomationConfirmation) Attributes() *console.PrConfirmationAttribut
 	}
 }
 
-// PrAutomationConfiguration ...
+// PrAutomationConfiguration defines a single input field in the self-service UI form.
 type PrAutomationConfiguration struct {
+	// Name is the identifier for this configuration field, used as a template variable
+	// and as the form field name in the UI.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
+	// Type specifies the input type for this field, determining how it's rendered
+	// in the UI and what validation is applied.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=STRING;INT;BOOL;PASSWORD;ENUM;CLUSTER;PROJECT;GROUP;USER;FLOW
 	Type console.ConfigurationType `json:"type"`
 
+	// Condition defines when this field should be displayed based on the values
+	// of other fields, enabling dynamic forms that adapt to user input.
 	// +kubebuilder:validation:Optional
 	*Condition `json:"condition,omitempty"`
 
+	// Default provides a default value for this field.
 	// +kubebuilder:validation:Optional
 	Default *string `json:"default,omitempty"`
 
+	// Documentation provides help text or description for this field to guide users in providing the correct input.
 	// +kubebuilder:validation:Optional
 	Documentation *string `json:"documentation,omitempty"`
 
-	// Extended documentation for the input of this field.
+	// Longform provides extended documentation or detailed explanation for complex configuration fields.
 	// +kubebuilder:validation:Optional
 	Longform *string `json:"longform,omitempty"`
 
-	// A custom display name for the input of this field.  Will default to name otherwise.
+	// DisplayName provides a human-readable label for this field in the UI.
+	// If not provided, the Name field is used as the display label.
 	// +kubebuilder:validation:Optional
 	DisplayName *string `json:"displayName,omitempty"`
 
+	// Optional indicates whether this field is required (false) or optional (true) for PR generation.
+	// Required fields must be filled by the user.
 	// +kubebuilder:validation:Optional
 	Optional *bool `json:"optional,omitempty"`
 
+	// Placeholder text to show in the input field to guide users on the expected format or content.
 	// +kubebuilder:validation:Optional
 	Placeholder *string `json:"placeholder,omitempty"`
 
-	// Any additional validations you want to apply to this configuration item before generating a pr
+	// Validation defines additional validation rules to apply to user input before allowing PR generation.
 	// +kubebuilder:validation:Optional
 	Validation *PrAutomationConfigurationValidation `json:"validation,omitempty"`
 
+	// Values provides the list of allowed values for ENUM type fields, creating a dropdown selection in the UI.
 	// +kubebuilder:validation:Optional
 	Values []*string `json:"values,omitempty"`
 }
 
-// PrAutomationConfigurationValidation validations to apply to configuration items in a PR Automation
+// PrAutomationConfigurationValidation defines validation rules for configuration field inputs.
 type PrAutomationConfigurationValidation struct {
 	// A regex to match string-valued configuration items
 	// +kubebuilder:validation:Optional
@@ -532,7 +569,7 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 	return conf
 }
 
-// Condition ...
+// Condition defines a conditional expression.
 type Condition struct {
 	// +kubebuilder:validation:Required
 	Field string `json:"field"`

@@ -10,15 +10,21 @@ func init() {
 	SchemeBuilder.Register(&GitRepository{}, &GitRepositoryList{})
 }
 
+// GitRepositorySpec defines the desired state of the GitRepository resource.
 type GitRepositorySpec struct {
+	// Url of the GitRepository, supporting both HTTPS and SSH protocols.
+	// This field is immutable once set.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Url is immutable"
 	Url string `json:"url"`
 
-	// Reference a ScmConnection to reuse its credentials for this GitRepository's authentication
+	// ConnectionRef references an ScmConnection to reuse existing credentials and configuration
+	// for authenticating with GitRepository.
 	// +kubebuilder:validation:Optional
 	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
 
-	// CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password.
+	// CredentialsRef references a Secret containing authentication credentials for this repository.
+	// The secret should contain keys for privateKey, passphrase, username, and password as needed
+	// for the repository's authentication method.
 	// +kubebuilder:validation:Optional
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
 }
@@ -34,10 +40,12 @@ type GitRepositoryStatus struct {
 	Status `json:",inline"`
 
 	// Health status.
+	// One of PULLABLE, FAILED.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum:=PULLABLE;FAILED
 	Health GitHealth `json:"health,omitempty"`
-	// Message indicating details about last transition.
+
+	// Message indicating details about the last transition.
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 }
@@ -47,6 +55,11 @@ type GitRepositoryStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Repo health status"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console repo Id"
+
+// GitRepository provides Git-based source control integration for Plural's GitOps workflows.
+// It represents a Git repository available for deployments, enabling automated fetching of manifests,
+// IaC code, and configuration from version-controlled sources. Supports both HTTPS and SSH authentication
+// methods with health monitoring and credential management through ScmConnections or direct secret references.
 type GitRepository struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -65,8 +78,9 @@ func (in *GitRepository) ConsoleName() string {
 	return in.Name
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
+// GitRepositoryList contains a list of GitRepository resources.
 type GitRepositoryList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
