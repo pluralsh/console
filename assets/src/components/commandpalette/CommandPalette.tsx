@@ -117,7 +117,7 @@ export default function CommandPalette() {
         <CommandAdvancedInput
           placeholder={
             aiEnabled
-              ? 'Search history, commands, or ask Copilot a question...'
+              ? 'Search history, commands, or ask Plural AI a question...'
               : 'Search commands...'
           }
           onValueChange={setValue}
@@ -360,7 +360,7 @@ function CommandAdvancedInput({
   const sendMessage = useCallback(
     (message: string) => {
       createNewThread({
-        summary: 'New Chat with Plural Copilot',
+        summary: 'New Chat with Plural AI',
       }).then(() => {
         setPendingMessage(message)
         setCmdkOpen?.(false)

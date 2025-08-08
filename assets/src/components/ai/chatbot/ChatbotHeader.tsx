@@ -78,7 +78,7 @@ export function ChatbotHeader({
           </div>
         )}
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
-          Copilot
+          Plural AI
         </Body2BoldP>
         <AgentSelect />
         <Flex gap="xsmall">
@@ -90,7 +90,7 @@ export function ChatbotHeader({
               tooltip="Start a new chat"
               onClick={() =>
                 createNewThread({
-                  summary: 'New chat with Plural Copilot',
+                  summary: 'New chat with Plural AI',
                   ...(connectionId && {
                     session: { connectionId, done: true },
                   }),

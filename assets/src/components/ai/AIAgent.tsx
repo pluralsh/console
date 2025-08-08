@@ -75,7 +75,7 @@ export function AIAgent() {
           />
         }
         message="No agent sessions"
-        description="You can create a new agent session from the AI Copilot panel."
+        description="You can create a new agent session from the Plural AI side panel."
         cssProps={{ overflow: 'auto' }}
       />
     )

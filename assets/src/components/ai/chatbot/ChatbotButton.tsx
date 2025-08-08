@@ -35,7 +35,7 @@ export function ChatbotIconButton({
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
-      Ask Copilot
+      Ask Plural AI
     </AIButton>
   )
 }

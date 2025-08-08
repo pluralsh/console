@@ -133,7 +133,7 @@ function ChatbotPanelInner() {
 
     // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
-      createNewThread({ summary: 'New chat with Plural Copilot' })
+      createNewThread({ summary: 'New chat with Plural AI' })
       return
     }
 
