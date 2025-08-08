@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/iancoleman/orderedmap"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -344,10 +343,11 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
-
-		sort.Slice(attr.Helm.ValuesFiles, func(i, j int) bool {
-			return *attr.Helm.ValuesFiles[i] < *attr.Helm.ValuesFiles[j]
-		})
+		if len(attr.Helm.ValuesFiles) > 0 {
+			sort.Slice(attr.Helm.ValuesFiles, func(i, j int) bool {
+				return *attr.Helm.ValuesFiles[i] < *attr.Helm.ValuesFiles[j]
+			})
+		}
 
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
@@ -519,13 +519,7 @@ func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secre
 	}
 
 	result := algorithms.Merge(valuesMap, valuesFromMap)
-
-	ordered, err := toOrderedMap(result)
-	if err != nil {
-		return nil, err
-	}
-
-	out, err := yaml.Marshal(ordered)
+	out, err := yaml.Marshal(result)
 	if err != nil {
 		return nil, err
 	}
@@ -701,7 +695,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
@@ -733,38 +727,4 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 
 		return requests
 	})
-}
-
-func toOrderedMap(data interface{}) (interface{}, error) {
-	switch v := data.(type) {
-	case map[string]interface{}:
-		omap := orderedmap.New()
-		keys := make([]string, 0, len(v))
-		for k := range v {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			val, err := toOrderedMap(v[k])
-			if err != nil {
-				return nil, err
-			}
-			omap.Set(k, val)
-		}
-		return omap, nil
-
-	case []interface{}:
-		result := make([]interface{}, len(v))
-		for i, item := range v {
-			val, err := toOrderedMap(item)
-			if err != nil {
-				return nil, err
-			}
-			result[i] = val
-		}
-		return result, nil
-
-	default:
-		return v, nil
-	}
 }
