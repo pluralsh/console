@@ -174,10 +174,7 @@ function usePeriodicPulse(onMs: number, periodMs: number) {
       setOn(true)
       timeoutId = setTimeout(() => setOn(false), onMs)
     }
-    // run once on mount, then every period
-    trigger()
     const intervalId = setInterval(trigger, periodMs)
-
     return () => {
       clearInterval(intervalId)
       clearTimeout(timeoutId)
