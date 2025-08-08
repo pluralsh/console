@@ -61,6 +61,13 @@ func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client
 		Token:    token,
 		Default:  s.Spec.Default,
 	}
+
+	if s.Spec.Proxy != nil {
+		attr.Proxy = &console.HTTPProxyAttributes{
+			URL: s.Spec.Proxy.URL,
+		}
+	}
+
 	if s.Spec.Github != nil {
 		attr.Github = &console.GithubAppAttributes{
 			AppID:          s.Spec.Github.AppID,
@@ -120,6 +127,11 @@ type ScmConnectionSpec struct {
 	APIUrl *string `json:"apiUrl,omitempty"`
 	// +kubebuilder:validation:Optional
 	Github *ScmGithubConnection `json:"github,omitempty"`
+
+	// Configures usage of an HTTP proxy for all requests involving this SCM connection.
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Default *bool `json:"default,omitempty"`
 }
@@ -129,4 +141,10 @@ type ScmGithubConnection struct {
 	InstallationId string `json:"installationId"`
 	// +kubebuilder:validation:Optional
 	PrivateKeyRef *corev1.SecretKeySelector `json:"privateKeyRef,omitempty"`
+}
+
+type HttpProxyConfiguration struct {
+	// The url of your HTTP proxy.
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
 }

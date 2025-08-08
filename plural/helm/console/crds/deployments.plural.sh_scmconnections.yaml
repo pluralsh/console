@@ -96,6 +96,16 @@ spec:
               name:
                 description: Name is a human-readable name of the ScmConnection.
                 type: string
+              proxy:
+                description: Configures usage of an HTTP proxy for all requests involving
+                  this SCM connection.
+                properties:
+                  url:
+                    description: The url of your HTTP proxy.
+                    type: string
+                required:
+                - url
+                type: object
               tokenSecretRef:
                 description: A secret containing this access token you will use, stored
                   in the `token` data field.

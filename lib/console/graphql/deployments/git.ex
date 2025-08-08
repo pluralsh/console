@@ -106,7 +106,13 @@ defmodule Console.GraphQl.Deployments.Git do
     field :api_url,             :string
     field :github,              :github_app_attributes
     field :default,             :boolean
+    field :proxy,               :http_proxy_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
+  end
+
+  @desc "Configuration for http proxy usage in connections to Git or SCM providers"
+  input_object :http_proxy_attributes do
+    field :url, non_null(:string)
   end
 
   @desc "Requirements to perform Github App authentication"
@@ -460,6 +466,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :type,     non_null(:scm_type)
     field :default,  :boolean
     field :username, :string
+    field :proxy,    :http_proxy_configuration, description: "a proxy to use for git requests"
+
     field :base_url, :string, description: "base url for git clones for self-hosted versions"
     field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"
 
@@ -723,6 +731,11 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_pipeline_action do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for http proxy usage in connections to Git or SCM providers"
+  object :http_proxy_configuration do
+    field :url, non_null(:string)
   end
 
 
