@@ -343,6 +343,12 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
+		if len(attr.Helm.ValuesFiles) > 0 {
+			sort.Slice(attr.Helm.ValuesFiles, func(i, j int) bool {
+				return *attr.Helm.ValuesFiles[i] < *attr.Helm.ValuesFiles[j]
+			})
+		}
+
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
 				Name:      service.Spec.Helm.Repository.Name,
