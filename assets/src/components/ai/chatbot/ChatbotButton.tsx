@@ -6,37 +6,30 @@ import {
   IconFrame,
   Spinner,
 } from '@pluralsh/design-system'
-import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
-import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
-import { useChatbot } from '../AIContext.tsx'
-import AIButton from '../explain/ExplainWithAIButton.tsx'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
+import { ComponentPropsWithRef } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
+import styled from 'styled-components'
+import { useChatbot } from '../AIContext.tsx'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
+const ANIMATION_DURATION_S = 4
 
-interface ChatbotButtonProps {
-  active: boolean
-  onClick: Dispatch<void>
-}
-
-export function ChatbotIconButton({
-  onClick,
-  active,
+export function MainChatbotButton({
   ...props
-}: ChatbotButtonProps & ComponentPropsWithRef<typeof Button>): ReactNode {
+}: ComponentPropsWithRef<typeof Button>) {
   return (
-    <AIButton
-      onClick={onClick}
-      active={active}
-      visible
+    <MainChatbotButtonSC
+      small
+      secondary
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
-      Ask Plural AI
-    </AIButton>
+      Plural AI
+    </MainChatbotButtonSC>
   )
 }
 
@@ -119,3 +112,45 @@ export function ChatWithAIButton({
     </Button>
   )
 }
+
+const MainChatbotButtonSC = styled(Button)(({ theme }) => ({
+  '&, &:hover, &:focus': {
+    '@property --border-angle-1': {
+      syntax: "'<angle>'",
+      inherits: 'true',
+      initialValue: '0deg',
+    },
+    '@property --border-angle-2': {
+      syntax: "'<angle>'",
+      inherits: 'true',
+      initialValue: '180deg',
+    },
+    '--border-angle-1': '0deg',
+    '--border-angle-2': '180deg',
+    border: '1px solid transparent',
+    backgroundImage: `
+    linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}),
+    conic-gradient(
+      from var(--border-angle-1) at 25% 30%,
+      transparent,
+      ${theme.colors['border-outline-focused']} 12%,
+      transparent 32%,
+      transparent
+    ),
+    conic-gradient(
+      from var(--border-angle-2) at 75% 60%,
+      transparent,
+      ${theme.colors['border-input']} 12%,
+      transparent 60%,
+      transparent
+    )
+  `,
+    backgroundClip: 'padding-box, border-box, border-box',
+    backgroundOrigin: 'border-box',
+    animation: `rotateChatBtnBorderA ${ANIMATION_DURATION_S}s linear infinite, rotateChatBtnBorderB ${ANIMATION_DURATION_S * 1.5}s linear infinite`,
+    '@keyframes rotateChatBtnBorderA': { to: { '--border-angle-1': '360deg' } },
+    '@keyframes rotateChatBtnBorderB': {
+      to: { '--border-angle-2': '-360deg' },
+    },
+  },
+}))
