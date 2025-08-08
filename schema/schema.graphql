@@ -369,7 +369,7 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
-  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID): GlobalServiceConnection
+  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID, q: String): GlobalServiceConnection
 
   clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
 

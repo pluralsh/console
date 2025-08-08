@@ -74,7 +74,7 @@ export function AgentSessionTypeSelect() {
             <Tooltip
               css={{ maxWidth: 500 }}
               placement="top"
-              label="Change the type of session you are having with Plural Copilot"
+              label="Change the type of session you are having with Plural AI"
             >
               <span css={{ ...TRUNCATE }}>
                 {capitalize(curType ?? 'Change session type')}

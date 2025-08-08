@@ -55,7 +55,7 @@ export function ChatbotAgentInit() {
           direction="column"
           gap="xxsmall"
         >
-          <Body1BoldP>Copilot Agent</Body1BoldP>
+          <Body1BoldP>Plural AI Agent</Body1BoldP>
           <Body2P css={{ color: theme.colors['text-xlight'] }}>
             Our agent is a background coding agent that can make clear,
             incremental changes to active Infrastructure as Code already managed

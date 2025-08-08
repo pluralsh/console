@@ -1,8 +1,4 @@
-import {
-  Accordion,
-  AccordionItem,
-  ChatOutlineIcon,
-} from '@pluralsh/design-system'
+import { Accordion, AccordionItem } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -21,7 +17,7 @@ import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
-import { ChatbotIconButton } from './ChatbotButton.tsx'
+import { MainChatbotButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import {
   ChatbotMessagesWrapperSC,
@@ -41,14 +37,7 @@ export function ChatbotLauncher() {
 
   if (!settings.ai?.enabled || open) return null
 
-  return (
-    <ChatbotIconButton
-      active={open}
-      onClick={() => setOpen(true)}
-    >
-      <ChatOutlineIcon />
-    </ChatbotIconButton>
-  )
+  return <MainChatbotButton onClick={() => setOpen(true)} />
 }
 
 export function ChatbotPanel() {
@@ -133,7 +122,7 @@ function ChatbotPanelInner() {
 
     // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
-      createNewThread({ summary: 'New chat with Plural Copilot' })
+      createNewThread({ summary: 'New chat with Plural AI' })
       return
     }
 

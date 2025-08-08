@@ -6,37 +6,36 @@ import {
   IconFrame,
   Spinner,
 } from '@pluralsh/design-system'
-import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
-import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
-import { useChatbot } from '../AIContext.tsx'
-import AIButton from '../explain/ExplainWithAIButton.tsx'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
+import { ComponentPropsWithRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
+import styled from 'styled-components'
+import { useChatbot } from '../AIContext.tsx'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
 
-interface ChatbotButtonProps {
-  active: boolean
-  onClick: Dispatch<void>
-}
+const ANIMATION_SPEED_S = 4
+// run every 20 minutes for 6 seconds
+const ANIMATION_ON_MS = 6_000
+const ANIMATION_PERIOD_MS = 20 * 60 * 1000
 
-export function ChatbotIconButton({
-  onClick,
-  active,
+export function MainChatbotButton({
   ...props
-}: ChatbotButtonProps & ComponentPropsWithRef<typeof Button>): ReactNode {
+}: ComponentPropsWithRef<typeof Button>) {
+  const showAnimation = usePeriodicPulse(ANIMATION_ON_MS, ANIMATION_PERIOD_MS)
   return (
-    <AIButton
-      onClick={onClick}
-      active={active}
-      visible
+    <MainChatbotButtonSC
+      $showAnimation={showAnimation}
+      small
+      secondary
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
-      Ask Copilot
-    </AIButton>
+      Plural AI
+    </MainChatbotButtonSC>
   )
 }
 
@@ -118,4 +117,68 @@ export function ChatWithAIButton({
       {bodyText}
     </Button>
   )
+}
+
+const MainChatbotButtonSC = styled(Button)<{ $showAnimation: boolean }>(
+  ({ theme, $showAnimation }) => ({
+    '&, &:hover, &:focus': {
+      '@property --border-angle-1': {
+        syntax: "'<angle>'",
+        inherits: 'true',
+        initialValue: '0deg',
+      },
+      '@property --border-angle-2': {
+        syntax: "'<angle>'",
+        inherits: 'true',
+        initialValue: '180deg',
+      },
+      '--border-angle-1': '0deg',
+      '--border-angle-2': '180deg',
+      border: $showAnimation ? '1px solid transparent' : undefined,
+      backgroundImage: `
+        linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}),
+        conic-gradient(
+          from var(--border-angle-1) at 25% 30%,
+          transparent,
+          ${theme.colors['border-outline-focused']} 12%,
+          transparent 32%,
+          transparent
+        ),
+        conic-gradient(
+          from var(--border-angle-2) at 75% 60%,
+          transparent,
+          ${theme.colors['border-input']} 12%,
+          transparent 60%,
+          transparent
+        )
+      `,
+      backgroundClip: 'padding-box, border-box, border-box',
+      backgroundOrigin: 'border-box',
+      animation: `rotateChatBtnBorderA ${ANIMATION_SPEED_S}s linear infinite, rotateChatBtnBorderB ${ANIMATION_SPEED_S * 1.5}s linear infinite`,
+      animationPlayState: $showAnimation ? 'running' : 'paused',
+      '@keyframes rotateChatBtnBorderA': {
+        to: { '--border-angle-1': '360deg' },
+      },
+      '@keyframes rotateChatBtnBorderB': {
+        to: { '--border-angle-2': '-360deg' },
+      },
+    },
+  })
+)
+
+function usePeriodicPulse(onMs: number, periodMs: number) {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    const trigger = () => {
+      setOn(true)
+      timeoutId = setTimeout(() => setOn(false), onMs)
+    }
+    const intervalId = setInterval(trigger, periodMs)
+    return () => {
+      clearInterval(intervalId)
+      clearTimeout(timeoutId)
+    }
+  }, [onMs, periodMs])
+  return on
 }

@@ -1,6 +1,16 @@
 defmodule Console.Schema.GlobalService do
   use Console.Schema.Base
-  alias Console.Schema.{Service, Cluster, Project, ClusterProvider, ServiceTemplate, TemplateContext}
+  alias Console.Schema.{
+    User,
+    Service,
+    Cluster,
+    Project,
+    ClusterProvider,
+    ServiceTemplate,
+    TemplateContext,
+    PolicyBinding
+  }
+  alias Console.Deployments.Policies.Rbac
 
   schema "global_services" do
     field :reparent, :boolean
@@ -29,6 +39,22 @@ defmodule Console.Schema.GlobalService do
     has_one :context, TemplateContext, foreign_key: :global_id, on_replace: :delete
 
     timestamps()
+  end
+
+  def search(query \\ __MODULE__, search) do
+    from(g in query, where: ilike(g.name, ^"%#{search}%"))
+  end
+
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(f in query,
+        join: p in assoc(f, :project),
+        left_join: b in PolicyBinding,
+          on: b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
   end
 
   def for_project(query \\ __MODULE__, id) do

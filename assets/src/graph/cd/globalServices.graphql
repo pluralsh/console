@@ -116,8 +116,8 @@ mutation DeleteGlobalService($id: ID!) {
   }
 }
 
-query GlobalServices($first: Int, $after: String, $projectId: ID) {
-  globalServices(first: $first, after: $after, projectId: $projectId) {
+query GlobalServices($first: Int, $after: String, $projectId: ID, $q: String) {
+  globalServices(first: $first, after: $after, projectId: $projectId, q: $q) {
     pageInfo {
       ...PageInfo
     }
