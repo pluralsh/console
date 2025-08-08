@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
-import { ComponentPropsWithRef } from 'react'
+import { ComponentPropsWithRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
 import styled from 'styled-components'
@@ -16,13 +16,19 @@ import { useChatbot } from '../AIContext.tsx'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
-const ANIMATION_DURATION_S = 4
+
+const ANIMATION_SPEED_S = 4
+// run every 20 minutes for 6 seconds
+const ANIMATION_ON_MS = 6_000
+const ANIMATION_PERIOD_MS = 20 * 60 * 1000
 
 export function MainChatbotButton({
   ...props
 }: ComponentPropsWithRef<typeof Button>) {
+  const showAnimation = usePeriodicPulse(ANIMATION_ON_MS, ANIMATION_PERIOD_MS)
   return (
     <MainChatbotButtonSC
+      $showAnimation={showAnimation}
       small
       secondary
       startIcon={<ChatOutlineIcon size={12} />}
@@ -113,44 +119,69 @@ export function ChatWithAIButton({
   )
 }
 
-const MainChatbotButtonSC = styled(Button)(({ theme }) => ({
-  '&, &:hover, &:focus': {
-    '@property --border-angle-1': {
-      syntax: "'<angle>'",
-      inherits: 'true',
-      initialValue: '0deg',
+const MainChatbotButtonSC = styled(Button)<{ $showAnimation: boolean }>(
+  ({ theme, $showAnimation }) => ({
+    '&, &:hover, &:focus': {
+      '@property --border-angle-1': {
+        syntax: "'<angle>'",
+        inherits: 'true',
+        initialValue: '0deg',
+      },
+      '@property --border-angle-2': {
+        syntax: "'<angle>'",
+        inherits: 'true',
+        initialValue: '180deg',
+      },
+      '--border-angle-1': '0deg',
+      '--border-angle-2': '180deg',
+      border: $showAnimation ? '1px solid transparent' : undefined,
+      backgroundImage: `
+        linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}),
+        conic-gradient(
+          from var(--border-angle-1) at 25% 30%,
+          transparent,
+          ${theme.colors['border-outline-focused']} 12%,
+          transparent 32%,
+          transparent
+        ),
+        conic-gradient(
+          from var(--border-angle-2) at 75% 60%,
+          transparent,
+          ${theme.colors['border-input']} 12%,
+          transparent 60%,
+          transparent
+        )
+      `,
+      backgroundClip: 'padding-box, border-box, border-box',
+      backgroundOrigin: 'border-box',
+      animation: `rotateChatBtnBorderA ${ANIMATION_SPEED_S}s linear infinite, rotateChatBtnBorderB ${ANIMATION_SPEED_S * 1.5}s linear infinite`,
+      animationPlayState: $showAnimation ? 'running' : 'paused',
+      '@keyframes rotateChatBtnBorderA': {
+        to: { '--border-angle-1': '360deg' },
+      },
+      '@keyframes rotateChatBtnBorderB': {
+        to: { '--border-angle-2': '-360deg' },
+      },
     },
-    '@property --border-angle-2': {
-      syntax: "'<angle>'",
-      inherits: 'true',
-      initialValue: '180deg',
-    },
-    '--border-angle-1': '0deg',
-    '--border-angle-2': '180deg',
-    border: '1px solid transparent',
-    backgroundImage: `
-    linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}),
-    conic-gradient(
-      from var(--border-angle-1) at 25% 30%,
-      transparent,
-      ${theme.colors['border-outline-focused']} 12%,
-      transparent 32%,
-      transparent
-    ),
-    conic-gradient(
-      from var(--border-angle-2) at 75% 60%,
-      transparent,
-      ${theme.colors['border-input']} 12%,
-      transparent 60%,
-      transparent
-    )
-  `,
-    backgroundClip: 'padding-box, border-box, border-box',
-    backgroundOrigin: 'border-box',
-    animation: `rotateChatBtnBorderA ${ANIMATION_DURATION_S}s linear infinite, rotateChatBtnBorderB ${ANIMATION_DURATION_S * 1.5}s linear infinite`,
-    '@keyframes rotateChatBtnBorderA': { to: { '--border-angle-1': '360deg' } },
-    '@keyframes rotateChatBtnBorderB': {
-      to: { '--border-angle-2': '-360deg' },
-    },
-  },
-}))
+  })
+)
+
+function usePeriodicPulse(onMs: number, periodMs: number) {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    const trigger = () => {
+      setOn(true)
+      timeoutId = setTimeout(() => setOn(false), onMs)
+    }
+    // run once on mount, then every period
+    trigger()
+    const intervalId = setInterval(trigger, periodMs)
+
+    return () => {
+      clearInterval(intervalId)
+      clearTimeout(timeoutId)
+    }
+  }, [onMs, periodMs])
+  return on
+}
