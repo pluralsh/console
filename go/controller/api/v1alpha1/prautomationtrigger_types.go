@@ -23,17 +23,24 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// PrAutomationTriggerSpec defines the desired state of PrAutomationTrigger
+// PrAutomationTriggerSpec defines the desired state of PrAutomationTrigger.
+// A trigger executes a specific PR automation with custom configuration and branch settings,
+// enabling programmatic and event-driven generation of pull requests for infrastructure changes.
 type PrAutomationTriggerSpec struct {
-	// PrAutomationRef pointing to source [PrAutomation]
+	// PrAutomationRef points to the source PrAutomation resource that defines
+	// the templates, operations, and target repository for the generated PR.
 	// +kubebuilder:validation:Optional
 	PrAutomationRef *corev1.ObjectReference `json:"prAutomationRef,omitempty"`
 
-	// Branch that should be created against [PrAutomation] base branch
+	// Branch specifies the name of the branch that should be created for this PR
+	// against the PrAutomation's configured base branch. This allows multiple
+	// triggers to operate on the same automation without conflicts.
 	// +kubebuilder:validation:Required
 	Branch string `json:"branch,omitempty"`
 
-	// Context is a [PrAutomation] configuration context
+	// Context provides the configuration values that will be used to template
+	// the PR content, file modifications, and metadata. This should match the
+	// configuration schema defined in the referenced PrAutomation.
 	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
 }
@@ -41,13 +48,19 @@ type PrAutomationTriggerSpec struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// PrAutomationTrigger is the Schema for the prautomationtriggers API
+// PrAutomationTrigger initiates the execution of a PR automation with specific parameters.
+// This resource enables automated, event-driven, or scheduled generation of pull requests
+// by providing configuration context and branch information to an existing PrAutomation.
 type PrAutomationTrigger struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PrAutomationTriggerSpec `json:"spec,omitempty"`
-	Status Status                  `json:"status,omitempty"`
+	// Spec defines the desired state of the PrAutomationTrigger, including
+	// the target automation, branch name, and configuration context.
+	Spec PrAutomationTriggerSpec `json:"spec,omitempty"`
+
+	// Status represents the current state of this PrAutomationTrigger resource.
+	Status Status `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
