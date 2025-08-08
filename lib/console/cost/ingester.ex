@@ -37,7 +37,6 @@ defmodule Console.Cost.Ingester do
     |> add_operation(:scaling, fn _ ->
       recs = Map.get(attrs, :recommendations) || []
       Logger.info "Found #{length(recs)} recommendations for #{handle}"
-      IO.inspect(recs)
 
       recs
       |> Stream.map(&cluster_timestamped(&1, id))
