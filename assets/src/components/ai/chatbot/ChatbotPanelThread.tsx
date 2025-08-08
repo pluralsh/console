@@ -1,9 +1,10 @@
-import { usePrevious, useResizeObserver } from '@pluralsh/design-system'
+import { usePrevious } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
 import {
   AgentSession,
   AiDeltaFragment,
   AiRole,
+  ChatFragment,
   ChatThreadDetailsQuery,
   ChatThreadFragment,
   ChatType,
@@ -14,10 +15,10 @@ import {
 import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
 
+import { VirtualizedList } from 'components/utils/VirtualizedList.tsx'
 import {
   Dispatch,
-  Fragment,
-  ReactNode,
+  RefObject,
   SetStateAction,
   useCallback,
   useEffect,
@@ -25,12 +26,10 @@ import {
   useRef,
   useState,
 } from 'react'
-import { VariableSizeList } from 'react-window'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useCommandPaletteMessage } from '../../commandpalette/CommandPalette.tsx'
-import SmoothScroller from '../../utils/SmoothScroller.tsx'
 import { FetchPaginatedDataResult } from '../../utils/table/useFetchPaginatedData.tsx'
 import TypingIndicator from '../../utils/TypingIndicator.tsx'
 import { Body1P } from '../../utils/typography/Text.tsx'
@@ -60,14 +59,13 @@ export function ChatbotPanelThread({
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
   const { readValue } = useCommandPaletteMessage()
   const [streaming, setStreaming] = useState<boolean>(false)
-  const [messageListRef, setMessageListRef] = useState<VariableSizeList>()
+  const messageListRef = useRef<HTMLDivElement>(null)
+
+  // TODO: figure this out for virtualized list
   const scrollToBottom = useCallback(
-    () => messageListRef?.scrollToItem(0),
+    () => messageListRef?.current?.scrollTo({ top: 0, behavior: 'smooth' }),
     [messageListRef]
   )
-  const evidence = currentThread.insight?.evidence
-    ?.filter(isNonNullable)
-    .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
 
   const [streamedMessages, setStreamedMessages] = useState<AiDeltaFragment[][]>(
     []
@@ -170,46 +168,32 @@ export function ChatbotPanelThread({
             error={messageError}
           />
         )}
-        <ChatbotMessagesWrapper
-          messageListRef={messageListRef}
-          setMessageListRef={setMessageListRef}
-          loading={!!loading}
-          pageInfo={pageInfo}
-          fetchNextPage={fetchNextPage}
-        >
-          {isEmpty(messages) &&
-            !currentThread.session?.type &&
-            (error ? (
+        <ChatbotMessagesWrapperSC>
+          {isEmpty(messages) && !currentThread.session?.type ? (
+            error ? (
               <GqlError error={error} />
             ) : (
               <Body1P css={{ color: theme.colors['text-long-form'] }}>
                 How can I help you?
               </Body1P>
-            ))}
-          {messages.map((msg) => (
-            <Fragment key={msg.id}>
-              <ChatMessage
-                {...msg}
-                threadId={currentThread.id}
-                serverName={msg.server?.name}
-                session={currentThread.session as AgentSession}
-              />
-              {!isEmpty(evidence) && // only attaches evidence to the initial insight
-                msg.seq === 0 &&
-                msg.role === AiRole.Assistant && (
-                  <ChatbotPanelEvidence evidence={evidence ?? []} />
-                )}
-            </Fragment>
-          ))}
+            )
+          ) : (
+            <ChatMessageList
+              scrollRef={messageListRef}
+              messages={messages}
+              currentThread={currentThread}
+              loading={!!loading}
+              pageInfo={pageInfo}
+              fetchNextPage={fetchNextPage}
+            />
+          )}
           {pendingMessage && (
-            <Fragment key="pending-message">
-              <ChatMessage
-                role={AiRole.User}
-                type={ChatType.Text}
-                content={pendingMessage}
-                disableActions
-              />
-            </Fragment>
+            <ChatMessage
+              role={AiRole.User}
+              type={ChatType.Text}
+              content={pendingMessage}
+              disableActions
+            />
           )}
           {streaming && !isEmpty(streamedMessages) ? (
             streamedMessages.map((message, i) => {
@@ -236,7 +220,7 @@ export function ChatbotPanelThread({
               }}
             />
           ) : null}
-        </ChatbotMessagesWrapper>
+        </ChatbotMessagesWrapperSC>
         {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
             setShowPrompts={setShowExamplePrompts}
@@ -257,81 +241,50 @@ export function ChatbotPanelThread({
   )
 }
 
-export const ChatbotMessagesWrapper = ({
-  messageListRef,
-  setMessageListRef,
-  children,
+export const ChatMessageList = ({
+  messages,
+  currentThread,
+  scrollRef,
   loading,
   pageInfo,
   fetchNextPage,
 }: {
-  messageListRef: VariableSizeList | undefined
-  setMessageListRef: Dispatch<SetStateAction<VariableSizeList | undefined>>
-  children: ReactNode | Array<ReactNode>
+  messages: ChatFragment[]
+  currentThread: ChatThreadFragment
+  scrollRef?: RefObject<HTMLDivElement | null>
   loading: boolean
   pageInfo: any
   fetchNextPage?: Dispatch<void>
 }) => {
   const items = useMemo(() => {
-    if (isEmpty(children)) return []
-    if (!Array.isArray(children)) return [children]
-
-    return children
-      .filter((child) => !isEmpty(child))
-      .flatMap((child) => {
-        if (Array.isArray(child)) return child
-        return [child]
-      })
-      .reverse()
-  }, [children])
+    return messages.reverse()
+  }, [messages])
+  const evidence = currentThread.insight?.evidence
+    ?.filter(isNonNullable)
+    .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr)
 
   return (
-    <ChatbotMessagesWrapperSC>
-      <SmoothScroller
-        listRef={messageListRef}
-        setListRef={setMessageListRef}
-        items={items}
-        loading={loading}
-        hasNextPage={pageInfo?.hasNextPage}
-        mapper={(child, _, { index, setSize }) => (
-          <ChatbotMessage
-            handleHeightChange={(height) => setSize(index, height)}
-            idx={index}
-          >
-            {child}
-          </ChatbotMessage>
-        )}
-        loadNextPage={fetchNextPage}
-        handleScroll={undefined}
-        placeholder={undefined}
-        refreshKey={undefined}
-        setLoader={undefined}
-      />
-    </ChatbotMessagesWrapperSC>
+    <VirtualizedList
+      items={items}
+      estimateSize={82}
+      overscan={1}
+      renderItem={(msg, index) => (
+        <div data-index={index}>
+          <ChatMessage
+            {...msg}
+            threadId={currentThread.id}
+            serverName={msg.server?.name}
+            session={currentThread.session as AgentSession}
+          />
+          {!isEmpty(evidence) && // only attaches evidence to the initial insight
+            msg.seq === 0 &&
+            msg.role === AiRole.Assistant && (
+              <ChatbotPanelEvidence evidence={evidence ?? []} />
+            )}
+        </div>
+      )}
+    />
   )
-}
-
-function ChatbotMessage({
-  handleHeightChange,
-  idx,
-  children,
-}: {
-  handleHeightChange: (idx: number, height: number) => void
-  idx: number
-  children: ReactNode
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  const prevHeight = useRef<number | null>(null)
-
-  useResizeObserver(ref, (entry) => {
-    const height = entry.height
-    if (prevHeight.current !== height) {
-      prevHeight.current = height
-      handleHeightChange(idx, height)
-    }
-  })
-
-  return <div ref={ref}>{children}</div>
 }
 
 export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
