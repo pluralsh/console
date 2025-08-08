@@ -17,6 +17,37 @@ defmodule Console.GraphQl.Deployments.GlobalQueriesTest do
              |> ids_equal(gs)
     end
 
+    test "it can search global services" do
+      gs = insert(:global_service, name: "test")
+      insert(:global_service, name: "other")
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query Search($q: String!) {
+          globalServices(first: 5, q: $q) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "test"}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal([gs])
+    end
+
+    test "it properly sql escapes search" do
+      gs = insert(:global_service, name: "test")
+      insert(:global_service, name: "other")
+
+      {:ok, %{data: %{"globalServices" => _}}} = run_query("""
+        query Search($q: String!) {
+          globalServices(first: 5, q: $q) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "drop tables \"global_services\""}, %{current_user: admin_user()})
+
+      assert refetch(gs)
+    end
+
     test "project readers can list project global services" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])

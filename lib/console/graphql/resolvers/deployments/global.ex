@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
     GlobalService.ordered()
     |> GlobalService.for_user(user)
     |> apply_filters(GlobalService, args)
+    |> maybe_search(GlobalService, args)
     |> paginate(args)
   end
 

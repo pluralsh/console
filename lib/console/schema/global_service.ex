@@ -41,6 +41,10 @@ defmodule Console.Schema.GlobalService do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(g in query, where: ilike(g.name, ^"%#{search}%"))
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(f in query,

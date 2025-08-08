@@ -207,6 +207,7 @@ defmodule Console.GraphQl.Deployments.Global do
     connection field :global_services, node_type: :global_service do
       middleware Authenticated
       arg :project_id, :id
+      arg :q,          :string
 
       safe_resolve &Deployments.list_global_services/2
     end
