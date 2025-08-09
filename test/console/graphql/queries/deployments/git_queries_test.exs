@@ -216,7 +216,8 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
 
   describe "catalogs" do
     test "it can fetch paginated catalogs" do
-      catalogs = insert_list(3, :catalog)
+      user = insert(:user)
+      catalogs = insert_list(3, :catalog, read_bindings: [%{user_id: user.id}])
 
       {:ok, %{data: %{"catalogs" => found}}} = run_query("""
         query {
@@ -224,14 +225,15 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
             edges { node { id } }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
       assert from_connection(found)
              |> ids_equal(catalogs)
     end
 
     test "it can filter by project" do
-      project = insert(:project)
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
       catalogs = insert_list(3, :catalog, project: project)
       insert_list(3, :catalog)
 
@@ -241,7 +243,7 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
             edges { node { id } }
           }
         }
-      """, %{"id" => project.id}, %{current_user: insert(:user)})
+      """, %{"id" => project.id}, %{current_user: user})
 
       assert from_connection(found)
              |> ids_equal(catalogs)
