@@ -4,9 +4,11 @@ defmodule Console.AI.Tools.Agent.PrAutomationsTest do
 
   describe "implement/1" do
     test "it can fetch catalogs" do
-      catalog = insert(:catalog)
+      user = insert(:user)
+      catalog = insert(:catalog, read_bindings: [%{user_id: user.id}])
       pr_automations = insert_list(2, :pr_automation, catalog: catalog)
 
+      Console.AI.Tool.context(%{user: user})
       {:ok, result} = PrAutomations.implement(%PrAutomations{catalog: catalog.name})
       {:ok, decoded} = Jason.decode(result)
 

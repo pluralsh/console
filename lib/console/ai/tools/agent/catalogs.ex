@@ -18,6 +18,7 @@ defmodule Console.AI.Tools.Agent.Catalogs do
 
   def implement(_) do
     Catalog.ordered()
+    |> Catalog.for_user(Tool.actor())
     |> Repo.all()
     |> Enum.map(&Map.take(&1, [:id, :name, :description, :category]))
     |> Jason.encode()
