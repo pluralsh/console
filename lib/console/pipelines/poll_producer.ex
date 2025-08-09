@@ -6,6 +6,7 @@ defmodule Console.Pipelines.PollProducer do
   * append those records to an internal buffer, filtering out ones that can't be processed on this node and deduping by id
   * deliver the records to the pipeline, in batches of demand, either on poll or when demand is sent upstream
   """
+  require Logger
 
   defmodule State, do: defstruct [demand: 0, buffer: []]
 
@@ -25,6 +26,7 @@ defmodule Console.Pipelines.PollProducer do
       @behaviour Console.Pipelines.PollProducer
 
       @poll_interval unquote(interval)
+      @gc_interval :timer.minutes(60)
 
       def start_link(opts \\ []) do
         GenStage.start_link(__MODULE__, opts, name: __MODULE__)
@@ -32,6 +34,7 @@ defmodule Console.Pipelines.PollProducer do
 
       def init(_) do
         :timer.send_interval(@poll_interval, :poll)
+        send_gc()
         {:producer, %State{}}
       end
 
@@ -41,12 +44,23 @@ defmodule Console.Pipelines.PollProducer do
         ingest(events, state)
         |> deliver()
       end
+
+      def handle_info(:gc, state) do
+        :erlang.garbage_collect()
+        send_gc()
+        {:noreply, [], state}
+      end
+
       def handle_info(_, state), do: {:noreply, [], state}
 
       def handle_demand(demand, %State{demand: remaining} = state) when demand > 0 do
         deliver(%{state | demand: demand + remaining})
       end
       def handle_demand(_, state), do: deliver(state)
+
+      defp send_gc() do
+        Process.send_after(self(), :gc, @gc_interval + Console.jitter(@gc_interval))
+      end
     end
   end
 
