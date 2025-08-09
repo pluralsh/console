@@ -7,15 +7,13 @@ defmodule Console.Pipelines.AI.Base do
   alias Console.Deployments.Settings
   alias Console.Schema.DeploymentSettings
 
-  def process_insights(flow, event) do
-    flow
-    |> Flow.map(& {&1, Worker.generate(&1)})
-    |> Flow.map(fn {res, t} -> {res, Worker.await(t)} end)
-    |> Flow.map(fn
-      {res, {:ok, insight}} ->
-        handle_notify(event, {res, insight})
+  def process_insights(res, event) do
+    Worker.generate(res)
+    |> Worker.await()
+    |> case do
+      {:ok, insight} -> handle_notify(event, {res, insight})
       _ -> :ok
-    end)
+    end
   end
 
   def if_enabled(fun) do

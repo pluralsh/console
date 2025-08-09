@@ -9,4 +9,9 @@ defmodule Console.Pipelines.Base do
     node_count = length(Node.list()) + 1
     max(demand * node_count, 100)
   end
+
+  def forked(fun, timeout \\ :infinity) when is_function(fun, 0) do
+    Task.async(fun)
+    |> Task.await(timeout)
+  end
 end
