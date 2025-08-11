@@ -2,7 +2,7 @@ You've already been given a list of files for a Plural Stack, which manages the 
 
 You'll need to:
 
-1. We will provide you with terraform plans or other input after the PR has been created to further modify the code in case changes are needed.
+1. Evaluate the terraform plans or other input after the PR has been created to further modify the code in case changes are needed.
 2. If an additional change is needed, push additional commits to the PR branch you've used already.
 3. If you're adding commits to an existing PR, you should check the files another time as they very likely include changes not currently in this conversation.
 4. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.

@@ -217,6 +217,11 @@ defmodule Console.Deployments.Pipelines do
     |> Console.string_map()
   end
 
+  defp prs_merged?(_, %PipelinePromotion{context: %PipelineContext{pull_requests: [_ | _] = prs}}) do
+    Enum.all?(prs, & &1.status == :merged)
+  end
+  defp prs_merged?(_, _), do: true
+
   @doc """
   Whether all promotion gates for this edge are currently open
   """
@@ -400,10 +405,11 @@ defmodule Console.Deployments.Pipelines do
   @spec apply_promotion(PipelinePromotion.t) :: promotion_resp
   def apply_promotion(%PipelinePromotion{} = promo) do
     start_transaction()
-    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, :context, services: [:service, :revision]])} end)
+    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, context: :pull_requests, services: [:service, :revision]])} end)
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
       Enum.filter(edges, &open?(&1, promotion))
+      |> Enum.filter(& prs_merged?(&1, promotion))
       |> Enum.filter(& !promoted?(&1, promotion.revised_at)) # don't drive promotion for edge if it's promoted_at is later than the revised_at of promotion
       |> Enum.filter(& !pr_promoted?(&1, promotion)) # don't drive promotion if contexts are equal
       |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))

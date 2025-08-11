@@ -197,6 +197,7 @@ config :console,
   vmetrics_url: get_env("CONSOLE_VMETRICS_URL"),
   es_url: get_env("CONSOLE_CLOUD_ES_URL"),
   byok: get_env("CONSOLE_BYOK") == "true",
+  cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")

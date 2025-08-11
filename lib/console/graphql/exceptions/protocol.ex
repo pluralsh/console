@@ -21,5 +21,5 @@ defimpl Console.GraphQl.Exception, for: Ecto.CastError do
 end
 
 defimpl Console.GraphQl.Exception, for: Ecto.Query.CastError do
-  def error(_), do: {404, "could not find resource"}
+  def error(_), do: {404, "could not find resource, invalid uuid format"}
 end

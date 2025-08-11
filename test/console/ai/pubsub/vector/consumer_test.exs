@@ -36,7 +36,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _ ->
+      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
@@ -228,7 +228,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _ ->
+      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
@@ -278,7 +278,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _ ->
+      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 

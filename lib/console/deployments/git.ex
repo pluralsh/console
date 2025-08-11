@@ -156,7 +156,9 @@ defmodule Console.Deployments.Git do
       |> notify(:delete, user)
     rescue
       # foreign key constraint violated
-      _ -> {:error, "could not delete repository"}
+      e ->
+        Logger.error "Could not delete git repository: #{Exception.format(:error, e, __STACKTRACE__)}}"
+        {:error, "could not delete repository"}
     end
   end
 

@@ -16,12 +16,18 @@ defmodule Console.AI.File.Editor do
   def replace(path, previous, replacement) do
     case File.read(path) do
       {:ok, content} ->
-        replace_existing(path, content, String.trim(previous, "\n"), String.trim(replacement, "\n"))
-      _ -> File.write(path, replacement)
+        replace_existing(
+          path,
+          content,
+          String.trim(safe(previous), "\n"),
+          String.trim(safe(replacement), "\n")
+        )
+      _ -> File.write(path, safe(replacement))
     end
   end
 
   defp replace_existing(path, content, "", replacement), do: File.write(path, "#{content}\n#{replacement}")
+  defp replace_existing(path, content, content, ""), do: File.rm(path) # wipe entire file
   defp replace_existing(path, content, previous, replacement) do
     {content, clines}     = prep(content)
     {replacement, rlines} = prep(replacement)
@@ -59,4 +65,7 @@ defmodule Console.AI.File.Editor do
       false -> content <> "\n"
     end
   end
+
+  defp safe(nil), do: ""
+  defp safe(str) when is_binary(str), do: str
 end

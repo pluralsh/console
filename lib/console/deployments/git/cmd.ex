@@ -1,4 +1,5 @@
 defmodule Console.Deployments.Git.Cmd do
+  import Console.Deployments.Pr.Git, only: [request_options: 1]
   alias Console.Schema.{GitRepository, ScmConnection}
   alias Console.Jwt.Github
 
@@ -21,9 +22,9 @@ defmodule Console.Deployments.Git.Cmd do
       base_url: url,
       api_url: api_url,
       github: %{app_id: app_id, installation_id: inst_id, private_key: pk}
-    }
+    } = conn
   } = git) do
-    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
+    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk, request_options(conn)),
       do: {:ok, %{git | password: token}}
   end
 
