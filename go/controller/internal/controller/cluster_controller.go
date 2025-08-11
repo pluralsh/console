@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -10,7 +9,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -123,14 +121,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, project.Status.ID, sha)
-	if goerrors.Is(err, operrors.ErrRetriable) {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
-	}
-
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, cluster.SetCondition)
 	}
 
 	// Update resource status.
@@ -183,11 +175,8 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
 	}
-	if err := r.ensureCluster(cluster); err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
-		}
+	if err := r.ensure(cluster); err != nil {
+		return handleRequeue(nil, err, cluster.SetCondition)
 	}
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.ReadOnlyUpdateAttributes())
@@ -310,7 +299,7 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 		return nil, err
 	}
 
-	if err := r.ensureCluster(cluster); err != nil {
+	if err := r.ensure(cluster); err != nil {
 		return nil, err
 	}
 
@@ -328,30 +317,26 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId, projectId))
 }
 
-// ensureCluster makes sure that user-friendly input such as userEmail/groupName in
+// ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ClusterReconciler) ensureCluster(cluster *v1alpha1.Cluster) error {
+func (r *ClusterReconciler) ensure(cluster *v1alpha1.Cluster) error {
 	if cluster.Spec.Bindings == nil {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 
 	cluster.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 
 	cluster.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return operrors.ErrRetriable
-	}
 
 	return nil
 }

@@ -5,10 +5,8 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -183,15 +181,11 @@ func (in *PersonaReconciler) ensure(persona *v1alpha1.Persona) error {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(persona.Spec.Bindings, in.UserGroupCache)
+	bindings, err := ensureBindings(persona.Spec.Bindings, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	persona.Spec.Bindings = bindings
-
-	if req {
-		return errors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

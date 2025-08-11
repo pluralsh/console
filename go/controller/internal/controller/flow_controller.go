@@ -14,7 +14,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -168,21 +167,17 @@ func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
 	if flow.Spec.Bindings == nil {
 		return nil
 	}
-	bindings, req, err := ensureBindings(flow.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(flow.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	flow.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(flow.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(flow.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	flow.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

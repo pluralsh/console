@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 	"time"
 
@@ -43,7 +42,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -161,11 +159,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	if !exists {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) {
-				return requeue, nil
-			}
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -186,11 +180,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	} else {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) {
-				return requeue, nil
-			}
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -594,21 +584,17 @@ func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureSta
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	stack.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	stack.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return operrors.ErrRetriable
-	}
 
 	return nil
 }

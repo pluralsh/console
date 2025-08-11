@@ -2,10 +2,7 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 
-	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -18,7 +15,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -79,13 +75,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 
 	apiCredential, err := in.sync(ctx, credential, changed)
 	if err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
-		}
-
-		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, credential.SetCondition)
 	}
 
 	credential.Status.ID = &apiCredential.ID
@@ -133,7 +123,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
 	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
 	if err != nil {
-		return nil, lo.Ternary[error](errors.IsNotFound(err), operrors.ErrRetriable, err)
+		return nil, err
 	}
 
 	attributes := credential.Attributes(userID)
