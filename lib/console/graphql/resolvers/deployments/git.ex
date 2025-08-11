@@ -92,8 +92,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> paginate(args)
   end
 
-  def list_catalogs(args, _) do
+  def list_catalogs(args, %{context: %{current_user: user}}) do
     Catalog.ordered()
+    |> Catalog.for_user(user)
     |> filter_proj(Catalog, args)
     |> paginate(args)
   end
