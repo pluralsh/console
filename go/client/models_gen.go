@@ -3030,6 +3030,16 @@ type HTTPIngressRule struct {
 	Paths []*IngressPath `json:"paths,omitempty"`
 }
 
+// Configuration for http proxy usage in connections to Git or SCM providers
+type HTTPProxyAttributes struct {
+	URL string `json:"url"`
+}
+
+// Configuration for http proxy usage in connections to Git or SCM providers
+type HTTPProxyConfiguration struct {
+	URL string `json:"url"`
+}
+
 type InfrastructureStack struct {
 	ID *string `json:"id,omitempty"`
 	// the name of the stack
@@ -5645,6 +5655,8 @@ type ScmConnection struct {
 	Type     ScmType `json:"type"`
 	Default  *bool   `json:"default,omitempty"`
 	Username *string `json:"username,omitempty"`
+	// a proxy to use for git requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// base url for HTTP apis for self-hosted versions if different from base url
@@ -5665,6 +5677,7 @@ type ScmConnectionAttributes struct {
 	APIURL   *string              `json:"apiUrl,omitempty"`
 	Github   *GithubAppAttributes `json:"github,omitempty"`
 	Default  *bool                `json:"default,omitempty"`
+	Proxy    *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }

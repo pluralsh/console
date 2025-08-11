@@ -27,19 +27,18 @@ import {
   CommandPaletteTab,
 } from 'components/commandpalette/CommandPaletteContext.tsx'
 import { use } from 'react'
+import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 
 export function ChatbotHeader({
   currentThread,
-  isActionsPanelOpen,
-  setIsActionsPanelOpen,
 }: {
   currentThread?: Nullable<ChatThreadTinyFragment>
-  isActionsPanelOpen: boolean
-  setIsActionsPanelOpen: (isOpen: boolean) => void
 }) {
-  const { colors, spacing } = useTheme()
+  const { colors } = useTheme()
   const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const {
+    actionsPanelOpen,
+    setActionsPanelOpen,
     agentInitMode,
     closeChatbot,
     createNewThread,
@@ -64,24 +63,22 @@ export function ChatbotHeader({
           <div
             css={{
               transition: 'transform 0.16s ease-in-out',
-              transform: isActionsPanelOpen ? 'scaleX(-1)' : 'scaleX(1)',
+              transform: actionsPanelOpen ? 'scaleX(-1)' : 'scaleX(1)',
             }}
           >
             <IconFrame
               clickable
               size="small"
               tooltip={
-                isActionsPanelOpen
-                  ? 'Close actions panel'
-                  : 'Open actions panel'
+                actionsPanelOpen ? 'Close actions panel' : 'Open actions panel'
               }
               icon={<HamburgerMenuCollapseIcon />}
-              onClick={() => setIsActionsPanelOpen(!isActionsPanelOpen)}
+              onClick={() => setActionsPanelOpen(!actionsPanelOpen)}
             />
           </div>
         )}
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
-          Copilot
+          Plural AI
         </Body2BoldP>
         <AgentSelect />
         <Flex gap="xsmall">
@@ -93,12 +90,9 @@ export function ChatbotHeader({
               tooltip="Start a new chat"
               onClick={() =>
                 createNewThread({
-                  summary: 'New chat with Plural Copilot',
+                  summary: 'New chat with Plural AI',
                   ...(connectionId && {
-                    session: {
-                      connectionId,
-                      done: true,
-                    },
+                    session: { connectionId, done: true },
                   }),
                 })
               }
@@ -136,8 +130,8 @@ export function ChatbotHeader({
           firstPartialType="body2Bold"
           firstColor="text"
           secondPartialType="caption"
-          css={{ flex: 1, paddingRight: spacing.large }}
         />
+        <AgentSessionTypeSelect />
       </SubHeaderSC>
       <Toast
         show={!!mutationError}
@@ -156,6 +150,8 @@ const SubHeaderSC = styled.div(({ theme }) => ({
   height: 48,
   display: 'flex',
   alignItems: 'center',
+  gap: theme.spacing.large,
+  justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
 }))

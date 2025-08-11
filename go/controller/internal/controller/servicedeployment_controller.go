@@ -343,6 +343,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
+
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
 				Name:      service.Spec.Helm.Repository.Name,

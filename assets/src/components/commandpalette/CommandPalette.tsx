@@ -1,6 +1,7 @@
 import {
   ArrowLeftIcon,
   CommandIcon,
+  Input,
   ReturnIcon,
   useResizeObserver,
 } from '@pluralsh/design-system'
@@ -28,6 +29,7 @@ import { useChatbot } from '../ai/AIContext.tsx'
 import { AITableActions } from '../ai/AITableActions.tsx'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
+import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import usePersistedSessionState from '../hooks/usePersistedSessionState.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
@@ -41,16 +43,8 @@ import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
 import { CommandGroup, useCommands, useHistory } from './commands.ts'
 
-const directory = [
-  { path: CommandPaletteTab.History, label: CommandPaletteTab.History },
-  {
-    path: CommandPaletteTab.Commands,
-    icon: <CommandIcon />,
-    label: CommandPaletteTab.Commands,
-  },
-]
-
 export default function CommandPalette() {
+  const aiEnabled = useAIEnabled()
   const theme = useTheme()
   const { setCmdkOpen, initialTab, setInitialTab } = use(CommandPaletteContext)
   const [value, setValue] = useState('')
@@ -80,6 +74,24 @@ export default function CommandPalette() {
     ),
   })
 
+  const directory = useMemo(
+    () =>
+      [
+        {
+          path: CommandPaletteTab.History,
+          label: CommandPaletteTab.History,
+          enabled: aiEnabled ?? false,
+        },
+        {
+          path: CommandPaletteTab.Commands,
+          icon: <CommandIcon />,
+          label: CommandPaletteTab.Commands,
+          enabled: true,
+        },
+      ].filter((d) => d.enabled),
+    [aiEnabled]
+  )
+
   const items: Array<CommandGroup> = useMemo(() => {
     switch (tab) {
       case CommandPaletteTab.History:
@@ -103,18 +115,25 @@ export default function CommandPalette() {
     <>
       <div id="cmdk-input-wrapper">
         <CommandAdvancedInput
-          placeholder="Search history, commands, or ask Copilot a question..."
+          placeholder={
+            aiEnabled
+              ? 'Search history, commands, or ask Plural AI a question...'
+              : 'Search commands...'
+          }
           onValueChange={setValue}
           value={value}
           setCmdkOpen={setCmdkOpen}
+          aiEnabled={aiEnabled}
         />
-        <div id="cmdk-input-tabs">
-          <ButtonGroup
-            directory={directory}
-            tab={tab}
-            onClick={(t) => setTab(t)}
-          />
-        </div>
+        {directory.length > 1 && (
+          <div id="cmdk-input-tabs">
+            <ButtonGroup
+              directory={directory}
+              tab={tab}
+              onClick={(t) => setTab(t)}
+            />
+          </div>
+        )}
       </div>
       <Command.List
         className={
@@ -323,13 +342,16 @@ interface CommandAdvancedInputProps {
   onValueChange: Dispatch<SetStateAction<string>>
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
   setCmdkOpen?: Dispatch<SetStateAction<boolean>>
+  aiEnabled?: Nullable<boolean>
 }
 
 function CommandAdvancedInput({
   placeholder,
   onValueChange,
+  value,
   onKeyDown,
   setCmdkOpen,
+  aiEnabled,
   ...props
 }: CommandAdvancedInputProps): ReactElement {
   const { createNewThread } = useChatbot()
@@ -338,7 +360,7 @@ function CommandAdvancedInput({
   const sendMessage = useCallback(
     (message: string) => {
       createNewThread({
-        summary: 'New Chat with Plural Copilot',
+        summary: 'New Chat with Plural AI',
       }).then(() => {
         setPendingMessage(message)
         setCmdkOpen?.(false)
@@ -347,7 +369,7 @@ function CommandAdvancedInput({
     [createNewThread, setPendingMessage, setCmdkOpen]
   )
 
-  return (
+  return aiEnabled ? (
     <ChatInput
       enableExamplePrompts={false}
       onKeyDown={onKeyDown}
@@ -356,6 +378,13 @@ function CommandAdvancedInput({
       onValueChange={onValueChange}
       stateless={true}
       {...props}
+    />
+  ) : (
+    <Input
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onValueChange(e.target.value)}
+      onKeyDown={onKeyDown}
     />
   )
 }

@@ -369,7 +369,7 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
-  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID): GlobalServiceConnection
+  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID, q: String): GlobalServiceConnection
 
   clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
 
@@ -7251,8 +7251,15 @@ input ScmConnectionAttributes {
 
   default: Boolean
 
+  proxy: HttpProxyAttributes
+
   "a ssh private key to be used for commit signing"
   signingPrivateKey: String
+}
+
+"Configuration for http proxy usage in connections to Git or SCM providers"
+input HttpProxyAttributes {
+  url: String!
 }
 
 "Requirements to perform Github App authentication"
@@ -7730,6 +7737,9 @@ type ScmConnection {
 
   username: String
 
+  "a proxy to use for git requests"
+  proxy: HttpProxyConfiguration
+
   "base url for git clones for self-hosted versions"
   baseUrl: String
 
@@ -8062,6 +8072,11 @@ type ObserverPipelineAction {
 
   "the context to apply, use $value to interject the observed value"
   context: Map!
+}
+
+"Configuration for http proxy usage in connections to Git or SCM providers"
+type HttpProxyConfiguration {
+  url: String!
 }
 
 "A catalog is an organized collection of PR Automations used for permissioning and discovery"

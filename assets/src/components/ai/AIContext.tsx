@@ -49,6 +49,9 @@ type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
 
+  actionsPanelOpen: boolean
+  setActionsPanelOpen: (show: boolean) => void
+
   setShowForkToast: (show: boolean) => void
 
   currentThread: Nullable<ChatThreadFragment>
@@ -88,7 +91,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = usePersistedState('plural-ai-copilot-open', true)
+  const [open, setOpen] = usePersistedState('plural-ai-chat-open', true)
+  const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [persistedThreadId, setPersistedThreadId] = usePersistedState<
     Nullable<string>
@@ -153,6 +157,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         persistedThreadId,
         lastNonAgentThreadId,
         setShowForkToast,
+        actionsPanelOpen,
+        setActionsPanelOpen,
       }}
     >
       {children}
@@ -205,6 +211,8 @@ export function useChatbot() {
     currentThread,
     currentThreadId,
     setCurrentThreadId,
+    actionsPanelOpen,
+    setActionsPanelOpen,
     persistedThreadId,
     lastNonAgentThreadId,
     selectedAgent,
@@ -260,13 +268,15 @@ export function useChatbot() {
     goToThread,
     goToLastNonAgentThread: () => {
       if (!lastNonAgentThreadId) {
-        createNewThread({ summary: 'New chat with Plural Copilot' })
+        createNewThread({ summary: 'New chat with Plural AI' })
         return
       }
 
       goToThread(lastNonAgentThreadId)
     },
     closeChatbot: () => setOpen(false),
+    actionsPanelOpen,
+    setActionsPanelOpen,
     currentThread,
     currentThreadId,
     persistedThreadId,

@@ -3729,6 +3729,17 @@ export type HttpIngressRule = {
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
 
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyAttributes = {
+  url: Scalars['String']['input'];
+};
+
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyConfiguration = {
+  __typename?: 'HttpProxyConfiguration';
+  url: Scalars['String']['output'];
+};
+
 export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
   /** the actor of this stack (defaults to root console user) */
@@ -8689,6 +8700,7 @@ export type RootQueryTypeGlobalServicesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -9556,6 +9568,8 @@ export type ScmConnection = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   type: ScmType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   username?: Maybe<Scalars['String']['output']>;
@@ -9570,6 +9584,7 @@ export type ScmConnectionAttributes = {
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
   owner?: InputMaybe<Scalars['String']['input']>;
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -12409,6 +12424,7 @@ export type GlobalServicesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -22888,8 +22904,8 @@ export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteG
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
 export const GlobalServicesDocument = gql`
-    query GlobalServices($first: Int, $after: String, $projectId: ID) {
-  globalServices(first: $first, after: $after, projectId: $projectId) {
+    query GlobalServices($first: Int, $after: String, $projectId: ID, $q: String) {
+  globalServices(first: $first, after: $after, projectId: $projectId, q: $q) {
     pageInfo {
       ...PageInfo
     }
@@ -22918,6 +22934,7 @@ ${GlobalServiceFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      projectId: // value for 'projectId'
+ *      q: // value for 'q'
  *   },
  * });
  */

@@ -1,8 +1,4 @@
-import {
-  Accordion,
-  AccordionItem,
-  ChatOutlineIcon,
-} from '@pluralsh/design-system'
+import { Accordion, AccordionItem } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -21,7 +17,7 @@ import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
-import { ChatbotIconButton } from './ChatbotButton.tsx'
+import { MainChatbotButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import {
   ChatbotMessagesWrapperSC,
@@ -29,7 +25,6 @@ import {
 } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
-import { useClickOutside } from '@react-hooks-library/core'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -42,14 +37,7 @@ export function ChatbotLauncher() {
 
   if (!settings.ai?.enabled || open) return null
 
-  return (
-    <ChatbotIconButton
-      active={open}
-      onClick={() => setOpen(true)}
-    >
-      <ChatOutlineIcon />
-    </ChatbotIconButton>
-  )
+  return <MainChatbotButton onClick={() => setOpen(true)} />
 }
 
 export function ChatbotPanel() {
@@ -87,7 +75,6 @@ function ChatbotPanelInner() {
     mutationLoading,
   } = useChatbot()
   const [showMcpServers, setShowMcpServers] = useState(false)
-  const [showActionsPanel, setShowActionsPanel] = useState<boolean>(false)
   const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
   const { data } = useFetchPaginatedData({
@@ -123,8 +110,6 @@ function ChatbotPanelInner() {
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
 
-  useClickOutside(ref, () => setShowActionsPanel(false))
-
   useEffect(() => {
     // If the agent is initializing, a thread doesn't need to be selected.
     if (agentInitMode) return
@@ -137,7 +122,7 @@ function ChatbotPanelInner() {
 
     // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
-      createNewThread({ summary: 'New chat with Plural Copilot' })
+      createNewThread({ summary: 'New chat with Plural AI' })
       return
     }
 
@@ -183,19 +168,13 @@ function ChatbotPanelInner() {
       )}
       {currentThread?.session && !agentInitMode && (
         <ChatbotActionsPanel
-          isOpen={showActionsPanel}
-          setOpen={setShowActionsPanel}
           zIndex={1}
           messages={messages}
         />
       )}
       <MainContentWrapperSC>
         <ResizeGripSC />
-        <ChatbotHeader
-          currentThread={currentThread}
-          isActionsPanelOpen={showActionsPanel}
-          setIsActionsPanelOpen={setShowActionsPanel}
-        />
+        <ChatbotHeader currentThread={currentThread} />
         {threadDetailsQuery.error?.error && (
           <GqlError error={threadDetailsQuery.error.error} />
         )}

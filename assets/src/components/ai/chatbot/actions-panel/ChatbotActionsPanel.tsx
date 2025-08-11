@@ -23,14 +23,13 @@ import {
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { isEmpty } from 'lodash'
-import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { iconUrl } from 'utils/icon.ts'
 import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts.tsx'
 import { PR_ABS_PATH } from '../../../../routes/selfServiceRoutesConsts.tsx'
 import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
 import { mapExistingNodes } from '../../../../utils/graphql.ts'
-import { ComponentIcon } from '../../../cd/services/service/component/misc.tsx'
 import { ServiceStatusChip } from '../../../cd/services/ServiceStatusChip.tsx'
 import { PrStatusChip } from '../../../self-service/pr/queue/PrQueueColumns.tsx'
 import StackStatusChip from '../../../stacks/common/StackStatusChip.tsx'
@@ -42,18 +41,15 @@ import { ActionsPanelResourceAccordion } from './ActionsPanelResourceAccordion.t
 const ACTIONS_PANEL_WIDTH = 400
 
 export function ChatbotActionsPanel({
-  isOpen,
-  setOpen,
   zIndex,
   messages,
 }: {
-  isOpen: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
   zIndex?: number
   messages: ChatFragment[]
 }) {
   const theme = useTheme()
-  const { currentThreadId } = useChatbot()
+  const { currentThreadId, actionsPanelOpen, setActionsPanelOpen } =
+    useChatbot()
 
   const { data, error, loading } = useChatAgentSessionQuery({
     variables: { id: currentThreadId ?? '' },
@@ -93,15 +89,15 @@ export function ChatbotActionsPanel({
   )
 
   useEffect(() => {
-    if (hasData) setOpen(true)
+    if (!loading) setActionsPanelOpen(hasData)
     // want this to also recheck when the thread changes
-  }, [hasData, setOpen, currentThreadId])
+  }, [hasData, loading, setActionsPanelOpen, currentThreadId])
 
   if (!currentThreadId) return null
 
   return (
     <SimpleFlyover
-      isOpen={isOpen}
+      isOpen={actionsPanelOpen}
       zIndex={zIndex}
       css={{ width: ACTIONS_PANEL_WIDTH }}
     >
@@ -167,7 +163,7 @@ export function ChatbotActionsPanel({
               <ActionItemSC>
                 <ActionItemHeaderSC>
                   <IconFrame
-                    icon={<GitPullIcon />}
+                    icon={<PrOpenIcon />}
                     size="small"
                   />
                   Pull request
@@ -242,7 +238,7 @@ export function ChatbotActionsPanel({
               <ActionItemSC>
                 <ActionItemHeaderSC>
                   <IconFrame
-                    icon={<ComponentIcon kind="service" />}
+                    icon={<GitPullIcon />}
                     size="small"
                   />
                   Service
@@ -273,12 +269,12 @@ export function ChatbotActionsPanel({
               </ActionItemSC>
             )}
             {/* rerender on open so the default accordion logic resets */}
-            {isOpen && (
+            {actionsPanelOpen && (
               <ActionsPanelResourceAccordion
                 prs={prs}
                 stacks={stacks}
                 services={services}
-                closePanel={() => setOpen(false)}
+                closePanel={() => setActionsPanelOpen(false)}
               />
             )}
           </>

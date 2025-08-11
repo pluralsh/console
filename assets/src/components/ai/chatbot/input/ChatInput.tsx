@@ -199,7 +199,7 @@ export function ChatInput({
             small
             startIcon={selectedAgent ? <RobotIcon /> : undefined}
           >
-            {selectedAgent ? 'Agent' : 'Copilot'}
+            {selectedAgent ? 'Agent' : 'Chat'}
           </Button>
         </Flex>
       </EditableContentWrapperSC>

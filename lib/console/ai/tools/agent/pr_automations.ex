@@ -1,7 +1,8 @@
 defmodule Console.AI.Tools.Agent.PrAutomations do
   use Console.AI.Tools.Agent.Base
   alias Console.Repo
-  alias Console.Schema.PrAutomation
+  alias Console.Schema.{Catalog, PrAutomation}
+  alias Console.Deployments.{Git, Policies}
 
   embedded_schema do
     field :catalog, :string
@@ -23,12 +24,19 @@ defmodule Console.AI.Tools.Agent.PrAutomations do
   def description(), do: "Returns a list of pr automations that are present in this catalog.  These are individual PRs that provision infrastructure a user might want to create in a tested, gitops fashion."
 
   def implement(%__MODULE__{catalog: catalog}) do
-    PrAutomation.for_catalog_name(catalog)
-    |> Repo.all()
-    |> Enum.map(fn pra ->
-      Map.take(pra, @fields)
-      |> Console.mapify()
-    end)
-    |> Jason.encode()
+    with %Catalog{id: id} = cat <- Git.get_catalog_by_name(catalog),
+         {:ok, _} <- Policies.allow(cat, Tool.actor(), :read) do
+      PrAutomation.for_catalog(id)
+      |> Repo.all()
+      |> Enum.map(fn pra ->
+        Map.take(pra, @fields)
+        |> Console.mapify()
+      end)
+      |> Jason.encode()
+    else
+      nil -> {:ok, "No catalog found with name #{catalog}"}
+      {:error, _} -> {:ok, "You do not have access to the catalog #{catalog}"}
+      err -> err
+    end
   end
 end

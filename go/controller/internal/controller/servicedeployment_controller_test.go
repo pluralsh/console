@@ -642,6 +642,50 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
       max_connections: 202
 `))
 		})
+
+		It("should successfully return sorted values", func() {
+			test := struct {
+				SecretRef *corev1.SecretReference
+				Values    *runtime.RawExtension
+			}{
+				Values: &runtime.RawExtension{
+					Raw: []byte(`console:
+  dashboard:
+    enabled: false
+  postgres:
+    parameters:
+      max_connections: 101
+m:
+  c: 3
+  a: 1
+  b: 2`),
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(*out).To(Equal(`console:
+  dashboard:
+    enabled: false
+  postgres:
+    parameters:
+      max_connections: 101
+m:
+  a: 1
+  b: 2
+  c: 3
+`))
+
+		})
 	})
 })
 

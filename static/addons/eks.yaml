@@ -840,6 +840,14 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.47.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.46.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -1501,6 +1509,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v2.1.10-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v2.1.9-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3286,6 +3303,14 @@
   publisher: dynatrace
 - name: eks-node-monitoring-agent
   versions:
+  - version: v1.4.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.3.0-eksbuild.2
     compatibilities:
     - '1.33'
@@ -3619,6 +3644,22 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v4.0.7-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v4.0.6-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v4.0.5-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5324,6 +5365,13 @@
   publisher: Solo.io
 - name: solo-io_istio-distro
   versions:
+  - version: v1.26.3-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.26.2-eksbuild.1
     compatibilities:
     - '1.32'
@@ -5337,6 +5385,12 @@
     - '1.30'
     - '1.29'
   - version: v1.26.0-eksbuild.1
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.25.4-eksbuild.1
     compatibilities:
     - '1.32'
     - '1.31'
@@ -5588,6 +5642,15 @@
   publisher: SUSE
 - name: sysdig_falco
   versions:
+  - version: v0.41.3-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.41.0-eksbuild.1
     compatibilities:
     - '1.32'

@@ -16,7 +16,7 @@ import {
 } from '../../generated/graphql.ts'
 import { isEmpty } from 'lodash'
 import { EmptyStateCompact } from './AIThreads.tsx'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { mapExistingNodes } from '../../utils/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
 import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
@@ -30,6 +30,9 @@ import {
   isAfter,
 } from '../../utils/datetime.ts'
 import { useChatbot } from './AIContext.tsx'
+import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent.tsx'
+
+export const CLOSE_CHAT_ACTION_PANEL_EVENT = 'pointerdown'
 
 export function AIAgent() {
   const theme = useTheme()
@@ -72,7 +75,7 @@ export function AIAgent() {
           />
         }
         message="No agent sessions"
-        description="You can create a new agent session from the AI Copilot panel."
+        description="You can create a new agent session from the Plural AI side panel."
         cssProps={{ overflow: 'auto' }}
       />
     )
@@ -119,6 +122,15 @@ const columns = [
       const theme = useTheme()
       const { goToThread } = useChatbot()
 
+      // need to do this natively so it stops propagation correctly, see Console.tsx
+      const wrapperRef = useRef<HTMLDivElement>(null)
+      useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, (e) => {
+        if (agentSession?.thread) {
+          e.stopPropagation()
+          goToThread(agentSession.thread.id)
+        }
+      })
+
       const agentSession = getValue()
 
       const timestamp =
@@ -130,6 +142,7 @@ const columns = [
 
       return (
         <div
+          ref={wrapperRef}
           css={{
             display: 'flex',
             alignItems: 'center',
@@ -143,13 +156,6 @@ const columns = [
                 cursor: 'pointer',
               },
             },
-          }}
-          // this needs to be pointerDown instead of onclick to prevent closing the action panel (they need to use the same event type)
-          onPointerDown={(e) => {
-            if (agentSession?.thread) {
-              e.stopPropagation()
-              goToThread(agentSession.thread.id)
-            }
           }}
         >
           <Flex

@@ -114,6 +114,16 @@ spec:
               name:
                 description: Name is a human-readable identifier for this SCM connection.
                 type: string
+              proxy:
+                description: Configures usage of an HTTP proxy for all requests involving
+                  this SCM connection.
+                properties:
+                  url:
+                    description: The url of your HTTP proxy.
+                    type: string
+                required:
+                - url
+                type: object
               tokenSecretRef:
                 description: |-
                   TokenSecretRef references a Kubernetes secret containing the access token for
