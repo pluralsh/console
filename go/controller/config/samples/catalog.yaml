@@ -50,3 +50,20 @@ metadata:
 spec:
   author: Plural
   description: The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-invalid-binding
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-invalid-binding
+spec:
+  author: Plural
+  description: Catalog with an invalid binding.
+  bindings:
+    create:
+      - userEmail: invalid@email.com
