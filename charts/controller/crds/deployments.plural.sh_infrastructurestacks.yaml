@@ -9068,8 +9068,9 @@ spec:
                   Terraform state of this stack.
                 type: boolean
               name:
-                description: Name of this stack. If not provided, the name from InfrastructureStack.ObjectMeta
-                  will be used.
+                description: |-
+                  Name of this stack.
+                  If not provided, the name from InfrastructureStack.ObjectMeta will be used.
                 type: string
               observableMetrics:
                 description: ObservableMetrics is a list of metrics to poll to determine

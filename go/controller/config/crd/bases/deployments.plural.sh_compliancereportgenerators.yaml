@@ -22,6 +22,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: ComplianceReportGenerator represents a resource that generates
+          compliance reports.
         properties:
           apiVersion:
             description: |-

@@ -15,14 +15,20 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: ID of the OIDCProvider in the Console API.
+    - description: ID of the OIDCProvider in the Console API
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: OIDCProvider is the Schema for the OIDCProviders API
+        description: |-
+          OIDCProvider configures OpenID Connect (OIDC) authentication for external applications and services.
+          It enables third-party applications to authenticate users through the Plural Console using the standard
+          OIDC protocol. This is useful for integrating external tools, dashboards, or custom applications with
+          Plural's authentication system while maintaining centralized user management and access control.
+          Common use cases include connecting monitoring dashboards, CI/CD tools, or custom applications that
+          need to authenticate users against the Plural Console's user directory.
         properties:
           apiVersion:
             description: |-
@@ -42,16 +48,16 @@ spec:
           metadata:
             type: object
           spec:
-            description: OIDCProviderSpec defines the desired state of OIDCProvider
+            description: |-
+              Spec defines the desired state of the OIDCProvider, including authentication settings,
+              redirect URIs, and credential management for OIDC client configuration.
             properties:
               credentialsSecretRef:
                 description: |-
-                  CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.
-                  It will be created once OIDCProvider is created in the Console API.
-
-                  Secret will contain 2 keys:
-                  - 'clientId'
-                  - 'clientSecret'
+                  CredentialsSecretRef references a Kubernetes Secret that will contain the generated OIDC client credentials.
+                  Once the OIDCProvider is successfully created in the Console API, this secret will be populated
+                  with the client ID and client secret needed for OIDC authentication flows.
+                  The secret will contain two keys: 'clientId' and 'clientSecret'.
                 properties:
                   name:
                     default: ""
@@ -65,17 +71,22 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               description:
-                description: Description can be used to describe this OIDCProvider.
+                description: |-
+                  Description provides a human-readable description of this OIDC provider.
+                  This helps administrators understand the purpose and intended use of this OIDC client,
+                  such as which application or service it's configured for.
                 type: string
               name:
                 description: |-
-                  Name of this OIDCProvider. If not provided OIDCProvider's own name
-                  from OIDCProvider.ObjectMeta will be used.
+                  Name specifies the name for this OIDC provider.
+                  If not provided, the name from the resource metadata will be used.
                 type: string
               redirectUris:
                 description: |-
-                  RedirectUris is a list of custom run steps that will be executed as
-                  part of the stack run.
+                  RedirectUris specifies the list of allowed redirect URIs for this OIDC client.
+                  These URIs define where the authorization server can redirect users after authentication.
+                  Each URI must be an exact match to be considered valid during the OIDC flow.
+                  Common patterns include application callback URLs or localhost URLs for development.
                 items:
                   type: string
                 type: array
@@ -83,6 +94,9 @@ spec:
             - credentialsSecretRef
             type: object
           status:
+            description: |-
+              Status represents the current state of this OIDCProvider resource, including
+              synchronization status with the Console API and generated client credentials.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

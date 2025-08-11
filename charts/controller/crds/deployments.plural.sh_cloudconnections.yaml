@@ -54,6 +54,9 @@ spec:
                 description: Configuration contains the cloud connection configuration.
                 properties:
                   aws:
+                    description: |-
+                      AWSCloudConnection contains AWS-specific authentication configuration.
+                      Enables cloud resource discovery and analysis across AWS resources and infrastructure.
                     properties:
                       accessKeyId:
                         type: string
@@ -91,6 +94,9 @@ spec:
                     - secretAccessKey
                     type: object
                   azure:
+                    description: |-
+                      AzureCloudConnection contains Microsoft Azure authentication configuration.
+                      Provides credentials for discovering and querying Azure resources.
                     properties:
                       clientId:
                         type: string
@@ -126,6 +132,9 @@ spec:
                     - tenantId
                     type: object
                   gcp:
+                    description: |-
+                      GCPCloudConnection contains Google Cloud Platform authentication configuration.
+                      Enables cloud resource discovery and analysis across GCP projects.
                     properties:
                       projectId:
                         type: string

@@ -26,6 +26,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: |-
+          GitRepository provides Git-based source control integration for Plural's GitOps workflows.
+          It represents a Git repository available for deployments, enabling automated fetching of manifests,
+          IaC code, and configuration from version-controlled sources. Supports both HTTPS and SSH authentication
+          methods with health monitoring and credential management through ScmConnections or direct secret references.
         properties:
           apiVersion:
             description: |-
@@ -45,10 +50,13 @@ spec:
           metadata:
             type: object
           spec:
+            description: GitRepositorySpec defines the desired state of the GitRepository
+              resource.
             properties:
               connectionRef:
-                description: Reference a ScmConnection to reuse its credentials for
-                  this GitRepository's authentication
+                description: |-
+                  ConnectionRef references an ScmConnection to reuse existing credentials and configuration
+                  for authenticating with GitRepository.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -91,8 +99,10 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               credentialsRef:
-                description: CredentialsRef is a secret reference which should contain
-                  privateKey, passphrase, username and password.
+                description: |-
+                  CredentialsRef references a Secret containing authentication credentials for this repository.
+                  The secret should contain keys for privateKey, passphrase, username, and password as needed
+                  for the repository's authentication method.
                 properties:
                   name:
                     description: name is unique within a namespace to reference a
@@ -105,6 +115,9 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               url:
+                description: |-
+                  Url of the GitRepository, supporting both HTTPS and SSH protocols.
+                  This field is immutable once set.
                 type: string
                 x-kubernetes-validations:
                 - message: Url is immutable
@@ -176,7 +189,9 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               health:
-                description: Health status.
+                description: |-
+                  Health status.
+                  One of PULLABLE, FAILED.
                 enum:
                 - PULLABLE
                 - FAILED
@@ -185,7 +200,7 @@ spec:
                 description: ID of the resource in the Console API.
                 type: string
               message:
-                description: Message indicating details about last transition.
+                description: Message indicating details about the last transition.
                 type: string
               sha:
                 description: SHA of last applied configuration.

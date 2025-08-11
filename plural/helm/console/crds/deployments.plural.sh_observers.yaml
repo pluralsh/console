@@ -15,14 +15,19 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: ID of the observer in the Console API.
+    - description: ID of the Observer in the Console API
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Observer is the Schema for the observers API
+        description: |-
+          Observer monitors external data sources and triggers automated actions when changes are detected.
+          It polls various targets like Helm repositories, OCI registries, Git repositories, or Kubernetes add-ons
+          on a scheduled basis and executes predefined actions when new versions or updates are discovered.
+          Common use cases include automatically creating pull requests when new chart versions are available or
+          triggering pipeline deployments when container images are updated.
         properties:
           apiVersion:
             description: |-
@@ -42,27 +47,44 @@ spec:
           metadata:
             type: object
           spec:
-            description: ObserverSpec defines the desired state of Observer
+            description: |-
+              Spec defines the desired state of the Observer, including the polling schedule,
+              target configuration, and actions to execute when changes are detected.
             properties:
               actions:
-                description: A list of predefined actions to take if a new Target
-                  is discovered in the last poll loop
+                description: |-
+                  Actions define the automated responses to execute when new values are detected.
+                  Each action specifies what should happen when the observer discovers an update,
+                  such as creating pull requests or triggering pipeline deployments.
                 items:
+                  description: |-
+                    ObserverAction defines an automated response to execute when the observer detects changes.
+                    Actions can create pull requests or trigger pipelines.
                   properties:
                     configuration:
-                      description: The configuration for the given action, relative
-                        to its current Type
+                      description: |-
+                        Configuration contains the specific settings for this action type.
+                        The structure depends on the Type field - PR actions use PR configuration,
+                        while PIPELINE actions use pipeline configuration.
                       properties:
                         pipeline:
+                          description: |-
+                            Pipeline contains configuration for pipeline actions.
+                            Used when the action type is PIPELINE to trigger pipeline context updates
+                            when new versions are detected by the observer.
                           properties:
                             context:
-                              description: Context is a templated context that will
-                                become the PipelineContext applied to the given pipeline,
-                                use `$value` to interpolate the observed value
+                              description: |-
+                                Context is a templated context that becomes the pipeline context.
+                                Use $value to interpolate the observed value into the context data.
+                                This context is applied to the pipeline to trigger appropriate actions.
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             pipelineRef:
-                              description: PipelineRef references to Pipeline.
+                              description: |-
+                                PipelineRef references the pipeline to update when changes are detected.
+                                The pipeline will receive a new context with the observed value,
+                                potentially triggering deployment workflows or other pipeline stages.
                               properties:
                                 apiVersion:
                                   description: API version of the referent.
@@ -108,20 +130,29 @@ spec:
                           - pipelineRef
                           type: object
                         pr:
+                          description: |-
+                            Pr contains configuration for pull request actions.
+                            Used when the action type is PR to automatically create pull requests
+                            when new versions are detected by the observer.
                           properties:
                             branchTemplate:
-                              description: BranchTemplate a template to use for the
-                                created branch, use $value to interject the observed
-                                value
+                              description: |-
+                                BranchTemplate provides a template for generating branch names.
+                                Use $value to inject the observed value into the branch name.
+                                Example: "update-chart-to-$value" becomes "update-chart-to-1.2.3".
                               type: string
                             context:
-                              description: Context is a templated context that will
-                                become the context applied to the given PR Automation,
-                                use `$value` to interpolate the observed value
+                              description: |-
+                                Context is a templated context that becomes the input for the PR automation.
+                                Use $value to interpolate the observed value into the context data.
+                                This context is passed to the PR automation for template rendering and file modifications.
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             prAutomationRef:
-                              description: PrAutomationRef references to PR automation.
+                              description: |-
+                                PrAutomationRef references the PR automation template to use for generating pull requests.
+                                The automation template defines the repository, branch pattern, and file modifications
+                                to apply when creating the pull request.
                               properties:
                                 apiVersion:
                                   description: API version of the referent.
@@ -164,12 +195,20 @@ spec:
                               type: object
                               x-kubernetes-map-type: atomic
                             repository:
+                              description: |-
+                                Repository overrides the repository slug for the referenced PR automation.
+                                Use this when you want to target a different repository than the one
+                                configured in the PR automation template.
                               type: string
                           required:
                           - prAutomationRef
                           type: object
                       type: object
                     type:
+                      description: |-
+                        Type specifies the kind of action to perform when changes are detected.
+                        PIPELINE actions trigger pipeline context updates, while PR actions create pull requests
+                        using PR automation templates with the discovered values.
                       enum:
                       - PIPELINE
                       - PR
@@ -180,20 +219,28 @@ spec:
                   type: object
                 type: array
               crontab:
-                description: The crontab you will poll the given Target with
+                description: |-
+                  Crontab defines the polling schedule using standard cron syntax.
+                  This determines how frequently the observer checks the target for updates.
+                  Examples: "0 */6 * * *" (every 6 hours), "*/15 * * * *" (every 15 minutes).
                 type: string
               initial:
-                description: The initial polled value of this observer, useful when
-                  you don't want to cause duplicate actions on initialization
+                description: |-
+                  Initial sets the baseline value for this observer to prevent duplicate actions on startup.
+                  When specified, the observer will only trigger actions for values that are newer than this initial value.
+                  This prevents unnecessary actions when the observer is first created or restarted.
                 type: string
               name:
-                description: the name of this observer, if not provided Observer's
-                  own name from Observer.ObjectMeta will be used.
+                description: |-
+                  Name specifies the name for this observer.
+                  If not provided, the name from the resource metadata will be used.
+                  This name is used for identification and logging purposes.
                 type: string
               projectRef:
                 description: |-
-                  ProjectRef references project this observer belongs to.
-                  If not provided, it will use the default project.
+                  ProjectRef references the project this observer belongs to.
+                  If not provided, the observer will use the default project.
+                  This helps organize observers and control access permissions.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -236,58 +283,81 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               target:
-                description: The target object to poll, triggering the list of Actions
-                  w/ the discovered value
+                description: |-
+                  Target specifies the external source to monitor for changes.
+                  This defines what type of resource to poll (Helm chart, OCI image, Git tags, etc.)
+                  and the specific configuration needed to access that resource.
                 properties:
                   addon:
-                    description: Configuration for Plural AddOn table scraping
+                    description: |-
+                      AddOn contains configuration for monitoring Plural add-on versions.
+                      Used when Type is ADDON to specify which Kubernetes add-on to monitor for updates.
                     properties:
                       kubernetesVersion:
-                        description: The Kubernetes version you want to ensure this
-                          add-on is compatible with
+                        description: |-
+                          KubernetesVersion specifies the Kubernetes version for compatibility checking.
+                          The observer will only consider add-on versions that are compatible with this Kubernetes version.
+                          This helps ensure that suggested updates will work with your cluster.
                         type: string
                       kubernetesVersions:
-                        description: The Kubernetes versions you want to ensure this
-                          add-on is compatible with, useful if working with a kubernetes
-                          version boundary during upgrade
+                        description: |-
+                          KubernetesVersions specifies multiple Kubernetes versions for compatibility checking.
+                          Useful when managing clusters with different Kubernetes versions or during upgrade periods.
+                          The observer will only suggest add-on versions compatible with all specified versions.
                         items:
                           type: string
                         type: array
                       name:
-                        description: The name of the add-on you want to poll
+                        description: |-
+                          Name specifies the add-on to monitor for new versions.
+                          This should match the add-on name as known to the monitoring system.
                         type: string
                     required:
                     - name
                     type: object
                   eksAddon:
-                    description: Configuration for EKS AddOn scraping
+                    description: |-
+                      EksAddOn contains configuration for monitoring AWS EKS add-on versions.
+                      Used when Type is EKS_ADDON to specify which EKS add-on to monitor for updates.
                     properties:
                       kubernetesVersion:
-                        description: The Kubernetes version you want to ensure this
-                          add-on is compatible with
+                        description: |-
+                          KubernetesVersion specifies the Kubernetes version for compatibility checking.
+                          The observer will only consider add-on versions that are compatible with this Kubernetes version.
+                          This helps ensure that suggested updates will work with your cluster.
                         type: string
                       kubernetesVersions:
-                        description: The Kubernetes versions you want to ensure this
-                          add-on is compatible with, useful if working with a kubernetes
-                          version boundary during upgrade
+                        description: |-
+                          KubernetesVersions specifies multiple Kubernetes versions for compatibility checking.
+                          Useful when managing clusters with different Kubernetes versions or during upgrade periods.
+                          The observer will only suggest add-on versions compatible with all specified versions.
                         items:
                           type: string
                         type: array
                       name:
-                        description: The name of the add-on you want to poll
+                        description: |-
+                          Name specifies the add-on to monitor for new versions.
+                          This should match the add-on name as known to the monitoring system.
                         type: string
                     required:
                     - name
                     type: object
                   format:
-                    description: Format is a regex with a capture group matching a
-                      well-formatted semver, eg `app-v([0-9]+.[0-9]+.[0-9]+)`
+                    description: |-
+                      Format is a regex pattern with a capture group for extracting version information.
+                      Useful when version strings are embedded in larger release names or tags.
+                      The first capture group is used as the version value.
+                      Example: "app-v([0-9]+.[0-9]+.[0-9]+)" extracts "1.2.3" from "app-v1.2.3".
                     type: string
                   git:
-                    description: Configuration for Git tags scaping
+                    description: |-
+                      Git contains configuration for monitoring Git repository tags.
+                      Used when Type is GIT to specify which Git repository to monitor for new tags.
                     properties:
                       gitRepositoryRef:
-                        description: GitRepositoryRef references to Git repository.
+                        description: |-
+                          GitRepositoryRef references the Git repository resource to monitor.
+                          The repository must be configured in Plural Console with appropriate access credentials.
                         properties:
                           apiVersion:
                             description: API version of the referent.
@@ -330,6 +400,9 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       type:
+                        description: |-
+                          Type specifies what Git resources to monitor within the repository.
+                          Currently only TAGS is supported, which monitors for new Git tags.
                         enum:
                         - TAGS
                         type: string
@@ -338,21 +411,38 @@ spec:
                     - type
                     type: object
                   helm:
-                    description: Configuration for helm scraping
+                    description: |-
+                      Helm contains configuration for monitoring Helm chart repositories.
+                      Used when Type is HELM to specify the repository URL, chart name, and authentication.
                     properties:
                       auth:
-                        description: Auth contains authentication credentials for
-                          the Helm repository.
+                        description: |-
+                          Auth contains authentication credentials for accessing the Helm repository.
+                          Required for private repositories, the format depends on the Provider type.
                         properties:
                           aws:
+                            description: |-
+                              Aws specifies AWS-specific authentication for Amazon ECR and other AWS-hosted repositories.
+                              Supports both static credentials and IAM role-based authentication for secure access
+                              to private repositories hosted in Amazon Web Services.
                             properties:
                               accessKey:
+                                description: |-
+                                  AccessKey specifies the AWS access key ID for authentication.
+                                  When using static credentials, this should be set along with the secret access key.
+                                  For enhanced security, consider using IAM roles instead of static credentials.
                                 type: string
                               assumeRoleArn:
+                                description: |-
+                                  AssumeRoleArn specifies an AWS IAM role ARN to assume for repository access.
+                                  This enables cross-account access and role-based authentication, providing
+                                  enhanced security and flexibility in AWS environments.
                                 type: string
                               secretAccessKeySecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  SecretAccessKeySecretKeyRef references a specific key within a Kubernetes Secret containing the secret access key.
+                                  This is the preferred method for storing AWS credentials as it allows multiple
+                                  credential sets to be organized within a single secret.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -376,8 +466,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               secretAccessKeySecretRef:
-                                description: SecretAccessKeySecretRef is a secret
-                                  reference that should contain secret access key.
+                                description: |-
+                                  SecretAccessKeySecretRef references a Kubernetes Secret containing the AWS secret access key.
+                                  The entire secret content will be used as the secret access key.
+                                  This approach is deprecated in favor of SecretAccessKeySecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -391,12 +483,21 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           azure:
+                            description: |-
+                              Azure specifies Azure-specific authentication for Azure Container Registry (ACR).
+                              Supports service principal authentication and managed identity for secure access
+                              to private repositories hosted in Microsoft Azure.
                             properties:
                               clientId:
+                                description: |-
+                                  ClientID specifies the Azure service principal client ID.
+                                  This is used in conjunction with the client secret to authenticate with Azure services.
                                 type: string
                               clientSecretSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  ClientSecretSecretKeyRef references a specific key within a Kubernetes Secret containing the client secret.
+                                  This is the preferred method for storing Azure credentials as it allows proper
+                                  secret organization and key-based access control.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -420,8 +521,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               clientSecretSecretRef:
-                                description: ClientSecretSecretRef is a secret reference
-                                  that should contain client secret.
+                                description: |-
+                                  ClientSecretSecretRef references a Kubernetes Secret containing the Azure service principal client secret.
+                                  The entire secret content will be used as the client secret.
+                                  This approach is deprecated in favor of ClientSecretSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -434,15 +537,29 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               subscriptionId:
+                                description: |-
+                                  SubscriptionID specifies the Azure subscription ID.
+                                  This identifies the Azure subscription containing the resources
+                                  and may be required for certain repository access scenarios.
                                 type: string
                               tenantId:
+                                description: |-
+                                  TenantID specifies the Azure Active Directory tenant ID.
+                                  This identifies the Azure AD instance that contains the service principal
+                                  and is required for proper authentication scope.
                                 type: string
                             type: object
                           basic:
+                            description: |-
+                              Basic specifies username/password authentication for repositories that support HTTP Basic Auth.
+                              Commonly used with private Helm repositories, Harbor registries, and other traditional
+                              repository managers that implement standard HTTP authentication.
                             properties:
                               passwordSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  PasswordSecretKeyRef references a specific key within a Kubernetes Secret that contains the password.
+                                  This is the preferred method for password storage as it allows multiple credentials
+                                  to be stored in a single secret with proper key-based access.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -467,8 +584,9 @@ spec:
                                 x-kubernetes-map-type: atomic
                               passwordSecretRef:
                                 description: |-
-                                  SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                                  in any namespace
+                                  PasswordSecretRef references a Kubernetes Secret containing the password for Basic authentication.
+                                  The entire secret content will be used as the password.
+                                  This approach is deprecated in favor of PasswordSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -481,15 +599,25 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               username:
+                                description: |-
+                                  Username specifies the username for HTTP Basic authentication.
+                                  This is typically a user account or service account name configured
+                                  in the target repository system.
                                 type: string
                             required:
                             - username
                             type: object
                           bearer:
+                            description: |-
+                              Bearer specifies token-based authentication for repositories that support Bearer tokens.
+                              Used with modern container registries and repositories that implement OAuth2 or similar
+                              token-based authentication schemes.
                             properties:
                               tokenSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  TokenSecretKeyRef references a specific key within a Kubernetes Secret that contains the bearer token.
+                                  This is the preferred method for token storage as it allows multiple tokens
+                                  to be stored in a single secret with proper key-based access.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -514,8 +642,9 @@ spec:
                                 x-kubernetes-map-type: atomic
                               tokenSecretRef:
                                 description: |-
-                                  SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                                  in any namespace
+                                  TokenSecretRef references a Kubernetes Secret containing the bearer token.
+                                  The entire secret content will be used as the authentication token.
+                                  This approach is deprecated in favor of TokenSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -529,10 +658,16 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           gcp:
+                            description: |-
+                              Gcp specifies Google Cloud-specific authentication for Google Artifact Registry.
+                              Supports service account key authentication for secure access to private
+                              repositories hosted in Google Cloud Platform.
                             properties:
                               applicationCredentialsSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  ApplicationCredentialsSecretKeyRef references a specific key within a Kubernetes Secret containing the service account JSON.
+                                  This is the preferred method for storing GCP credentials as it allows multiple
+                                  service account keys to be organized within a single secret with proper access control.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -556,9 +691,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               applicationCredentialsSecretRef:
-                                description: ApplicationCredentialsSecretRef is a
-                                  secret reference that should contain application
-                                  credentials.
+                                description: |-
+                                  ApplicationCredentialsSecretRef references a Kubernetes Secret containing the GCP service account key JSON.
+                                  The entire secret content will be used as the service account credentials.
+                                  This approach is deprecated in favor of ApplicationCredentialsSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -573,10 +709,14 @@ spec:
                             type: object
                         type: object
                       chart:
-                        description: Chart of the Helm repository.
+                        description: |-
+                          Chart specifies the name of the chart within the repository to monitor.
+                          The observer will check for new versions of this specific chart.
                         type: string
                       provider:
-                        description: Provider is the name of the Helm auth provider.
+                        description: |-
+                          Provider specifies the authentication provider type for the Helm repository.
+                          Different providers support different authentication mechanisms optimized for their platforms.
                         enum:
                         - BASIC
                         - BEARER
@@ -586,7 +726,10 @@ spec:
                         example: AWS
                         type: string
                       url:
-                        description: URL of the Helm repository.
+                        description: |-
+                          URL specifies the Helm repository URL to monitor.
+                          This should be a valid Helm repository URL that contains the chart index.
+                          The URL is immutable once set to ensure consistent monitoring.
                         type: string
                         x-kubernetes-validations:
                         - message: URL is immutable
@@ -596,21 +739,38 @@ spec:
                     - url
                     type: object
                   oci:
-                    description: Configuration for OCI repository scraping
+                    description: |-
+                      OCI contains configuration for monitoring OCI (container) registries.
+                      Used when Type is OCI to specify the registry URL and authentication credentials.
                     properties:
                       auth:
-                        description: Auth contains authentication credentials for
-                          the Helm repository.
+                        description: |-
+                          Auth contains authentication credentials for accessing the OCI registry.
+                          Required for private registries, the format depends on the Provider type.
                         properties:
                           aws:
+                            description: |-
+                              Aws specifies AWS-specific authentication for Amazon ECR and other AWS-hosted repositories.
+                              Supports both static credentials and IAM role-based authentication for secure access
+                              to private repositories hosted in Amazon Web Services.
                             properties:
                               accessKey:
+                                description: |-
+                                  AccessKey specifies the AWS access key ID for authentication.
+                                  When using static credentials, this should be set along with the secret access key.
+                                  For enhanced security, consider using IAM roles instead of static credentials.
                                 type: string
                               assumeRoleArn:
+                                description: |-
+                                  AssumeRoleArn specifies an AWS IAM role ARN to assume for repository access.
+                                  This enables cross-account access and role-based authentication, providing
+                                  enhanced security and flexibility in AWS environments.
                                 type: string
                               secretAccessKeySecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  SecretAccessKeySecretKeyRef references a specific key within a Kubernetes Secret containing the secret access key.
+                                  This is the preferred method for storing AWS credentials as it allows multiple
+                                  credential sets to be organized within a single secret.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -634,8 +794,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               secretAccessKeySecretRef:
-                                description: SecretAccessKeySecretRef is a secret
-                                  reference that should contain secret access key.
+                                description: |-
+                                  SecretAccessKeySecretRef references a Kubernetes Secret containing the AWS secret access key.
+                                  The entire secret content will be used as the secret access key.
+                                  This approach is deprecated in favor of SecretAccessKeySecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -649,12 +811,21 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           azure:
+                            description: |-
+                              Azure specifies Azure-specific authentication for Azure Container Registry (ACR).
+                              Supports service principal authentication and managed identity for secure access
+                              to private repositories hosted in Microsoft Azure.
                             properties:
                               clientId:
+                                description: |-
+                                  ClientID specifies the Azure service principal client ID.
+                                  This is used in conjunction with the client secret to authenticate with Azure services.
                                 type: string
                               clientSecretSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  ClientSecretSecretKeyRef references a specific key within a Kubernetes Secret containing the client secret.
+                                  This is the preferred method for storing Azure credentials as it allows proper
+                                  secret organization and key-based access control.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -678,8 +849,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               clientSecretSecretRef:
-                                description: ClientSecretSecretRef is a secret reference
-                                  that should contain client secret.
+                                description: |-
+                                  ClientSecretSecretRef references a Kubernetes Secret containing the Azure service principal client secret.
+                                  The entire secret content will be used as the client secret.
+                                  This approach is deprecated in favor of ClientSecretSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -692,15 +865,29 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               subscriptionId:
+                                description: |-
+                                  SubscriptionID specifies the Azure subscription ID.
+                                  This identifies the Azure subscription containing the resources
+                                  and may be required for certain repository access scenarios.
                                 type: string
                               tenantId:
+                                description: |-
+                                  TenantID specifies the Azure Active Directory tenant ID.
+                                  This identifies the Azure AD instance that contains the service principal
+                                  and is required for proper authentication scope.
                                 type: string
                             type: object
                           basic:
+                            description: |-
+                              Basic specifies username/password authentication for repositories that support HTTP Basic Auth.
+                              Commonly used with private Helm repositories, Harbor registries, and other traditional
+                              repository managers that implement standard HTTP authentication.
                             properties:
                               passwordSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  PasswordSecretKeyRef references a specific key within a Kubernetes Secret that contains the password.
+                                  This is the preferred method for password storage as it allows multiple credentials
+                                  to be stored in a single secret with proper key-based access.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -725,8 +912,9 @@ spec:
                                 x-kubernetes-map-type: atomic
                               passwordSecretRef:
                                 description: |-
-                                  SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                                  in any namespace
+                                  PasswordSecretRef references a Kubernetes Secret containing the password for Basic authentication.
+                                  The entire secret content will be used as the password.
+                                  This approach is deprecated in favor of PasswordSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -739,15 +927,25 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               username:
+                                description: |-
+                                  Username specifies the username for HTTP Basic authentication.
+                                  This is typically a user account or service account name configured
+                                  in the target repository system.
                                 type: string
                             required:
                             - username
                             type: object
                           bearer:
+                            description: |-
+                              Bearer specifies token-based authentication for repositories that support Bearer tokens.
+                              Used with modern container registries and repositories that implement OAuth2 or similar
+                              token-based authentication schemes.
                             properties:
                               tokenSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  TokenSecretKeyRef references a specific key within a Kubernetes Secret that contains the bearer token.
+                                  This is the preferred method for token storage as it allows multiple tokens
+                                  to be stored in a single secret with proper key-based access.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -772,8 +970,9 @@ spec:
                                 x-kubernetes-map-type: atomic
                               tokenSecretRef:
                                 description: |-
-                                  SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                                  in any namespace
+                                  TokenSecretRef references a Kubernetes Secret containing the bearer token.
+                                  The entire secret content will be used as the authentication token.
+                                  This approach is deprecated in favor of TokenSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -787,10 +986,16 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           gcp:
+                            description: |-
+                              Gcp specifies Google Cloud-specific authentication for Google Artifact Registry.
+                              Supports service account key authentication for secure access to private
+                              repositories hosted in Google Cloud Platform.
                             properties:
                               applicationCredentialsSecretKeyRef:
-                                description: SecretKeySelector selects a key of a
-                                  Secret.
+                                description: |-
+                                  ApplicationCredentialsSecretKeyRef references a specific key within a Kubernetes Secret containing the service account JSON.
+                                  This is the preferred method for storing GCP credentials as it allows multiple
+                                  service account keys to be organized within a single secret with proper access control.
                                 properties:
                                   key:
                                     description: The key of the secret to select from.  Must
@@ -814,9 +1019,10 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               applicationCredentialsSecretRef:
-                                description: ApplicationCredentialsSecretRef is a
-                                  secret reference that should contain application
-                                  credentials.
+                                description: |-
+                                  ApplicationCredentialsSecretRef references a Kubernetes Secret containing the GCP service account key JSON.
+                                  The entire secret content will be used as the service account credentials.
+                                  This approach is deprecated in favor of ApplicationCredentialsSecretKeyRef for better secret management.
                                 properties:
                                   name:
                                     description: name is unique within a namespace
@@ -831,7 +1037,9 @@ spec:
                             type: object
                         type: object
                       provider:
-                        description: Provider is the name of the Helm auth provider.
+                        description: |-
+                          Provider specifies the authentication provider type for the OCI registry.
+                          Different providers support different authentication mechanisms optimized for their platforms.
                         enum:
                         - BASIC
                         - BEARER
@@ -841,7 +1049,10 @@ spec:
                         example: AWS
                         type: string
                       url:
-                        description: URL of the Helm repository.
+                        description: |-
+                          URL specifies the OCI registry URL to monitor.
+                          This should include the full path to the specific repository or artifact.
+                          The URL is immutable once set to ensure consistent monitoring.
                         type: string
                         x-kubernetes-validations:
                         - message: URL is immutable
@@ -850,11 +1061,19 @@ spec:
                     - url
                     type: object
                   order:
+                    description: |-
+                      Order determines how discovered versions are sorted and which one is selected.
+                      SEMVER sorts by semantic version rules, while LATEST uses chronological ordering.
+                      SEMVER is recommended for most use cases as it provides predictable version ordering.
                     enum:
                     - SEMVER
                     - LATEST
                     type: string
                   type:
+                    description: |-
+                      Type specifies the kind of external source to monitor.
+                      Each type has different configuration requirements and polling mechanisms.
+                      Supported types include Helm charts, OCI images, Git tags, and Kubernetes add-ons.
                     enum:
                     - OCI
                     - HELM
@@ -871,6 +1090,9 @@ spec:
             - target
             type: object
           status:
+            description: |-
+              Status represents the current state of this Observer resource, including
+              synchronization status with the Console API and last polling information.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

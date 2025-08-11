@@ -22,7 +22,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: StackDefinition is the Schema for the StackDefinitions API
+        description: |-
+          StackDefinition provides reusable templates for Infrastructure Stack configurations and execution steps.
+          It allows you to define standardized stack configurations, custom execution steps, and runtime environments
+          that can be referenced by multiple Infrastructure Stacks. This enables consistent deployment patterns
+          and reduces duplication when managing similar infrastructure components across different environments.
         properties:
           apiVersion:
             description: |-
@@ -42,12 +46,12 @@ spec:
           metadata:
             type: object
           spec:
-            description: StackDefinitionSpec defines the desired state of StackDefinition
+            description: StackDefinitionSpec defines the desired state of the StackDefinition.
             properties:
               configuration:
                 description: |-
-                  Configuration allows modifying the StackDefinition environment
-                  and execution.
+                  Configuration allows customization of the stack execution environment,
+                  including Docker image settings, version specifications, and execution hooks.
                 properties:
                   hooks:
                     description: Hooks to run at various stages of the stack run.
@@ -103,41 +107,49 @@ spec:
                     type: string
                 type: object
               description:
-                description: Description can be used to describe this StackDefinition.
+                description: |-
+                  Description provides a human-readable explanation of what this StackDefinition
+                  template is intended for and how it should be used.
                 type: string
               name:
                 description: |-
-                  Name of this StackDefinition. If not provided StackDefinition's own name
-                  from StackDefinition.ObjectMeta will be used.
+                  Name of this StackDefinition.
+                  If not provided, the name from StackDefinition.ObjectMeta will be used.
                 type: string
               steps:
                 description: |-
-                  Steps is a list of custom run steps that will be executed as
-                  part of the stack run.
+                  Steps defines a list of custom run steps that will be executed as part of
+                  any stack run using this definition. Each step specifies a command, arguments,
+                  execution stage, and approval requirements.
                 items:
+                  description: |-
+                    CustomRunStep defines a custom execution step within a StackDefinition template.
+                    Each step represents a discrete action that will be performed during stack execution,
+                    with control over when it runs and whether it requires manual approval.
                   properties:
                     args:
                       description: |-
-                        Args allow you to provide any additional
-                        args that should be passed to the custom
-                        run step.
+                        Args provides additional command-line arguments that should be passed
+                        to the command specified in Cmd during execution.
                       items:
                         type: string
                       type: array
                     cmd:
                       description: |-
-                        Cmd defines what command should be executed
-                        as part of your custom run step.
+                        Cmd specifies the executable command that should be run as part of this
+                        custom step. This can be any command available in the execution environment.
                       type: string
                     requireApproval:
                       description: |-
-                        RequireApproval controls whether this custom run step
-                        will require an approval to proceed.
+                        RequireApproval determines whether this step requires manual approval
+                        before it can proceed. When true, the stack run will pause at this step
+                        until an authorized user approves its execution.
                       type: boolean
                     stage:
                       description: |-
-                        Stage controls at which stage should this custom run
-                        step be executed.
+                        Stage controls at which phase of the stack lifecycle this step should be executed.
+                        Valid stages include PLAN, VERIFY, APPLY, INIT, and DESTROY, allowing fine-grained
+                        control over when custom logic runs in relation to the main IaC operations.
                       enum:
                       - PLAN
                       - VERIFY

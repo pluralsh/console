@@ -17,7 +17,9 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ClusterRestore is the Schema for the clusterrestores API
+        description: |-
+          ClusterRestore manages the restoration of cluster data from backup snapshots.
+          Orchestrates the recovery process for Kubernetes resources.
         properties:
           apiVersion:
             description: |-
@@ -37,13 +39,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: ClusterRestoreSpec defines the desired state of ClusterRestore
+            description: |-
+              ClusterRestoreSpec defines the desired state of ClusterRestore.
+              It specifies the backup to restore from, including the backup ID, name, namespace, and cluster reference.
             properties:
               backupClusterRef:
                 description: |-
                   BackupClusterID is an ID of a cluster where the backup to restore is located.
                   BackupName and BackupNamespace have to be specified as well with it.
-                  If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed.
+                  If BackupName, BackupNamespace, and BackupClusterRef are specified, then BackupID is not needed.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -91,7 +95,7 @@ spec:
               backupID:
                 description: |-
                   BackupID is an ID of the backup to restore.
-                  If BackupID is specified, then BackupName, BackupNamespace and BackupClusterRef are not needed.
+                  If BackupID is specified, then BackupName, BackupNamespace, and BackupClusterRef are not needed.
                 type: string
                 x-kubernetes-validations:
                 - message: BackupID is immutable
@@ -100,7 +104,7 @@ spec:
                 description: |-
                   BackupName is a name of the backup to restore.
                   BackupNamespace and BackupClusterRef have to be specified as well with it.
-                  If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
+                  If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed.
                 type: string
                 x-kubernetes-validations:
                 - message: BackupName is immutable
@@ -109,14 +113,16 @@ spec:
                 description: |-
                   BackupNamespace is a namespace of the backup to restore.
                   BackupName and BackupClusterRef have to be specified as well with it.
-                  If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
+                  If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed.
                 type: string
                 x-kubernetes-validations:
                 - message: BackupNamespace is immutable
                   rule: self == oldSelf
             type: object
           status:
-            description: ClusterRestoreStatus defines the observed state of ClusterRestore
+            description: |-
+              ClusterRestoreStatus represents the observed state of a ClusterRestore operation.
+              Tracks the progress, completion status, and any issues encountered during the restoration process.
             properties:
               conditions:
                 description: Represents the observations of ClusterRestore current

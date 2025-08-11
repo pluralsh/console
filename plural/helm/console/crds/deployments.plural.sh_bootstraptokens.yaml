@@ -22,7 +22,12 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: BootstrapToken is the Schema for the BootstrapTokens API
+        description: |-
+          BootstrapToken is a restricted authentication token for secure cluster registration.
+          It enables edge devices and new clusters to self-register with the Plural Console
+          without exposing full user credentials. The token is scope-limited to cluster
+          registration operations only and automatically assigns registered clusters to a
+          specified project.
         properties:
           apiVersion:
             description: |-
@@ -45,8 +50,8 @@ spec:
             description: BootstrapTokenSpec defines the desired state of BootstrapToken
             properties:
               projectRef:
-                description: ProjectRef is the project that all clusters spawned by
-                  generated bootstrap token will belong to
+                description: ProjectRef is the project that all clusters registered
+                  with this token will belong to.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -93,8 +98,8 @@ spec:
                   rule: self == oldSelf
               tokenSecretRef:
                 description: |-
-                  TokenSecretRef points to an output secret where bootstrap token will be stored.
-                  It will be created automatically in the same namespace as BootstrapToken and cannot exist.
+                  TokenSecretRef points to a secret where the generated bootstrap token will be stored.
+                  The secret is created automatically and must not already exist when the BootstrapToken is created.
                 properties:
                   name:
                     description: name is unique within a namespace to reference a
@@ -110,8 +115,8 @@ spec:
                 - message: Token secret is immutable
                   rule: self == oldSelf
               user:
-                description: User is an optional email to the user identity for this
-                  bootstrap token in audit logs
+                description: User is an optional email to attribute bootstrap token
+                  operations in audit logs.
                 type: string
                 x-kubernetes-validations:
                 - message: User is immutable

@@ -15,20 +15,23 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: ID of the scm connection in the Console API.
+    - description: ID of the SCM connection in the Console API.
       jsonPath: .status.id
       name: ID
       type: string
-    - description: Name of the scm provider service.
+    - description: Name of the SCM provider service.
       jsonPath: .spec.type
       name: Provider
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ScmConnection is a container for credentials to a scm provider.  You
-          can also reference a SCM connection created in the Plural UI via the provider
-          + name, leaving all other fields blank.
+        description: |-
+          ScmConnection provides authentication credentials and configuration for connecting to source control
+          management providers like GitHub, GitLab, and Bitbucket. It enables Plural to interact with your
+          repositories for PR automation, webhook management, and git-based workflows. You can either create
+          a new connection with full credentials or reference an existing SCM connection from the Plural UI
+          by specifying the provider type and name while leaving other fields blank.
         properties:
           apiVersion:
             description: |-
@@ -48,25 +51,40 @@ spec:
           metadata:
             type: object
           spec:
+            description: |-
+              Spec defines the desired state of the ScmConnection, including provider type,
+              authentication details, and connection settings.
             properties:
               apiUrl:
-                description: APIUrl is a base URL for HTTP apis for shel-hosted versions
-                  if different from BaseUrl.
+                description: |-
+                  APIUrl is the base URL for HTTP API calls to self-hosted SCM providers.
+                  If different from BaseUrl, this allows separate configuration for Git operations
+                  and API interactions.
                 type: string
               baseUrl:
-                description: BaseUrl is a base URL for Git clones for self-hosted
-                  versions.
+                description: |-
+                  BaseUrl is the base URL for Git clone operations when using self-hosted SCM providers.
+                  For cloud-hosted providers like GitHub.com, this can be omitted to use default URLs.
                 type: string
               default:
+                description: |-
+                  Default indicates whether this SCM connection should be used as the default connection.
+                  Only one connection should be marked as default.
                 type: boolean
               github:
+                description: Github contains GitHub App-specific authentication configuration.
                 properties:
                   appId:
+                    description: AppID is the unique identifier of the GitHub App
+                      used for authentication.
                     type: string
                   installationId:
+                    description: InstallationId is the unique identifier of the GitHub
+                      App installation.
                     type: string
                   privateKeyRef:
-                    description: SecretKeySelector selects a key of a Secret.
+                    description: PrivateKeyRef references a Kubernetes secret containing
+                      the private key for the GitHub App.
                     properties:
                       key:
                         description: The key of the secret to select from.  Must be
@@ -94,11 +112,13 @@ spec:
                 - installationId
                 type: object
               name:
-                description: Name is a human-readable name of the ScmConnection.
+                description: Name is a human-readable identifier for this SCM connection.
                 type: string
               tokenSecretRef:
-                description: A secret containing this access token you will use, stored
-                  in the `token` data field.
+                description: |-
+                  TokenSecretRef references a Kubernetes secret containing the access token for
+                  authenticating with the SCM provider. The token should be stored in the 'token'
+                  data field of the referenced secret.
                 properties:
                   name:
                     description: name is unique within a namespace to reference a
@@ -112,8 +132,8 @@ spec:
                 x-kubernetes-map-type: atomic
               type:
                 description: |-
-                  Type is the name of the scm service for the ScmConnection.
-                  One of (ScmType): [github, gitlab]
+                  Type specifies the source control management provider for this connection.
+                  Supported providers include GITHUB, GITLAB, and BITBUCKET.
                 enum:
                 - GITHUB
                 - GITLAB
@@ -121,13 +141,16 @@ spec:
                 example: GITHUB
                 type: string
               username:
-                description: Username ...
+                description: Username is the username for HTTP basic authentication
+                  with the SCM provider.
                 type: string
             required:
             - name
             - type
             type: object
           status:
+            description: Status represents the current state of this ScmConnection
+              resource.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

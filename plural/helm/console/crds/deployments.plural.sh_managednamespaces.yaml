@@ -22,7 +22,10 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ManagedNamespace is the Schema for the managednamespaces API
+        description: |-
+          ManagedNamespace handles the creation and management of Kubernetes namespaces across multiple clusters.
+          It provides a centralized way to define namespace specifications that should be replicated
+          across a fleet of Kubernetes clusters.
         properties:
           apiVersion:
             description: |-
@@ -42,42 +45,62 @@ spec:
           metadata:
             type: object
           spec:
-            description: ManagedNamespaceSpec defines the desired state of ManagedNamespace
+            description: |-
+              ManagedNamespaceSpec defines the desired state of a ManagedNamespace.
+              It specifies how Kubernetes namespaces should be created and managed across multiple clusters,
+              including their metadata, targeting criteria, and associated service deployments.
             properties:
               annotations:
                 additionalProperties:
                   type: string
-                description: Annotations for this namespace
+                description: |-
+                  Annotations define key-value pairs to be applied to the created namespaces.
+                  These annotations are applied to the actual Kubernetes namespace resources
+                  and are commonly used for configuration, tooling integration, and metadata.
                 type: object
               cascade:
-                description: Cascade specifies how owned resources are deleted
+                description: |-
+                  Cascade specifies the deletion behavior for resources owned by this managed namespace.
+                  This controls whether namespace deletion removes associated resources from
+                  Plural Console only, target clusters only, or both.
                 properties:
                   delete:
-                    description: Whether you want to delete owned resources in Plural
-                      and in the targeted k8s cluster
+                    description: |-
+                      Delete specifies whether to delete owned resources both in Plural Console
+                      and in the targeted Kubernetes clusters. When true, this performs a complete
+                      cleanup of all associated resources across the entire service deployment.
                     type: boolean
                   detach:
-                    description: Whether you want to delete owned resources in Plural
-                      but leave kubernetes objects in-place
+                    description: |-
+                      Detach specifies whether to delete owned resources in Plural Console but leave
+                      the corresponding Kubernetes objects in-place in the target clusters.
+                      This allows for graceful handoff of resource management without disrupting running workloads.
                     type: boolean
                 type: object
               description:
-                description: Description a short description of the purpose of this
-                  namespace
+                description: |-
+                  Description provides a short description of the purpose of this namespace.
+                  This is useful for documentation and helping teams understand the namespace's role
+                  within the broader application architecture.
                 type: string
               labels:
                 additionalProperties:
                   type: string
-                description: Labels for this namespace
+                description: |-
+                  Labels define key-value pairs to be applied to the created namespaces.
+                  These labels are applied to the actual Kubernetes namespace resources
+                  and can be used for organization, monitoring, and policy enforcement.
                 type: object
               name:
-                description: Name of this namespace once its placed on a cluster.
-                  If not provided ManagedNamespace's own name from ManagedNamespace.ObjectMeta
-                  will be used.
+                description: |-
+                  Name specifies the name of the namespace once it's placed on a cluster.
+                  If not provided, the ManagedNamespace's own name from metadata will be used.
                 type: string
               projectRef:
-                description: ProjectRef allows a managed namespace to span a specific
-                  project only
+                description: |-
+                  ProjectRef constrains the managed namespace scope to clusters within a specific project.
+                  This provides project-level isolation and ensures namespaces are only created
+                  on clusters belonging to the designated project.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -120,24 +143,32 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               pullSecrets:
-                description: PullSecrets a list of pull secrets to attach to this
-                  namespace
+                description: |-
+                  PullSecrets specifies a list of image pull secrets to attach to this namespace.
+                  These secrets will be available for pulling container images within the namespace,
+                  enabling access to private container registries across all pods in the namespace.
                 items:
                   type: string
                 type: array
               service:
-                description: Attributes for configuring a service in something like
-                  a managed namespace
+                description: |-
+                  Service defines the service deployment specification to be created within this namespace.
+                  This allows for automatic deployment of applications or infrastructure components
+                  as part of the namespace provisioning process.
                 properties:
                   configuration:
                     additionalProperties:
                       type: string
-                    description: Configuration is a set of non-secret service specific
-                      configuration useful for templating
+                    description: |-
+                      Configuration provides a set of non-secret service-specific configuration values.
+                      These key-value pairs are useful for templating and can be referenced
+                      in manifest templates for environment-specific customization.
                     type: object
                   configurationRef:
-                    description: ConfigurationRef is a secret reference which should
-                      contain service configuration.
+                    description: |-
+                      ConfigurationRef references a Kubernetes Secret containing service-specific configuration.
+                      This secret should contain key-value pairs that will be made available
+                      to the service for runtime configuration and secrets management.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -150,12 +181,18 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   contexts:
-                    description: a list of context names to add to this service
+                    description: |-
+                      Contexts specifies a list of context names to add to this service.
+                      Contexts provide reusable configuration bundles that can be shared
+                      across multiple services for consistent environment setup.
                     items:
                       type: string
                     type: array
                   dependencies:
-                    description: Dependencies contain dependent services
+                    description: |-
+                      Dependencies specify other services that must be healthy before this service is deployed.
+                      This ensures proper deployment ordering and dependency resolution
+                      within the managed namespace.
                     items:
                       description: ObjectReference contains enough information to
                         let you inspect or modify the referred object.
@@ -202,7 +239,10 @@ spec:
                       x-kubernetes-map-type: atomic
                     type: array
                   git:
-                    description: Git settings to configure git for a service
+                    description: |-
+                      Git defines Git-specific settings for sourcing service manifests.
+                      This includes repository references, branch/tag specifications,
+                      and subdirectory paths within the Git repository.
                     properties:
                       files:
                         description: Optional files to add to the manifests for this
@@ -223,13 +263,17 @@ spec:
                     - ref
                     type: object
                   helm:
-                    description: Helm settings to configure helm for a service
+                    description: |-
+                      Helm defines Helm-specific settings for deploying Helm charts as part of this service.
+                      This includes chart specifications, values files, repository references,
+                      and Helm-specific deployment options.
                     properties:
                       chart:
-                        description: chart to use
+                        description: Chart is the name of the Helm chart to use.
                         type: string
                       git:
-                        description: A reference to a git folder/ref
+                        description: Git contains a reference to a Git folder and
+                          ref where the Helm chart is located.
                         properties:
                           files:
                             description: Optional files to add to the manifests for
@@ -250,18 +294,19 @@ spec:
                         - ref
                         type: object
                       ignoreCrds:
-                        description: whether you want to not include the crds in the
-                          /crds folder of the chart (useful if reinstantiating the
-                          same chart on the same cluster)
+                        description: |-
+                          IgnoreCrds indicates whether to not include the CRDs in the /crds folder of the chart.
+                          It is useful if you want to avoid installing CRDs that are already present in the cluster.
                         type: boolean
                       ignoreHooks:
-                        description: whether you want to completely ignore any helm
-                          hooks when actualizing this service
+                        description: IgnoreHooks indicates whether to completely ignore
+                          Helm hooks when actualizing this service.
                         type: boolean
                       luaFile:
                         description: |-
-                          a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
-                          based on git state or other metadata
+                          LuaFile to use to generate Helm configuration.
+                          This can ultimately return a Lua table with keys "values" and "valuesFiles"
+                          to supply overlays for either dynamically based on Git state or other metadata.
                         type: string
                       luaFolder:
                         description: a folder of lua files to include in the final
@@ -269,14 +314,17 @@ spec:
                         type: string
                       luaScript:
                         description: |-
-                          a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
-                          based on git state or other metadata
+                          LuaScript to use to generate Helm configuration.
+                          This can ultimately return a lua table with keys "values" and "valuesFiles"
+                          to supply overlays for either dynamically based on git state or other metadata.
                         type: string
                       release:
-                        description: name of the helm release to use when applying
+                        description: Release contains the name of the Helm release
+                          to use when applying this service.
                         type: string
                       repository:
-                        description: pointer to the FluxCD helm repository to use
+                        description: Repository is a pointer to the FluxCD Helm repository
+                          to use.
                         properties:
                           name:
                             description: Name is a resource name.
@@ -289,9 +337,9 @@ spec:
                         - namespace
                         type: object
                       repositoryRef:
-                        description: reference to a GitRepository to source the helm
-                          chart from (useful if you're using a multi-source configuration
-                          for values files)
+                        description: |-
+                          RepositoryRef contains a reference to a GitRepository to source the Helm chart from.
+                          This is useful for using a multi-source configuration for values files.
                         properties:
                           apiVersion:
                             description: API version of the referent.
@@ -336,7 +384,7 @@ spec:
                       url:
                         type: string
                       values:
-                        description: arbitrary yaml values to overlay
+                        description: Values contains arbitrary YAML values to overlay.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       valuesConfigMapRef:
@@ -363,14 +411,16 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       valuesFiles:
-                        description: individual values files to overlay
+                        description: ' ValuesFiles contains individual values files
+                          to overlay.'
                         items:
                           type: string
                         type: array
                       valuesFrom:
-                        description: Fetches the helm values from a secret in this
-                          cluster, will consider any key with yaml data a values file
-                          and merge them iteratively
+                        description: |-
+                          ValuesFrom is a reference to a Kubernetes Secret containing Helm values.
+                          It will consider any key with YAML data as a values file and merge them iteratively.
+                          This allows you to store Helm values in a secret and reference them here.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -383,51 +433,64 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       version:
-                        description: chart version to use
+                        description: Version of the Helm chart to use.
                         type: string
                     type: object
                   kustomize:
-                    description: Kustomize settings for service kustomization
+                    description: |-
+                      Kustomize defines Kustomize-specific settings for manifest customization.
+                      This enables sophisticated YAML manipulation and configuration overlay
+                      capabilities for complex deployment scenarios.
                     properties:
                       enableHelm:
-                        description: whether to enable helm for this kustomize deployment,
-                          used for inflating helm charts
+                        description: |-
+                          EnableHelm indicates whether to enable Helm for this Kustomize deployment.
+                          Used for inflating Helm charts.
                         type: boolean
                       path:
-                        description: The path to the kustomization file to use
+                        description: Path to the kustomization file to use.
                         type: string
                     required:
                     - path
                     type: object
                   name:
-                    description: Name the name for this service (optional for managed
-                      namespaces)
+                    description: |-
+                      Name specifies the name for the service deployment.
+                      For managed namespaces, this is optional and can be auto-generated
+                      if not explicitly provided.
                     type: string
                   namespace:
-                    description: Namespace the namespace for this service (optional
-                      for managed namespaces)
+                    description: |-
+                      Namespace specifies the namespace for the service deployment.
+                      For managed namespaces, this is typically auto-populated with
+                      the managed namespace name if not explicitly provided.
                     type: string
                   protect:
-                    description: Whether to protect this service from deletion.  Protected
-                      services are also not drained on cluster deletion.
+                    description: |-
+                      Protect indicates whether to protect this service from deletion.
+                      Protected services are not automatically deleted during namespace cleanup
+                      or cluster deletion operations, providing safety for critical workloads.
                     type: boolean
                   renderers:
-                    description: Renderers of this service
+                    description: |-
+                      Renderers specify how manifests should be processed and rendered.
+                      This includes options for Helm chart rendering, Kustomize processing,
+                      and other manifest transformation workflows.
                     items:
                       properties:
                         helm:
                           properties:
                             release:
-                              description: Release the helm release name to use when
-                                rendering this helm chart
+                              description: Release is a Helm release name to use when
+                                rendering this Helm chart.
                               type: string
                             values:
-                              description: Values a helm values file to use when rendering
-                                this helm chart
+                              description: Values a Helm values file to use when rendering
+                                this Helm chart.
                               type: string
                             valuesFiles:
                               description: ValuesFiles a list of relative paths to
-                                values files to use for helm chart templating
+                                values files to use for Helm chart templating.
                               items:
                                 type: string
                               type: array
@@ -447,8 +510,10 @@ spec:
                       type: object
                     type: array
                   repositoryRef:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
+                    description: |-
+                      RepositoryRef references a GitRepository resource containing the service manifests.
+                      This provides the source location for Kubernetes YAML files, Helm charts,
+                      or other deployment artifacts needed for the service.
                     properties:
                       apiVersion:
                         description: API version of the referent.
@@ -491,11 +556,15 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   sources:
-                    description: Sources of this service
+                    description: |-
+                      Sources specify additional Git repositories or locations to source manifests from.
+                      This enables multi-repository deployments and complex source composition
+                      for sophisticated application architectures.
                     items:
                       properties:
                         git:
-                          description: Git the location in git to use
+                          description: Git contains a location in a Git repository
+                            to use.
                           properties:
                             files:
                               description: Optional files to add to the manifests
@@ -520,8 +589,8 @@ spec:
                             in the final tarball
                           type: string
                         repositoryRef:
-                          description: RepositoryRef the reference of the git repository
-                            to source from
+                          description: RepositoryRef the reference of the Git repository
+                            to source from.
                           properties:
                             apiVersion:
                               description: API version of the referent.
@@ -566,8 +635,10 @@ spec:
                       type: object
                     type: array
                   syncConfig:
-                    description: SyncConfig attributes to configure sync settings
-                      for this service
+                    description: |-
+                      SyncConfig defines advanced synchronization settings for the service deployment.
+                      This includes options for namespace management, drift detection configuration,
+                      and deployment behavior customization.
                     properties:
                       annotations:
                         additionalProperties:
@@ -585,17 +656,18 @@ spec:
                       diffNormalizers:
                         description: DiffNormalizers a list of diff normalizers to
                           apply to the service which controls how drift detection
-                          works
+                          works.
                         items:
                           properties:
                             backfill:
-                              description: Whether to backfill the given pointers
-                                with the current live value, or otherwise ignore it
-                                entirely
+                              description: |-
+                                Backfill indicates whether to backfill the given pointers with the current live value
+                                or otherwise ignore it entirely.
                               type: boolean
                             jsonPointers:
-                              description: A list of json patches to apply to the
-                                service which controls how drift detection works
+                              description: JSONPointers contains a list of JSON patches
+                                to apply to the service, which controls how drift
+                                detection works.
                               items:
                                 type: string
                               type: array
@@ -617,18 +689,31 @@ spec:
                         type: object
                     type: object
                   templated:
+                    description: |-
+                      Templated indicates whether to apply liquid templating to raw YAML files.
+                      When enabled, allows for dynamic configuration injection and
+                      environment-specific customization of service manifests.
                     type: boolean
                 type: object
               target:
-                description: A spec for targeting clusters
+                description: |-
+                  Target specifies the targeting criteria for selecting which clusters should receive this namespace.
+                  This enables flexible namespace distribution based on tags and Kubernetes distributions.
                 properties:
                   distro:
-                    description: Distro kubernetes distribution to target
+                    description: |-
+                      Distro specifies the Kubernetes distribution type for target cluster selection.
+                      This allows targeting namespaces to specific cluster types that may have
+                      distribution-specific requirements, networking configurations, or security policies.
                     type: string
                   tags:
                     additionalProperties:
                       type: string
-                    description: Tags the cluster tags to target
+                    description: |-
+                      Tags specify a set of key-value pairs used to select target clusters.
+                      Only clusters that match all specified tags will receive the managed namespace.
+                      This provides a flexible mechanism for targeting specific cluster groups,
+                      environments, or organizational boundaries.
                     type: object
                 type: object
             type: object

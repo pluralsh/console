@@ -14,11 +14,20 @@ spec:
     singular: notificationrouter
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: ID of the NotificationRouter in the Console API.
+      jsonPath: .status.id
+      name: ID
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: NotificationRouter is the Schema for the notificationrouters
-          API
+        description: |-
+          NotificationRouter routes events from Plural Console to notification destinations.
+          It filters events based on type, resource associations, and regex patterns, then
+          forwards matching events to configured sinks like Slack, Teams, or in-app notifications.
+          Common use cases include routing service deployment events, pipeline failures,
+          cluster alerts, and security events to appropriate teams or channels.
         properties:
           apiVersion:
             description: |-
@@ -38,20 +47,32 @@ spec:
           metadata:
             type: object
           spec:
-            description: NotificationRouterSpec defines the desired state of NotificationRouter
+            description: |-
+              Spec defines the desired state of the NotificationRouter, including event subscriptions,
+              filtering criteria, and destination sink configurations.
             properties:
               events:
-                description: Events the events to trigger, or use * for any
+                description: |-
+                  Events define the list of event types this router should subscribe to.
+                  Use "*" to subscribe to all events, or specify specific event names to filter
+                  for particular types of notifications. Common events include deployment updates,
+                  service health changes, pipeline status changes, and security alerts.
                 items:
                   type: string
                 type: array
               filters:
-                description: Filters filters by object type
+                description: |-
+                  Filters define criteria for selectively routing events.
+                  These filters control which events trigger notifications, allowing teams
+                  to focus on relevant events. Multiple filters can be combined.
                 items:
+                  description: |-
+                    RouterFilters defines filtering criteria for routing events to notification destinations.
+                    Filters can be based on regex patterns, resource associations, or combinations thereof.
                   properties:
                     clusterRef:
-                      description: ClusterRef whether to enable delivery for events
-                        associated with this cluster
+                      description: ClusterRef filters events to only those associated
+                        with a specific cluster.
                       properties:
                         apiVersion:
                           description: API version of the referent.
@@ -94,8 +115,8 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     pipelineRef:
-                      description: PipelineRef whether to enable delivery for events
-                        associated with this pipeline
+                      description: PipelineRef filters events to only those associated
+                        with a specific pipeline.
                       properties:
                         apiVersion:
                           description: API version of the referent.
@@ -138,11 +159,14 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     regex:
-                      description: Regex a regex for filtering by things like pr url
+                      description: |-
+                        Regex specifies a regular expression pattern for filtering events based on content.
+                        This can be used to filter events by URLs, resource names, error messages, or any
+                        other textual content within the event data. Use standard regex syntax.
                       type: string
                     serviceRef:
-                      description: ServiceRef whether to enable delivery for events
-                        associated with this service
+                      description: ServiceRef filters events to only those associated
+                        with a specific service deployment.
                       properties:
                         apiVersion:
                           description: API version of the referent.
@@ -187,11 +211,17 @@ spec:
                   type: object
                 type: array
               name:
-                description: Name the name of this router, if not provided NotificationRouter's
-                  own name from NotificationRouter.ObjectMeta will be used.
+                description: |-
+                  Name specifies the name for this notification router.
+                  If not provided, the name from the resource metadata will be used.
                 type: string
               sinks:
-                description: Sinks notification sinks to deliver notifications to
+                description: |-
+                  Sinks specify the notification destinations where filtered events should be delivered.
+                  Each sink represents a configured notification channel such as Slack webhooks,
+                  Microsoft Teams channels, or in-app notification systems. Events matching the
+                  router's criteria will be formatted and sent to all configured sinks.
+                  It is a reference to the NotificationSink resource.
                 items:
                   description: ObjectReference contains enough information to let
                     you inspect or modify the referred object.
@@ -239,6 +269,9 @@ spec:
                 type: array
             type: object
           status:
+            description: |-
+              Status represents the current state of this NotificationRouter resource, including
+              synchronization status and operational health information.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current
