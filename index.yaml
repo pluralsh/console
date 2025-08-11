@@ -86,6 +86,34 @@ entries:
     version: 0.0.1
   console:
   - apiVersion: v2
+    appVersion: 0.11.34
+    created: "2025-08-11T04:04:18.544612475Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.139
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 2244c4ec53fdb2e86d8ab0afb3bc08086b61a7812119bd15f80c2fc143f4c29d
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.111/console-0.3.111.tgz
+    version: 0.3.111
+  - apiVersion: v2
     appVersion: 0.11.33
     created: "2025-08-09T15:05:52.630797938Z"
     dependencies:
@@ -7978,6 +8006,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.34
+    created: "2025-08-11T04:04:18.715845484Z"
+    description: deploys the datastore operator for plural cd
+    digest: 62d4dcb46ded2f996eab184f0d84e60e4250211f5d3d6941cf93532b2f6985fd
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.17/datastore-0.0.17.tgz
+    version: 0.0.17
+  - apiVersion: v2
     appVersion: 0.11.33
     created: "2025-08-09T15:05:52.796175373Z"
     description: deploys the datastore operator for plural cd
@@ -8305,4 +8343,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-11T03:46:43.357392904Z"
+generated: "2025-08-11T04:04:18.716983339Z"
