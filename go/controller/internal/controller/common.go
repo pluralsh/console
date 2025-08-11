@@ -92,7 +92,7 @@ func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupC
 
 func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, error) {
 	if binding.GroupName == nil && binding.UserEmail == nil {
-		return binding, apierrors.NewNotFound(schema.GroupResource{}, "")
+		return binding, apierrors.NewNotFound(schema.GroupResource{Resource: "group/user"}, "nil")
 	}
 
 	if binding.GroupName != nil {
