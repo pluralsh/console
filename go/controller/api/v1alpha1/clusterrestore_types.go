@@ -90,6 +90,18 @@ type ClusterRestoreSpec struct {
 	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
 }
 
+func (p *ClusterRestoreSpec) HasBackupID() bool {
+	return p.BackupID != nil && len(*p.BackupID) > 0
+}
+
+func (p *ClusterRestoreSpec) GetBackupID() string {
+	if !p.HasBackupID() {
+		return ""
+	}
+
+	return *p.BackupID
+}
+
 // ClusterRestoreStatus represents the observed state of a ClusterRestore operation.
 // Tracks the progress, completion status, and any issues encountered during the restoration process.
 type ClusterRestoreStatus struct {

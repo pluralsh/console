@@ -116,6 +116,7 @@ type AWSCloudConnection struct {
 	// +kubebuilder:validation:Optional
 	Regions []string `json:"regions"`
 }
+
 // GCPCloudConnection contains Google Cloud Platform authentication configuration.
 // Enables cloud resource discovery and analysis across GCP projects.
 type GCPCloudConnection struct {

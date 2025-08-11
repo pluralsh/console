@@ -34,8 +34,8 @@ type MCPServer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MCPServerSpec   `json:"spec,omitempty"`
-	Status MCPServerStatus `json:"status,omitempty"`
+	Spec   MCPServerSpec `json:"spec,omitempty"`
+	Status Status        `json:"status,omitempty"`
 }
 
 // SetCondition sets a condition on the MCPServer status.
@@ -142,10 +142,4 @@ type MCPServerAuthentication struct {
 	// "X-API-Key", or custom authentication headers.
 	// +kubebuilder:validation:Optional
 	Headers map[string]string `json:"headers,omitempty"`
-}
-
-// MCPServerStatus defines the observed state of an MCP server.
-type MCPServerStatus struct {
-	// Status contains the common status fields including conditions and synchronization state.
-	Status `json:",inline"`
 }

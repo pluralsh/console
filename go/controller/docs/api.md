@@ -1944,8 +1944,6 @@ _Appears in:_
 | `confirm` _boolean_ | Confirm determines whether tool calls against this server require explicit user confirmation.<br />When true, users must approve each tool execution before it proceeds, providing<br />an additional safety mechanism for sensitive operations. Defaults to false. |  | Optional: {} <br /> |
 
 
-
-
 #### ManagedNamespace
 
 
@@ -4170,7 +4168,6 @@ _Appears in:_
 - [ClusterStatus](#clusterstatus)
 - [GeneratedSecretStatus](#generatedsecretstatus)
 - [GitRepositoryStatus](#gitrepositorystatus)
-- [MCPServerStatus](#mcpserverstatus)
 - [ServiceStatus](#servicestatus)
 
 | Field | Description | Default | Validation |
