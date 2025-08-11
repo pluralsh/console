@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -29,7 +30,6 @@ import (
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -77,48 +77,43 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	return defaultMessage
 }
 
-func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, bool, error) {
-	requeue := false
+func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, error) {
 	for i := range bindings {
-		binding, req, err := ensureBinding(bindings[i], userGroupCache)
+		binding, err := ensureBinding(bindings[i], userGroupCache)
 		if err != nil {
-			return bindings, req, err
+			return bindings, err
 		}
 
-		requeue = requeue || req
 		bindings[i] = binding
 	}
 
-	return bindings, requeue, nil
+	return bindings, nil
 }
 
-func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, bool, error) {
-	requeue := false
+func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, error) {
 	if binding.GroupName == nil && binding.UserEmail == nil {
-		return binding, requeue, nil
+		return binding, apierrors.NewNotFound(schema.GroupResource{}, "")
 	}
 
 	if binding.GroupName != nil {
 		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
-		if err != nil && !errors.IsNotFound(err) {
-			return binding, requeue, err
+		if err != nil {
+			return binding, err
 		}
 
-		requeue = errors.IsNotFound(err)
 		binding.GroupID = lo.EmptyableToPtr(groupID)
 	}
 
 	if binding.UserEmail != nil {
 		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
-		if err != nil && !errors.IsNotFound(err) {
-			return binding, requeue, err
+		if err != nil {
+			return binding, err
 		}
 
-		requeue = errors.IsNotFound(err)
 		binding.UserID = lo.EmptyableToPtr(userID)
 	}
 
-	return binding, requeue, nil
+	return binding, nil
 }
 
 func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttributes {
