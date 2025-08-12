@@ -5,21 +5,15 @@ import {
   QueryHookOptions,
   QueryResult,
 } from '@apollo/client'
-import { Table } from '@pluralsh/design-system'
-import { VirtualItem } from '@tanstack/react-virtual'
+import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
-import { ComponentProps, Dispatch, useCallback, useMemo, useState } from 'react'
+import { Dispatch, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
-
-// TODO: remove this, it was added as the default in Table itself a while ago
-export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = { overscan: 10 }
 
 export const DEFAULT_PAGE_SIZE = 100
 
@@ -43,10 +37,10 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   skip?: boolean
 }
 
-export type VirtualSlice = {
-  start: VirtualItem | undefined
-  end: VirtualItem | undefined
-}
+// could also export this directly from DS
+export type VirtualSlice = Parameters<
+  NonNullable<TableProps['onVirtualSliceChange']>
+>[0]
 
 export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
