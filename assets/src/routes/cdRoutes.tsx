@@ -36,7 +36,6 @@ import { ComponentInsights } from 'components/component/ComponentInsights'
 import ComponentMetadata from 'components/component/ComponentMetadata'
 import ComponentMetrics from 'components/component/ComponentMetrics'
 import ComponentRaw from 'components/component/ComponentRaw'
-import ComponentTree from 'components/component/ComponentTree'
 import { Navigate, Outlet, Route } from 'react-router-dom'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
@@ -208,10 +207,6 @@ export const getComponentRoutes = (type: 'service' | 'flow') => (
     <Route
       path="raw"
       element={<ComponentRaw />}
-    />
-    <Route
-      path="tree"
-      element={<ComponentTree />}
     />
     <Route
       path="dryrun"
