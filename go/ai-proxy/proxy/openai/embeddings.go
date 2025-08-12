@@ -8,8 +8,11 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
+)
+
+const (
+	embeddingsEndpoint = "/v1/embeddings"
 )
 
 func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
@@ -24,7 +27,7 @@ func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
 
 			r.SetXForwarded()
 
-			targetURL, err := url.Parse(openai.EndpointEmbeddings)
+			targetURL, err := url.Parse(embeddingsEndpoint)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse target url")
 				return
