@@ -1,17 +1,15 @@
 import { QueryResult } from '@apollo/client'
 import { usePrevious } from '@pluralsh/design-system'
-import { VirtualItem } from '@tanstack/react-virtual'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
+import { VirtualSlice } from './table/useFetchPaginatedData'
 
 type FetchSliceOptions = {
   keyPath: string[]
-  virtualSlice:
-    | { start: VirtualItem | undefined; end: VirtualItem | undefined }
-    | undefined
+  virtualSlice: VirtualSlice | undefined
   pageSize: number
 }
 

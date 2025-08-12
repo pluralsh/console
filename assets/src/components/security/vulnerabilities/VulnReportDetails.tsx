@@ -8,7 +8,7 @@ import {
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
+
 import { useClusterQuery, useVulnerabilityReportQuery } from 'generated/graphql'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getVulnerabilityReportsPath } from 'routes/securityRoutesConsts'
@@ -74,7 +74,6 @@ export function VulnerabilityReportDetails() {
         data={data?.vulnerabilityReport?.vulnerabilities ?? []}
         columns={columns}
         loading={loading && !data}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         getRowCanExpand={() => true}
         renderExpanded={VulnerabilityExpansionPanel}
         onRowClick={(_, row) => row.getToggleExpandedHandler()()}

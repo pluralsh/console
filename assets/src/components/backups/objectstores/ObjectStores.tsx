@@ -11,10 +11,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useTheme } from 'styled-components'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import {
@@ -86,7 +83,6 @@ export default function ObjectStores() {
           loose
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={objectStores?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

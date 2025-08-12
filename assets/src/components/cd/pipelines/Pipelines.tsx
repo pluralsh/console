@@ -20,10 +20,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -84,7 +81,6 @@ export default function PipelineList() {
       <Table
         fullHeightWrap
         columns={columns}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={data?.pipelines?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

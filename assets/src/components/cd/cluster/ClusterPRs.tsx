@@ -2,7 +2,6 @@ import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { usePullRequestsQuery } from 'generated/graphql'
 import { useThrottle } from 'components/hooks/useThrottle'
 import {
   ColActions,
@@ -14,10 +13,8 @@ import {
   ColTitle,
 } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { usePullRequestsQuery } from 'generated/graphql'
 
 import { useClusterContext } from './Cluster'
 
@@ -86,7 +83,6 @@ export default function ClusterPRs() {
             columns={columns}
             data={data?.pullRequests?.edges || []}
             loading={!data && loading}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             reactTableOptions={reactTableOptions}
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
