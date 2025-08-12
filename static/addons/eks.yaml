@@ -3487,6 +3487,15 @@
   publisher: eks
 - name: elastic_elastic-agent
   versions:
+  - version: v9.1.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v9.1.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3531,6 +3540,15 @@
     - '1.27'
   - version: v9.0.0-eksbuild.1
     compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v8.19.1-eksbuild.1
+    compatibilities:
+    - '1.33'
     - '1.32'
     - '1.31'
     - '1.30'
