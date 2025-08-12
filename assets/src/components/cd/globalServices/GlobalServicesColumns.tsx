@@ -9,7 +9,12 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
-import { GlobeIcon, ListBoxItem, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  Chip,
+  GlobeIcon,
+  ListBoxItem,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { useState } from 'react'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
@@ -85,6 +90,27 @@ export const ColProject = columnHelper.accessor(
     meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   }
 )
+
+export const ColMgmt = columnHelper.accessor(({ node }) => node?.mgmt, {
+  id: 'mgmt',
+  header: 'Mgmt',
+  cell: ({ getValue }) =>
+    getValue() ? (
+      <Chip
+        size="small"
+        severity="success"
+      >
+        Included
+      </Chip>
+    ) : (
+      <Chip
+        size="small"
+        severity="neutral"
+      >
+        Excluded
+      </Chip>
+    ),
+})
 
 export const ColLastActivity = columnHelper.accessor(
   ({ node }) => {

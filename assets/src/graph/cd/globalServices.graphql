@@ -32,6 +32,7 @@ fragment GlobalService on GlobalService {
   }
   insertedAt
   updatedAt
+  mgmt
 }
 
 fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
