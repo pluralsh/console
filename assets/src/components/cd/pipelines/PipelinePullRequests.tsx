@@ -3,8 +3,6 @@ import { prColumns } from 'components/self-service/pr/queue/PrQueueColumns'
 import { PullRequestFragment } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
-
 export function PipelinePullRequestsModal({
   pullRequests,
   open,
@@ -38,7 +36,6 @@ export function PipelinePullRequestsTable({
     <Table
       fullHeightWrap
       columns={prColumns}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={pullRequestEdges || []}
       virtualizeRows
     />

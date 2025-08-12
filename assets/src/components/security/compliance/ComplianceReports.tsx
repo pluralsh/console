@@ -17,10 +17,7 @@ import {
   ComplianceReportGeneratorFragment,
   useComplianceReportGeneratorsQuery,
 } from '../../../generated/graphql.ts'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import { parse } from 'content-disposition'
 import streamSaver from 'streamsaver'
@@ -107,7 +104,6 @@ export function ComplianceReports() {
       columns={columns}
       hasNextPage={data?.complianceReportGenerators?.pageInfo?.hasNextPage}
       isFetchingNextPage={loading}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       onVirtualSliceChange={setVirtualSlice}
       fetchNextPage={fetchNextPage}
     />

@@ -9,10 +9,7 @@ import { ObscuredToken } from '../../profile/ObscuredToken.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import CopyButton from '../../utils/CopyButton.tsx'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 
 const columnHelper = createColumnHelper<ClusterIsoImageEdge>()
 
@@ -88,7 +85,6 @@ export default function Images(): ReactNode {
       fullHeightWrap
       data={(data?.clusterIsoImages?.edges as Array<ClusterIsoImageEdge>) ?? []}
       columns={columns}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}

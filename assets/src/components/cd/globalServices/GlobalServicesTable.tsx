@@ -14,10 +14,7 @@ import { useProjectId } from 'components/contexts/ProjectsContext'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { columns } from './GlobalServices'
 
@@ -84,7 +81,6 @@ function GlobalServicesTableComponent({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{
           message: debouncedSearchString

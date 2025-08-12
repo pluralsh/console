@@ -11,8 +11,6 @@ import { Edge } from 'utils/graphql'
 
 import { getPolicyPath } from 'routes/securityRoutesConsts'
 
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
-
 import {
   ColCluster,
   ColDescription,
@@ -88,7 +86,6 @@ export function PoliciesTable({
         hasNextPage={data?.policyConstraints?.pageInfo?.hasNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{
           message: 'No policies found.',

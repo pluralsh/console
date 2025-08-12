@@ -11,7 +11,6 @@ import {
 } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import { OverlineH1 } from 'components/utils/typography/Text'
 import { ClusterNamespaceUsageFragment } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -159,7 +158,6 @@ export function CostManagementDetailsNamespaces() {
               }
               isFetchingNextPage={loading}
               fetchNextPage={fetchNextPage}
-              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
               onVirtualSliceChange={setVirtualSlice}
             />
           )}

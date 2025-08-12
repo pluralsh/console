@@ -18,10 +18,7 @@ import { useVClustersQuery } from '../../../generated/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { ClustersTable } from '../clusters/Clusters'
 import { ClusterStatusTabKey, statusTabs } from '../services/ClustersFilters'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -87,7 +84,6 @@ export default function VClusters(): ReactNode {
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
       />
     </div>

@@ -14,10 +14,7 @@ import { useMemo } from 'react'
 
 import { columns } from 'components/cd/services/Services'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 
@@ -81,7 +78,6 @@ export function ManagedNamespaceServices() {
         )
       }
       reactTableOptions={{ meta: { refetch } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       emptyStateProps={{ message: 'No services found.' }}
     />
   )

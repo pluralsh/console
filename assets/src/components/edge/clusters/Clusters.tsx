@@ -8,10 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ClusterRegistrationFragment,
   useClusterRegistrationsQuery,
@@ -162,7 +159,6 @@ export default function Clusters(): ReactNode {
       fullHeightWrap
       columns={columns}
       reactTableOptions={{ meta: { refetch } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={clusterRegistrations}
       virtualizeRows
       hasNextPage={pageInfo?.hasNextPage}

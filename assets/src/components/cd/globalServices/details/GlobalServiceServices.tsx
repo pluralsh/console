@@ -14,10 +14,7 @@ import { useNavigate } from 'react-router'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { columns } from './columns'
 
 interface GlobalServiceServicesProps {
@@ -76,7 +73,6 @@ export function GlobalServiceServices({
         )
       }
       reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       emptyStateProps={{ message: 'No services found.' }}
     />
   )

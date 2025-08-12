@@ -53,10 +53,7 @@ import {
 
 import { TagsFilter } from '../services/ClusterTagsFilter'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -276,7 +273,6 @@ export default function Clusters() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
           {!onboarded && tableData && tableData?.length < 2 && (
