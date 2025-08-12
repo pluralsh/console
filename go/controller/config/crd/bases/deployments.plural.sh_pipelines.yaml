@@ -22,7 +22,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Pipeline is the Schema for the pipelines API
+        description: |-
+          Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
+          It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
+          customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
+          configuration of deployment flows, including gating, promotions, and service progression.
         properties:
           apiVersion:
             description: |-
@@ -42,10 +46,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: PipelineSpec defines the desired state of Pipeline.
+            description: PipelineSpec defines the desired state of the Pipeline.
             properties:
               bindings:
-                description: Bindings contain read and write policies of this pipeline
+                description: Bindings contain read and write policies controlling
+                  access to this pipeline.
                 properties:
                   read:
                     description: Read bindings.
@@ -83,10 +88,13 @@ spec:
                     type: array
                 type: object
               edges:
-                description: Edges of a pipeline.
+                description: |-
+                  Edges define the dependencies and flow between stages, controlling the execution order
+                  and promotion path through the pipeline.
                 items:
-                  description: PipelineEdge is a specification of an edge between
-                    two pipeline stages.
+                  description: |-
+                    PipelineEdge defines the flow of execution between stages, controlling promotion paths
+                    and enabling attachment of gates for additional validation and approval.
                   properties:
                     from:
                       description: From is the name of the pipeline stage this edge
@@ -100,12 +108,14 @@ spec:
                       description: Gates are any optional promotion gates you wish
                         to configure.
                       items:
-                        description: PipelineGate will configure a promotion gate
-                          for a pipeline.
+                        description: |-
+                          PipelineGate serves as a checkpoint between pipeline stages, enforcing promotion policies.
+                          Three gate types are supported: APPROVAL (human sign-off), WINDOW (time-based constraints),
+                          and JOB (custom validation jobs like tests or security scans).
                         properties:
                           clusterRef:
-                            description: ClusterRef of a Cluster this gate will execute
-                              on.
+                            description: ClusterRef specifies the target cluster where
+                              this gate will execute.
                             properties:
                               apiVersion:
                                 description: API version of the referent.
@@ -151,17 +161,23 @@ spec:
                             description: Name of this gate.
                             type: string
                           spec:
-                            description: Spec contains specification for more complex
-                              gate types.
+                            description: Spec contains detailed configuration for
+                              complex gate types like JOB gates.
                             properties:
                               job:
-                                description: JobSpec is a spec for a job gate.
+                                description: |-
+                                  Job configuration for JOB gate types, enabling custom validation jobs
+                                  such as integration tests, security scans, or other promotion checks.
                                 properties:
                                   annotations:
                                     additionalProperties:
                                       type: string
+                                    description: Annotations to apply to the job for
+                                      additional metadata.
                                     type: object
                                   containers:
+                                    description: Containers to run as part of the
+                                      job, such as test runners or validation scripts.
                                     items:
                                       properties:
                                         args:
@@ -172,8 +188,12 @@ spec:
                                           items:
                                             properties:
                                               name:
+                                                description: Name of the environment
+                                                  variable to set.
                                                 type: string
                                               value:
+                                                description: Value of the environment
+                                                  variable to set.
                                                 type: string
                                             required:
                                             - name
@@ -184,8 +204,12 @@ spec:
                                           items:
                                             properties:
                                               configMap:
+                                                description: ConfigMap to source environment
+                                                  variables from.
                                                 type: string
                                               secret:
+                                                description: Secret to source environment
+                                                  variables from.
                                                 type: string
                                             required:
                                             - configMap
@@ -218,13 +242,16 @@ spec:
                                   labels:
                                     additionalProperties:
                                       type: string
+                                    description: Labels to apply to the job for organization
+                                      and selection.
                                     type: object
                                   namespace:
+                                    description: Namespace where the job will be executed.
                                     type: string
                                   raw:
-                                    description: Raw can be used if you'd rather define
-                                      the job spec via straight Kubernetes manifest
-                                      file.
+                                    description: |-
+                                      Raw allows defining the job using a full Kubernetes JobSpec manifest
+                                      instead of the simplified container-based approach.
                                     properties:
                                       activeDeadlineSeconds:
                                         description: |-
@@ -9432,9 +9459,9 @@ spec:
                                     - template
                                     type: object
                                   resources:
-                                    description: Resource specification that overrides
-                                      implicit container resources when containers
-                                      are not directly configured.
+                                    description: |-
+                                      Resources specification that overrides implicit container resources
+                                      when containers are not directly configured.
                                     properties:
                                       limits:
                                         properties:
@@ -9452,13 +9479,20 @@ spec:
                                         type: object
                                     type: object
                                   serviceAccount:
+                                    description: ServiceAccount to use for the job
+                                      execution.
                                     type: string
                                 required:
                                 - namespace
                                 type: object
                             type: object
                           type:
-                            description: Type of gate this is.
+                            description: |-
+                              Type of gate.
+                              One of:
+                              - APPROVAL (requires human approval)
+                              - WINDOW (time-based constraints),
+                              - JOB (runs custom validation before allowing promotion).
                             enum:
                             - APPROVAL
                             - WINDOW
@@ -9480,7 +9514,8 @@ spec:
                   type: object
                 type: array
               flowRef:
-                description: reference to a Flow this pipeline belongs within
+                description: FlowRef provides contextual linkage to a broader application
+                  Flow this pipeline belongs within.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -9524,7 +9559,7 @@ spec:
                 x-kubernetes-map-type: atomic
               projectRef:
                 description: |-
-                  ProjectRef references project this stack belongs to.
+                  ProjectRef references the project this pipeline belongs to.
                   If not provided, it will use the default project.
                 properties:
                   apiVersion:
@@ -9568,27 +9603,34 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               stages:
-                description: Stages of a pipeline.
+                description: |-
+                  Stages represent discrete steps in the deployment pipeline, such as environments (dev, staging, prod)
+                  or specific deployment phases that services progress through.
                 items:
-                  description: PipelineStage defines the Pipeline stage.
+                  description: |-
+                    PipelineStage represents a logical unit within the pipeline, typically corresponding to
+                    environments (e.g., dev, staging, prod) or specific deployment phases.
                   properties:
                     name:
                       description: Name of this stage.
                       type: string
                     services:
-                      description: Services including optional promotion criteria.
+                      description: |-
+                        Services deployed in this stage, including optional promotion criteria
+                        that dictate when and how services advance to subsequent stages.
                       items:
                         description: |-
-                          PipelineStageService is the configuration of a service within a pipeline stage,
-                          including optional promotion criteria.
+                          PipelineStageService defines a service within a pipeline stage and its promotion rules.
+                          This enables conditional promotions, a critical part of automating production deployments safely.
                         properties:
                           criteria:
-                            description: PipelineStageServicePromotionCriteria represents
-                              actions to perform if this stage service were promoted.
+                            description: |-
+                              Criteria defines optional promotion rules that control when and how
+                              this service is allowed to advance to the next stage.
                             properties:
                               prAutomationRef:
-                                description: PrAutomationRef pointing to source PR
-                                  automation to promote from.
+                                description: PrAutomationRef pointing to a source
+                                  PrAutomation to promote from.
                                 properties:
                                   apiVersion:
                                     description: API version of the referent.
@@ -9631,9 +9673,9 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               repository:
-                                description: The repository slug the pr automation
-                                  will use (eg pluralsh/console if you will pr against
-                                  https://github.com/pluralsh/console)
+                                description: |-
+                                  The repository slug the PrAutomation will use.
+                                  E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console.
                                 type: string
                               secrets:
                                 description: Secrets to copy over in a promotion.
@@ -9641,7 +9683,7 @@ spec:
                                   type: string
                                 type: array
                               serviceRef:
-                                description: ServiceRef pointing to source service
+                                description: ServiceRef pointing to a source ServiceDeployment
                                   to promote from.
                                 properties:
                                   apiVersion:
@@ -9686,8 +9728,8 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           serviceRef:
-                            description: ObjectReference contains enough information
-                              to let you inspect or modify the referred object.
+                            description: ServiceRef references the ServiceDeployment
+                              being deployed at this stage.
                             properties:
                               apiVersion:
                                 description: API version of the referent.

@@ -22,7 +22,12 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Catalog is the Schema for the catalogs API
+        description: |-
+          Catalog is an organized collection of PR Automations.
+          It enables teams to group related automation workflows by category (like "data", "security",
+          "devops") and provides a browsable interface for self-service capabilities. Catalogs support
+          hierarchical permissions through RBAC bindings and can be scoped to specific projects for
+          multi-tenant environments.
         properties:
           apiVersion:
             description: |-
@@ -45,12 +50,20 @@ spec:
             description: CatalogSpec defines the desired state of Catalog
             properties:
               author:
+                description: |-
+                  Author is the name of the catalog creator used for attribution and contact purposes.
+                  This field helps users identify who maintains and supports the catalog contents.
                 type: string
               bindings:
-                description: Bindings contain read and write policies of this Catalog.
+                description: |-
+                  Bindings define the read, write, and create permissions for this catalog.
+                  Controls who can view, modify, and use the PR automations within this catalog.
+                  Bindings contain read and write policies of this Catalog.
                 properties:
                   create:
-                    description: Create bindings.
+                    description: |-
+                      Create bindings control who can generate new PR automations using this catalog.
+                      Users with create permissions can trigger self-service workflows but cannot modify the catalog itself.
                     items:
                       description: Binding represents a policy binding.
                       properties:
@@ -67,7 +80,9 @@ spec:
                       type: object
                     type: array
                   read:
-                    description: Read bindings.
+                    description: |-
+                      Read bindings control who can view and browse this catalog and its PR automations.
+                      Users with read permissions can see available automations but cannot execute or modify them.
                     items:
                       description: Binding represents a policy binding.
                       properties:
@@ -84,7 +99,9 @@ spec:
                       type: object
                     type: array
                   write:
-                    description: Write bindings.
+                    description: |-
+                      Write bindings control who can modify the catalog and its PR automations.
+                      Users with write permissions can add, update, or remove PR automations within this catalog.
                     items:
                       description: Binding represents a policy binding.
                       properties:
@@ -102,22 +119,36 @@ spec:
                     type: array
                 type: object
               category:
+                description: |-
+                  Category is a short classification label for organizing catalogs in the browser.
+                  Examples include "infrastructure", "security", "monitoring", or "development".
                 type: string
               darkIcon:
-                description: An darkmode icon url to annotate this pr automation
+                description: |-
+                  DarkIcon is a URL to a dark mode variant of the catalog icon.
+                  Used when the UI is in dark mode to ensure proper contrast and visibility.
                 type: string
               description:
-                description: Description is a description of this Catalog.
+                description: |-
+                  Description provides a detailed explanation of the catalog's purpose and contents.
+                  This helps users understand what types of automations they can find within.
                 example: my catalog description
                 type: string
               icon:
-                description: An icon url to annotate this pr automation
+                description: |-
+                  Icon is a URL to an icon image for visual identification in the catalog browser.
+                  Should be a publicly accessible image URL that displays well at small sizes.
                 type: string
               name:
+                description: |-
+                  Name is the display name for this catalog if different from metadata.name.
+                  Defaults to metadata.name if not specified.
                 type: string
               projectRef:
-                description: ProjectRef owning project of the catalog, permissions
-                  will propagate down
+                description: |-
+                  ProjectRef links this catalog to a specific project for permission inheritance.
+                  When set, the catalog inherits the project's RBAC policies and is scoped to that project.
+                  ProjectRef owning project of the catalog, permissions will propagate down
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -162,6 +193,9 @@ spec:
               tags:
                 additionalProperties:
                   type: string
+                description: |-
+                  Tags provide key-value metadata for filtering and organizing catalogs.
+                  Useful for adding custom labels like environment, team, or technology stack.
                 type: object
             required:
             - author

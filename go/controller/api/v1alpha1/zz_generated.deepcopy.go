@@ -6576,6 +6576,11 @@ func (in *ServiceComponent) DeepCopyInto(out *ServiceComponent) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Version != nil {
+		in, out := &in.Version, &out.Version
+		*out = new(string)
+		**out = **in
+	}
 	if in.Namespace != nil {
 		in, out := &in.Namespace, &out.Namespace
 		*out = new(string)
@@ -6584,11 +6589,6 @@ func (in *ServiceComponent) DeepCopyInto(out *ServiceComponent) {
 	if in.State != nil {
 		in, out := &in.State, &out.State
 		*out = new(ComponentState)
-		**out = **in
-	}
-	if in.Version != nil {
-		in, out := &in.Version, &out.Version
-		*out = new(string)
 		**out = **in
 	}
 }

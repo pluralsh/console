@@ -22,8 +22,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: InfrastructureStack is the Schema for the infrastructurestacks
-          API
+        description: |-
+          InfrastructureStack provides a scalable framework to manage infrastructure as code with a K8s-friendly, API-driven approach.
+          It declaratively defines a stack with a type, Git repository location, and target cluster for execution.
+          On each commit to the tracked repository, a run is created which the Plural deployment operator detects
+          and executes on the targeted cluster, enabling fine-grained permissions and network location control for IaC runs.
         properties:
           apiVersion:
             description: |-
@@ -43,21 +46,25 @@ spec:
           metadata:
             type: object
           spec:
-            description: InfrastructureStackSpec defines the desired state of InfrastructureStack
+            description: InfrastructureStackSpec defines the desired state of the
+              InfrastructureStack.
             properties:
               actor:
-                description: Actor - user email to use for default Plural authentication
+                description: Actor is a user email to use for default Plural authentication
                   in this stack.
                 type: string
               agentId:
-                description: The agent session id that created this service, used
-                  for ui linking and otherwise ignored
+                description: |-
+                  AgentId represents agent session ID that created this stack.
+                  It is used for UI linking and otherwise ignored.
                 type: string
               approval:
-                description: Approval whether to require approval
+                description: |-
+                  Approval when set to true, requires human approval before Terraform apply triggers,
+                  ensuring verification of the plan to reduce misconfiguration risk.
                 type: boolean
               bindings:
-                description: Bindings contain read and write policies of this cluster
+                description: Bindings contain read and write policies of this stack.
                 properties:
                   read:
                     description: Read bindings.
@@ -95,8 +102,8 @@ spec:
                     type: array
                 type: object
               clusterRef:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
+                description: ClusterRef references the target Cluster where this stack
+                  will be executed.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -139,11 +146,11 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               configuration:
-                description: Configuration version/image config for the tool you're
-                  using
+                description: Configuration specifies version/image config for the
+                  IaC tool being used.
                 properties:
                   hooks:
-                    description: Hooks to run at various stages of the stack run
+                    description: Hooks to run at various stages of the stack run.
                     items:
                       properties:
                         afterStage:
@@ -155,12 +162,13 @@ spec:
                           - DESTROY
                           type: string
                         args:
-                          description: optional arguments to pass to the command
+                          description: Args contain optional arguments to pass to
+                            the command.
                           items:
                             type: string
                           type: array
                         cmd:
-                          description: the command this hook will execute
+                          description: Cmd is the command to execute.
                           type: string
                       required:
                       - afterStage
@@ -168,55 +176,59 @@ spec:
                       type: object
                     type: array
                   image:
-                    description: Image optional custom image you might want to use
+                    description: |-
+                      Image contains the optional Docker image to use for the IaC tool.
+                      If not provided, the default image for the tool will be used.
                     type: string
                   tag:
-                    description: |-
-                      Tag is the docker image tag you wish to use
-                      if you're customizing the version
+                    description: Tag of the IaC tool Docker image to use.
                     type: string
                   terraform:
-                    description: Terraform is the terraform configuration for this
-                      stack
+                    description: Terraform configuration for this stack.
                     properties:
                       parallelism:
-                        description: Parallelism is the number of concurrent operations
-                          to run, equivalent to the -parallelism flag in terraform
+                        description: |-
+                          Parallelism is the number of concurrent operations to run,
+                          equivalent to the -parallelism flag in Terraform.
                         format: int64
                         type: integer
                       refresh:
-                        description: Refresh is whether to refresh the state of the
-                          stack, equivalent to the -refresh flag in terraform
+                        description: |-
+                          Refresh is whether to refresh the state of the stack,
+                          equivalent to the -refresh flag in Terraform.
                         type: boolean
                     type: object
                   version:
-                    description: Version the semver of the tool you wish to use
+                    description: Version of the IaC tool to use.
                     type: string
                 type: object
               cron:
-                description: Configuration for cron generation of stack runs
+                description: Cron configuration for automated, scheduled generation
+                  of stack runs.
                 properties:
                   autoApprove:
-                    description: Whether to automatically approve cron-spawned runs
+                    description: Whether to automatically approve cron-spawned runs.
                     type: boolean
                   crontab:
-                    description: The crontab on which to spawn stack runs
+                    description: The crontab on which to spawn stack runs.
                     type: string
                   overrides:
-                    description: Overrides for the cron triggered stack run configuration
+                    description: Overrides for the cron triggered stack run configuration.
                     properties:
                       terraform:
                         description: Terraform is the terraform configuration for
                           this stack
                         properties:
                           parallelism:
-                            description: Parallelism is the number of concurrent operations
-                              to run, equivalent to the -parallelism flag in terraform
+                            description: |-
+                              Parallelism is the number of concurrent operations to run,
+                              equivalent to the -parallelism flag in Terraform.
                             format: int64
                             type: integer
                           refresh:
-                            description: Refresh is whether to refresh the state of
-                              the stack, equivalent to the -refresh flag in terraform
+                            description: |-
+                              Refresh is whether to refresh the state of the stack,
+                              equivalent to the -refresh flag in Terraform.
                             type: boolean
                         type: object
                     type: object
@@ -224,14 +236,18 @@ spec:
                 - crontab
                 type: object
               detach:
-                description: Detach if true, detach the stack on CR deletion, leaving
-                  all cloud resources in-place.
+                description: |-
+                  Detach indicates whether to detach the stack on deletion instead of destroying it.
+                  This leaves all cloud resources in place.
                 type: boolean
               environment:
+                description: Environment variables to inject into the stack execution
+                  environment.
                 items:
                   properties:
                     configMapRef:
-                      description: Selects a key from a ConfigMap.
+                      description: ConfigMapRef references a key in a ConfigMap to
+                        set the environment variable value.
                       properties:
                         key:
                           description: The key to select.
@@ -254,9 +270,11 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     name:
+                      description: Name of the environment variable to set.
                       type: string
                     secretKeyRef:
-                      description: SecretKeySelector selects a key of a Secret.
+                      description: SecretKeyRef references a key in a Secret to set
+                        the environment variable value.
                       properties:
                         key:
                           description: The key of the secret to select from.  Must
@@ -280,22 +298,27 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     value:
+                      description: Value of the environment variable to set.
                       type: string
                   required:
                   - name
                   type: object
                 type: array
               files:
-                description: Files reference to Secret with a key as a part of mount
-                  path and value as a content
+                description: |-
+                  Files to mount from Secrets into the stack execution environment,
+                  commonly used for cloud credentials (though IRSA/Workload Identity is preferred).
                 items:
+                  description: "StackFile represents\ta file to mount from secrets
+                    into the stack execution environment."
                   properties:
                     mountPath:
+                      description: MountPath is the path where the file will be mounted
+                        in the stack execution environment.
                       type: string
                     secretRef:
-                      description: |-
-                        LocalObjectReference contains enough information to let you locate the
-                        referenced object inside the same namespace.
+                      description: SecretRef is a reference to the secret containing
+                        the file.
                       properties:
                         name:
                           default: ""
@@ -314,7 +337,8 @@ spec:
                   type: object
                 type: array
               git:
-                description: Git reference w/in the repository where the IaC lives
+                description: Git contains reference within the repository where the
+                  IaC manifests are located.
                 properties:
                   files:
                     description: Optional files to add to the manifests for this service
@@ -338,14 +362,17 @@ spec:
                   be reconciled, default is 5m
                 type: string
               jobSpec:
-                description: JobSpec optional k8s job configuration for the job that
-                  will apply this stack
+                description: JobSpec contains an optional configuration for the job
+                  that will apply this stack.
                 properties:
                   annotations:
                     additionalProperties:
                       type: string
+                    description: Annotations to apply to the job for additional metadata.
                     type: object
                   containers:
+                    description: Containers to run as part of the job, such as test
+                      runners or validation scripts.
                     items:
                       properties:
                         args:
@@ -356,8 +383,11 @@ spec:
                           items:
                             properties:
                               name:
+                                description: Name of the environment variable to set.
                                 type: string
                               value:
+                                description: Value of the environment variable to
+                                  set.
                                 type: string
                             required:
                             - name
@@ -368,8 +398,12 @@ spec:
                           items:
                             properties:
                               configMap:
+                                description: ConfigMap to source environment variables
+                                  from.
                                 type: string
                               secret:
+                                description: Secret to source environment variables
+                                  from.
                                 type: string
                             required:
                             - configMap
@@ -402,12 +436,15 @@ spec:
                   labels:
                     additionalProperties:
                       type: string
+                    description: Labels to apply to the job for organization and selection.
                     type: object
                   namespace:
+                    description: Namespace where the job will be executed.
                     type: string
                   raw:
-                    description: Raw can be used if you'd rather define the job spec
-                      via straight Kubernetes manifest file.
+                    description: |-
+                      Raw allows defining the job using a full Kubernetes JobSpec manifest
+                      instead of the simplified container-based approach.
                     properties:
                       activeDeadlineSeconds:
                         description: |-
@@ -9001,8 +9038,9 @@ spec:
                     - template
                     type: object
                   resources:
-                    description: Resource specification that overrides implicit container
-                      resources when containers are not directly configured.
+                    description: |-
+                      Resources specification that overrides implicit container resources
+                      when containers are not directly configured.
                     properties:
                       limits:
                         properties:
@@ -9020,19 +9058,23 @@ spec:
                         type: object
                     type: object
                   serviceAccount:
+                    description: ServiceAccount to use for the job execution.
                     type: string
                 required:
                 - namespace
                 type: object
               manageState:
-                description: ManageState - whether you want Plural to manage the state
-                  of this stack
+                description: ManageState indicates whether Plural should manage the
+                  Terraform state of this stack.
                 type: boolean
               name:
-                description: Name of this Stack. If not provided InfrastructureStack's
-                  own name from InfrastructureStack.ObjectMeta will be used.
+                description: |-
+                  Name of this stack.
+                  If not provided, the name from InfrastructureStack.ObjectMeta will be used.
                 type: string
               observableMetrics:
+                description: ObservableMetrics is a list of metrics to poll to determine
+                  if a stack run should be canceled.
                 items:
                   properties:
                     identifier:
@@ -9091,8 +9133,9 @@ spec:
                   to a stack.
                 properties:
                   maxSeverity:
-                    description: MaxSeverity is the maximum allowed severity without
-                      failing the stack run
+                    description: |-
+                      MaxSeverity is the maximum allowed severity without failing the stack run.
+                      One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE.
                     enum:
                     - UNKNOWN
                     - LOW
@@ -9102,7 +9145,9 @@ spec:
                     - NONE
                     type: string
                   type:
-                    description: Type is the policy engine to use with this stack
+                    description: |-
+                      Type of the policy engine to use with this stack.
+                      At the moment only TRIVY is supported.
                     enum:
                     - TRIVY
                     type: string
@@ -9111,7 +9156,7 @@ spec:
                 type: object
               projectRef:
                 description: |-
-                  ProjectRef references project this stack belongs to.
+                  ProjectRef references a project this stack belongs to.
                   If not provided, it will use the default project.
                 properties:
                   apiVersion:
@@ -9155,7 +9200,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               repositoryRef:
-                description: RepositoryRef to source IaC from
+                description: RepositoryRef references the GitRepository containing
+                  the IaC source code.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -9288,10 +9334,13 @@ spec:
               tags:
                 additionalProperties:
                   type: string
-                description: Tags used to filter stacks.
+                description: Tags represent a set of key-value pairs that can be used
+                  to filter stacks.
                 type: object
               type:
-                description: Type specifies the tool to use to apply it
+                description: |-
+                  Type specifies the IaC tool to use for executing the stack.
+                  One of TERRAFORM, ANSIBLE, CUSTOM.
                 enum:
                 - TERRAFORM
                 - ANSIBLE
@@ -9299,14 +9348,15 @@ spec:
                 type: string
               variables:
                 description: |-
-                  Variables represents a file with variables in the stack run environment.
+                  Variables represent a file with variables in the stack run environment.
                   It will be automatically passed to the specific tool depending on the
                   stack Type (except [console.StackTypeCustom]).
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               workdir:
-                description: Workdir - the working directory within the git spec you
-                  want to run commands in (useful for projects with external modules)
+                description: |-
+                  Workdir specifies the working directory within the Git repository to execute commands in.
+                  It is useful for projects with external modules or nested folder structures.
                 type: string
             required:
             - clusterRef

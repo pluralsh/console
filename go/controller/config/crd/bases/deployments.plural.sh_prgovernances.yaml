@@ -15,14 +15,17 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: ID of the PrGovernance in the Console API.
+    - description: ID of the PrGovernance in the Console API
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PrGovernance is the Schema for the prgovernances API
+        description: |-
+          PrGovernance defines governance rules and policies for pull request management within Plural Console.
+          It enforces organizational policies, approval workflows, and compliance requirements for pull requests
+          created through PR automations.
         properties:
           apiVersion:
             description: |-
@@ -42,13 +45,30 @@ spec:
           metadata:
             type: object
           spec:
-            description: PrGovernanceSpec defines the desired state of PrGovernance
+            description: |-
+              Spec defines the desired state of the PrGovernance, including governance rules,
+              webhook configurations, and SCM integration settings for pull request management.
             properties:
               configuration:
+                description: |-
+                  Configuration contains the specific governance settings and rules to enforce on pull requests.
+                  This includes webhook configurations, approval requirements, and other policy enforcement
+                  mechanisms that control how pull requests are managed and processed.
                 properties:
                   webhook:
+                    description: |-
+                      Webhooks defines webhook integration settings for governance enforcement.
+                      This enables the governance controller to receive notifications about pull request
+                      events and respond with appropriate policy enforcement actions such as requiring
+                      additional approvals, running compliance checks, or blocking merges.
                     properties:
                       url:
+                        description: |-
+                          Url specifies the HTTP endpoint where governance webhook notifications should be sent.
+                          This URL will receive webhook payloads containing pull request information and governance
+                          context, allowing external systems to implement custom approval workflows, compliance
+                          checks, or other governance processes. The endpoint should be accessible and configured
+                          to handle the webhook payload format expected by the governance system.
                         type: string
                     required:
                     - url
@@ -57,8 +77,8 @@ spec:
                 - webhook
                 type: object
               connectionRef:
-                description: Reference a ScmConnection to reuse its credentials for
-                  this PrGovernance's authentication
+                description: ConnectionRef references an ScmConnection to reuse its
+                  credentials for this governance controller's authentication.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -101,9 +121,17 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               name:
+                description: |-
+                  Name specifies the name for this PR governance controller.
+                  If not provided, the name from the resource metadata will be used.
                 type: string
+            required:
+            - connectionRef
             type: object
           status:
+            description: |-
+              Status represents the current state of this PrGovernance resource, including
+              synchronization status with the Console API and governance rule enforcement status.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

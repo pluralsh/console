@@ -25,59 +25,68 @@ import (
 	console "github.com/pluralsh/console/go/client"
 )
 
-// PipelineSpec defines the desired state of Pipeline.
+// PipelineSpec defines the desired state of the Pipeline.
 type PipelineSpec struct {
-	// Stages of a pipeline.
+	// Stages represent discrete steps in the deployment pipeline, such as environments (dev, staging, prod)
+	// or specific deployment phases that services progress through.
 	Stages []PipelineStage `json:"stages,omitempty"`
 
-	// Edges of a pipeline.
+	// Edges define the dependencies and flow between stages, controlling the execution order
+	// and promotion path through the pipeline.
 	Edges []PipelineEdge `json:"edges,omitempty"`
 
-	// reference to a Flow this pipeline belongs within
+	// FlowRef provides contextual linkage to a broader application Flow this pipeline belongs within.
 	// +kubebuilder:validation:Optional
 	FlowRef *corev1.ObjectReference `json:"flowRef,omitempty"`
 
-	// ProjectRef references project this stack belongs to.
+	// ProjectRef references the project this pipeline belongs to.
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Bindings contain read and write policies of this pipeline
+	// Bindings contain read and write policies controlling access to this pipeline.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 }
 
-// PipelineStage defines the Pipeline stage.
+// PipelineStage represents a logical unit within the pipeline, typically corresponding to
+// environments (e.g., dev, staging, prod) or specific deployment phases.
 type PipelineStage struct {
 	// Name of this stage.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Name string `json:"name"`
 
-	// Services including optional promotion criteria.
+	// Services deployed in this stage, including optional promotion criteria
+	// that dictate when and how services advance to subsequent stages.
 	Services []PipelineStageService `json:"services,omitempty"`
 }
 
-// PipelineStageService is the configuration of a service within a pipeline stage,
-// including optional promotion criteria.
+// PipelineStageService defines a service within a pipeline stage and its promotion rules.
+// This enables conditional promotions, a critical part of automating production deployments safely.
 type PipelineStageService struct {
+	// ServiceRef references the ServiceDeployment being deployed at this stage.
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
+	// Criteria defines optional promotion rules that control when and how
+	// this service is allowed to advance to the next stage.
 	// +kubebuilder:validation:Optional
 	Criteria *PipelineStageServicePromotionCriteria `json:"criteria,omitempty"`
 }
 
-// PipelineStageServicePromotionCriteria represents actions to perform if this stage service were promoted.
+// PipelineStageServicePromotionCriteria defines actions to perform when promoting this service
+// to the next stage, including source references and secrets to copy.
 type PipelineStageServicePromotionCriteria struct {
-	// ServiceRef pointing to source service to promote from.
+	// ServiceRef pointing to a source ServiceDeployment to promote from.
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
-	// PrAutomationRef pointing to source PR automation to promote from.
+	// PrAutomationRef pointing to a source PrAutomation to promote from.
 	// +kubebuilder:validation:Optional
 	PrAutomationRef *corev1.ObjectReference `json:"prAutomationRef,omitempty"`
 
-	// The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console)
+	// The repository slug the PrAutomation will use.
+	// E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console.
 	// +kubebuilder:validation:Optional
 	Repository *string `json:"repository,omitempty"`
 
@@ -86,7 +95,8 @@ type PipelineStageServicePromotionCriteria struct {
 	Secrets []*string `json:"secrets,omitempty"`
 }
 
-// PipelineEdge is a specification of an edge between two pipeline stages.
+// PipelineEdge defines the flow of execution between stages, controlling promotion paths
+// and enabling attachment of gates for additional validation and approval.
 type PipelineEdge struct {
 	// FromID is stage ID the edge is from, can also be specified by name.
 	// +kubebuilder:validation:Optional
@@ -113,57 +123,73 @@ type PipelineEdge struct {
 	Gates []PipelineGate `json:"gates,omitempty"`
 }
 
-// PipelineGate will configure a promotion gate for a pipeline.
+// PipelineGate serves as a checkpoint between pipeline stages, enforcing promotion policies.
+// Three gate types are supported: APPROVAL (human sign-off), WINDOW (time-based constraints),
+// and JOB (custom validation jobs like tests or security scans).
 type PipelineGate struct {
 	// Name of this gate.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Name string `json:"name"`
 
-	// Type of gate this is.
+	// Type of gate.
+	// One of:
+	// - APPROVAL (requires human approval)
+	// - WINDOW (time-based constraints),
+	// - JOB (runs custom validation before allowing promotion).
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=APPROVAL;WINDOW;JOB
 	Type console.GateType `json:"type"`
 
-	// ClusterRef of a Cluster this gate will execute on.
+	// ClusterRef specifies the target cluster where this gate will execute.
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
-	// Spec contains specification for more complex gate types.
+	// Spec contains detailed configuration for complex gate types like JOB gates.
 	// +kubebuilder:validation:Optional
 	Spec *GateSpec `json:"spec,omitempty"`
 }
 
-// GateSpec is a more refined spec for parameters needed for complex gates.
+// GateSpec provides detailed configuration for complex gate types, particularly JOB gates.
 type GateSpec struct {
+	// Job configuration for JOB gate types, enabling custom validation jobs
+	// such as integration tests, security scans, or other promotion checks.
 	// +kubebuilder:validation:Optional
 	Job *JobSpec `json:"job,omitempty"`
 }
 
-// JobSpec is a spec for a job gate.
+// JobSpec defines a Kubernetes Job to execute as part of a JOB gate, allowing
+// inline job definition with containers, resources, and Kubernetes-native configurations.
 type JobSpec struct {
+	// Namespace where the job will be executed.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Namespace string `json:"namespace"`
 
+	// Containers to run as part of the job, such as test runners or validation scripts.
 	// +kubebuilder:validation:Optional
 	Containers []*Container `json:"containers,omitempty"`
 
+	// Labels to apply to the job for organization and selection.
 	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
+	// Annotations to apply to the job for additional metadata.
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 
+	// ServiceAccount to use for the job execution.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
 
-	// Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file.
+	// Raw allows defining the job using a full Kubernetes JobSpec manifest
+	// instead of the simplified container-based approach.
 	// +kubebuilder:validation:Optional
 	Raw *batchv1.JobSpec `json:"raw,omitempty"`
 
-	// Resource specification that overrides implicit container resources when containers are not directly configured.
+	// Resources specification that overrides implicit container resources
+	// when containers are not directly configured.
 	// +kubebuilder:validation:Optional
 	Resources *ContainerResources `json:"resources,omitempty"`
 }
@@ -189,6 +215,7 @@ type Container struct {
 type ContainerResources struct {
 	// +kubebuilder:validation:Optional
 	Requests *ContainerResourceRequests `json:"requests,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Limits *ContainerResourceRequests `json:"limits,omitempty"`
 }
@@ -196,33 +223,42 @@ type ContainerResources struct {
 type ContainerResourceRequests struct {
 	// +kubebuilder:validation:Optional
 	CPU *string `json:"cpu,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Memory *string `json:"memory,omitempty"`
 }
 
 type Env struct {
+	// Name of the environment variable to set.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Name string `json:"name"`
 
+	// Value of the environment variable to set.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Value string `json:"value"`
 }
 
 type EnvFrom struct {
+	// Secret to source environment variables from.
 	// +kubebuilder:validation:Type:=string
 	Secret string `json:"secret"`
 
+	// ConfigMap to source environment variables from.
 	// +kubebuilder:validation:Type:=string
 	ConfigMap string `json:"configMap"`
 }
 
-// Pipeline is the Schema for the pipelines API
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="Console ID"
+
+// Pipeline automates Service Deployments across environments by promoting git-based changes through defined stages.
+// It models multi-stage deployment pipelines with support for approval and job gates, offering safe,
+// customizable delivery flows. Integrates with continuous deployment systems by enabling declarative
+// configuration of deployment flows, including gating, promotions, and service progression.
 type Pipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -247,8 +283,9 @@ func (p *Pipeline) HasProjectRef() bool {
 	return p.Spec.ProjectRef != nil
 }
 
-// PipelineList contains a list of Pipeline
 // +kubebuilder:object:root=true
+
+// PipelineList contains a list of Pipeline resources.
 type PipelineList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

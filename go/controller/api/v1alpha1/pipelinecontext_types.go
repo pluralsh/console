@@ -23,20 +23,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// PipelineContextSpec defines the desired state of PipelineContext
-type PipelineContextSpec struct {
-	// PipelineRef pointing to source Pipeline.
-	// +kubebuilder:validation:Optional
-	PipelineRef *corev1.ObjectReference `json:"pipelineRef,omitempty"`
-
-	// Context is a Pipeline context
-	Context runtime.RawExtension `json:"context,omitempty"`
+func init() {
+	SchemeBuilder.Register(&PipelineContext{}, &PipelineContextList{})
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
 
-// PipelineContext is the Schema for the pipelinecontexts API
+// PipelineContextList contains a list of PipelineContext resources.
+type PipelineContextList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PipelineContext `json:"items"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID in the Console API."
+
+// PipelineContext provides a variable context mechanism for pipelines.
+// It stores a context map that gets passed to the pipeline to enable advanced automation workflows.
 type PipelineContext struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -45,19 +50,17 @@ type PipelineContext struct {
 	Status Status              `json:"status,omitempty"`
 }
 
+// PipelineContextSpec defines the desired state of the PipelineContext.
+type PipelineContextSpec struct {
+	// PipelineRef references the Pipeline this context will be applied to.
+	// +kubebuilder:validation:Optional
+	PipelineRef *corev1.ObjectReference `json:"pipelineRef,omitempty"`
+
+	// Context is a templated context map that will be passed to the pipeline.
+	// This context can contain variables, configuration data, and other information needed.
+	Context runtime.RawExtension `json:"context,omitempty"`
+}
+
 func (p *PipelineContext) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
-}
-
-//+kubebuilder:object:root=true
-
-// PipelineContextList contains a list of PipelineContext
-type PipelineContextList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PipelineContext `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&PipelineContext{}, &PipelineContextList{})
 }

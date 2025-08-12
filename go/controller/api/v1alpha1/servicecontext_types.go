@@ -7,28 +7,31 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// ServiceContextSpec defines the desired state of ServiceContext
+// ServiceContextSpec defines the desired state of the ServiceContext.
 type ServiceContextSpec struct {
-	// the name of this service, if not provided ServiceContext's own name from ServiceContext.ObjectMeta will be used.
+	// Name of this service context.
+	// If not provided, the name from ServiceContext.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// A reusable configuration context, useful for plumbing data from external tools like terraform, pulumi, etc.
+	// Configuration is a reusable configuration context that can include any JSON-compatible configuration data
+	// that needs to be shared across multiple services.
 	Configuration runtime.RawExtension `json:"configuration,omitempty"`
 
-	// ProjectRef references project this service context belongs to.
+	// ProjectRef references the project this service context belongs to.
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:resource:scope=Namespaced
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID in the Console API."
 
-// ServiceContext is the Schema for the servicecontexts API
+// ServiceContext provides a reusable bundle of configuration. It enables sharing configuration data across multiple services.
+// This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.
 type ServiceContext struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -37,9 +40,9 @@ type ServiceContext struct {
 	Status Status             `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
-// ServiceContextList contains a list of ServiceContext
+// ServiceContextList contains a list of ServiceContext resources.
 type ServiceContextList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
