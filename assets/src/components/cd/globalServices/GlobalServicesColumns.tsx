@@ -95,19 +95,19 @@ export const ColMgmt = columnHelper.accessor(({ node }) => node?.mgmt, {
   id: 'mgmt',
   header: 'Mgmt',
   cell: ({ getValue }) =>
-    getValue() ? (
-      <Chip
-        size="small"
-        severity="success"
-      >
-        Included
-      </Chip>
-    ) : (
+    getValue() === false ? (
       <Chip
         size="small"
         severity="neutral"
       >
         Excluded
+      </Chip>
+    ) : (
+      <Chip
+        size="small"
+        severity="success"
+      >
+        Included
       </Chip>
     ),
 })
