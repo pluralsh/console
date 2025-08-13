@@ -91,7 +91,7 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = usePersistedState('plural-ai-chat-open', true)
+  const [open, setOpen] = usePersistedState('plural-ai-chat-open', false)
   const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [persistedThreadId, setPersistedThreadId] = usePersistedState<

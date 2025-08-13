@@ -95,7 +95,7 @@ export function AgentSelect() {
         <>
           <ListBoxFooter
             css={{
-              borderBottom: theme.borders.input,
+              borderBottom: selectedAgent ? theme.borders.input : undefined,
             }}
             onClick={() => {
               navigate(AI_AGENT_ABS_PATH)
