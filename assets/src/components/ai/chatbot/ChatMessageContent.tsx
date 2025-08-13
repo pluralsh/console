@@ -427,12 +427,12 @@ function ToolMessageContent({
   const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
     useDeleteChatMutation({
       awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
     })
   const [confirmMessage, { loading: confirmLoading, error: confirmError }] =
     useConfirmChatMutation({
       awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
     })
 
   return (

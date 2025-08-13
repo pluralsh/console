@@ -42,6 +42,10 @@ export function useSlicePolling<
     if (!edges) {
       return
     }
+
+    // if interval is 0, prevent polling
+    if (interval === 0) return
+
     let intervalId
 
     if (!loading) {

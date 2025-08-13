@@ -1,28 +1,22 @@
 import { Accordion, AccordionItem } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import styled from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
-  useChatThreadDetailsQuery,
+  useChatThreadMessagesQuery,
   useChatThreadsQuery,
 } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
-import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { MainChatbotButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import {
-  ChatbotMessagesWrapperSC,
-  ChatbotPanelThread,
-} from './ChatbotPanelThread.tsx'
+import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
 
@@ -64,7 +58,6 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
-  const ref = useRef<any>(undefined)
   const {
     currentThread,
     currentThreadId,
@@ -74,38 +67,32 @@ function ChatbotPanelInner() {
     createNewThread,
     mutationLoading,
   } = useChatbot()
-  const [showMcpServers, setShowMcpServers] = useState(false)
-  const [showPrompts, setShowPrompts] = useState<boolean>(false)
 
-  const { data } = useFetchPaginatedData({
+  const { data: threadsData } = useFetchPaginatedData({
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],
   })
-
-  const threadDetailsQuery = useFetchPaginatedData(
-    {
-      skip: !currentThreadId,
-      queryHook: useChatThreadDetailsQuery,
-      keyPath: ['chatThread', 'chats'],
-      pageSize: 25,
-      pollInterval: 60_000,
-    },
-    { id: currentThreadId ?? '' }
-  )
-
   const threads = useMemo(
-    () => mapExistingNodes(data?.chatThreads),
-    [data?.chatThreads]
+    () => mapExistingNodes(threadsData?.chatThreads),
+    [threadsData?.chatThreads]
   )
 
-  const tools =
-    threadDetailsQuery?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
+  const { data, loading, error, fetchNextPage, pageInfo } =
+    useFetchPaginatedData(
+      {
+        skip: !currentThreadId,
+        queryHook: useChatThreadMessagesQuery,
+        keyPath: ['chatThread', 'chats'],
+        pageSize: 100,
+        pollInterval: 0, // don't poll messages, they shouldn't change, will break pagination otherwise
+      },
+      { id: currentThreadId ?? '' }
+    )
 
-  const isThreadDetailsLoading =
-    (!threadDetailsQuery?.data?.chatThread?.chats &&
-      threadDetailsQuery?.loading) ||
-    (threadDetailsQuery?.loading &&
-      threadDetailsQuery?.data?.chatThread?.id !== currentThreadId)
+  const messages = useMemo(
+    () => mapExistingNodes(data?.chatThread?.chats).toReversed(),
+    [data?.chatThread?.chats]
+  )
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
@@ -118,7 +105,7 @@ function ChatbotPanelInner() {
     if (!isEmpty(currentThreadId)) return
 
     // If data is not yet loaded, do nothing.
-    if (!data || mutationLoading) return
+    if (!threadsData || mutationLoading) return
 
     // If there are no threads after an initial data load, create a new thread.
     if (isEmpty(threads)) {
@@ -141,31 +128,19 @@ function ChatbotPanelInner() {
     agentInitMode,
     createNewThread,
     currentThreadId,
-    data,
     goToThread,
     mutationLoading,
     persistedThreadId,
     threads,
+    threadsData,
   ])
-
-  const messages = useMemo(() => {
-    return mapExistingNodes(currentThread?.chats)
-  }, [currentThread])
 
   return (
     <div
-      ref={ref}
       css={{ position: 'relative', height: '100%' }}
       style={{ '--chatbot-panel-width': `${calculatedPanelWidth}px` }}
     >
-      {!isEmpty(tools) && (
-        <McpServerShelf
-          zIndex={2}
-          isOpen={showMcpServers}
-          onClose={() => setShowMcpServers(false)}
-          tools={tools}
-        />
-      )}
+      {!isEmpty(currentThread?.tools) && <McpServerShelf zIndex={2} />}
       {currentThread?.session && !agentInitMode && (
         <ChatbotActionsPanel
           zIndex={1}
@@ -174,29 +149,19 @@ function ChatbotPanelInner() {
       )}
       <MainContentWrapperSC>
         <ResizeGripSC />
-        <ChatbotHeader currentThread={currentThread} />
-        {threadDetailsQuery.error?.error && (
-          <GqlError error={threadDetailsQuery.error.error} />
-        )}
-        {isThreadDetailsLoading && (
-          <ChatbotMessagesWrapperSC>
-            <LoadingIndicator />
-          </ChatbotMessagesWrapperSC>
-        )}
+        <ChatbotHeader />
         {!!agentInitMode ? (
           <ChatbotAgentInit />
         ) : (
-          currentThread &&
-          !isThreadDetailsLoading && (
-            <ChatbotPanelThread
-              currentThread={currentThread}
-              threadDetailsQuery={threadDetailsQuery}
-              showMcpServers={showMcpServers}
-              setShowMcpServers={setShowMcpServers}
-              showExamplePrompts={showPrompts}
-              setShowExamplePrompts={setShowPrompts}
-            />
-          )
+          <ChatbotPanelThread
+            messages={messages}
+            loading={
+              loading && (!data || data.chatThread?.id !== currentThread?.id)
+            }
+            error={error}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={pageInfo?.hasNextPage}
+          />
         )}
       </MainContentWrapperSC>
       <DragHandleSC

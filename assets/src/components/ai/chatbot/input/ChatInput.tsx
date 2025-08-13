@@ -40,8 +40,6 @@ export function ChatInput({
   sendMessage,
   currentThread,
   serverNames,
-  showMcpServers,
-  setShowMcpServers,
   enableExamplePrompts = true,
   showPrompts,
   setShowPrompts,
@@ -51,10 +49,8 @@ export function ChatInput({
   ...props
 }: {
   sendMessage: (newMessage: string) => void
-  currentThread?: ChatThreadTinyFragment
+  currentThread?: Nullable<ChatThreadTinyFragment>
   serverNames?: string[]
-  showMcpServers?: boolean
-  setShowMcpServers?: Dispatch<SetStateAction<boolean>>
   enableExamplePrompts?: boolean
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
@@ -62,7 +58,7 @@ export function ChatInput({
   onValueChange?: Dispatch<string>
   stateless?: boolean
 } & ComponentPropsWithoutRef<'div'>) {
-  const { selectedAgent } = useChatbot()
+  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -180,8 +176,8 @@ export function ChatInput({
             {!isEmpty(serverNames) && (
               <ChatInputIconFrame
                 icon={<ServersIcon />}
-                tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
-                onClick={() => setShowMcpServers?.(!showMcpServers)}
+                tooltip={`${mcpPanelOpen ? 'Collapse' : 'Expand'} MCP servers`}
+                onClick={() => setMcpPanelOpen(!mcpPanelOpen)}
               />
             )}
             {!selectedAgent && currentThread && (
