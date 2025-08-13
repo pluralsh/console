@@ -761,6 +761,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.2.2-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.1-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5153,6 +5159,15 @@
   publisher: rafay-systems
 - name: snapshot-controller
   versions:
+  - version: v8.3.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v8.2.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5861,6 +5876,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.20.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.20.0-eksbuild.1
     compatibilities:
     - '1.33'
