@@ -99,7 +99,7 @@ export function useFetchPaginatedData<
   const { refetch } = useSlicePolling(reducedQueryResult, {
     virtualSlice,
     pageSize: options.pageSize ?? DEFAULT_PAGE_SIZE,
-    interval: options.pollInterval || POLL_INTERVAL,
+    interval: options.pollInterval ?? POLL_INTERVAL,
     keyPath: options.keyPath,
   })
 

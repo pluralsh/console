@@ -4,7 +4,8 @@ import {
   AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
-  ChatThreadFragment,
+  ChatThreadDetailsFragment,
+  ChatThreadTinyFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
   useChatThreadDetailsQuery,
@@ -52,10 +53,14 @@ type ChatbotContextT = {
   actionsPanelOpen: boolean
   setActionsPanelOpen: (show: boolean) => void
 
+  mcpPanelOpen: boolean
+  setMcpPanelOpen: (show: boolean) => void
+
   setShowForkToast: (show: boolean) => void
 
-  currentThread: Nullable<ChatThreadFragment>
+  currentThread: Nullable<ChatThreadDetailsFragment>
 
+  // this is the selected thread ID, updating it triggers currentThread to populate with its details
   currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
 
@@ -93,6 +98,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const [open, setOpen] = usePersistedState('plural-ai-chat-open', false)
   const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
+  const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
   const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
   const [persistedThreadId, setPersistedThreadId] = usePersistedState<
     Nullable<string>
@@ -104,10 +110,11 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     null
   )
   const [showForkToast, setShowForkToast] = useState(false)
-
   const { data: threadData } = useChatThreadDetailsQuery({
     skip: !currentThreadId,
     variables: { id: currentThreadId ?? '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 10_000,
   })
 
   const currentThread = useMemo(() => threadData?.chatThread, [threadData])
@@ -159,6 +166,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         setShowForkToast,
         actionsPanelOpen,
         setActionsPanelOpen,
+        mcpPanelOpen,
+        setMcpPanelOpen,
       }}
     >
       {children}
@@ -207,18 +216,13 @@ export function useChatbotContext() {
 
 export function useChatbot() {
   const {
+    open,
     setOpen,
-    currentThread,
-    currentThreadId,
     setCurrentThreadId,
-    actionsPanelOpen,
-    setActionsPanelOpen,
-    persistedThreadId,
     lastNonAgentThreadId,
-    selectedAgent,
-    agentInitMode,
     setAgentInitMode,
     setShowForkToast,
+    ...restChatbotCtx
   } = useChatbotContext()
 
   const [createThread, { loading: createLoading, error: createError }] =
@@ -274,23 +278,17 @@ export function useChatbot() {
 
       goToThread(lastNonAgentThreadId)
     },
+    isChatbotOpen: open,
     closeChatbot: () => setOpen(false),
-    actionsPanelOpen,
-    setActionsPanelOpen,
-    currentThread,
-    currentThreadId,
-    persistedThreadId,
-    selectedAgent,
-    agentInitMode,
-    setAgentInitMode,
     mutationLoading: createLoading || forkLoading,
     mutationError: createError || forkError,
+    ...restChatbotCtx,
   }
 }
 
 const addThreadToCache = (
   cache: ApolloCache<any>,
-  thread: Nullable<ChatThreadFragment>
+  thread: Nullable<ChatThreadTinyFragment>
 ) => {
   if (!thread) return
   cache.writeQuery({
