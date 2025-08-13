@@ -11,7 +11,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -125,15 +124,12 @@ func (r *ComplianceReportGeneratorReconciler) ensure(server *v1alpha1.Compliance
 	if server.Spec.ReadBindings == nil {
 		return nil
 	}
-	bindings, req, err := ensureBindings(server.Spec.ReadBindings, r.UserGroupCache)
+
+	bindings, err := ensureBindings(server.Spec.ReadBindings, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	server.Spec.ReadBindings = bindings
-
-	if req {
-		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

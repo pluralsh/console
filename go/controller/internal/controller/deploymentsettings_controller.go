@@ -21,10 +21,8 @@ import (
 	"fmt"
 
 	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -217,6 +215,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		if err := r.ensure(settings); err != nil {
 			return nil, err
 		}
+
 		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
 		attr.WriteBindings = policyBindings(settings.Spec.Bindings.Write)
 		attr.CreateBindings = policyBindings(settings.Spec.Bindings.Create)
@@ -249,33 +248,29 @@ func (r *DeploymentSettingsReconciler) ensure(settings *v1alpha1.DeploymentSetti
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(settings.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(settings.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	settings.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(settings.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(settings.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	settings.Spec.Bindings.Write = bindings
 
-	bindings, req3, err := ensureBindings(settings.Spec.Bindings.Create, r.UserGroupCache)
+	bindings, err = ensureBindings(settings.Spec.Bindings.Create, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	settings.Spec.Bindings.Create = bindings
 
-	bindings, req4, err := ensureBindings(settings.Spec.Bindings.Git, r.UserGroupCache)
+	bindings, err = ensureBindings(settings.Spec.Bindings.Git, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	settings.Spec.Bindings.Git = bindings
-
-	if req || req2 || req3 || req4 {
-		return errors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

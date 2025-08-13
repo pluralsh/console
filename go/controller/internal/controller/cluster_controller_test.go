@@ -4,12 +4,9 @@ import (
 	"context"
 	"sort"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -621,9 +618,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				ID:             byokReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
-				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
-			})
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
 
 			controllerReconciler := &controller.ClusterReconciler{
 				Client:           k8sClient,

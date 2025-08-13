@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -242,21 +241,17 @@ func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
+	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
+	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return errors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

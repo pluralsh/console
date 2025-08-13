@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -19,7 +18,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -90,11 +88,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	// Sync Catalog CRD with the Console API
 	if err := r.ensure(catalog); err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, retErr
-		}
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, catalog.SetCondition)
 	}
 
 	// Get Catalog SHA that can be saved back in the status to check for changes
@@ -215,27 +209,23 @@ func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(catalog.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(catalog.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	catalog.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(catalog.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(catalog.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	catalog.Spec.Bindings.Write = bindings
 
-	bindings, req3, err := ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
+	bindings, err = ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	catalog.Spec.Bindings.Create = bindings
-
-	if req || req2 || req3 {
-		return operrors.ErrRetriable
-	}
 
 	return nil
 }

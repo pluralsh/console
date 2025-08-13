@@ -14,8 +14,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/go/controller/internal/errors"
-
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
@@ -144,8 +142,8 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 		return pra, sha, nil, err
 	}
 
-	if result, err = in.ensure(prAutomation); result != nil || err != nil {
-		return pra, sha, result, err
+	if err = in.ensure(prAutomation); err != nil {
+		return pra, sha, nil, err
 	}
 
 	attributes, result, err := in.Attributes(ctx, prAutomation)
@@ -181,28 +179,24 @@ func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.Pr
 
 // ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {
+func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
 	if prAutomation.Spec.Bindings == nil {
-		return nil, nil
+		return nil
 	}
 
-	bindings, req, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
+	bindings, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	prAutomation.Spec.Bindings.Create = bindings
 
-	bindings, req2, err := ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
+	bindings, err = ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	prAutomation.Spec.Bindings.Write = bindings
 
-	if req || req2 {
-		return &waitForResources, errors.ErrRetriable
-	}
-
-	return nil, nil
+	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

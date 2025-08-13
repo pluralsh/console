@@ -9,10 +9,8 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -142,7 +140,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		}
 	}
 
-	if err = r.ensureService(service); err != nil {
+	if err = r.ensure(service); err != nil {
 		return handleRequeue(nil, err, service.SetCondition)
 	}
 
@@ -644,28 +642,24 @@ func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) erro
 	return r.ConsoleClient.DeleteService(id)
 }
 
-// ensureService makes sure that user-friendly input such as userEmail/groupName in
+// ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceDeploymentReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
+func (r *ServiceDeploymentReconciler) ensure(service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.Bindings == nil {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

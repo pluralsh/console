@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -93,9 +92,8 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	if p.Spec.Bindings != nil {
-		result, err := r.ensure(p)
-		if result != nil || err != nil {
-			return nil, result, err
+		if err := r.ensure(p); err != nil {
+			return nil, nil, err // Not found error will be checked above in the requeue handler.
 		}
 
 		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
@@ -222,26 +220,22 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 
 // ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) (*ctrl.Result, error) {
+func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
 	if p.Spec.Bindings == nil {
-		return nil, nil
+		return nil
 	}
 
-	bindings, req, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	p.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	p.Spec.Bindings.Write = bindings
 
-	if req || req2 {
-		return &waitForResources, errors.ErrRetriable
-	}
-
-	return nil, nil
+	return nil
 }

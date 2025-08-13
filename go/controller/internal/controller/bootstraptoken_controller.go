@@ -2,11 +2,9 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -21,7 +19,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -92,12 +89,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// Create token and generate secret
 	apiBootstrapToken, err := in.sync(ctx, bootstrapToken, *project)
 	if err != nil {
-		if goerrors.Is(err, operrors.ErrRetriable) {
-			utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, nil
-		}
-
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, bootstrapToken.SetCondition)
 	}
 
 	bootstrapToken.Status.ID = &apiBootstrapToken.ID
@@ -146,10 +138,6 @@ func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1
 
 	if !lo.IsEmpty(bootstrapToken.Spec.User) {
 		userID, err := in.UserGroupCache.GetUserID(*bootstrapToken.Spec.User)
-		if errors.IsNotFound(err) {
-			return nil, operrors.ErrRetriable
-		}
-
 		if err != nil {
 			return nil, err
 		}

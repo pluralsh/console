@@ -18,15 +18,12 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/controller/internal/cache"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -115,13 +112,8 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	err = r.ensureNotificationSink(notificationSink)
-	if goerrors.Is(err, operrors.ErrRetriable) {
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return waitForResources, nil
-	}
 	if err != nil {
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, notificationSink.SetCondition)
 	}
 
 	// Mark resource as managed by this operator.
@@ -303,15 +295,12 @@ func (r *NotificationSinkReconciler) ensureNotificationSink(notificationSink *v1
 	if notificationSink.Spec.Bindings == nil {
 		return nil
 	}
-	bindings, req, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
+
+	bindings, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	notificationSink.Spec.Bindings = bindings
-
-	if req {
-		return operrors.ErrRetriable
-	}
 
 	return nil
 }
