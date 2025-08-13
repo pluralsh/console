@@ -341,6 +341,31 @@ export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: theme.spacing.medium,
+  padding: `0 ${theme.spacing.medium}px 0 ${theme.spacing.medium}px`,
+  position: 'relative',
   height: '100%',
+
+  '&:after': {
+    content: '""',
+    pointerEvents: 'none',
+    position: 'absolute',
+    height: 32,
+    inset: 0,
+    zIndex: 1,
+    background: `linear-gradient(180deg, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%)`,
+    filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
+  },
+
+  '&:before': {
+    content: '""',
+    pointerEvents: 'none',
+    position: 'absolute',
+    height: 32,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    background: `linear-gradient(0deg, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%)`,
+    filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
+  },
 }))
