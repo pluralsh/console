@@ -1006,7 +1006,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   describe "projectUsageHistory" do
     test "it can list aggregated usage history for a project" do
       user = admin_user()
-      project = insert(:project)
+      user2 = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user2.id}])
       project2 = insert(:project)
 
       times = Map.new(1..3, & {&1, Timex.now() |> Timex.shift(days: -&1)})
@@ -1097,6 +1098,40 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         for field <- fields do
           assert h["timestamp"]
           assert h[field] == if h["projectId"] == project.id, do: 150, else: 300
+        end
+      end
+
+      {:ok, %{data: %{"projectUsageHistory" => found}}} = run_query("""
+        query {
+          projectUsageHistory(first: 100) {
+            edges {
+              node {
+                timestamp
+                cpu
+                memory
+                cpuCost
+                memoryCost
+                gpuCost
+                ingressCost
+                loadBalancerCost
+                egressCost
+                nodeCost
+                storageCost
+                controlPlaneCost
+                projectId
+              }
+            }
+          }
+        }
+      """, %{}, %{current_user: Console.Services.Rbac.preload(user2)})
+
+      assert length(from_connection(found)) == 3
+
+      for h <- from_connection(found) do
+        for field <- fields do
+          assert h["timestamp"]
+          assert h["projectId"] == project.id
+          assert h[field] == 150
         end
       end
     end
