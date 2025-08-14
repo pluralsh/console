@@ -20,7 +20,8 @@ defmodule Console.Deployments.Cron do
     Alert,
     ClusterAuditLog,
     PolicyConstraint,
-    VulnerabilityReport
+    VulnerabilityReport,
+    ServiceTemplate
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -60,7 +61,7 @@ defmodule Console.Deployments.Cron do
   def prune_alerts() do
     Logger.info "pruning all expired alerts"
     Alert.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def cache_warm(), do: Git.warm_helm_cache()
@@ -181,7 +182,7 @@ defmodule Console.Deployments.Cron do
 
   def prune_migrations() do
     AgentMigration.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def scan_pipeline_stages() do
@@ -218,7 +219,7 @@ defmodule Console.Deployments.Cron do
   def prune_logs() do
     Logger.info "deleting old run logs"
     RunLog.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def place_run_workers() do
@@ -245,12 +246,12 @@ defmodule Console.Deployments.Cron do
 
   def prune_notifications() do
     AppNotification.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def prune_cluster_audit_logs() do
     ClusterAuditLog.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def run_observers() do
@@ -263,12 +264,17 @@ defmodule Console.Deployments.Cron do
 
   def prune_policy() do
     PolicyConstraint.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def prune_vuln_reports() do
     VulnerabilityReport.expired()
-    |> Repo.delete_all()
+    |> Repo.delete_all(timeout: 300_000)
+  end
+
+  def prune_dangling_templates() do
+    ServiceTemplate.dangling()
+    |> Repo.delete_all(timeout: 300_000)
   end
 
   def add_ignore_crds(search) do

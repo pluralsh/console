@@ -32,6 +32,12 @@ defmodule Console.Schema.ServiceTemplate do
     timestamps()
   end
 
+  def dangling(query \\ __MODULE__) do
+    from(tpl in query,
+      where: fragment("NOT EXISTS(SELECT 1 FROM global_services WHERE template_id = ?)", tpl.id) and
+        fragment("NOT EXISTS(SELECT 1 FROM preview_environment_templates WHERE template_id = ?)", tpl.id)
+    )
+  end
 
   def attributes(%__MODULE__{} = tpl) do
     tpl = load_configuration(tpl)

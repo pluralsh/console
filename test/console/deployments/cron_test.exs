@@ -293,4 +293,23 @@ defmodule Console.Deployments.CronTest do
       assert refetch(pr).approved
     end
   end
+
+  describe "#prune_dangling_templates/0" do
+    test "it will prune dangling templates" do
+      tpl = insert(:service_template)
+      insert(:global_service, template: tpl)
+
+      tpl2 = insert(:service_template)
+      insert(:preview_environment_template, template: tpl2)
+
+      del = insert_list(3, :service_template)
+
+      {3, _} = Cron.prune_dangling_templates()
+
+      assert refetch(tpl)
+      assert refetch(tpl2)
+
+      for t <- del, do: refute refetch(t)
+    end
+  end
 end

@@ -152,7 +152,7 @@ defmodule Console.Deployments.Git do
       get_repository!(id)
       |> GitRepository.changeset()
       |> allow(user, :git)
-      |> when_ok(:delete)
+      |> when_ok(&Repo.delete(&1, timeout: 60_000))
       |> notify(:delete, user)
     rescue
       # foreign key constraint violated
