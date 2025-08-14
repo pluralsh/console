@@ -6,7 +6,7 @@ on:
       - "v*.*.*"
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
@@ -50,7 +50,7 @@ jobs:
         if: always()
   publish:
     name: Build and push Console container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: test
     permissions:
       contents: "read"
@@ -168,7 +168,7 @@ jobs:
         if: always()
   release:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: publish
     permissions:
       contents: write
@@ -183,7 +183,7 @@ jobs:
           draft: false
   bump:
     name: Bump Chart Version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [release]
     permissions:
       contents: write
@@ -245,7 +245,7 @@ jobs:
           base: master
   bump-rapid:
     name: Bump Rapid Chart Version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [release]
     permissions:
       contents: write

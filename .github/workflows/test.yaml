@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Test Build Docker image
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -95,7 +95,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
@@ -145,7 +145,7 @@ jobs:
         if: always()
   updateSchema:
     name: Check that Schema is up to date
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1

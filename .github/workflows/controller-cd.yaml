@@ -20,7 +20,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash
@@ -50,9 +50,9 @@ jobs:
       matrix:
         platforms:
           - platform: linux/amd64
-            runner: ubuntu-24.04
+            runner: blacksmith-4vcpu-ubuntu-2404
           - platform: linux/arm64
-            runner: ubuntu-24.04-arm
+            runner: blacksmith-4vcpu-ubuntu-2404
     runs-on: ${{ matrix.platforms.runner }}
     defaults:
       run:
@@ -137,7 +137,7 @@ jobs:
           - ghcr.io/pluralsh/deployment-controller
           - gcr.io/pluralsh/deployment-controller
           - docker.io/pluralsh/deployment-controller
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4

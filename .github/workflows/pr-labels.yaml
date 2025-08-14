@@ -6,7 +6,7 @@ on:
 jobs:
   label:
     name: Check that PR has required labels
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: mheap/github-action-required-labels@v2
         with:

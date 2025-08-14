@@ -29,7 +29,7 @@ jobs:
   #         base: master
 
   run-compatibility-updater:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: 'write'
       id-token: 'write'
@@ -65,7 +65,7 @@ jobs:
         base: master
 
   eks-addons:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: 'write'
       id-token: 'write'

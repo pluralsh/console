@@ -27,7 +27,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash
@@ -57,9 +57,9 @@ jobs:
       matrix:
         platforms:
           - platform: linux/amd64
-            runner: ubuntu-24.04
+            runner: blacksmith-4vcpu-ubuntu-2404
           - platform: linux/arm64
-            runner: ubuntu-24.04-arm
+            runner: blacksmith-4vcpu-ubuntu-2404
     runs-on: ${{ matrix.platforms.runner }}
     defaults:
       run:
@@ -142,9 +142,9 @@ jobs:
       matrix:
         platforms:
           - platform: linux/amd64
-            runner: ubuntu-24.04
+            runner: blacksmith-4vcpu-ubuntu-2404
           - platform: linux/arm64
-            runner: ubuntu-24.04-arm
+            runner: blacksmith-4vcpu-ubuntu-2404
     runs-on: ${{ matrix.platforms.runner }}
     defaults:
       run:
@@ -229,7 +229,7 @@ jobs:
           - ghcr.io/pluralsh/cloud-query-db
           - gcr.io/pluralsh/cloud-query-db
           - docker.io/pluralsh/cloud-query-db
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -292,7 +292,7 @@ jobs:
           - ghcr.io/pluralsh/cloud-query
           - gcr.io/pluralsh/cloud-query
           - docker.io/pluralsh/cloud-query
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4

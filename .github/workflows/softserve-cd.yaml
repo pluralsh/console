@@ -17,7 +17,7 @@ permissions:
 jobs:
   publish-softserve-docker:
     name: Build and push softserve
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash

@@ -21,7 +21,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash
@@ -37,7 +37,7 @@ jobs:
     - run: PATH=$PATH:$GOPATH/bin make test
   publish-docker:
     name: Build and push oci-auth container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash
