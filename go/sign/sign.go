@@ -56,6 +56,10 @@ func handler(ctx context.Context, e event) (string, error) {
 		return "", fmt.Errorf("failed to marshal body: %w", err)
 	}
 
+	if len(e.Secret) == 0 {
+		return "", fmt.Errorf("secret can't be empty: %w", err)
+	}
+
 	err = sendWebhookRequest(e.URL, []byte(e.Secret), bodyBytes)
 	if err != nil {
 		return "", err
