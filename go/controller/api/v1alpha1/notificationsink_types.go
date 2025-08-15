@@ -94,7 +94,7 @@ type NotificationSinkSpec struct {
 	// Configuration contains the type-specific settings for this notification sink.
 	// Only one configuration section should be populated based on the Type field.
 	// Each type has different requirements for delivery setup and authentication.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	Configuration SinkConfiguration `json:"configuration"`
 
 	// Bindings define the users and groups who can receive notifications through this sink.

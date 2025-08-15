@@ -2151,7 +2151,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this notification sink.<br />If not provided, the name from the resource metadata will be used. // +kubebuilder:validation:Optional |  |  |
 | `type` _[SinkType](#sinktype)_ | Type specifies the channel type of this sink.<br />Determines which configuration section will be used and how notifications are delivered.<br />SLACK and TEAMS require webhook URLs, while PLURAL delivers in-app notifications. |  | Enum: [SLACK TEAMS PLURAL] <br />Required: {} <br /> |
-| `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration contains the type-specific settings for this notification sink.<br />Only one configuration section should be populated based on the Type field.<br />Each type has different requirements for delivery setup and authentication. |  | Required: {} <br /> |
+| `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration contains the type-specific settings for this notification sink.<br />Only one configuration section should be populated based on the Type field.<br />Each type has different requirements for delivery setup and authentication. |  | Optional: {} <br /> |
 | `bindings` _[Binding](#binding) array_ | Bindings define the users and groups who can receive notifications through this sink.<br />This is only applicable for PLURAL type sinks that deliver in-app notifications.<br />For external sinks like Slack or Teams, notifications are sent to the configured webhook. |  | Optional: {} <br /> |
 
 

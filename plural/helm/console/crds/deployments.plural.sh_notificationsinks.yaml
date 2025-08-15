@@ -143,7 +143,6 @@ spec:
                 - PLURAL
                 type: string
             required:
-            - configuration
             - type
             type: object
           status:
