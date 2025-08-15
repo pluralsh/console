@@ -91,9 +91,7 @@ export function ChatbotHeader({
               onClick={() =>
                 createNewThread({
                   summary: 'New chat with Plural AI',
-                  ...(connectionId && {
-                    session: { connectionId, done: true },
-                  }),
+                  session: { connectionId, done: true },
                 })
               }
             />
