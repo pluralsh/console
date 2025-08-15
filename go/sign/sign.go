@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -25,12 +26,12 @@ func signBody(secret, body []byte) string {
 	return "sha256=" + hex.EncodeToString(computed.Sum(nil))
 }
 
-func sendWebhookRequest(url string, secret []byte, body []byte) error {
+func sendWebhookRequest(url string, secret []byte, body []byte) ([]byte, error) {
 	signature := signBody(secret, body)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -39,33 +40,42 @@ func sendWebhookRequest(url string, secret []byte, body []byte) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("webhook request failed with status: %s", resp.Status)
+		return nil, fmt.Errorf("webhook request failed with status: %s", resp.Status)
 	}
 
-	return nil
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	return respBody, nil
 }
 
-func handler(ctx context.Context, e event) (string, error) {
+func handler(ctx context.Context, e event) ([]byte, error) {
 	bodyBytes, err := json.Marshal(e.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal body: %w", err)
+		return nil, fmt.Errorf("failed to marshal body: %w", err)
 	}
 
 	if len(e.Secret) == 0 {
-		return "", fmt.Errorf("secret can't be empty: %w", err)
+		return nil, fmt.Errorf("secret can't be empty")
 	}
 
-	err = sendWebhookRequest(e.URL, []byte(e.Secret), bodyBytes)
+	if len(e.URL) == 0 {
+		return nil, fmt.Errorf("url can't be empty")
+	}
+
+	respBody, err := sendWebhookRequest(e.URL, []byte(e.Secret), bodyBytes)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return "Webhook request sent successfully", nil
+	return respBody, nil
 }
 func main() {
 	lambda.Start(handler)

@@ -22,7 +22,7 @@ func TestSendWebhookRequest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	err := sendWebhookRequest(server.URL, secret, body)
+	_, err := sendWebhookRequest(server.URL, secret, body)
 	if err != nil {
 		t.Errorf("SendWebhook() error = %v", err)
 	}
