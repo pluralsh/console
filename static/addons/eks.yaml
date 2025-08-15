@@ -761,6 +761,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.3.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.2-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3743,6 +3749,13 @@
   publisher: FriendliAI
 - name: friendliai_friendli-container-eks
   versions:
+  - version: v1.10.26-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.10.4-eksbuild.1
     compatibilities:
     - '1.32'
@@ -5455,6 +5468,13 @@
   publisher: Solo.io
 - name: solo-io_istio-distro
   versions:
+  - version: v1.27.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.26.3-eksbuild.1
     compatibilities:
     - '1.33'
