@@ -5,9 +5,10 @@ defmodule Console.AI.Tools.Agent.CallPr do
   embedded_schema do
     field :pr_automation_id, :string
     field :context,          :string
+    field :branch,           :string
   end
 
-  @valid ~w(pr_automation_id context)a
+  @valid ~w(pr_automation_id context branch)a
 
   def changeset(model, attrs) do
     model
@@ -26,7 +27,7 @@ defmodule Console.AI.Tools.Agent.CallPr do
         content: "Calling pr #{pra.name} (id=#{pra.id}), the user will be prompted for how to configure this PR in product (don't reiterate what configuration is necessary)",
         type: :pr_call,
         pr_automation_id: pra_id,
-        attributes: %{pr_call: %{context: get_context(model)}}
+        attributes: %{pr_call: %{context: get_context(model), branch: model.branch}}
       }}
     end)
   end

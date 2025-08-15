@@ -8,6 +8,10 @@
         "context": {
             "type": "string",
             "description": "A json encoded string valued map for the given call, this should fill out the entries in the configuration field of the pr automation with decent initial configurations a user can modify, with keys being the name of each field and values being the expected value."
+        },
+        "branch": {
+            "type": "string",
+            "description": "The branch to create the PR on.  If not provided, the user will specify a branch name."
         }
     },
     "required": ["pr_automation_id"],

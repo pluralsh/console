@@ -4974,6 +4974,7 @@ type PrAutomationUpdateSpecAttributes struct {
 // Additional attributes for describing a pr call tool call that derived this chat message
 type PrCallAttributes struct {
 	Context map[string]any `json:"context,omitempty"`
+	Branch  *string        `json:"branch,omitempty"`
 }
 
 // a checkbox item to render before creating a pr
