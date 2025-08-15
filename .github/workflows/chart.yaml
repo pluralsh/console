@@ -44,9 +44,24 @@ jobs:
         with:
           msg: ${{ steps.release.outputs.changed_charts }}
           separator: ","
+      - name: Chart | Check
+        id: chart_exists
+        env:
+          REGISTRY_PASSWORD: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        run: |
+          helm registry login registry-1.docker.io -u mjgpluralsh --password-stdin <<< $REGISTRY_PASSWORD
+          
+          if helm pull oci://registry-1.docker.io/pluralsh/helm-charts/console --version ${{ steps.console_vsn.outputs.result }} --destination /tmp 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Chart version ${{ steps.console_vsn.outputs.result }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Chart version ${{ steps.console_vsn.outputs.result }} does not exist"
+          fi
+        continue-on-error: true
       - name: Chart | OCI Push
         uses: appany/helm-oci-chart-releaser@v0.5.0
-        if: ${{ contains(steps.split.outputs, 'console') }}
+        if: ${{ steps.chart_exists.outputs.exists == 'false' }}
         with:
           name: console
           repository: pluralsh/helm-charts
