@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Agent.ServiceComponent do
   def name(), do: plrl_tool("service_search")
   def description(), do: "Execute a semantic search for a kubernetes resource deployed through a Plural Service.  Use this if a user is searching specifically for a plural service or for a resource that would likely be deployed to a kubernetes cluster, eg a stateless service or kubernetes operator"
 
-  @opts [filters: [datatype: {:raw, :service_component}], count: 10]
+  @opts [filters: [datatype: {:raw, :service_component}], count: 15]
 
   def implement(%__MODULE__{query: query}) do
     with true <- VectorStore.enabled?(),

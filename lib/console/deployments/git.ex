@@ -152,11 +152,13 @@ defmodule Console.Deployments.Git do
       get_repository!(id)
       |> GitRepository.changeset()
       |> allow(user, :git)
-      |> when_ok(:delete)
+      |> when_ok(&Repo.delete(&1, timeout: 60_000))
       |> notify(:delete, user)
     rescue
       # foreign key constraint violated
-      _ -> {:error, "could not delete repository"}
+      e ->
+        Logger.error "Could not delete git repository: #{Exception.format(:error, e, __STACKTRACE__)}}"
+        {:error, "could not delete repository"}
     end
   end
 

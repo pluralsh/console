@@ -64,6 +64,7 @@ config :console,
   qps: 1_000,
   nowatchers: false,
   prom_plugins: [Console.Prom.Plugin],
+  cloudquery: false,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,

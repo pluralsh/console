@@ -129,9 +129,9 @@ defmodule Console.Deployments.Pr.Impl.Github do
     |> Enum.filter(&File.valid?/1)
   end
 
-  defp get_content(client, url) when is_binary(url) do
-    headers = [{"authorization", "Token #{client.auth.access_token}"}]
-    with {:ok, %HTTPoison.Response{status_code: 200, body: content}} <- HTTPoison.get(url, headers),
+  defp get_content(%Tentacat.Client{auth: auth, request_options: opts}, url) when is_binary(url) do
+    headers = [{"authorization", "Token #{auth.access_token}"}]
+    with {:ok, %HTTPoison.Response{status_code: 200, body: content}} <- HTTPoison.get(url, headers, opts || []),
          {:ok, %{"content" => content}} <- Jason.decode(content) do
       String.split(content)
       |> Enum.map(fn line ->
@@ -161,16 +161,26 @@ defmodule Console.Deployments.Pr.Impl.Github do
       {:ok, url, token} -> {:ok, Tentacat.Client.new(%{access_token: token}, url)}
       err -> err
     end
+    |> add_opts(request_options(pr))
   end
 
   defp fetch_app_token(url, %PrAutomation{connection: %ScmConnection{} = conn}),
     do: fetch_app_token(url, conn)
-  defp fetch_app_token(url, %ScmConnection{github: %{app_id: app_id, installation_id: inst_id, private_key: pk}}),
-    do: Github.gh_client(url, app_id, inst_id, pk)
+  defp fetch_app_token(url, %ScmConnection{github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn),
+    do: Github.gh_client(url, app_id, inst_id, pk, request_options(conn))
   defp fetch_app_token(_, _), do: {:error, "could not find github app credentials on this connection"}
 
   defp owner(%{"user" => %{"login" => owner}}), do: owner
   defp owner(_), do: nil
+
+  defp add_opts({:ok, %Tentacat.Client{} = client}, [_ | _] = opts),
+    do: {:ok, %{client | request_options: opts}}
+  defp add_opts(pass, _), do: pass
+
+  defp request_options(%PrAutomation{connection: %ScmConnection{} = conn}), do: request_options(conn)
+  defp request_options(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}}) when is_binary(url),
+    do: [proxy: url]
+  defp request_options(_), do: []
 
   defp state(%{"merged" => true}), do: :merged
   defp state(%{"state" => "closed", "merged_at" => merged}) when not is_nil(merged), do: :merged

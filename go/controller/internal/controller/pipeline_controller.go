@@ -155,9 +155,13 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !pipeline.DeletionTimestamp.IsZero() {
-		exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
-		if err != nil {
-			return &requeue
+		exists := false
+		var err error
+		if pipeline.Status.GetID() != "" {
+			exists, err = r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
+			if err != nil {
+				return &requeue
+			}
 		}
 
 		// Remove Pipeline from Console API if it exists.
@@ -186,21 +190,24 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, attrs console.PipelineAttributes, sha string) (*console.PipelineFragmentMinimal, error) {
 	logger := log.FromContext(ctx)
-	exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
-	if err != nil {
-		return nil, err
+	if pipeline.Status.ID != nil {
+		exists, err := r.ConsoleClient.IsPipelineExisting(*pipeline.Status.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if exists && pipeline.Status.IsSHAEqual(sha) {
+			logger.V(9).Info("no changes detected for pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
+			return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
+		}
+
+		if exists {
+			logger.V(9).Info("detected changes, saving pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
+		} else {
+			logger.V(9).Info("pipeline does not exist, saving it", "name", pipeline.Name)
+		}
 	}
 
-	if exists && pipeline.Status.IsSHAEqual(sha) {
-		logger.V(9).Info("no changes detected for pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
-		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
-	}
-
-	if exists {
-		logger.V(9).Info("detected changes, saving pipeline", "name", pipeline.Name, "id", pipeline.Status.GetID())
-	} else {
-		logger.V(9).Info("pipeline does not exist, saving it", "name", pipeline.Name)
-	}
 	return r.ConsoleClient.SavePipeline(pipeline.Name, attrs)
 }
 

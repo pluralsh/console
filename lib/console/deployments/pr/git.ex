@@ -77,10 +77,14 @@ defmodule Console.Deployments.Pr.Git do
   defp _to_http(_, "https://" <> _ = url), do: url
 
   defp backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
-    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
+    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk, request_options(conn)),
       do: {:ok, %{conn | token: token}}
   end
   defp backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
+
+  def request_options(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}}) when is_binary(url),
+    do: [proxy: url]
+  def request_options(_), do: []
 
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
 

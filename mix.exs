@@ -85,7 +85,7 @@ defmodule Console.MixProject do
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 4.0"},
       {:crontab, "~> 1.1"},
-      {:tentacat, "~> 2.0"},
+      {:tentacat, "~> 2.0", git: "https://github.com/pluralsh/tentacat.git", ref: "c2c4c30b113c70b2ff2cd674fc04492b87d04100"},
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},
       {:grpc, "~> 0.10"},
