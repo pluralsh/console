@@ -12,5 +12,6 @@ use (
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
+	./sign
 	./tools // github.com/pluralsh/console/go/tools
 )
