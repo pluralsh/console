@@ -86,15 +86,17 @@ export function usePrAutomationForm({
   onSuccess,
   threadId,
   preFilledContext,
+  preFilledBranch,
 }: {
   prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
   threadId?: string
   preFilledContext?: PrCallAttributes['context']
+  preFilledBranch?: PrCallAttributes['branch']
 }) {
   const defaults = useMemo(
-    () => getStateDefaults(prAutomation, preFilledContext),
-    [prAutomation, preFilledContext]
+    () => getStateDefaults(prAutomation, preFilledContext, preFilledBranch),
+    [prAutomation, preFilledContext, preFilledBranch]
   )
 
   const [curConfigVals, setCurConfigVals] = useState(defaults.curConfigVals)
@@ -152,7 +154,8 @@ export function usePrAutomationForm({
 
 const getStateDefaults = (
   prAutomation: Nullable<PrAutomationFragment>,
-  preFilledContext?: PrCallAttributes['context']
+  preFilledContext?: PrCallAttributes['context'],
+  preFilledBranch?: PrCallAttributes['branch']
 ) => {
   const { configuration, confirmation } = prAutomation ?? {}
   return {
@@ -165,7 +168,7 @@ const getStateDefaults = (
         ]) ?? []
     ),
     reviewFormState: {
-      branch: '',
+      branch: preFilledBranch ?? '',
       identifier: prAutomation?.identifier ?? '',
       checkedItems: Object.fromEntries(
         confirmation?.checklist

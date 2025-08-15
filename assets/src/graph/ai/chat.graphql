@@ -30,6 +30,7 @@ fragment Chat on Chat {
     }
     prCall {
       context
+      branch
     }
   }
   pullRequest {

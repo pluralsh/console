@@ -46,6 +46,7 @@ function CreatePrModalBase({
   onClose,
   onSuccess,
   preFilledContext,
+  preFilledBranch,
 }: {
   prAutomation: PrAutomationFragment
   open: boolean
@@ -53,6 +54,7 @@ function CreatePrModalBase({
   onClose: Nullable<() => void>
   onSuccess?: Nullable<Dispatch<PullRequestFragment>>
   preFilledContext?: PrCallAttributes['context']
+  preFilledBranch?: PrCallAttributes['branch']
 }) {
   const { configuration, confirmation } = prAutomation
   const hasConfiguration = !isEmpty(configuration)
@@ -77,6 +79,7 @@ function CreatePrModalBase({
     prAutomation,
     threadId,
     preFilledContext,
+    preFilledBranch,
     onSuccess: () => setCurrentStep('success'),
   })
 
