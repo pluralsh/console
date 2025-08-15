@@ -4,14 +4,14 @@ on:
   push:
     branches:
     - master
-    - switch-gcr-auth
 jobs:
   publish:
     name: Publish helm chart
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
