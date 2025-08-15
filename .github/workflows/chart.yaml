@@ -4,10 +4,14 @@ on:
   push:
     branches:
     - master
+    - switch-gcr-auth
 jobs:
   publish:
     name: Publish helm chart
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,12 +42,6 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: yq ".version" charts/console/Chart.yaml
-      - uses: winterjung/split@v2
-        id: split
-        if: ${{ steps.release.outputs.changed_charts }}
-        with:
-          msg: ${{ steps.release.outputs.changed_charts }}
-          separator: ","
       - uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: "projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github"
@@ -54,8 +52,10 @@ jobs:
       - name: Login to gcr
         run: gcloud auth configure-docker -q
       - name: Helm Login
+        id: helm_login
         run: |
           gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://gcr.io
+          echo "token=$(gcloud auth application-default print-access-token)" >> $GITHUB_OUTPUT
       - name: Chart | Check
         id: chart_exists
         run: |
@@ -75,6 +75,6 @@ jobs:
           repository: pluralsh/helm-charts
           tag: ${{ steps.console_vsn.outputs.result }}
           registry: gcr.io
-          registry_username: mjgpluralsh
-          registry_password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          registry_username: oauth2accesstoken
+          registry_password: ${{ steps.helm_login.outputs.token }}
           update_dependencies: 'true' # Defaults to false
