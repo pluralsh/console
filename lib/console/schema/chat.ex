@@ -35,6 +35,7 @@ defmodule Console.Schema.Chat do
 
       embeds_one :pr_call, PrCallAttributes, on_replace: :update do
         field :context, :map
+        field :branch,  :string
       end
     end
 
@@ -143,6 +144,6 @@ defmodule Console.Schema.Chat do
 
   defp pr_call_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(context)a)
+    |> cast(attrs, ~w(context branch)a)
   end
 end

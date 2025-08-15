@@ -105,6 +105,7 @@ defmodule Console.GraphQl.AI do
   @desc "Additional attributes for describing a pr call tool call that derived this chat message"
   object :pr_call_attributes do
     field :context, :map
+    field :branch,  :string
   end
 
   @desc "A list of chat messages around a specific topic created on demand"

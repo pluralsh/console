@@ -129,7 +129,9 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
   defp file_updates(_, _), do: :ok
 
   defp file_deletes(%{file_deletes: [_ | _] = deletes}, dir) do
-    Enum.reduce_while(deletes, :ok, fn %__MODULE__.FileDelete{file_name: f}, _ ->
+    deletes
+    |> Enum.uniq_by(& &1.file_name)
+    |> Enum.reduce_while(:ok, fn %__MODULE__.FileDelete{file_name: f}, _ ->
       with {:ok, path} <- relpath(dir, f),
            :ok <- File.rm(path) do
         {:cont, :ok}
@@ -142,7 +144,9 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
   defp file_deletes(_, _), do: :ok
 
   defp file_creates(%{file_creates: [_ | _] = creates}, dir) do
-    Enum.reduce_while(creates, :ok, fn %__MODULE__.FileCreate{file_name: f, content: c}, _ ->
+    creates
+    |> Enum.uniq_by(& &1.file_name)
+    |> Enum.reduce_while(:ok, fn %__MODULE__.FileCreate{file_name: f, content: c}, _ ->
       with {:ok, path} <- relpath(dir, f),
            :ok <- File.write(path, c) do
         {:cont, :ok}

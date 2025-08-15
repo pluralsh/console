@@ -6046,6 +6046,7 @@ export type PrAutomationUpdateSpecAttributes = {
 /** Additional attributes for describing a pr call tool call that derived this chat message */
 export type PrCallAttributes = {
   __typename?: 'PrCallAttributes';
+  branch?: Maybe<Scalars['String']['output']>;
   context?: Maybe<Scalars['Map']['output']>;
 };
 
