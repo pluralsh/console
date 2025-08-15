@@ -282,6 +282,11 @@ export function useChatbot() {
     closeChatbot: () => setOpen(false),
     mutationLoading: createLoading || forkLoading,
     mutationError: createError || forkError,
+    setOpen,
+    setCurrentThreadId,
+    lastNonAgentThreadId,
+    setAgentInitMode,
+    setShowForkToast,
     ...restChatbotCtx,
   }
 }

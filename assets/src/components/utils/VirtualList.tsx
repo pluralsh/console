@@ -1,4 +1,4 @@
-import { ReactNode, RefObject, useEffect, useRef } from 'react'
+import { ReactNode, RefObject, useRef } from 'react'
 import { mergeRefs } from 'react-merge-refs'
 import styled from 'styled-components'
 import { VirtualizerProps, VList, VListHandle } from 'virtua'
@@ -36,23 +36,14 @@ export function VirtualList<T, M>({
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const internalRef = useRef<VListHandle>(null)
-  const hasScrolledRef = useRef(false)
-
-  useEffect(() => {
-    if (!hasScrolledRef.current && data.length > 0) {
-      internalRef.current?.scrollToIndex(isReversed ? 0 : data.length - 1)
-      hasScrolledRef.current = true
-    }
-  }, [data.length, isReversed])
 
   return (
     <VList
+      overscan={1}
+      shift={isReversed}
+      css={{ height: '100%', width: '100%' }}
       {...props}
       ref={mergeRefs([listRef, internalRef])}
-      shift={isReversed}
-      reverse={isReversed}
-      overscan={1}
-      style={{ height: '100%', width: '100%' }}
     >
       {hasNextPage && (
         <button
