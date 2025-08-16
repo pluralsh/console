@@ -563,6 +563,25 @@ type AzureConnectionAttributes struct {
 	ClientSecret string `json:"clientSecret"`
 }
 
+// Requirements to perform Azure DevOps authentication
+type AzureDevopsAttributes struct {
+	// the username asociated with your Azure DevOps PAT
+	Username string `json:"username"`
+	// the organization to use for azure devops
+	Organization string `json:"organization"`
+	// the project to use for azure devops
+	Project string `json:"project"`
+}
+
+type AzureDevopsConfiguration struct {
+	// the username asociated with your Azure DevOps PAT
+	Username string `json:"username"`
+	// the organization to use for azure devops
+	Organization string `json:"organization"`
+	// the project to use for azure devops
+	Project string `json:"project"`
+}
+
 type AzureOpenaiAttributes struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments
 	Endpoint string `json:"endpoint"`
@@ -5658,6 +5677,8 @@ type ScmConnection struct {
 	Username *string `json:"username,omitempty"`
 	// a proxy to use for git requests
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
+	// the azure devops attributes for this connection
+	Azure *AzureDevopsConfiguration `json:"azure,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// base url for HTTP apis for self-hosted versions if different from base url
@@ -5671,14 +5692,15 @@ type ScmConnectionAttributes struct {
 	Name string  `json:"name"`
 	Type ScmType `json:"type"`
 	// the owning entity in this scm provider, eg a github organization
-	Owner    *string              `json:"owner,omitempty"`
-	Username *string              `json:"username,omitempty"`
-	Token    *string              `json:"token,omitempty"`
-	BaseURL  *string              `json:"baseUrl,omitempty"`
-	APIURL   *string              `json:"apiUrl,omitempty"`
-	Github   *GithubAppAttributes `json:"github,omitempty"`
-	Default  *bool                `json:"default,omitempty"`
-	Proxy    *HTTPProxyAttributes `json:"proxy,omitempty"`
+	Owner    *string                `json:"owner,omitempty"`
+	Username *string                `json:"username,omitempty"`
+	Token    *string                `json:"token,omitempty"`
+	BaseURL  *string                `json:"baseUrl,omitempty"`
+	APIURL   *string                `json:"apiUrl,omitempty"`
+	Github   *GithubAppAttributes   `json:"github,omitempty"`
+	Azure    *AzureDevopsAttributes `json:"azure,omitempty"`
+	Default  *bool                  `json:"default,omitempty"`
+	Proxy    *HTTPProxyAttributes   `json:"proxy,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -9617,20 +9639,22 @@ func (e ScalingRecommendationType) MarshalGQL(w io.Writer) {
 type ScmType string
 
 const (
-	ScmTypeGithub    ScmType = "GITHUB"
-	ScmTypeGitlab    ScmType = "GITLAB"
-	ScmTypeBitbucket ScmType = "BITBUCKET"
+	ScmTypeGithub      ScmType = "GITHUB"
+	ScmTypeGitlab      ScmType = "GITLAB"
+	ScmTypeBitbucket   ScmType = "BITBUCKET"
+	ScmTypeAzureDevops ScmType = "AZURE_DEVOPS"
 )
 
 var AllScmType = []ScmType{
 	ScmTypeGithub,
 	ScmTypeGitlab,
 	ScmTypeBitbucket,
+	ScmTypeAzureDevops,
 }
 
 func (e ScmType) IsValid() bool {
 	switch e {
-	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket:
+	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket, ScmTypeAzureDevops:
 		return true
 	}
 	return false
