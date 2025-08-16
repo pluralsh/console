@@ -784,7 +784,7 @@ type RootMutationType {
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
   "creates a new pipeline context and binds it to the beginning stage"
-  createPipelineContext(pipelineId: ID!, attributes: PipelineContextAttributes!): PipelineContext
+  createPipelineContext(pipelineId: ID, pipelineName: String, attributes: PipelineContextAttributes!): PipelineContext
 
   deletePipeline(id: ID!): Pipeline
 

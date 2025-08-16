@@ -104,10 +104,10 @@ defmodule Console.Deployments.Pipelines do
   data-map for things like contextualizing pr automations
   """
   @spec create_pipeline_context(map, binary, User.t) :: context_resp
-  def create_pipeline_context(attrs, pipe_id, %User{} = user) do
+  def create_pipeline_context(attrs, %Pipeline{} = pipe, %User{} = user) do
     start_transaction()
     |> add_operation(:pipe, fn _ ->
-      get_pipeline!(pipe_id)
+      pipe
       |> Repo.preload([:edges, :stages, :write_bindings, :read_bindings])
       |> allow(user, :write)
     end)
@@ -129,6 +129,12 @@ defmodule Console.Deployments.Pipelines do
     |> flush_context_events(fn %{link: links} -> Map.values(links) end, :ctx)
     |> notify(:create, user)
   end
+  def create_pipeline_context(_, nil, _), do: {:error, "Pipeline not found"}
+  def create_pipeline_context(attrs, pipe_id, %User{} = user) when is_binary(pipe_id),
+    do: create_pipeline_context(attrs, get_pipeline!(pipe_id), user)
+
+  def create_pipeline_context_by_name(attrs, name, %User{} = user),
+    do: create_pipeline_context(attrs, get_pipeline_by_name(name), user)
 
   @spec create_context_binding(binary, PipelineStage.t) :: stage_resp
   def create_context_binding(ctx_id, %PipelineStage{} = stage) do

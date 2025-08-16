@@ -72,6 +72,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   def update_gate(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Pipelines.update_gate(attrs, id, cluster)
 
+  def create_pipeline_context(%{pipeline_name: name, attributes: attrs}, %{context: %{current_user: user}})
+      when is_binary(name) do
+    pipe = Pipelines.get_pipeline_by_name(name)
+    Pipelines.create_pipeline_context(attrs, pipe, user)
+  end
+
   def create_pipeline_context(%{pipeline_id: pipe_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.create_pipeline_context(attrs, pipe_id, user)
 
