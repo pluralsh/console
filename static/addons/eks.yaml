@@ -1956,6 +1956,22 @@
   publisher: eks
 - name: aws-guardduty-agent
   versions:
+  - version: v1.11.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.11.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.10.0-eksbuild.2
     compatibilities:
     - '1.33'
