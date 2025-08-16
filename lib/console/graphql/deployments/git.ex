@@ -105,6 +105,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :base_url,            :string
     field :api_url,             :string
     field :github,              :github_app_attributes
+    field :azure,               :azure_devops_attributes
     field :default,             :boolean
     field :proxy,               :http_proxy_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
@@ -120,6 +121,13 @@ defmodule Console.GraphQl.Deployments.Git do
     field :app_id,          non_null(:string), description: "Github App ID"
     field :installation_id, non_null(:string), description: "ID of this github app installation"
     field :private_key,     non_null(:string), description: "PEM-encoded private key for this app"
+  end
+
+  @desc "Requirements to perform Azure DevOps authentication"
+  input_object :azure_devops_attributes do
+    field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
+    field :organization, non_null(:string), description: "the organization to use for azure devops"
+    field :project,      non_null(:string), description: "the project to use for azure devops"
   end
 
   @desc "A way to create a self-service means of generating PRs against an IaC repo"
@@ -467,6 +475,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :default,  :boolean
     field :username, :string
     field :proxy,    :http_proxy_configuration, description: "a proxy to use for git requests"
+    field :azure,    :azure_devops_configuration, description: "the azure devops attributes for this connection"
 
     field :base_url, :string, description: "base url for git clones for self-hosted versions"
     field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"
@@ -603,6 +612,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a checkbox item to render before creating a pr"
   object :pr_checklist do
     field :label, non_null(:string), description: "the label for the checkbox"
+  end
+
+  object :azure_devops_configuration do
+    field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
+    field :organization, non_null(:string), description: "the organization to use for azure devops"
+    field :project,      non_null(:string), description: "the project to use for azure devops"
   end
 
   @desc "A reference to a pull request for your kubernetes related IaC"

@@ -71,6 +71,7 @@ export const scmTypeToLabel = {
   [ScmType.Github]: 'GitHub',
   [ScmType.Gitlab]: 'GitLab',
   [ScmType.Bitbucket]: 'BitBucket',
+  [ScmType.AzureDevops]: 'Azure DevOps',
   '': 'Unknown',
 } as const satisfies Record<ScmType | '', string>
 
@@ -78,6 +79,7 @@ export const scmTypeToIcon = {
   [ScmType.Github]: <GitHubLogoIcon fullColor />,
   [ScmType.Gitlab]: <GitLabLogoIcon fullColor />,
   [ScmType.Bitbucket]: <BitBucketIcon fullColor />,
+  [ScmType.AzureDevops]: <PrOpenIcon />,
   '': <PrOpenIcon />,
 } as const satisfies Record<ScmType | '', ReactElement<any>>
 

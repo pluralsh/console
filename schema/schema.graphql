@@ -7037,6 +7037,7 @@ enum ScmType {
   GITHUB
   GITLAB
   BITBUCKET
+  AZURE_DEVOPS
 }
 
 enum MatchStrategy {
@@ -7249,6 +7250,8 @@ input ScmConnectionAttributes {
 
   github: GithubAppAttributes
 
+  azure: AzureDevopsAttributes
+
   default: Boolean
 
   proxy: HttpProxyAttributes
@@ -7272,6 +7275,18 @@ input GithubAppAttributes {
 
   "PEM-encoded private key for this app"
   privateKey: String!
+}
+
+"Requirements to perform Azure DevOps authentication"
+input AzureDevopsAttributes {
+  "the username asociated with your Azure DevOps PAT"
+  username: String!
+
+  "the organization to use for azure devops"
+  organization: String!
+
+  "the project to use for azure devops"
+  project: String!
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"
@@ -7740,6 +7755,9 @@ type ScmConnection {
   "a proxy to use for git requests"
   proxy: HttpProxyConfiguration
 
+  "the azure devops attributes for this connection"
+  azure: AzureDevopsConfiguration
+
   "base url for git clones for self-hosted versions"
   baseUrl: String
 
@@ -7920,6 +7938,17 @@ type PrConfirmation {
 type PrChecklist {
   "the label for the checkbox"
   label: String!
+}
+
+type AzureDevopsConfiguration {
+  "the username asociated with your Azure DevOps PAT"
+  username: String!
+
+  "the organization to use for azure devops"
+  organization: String!
+
+  "the project to use for azure devops"
+  project: String!
 }
 
 "A reference to a pull request for your kubernetes related IaC"

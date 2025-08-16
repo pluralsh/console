@@ -2,7 +2,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
   import Console.Services.Base, only: [ok: 1]
   alias Console.Deployments.Pr.File
-  alias Console.Schema.{PrAutomation, PullRequest}
+  alias Console.Schema.{PullRequest}
   require Logger
 
   @behaviour Console.Deployments.Pr.Dispatcher
@@ -19,7 +19,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def create(%PrAutomation{} = pr, branch, ctx) do
+  def create(pr, branch, ctx) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
       id = URI.encode(pr.identifier)

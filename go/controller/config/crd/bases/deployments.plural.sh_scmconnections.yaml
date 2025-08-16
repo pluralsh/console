@@ -53,6 +53,24 @@ spec:
                 description: APIUrl is a base URL for HTTP apis for shel-hosted versions
                   if different from BaseUrl.
                 type: string
+              azure:
+                description: Settings for configuring Azure DevOps authentication
+                properties:
+                  organization:
+                    description: The organization to use for azure devops
+                    type: string
+                  project:
+                    description: The project to use for azure devops
+                    type: string
+                  username:
+                    description: The username to use for azure devops, it should be
+                      associated with the PAT you are supplying as the tokenSecretRef
+                    type: string
+                required:
+                - organization
+                - project
+                - username
+                type: object
               baseUrl:
                 description: BaseUrl is a base URL for Git clones for self-hosted
                   versions.
@@ -60,10 +78,16 @@ spec:
               default:
                 type: boolean
               github:
+                description: Settings for configuring Github App authentication
                 properties:
                   appId:
+                    description: The Github App ID to use for authentication (can
+                      be found on the Github Apps settings page)
                     type: string
                   installationId:
+                    description: The installation ID of your install of the Github
+                      App (found on the Github Apps section of your github repo/organization,
+                      located in the url path)
                     type: string
                   privateKeyRef:
                     description: SecretKeySelector selects a key of a Secret.

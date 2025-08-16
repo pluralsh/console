@@ -3,7 +3,11 @@ defmodule Console.Schema.ScmConnection do
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils
 
-  defenum Type, github: 0, gitlab: 1, bitbucket: 2
+  defenum Type,
+    github: 0,
+    gitlab: 1,
+    bitbucket: 2,
+    azure_devops: 3
 
   schema "scm_connections" do
     field :name,     :string
@@ -21,6 +25,12 @@ defmodule Console.Schema.ScmConnection do
       field :app_id,          :string
       field :installation_id, :string
       field :private_key,     EncryptedString
+    end
+
+    embeds_one :azure, Azure, on_replace: :update do
+      field :username,     :string
+      field :organization, :string
+      field :project,      :string
     end
 
     embeds_one :proxy, Proxy, on_replace: :update do
@@ -45,6 +55,7 @@ defmodule Console.Schema.ScmConnection do
     |> cast(attrs, @valid)
     |> cast_embed(:github, with: &github_changeset/2)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
+    |> cast_embed(:azure, with: &azure_changeset/2)
     |> unique_constraint(:name)
     |> unique_constraint(:default, message: "only one scm connection can be marked default at once")
     |> validate_required([:name, :type])
@@ -57,6 +68,12 @@ defmodule Console.Schema.ScmConnection do
     |> cast(attrs, ~w(app_id installation_id private_key)a)
     |> validate_required(~w(app_id installation_id private_key)a)
     |> validate_private_key(:private_key)
+  end
+
+  defp azure_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(username organization project)a)
+    |> validate_required(~w(username organization project)a)
   end
 
   def proxy_changeset(model, attrs) do

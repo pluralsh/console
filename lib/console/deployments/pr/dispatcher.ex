@@ -4,7 +4,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Repo
   alias Console.Deployments.{Pr.Config, Pr.File, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
-  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
+  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket, Azure}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
 
   @type pr_attrs :: %{title: binary, body: binary, branch: binary}
@@ -123,4 +123,5 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def dispatcher(%{type: :github}), do: Github
   def dispatcher(%{type: :gitlab}), do: Gitlab
   def dispatcher(%{type: :bitbucket}), do: BitBucket
+  def dispatcher(%{type: :azure_devops}), do: Azure
 end

@@ -767,6 +767,26 @@ export type AzureConnectionAttributes = {
   tenantId: Scalars['String']['output'];
 };
 
+/** Requirements to perform Azure DevOps authentication */
+export type AzureDevopsAttributes = {
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['input'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['input'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['input'];
+};
+
+export type AzureDevopsConfiguration = {
+  __typename?: 'AzureDevopsConfiguration';
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['output'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['output'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['output'];
+};
+
 export type AzureOpenaiAttributes = {
   /** the azure openai access token to use */
   accessToken: Scalars['String']['input'];
@@ -9564,6 +9584,8 @@ export type ScmConnection = {
   __typename?: 'ScmConnection';
   /** base url for HTTP apis for self-hosted versions if different from base url */
   apiUrl?: Maybe<Scalars['String']['output']>;
+  /** the azure devops attributes for this connection */
+  azure?: Maybe<AzureDevopsConfiguration>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
   default?: Maybe<Scalars['Boolean']['output']>;
@@ -9580,6 +9602,7 @@ export type ScmConnection = {
 /** an object representing a means to authenticate to a source control provider like Github */
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
+  azure?: InputMaybe<AzureDevopsAttributes>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
@@ -9607,6 +9630,7 @@ export type ScmConnectionEdge = {
 };
 
 export enum ScmType {
+  AzureDevops = 'AZURE_DEVOPS',
   Bitbucket = 'BITBUCKET',
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
