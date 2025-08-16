@@ -132,4 +132,27 @@ defmodule Console.GraphQl.Deployments.PipelineMutationsTest do
       refute refetch(pipe)
     end
   end
+
+  describe "createPipelineContext" do
+    test "it can create a context by pipeline id" do
+      pipe = insert(:pipeline)
+
+      {:ok, %{data: %{"createPipelineContext" => ctx}}} = run_query("""
+        mutation Create($name: String!, $attributes: PipelineContextAttributes!) {
+          createPipelineContext(pipelineName: $name, attributes: $attributes) {
+            id
+            context
+            pipeline { id }
+          }
+        }
+      """, %{
+        "name" => pipe.name,
+        "attributes" => %{"context" => Jason.encode!(%{some: "context"})}
+      }, %{current_user: admin_user()})
+
+      assert ctx["id"]
+      assert ctx["pipeline"]["id"] == pipe.id
+      assert ctx["context"] == %{"some" => "context"}
+    end
+  end
 end

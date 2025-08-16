@@ -436,8 +436,10 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "creates a new pipeline context and binds it to the beginning stage"
     field :create_pipeline_context, :pipeline_context do
       middleware Authenticated
-      arg :pipeline_id, non_null(:id)
-      arg :attributes,  non_null(:pipeline_context_attributes)
+      middleware Scope, api: "createPipelineContext"
+      arg :pipeline_id,   :id
+      arg :pipeline_name, :string
+      arg :attributes,    non_null(:pipeline_context_attributes)
 
       resolve &Deployments.create_pipeline_context/2
     end

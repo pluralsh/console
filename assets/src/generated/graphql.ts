@@ -7186,7 +7186,8 @@ export type RootMutationTypeCreatePinnedCustomResourceArgs = {
 
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
-  pipelineId: Scalars['ID']['input'];
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  pipelineName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
