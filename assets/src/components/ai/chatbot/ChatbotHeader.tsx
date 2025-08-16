@@ -8,35 +8,29 @@ import {
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
-import { Body2BoldP } from 'components/utils/typography/Text'
 import {
-  ChatThreadTinyFragment,
-  useCloudConnectionsQuery,
-} from 'generated/graphql'
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from 'components/commandpalette/CommandPaletteContext.tsx'
+import { Body2BoldP } from 'components/utils/typography/Text'
+import { useCloudConnectionsQuery } from 'generated/graphql'
+import { capitalize } from 'lodash'
+import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { useChatbot } from '../AIContext'
 import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
+import { AgentSelect } from './AgentSelect.tsx'
+import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
-import { AgentSelect } from './AgentSelect.tsx'
-import { capitalize } from 'lodash'
-import {
-  CommandPaletteContext,
-  CommandPaletteTab,
-} from 'components/commandpalette/CommandPaletteContext.tsx'
-import { use } from 'react'
-import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 
-export function ChatbotHeader({
-  currentThread,
-}: {
-  currentThread?: Nullable<ChatThreadTinyFragment>
-}) {
+export function ChatbotHeader() {
   const { colors } = useTheme()
   const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const {
+    currentThread,
     actionsPanelOpen,
     setActionsPanelOpen,
     agentInitMode,

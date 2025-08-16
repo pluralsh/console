@@ -5,10 +5,7 @@ import { useScmConnectionsQuery, useScmWebhooksQuery } from 'generated/graphql'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { ReactNode } from 'react'
@@ -56,7 +53,6 @@ export function ScmManagement() {
             columns={connectionsColumns}
             loading={!connectionsQ.data && connectionsQ.loading}
             reactTableOptions={{ meta: { refetch: connectionsQ.refetch } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={connectionsQ.data?.scmConnections?.edges || []}
             virtualizeRows
             hasNextPage={connectionsQ.pageInfo?.hasNextPage}
@@ -80,7 +76,6 @@ export function ScmManagement() {
             columns={webhooksColumns}
             loading={!webhooksQ.data && webhooksQ.loading}
             reactTableOptions={{ meta: { refetch: webhooksQ.refetch } }}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={webhooksQ.data?.scmWebhooks?.edges || []}
             virtualizeRows
             hasNextPage={webhooksQ.pageInfo?.hasNextPage}

@@ -21,10 +21,7 @@ import { AiInsightSummaryIcon } from '../AiInsights'
 import { GqlError } from '../Alert'
 
 import { StackedText } from '../table/StackedText'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  VirtualSlice,
-} from '../table/useFetchPaginatedData'
+import { VirtualSlice } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { useState } from 'react'
@@ -63,7 +60,6 @@ export function AlertsTable({
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       loading={loading && isEmpty(alerts)}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       getRowCanExpand={() => true}
       renderExpanded={AlertsTableExpander}
       onRowClick={(_, row) => row.getToggleExpandedHandler()()}

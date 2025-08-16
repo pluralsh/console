@@ -16,7 +16,7 @@ import {
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
-  AgentSession,
+  AgentSessionFragment,
   AiRole,
   ChatType,
   ChatTypeAttributes,
@@ -68,7 +68,7 @@ export function ChatMessage({
   contentStyles?: CSSObject
   highlightToolContent?: boolean
   updatedAt?: Nullable<string>
-  session?: Nullable<AgentSession>
+  session?: Nullable<AgentSessionFragment>
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const rightAlign = role === AiRole.User
@@ -161,7 +161,7 @@ export function ChatMessageActions({
 
   const [deleteMessage, { loading: deleteLoading }] = useDeleteChatMutation({
     awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreadDetails'],
+    refetchQueries: ['ChatThreadMessages'],
   })
 
   return (

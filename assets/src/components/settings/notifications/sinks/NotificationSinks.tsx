@@ -18,10 +18,7 @@ import {
   NOTIFICATIONS_SINKS_ABS_PATH,
 } from 'routes/settingsRoutesConst'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './NotificationSinksColumns'
 import { CreateNotificationSinkModal } from './UpsertNotificationSinkModal'
@@ -74,7 +71,6 @@ export default function NotificationSinks() {
         fullHeightWrap
         columns={columns}
         reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={data?.notificationSinks?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

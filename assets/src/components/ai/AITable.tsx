@@ -2,10 +2,7 @@ import { Table, TableProps } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  FetchPaginatedDataResult,
-} from 'components/utils/table/useFetchPaginatedData'
+import { FetchPaginatedDataResult } from 'components/utils/table/useFetchPaginatedData'
 import {
   AiPinsQuery,
   ChatThreadsQuery,
@@ -64,7 +61,6 @@ export function AITable({
       isFetchingNextPage={query.loading}
       onVirtualSliceChange={query.setVirtualSlice}
       reactTableOptions={reactTableOptions}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       emptyStateProps={{ message: 'No entries found.' }}
       {...props}
     />

@@ -184,6 +184,7 @@ export function ChatbotActionsPanel({
                     small
                     as={Link}
                     to={PR_ABS_PATH}
+                    onClick={() => setActionsPanelOpen(false)}
                   >
                     View all PRs
                   </Button>
@@ -227,6 +228,7 @@ export function ChatbotActionsPanel({
                     small
                     as={Link}
                     to={getStacksAbsPath(stack.id)}
+                    onClick={() => setActionsPanelOpen(false)}
                   >
                     View stack
                   </Button>
@@ -262,6 +264,7 @@ export function ChatbotActionsPanel({
                       serviceId: service?.id,
                       clusterId: service?.cluster?.id,
                     })}
+                    onClick={() => setActionsPanelOpen(false)}
                   >
                     View service
                   </Button>

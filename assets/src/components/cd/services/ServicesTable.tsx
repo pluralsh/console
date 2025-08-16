@@ -15,10 +15,7 @@ import { Edge } from 'utils/graphql'
 
 import { useOutletContext } from 'react-router-dom'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -113,7 +110,6 @@ export default function ServicesTable() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             reactTableOptions={reactTableOptions}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
         ) : (

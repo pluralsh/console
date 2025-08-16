@@ -6,10 +6,7 @@ import { useState } from 'react'
 
 import { GqlError } from 'components/utils/Alert'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { EditObservabilityProviderModal } from './EditObservabilityProvider'
 import { columns } from './ObservabilityProvidersColumns'
@@ -63,7 +60,6 @@ export function ObservabilityProviders() {
           loading={!data && loading}
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.observabilityProviders?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

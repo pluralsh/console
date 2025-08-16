@@ -7,10 +7,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from './PrAutomationsColumns'
@@ -62,7 +59,6 @@ export function PrAutomations() {
       columns={columns}
       loading={!data && loading}
       reactTableOptions={{ meta: { refetch } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={prAutomations}
       virtualizeRows
       hasNextPage={pageInfo?.hasNextPage}

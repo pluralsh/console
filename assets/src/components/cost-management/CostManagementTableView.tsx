@@ -3,10 +3,7 @@ import { Row } from '@tanstack/react-table'
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ClusterUsageTinyFragment,
   useClusterUsagesQuery,
@@ -84,7 +81,6 @@ export function CostManagementTableView() {
         hasNextPage={data?.clusterUsages?.pageInfo?.hasNextPage}
         isFetchingNextPage={loading}
         fetchNextPage={fetchNextPage}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
       />
     </Flex>

@@ -6,10 +6,7 @@ import {
   Spinner,
   Table,
 } from '@pluralsh/design-system'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 import {
   AgentSessionFragment,
   useAgentSessionsQuery,
@@ -105,7 +102,6 @@ export function AIAgent() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           emptyStateProps={{ message: 'No entries found.' }}
         />
       </Flex>

@@ -11,10 +11,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useProjectId } from 'components/contexts/ProjectsContext'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { columns } from './Namespaces'
 
@@ -84,7 +81,6 @@ export function NamespacesTable() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           reactTableOptions={reactTableOptions}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{
             message: "Looks like you don't have any namespaces yet",

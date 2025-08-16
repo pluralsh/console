@@ -21,10 +21,7 @@ import {
   ColTitle,
 } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useThrottle } from 'components/hooks/useThrottle'
 
 export const columns = [
@@ -98,7 +95,6 @@ export default function ServicePRs() {
           <Table
             fullHeightWrap
             columns={columns}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={data?.pullRequests?.edges || []}
             virtualizeRows
             reactTableOptions={reactTableOptions}

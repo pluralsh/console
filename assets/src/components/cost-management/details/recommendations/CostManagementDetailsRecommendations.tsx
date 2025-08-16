@@ -11,7 +11,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import { ScalingRecommendationType } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -109,7 +108,6 @@ export function CostManagementDetailsRecommendations() {
           columns={cols}
           data={recs}
           loading={!data && loading}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           hasNextPage={
             data?.clusterUsage?.recommendations?.pageInfo?.hasNextPage
           }

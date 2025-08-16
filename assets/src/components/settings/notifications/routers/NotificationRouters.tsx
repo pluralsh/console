@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
 import {
   Button,
   LoopingLogo,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useNotificationRoutersQuery } from 'generated/graphql'
@@ -18,13 +18,10 @@ import {
   NOTIFICATIONS_ROUTERS_ABS_PATH,
 } from 'routes/settingsRoutesConst'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
-import { columns } from './NotificationRoutersColumns'
 import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
+import { columns } from './NotificationRoutersColumns'
 
 const crumbs = [
   ...NOTIFICATIONS_BASE_CRUMBS,
@@ -94,7 +91,6 @@ export default function NotificationRouters() {
         fullHeightWrap
         columns={columns}
         reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={data?.notificationRouters?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

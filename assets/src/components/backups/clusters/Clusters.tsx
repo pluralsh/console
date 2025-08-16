@@ -10,10 +10,7 @@ import { useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useNavigate } from 'react-router-dom'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import {
   BACKUPS_ABS_PATH,
@@ -86,7 +83,6 @@ export default function Clusters() {
           loose
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={clusters?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

@@ -7,10 +7,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { GqlError } from 'components/utils/Alert'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { prColumns } from './PrQueueColumns'
 import { useTheme } from 'styled-components'
@@ -66,7 +63,6 @@ export function OutstandingPrs() {
         columns={prColumns}
         loading={!data && loading}
         data={data?.pullRequests?.edges || []}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         reactTableOptions={reactTableOptions}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
