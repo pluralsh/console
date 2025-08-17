@@ -178,8 +178,8 @@ defmodule ConsoleWeb.GitControllerTest do
 
   describe "#stack_tarball/2" do
     test "it will download stack git content for valid deploy tokens", %{conn: conn} do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      run = insert(:stack_run, repository: git, git: %{ref: "master", folder: "bin"})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      run = insert(:stack_run, repository: git, git: %{ref: "main", folder: "charts/deployment-operator"})
 
       conn
       |> add_auth_headers(run.cluster)

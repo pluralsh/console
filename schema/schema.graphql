@@ -423,6 +423,10 @@ type RootQueryType {
 
   oidcProviders(after: String, first: Int, before: String, last: Int, q: String): OidcProviderConnection
 
+  sentinel(id: ID, name: String): Sentinel
+
+  sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -985,6 +989,14 @@ type RootMutationType {
 
   deletePreviewEnvironmentTemplate(id: ID!): PreviewEnvironmentTemplate
 
+  createSentinel(attributes: SentinelAttributes): Sentinel
+
+  updateSentinel(id: ID!, attributes: SentinelAttributes): Sentinel
+
+  deleteSentinel(id: ID!): Sentinel
+
+  runSentinel(id: ID!): SentinelRun
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1140,6 +1152,213 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum SentinelCheckType {
+  LOG
+  KUBERNETES
+}
+
+enum SentinelRunStatus {
+  PENDING
+  SUCCESS
+  FAILURE
+}
+
+input SentinelAttributes {
+  "the name of the sentinel"
+  name: String
+
+  "the description of the sentinel"
+  description: String
+
+  "the repository to use for this sentinel"
+  repositoryId: ID
+
+  "the project to use for this sentinel"
+  projectId: ID
+
+  "the git repository to use for this sentinel"
+  git: GitAttributes
+
+  "the checks to run for this sentinel"
+  checks: [SentinelCheckAttributes]
+}
+
+input SentinelCheckAttributes {
+  "the type of check to run"
+  type: SentinelCheckType!
+
+  "the name of the check"
+  name: String!
+
+  "the rule file to use for this check"
+  ruleFile: String
+
+  "the configuration to use for this check"
+  configuration: SentinelCheckConfigurationAttributes
+}
+
+input SentinelCheckConfigurationAttributes {
+  "the log configuration to use for this check"
+  log: SentinelCheckLogConfigurationAttributes
+
+  "the kubernetes configuration to use for this check"
+  kubernetes: SentinelCheckKubernetesConfigurationAttributes
+}
+
+input SentinelCheckLogConfigurationAttributes {
+  "the namespace to run the query against"
+  namespace: String
+
+  "a search query this will run against the logs"
+  query: String!
+
+  "the cluster to run the query against"
+  clusterId: ID
+
+  "The duration of the log analysis run"
+  duration: String!
+
+  "the log facets to run the query against"
+  facets: [LogFacetInput]
+}
+
+input SentinelCheckKubernetesConfigurationAttributes {
+  "the api group to use when fetching this resource"
+  group: String
+
+  "the api version to use when fetching this resource"
+  version: String!
+
+  "the kind to use when fetching this resource"
+  kind: String!
+
+  "the name to use when fetching this resource"
+  name: String!
+
+  "the namespace to use when fetching this resource"
+  namespace: String
+
+  "the cluster to run the query against"
+  clusterId: ID!
+}
+
+type Sentinel {
+  "the id of the sentinel"
+  id: String!
+
+  "the name of the sentinel"
+  name: String!
+
+  "the description of the sentinel"
+  description: String
+
+  "the git location for rules files from the associated repository"
+  git: GitRef
+
+  "the git repository to use for fetching rules files for AI enabled analysis"
+  repository: GitRepository
+
+  "the project of this sentinel"
+  project: Project
+
+  "the checks to run for this sentinel"
+  checks: [SentinelCheck]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type SentinelCheck {
+  "the id of the check"
+  id: String!
+
+  "the name of the check"
+  name: String!
+
+  "the type of check to run"
+  type: SentinelCheckType!
+
+  "the rule file to use for this check"
+  ruleFile: String
+
+  "the configuration to use for this check"
+  configuration: SentinelCheckConfiguration
+}
+
+type SentinelCheckConfiguration {
+  "the log configuration to use for this check"
+  log: SentinelCheckLogConfiguration
+
+  "the kubernetes configuration to use for this check"
+  kubernetes: SentinelCheckKubernetesConfiguration
+}
+
+type SentinelCheckLogConfiguration {
+  "the namespace to run the query against"
+  namespace: String
+
+  "a search query this will run against the logs"
+  query: String!
+
+  "the cluster to run the query against"
+  clusterId: ID
+
+  "the log facets to run the query against"
+  facets: [LogFacet]
+}
+
+type SentinelCheckKubernetesConfiguration {
+  "the api group to use when fetching this resource"
+  group: String
+
+  "the api version to use when fetching this resource"
+  version: String!
+
+  "the kind to use when fetching this resource"
+  kind: String!
+
+  "the name to use when fetching this resource"
+  name: String!
+
+  "the namespace to use when fetching this resource"
+  namespace: String
+}
+
+type SentinelRun {
+  "the id of the run"
+  id: String!
+
+  "the status of the run"
+  status: SentinelRunStatus!
+
+  "the sentinel that was run"
+  sentinel: Sentinel
+
+  "the results of the run"
+  results: [SentinelRunResult]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type SentinelRunResult {
+  "the name of the check"
+  name: String
+
+  "the status of the result"
+  status: SentinelRunStatus!
+
+  "the reason for the result"
+  reason: String
+}
+
+type SentinelConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelEdge]
 }
 
 input FlowAttributes {
@@ -10311,5 +10530,10 @@ type McpServerEdge {
 
 type FlowEdge {
   node: Flow
+  cursor: String
+}
+
+type SentinelEdge {
+  node: Sentinel
   cursor: String
 }

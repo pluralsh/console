@@ -39,7 +39,8 @@ defmodule Console.Deployments.Policies.Rbac do
     PreviewEnvironmentTemplate,
     ComplianceReportGenerator,
     ServiceContext,
-    CloudConnection
+    CloudConnection,
+    Sentinel
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -107,6 +108,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(gen, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ServiceContext{} = ctx, user, action),
     do: recurse(ctx, user, action, & &1.project)
+  def evaluate(%Sentinel{} = sentinel, user, action),
+    do: recurse(sentinel, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -214,6 +217,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(ctx, [project: @bindings])
   def preload(%CloudConnection{} = conn),
     do: Repo.preload(conn, [:read_bindings])
+  def preload(%Sentinel{} = sentinel),
+    do: Repo.preload(sentinel, [project: @bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

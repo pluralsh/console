@@ -5760,6 +5760,162 @@ type Secret struct {
 	Data     map[string]any `json:"data"`
 }
 
+type Sentinel struct {
+	// the id of the sentinel
+	ID string `json:"id"`
+	// the name of the sentinel
+	Name string `json:"name"`
+	// the description of the sentinel
+	Description *string `json:"description,omitempty"`
+	// the git location for rules files from the associated repository
+	Git *GitRef `json:"git,omitempty"`
+	// the git repository to use for fetching rules files for AI enabled analysis
+	Repository *GitRepository `json:"repository,omitempty"`
+	// the project of this sentinel
+	Project *Project `json:"project,omitempty"`
+	// the checks to run for this sentinel
+	Checks     []*SentinelCheck `json:"checks,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+}
+
+type SentinelAttributes struct {
+	// the name of the sentinel
+	Name *string `json:"name,omitempty"`
+	// the description of the sentinel
+	Description *string `json:"description,omitempty"`
+	// the repository to use for this sentinel
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the project to use for this sentinel
+	ProjectID *string `json:"projectId,omitempty"`
+	// the git repository to use for this sentinel
+	Git *GitAttributes `json:"git,omitempty"`
+	// the checks to run for this sentinel
+	Checks []*SentinelCheckAttributes `json:"checks,omitempty"`
+}
+
+type SentinelCheck struct {
+	// the id of the check
+	ID string `json:"id"`
+	// the name of the check
+	Name string `json:"name"`
+	// the type of check to run
+	Type SentinelCheckType `json:"type"`
+	// the rule file to use for this check
+	RuleFile *string `json:"ruleFile,omitempty"`
+	// the configuration to use for this check
+	Configuration *SentinelCheckConfiguration `json:"configuration,omitempty"`
+}
+
+type SentinelCheckAttributes struct {
+	// the type of check to run
+	Type SentinelCheckType `json:"type"`
+	// the name of the check
+	Name string `json:"name"`
+	// the rule file to use for this check
+	RuleFile *string `json:"ruleFile,omitempty"`
+	// the configuration to use for this check
+	Configuration *SentinelCheckConfigurationAttributes `json:"configuration,omitempty"`
+}
+
+type SentinelCheckConfiguration struct {
+	// the log configuration to use for this check
+	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
+	// the kubernetes configuration to use for this check
+	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+}
+
+type SentinelCheckConfigurationAttributes struct {
+	// the log configuration to use for this check
+	Log *SentinelCheckLogConfigurationAttributes `json:"log,omitempty"`
+	// the kubernetes configuration to use for this check
+	Kubernetes *SentinelCheckKubernetesConfigurationAttributes `json:"kubernetes,omitempty"`
+}
+
+type SentinelCheckKubernetesConfiguration struct {
+	// the api group to use when fetching this resource
+	Group *string `json:"group,omitempty"`
+	// the api version to use when fetching this resource
+	Version string `json:"version"`
+	// the kind to use when fetching this resource
+	Kind string `json:"kind"`
+	// the name to use when fetching this resource
+	Name string `json:"name"`
+	// the namespace to use when fetching this resource
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+type SentinelCheckKubernetesConfigurationAttributes struct {
+	// the api group to use when fetching this resource
+	Group *string `json:"group,omitempty"`
+	// the api version to use when fetching this resource
+	Version string `json:"version"`
+	// the kind to use when fetching this resource
+	Kind string `json:"kind"`
+	// the name to use when fetching this resource
+	Name string `json:"name"`
+	// the namespace to use when fetching this resource
+	Namespace *string `json:"namespace,omitempty"`
+	// the cluster to run the query against
+	ClusterID string `json:"clusterId"`
+}
+
+type SentinelCheckLogConfiguration struct {
+	// the namespace to run the query against
+	Namespace *string `json:"namespace,omitempty"`
+	// a search query this will run against the logs
+	Query string `json:"query"`
+	// the cluster to run the query against
+	ClusterID *string `json:"clusterId,omitempty"`
+	// the log facets to run the query against
+	Facets []*LogFacet `json:"facets,omitempty"`
+}
+
+type SentinelCheckLogConfigurationAttributes struct {
+	// the namespace to run the query against
+	Namespace *string `json:"namespace,omitempty"`
+	// a search query this will run against the logs
+	Query string `json:"query"`
+	// the cluster to run the query against
+	ClusterID *string `json:"clusterId,omitempty"`
+	// The duration of the log analysis run
+	Duration string `json:"duration"`
+	// the log facets to run the query against
+	Facets []*LogFacetInput `json:"facets,omitempty"`
+}
+
+type SentinelConnection struct {
+	PageInfo PageInfo        `json:"pageInfo"`
+	Edges    []*SentinelEdge `json:"edges,omitempty"`
+}
+
+type SentinelEdge struct {
+	Node   *Sentinel `json:"node,omitempty"`
+	Cursor *string   `json:"cursor,omitempty"`
+}
+
+type SentinelRun struct {
+	// the id of the run
+	ID string `json:"id"`
+	// the status of the run
+	Status SentinelRunStatus `json:"status"`
+	// the sentinel that was run
+	Sentinel *Sentinel `json:"sentinel,omitempty"`
+	// the results of the run
+	Results    []*SentinelRunResult `json:"results,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunResult struct {
+	// the name of the check
+	Name *string `json:"name,omitempty"`
+	// the status of the result
+	Status SentinelRunStatus `json:"status"`
+	// the reason for the result
+	Reason *string `json:"reason,omitempty"`
+}
+
 type Service struct {
 	Metadata Metadata      `json:"metadata"`
 	Status   ServiceStatus `json:"status"`
@@ -9678,6 +9834,90 @@ func (e *ScmType) UnmarshalGQL(v any) error {
 }
 
 func (e ScmType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelCheckType string
+
+const (
+	SentinelCheckTypeLog        SentinelCheckType = "LOG"
+	SentinelCheckTypeKubernetes SentinelCheckType = "KUBERNETES"
+)
+
+var AllSentinelCheckType = []SentinelCheckType{
+	SentinelCheckTypeLog,
+	SentinelCheckTypeKubernetes,
+}
+
+func (e SentinelCheckType) IsValid() bool {
+	switch e {
+	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes:
+		return true
+	}
+	return false
+}
+
+func (e SentinelCheckType) String() string {
+	return string(e)
+}
+
+func (e *SentinelCheckType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelCheckType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelCheckType", str)
+	}
+	return nil
+}
+
+func (e SentinelCheckType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunStatus string
+
+const (
+	SentinelRunStatusPending SentinelRunStatus = "PENDING"
+	SentinelRunStatusSuccess SentinelRunStatus = "SUCCESS"
+	SentinelRunStatusFailure SentinelRunStatus = "FAILURE"
+)
+
+var AllSentinelRunStatus = []SentinelRunStatus{
+	SentinelRunStatusPending,
+	SentinelRunStatusSuccess,
+	SentinelRunStatusFailure,
+}
+
+func (e SentinelRunStatus) IsValid() bool {
+	switch e {
+	case SentinelRunStatusPending, SentinelRunStatusSuccess, SentinelRunStatusFailure:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunStatus) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunStatus", str)
+	}
+	return nil
+}
+
+func (e SentinelRunStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

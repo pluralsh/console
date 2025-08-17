@@ -110,8 +110,8 @@ defmodule Console.Deployments.Git.AgentTest do
 
   describe "#digest/2" do
     test "it can fetch a unique sha for a folder in a repo" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service, repository: git, git: %{ref: "main", folder: "charts/deployment-operator"})
 
       {:ok, pid} = Discovery.start(git)
 
@@ -135,13 +135,13 @@ defmodule Console.Deployments.Git.AgentTest do
 
   describe "#changes" do
     test "it can fetch the sha for a ref and the changes in a sha" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, pid} = Discovery.start(git)
 
-      {:ok, sha} = Discovery.sha(git, "master")
+      {:ok, sha} = Discovery.sha(git, "main")
 
-      {:ok, :pass, msg} = Discovery.changes(git, nil, sha, "bin")
+      {:ok, :pass, msg} = Discovery.changes(git, nil, sha, "charts/deployment-operator")
 
       assert is_binary(msg)
 
