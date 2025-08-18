@@ -17,6 +17,8 @@ type BaseProps<T> = {
   hasNextPage?: boolean
   isLoadingNextPage?: boolean
   getRowId?: (row: T) => string
+  topContent?: ReactNode
+  bottomContent?: ReactNode
   // if true, scroll will start at bottom on mount, and fetches will be triggered at the top
   isReversed?: boolean
 } & Omit<VirtualizerProps, 'ref' | 'children'>
@@ -40,10 +42,13 @@ export function VirtualList<T, M>({
   getRowId,
   renderer,
   meta,
+  topContent,
+  bottomContent,
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
+  const shouldStickToBottom = useRef(false)
 
   // initially align to top normally, or bottom if reversed
   useLayoutEffect(() => {
@@ -52,47 +57,64 @@ export function VirtualList<T, M>({
     internalRef.current?.scrollToIndex(isReversed ? Infinity : 0)
   }, [isReversed])
 
-  // infinite scroll
-  const onScroll = useCallback(() => {
-    if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
-      return
-    if (
-      isReversed
-        ? internalRef.current?.findStartIndex() === 0
-        : internalRef.current?.findEndIndex() === data.length - 1
-    )
-      loadNextPage?.()
-  }, [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage])
+  // stick to bottom if user scrolls there and bottomContent or num items is changing (only applies to reversed lists)
+  useLayoutEffect(() => {
+    if (isReversed && shouldStickToBottom.current)
+      internalRef.current?.scrollToIndex(Infinity, { align: 'end' })
+  }, [data.length, bottomContent, isReversed])
+
+  const onScroll = useCallback(
+    (offset: number) => {
+      if (!internalRef.current) return
+      const { viewportSize, scrollSize, findStartIndex, findEndIndex } =
+        internalRef.current
+
+      // enable sticky bottom when scrolled there (within 5px buffer), otherwise disable
+      if (scrollSize - (offset + viewportSize) < 5)
+        shouldStickToBottom.current = true
+      else shouldStickToBottom.current = false
+
+      // infinite scroll (weird indices add a buffer and account for top/bottom content)
+      if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
+        return
+      if (
+        isReversed ? findStartIndex?.() <= 1 : findEndIndex?.() >= data.length
+      )
+        loadNextPage?.()
+    },
+    [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage]
+  )
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
+    <VList
+      overscan={1}
+      shift={isReversed}
+      css={{ height: '100%', width: '100%' }}
+      onScroll={onScroll}
+      {...props}
+      ref={mergeRefs([listRef, internalRef])}
     >
-      {isLoadingNextPage && isReversed && <LoaderRow />}
-      <VList
-        overscan={1}
-        shift={isReversed}
-        css={{ height: '100%', width: '100%' }}
-        onScroll={onScroll}
-        {...props}
-        ref={mergeRefs([listRef, internalRef])}
-      >
-        {data.map((rowData, index) => (
-          <ItemSC
-            key={
-              getRowId?.(rowData) ||
-              (rowData as any).id ||
-              (rowData as any).node?.id ||
-              index
-            }
-          >
-            {renderer({ rowData, meta })}
-          </ItemSC>
-        ))}
-      </VList>
-      {isLoadingNextPage && !isReversed && <LoaderRow />}
-    </Flex>
+      <div key="topContent">
+        {isLoadingNextPage && isReversed && <LoaderRow />}
+        {topContent}
+      </div>
+      {data.map((rowData, index) => (
+        <ItemSC
+          key={
+            getRowId?.(rowData) ||
+            (rowData as any).id ||
+            (rowData as any).node?.id ||
+            index
+          }
+        >
+          {renderer({ rowData, meta })}
+        </ItemSC>
+      ))}
+      <div key="bottomContent">
+        {bottomContent}
+        {isLoadingNextPage && !isReversed && <LoaderRow />}
+      </div>
+    </VList>
   )
 }
 

@@ -60,7 +60,6 @@ export function ChatbotPanelThread({
     onData: ({ data: { data } }) => {
       setStreaming(true)
       const newDelta = data?.aiStream
-      if ((newDelta?.seq ?? 1) % 120 === 0) scrollToBottom()
       setStreamedMessages((streamedMessages) =>
         produce(streamedMessages, (draft) => {
           const msgNum = newDelta?.message ?? 0
@@ -91,10 +90,7 @@ export function ChatbotPanelThread({
   )
 
   const scrollToBottom = useCallback(
-    () =>
-      messageListRef?.current?.scrollToIndex(Infinity, {
-        smooth: true,
-      }),
+    () => messageListRef.current?.scrollTo(messageListRef.current.scrollSize),
     []
   )
 
@@ -104,19 +100,21 @@ export function ChatbotPanelThread({
   ] = useHybridChatMutation({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadMessages', 'ChatThreadDetails'],
-    onCompleted: () => streaming && scrollToBottom(),
+    onCompleted: () => scrollToBottom(),
   })
 
   const sendMessage = useCallback(
     (newMessage: string) => {
       setPendingMessage(newMessage)
-      const variables = {
-        messages: [{ role: AiRole.User, content: newMessage }],
-        threadId,
-      }
-      mutateHybridChat({ variables })
+      mutateHybridChat({
+        variables: {
+          messages: [{ role: AiRole.User, content: newMessage }],
+          threadId,
+        },
+      })
+      scrollToBottom()
     },
-    [threadId, mutateHybridChat]
+    [threadId, mutateHybridChat, scrollToBottom]
   )
 
   // runs when new messages are added
@@ -190,48 +188,51 @@ export function ChatbotPanelThread({
                   )}
               </div>
             )}
+            bottomContent={
+              <>
+                {pendingMessage && (
+                  <ChatMessage
+                    role={AiRole.User}
+                    type={ChatType.Text}
+                    content={pendingMessage}
+                    disableActions
+                  />
+                )}
+                {streaming && !isEmpty(streamedMessages) ? (
+                  streamedMessages.map((message, i) => {
+                    const { tool, role } = message[0] ?? {}
+                    return (
+                      <ChatMessage
+                        key={i}
+                        disableActions
+                        role={role ?? AiRole.Assistant}
+                        type={!!tool ? ChatType.Tool : ChatType.Text}
+                        attributes={
+                          tool ? { tool: { name: tool.name } } : undefined
+                        }
+                        highlightToolContent={false}
+                        content={message
+                          .toSorted((a, b) => a.seq - b.seq)
+                          .map((delta) => delta.content)
+                          .join('')}
+                      />
+                    )
+                  })
+                ) : sendingMessage ||
+                  curThreadDetails?.session?.done === false ? (
+                  <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
+                ) : null}
+              </>
+            }
           />
         )}
-        {pendingMessage && (
-          <ChatMessage
-            role={AiRole.User}
-            type={ChatType.Text}
-            content={pendingMessage}
-            disableActions
+        {showExamplePrompts && (
+          <ChatbotPanelExamplePrompts
+            setShowPrompts={setShowExamplePrompts}
+            sendMessage={sendMessage}
           />
         )}
-        {streaming && !isEmpty(streamedMessages) ? (
-          streamedMessages.map((message, i) => {
-            const { tool, role } = message[0] ?? {}
-            return (
-              <ChatMessage
-                key={i}
-                disableActions
-                role={role ?? AiRole.Assistant}
-                type={!!tool ? ChatType.Tool : ChatType.Text}
-                attributes={tool ? { tool: { name: tool.name } } : undefined}
-                highlightToolContent={false}
-                content={message
-                  .toSorted((a, b) => a.seq - b.seq)
-                  .map((delta) => delta.content)
-                  .join('')}
-              />
-            )
-          })
-        ) : sendingMessage || curThreadDetails?.session?.done === false ? (
-          <TypingIndicator
-            css={{
-              marginLeft: theme.spacing.small,
-            }}
-          />
-        ) : null}
       </ChatbotMessagesWrapperSC>
-      {showExamplePrompts && (
-        <ChatbotPanelExamplePrompts
-          setShowPrompts={setShowExamplePrompts}
-          sendMessage={sendMessage}
-        />
-      )}
       <ChatInput
         currentThread={curThreadDetails}
         sendMessage={sendMessage}
