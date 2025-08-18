@@ -1,19 +1,10 @@
 apiVersion: deployments.plural.sh/v1alpha1
-kind: Provider
-metadata:
-  name: gcp
-spec:
-  cloud: gcp
-  name: gcp
----
-apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
 metadata:
   name: dev
   namespace: default
 spec:
-  handle: cd-demo
-  cloud: gcp
+  handle: plrl-dev-gke
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
@@ -21,8 +12,7 @@ metadata:
   name: prod
   namespace: default
 spec:
-  handle: cd-demo-workload-1
-  cloud: gcp
+  handle: mgmt
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: GitRepository
