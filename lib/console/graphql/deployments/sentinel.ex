@@ -27,7 +27,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   input_object :sentinel_check_log_configuration_attributes do
-    field :namespace,  :string, description: "the namespace to run the query against"
+    field :namespaces, list_of(:string), description: "the namespaces to run the query against"
     field :query,      non_null(:string), description: "a search query this will run against the logs"
     field :cluster_id, :id, description: "the cluster to run the query against"
     field :duration,   non_null(:string), description: "The duration of the log analysis run"
@@ -69,7 +69,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   object :sentinel_check_log_configuration do
-    field :namespace,  :string, description: "the namespace to run the query against"
+    field :namespaces, list_of(:string), description: "the namespaces to run the query against"
     field :query,      non_null(:string), description: "a search query this will run against the logs"
     field :cluster_id, :id, description: "the cluster to run the query against"
     field :facets,     list_of(:log_facet), description: "the log facets to run the query against"

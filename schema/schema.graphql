@@ -1208,8 +1208,8 @@ input SentinelCheckConfigurationAttributes {
 }
 
 input SentinelCheckLogConfigurationAttributes {
-  "the namespace to run the query against"
-  namespace: String
+  "the namespaces to run the query against"
+  namespaces: [String]
 
   "a search query this will run against the logs"
   query: String!
@@ -1297,8 +1297,8 @@ type SentinelCheckConfiguration {
 }
 
 type SentinelCheckLogConfiguration {
-  "the namespace to run the query against"
-  namespace: String
+  "the namespaces to run the query against"
+  namespaces: [String]
 
   "a search query this will run against the logs"
   query: String!
@@ -1308,6 +1308,9 @@ type SentinelCheckLogConfiguration {
 
   "the log facets to run the query against"
   facets: [LogFacet]
+
+  "The duration of the log analysis run"
+  duration: String!
 }
 
 type SentinelCheckKubernetesConfiguration {

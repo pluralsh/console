@@ -9835,10 +9835,12 @@ export type SentinelCheckLogConfiguration = {
   __typename?: 'SentinelCheckLogConfiguration';
   /** the cluster to run the query against */
   clusterId?: Maybe<Scalars['ID']['output']>;
+  /** The duration of the log analysis run */
+  duration: Scalars['String']['output'];
   /** the log facets to run the query against */
   facets?: Maybe<Array<Maybe<LogFacet>>>;
-  /** the namespace to run the query against */
-  namespace?: Maybe<Scalars['String']['output']>;
+  /** the namespaces to run the query against */
+  namespaces?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** a search query this will run against the logs */
   query: Scalars['String']['output'];
 };
@@ -9850,8 +9852,8 @@ export type SentinelCheckLogConfigurationAttributes = {
   duration: Scalars['String']['input'];
   /** the log facets to run the query against */
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
-  /** the namespace to run the query against */
-  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the namespaces to run the query against */
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** a search query this will run against the logs */
   query: Scalars['String']['input'];
 };

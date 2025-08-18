@@ -5861,19 +5861,21 @@ type SentinelCheckKubernetesConfigurationAttributes struct {
 }
 
 type SentinelCheckLogConfiguration struct {
-	// the namespace to run the query against
-	Namespace *string `json:"namespace,omitempty"`
+	// the namespaces to run the query against
+	Namespaces []*string `json:"namespaces,omitempty"`
 	// a search query this will run against the logs
 	Query string `json:"query"`
 	// the cluster to run the query against
 	ClusterID *string `json:"clusterId,omitempty"`
 	// the log facets to run the query against
 	Facets []*LogFacet `json:"facets,omitempty"`
+	// The duration of the log analysis run
+	Duration string `json:"duration"`
 }
 
 type SentinelCheckLogConfigurationAttributes struct {
-	// the namespace to run the query against
-	Namespace *string `json:"namespace,omitempty"`
+	// the namespaces to run the query against
+	Namespaces []*string `json:"namespaces,omitempty"`
 	// a search query this will run against the logs
 	Query string `json:"query"`
 	// the cluster to run the query against

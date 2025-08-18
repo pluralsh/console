@@ -1,6 +1,8 @@
 defmodule Console.Pipelines.Base do
-  def log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
-  def log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
+  require Logger
+
+  def log({:ok, %{id: id}}, msg), do: Logger.info("Successfully #{msg} for #{id}")
+  def log({:error, error}, msg), do: Logger.error("Failed to #{msg} with error: #{inspect(error)}")
   def log(_, _), do: :ok
 
   def refetch(%{__struct__: schema, id: id}), do: Console.Repo.get(schema, id)

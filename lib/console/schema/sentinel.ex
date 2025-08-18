@@ -23,7 +23,7 @@ defmodule Console.Schema.Sentinel do
         embeds_one :log, LogConfiguration, on_replace: :update do
           field :query,      :string
           field :cluster_id, :binary_id
-          field :namespace,  :string
+          field :namespaces, {:array, :string}
           field :duration,   :string
 
           embeds_many :facets, Facet, on_replace: :delete do
@@ -92,7 +92,7 @@ defmodule Console.Schema.Sentinel do
 
   defp log_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(query cluster_id namespace duration)a)
+    |> cast(attrs, ~w(query cluster_id namespaces duration)a)
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_required(~w(duration query)a)
   end

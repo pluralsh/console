@@ -19,6 +19,14 @@ defmodule Console.Schema.SentinelRun do
     timestamps()
   end
 
+  def with_lock(query \\ __MODULE__) do
+    from(l in query, lock: "FOR UPDATE")
+  end
+
+  def unpolled(query \\ __MODULE__) do
+    from(s in query, where: is_nil(s.polled_at))
+  end
+
   def for_sentinel(query \\ __MODULE__, sentinel_id) do
     from(s in query, where: s.sentinel_id == ^sentinel_id)
   end

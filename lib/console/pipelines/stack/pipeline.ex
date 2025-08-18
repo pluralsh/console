@@ -5,9 +5,9 @@ defmodule Console.Pipelines.Stack.Pipeline do
 
   def handle_event(stack) do
     Stacks.poll(stack)
-    |> log("poll stack for a new run")
+    # |> log("poll stack for a new run")
 
     Stacks.dequeue(refetch(stack))
-    |> log("dequeue a new stack run")
+    # |> log("dequeue a new stack run")
   end
 end
