@@ -41,10 +41,18 @@ type ExplainWithAIContextT = {
   system: string
 }
 
-export type AgentSessionT =
-  | AgentSessionType.Terraform
-  | AgentSessionType.Kubernetes
-  | null
+export const AUTO_AGENT_TYPES = [
+  AgentSessionType.Kubernetes,
+  AgentSessionType.Terraform,
+] as const
+
+export type AutoAgentSessionT = Nullable<(typeof AUTO_AGENT_TYPES)[number]>
+
+const isAutoAgentType = (
+  type: Nullable<AgentSessionType>
+): type is NonNullable<AutoAgentSessionT> => {
+  return AUTO_AGENT_TYPES.includes(type as any)
+}
 
 type ChatbotContextT = {
   open: boolean
@@ -64,20 +72,16 @@ type ChatbotContextT = {
   currentThreadId: Nullable<string>
   setCurrentThreadId: (threadId: Nullable<string>) => void
 
-  // The thread ID that is persisted in local storage, used to restore the last thread when the user returns.
-  // Separate from the currentThreadId to check first if the thread still exists before redirecting to it.
-  persistedThreadId: Nullable<string>
-
   // The last non-agent thread ID, used to navigate back to the last non-agent thread when the agent is deselected.
   lastNonAgentThreadId: Nullable<string>
 
   // The agent session type that is currently selected in the UI.
   // Coming from the current thread or the agent init mode.
-  selectedAgent: AgentSessionT
+  selectedAgent: AutoAgentSessionT
 
   // The agent session type that is currently selected in the UI but not yet applied to the current thread.
-  agentInitMode: AgentSessionT
-  setAgentInitMode: Dispatch<SetStateAction<AgentSessionT>>
+  agentInitMode: AutoAgentSessionT
+  setAgentInitMode: Dispatch<SetStateAction<AutoAgentSessionT>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -99,16 +103,13 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = usePersistedState('plural-ai-chat-open', false)
   const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
   const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
-  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
-  const [persistedThreadId, setPersistedThreadId] = usePersistedState<
+  const [currentThreadId, setCurrentThreadId] = usePersistedState<
     Nullable<string>
   >('plural-ai-current-thread-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
     useState<Nullable<string>>()
-  const [agentInitMode, setAgentInitMode] = usePersistedState<AgentSessionT>(
-    'plural-ai-agent-init-mode',
-    null
-  )
+  const [agentInitMode, setAgentInitMode] =
+    usePersistedState<AutoAgentSessionT>('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
   const { data: threadData } = useChatThreadDetailsQuery({
     skip: !currentThreadId,
@@ -116,52 +117,30 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     fetchPolicy: 'cache-and-network',
     pollInterval: 10_000,
   })
-
-  const currentThread = useMemo(() => threadData?.chatThread, [threadData])
+  const currentThread = threadData?.chatThread
 
   const selectedAgent = useMemo(() => {
-    if (agentInitMode) {
-      return agentInitMode
-    }
-
-    if (
-      currentThread?.session?.type === AgentSessionType.Kubernetes ||
-      currentThread?.session?.type === AgentSessionType.Terraform
-    ) {
-      return currentThread.session.type
-    }
-
-    return null
+    const curType = currentThread?.session?.type
+    return agentInitMode || (isAutoAgentType(curType) ? curType : null)
   }, [agentInitMode, currentThread?.session?.type])
 
+  // keep track of the last non-agent thread ID
   useEffect(() => {
-    if (currentThreadId) setPersistedThreadId(currentThreadId)
-  }, [currentThreadId, setPersistedThreadId])
-
-  useEffect(() => {
-    if (!threadData?.chatThread?.id) return
-
-    if (
-      ![AgentSessionType.Kubernetes, AgentSessionType.Terraform].includes(
-        threadData?.chatThread?.session?.type as AgentSessionType
-      )
-    ) {
-      setLastNonAgentThreadId(threadData?.chatThread?.id)
-    }
-  }, [threadData?.chatThread?.id, threadData?.chatThread?.session?.type])
+    if (!!currentThread?.id && !isAutoAgentType(currentThread.session?.type))
+      setLastNonAgentThreadId(currentThread.id)
+  }, [currentThread?.id, currentThread?.session?.type])
 
   return (
     <ChatbotContext
       value={{
         open,
         setOpen,
-        currentThread: threadData?.chatThread,
+        currentThread,
         currentThreadId,
         setCurrentThreadId,
         selectedAgent,
         agentInitMode,
         setAgentInitMode,
-        persistedThreadId,
         lastNonAgentThreadId,
         setShowForkToast,
         actionsPanelOpen,
@@ -241,7 +220,7 @@ export function useChatbot() {
 
   const createNewThread = (attributes: ChatThreadAttributes) => {
     return createThread({
-      variables: { attributes },
+      variables: { attributes: { session: { done: true }, ...attributes } },
       onCompleted: ({ createThread }) => {
         if (createThread?.id) goToThread(createThread?.id)
       },

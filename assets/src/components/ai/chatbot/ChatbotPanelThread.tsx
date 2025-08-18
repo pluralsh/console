@@ -29,16 +29,18 @@ import { ChatInput } from './input/ChatInput.tsx'
 
 export function ChatbotPanelThread({
   messages,
-  loading,
+  initLoading,
   error,
   fetchNextPage,
   hasNextPage,
+  isLoadingNextPage,
 }: {
   messages: ChatFragment[]
-  loading: boolean
+  initLoading: boolean
   error: GqlErrorType
   fetchNextPage: () => void
   hasNextPage: boolean
+  isLoadingNextPage: boolean
 }) {
   const theme = useTheme()
   const { readValue } = useCommandPaletteMessage()
@@ -141,7 +143,7 @@ export function ChatbotPanelThread({
     sendMessage(commandPalettePendingMessage)
   }, [readValue, sendMessage])
 
-  if (loading) return <LoadingIndicator />
+  if (initLoading) return <LoadingIndicator />
 
   return (
     <Flex
@@ -172,7 +174,7 @@ export function ChatbotPanelThread({
             data={messages}
             loadNextPage={fetchNextPage}
             hasNextPage={hasNextPage}
-            isLoadingNextPage={loading}
+            isLoadingNextPage={isLoadingNextPage}
             renderer={({ rowData }) => (
               <div>
                 <ChatMessage

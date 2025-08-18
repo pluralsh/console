@@ -1,3 +1,4 @@
+import { Flex, Spinner } from '@pluralsh/design-system'
 import {
   ReactNode,
   RefObject,
@@ -6,7 +7,7 @@ import {
   useRef,
 } from 'react'
 import { mergeRefs } from 'react-merge-refs'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { VirtualizerProps, VList, VListHandle } from 'virtua'
 
 type BaseProps<T> = {
@@ -64,30 +65,52 @@ export function VirtualList<T, M>({
   }, [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage])
 
   return (
-    <VList
-      overscan={1}
-      shift={isReversed}
-      css={{ height: '100%', width: '100%' }}
-      onScroll={onScroll}
-      {...props}
-      ref={mergeRefs([listRef, internalRef])}
+    <Flex
+      direction="column"
+      height="100%"
     >
-      {data.map((rowData, index) => (
-        <ItemSC
-          key={
-            getRowId?.(rowData) ||
-            (rowData as any).id ||
-            (rowData as any).node?.id ||
-            index
-          }
-        >
-          {renderer({ rowData, meta })}
-        </ItemSC>
-      ))}
-    </VList>
+      {isLoadingNextPage && isReversed && <LoaderRow />}
+      <VList
+        overscan={1}
+        shift={isReversed}
+        css={{ height: '100%', width: '100%' }}
+        onScroll={onScroll}
+        {...props}
+        ref={mergeRefs([listRef, internalRef])}
+      >
+        {data.map((rowData, index) => (
+          <ItemSC
+            key={
+              getRowId?.(rowData) ||
+              (rowData as any).id ||
+              (rowData as any).node?.id ||
+              index
+            }
+          >
+            {renderer({ rowData, meta })}
+          </ItemSC>
+        ))}
+      </VList>
+      {isLoadingNextPage && !isReversed && <LoaderRow />}
+    </Flex>
   )
 }
 
 const ItemSC = styled.div((_) => ({
   width: '100%',
 }))
+
+function LoaderRow() {
+  const { colors } = useTheme()
+  return (
+    <Flex
+      align="center"
+      justify="center"
+      gap="xsmall"
+      height={40}
+    >
+      <span style={{ color: colors['text-xlight'] }}>Loading</span>
+      <Spinner color={colors['text-xlight']} />
+    </Flex>
+  )
+}

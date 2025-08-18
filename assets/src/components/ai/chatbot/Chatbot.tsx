@@ -61,7 +61,6 @@ function ChatbotPanelInner() {
   const {
     currentThread,
     currentThreadId,
-    persistedThreadId,
     agentInitMode,
     goToThread,
     createNewThread,
@@ -83,7 +82,7 @@ function ChatbotPanelInner() {
         skip: !currentThreadId,
         queryHook: useChatThreadMessagesQuery,
         keyPath: ['chatThread', 'chats'],
-        pageSize: 100,
+        pageSize: 5,
         pollInterval: 0, // don't poll messages, they shouldn't change, will break pagination otherwise
       },
       { id: currentThreadId ?? '' }
@@ -98,39 +97,20 @@ function ChatbotPanelInner() {
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
 
   useEffect(() => {
-    // If the agent is initializing, a thread doesn't need to be selected.
-    if (agentInitMode) return
+    if (agentInitMode || !threadsData || mutationLoading) return
 
-    // If a thread is already selected, nothing needs to be done.
-    if (!isEmpty(currentThreadId)) return
-
-    // If data is not yet loaded, do nothing.
-    if (!threadsData || mutationLoading) return
-
-    // If there are no threads after an initial data load, create a new thread.
-    if (isEmpty(threads)) {
-      createNewThread({ summary: 'New chat with Plural AI' })
-      return
+    // if the currently selected thread is invalid (can happen when fetching from local storage), either select most recent or otherwise create a new one
+    if (!threads.find((thread) => thread.id === currentThreadId)) {
+      if (isEmpty(threads))
+        createNewThread({ summary: 'New chat with Plural AI' })
+      else goToThread(threads[0]?.id)
     }
-
-    // If there is a persisted thread, and it exists in the fetched threads, go to that thread.
-    if (
-      persistedThreadId &&
-      threads?.find((thread) => thread?.id === persistedThreadId)
-    ) {
-      goToThread(persistedThreadId)
-      return
-    }
-
-    // Otherwise, select the first available thread.
-    goToThread(threads[0]?.id)
   }, [
     agentInitMode,
     createNewThread,
     currentThreadId,
     goToThread,
     mutationLoading,
-    persistedThreadId,
     threads,
     threadsData,
   ])
@@ -155,11 +135,12 @@ function ChatbotPanelInner() {
         ) : (
           <ChatbotPanelThread
             messages={messages}
-            loading={
+            initLoading={
               loading && (!data || data.chatThread?.id !== currentThread?.id)
             }
             error={error}
             fetchNextPage={fetchNextPage}
+            isLoadingNextPage={!!data && loading}
             hasNextPage={pageInfo?.hasNextPage}
           />
         )}

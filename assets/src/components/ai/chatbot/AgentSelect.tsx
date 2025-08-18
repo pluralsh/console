@@ -19,7 +19,7 @@ import { useTheme } from 'styled-components'
 import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
 import { CaptionP } from '../../utils/typography/Text.tsx'
-import { AgentSessionT, useChatbot } from '../AIContext.tsx'
+import { AutoAgentSessionT, useChatbot } from '../AIContext.tsx'
 
 export function AgentIcon({
   type,
@@ -61,7 +61,7 @@ export function AgentSelect() {
   )
 
   const onAgentChange = useCallback(
-    (newAgent: AgentSessionT) => {
+    (newAgent: AutoAgentSessionT) => {
       if (newAgent) {
         setOpen(false)
         setAgentInitMode(newAgent)
@@ -78,7 +78,7 @@ export function AgentSelect() {
       isOpen={open}
       onOpenChange={setOpen}
       selectedKey={selectedAgent ?? ''}
-      onSelectionChange={(key) => onAgentChange(key as AgentSessionT)}
+      onSelectionChange={(key) => onAgentChange(key as AutoAgentSessionT)}
       label="agent"
       width={330}
       dropdownHeaderFixed={
