@@ -2,12 +2,9 @@ import { Accordion, AccordionItem } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import styled from 'styled-components'
-import {
-  useChatThreadMessagesQuery,
-  useChatThreadsQuery,
-} from '../../../generated/graphql.ts'
+import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
@@ -58,62 +55,28 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
-  const {
-    currentThread,
-    currentThreadId,
-    agentInitMode,
-    goToThread,
-    createNewThread,
-    mutationLoading,
-  } = useChatbot()
-
-  const { data: threadsData } = useFetchPaginatedData({
-    queryHook: useChatThreadsQuery,
-    keyPath: ['chatThreads'],
-  })
-  const threads = useMemo(
-    () => mapExistingNodes(threadsData?.chatThreads),
-    [threadsData?.chatThreads]
-  )
-
+  const { currentThread, currentThreadId, agentInitMode } = useChatbot()
   const { data, loading, error, fetchNextPage, pageInfo } =
     useFetchPaginatedData(
       {
         skip: !currentThreadId,
         queryHook: useChatThreadMessagesQuery,
         keyPath: ['chatThread', 'chats'],
-        pageSize: 5,
         pollInterval: 0, // don't poll messages, they shouldn't change, will break pagination otherwise
       },
       { id: currentThreadId ?? '' }
     )
 
   const messages = useMemo(
-    () => mapExistingNodes(data?.chatThread?.chats).toReversed(),
-    [data?.chatThread?.chats]
+    () =>
+      currentThreadId
+        ? mapExistingNodes(data?.chatThread?.chats).toReversed()
+        : [],
+    [currentThreadId, data?.chatThread?.chats]
   )
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
-
-  useEffect(() => {
-    if (agentInitMode || !threadsData || mutationLoading) return
-
-    // if the currently selected thread is invalid (can happen when fetching from local storage), either select most recent or otherwise create a new one
-    if (!threads.find((thread) => thread.id === currentThreadId)) {
-      if (isEmpty(threads))
-        createNewThread({ summary: 'New chat with Plural AI' })
-      else goToThread(threads[0]?.id)
-    }
-  }, [
-    agentInitMode,
-    createNewThread,
-    currentThreadId,
-    goToThread,
-    mutationLoading,
-    threads,
-    threadsData,
-  ])
 
   return (
     <div

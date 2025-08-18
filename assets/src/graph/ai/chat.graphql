@@ -317,12 +317,6 @@ mutation DeleteAIPin($id: ID!) {
   }
 }
 
-mutation Chat($messages: [ChatMessage], $threadId: ID) {
-  chat(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-
 mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
   hybridChat(messages: $messages, threadId: $threadId) {
     ...Chat
@@ -353,13 +347,13 @@ mutation DeleteChat($id: ID!) {
 
 mutation CreateChatThread($attributes: ChatThreadAttributes!) {
   createThread(attributes: $attributes) {
-    ...ChatThreadTiny
+    ...ChatThreadDetails
   }
 }
 
 mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
   updateThread(id: $id, attributes: $attributes) {
-    ...ChatThreadTiny
+    ...ChatThreadDetails
   }
 }
 
@@ -371,7 +365,7 @@ mutation DeleteChatThread($id: ID!) {
 
 mutation CloneChatThread($id: ID!, $seq: Int) {
   cloneThread(id: $id, seq: $seq) {
-    ...ChatThreadTiny
+    ...ChatThreadDetails
   }
 }
 

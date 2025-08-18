@@ -5,7 +5,6 @@ import {
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
   ChatThreadDetailsFragment,
-  ChatThreadTinyFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
   useChatThreadDetailsQuery,
@@ -74,6 +73,7 @@ type ChatbotContextT = {
 
   // The last non-agent thread ID, used to navigate back to the last non-agent thread when the agent is deselected.
   lastNonAgentThreadId: Nullable<string>
+  setLastNonAgentThreadId: Dispatch<SetStateAction<Nullable<string>>>
 
   // The agent session type that is currently selected in the UI.
   // Coming from the current thread or the agent init mode.
@@ -111,12 +111,18 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [agentInitMode, setAgentInitMode] =
     usePersistedState<AutoAgentSessionT>('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
-  const { data: threadData } = useChatThreadDetailsQuery({
+
+  const { data: threadData, error: threadError } = useChatThreadDetailsQuery({
     skip: !currentThreadId,
     variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: 10_000,
   })
+  // should handle cases of stale thread id being persisted
+  useEffect(() => {
+    if (currentThreadId && threadError) setCurrentThreadId(null)
+  }, [currentThreadId, setCurrentThreadId, threadError])
+
   const currentThread = threadData?.chatThread
 
   const selectedAgent = useMemo(() => {
@@ -142,6 +148,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         agentInitMode,
         setAgentInitMode,
         lastNonAgentThreadId,
+        setLastNonAgentThreadId,
         setShowForkToast,
         actionsPanelOpen,
         setActionsPanelOpen,
@@ -210,7 +217,7 @@ export function useChatbot() {
     useCloneChatThreadMutation()
 
   const goToThread = useCallback(
-    (threadId: string) => {
+    (threadId: Nullable<string>) => {
       setCurrentThreadId(threadId)
       setAgentInitMode(null)
       setOpen(true)
@@ -272,7 +279,7 @@ export function useChatbot() {
 
 const addThreadToCache = (
   cache: ApolloCache<any>,
-  thread: Nullable<ChatThreadTinyFragment>
+  thread: Nullable<ChatThreadDetailsFragment>
 ) => {
   if (!thread) return
   cache.writeQuery({

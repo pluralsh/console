@@ -20,8 +20,8 @@ function usePersistedState<T>(
     try {
       const item = localStorage.getItem(`plural-${key}`)
       if (item) return parser(JSON.parse(item))
-    } catch (_) {
-      console.error('Error on localStorage.getItem of', key)
+    } catch (e) {
+      console.error('Error on localStorage.getItem of', key, e)
     }
     return defaultValue
   }, [key, defaultValue, parser])
@@ -30,7 +30,8 @@ function usePersistedState<T>(
   const debouncedState = useDebounce(state, debounceMs)
 
   useEffect(() => {
-    localStorage.setItem(`plural-${key}`, JSON.stringify(debouncedState))
+    if (debouncedState === undefined) localStorage.removeItem(`plural-${key}`)
+    else localStorage.setItem(`plural-${key}`, JSON.stringify(debouncedState))
   }, [key, debouncedState, debounceMs])
 
   return [state, setState]

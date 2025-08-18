@@ -87,7 +87,6 @@ export function VirtualList<T, M>({
 
   return (
     <VList
-      overscan={1}
       shift={isReversed}
       css={{ height: '100%', width: '100%' }}
       onScroll={onScroll}

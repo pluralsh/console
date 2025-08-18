@@ -30,6 +30,7 @@ export function ChatbotHeader() {
   const { colors } = useTheme()
   const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
   const {
+    currentThreadId,
     currentThread,
     actionsPanelOpen,
     setActionsPanelOpen,
@@ -116,7 +117,8 @@ export function ChatbotHeader() {
           first={
             agentInitMode
               ? `New ${capitalize(agentInitMode)} agent session`
-              : currentThread?.summary
+              : (currentThread?.summary ??
+                (currentThreadId ? '' : 'New chat with Plural AI'))
           }
           second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
           firstPartialType="body2Bold"

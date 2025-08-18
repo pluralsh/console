@@ -21,6 +21,13 @@ import { rootRoutes } from './routes/rootRoutes'
 
 import { shouldForwardProp } from 'utils/shouldForwardProp'
 import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
+import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
+
+// required by apollo so we can see errors in dev console
+if (process.env.NODE_ENV === 'development') {
+  loadDevMessages()
+  loadErrorMessages()
+}
 
 const router = createBrowserRouter(rootRoutes)
 

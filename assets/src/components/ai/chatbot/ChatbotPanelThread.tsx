@@ -7,6 +7,7 @@ import {
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
+  useCreateChatThreadMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -44,7 +45,7 @@ export function ChatbotPanelThread({
 }) {
   const theme = useTheme()
   const { readValue } = useCommandPaletteMessage()
-  const { currentThread: curThreadDetails } = useChatbot()
+  const { currentThread: curThreadDetails, goToThread } = useChatbot()
   const threadId = curThreadDetails?.id
   const messageListRef = useRef<VListHandle | null>(null)
 
@@ -96,25 +97,44 @@ export function ChatbotPanelThread({
 
   const [
     mutateHybridChat,
-    { loading: sendingMessage, error: messageError, reset },
+    { loading: hybridChatLoading, error: hybridChatError, reset },
   ] = useHybridChatMutation({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadMessages', 'ChatThreadDetails'],
     onCompleted: () => scrollToBottom(),
   })
+  const [
+    createThread,
+    { loading: creatingThread, error: creatingThreadError },
+  ] = useCreateChatThreadMutation({
+    variables: {
+      attributes: {
+        summary: 'New chat with Plural AI',
+        session: { done: true },
+      },
+    },
+  })
+  const sendingMessage = hybridChatLoading || creatingThread
+  const messageError = hybridChatError || creatingThreadError
 
   const sendMessage = useCallback(
     (newMessage: string) => {
-      setPendingMessage(newMessage)
-      mutateHybridChat({
-        variables: {
-          messages: [{ role: AiRole.User, content: newMessage }],
-          threadId,
-        },
-      })
       scrollToBottom()
+      setPendingMessage(newMessage)
+      const messages = [{ role: AiRole.User, content: newMessage }]
+      if (threadId) mutateHybridChat({ variables: { messages, threadId } })
+      else
+        createThread({
+          onCompleted: ({ createThread }) => {
+            if (createThread?.id)
+              mutateHybridChat({
+                variables: { messages, threadId: createThread.id },
+                onCompleted: () => goToThread(createThread.id),
+              })
+          },
+        })
     },
-    [threadId, mutateHybridChat, scrollToBottom]
+    [scrollToBottom, threadId, mutateHybridChat, createThread, goToThread]
   )
 
   // runs when new messages are added
@@ -160,6 +180,8 @@ export function ChatbotPanelThread({
         {isEmpty(messages) && !curThreadDetails?.session?.type ? (
           error ? (
             <GqlError error={error} />
+          ) : sendingMessage ? (
+            <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
           ) : (
             <Body1P css={{ color: theme.colors['text-long-form'] }}>
               How can I help you?
@@ -234,7 +256,6 @@ export function ChatbotPanelThread({
         )}
       </ChatbotMessagesWrapperSC>
       <ChatInput
-        currentThread={curThreadDetails}
         sendMessage={sendMessage}
         serverNames={serverNames}
         showPrompts={showExamplePrompts}

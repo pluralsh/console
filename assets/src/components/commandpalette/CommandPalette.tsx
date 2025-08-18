@@ -1,6 +1,8 @@
 import {
   ArrowLeftIcon,
+  Chip,
   CommandIcon,
+  Flex,
   Input,
   ReturnIcon,
   useResizeObserver,
@@ -67,9 +69,6 @@ export default function CommandPalette() {
       <HistoryItem
         key={thread.id}
         thread={thread as ChatThreadTinyFragment}
-        css={{
-          backgroundColor: theme.colors['fill-zero'],
-        }}
       />
     ),
   })
@@ -395,20 +394,26 @@ interface HistoryItemProps {
 }
 
 function HistoryItem({ thread }: HistoryItemProps): ReactElement {
+  const { currentThreadId } = useChatbot()
   const timestamp = getThreadOrPinTimestamp(thread)
 
   const insight = thread.insight
 
   return (
-    <>
+    <Flex
+      width="100%"
+      alignItems="center"
+      gap="small"
+    >
       <AIEntryLabel
         isStale={false}
         thread={thread}
         insight={insight}
       />
+      {thread.id === currentThreadId && <Chip severity="info">Selected</Chip>}
       <CaptionP css={{ flexShrink: 0 }}>{fromNow(timestamp)}</CaptionP>
       <AITableActions thread={thread} />
-    </>
+    </Flex>
   )
 }
 
