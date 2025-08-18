@@ -9900,7 +9900,7 @@ export type SentinelRunResult = {
 };
 
 export enum SentinelRunStatus {
-  Failure = 'FAILURE',
+  Failed = 'FAILED',
   Pending = 'PENDING',
   Success = 'SUCCESS'
 }

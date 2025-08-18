@@ -13,7 +13,7 @@ defmodule Console.Deployments.Sentinel.Impl.Base do
 
   @spec ai_call(Provider.history, String.t) :: {:ok, status} | :ignore | {:error, binary}
   def ai_call(history, preface) do
-    Provider.tool_call(history, Sentinel, preface: preface)
+    Provider.tool_call(history, [Sentinel], preface: preface)
     |> case do
       {:ok, [%{sentinel_check: %{result: %Sentinel{passing: passing, reason: reason}}} | _]} ->
         {:ok, %{status: if(passing, do: :success, else: :failed), reason: reason}}

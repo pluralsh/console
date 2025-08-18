@@ -34,17 +34,18 @@ defmodule Console.Deployments.Sentinel.Runner do
     end
   end
 
-  def handle_info({:DOWN, _, :process, pid, _reason}, %State{checks: checks, results: results} = state) do
+  def handle_info({:DOWN, _, :process, pid, _}, %State{checks: checks, results: results} = state) do
     case Map.pop(checks, pid) do
-      {check, checks} ->
-        results = Map.put(results, check.name, %{status: :failed, reason: "Check process ended prematurely"})
+      {%Sentinel.SentinelCheck{name: name}, checks} ->
+        results = Map.put(results, name, %{status: :failed, reason: "Check process ended prematurely"})
         save_results(%{state | checks: checks, results: results})
-      _ -> {:noreply, state}
+      _ ->
+        {:noreply, state}
     end
   end
 
   def handle_info({:status, pid, status}, %State{checks: checks, results: results} = state) do
-    case Map.get(checks, pid) do
+    case Map.pop(checks, pid) do
       {%Sentinel.SentinelCheck{name: name}, checks} ->
         results = Map.put(results, name, status)
         save_results(%{state | results: results, checks: checks})
@@ -64,10 +65,10 @@ defmodule Console.Deployments.Sentinel.Runner do
   defp save_results(%State{run: run, results: results, checks: checks} = state) do
     do_update(%{
       status: status(checks, results),
-      results: Enum.map(results, fn {name, status} -> Map.put(status, :name, name) end)
+      results: Enum.map(results, fn {name, result} -> to_status(name, result) end)
     }, run)
     |> case do
-      {:ok, %SentinelRun{status: :success} = run} ->
+      {:ok, %SentinelRun{status: s} = run} when s in ~w(success failed)a ->
         {:stop, :normal, %{state | run: run}}
       {:ok, %SentinelRun{status: :pending} = run} ->
         {:noreply, %{state | run: run}}
@@ -81,7 +82,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   defp rule_files(%SentinelRun{sentinel: %Sentinel{repository: %GitRepository{} = repo, git: git}}) do
-    with {:ok, f, _} <- Discovery.fetch(repo, git),
+    with {:ok, f} <- Discovery.fetch(repo, git),
          {:ok, contents} <- Tar.tar_stream(f),
       do: {:ok, Map.new(contents)}
   end
@@ -93,6 +94,11 @@ defmodule Console.Deployments.Sentinel.Runner do
       true -> :success
       false -> :failed
     end
+  end
+
+  defp to_status(name, result) do
+    Map.take(result, [:status, :reason])
+    |> Map.put(:name, name)
   end
 
   defp start_check(%Sentinel.SentinelCheck{type: :log} = check, rules), do: Impl.Log.start(check, self(), rules)

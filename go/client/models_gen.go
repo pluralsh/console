@@ -9885,18 +9885,18 @@ type SentinelRunStatus string
 const (
 	SentinelRunStatusPending SentinelRunStatus = "PENDING"
 	SentinelRunStatusSuccess SentinelRunStatus = "SUCCESS"
-	SentinelRunStatusFailure SentinelRunStatus = "FAILURE"
+	SentinelRunStatusFailed  SentinelRunStatus = "FAILED"
 )
 
 var AllSentinelRunStatus = []SentinelRunStatus{
 	SentinelRunStatusPending,
 	SentinelRunStatusSuccess,
-	SentinelRunStatusFailure,
+	SentinelRunStatusFailed,
 }
 
 func (e SentinelRunStatus) IsValid() bool {
 	switch e {
-	case SentinelRunStatusPending, SentinelRunStatusSuccess, SentinelRunStatusFailure:
+	case SentinelRunStatusPending, SentinelRunStatusSuccess, SentinelRunStatusFailed:
 		return true
 	}
 	return false

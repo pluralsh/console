@@ -2,7 +2,7 @@ defmodule Console.Schema.SentinelRun do
   use Console.Schema.Base
   alias Console.Schema.Sentinel
 
-  defenum Status, pending: 0, success: 1, failure: 2
+  defenum Status, pending: 0, success: 1, failed: 2
 
   schema "sentinel_runs" do
     field :status, Status, default: :pending

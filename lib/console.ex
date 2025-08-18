@@ -272,6 +272,15 @@ defmodule Console do
     end
   end
 
+  def await(pid, timeout \\ :timer.seconds(60)) when is_pid(pid) do
+    ref = Process.monitor(pid)
+    receive do
+      {:DOWN, ^ref, :process, ^pid, :normal} -> :ok
+    after
+      timeout -> :timeout
+    end
+  end
+
   def workspace(), do: Path.join(conf(:workspace_root), conf(:repo_root))
 
   def sha_file(f) do

@@ -1162,7 +1162,7 @@ enum SentinelCheckType {
 enum SentinelRunStatus {
   PENDING
   SUCCESS
-  FAILURE
+  FAILED
 }
 
 input SentinelAttributes {

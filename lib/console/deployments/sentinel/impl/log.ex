@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Sentinel.Impl.Log do
   use GenServer
   import Console.Deployments.Sentinel.Impl.Base
+  import Console.Schema.Base, only: [parse_duration: 1, seconds: 1]
   alias Console.Schema.Sentinel.SentinelCheck
   alias Console.Schema.Sentinel.SentinelCheck.CheckConfiguration
   alias Console.Schema.Sentinel.SentinelCheck.CheckConfiguration.LogConfiguration
@@ -63,9 +64,8 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
     |> Provider.query()
     |> case do
       {:ok, new_logs} ->
-        latest = Enum.max_by(new_logs, & &1.timestamp, DateTime.utc_now())
-        {:noreply, %{state | logs: Enum.concat(logs, new_logs), latest: latest}}
-      {:error, _} -> {:noreply, state}
+        {:noreply, %{state | logs: Enum.concat(logs, new_logs), latest: DateTime.utc_now()}}
+      _ -> {:noreply, state}
     end
   end
 
@@ -81,16 +81,14 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
     )
   end
 
-  defp setup_duration(%LogConfiguration{duration: duration}, state) do
-    String.upcase(duration)
-    |> Duration.from_iso8601()
-    |> case do
+  defp setup_duration(%LogConfiguration{duration: duration}, state) when is_binary(duration) do
+    case parse_duration(duration) do
       {:ok, duration} ->
-        expiry = DateTime.utc_now() |> DateTime.shift(duration)
-        diff = DateTime.diff(expiry, DateTime.utc_now(), :second)
-        Process.send_after(self(), :done, :timer.seconds(diff))
+        timeout = :timer.seconds(seconds(duration))
+        Process.send_after(self(), :done, timeout)
         {:noreply, state}
-      {:error, _} -> {:stop, :normal, :invalid_duration}
+      {:error, _} ->
+        {:stop, :normal, :invalid_duration}
     end
   end
   defp setup_duration(_, _), do: {:stop, :normal, :invalid_duration}
