@@ -43,6 +43,7 @@
   import_types Console.GraphQl.Deployments.Settings
   import_types Console.GraphQl.Deployments.OAuth
   import_types Console.GraphQl.Deployments.Flow
+  import_types Console.GraphQl.Deployments.Sentinel
 
   input_object :rbac_attributes do
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -69,6 +70,7 @@
     import_fields :settings_queries
     import_fields :flow_queries
     import_fields :oauth_queries
+    import_fields :sentinel_queries
   end
 
   object :deployment_mutations do
@@ -90,6 +92,7 @@
     import_fields :settings_mutations
     import_fields :oauth_mutations
     import_fields :flow_mutations
+    import_fields :sentinel_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

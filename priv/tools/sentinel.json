@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "passing": {
+            "type": "boolean",
+            "description": "Whether the evidence indicates that this check is passing"
+        },
+        "reason": {
+            "type": "string",
+            "description": "A short two sentence description of the reason for the passing or failing status"
+        }
+    },
+    "required": ["passing", "reason"],
+    "additionalProperties": false
+}

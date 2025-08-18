@@ -1,6 +1,6 @@
 defmodule Console.Pipelines.Supervisor do
   use Supervisor
-  alias Console.Pipelines.{GlobalService, Stack, AI}
+  alias Console.Pipelines.{GlobalService, Stack, AI, Sentinel}
 
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -15,12 +15,14 @@ defmodule Console.Pipelines.Supervisor do
       AI.Cluster.Producer,
       AI.Alert.Producer,
       AI.Stack.Producer,
+      Sentinel.Producer,
       {GlobalService.Pipeline, GlobalService.Producer},
       {Stack.Pipeline, Stack.Producer},
       {AI.Service.Pipeline, AI.Service.Producer},
       {AI.Cluster.Pipeline, AI.Cluster.Producer},
       {AI.Alert.Pipeline, AI.Alert.Producer},
       {AI.Stack.Pipeline, AI.Stack.Producer},
+      {Sentinel.Pipeline, Sentinel.Producer},
     ]
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 15)
   end

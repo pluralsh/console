@@ -1038,6 +1038,19 @@ defmodule Console.Factory do
     }
   end
 
+  def sentinel_factory do
+    %Schema.Sentinel{
+      name: sequence(:sentinel, & "sentinel-#{&1}"),
+      project: build(:project)
+    }
+  end
+
+  def sentinel_run_factory do
+    %Schema.SentinelRun{
+      sentinel: build(:sentinel)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

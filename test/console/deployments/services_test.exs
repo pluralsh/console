@@ -1442,9 +1442,9 @@ defmodule Console.Deployments.ServicesSyncTest do
       {:ok, ^sha} = Services.digest(svc)
     end
 
-    test "it can splice in a new values.yaml.tpl" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "master", folder: "charts/console"})
+    test "it can splice in a new values.yaml.static" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "main", folder: "charts/deployment-operator"})
 
       {:ok, sha} = Services.digest(svc)
       {:ok, ^sha} = Services.digest(svc)

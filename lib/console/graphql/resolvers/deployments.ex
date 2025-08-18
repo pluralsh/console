@@ -94,7 +94,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PreviewEnvironmentTemplate,
     TemplateContext,
     NodeStatistic,
-    CloudConnection
+    CloudConnection,
+    Sentinel
   }
 
   def query(Project, _), do: Project
@@ -178,6 +179,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(TemplateContext, _), do: TemplateContext
   def query(NodeStatistic, _), do: NodeStatistic
   def query(CloudConnection, _), do: CloudConnection
+  def query(Sentinel, _), do: Sentinel
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -193,6 +195,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Settings
   delegates Console.GraphQl.Resolvers.Deployments.OAuth
   delegates Console.GraphQl.Resolvers.Deployments.Flow
+  delegates Console.GraphQl.Resolvers.Deployments.Sentinel
 
   def list_addons(_, _), do: AddOns.addons()
 

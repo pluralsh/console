@@ -950,21 +950,24 @@ defmodule Console.Deployments.Clusters do
 
   def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    start_transaction()
-    |> add_operation(:svc, fn _ ->
-      Service.agent()
-      |> Service.stream()
-      |> Repo.stream(method: :keyset)
-      |> Stream.each(fn svc ->
-        Logger.info "applying agent migration #{id} for #{svc.id}"
-        AgentMigration.updates(migration, svc)
-        |> Services.update_service(svc.id, bot)
-      end)
-      |> Enum.count()
-      |> ok()
+    # can't make this a transaction because there's no true time boundary on it
+    Service.agent()
+    |> Service.stream()
+    |> Repo.stream(method: :keyset)
+    |> Task.async_stream(fn svc ->
+      Logger.info "applying agent migration #{id} for #{svc.id}"
+      AgentMigration.updates(migration, svc)
+      |> Services.update_service(svc.id, bot)
+    end, max_concurrency: 30)
+    |> Enum.reduce_while(:ok, fn
+      {:ok, {:ok, _}}, acc -> {:cont, acc}
+      {:ok, err}, _ -> {:halt, err}
+      err, _ -> {:halt, err}
     end)
-    |> add_operation(:complete, fn _ -> complete_migration(migration) end)
-    |> execute(extract: :complete, timeout: :timer.minutes(5))
+    |> case do
+      :ok -> complete_migration(migration)
+      err -> err
+    end
   end
   def apply_migration(_), do: :ok
 

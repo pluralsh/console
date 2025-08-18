@@ -51,7 +51,7 @@ defmodule Console.GraphQl.Mutations.SyncDeploymentQueriesTest do
   describe "gitRepository" do
     test "it can fetch the refs from a git repository" do
       admin = admin_user()
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, %{data: %{"gitRepository" => %{"refs" => refs}}}} = run_query("""
         query Git($id: ID!) {
@@ -61,7 +61,7 @@ defmodule Console.GraphQl.Mutations.SyncDeploymentQueriesTest do
         }
       """, %{"id" => git.id}, %{current_user: admin})
 
-      assert Enum.member?(refs, "refs/heads/master")
+      assert Enum.member?(refs, "refs/heads/main")
     end
   end
 end

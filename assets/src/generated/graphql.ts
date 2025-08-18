@@ -767,6 +767,26 @@ export type AzureConnectionAttributes = {
   tenantId: Scalars['String']['output'];
 };
 
+/** Requirements to perform Azure DevOps authentication */
+export type AzureDevopsAttributes = {
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['input'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['input'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['input'];
+};
+
+export type AzureDevopsConfiguration = {
+  __typename?: 'AzureDevopsConfiguration';
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['output'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['output'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['output'];
+};
+
 export type AzureOpenaiAttributes = {
   /** the azure openai access token to use */
   accessToken: Scalars['String']['input'];
@@ -6774,6 +6794,7 @@ export type RootMutationType = {
   createScmWebhook?: Maybe<ScmWebhook>;
   /** creates a webhook reference in our system but doesn't attempt to create it in your upstream provider */
   createScmWebhookPointer?: Maybe<ScmWebhook>;
+  createSentinel?: Maybe<Sentinel>;
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
@@ -6824,6 +6845,7 @@ export type RootMutationType = {
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteScmWebhook?: Maybe<ScmWebhook>;
+  deleteSentinel?: Maybe<Sentinel>;
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
@@ -6879,6 +6901,7 @@ export type RootMutationType = {
   restoreStack?: Maybe<InfrastructureStack>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
+  runSentinel?: Maybe<SentinelRun>;
   /** saves a list of chat messages to your current chat history, can be used at any time */
   saveChats?: Maybe<Array<Maybe<Chat>>>;
   /** save the manifests in cache to be retrieved by the requesting user */
@@ -6925,6 +6948,7 @@ export type RootMutationType = {
   updateRole?: Maybe<Role>;
   updateRunStep?: Maybe<RunStep>;
   updateScmConnection?: Maybe<ScmConnection>;
+  updateSentinel?: Maybe<Sentinel>;
   updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
@@ -7186,7 +7210,8 @@ export type RootMutationTypeCreatePinnedCustomResourceArgs = {
 
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
-  pipelineId: Scalars['ID']['input'];
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  pipelineName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -7239,6 +7264,11 @@ export type RootMutationTypeCreateScmWebhookArgs = {
 
 export type RootMutationTypeCreateScmWebhookPointerArgs = {
   attributes: ScmWebhookAttributes;
+};
+
+
+export type RootMutationTypeCreateSentinelArgs = {
+  attributes?: InputMaybe<SentinelAttributes>;
 };
 
 
@@ -7492,6 +7522,11 @@ export type RootMutationTypeDeleteScmWebhookArgs = {
 };
 
 
+export type RootMutationTypeDeleteSentinelArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteServiceContextArgs = {
   id: Scalars['ID']['input'];
 };
@@ -7694,6 +7729,11 @@ export type RootMutationTypeRollbackServiceArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   revisionId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRunSentinelArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -7919,6 +7959,12 @@ export type RootMutationTypeUpdateRunStepArgs = {
 
 export type RootMutationTypeUpdateScmConnectionArgs = {
   attributes: ScmConnectionAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateSentinelArgs = {
+  attributes?: InputMaybe<SentinelAttributes>;
   id: Scalars['ID']['input'];
 };
 
@@ -8227,6 +8273,8 @@ export type RootQueryType = {
   scmWebhook?: Maybe<ScmWebhook>;
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
+  sentinel?: Maybe<Sentinel>;
+  sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
   serviceContext?: Maybe<ServiceContext>;
@@ -9234,6 +9282,21 @@ export type RootQueryTypeSecretArgs = {
 };
 
 
+export type RootQueryTypeSentinelArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeSentinelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -9563,6 +9626,8 @@ export type ScmConnection = {
   __typename?: 'ScmConnection';
   /** base url for HTTP apis for self-hosted versions if different from base url */
   apiUrl?: Maybe<Scalars['String']['output']>;
+  /** the azure devops attributes for this connection */
+  azure?: Maybe<AzureDevopsConfiguration>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
   default?: Maybe<Scalars['Boolean']['output']>;
@@ -9579,6 +9644,7 @@ export type ScmConnection = {
 /** an object representing a means to authenticate to a source control provider like Github */
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
+  azure?: InputMaybe<AzureDevopsAttributes>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
@@ -9606,6 +9672,7 @@ export type ScmConnectionEdge = {
 };
 
 export enum ScmType {
+  AzureDevops = 'AZURE_DEVOPS',
   Bitbucket = 'BITBUCKET',
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
@@ -9659,6 +9726,184 @@ export type Secret = {
   metadata: Metadata;
   type?: Maybe<Scalars['String']['output']>;
 };
+
+export type Sentinel = {
+  __typename?: 'Sentinel';
+  /** the checks to run for this sentinel */
+  checks?: Maybe<Array<Maybe<SentinelCheck>>>;
+  /** the description of the sentinel */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the git location for rules files from the associated repository */
+  git?: Maybe<GitRef>;
+  /** the id of the sentinel */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the sentinel */
+  name: Scalars['String']['output'];
+  /** the project of this sentinel */
+  project?: Maybe<Project>;
+  /** the git repository to use for fetching rules files for AI enabled analysis */
+  repository?: Maybe<GitRepository>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SentinelAttributes = {
+  /** the checks to run for this sentinel */
+  checks?: InputMaybe<Array<InputMaybe<SentinelCheckAttributes>>>;
+  /** the description of the sentinel */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the git repository to use for this sentinel */
+  git?: InputMaybe<GitAttributes>;
+  /** the name of the sentinel */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the project to use for this sentinel */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** the repository to use for this sentinel */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type SentinelCheck = {
+  __typename?: 'SentinelCheck';
+  /** the configuration to use for this check */
+  configuration?: Maybe<SentinelCheckConfiguration>;
+  /** the id of the check */
+  id: Scalars['String']['output'];
+  /** the name of the check */
+  name: Scalars['String']['output'];
+  /** the rule file to use for this check */
+  ruleFile?: Maybe<Scalars['String']['output']>;
+  /** the type of check to run */
+  type: SentinelCheckType;
+};
+
+export type SentinelCheckAttributes = {
+  /** the configuration to use for this check */
+  configuration?: InputMaybe<SentinelCheckConfigurationAttributes>;
+  /** the name of the check */
+  name: Scalars['String']['input'];
+  /** the rule file to use for this check */
+  ruleFile?: InputMaybe<Scalars['String']['input']>;
+  /** the type of check to run */
+  type: SentinelCheckType;
+};
+
+export type SentinelCheckConfiguration = {
+  __typename?: 'SentinelCheckConfiguration';
+  /** the kubernetes configuration to use for this check */
+  kubernetes?: Maybe<SentinelCheckKubernetesConfiguration>;
+  /** the log configuration to use for this check */
+  log?: Maybe<SentinelCheckLogConfiguration>;
+};
+
+export type SentinelCheckConfigurationAttributes = {
+  /** the kubernetes configuration to use for this check */
+  kubernetes?: InputMaybe<SentinelCheckKubernetesConfigurationAttributes>;
+  /** the log configuration to use for this check */
+  log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
+};
+
+export type SentinelCheckKubernetesConfiguration = {
+  __typename?: 'SentinelCheckKubernetesConfiguration';
+  /** the api group to use when fetching this resource */
+  group?: Maybe<Scalars['String']['output']>;
+  /** the kind to use when fetching this resource */
+  kind: Scalars['String']['output'];
+  /** the name to use when fetching this resource */
+  name: Scalars['String']['output'];
+  /** the namespace to use when fetching this resource */
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the api version to use when fetching this resource */
+  version: Scalars['String']['output'];
+};
+
+export type SentinelCheckKubernetesConfigurationAttributes = {
+  /** the cluster to run the query against */
+  clusterId: Scalars['ID']['input'];
+  /** the api group to use when fetching this resource */
+  group?: InputMaybe<Scalars['String']['input']>;
+  /** the kind to use when fetching this resource */
+  kind: Scalars['String']['input'];
+  /** the name to use when fetching this resource */
+  name: Scalars['String']['input'];
+  /** the namespace to use when fetching this resource */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the api version to use when fetching this resource */
+  version: Scalars['String']['input'];
+};
+
+export type SentinelCheckLogConfiguration = {
+  __typename?: 'SentinelCheckLogConfiguration';
+  /** the cluster to run the query against */
+  clusterId?: Maybe<Scalars['ID']['output']>;
+  /** The duration of the log analysis run */
+  duration: Scalars['String']['output'];
+  /** the log facets to run the query against */
+  facets?: Maybe<Array<Maybe<LogFacet>>>;
+  /** the namespaces to run the query against */
+  namespaces?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a search query this will run against the logs */
+  query: Scalars['String']['output'];
+};
+
+export type SentinelCheckLogConfigurationAttributes = {
+  /** the cluster to run the query against */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  /** The duration of the log analysis run */
+  duration: Scalars['String']['input'];
+  /** the log facets to run the query against */
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  /** the namespaces to run the query against */
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a search query this will run against the logs */
+  query: Scalars['String']['input'];
+};
+
+export enum SentinelCheckType {
+  Kubernetes = 'KUBERNETES',
+  Log = 'LOG'
+}
+
+export type SentinelConnection = {
+  __typename?: 'SentinelConnection';
+  edges?: Maybe<Array<Maybe<SentinelEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelEdge = {
+  __typename?: 'SentinelEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Sentinel>;
+};
+
+export type SentinelRun = {
+  __typename?: 'SentinelRun';
+  /** the id of the run */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the results of the run */
+  results?: Maybe<Array<Maybe<SentinelRunResult>>>;
+  /** the sentinel that was run */
+  sentinel?: Maybe<Sentinel>;
+  /** the status of the run */
+  status: SentinelRunStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SentinelRunResult = {
+  __typename?: 'SentinelRunResult';
+  /** the name of the check */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the reason for the result */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** the status of the result */
+  status: SentinelRunStatus;
+};
+
+export enum SentinelRunStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Success = 'SUCCESS'
+}
 
 export type Service = {
   __typename?: 'Service';

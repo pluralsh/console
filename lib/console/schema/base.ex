@@ -34,10 +34,11 @@ defmodule Console.Schema.Base do
     end
   end
 
-  def jitter(%Duration{hour: h, minute: m, second: s}) do
-    seconds = h * 3600 + m * 60 + s
-    Console.jitter(floor(seconds / 2))
+  def jitter(%Duration{} = duration) do
+    Console.jitter(floor(seconds(duration) / 2))
   end
+
+  def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
   def parse_duration(duration), do: Duration.from_iso8601(String.upcase("PT#{duration}"))

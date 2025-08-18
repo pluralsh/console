@@ -141,6 +141,24 @@ _Appears in:_
 | `clientSecret` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 
 
+#### AzureDevopsSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [ScmConnectionSpec](#scmconnectionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `username` _string_ | The username to use for azure devops, it should be associated with the PAT you are supplying as the tokenSecretRef |  |  |
+| `organization` _string_ | The organization to use for azure devops |  |  |
+| `project` _string_ | The project to use for azure devops |  |  |
+
+
 #### AzureOpenAISettings
 
 
@@ -3573,7 +3591,8 @@ _Appears in:_
 | `username` _string_ | Username ... |  | Optional: {} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
-| `github` _[ScmGithubConnection](#scmgithubconnection)_ |  |  | Optional: {} <br /> |
+| `github` _[ScmGithubConnection](#scmgithubconnection)_ | Settings for configuring Github App authentication |  | Optional: {} <br /> |
+| `azure` _[AzureDevopsSettings](#azuredevopssettings)_ | Settings for configuring Azure DevOps authentication |  | Optional: {} <br /> |
 | `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this SCM connection. |  | Optional: {} <br /> |
 | `default` _boolean_ |  |  | Optional: {} <br /> |
 
@@ -3591,8 +3610,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `appId` _string_ |  |  |  |
-| `installationId` _string_ |  |  |  |
+| `appId` _string_ | The Github App ID to use for authentication (can be found on the Github Apps settings page) |  |  |
+| `installationId` _string_ | The installation ID of your install of the Github App (found on the Github Apps section of your github repo/organization, located in the url path) |  |  |
 | `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 

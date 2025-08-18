@@ -68,6 +68,14 @@ func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client
 		}
 	}
 
+	if s.Spec.Azure != nil {
+		attr.Azure = &console.AzureDevopsAttributes{
+			Username:     s.Spec.Azure.Username,
+			Organization: s.Spec.Azure.Organization,
+			Project:      s.Spec.Azure.Project,
+		}
+	}
+
 	if s.Spec.Github != nil {
 		attr.Github = &console.GithubAppAttributes{
 			AppID:          s.Spec.Github.AppID,
@@ -125,8 +133,14 @@ type ScmConnectionSpec struct {
 	// APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl.
 	// +kubebuilder:validation:Optional
 	APIUrl *string `json:"apiUrl,omitempty"`
+
+	// Settings for configuring Github App authentication
 	// +kubebuilder:validation:Optional
 	Github *ScmGithubConnection `json:"github,omitempty"`
+
+	// Settings for configuring Azure DevOps authentication
+	// +kubebuilder:validation:Optional
+	Azure *AzureDevopsSettings `json:"azure,omitempty"`
 
 	// Configures usage of an HTTP proxy for all requests involving this SCM connection.
 	// +kubebuilder:validation:Optional
@@ -137,10 +151,21 @@ type ScmConnectionSpec struct {
 }
 
 type ScmGithubConnection struct {
-	AppID          string `json:"appId"`
+	// The Github App ID to use for authentication (can be found on the Github Apps settings page)
+	AppID string `json:"appId"`
+	// The installation ID of your install of the Github App (found on the Github Apps section of your github repo/organization, located in the url path)
 	InstallationId string `json:"installationId"`
 	// +kubebuilder:validation:Optional
 	PrivateKeyRef *corev1.SecretKeySelector `json:"privateKeyRef,omitempty"`
+}
+
+type AzureDevopsSettings struct {
+	// The username to use for azure devops, it should be associated with the PAT you are supplying as the tokenSecretRef
+	Username string `json:"username"`
+	// The organization to use for azure devops
+	Organization string `json:"organization"`
+	// The project to use for azure devops
+	Project string `json:"project"`
 }
 
 type HttpProxyConfiguration struct {
