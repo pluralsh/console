@@ -1384,6 +1384,8 @@ export type Cluster = {
   operationalLayout?: Maybe<OperationalLayout>;
   /** the parent of this virtual cluster */
   parentCluster?: Maybe<Cluster>;
+  /** the interval in seconds between pings to the cluster */
+  pingInterval?: Maybe<Scalars['Int']['output']>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** custom resources with dedicated views for this cluster */
@@ -1826,6 +1828,8 @@ export type ClusterPing = {
   nodeCount?: InputMaybe<Scalars['Int']['input']>;
   nodeStatistics?: InputMaybe<Array<InputMaybe<NodeStatisticAttributes>>>;
   openshiftVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the interval in seconds between pings to the cluster */
+  pingInterval?: InputMaybe<Scalars['Int']['input']>;
   podCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
