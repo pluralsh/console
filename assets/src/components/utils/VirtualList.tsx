@@ -1,4 +1,10 @@
-import { ReactNode, RefObject, useRef } from 'react'
+import {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+} from 'react'
 import { mergeRefs } from 'react-merge-refs'
 import styled from 'styled-components'
 import { VirtualizerProps, VList, VListHandle } from 'virtua'
@@ -36,23 +42,36 @@ export function VirtualList<T, M>({
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const internalRef = useRef<VListHandle>(null)
+  const hasInitiallyAligned = useRef(false)
+
+  // initially align to top normally, or bottom if reversed
+  useLayoutEffect(() => {
+    if (hasInitiallyAligned.current) return
+    hasInitiallyAligned.current = true
+    internalRef.current?.scrollToIndex(isReversed ? Infinity : 0)
+  }, [isReversed])
+
+  // infinite scroll
+  const onScroll = useCallback(() => {
+    if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
+      return
+    if (
+      isReversed
+        ? internalRef.current?.findStartIndex() === 0
+        : internalRef.current?.findEndIndex() === data.length - 1
+    )
+      loadNextPage?.()
+  }, [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage])
 
   return (
     <VList
       overscan={1}
       shift={isReversed}
       css={{ height: '100%', width: '100%' }}
+      onScroll={onScroll}
       {...props}
       ref={mergeRefs([listRef, internalRef])}
     >
-      {hasNextPage && (
-        <button
-          onClick={() => loadNextPage?.()}
-          disabled={isLoadingNextPage}
-        >
-          {isLoadingNextPage ? 'Loading...' : 'Load More'}
-        </button>
-      )}
       {data.map((rowData, index) => (
         <ItemSC
           key={

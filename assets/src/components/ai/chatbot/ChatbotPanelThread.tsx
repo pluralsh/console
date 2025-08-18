@@ -90,10 +90,10 @@ export function ChatbotPanelThread({
 
   const scrollToBottom = useCallback(
     () =>
-      messageListRef?.current?.scrollToIndex(messages.length - 1, {
+      messageListRef?.current?.scrollToIndex(Infinity, {
         smooth: true,
       }),
-    [messages.length]
+    []
   )
 
   const [
@@ -117,17 +117,16 @@ export function ChatbotPanelThread({
     [threadId, mutateHybridChat]
   )
 
-  // scroll to bottom when new messages are added
+  // runs when new messages are added
   const lastMessageId = messages[messages.length - 1]?.id
   const prevLastMessageId = usePrevious(lastMessageId)
   useEffect(() => {
     if (!lastMessageId || lastMessageId === prevLastMessageId) return
 
-    scrollToBottom()
     setStreaming(false)
     setStreamedMessages([])
     setPendingMessage(null)
-  }, [lastMessageId, prevLastMessageId, scrollToBottom])
+  }, [lastMessageId, prevLastMessageId])
 
   // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
   useEffect(() => {
@@ -157,16 +156,6 @@ export function ChatbotPanelThread({
           error={messageError}
         />
       )}
-      <button
-        onClick={() =>
-          messageListRef.current?.scrollToIndex(0, {
-            smooth: true,
-          })
-        }
-      >
-        scroll to top
-      </button>
-      <button onClick={() => scrollToBottom()}>scroll to bottom</button>
       <ChatbotMessagesWrapperSC>
         {isEmpty(messages) && !curThreadDetails?.session?.type ? (
           error ? (

@@ -243,6 +243,7 @@ function CommandPaletteHistory({
         ref={wrapperRef}
         css={{ minHeight: 500 }}
       >
+        {/* TODO: replace with VirtualList */}
         <StandardScroller
           customHeight={height}
           customWidth={width}
