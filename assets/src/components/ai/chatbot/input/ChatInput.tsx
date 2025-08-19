@@ -11,11 +11,7 @@ import {
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
-import {
-  AiRole,
-  ChatThreadTinyFragment,
-  useAddChatContextMutation,
-} from 'generated/graphql.ts'
+import { AiRole, useAddChatContextMutation } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -38,10 +34,7 @@ import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 
 export function ChatInput({
   sendMessage,
-  currentThread,
   serverNames,
-  showMcpServers,
-  setShowMcpServers,
   enableExamplePrompts = true,
   showPrompts,
   setShowPrompts,
@@ -51,10 +44,7 @@ export function ChatInput({
   ...props
 }: {
   sendMessage: (newMessage: string) => void
-  currentThread?: ChatThreadTinyFragment
   serverNames?: string[]
-  showMcpServers?: boolean
-  setShowMcpServers?: Dispatch<SetStateAction<boolean>>
   enableExamplePrompts?: boolean
   showPrompts?: boolean
   setShowPrompts?: Dispatch<SetStateAction<boolean>>
@@ -62,7 +52,9 @@ export function ChatInput({
   onValueChange?: Dispatch<string>
   stateless?: boolean
 } & ComponentPropsWithoutRef<'div'>) {
-  const { selectedAgent } = useChatbot()
+  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen, currentThread } =
+    useChatbot()
+
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
   const [contextBtnClicked, setContextBtnClicked] = useState(false)
@@ -180,8 +172,8 @@ export function ChatInput({
             {!isEmpty(serverNames) && (
               <ChatInputIconFrame
                 icon={<ServersIcon />}
-                tooltip={`${showMcpServers ? 'Collapse' : 'Expand'} MCP servers`}
-                onClick={() => setShowMcpServers?.(!showMcpServers)}
+                tooltip={`${mcpPanelOpen ? 'Collapse' : 'Expand'} MCP servers`}
+                onClick={() => setMcpPanelOpen(!mcpPanelOpen)}
               />
             )}
             {!selectedAgent && currentThread && (

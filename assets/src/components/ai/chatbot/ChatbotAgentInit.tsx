@@ -69,6 +69,7 @@ export function ChatbotAgentInit() {
         >
           {examplePrompts.map((prompt) => (
             <Chip
+              key={prompt}
               onClick={() => send(prompt)}
               clickable
               size="small"

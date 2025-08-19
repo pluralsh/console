@@ -1,9 +1,6 @@
 import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   useVulnerabilityReportsQuery,
   VulnReportGrade,
@@ -73,7 +70,6 @@ export const VulneratbilityReportsTable = memo(
         hasNextPage={data?.vulnerabilityReports?.pageInfo?.hasNextPage}
         isFetchingNextPage={loading}
         fetchNextPage={fetchNextPage}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No vulnerability reports found.' }}
       />

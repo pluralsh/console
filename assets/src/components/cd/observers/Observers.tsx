@@ -23,10 +23,7 @@ import { Edge } from 'utils/graphql'
 import styled, { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import {
@@ -292,7 +289,6 @@ export default function Observers() {
     <Table
       fullHeightWrap
       columns={columns}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={data?.observers?.edges || []}
       virtualizeRows
       hasNextPage={pageInfo?.hasNextPage}

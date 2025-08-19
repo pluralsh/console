@@ -70,23 +70,33 @@ fragment ChatThreadTiny on ChatThread {
   }
 }
 
-fragment ChatThread on ChatThread {
+fragment ChatThreadDetails on ChatThread {
   ...ChatThreadTiny
-  chats(first: 100) {
+  insight {
+    ...AiInsight
+  }
+  tools {
+    ...McpServerTool
+  }
+}
+
+fragment ChatThreadMessages on ChatThread {
+  id
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    reverse: $reverse
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
     edges {
       node {
         ...Chat
       }
     }
-  }
-  insight {
-    ...AiInsight
-  }
-  flow {
-    ...FlowBasic
-  }
-  tools {
-    ...McpServerTool
   }
 }
 
@@ -199,6 +209,7 @@ query ChatAgentSession($id: ID!) {
     id
     session {
       id
+      done
       pullRequest {
         ...PullRequest
       }
@@ -233,49 +244,13 @@ query ChatAgentSession($id: ID!) {
   }
 }
 
-fragment ChatThreadChatsWithTools on ChatThread {
-  id
-  default
-  summary
-  insertedAt
-  updatedAt
-  lastMessageAt
-  settings {
-    ...ChatThreadSettings
-  }
-  insight {
-    ...AiInsightSummary
-  }
-  flow {
-    id
-    name
-    icon
-  }
-  session {
-    ...AgentSession
-  }
-  tools {
-    ...McpServerTool
-  }
-  chats(
-    first: $first
-    last: $last
-    after: $after
-    before: $before
-    reverse: $reverse
-  ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...Chat
-      }
-    }
+query ChatThreadDetails($id: ID!) {
+  chatThread(id: $id) {
+    ...ChatThreadDetails
   }
 }
 
-query ChatThreadDetails(
+query ChatThreadMessages(
   $id: ID!
   $first: Int = 25
   $last: Int
@@ -284,7 +259,7 @@ query ChatThreadDetails(
   $reverse: Boolean = true
 ) {
   chatThread(id: $id) {
-    ...ChatThreadChatsWithTools
+    ...ChatThreadMessages
   }
 }
 
@@ -343,12 +318,6 @@ mutation DeleteAIPin($id: ID!) {
   }
 }
 
-mutation Chat($messages: [ChatMessage], $threadId: ID) {
-  chat(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-
 mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
   hybridChat(messages: $messages, threadId: $threadId) {
     ...Chat
@@ -377,21 +346,15 @@ mutation DeleteChat($id: ID!) {
   }
 }
 
-mutation SaveChats($messages: [ChatMessage], $threadId: ID) {
-  saveChats(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-
 mutation CreateChatThread($attributes: ChatThreadAttributes!) {
   createThread(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
 mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
   updateThread(id: $id, attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
@@ -403,7 +366,7 @@ mutation DeleteChatThread($id: ID!) {
 
 mutation CloneChatThread($id: ID!, $seq: Int) {
   cloneThread(id: $id, seq: $seq) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
@@ -419,7 +382,7 @@ mutation AddChatContext(
 
 mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
   createAgentSession(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadTiny
   }
 }
 

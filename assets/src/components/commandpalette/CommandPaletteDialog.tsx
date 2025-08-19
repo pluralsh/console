@@ -60,9 +60,7 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
       transition: 'height 100ms ease',
 
       '&.cmdk-history': {
-        overflow: 'hidden',
         height: 500,
-        minHeight: 500,
         padding: 0,
       },
 

@@ -1,28 +1,19 @@
-import { Accordion, AccordionItem } from '@pluralsh/design-system'
+import { Accordion, AccordionItem, usePrevious } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import styled from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import {
-  useChatThreadDetailsQuery,
-  useChatThreadsQuery,
-} from '../../../generated/graphql.ts'
+import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
-import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
+import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { MainChatbotButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import {
-  ChatbotMessagesWrapperSC,
-  ChatbotPanelThread,
-} from './ChatbotPanelThread.tsx'
+import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
 
@@ -64,108 +55,41 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
-  const ref = useRef<any>(undefined)
-  const {
-    currentThread,
-    currentThreadId,
-    persistedThreadId,
-    agentInitMode,
-    goToThread,
-    createNewThread,
-    mutationLoading,
-  } = useChatbot()
-  const [showMcpServers, setShowMcpServers] = useState(false)
-  const [showPrompts, setShowPrompts] = useState<boolean>(false)
+  const { currentThread, currentThreadId, agentInitMode } = useChatbot()
+  const { data, loading, error, fetchNextPage, pageInfo, refetch } =
+    useFetchPaginatedData(
+      {
+        skip: !currentThreadId,
+        queryHook: useChatThreadMessagesQuery,
+        keyPath: ['chatThread', 'chats'],
+        pollInterval: 0, // don't poll messages, they shouldn't change except when agent is running
+      },
+      { id: currentThreadId ?? '' }
+    )
 
-  const { data } = useFetchPaginatedData({
-    queryHook: useChatThreadsQuery,
-    keyPath: ['chatThreads'],
-  })
+  // refetch new messages when thread marks itself done (might miss if agent does everything between poll intervals but that's alright)
+  const prevIsDone = usePrevious(currentThread?.session?.done)
+  useEffect(() => {
+    if (!!currentThread?.session?.done && !prevIsDone) refetch()
+  }, [currentThread?.session?.done, prevIsDone, refetch])
 
-  const threadDetailsQuery = useFetchPaginatedData(
-    {
-      skip: !currentThreadId,
-      queryHook: useChatThreadDetailsQuery,
-      keyPath: ['chatThread', 'chats'],
-      pageSize: 25,
-      pollInterval: 60_000,
-    },
-    { id: currentThreadId ?? '' }
+  const messages = useMemo(
+    () =>
+      currentThreadId
+        ? mapExistingNodes(data?.chatThread?.chats).toReversed()
+        : [],
+    [currentThreadId, data?.chatThread?.chats]
   )
-
-  const threads = useMemo(
-    () => mapExistingNodes(data?.chatThreads),
-    [data?.chatThreads]
-  )
-
-  const tools =
-    threadDetailsQuery?.data?.chatThread?.tools?.filter(isNonNullable) ?? []
-
-  const isThreadDetailsLoading =
-    (!threadDetailsQuery?.data?.chatThread?.chats &&
-      threadDetailsQuery?.loading) ||
-    (threadDetailsQuery?.loading &&
-      threadDetailsQuery?.data?.chatThread?.id !== currentThreadId)
 
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
 
-  useEffect(() => {
-    // If the agent is initializing, a thread doesn't need to be selected.
-    if (agentInitMode) return
-
-    // If a thread is already selected, nothing needs to be done.
-    if (!isEmpty(currentThreadId)) return
-
-    // If data is not yet loaded, do nothing.
-    if (!data || mutationLoading) return
-
-    // If there are no threads after an initial data load, create a new thread.
-    if (isEmpty(threads)) {
-      createNewThread({ summary: 'New chat with Plural AI' })
-      return
-    }
-
-    // If there is a persisted thread, and it exists in the fetched threads, go to that thread.
-    if (
-      persistedThreadId &&
-      threads?.find((thread) => thread?.id === persistedThreadId)
-    ) {
-      goToThread(persistedThreadId)
-      return
-    }
-
-    // Otherwise, select the first available thread.
-    goToThread(threads[0]?.id)
-  }, [
-    agentInitMode,
-    createNewThread,
-    currentThreadId,
-    data,
-    goToThread,
-    mutationLoading,
-    persistedThreadId,
-    threads,
-  ])
-
-  const messages = useMemo(() => {
-    return mapExistingNodes(currentThread?.chats)
-  }, [currentThread])
-
   return (
     <div
-      ref={ref}
       css={{ position: 'relative', height: '100%' }}
       style={{ '--chatbot-panel-width': `${calculatedPanelWidth}px` }}
     >
-      {!isEmpty(tools) && (
-        <McpServerShelf
-          zIndex={2}
-          isOpen={showMcpServers}
-          onClose={() => setShowMcpServers(false)}
-          tools={tools}
-        />
-      )}
+      {!isEmpty(currentThread?.tools) && <McpServerShelf zIndex={2} />}
       {currentThread?.session && !agentInitMode && (
         <ChatbotActionsPanel
           zIndex={1}
@@ -174,29 +98,20 @@ function ChatbotPanelInner() {
       )}
       <MainContentWrapperSC>
         <ResizeGripSC />
-        <ChatbotHeader currentThread={currentThread} />
-        {threadDetailsQuery.error?.error && (
-          <GqlError error={threadDetailsQuery.error.error} />
-        )}
-        {isThreadDetailsLoading && (
-          <ChatbotMessagesWrapperSC>
-            <LoadingIndicator />
-          </ChatbotMessagesWrapperSC>
-        )}
+        <ChatbotHeader />
         {!!agentInitMode ? (
           <ChatbotAgentInit />
         ) : (
-          currentThread &&
-          !isThreadDetailsLoading && (
-            <ChatbotPanelThread
-              currentThread={currentThread}
-              threadDetailsQuery={threadDetailsQuery}
-              showMcpServers={showMcpServers}
-              setShowMcpServers={setShowMcpServers}
-              showExamplePrompts={showPrompts}
-              setShowExamplePrompts={setShowPrompts}
-            />
-          )
+          <ChatbotPanelThread
+            messages={messages}
+            initLoading={
+              loading && (!data || data.chatThread?.id !== currentThread?.id)
+            }
+            error={error}
+            fetchNextPage={fetchNextPage}
+            isLoadingNextPage={!!data && loading}
+            hasNextPage={pageInfo?.hasNextPage}
+          />
         )}
       </MainContentWrapperSC>
       <DragHandleSC

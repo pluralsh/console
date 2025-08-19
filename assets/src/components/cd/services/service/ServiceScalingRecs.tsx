@@ -1,7 +1,6 @@
 import { ClusterScalingRecommendationFragment } from 'generated/graphql'
 
 import { Table } from '@pluralsh/design-system'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
 import { useServiceContext } from './ServiceDetails'
 
 import {
@@ -27,7 +26,6 @@ export function ServiceScalingRecs() {
       rowBg="base"
       columns={cols}
       data={recommendations}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
     />
   )
 }

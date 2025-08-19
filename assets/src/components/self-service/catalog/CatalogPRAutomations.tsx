@@ -5,10 +5,7 @@ import { usePrAutomationsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
-import {
-  useFetchPaginatedData,
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-} from 'components/utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import { mapExistingNodes } from 'utils/graphql.ts'
 
 export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
@@ -39,7 +36,6 @@ export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
       fullHeightWrap
       columns={columns}
       reactTableOptions={{ meta: { refetch } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={prAutomations}
       virtualizeRows
       hasNextPage={pageInfo?.hasNextPage}

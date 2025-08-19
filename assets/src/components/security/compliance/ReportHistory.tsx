@@ -16,10 +16,7 @@ import {
   useComplianceReportsQuery,
 } from '../../../generated/graphql.ts'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 
 const columnHelper = createColumnHelper<Edge<ComplianceReportFragment>>()
@@ -99,7 +96,6 @@ export function ReportHistoryModal({
             ?.hasNextPage
         }
         isFetchingNextPage={loading}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         fetchNextPage={fetchNextPage}
       />

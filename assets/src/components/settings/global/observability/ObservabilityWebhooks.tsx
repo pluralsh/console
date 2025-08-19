@@ -1,9 +1,6 @@
 import { Button, Card, Flex, PlusIcon, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ObservabilityWebhookFragment,
   useObservabilityWebhooksQuery,
@@ -63,7 +60,6 @@ export function ObservabilityWebhooks() {
         data={webhooks}
         loading={!data && loading}
         reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
