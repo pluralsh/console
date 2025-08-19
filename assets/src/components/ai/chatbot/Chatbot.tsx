@@ -1,8 +1,8 @@
-import { Accordion, AccordionItem } from '@pluralsh/design-system'
+import { Accordion, AccordionItem, usePrevious } from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { isEmpty } from 'lodash'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
@@ -56,16 +56,22 @@ export function ChatbotPanel() {
 
 function ChatbotPanelInner() {
   const { currentThread, currentThreadId, agentInitMode } = useChatbot()
-  const { data, loading, error, fetchNextPage, pageInfo } =
+  const { data, loading, error, fetchNextPage, pageInfo, refetch } =
     useFetchPaginatedData(
       {
         skip: !currentThreadId,
         queryHook: useChatThreadMessagesQuery,
         keyPath: ['chatThread', 'chats'],
-        pollInterval: 0, // don't poll messages, they shouldn't change, will break pagination otherwise
+        pollInterval: 0, // don't poll messages, they shouldn't change except when agent is running
       },
       { id: currentThreadId ?? '' }
     )
+
+  // refetch new messages when thread marks itself done (might miss if agent does everything between poll intervals but that's alright)
+  const prevIsDone = usePrevious(currentThread?.session?.done)
+  useEffect(() => {
+    if (!!currentThread?.session?.done && !prevIsDone) refetch()
+  }, [currentThread?.session?.done, prevIsDone, refetch])
 
   const messages = useMemo(
     () =>

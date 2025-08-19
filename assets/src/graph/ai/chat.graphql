@@ -209,6 +209,7 @@ query ChatAgentSession($id: ID!) {
     id
     session {
       id
+      done
       pullRequest {
         ...PullRequest
       }
