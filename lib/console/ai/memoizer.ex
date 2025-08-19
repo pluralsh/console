@@ -80,12 +80,15 @@ defmodule Console.AI.Memoizer do
       }
     else
       {:error, error} ->
-        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}}
+        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}, ai_poll_at: next_poll_at()}
     end
   end
 
   defp gen_error(%schema{} = model, error) do
-    schema.changeset(model, %{insight: %{errors: [%{source: "evidence", message: error}]}})
+    schema.changeset(model, %{
+      ai_poll_at: next_poll_at(),
+      insight: %{errors: [%{source: "evidence", message: error}]}
+    })
     |> Repo.update()
   end
 
