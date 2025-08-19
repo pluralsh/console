@@ -11,6 +11,7 @@ fragment ClusterFragment on Cluster {
     kasUrl
     deletedAt
     metadata
+    distro
     tags { ...ClusterTags }
     provider { ...ClusterProviderFragment }
     nodePools { ...NodePoolFragment }
