@@ -1,9 +1,9 @@
 defmodule Console.Deployments.Global do
   use Console.Services.Base
   import Console.Deployments.Policies
-  import Console, only: [clean: 1, clamp: 1]
+  import Console, only: [clean: 1]
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services}
   alias Console.Services.Users
   alias Console.Schema.{
     GlobalService,
@@ -323,7 +323,7 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 10)
     |> Stream.map(fn
       {:ok, res} -> res
       _ -> nil
@@ -341,7 +341,6 @@ defmodule Console.Deployments.Global do
     |> (fn s -> MapSet.difference(service_ids, s) end).()
     |> MapSet.to_list()
     |> maybe_drain(global)
-    next_poll(global)
     :ok
   end
 
