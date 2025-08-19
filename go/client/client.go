@@ -550,6 +550,7 @@ type ClusterFragment struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -630,6 +631,12 @@ func (t *ClusterFragment) GetMetadata() map[string]any {
 		t = &ClusterFragment{}
 	}
 	return t.Metadata
+}
+func (t *ClusterFragment) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.Distro
 }
 func (t *ClusterFragment) GetTags() []*ClusterTags {
 	if t == nil {
@@ -8990,6 +8997,7 @@ type CreateCluster_CreateCluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -9076,6 +9084,12 @@ func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
 		t = &CreateCluster_CreateCluster{}
 	}
 	return t.Metadata
+}
+func (t *CreateCluster_CreateCluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Distro
 }
 func (t *CreateCluster_CreateCluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -10437,6 +10451,7 @@ type GetClusterWithToken_Cluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -10518,6 +10533,12 @@ func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
 		t = &GetClusterWithToken_Cluster{}
 	}
 	return t.Metadata
+}
+func (t *GetClusterWithToken_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Distro
 }
 func (t *GetClusterWithToken_Cluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -11412,6 +11433,7 @@ type UpsertVirtualCluster_UpsertVirtualCluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -11498,6 +11520,12 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.Metadata
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Distro
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -22228,6 +22256,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -22457,6 +22486,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23207,6 +23237,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23452,6 +23483,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23686,6 +23718,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23979,6 +24012,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -24209,6 +24243,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -24940,6 +24975,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
