@@ -274,6 +274,14 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v4.3.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v4.3.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3649,6 +3657,14 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.18.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v0.18.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -4858,6 +4874,14 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.16.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v2.16.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5051,6 +5075,15 @@
   publisher: eks
 - name: netapp_trident-operator
   versions:
+  - version: v25.6.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v25.6.0-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5168,6 +5201,14 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.9.1-eksbuild.4
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.9.1-eksbuild.3
     compatibilities:
     - '1.33'
