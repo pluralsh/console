@@ -101,8 +101,7 @@ defmodule Console.AI.Memoizer do
   @poll_duration 10 * 60 # 10 minutes
 
   defp next_poll_at() do
-    duration = Duration.new!(second: @poll_duration)
-    jittered = Duration.add(duration, Duration.new!(second: Console.jitter(floor(@poll_duration / 2))))
-    DateTime.shift(DateTime.utc_now(), jittered)
+    duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
+    DateTime.shift(DateTime.utc_now(), duration)
   end
 end
