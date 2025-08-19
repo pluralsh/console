@@ -84,10 +84,10 @@ export function VirtualList<T, M>({
     },
     [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage]
   )
-
   return (
     <VList
-      shift={isReversed}
+      // only shift when infinite scrolling up
+      shift={isReversed && (internalRef.current?.scrollOffset ?? Infinity) < 50}
       css={{ height: '100%', width: '100%' }}
       onScroll={onScroll}
       {...props}
