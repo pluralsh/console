@@ -109,7 +109,7 @@ function ChatbotPanelInner() {
             }
             error={error}
             fetchNextPage={fetchNextPage}
-            isLoadingNextPage={!!data && loading}
+            isLoadingNextPage={!!data && loading && messages.length >= 25}
             hasNextPage={pageInfo?.hasNextPage}
           />
         )}

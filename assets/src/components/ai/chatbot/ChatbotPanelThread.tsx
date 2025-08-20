@@ -7,7 +7,6 @@ import {
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
-  useCreateChatThreadMutation,
   useHybridChatMutation,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -45,7 +44,7 @@ export function ChatbotPanelThread({
 }) {
   const theme = useTheme()
   const { readValue } = useCommandPaletteMessage()
-  const { currentThread: curThreadDetails, goToThread } = useChatbot()
+  const { currentThread: curThreadDetails, createNewThread } = useChatbot()
   const threadId = curThreadDetails?.id
   const messageListRef = useRef<VListHandle | null>(null)
 
@@ -97,44 +96,25 @@ export function ChatbotPanelThread({
 
   const [
     mutateHybridChat,
-    { loading: hybridChatLoading, error: hybridChatError, reset },
+    { loading: sendingMessage, error: messageError, reset },
   ] = useHybridChatMutation({
     awaitRefetchQueries: true,
     refetchQueries: ['ChatThreadMessages', 'ChatThreadDetails'],
     onCompleted: () => scrollToBottom(),
   })
-  const [
-    createThread,
-    { loading: creatingThread, error: creatingThreadError },
-  ] = useCreateChatThreadMutation({
-    variables: {
-      attributes: {
-        summary: 'New chat with Plural AI',
-        session: { done: true },
-      },
-    },
-  })
-  const sendingMessage = hybridChatLoading || creatingThread
-  const messageError = hybridChatError || creatingThreadError
 
   const sendMessage = useCallback(
     (newMessage: string) => {
       scrollToBottom()
       setPendingMessage(newMessage)
-      const messages = [{ role: AiRole.User, content: newMessage }]
-      if (threadId) mutateHybridChat({ variables: { messages, threadId } })
-      else
-        createThread({
-          onCompleted: ({ createThread }) => {
-            if (createThread?.id)
-              mutateHybridChat({
-                variables: { messages, threadId: createThread.id },
-                onCompleted: () => goToThread(createThread.id),
-              })
-          },
-        })
+      mutateHybridChat({
+        variables: {
+          messages: [{ role: AiRole.User, content: newMessage }],
+          threadId,
+        },
+      })
     },
-    [scrollToBottom, threadId, mutateHybridChat, createThread, goToThread]
+    [scrollToBottom, threadId, mutateHybridChat]
   )
 
   // runs when new messages are added
@@ -154,6 +134,12 @@ export function ChatbotPanelThread({
     setStreamedMessages([])
     reset()
   }, [threadId, reset])
+
+  // create a new thread if we're here and one doesn't exist
+  useEffect(() => {
+    if (threadId) return
+    createNewThread({ summary: 'New chat with Plural AI' })
+  }, [threadId, createNewThread])
 
   useEffect(() => {
     const commandPalettePendingMessage = readValue()
@@ -177,11 +163,11 @@ export function ChatbotPanelThread({
         />
       )}
       <ChatbotMessagesWrapperSC>
-        {isEmpty(messages) && !curThreadDetails?.session?.type ? (
+        {isEmpty(messages) &&
+        !sendingMessage &&
+        !curThreadDetails?.session?.type ? (
           error ? (
             <GqlError error={error} />
-          ) : sendingMessage ? (
-            <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
           ) : (
             <Body1P css={{ color: theme.colors['text-long-form'] }}>
               How can I help you?
