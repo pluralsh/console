@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 
@@ -67,8 +68,11 @@ func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 	return nil
 }
 
-func NewOpenAIProxy(target, token string) (api.TranslationProxy, error) {
-	proxy := &OpenAIProxy{token: token}
+func NewOpenAIProxy(target string, tokens []string) (api.TranslationProxy, error) {
+	if len(tokens) == 0 {
+		return nil, fmt.Errorf("must have at least one openai token")
+	}
+	proxy := &OpenAIProxy{token: tokens[0]} // just use the first one for now; not trying to do open-heart surgery on these proxies today
 	base, err := newBaseTranslationProxy(target, api.ProviderOpenAI, proxy.ModifyRequest, proxy.ModifyResponse, nil)
 	if err != nil {
 		return nil, err

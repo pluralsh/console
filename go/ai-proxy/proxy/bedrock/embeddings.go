@@ -33,7 +33,12 @@ type BedrockEmbeddingsProxy struct {
 	bedrockClient *bedrockruntime.Client
 }
 
-func NewBedrockEmbeddingsProxy(region string) (api.OpenAIProxy, error) {
+func NewBedrockEmbeddingsProxy(credentials []string) (api.OpenAIProxy, error) {
+	var region string
+	if len(credentials) > 0 {
+		region = credentials[0]
+	}
+
 	ctx := context.Background()
 
 	var loadOptions []func(options *config.LoadOptions) error

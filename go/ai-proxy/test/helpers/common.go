@@ -19,6 +19,7 @@ import (
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/args"
 	"github.com/pluralsh/console/go/ai-proxy/proxy"
+	token "github.com/pluralsh/console/go/ai-proxy/proxy/openai"
 )
 
 func SetupServer() (*httptest.Server, error) {
@@ -36,12 +37,13 @@ func SetupServer() (*httptest.Server, error) {
 	}
 
 	if args.OpenAICompatible() {
-		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+		tokenRotator := token.NewRoundRobinTokenRotator(args.ProviderCredentials())
+		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials(), tokenRotator)
 		if err != nil {
 			klog.ErrorS(err, "Could not create proxy")
 			os.Exit(1)
 		}
-		ep, err := proxy.NewOpenAIEmbeddingsProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
+		ep, err := proxy.NewOpenAIEmbeddingsProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials(), tokenRotator)
 		if err != nil {
 			klog.ErrorS(err, "Could not create embedding proxy")
 			os.Exit(1)

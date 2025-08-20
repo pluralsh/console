@@ -10,7 +10,7 @@ import (
 	"github.com/pluralsh/console/go/ai-proxy/proxy/provider"
 )
 
-func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) (api.TranslationProxy, error) {
+func NewOllamaTranslationProxy(p api.Provider, host string, credentials []string) (api.TranslationProxy, error) {
 	switch p {
 	case api.ProviderOllama:
 		return provider.NewOllamaProxy(host)
@@ -25,10 +25,10 @@ func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) 
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, error) {
+func NewOpenAIProxy(p api.Provider, host string, credentials []string, tokenRotator *openai.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIProxy(host, credentials)
+		return openai.NewOpenAIProxy(host, tokenRotator)
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockProxy(credentials)
 	case api.ProviderOllama:
@@ -37,10 +37,10 @@ func NewOpenAIProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, 
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIEmbeddingsProxy(p api.Provider, host, credentials string) (api.OpenAIProxy, error) {
+func NewOpenAIEmbeddingsProxy(p api.Provider, host string, credentials []string, tokenRotator *openai.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIEmbeddingsProxy(host, credentials)
+		return openai.NewOpenAIEmbeddingsProxy(host, tokenRotator)
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockEmbeddingsProxy(credentials)
 	case api.ProviderOllama:

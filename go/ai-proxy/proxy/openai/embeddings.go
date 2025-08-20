@@ -2,6 +2,7 @@ package openai
 
 import (
 	"fmt"
+	"net/http"
 	"net/http/httputil"
 	"net/url"
 
@@ -15,15 +16,23 @@ const (
 	embeddingsEndpoint = "/v1/embeddings"
 )
 
-func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
+func NewOpenAIEmbeddingsProxy(host string, tokenRotator *RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+	if len(tokenRotator.tokens) == 0 {
+		return nil, fmt.Errorf("at least one token is required")
+	}
+
 	parsedURL, err := url.Parse(host)
 	if err != nil {
 		return nil, err
 	}
 
 	reverse := &httputil.ReverseProxy{
+		Transport: &RetryTransport{
+			tokenRotator: tokenRotator,
+			base:         http.DefaultTransport,
+		},
 		Rewrite: func(r *httputil.ProxyRequest) {
-			r.Out.Header.Set("Authorization", "Bearer "+token)
+			r.Out.Header.Set("Authorization", "Bearer "+tokenRotator.GetNextToken())
 
 			r.SetXForwarded()
 
@@ -47,7 +56,7 @@ func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
 	}
 
 	return &OpenAIProxy{
-		proxy: reverse,
-		token: token,
+		proxy:        reverse,
+		tokenRotator: tokenRotator,
 	}, nil
 }

@@ -27,7 +27,7 @@ const (
 var (
 	argProvider               = pflag.String("provider", defaultProvider.String(), "Provider name. Must be one of: ollama, openai, vertex. Defaults to 'ollama' type API.")
 	argProviderHost           = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
-	argProviderToken          = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "Provider token used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
+	argProviderTokens         = pflag.StringSlice("provider-tokens", []string{helpers.GetPluralEnv(envProviderToken, "")}, "Provider tokens used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
 	argProviderServiceAccount = pflag.String("provider-service-account", helpers.GetPluralEnv(envProviderServiceAccount, ""), "Provider service account file used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_SERVICE_ACCOUNT env var.")
 	argsProviderAWSRegion     = pflag.String("provider-aws-region", helpers.GetPluralEnv(envProviderAWSRegion, ""), "Provider AWS region used to connect to BedRock API.")
 	argPort                   = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
@@ -76,24 +76,35 @@ func ProviderHost() string {
 	return *argProviderHost
 }
 
-func ProviderCredentials() string {
-	if len(*argProviderToken) > 0 && Provider() == api.ProviderOpenAI {
-		return *argProviderToken
+func ProviderCredentials() []string {
+	// if len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
+	// 	return *argProviderTokens
+	// }
+	if Provider() == api.ProviderOpenAI {
+		klog.V(log.LogLevelDebug).InfoS(
+			"provider tokens debug",
+			"tokens", *argProviderTokens,
+			"flag_defined", pflag.Lookup("provider-tokens") != nil,
+			"flag_changed", pflag.Lookup("provider-tokens").Changed,
+		)
+		if len(*argProviderTokens) > 0 {
+			return *argProviderTokens
+		}
 	}
 
 	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
-		return *argProviderServiceAccount
+		return []string{*argProviderServiceAccount}
 	}
 
 	if Provider() == api.ProviderBedrock {
 		if len(*argsProviderAWSRegion) > 0 {
-			return *argsProviderAWSRegion
+			return []string{*argsProviderAWSRegion}
 		}
-		return ""
+		return nil
 	}
 
 	if Provider() == defaultProvider {
-		return ""
+		return nil
 	}
 
 	panic(fmt.Errorf("provider credentials must be provided when %s provider is used", Provider()))
