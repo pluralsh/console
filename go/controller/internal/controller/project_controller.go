@@ -114,7 +114,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
@@ -205,7 +205,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {

@@ -138,7 +138,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
@@ -169,11 +169,11 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	if errors.IsNotFound(err) {
 		cluster.Status.ID = nil
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Cluster in Console API")
-		return requeue, nil
+		return jitterRequeue(), nil
 	}
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return jitterRequeue(), err
 	}
 	if err := r.ensure(cluster); err != nil {
 		return handleRequeue(nil, err, cluster.SetCondition)
@@ -201,7 +201,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {

@@ -187,7 +187,7 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (r *NotificationSinkReconciler) isReadOnly(ctx context.Context, notificationSink *v1alpha1.NotificationSink) (bool, error) {

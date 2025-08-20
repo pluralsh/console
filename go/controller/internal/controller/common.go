@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
+	"golang.org/x/exp/rand"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
@@ -47,6 +49,10 @@ var (
 	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
+
+func jitterRequeue() ctrl.Result {
+	return ctrl.Result{RequeueAfter: requeueDefault + time.Duration(rand.Intn(int(requeueDefault/2)))}
+}
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
@@ -150,15 +156,18 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		for _, dep := range srv.Dependencies {
 			serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
 		}
+
+		slices.SortFunc(serviceTemplate.Dependencies, func(a, b *console.ServiceDependencyAttributes) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 	}
 
 	if srv.Templated != nil {
 		serviceTemplate.Templated = srv.Templated
 	}
 	if srv.Contexts != nil {
-		serviceTemplate.Contexts = make([]*string, 0)
-		serviceTemplate.Contexts = algorithms.Map(srv.Contexts,
-			func(b string) *string { return &b })
+		slices.Sort(srv.Contexts)
+		serviceTemplate.Contexts = lo.ToSlicePtr(srv.Contexts)
 	}
 	if srv.Git != nil {
 		serviceTemplate.Git = &console.GitRefAttributes{
@@ -233,6 +242,10 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			})
 		}
 	}
+	slices.SortFunc(serviceTemplate.Configuration, func(a, b *console.ConfigAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
 	if err := getSources(ctx, c, serviceTemplate, srv.Sources); err != nil {
 		return nil, err
 	}
