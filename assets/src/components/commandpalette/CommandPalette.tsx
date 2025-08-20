@@ -6,7 +6,6 @@ import {
   Input,
   ReturnIcon,
 } from '@pluralsh/design-system'
-import { Command } from 'cmdk'
 import {
   Dispatch,
   KeyboardEvent,
@@ -18,10 +17,7 @@ import {
   useState,
 } from 'react'
 import { useTheme } from 'styled-components'
-import {
-  ChatThreadTinyFragment,
-  PageInfoFragment,
-} from '../../generated/graphql.ts'
+import { ChatThreadTinyFragment } from '../../generated/graphql.ts'
 import { fromNow } from '../../utils/datetime.ts'
 import { useChatbot } from '../ai/AIContext.tsx'
 import { AITableActions } from '../ai/AITableActions.tsx'
@@ -30,7 +26,6 @@ import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import usePersistedSessionState from '../hooks/usePersistedSessionState.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { Body1BoldP, Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import {
   CommandPaletteContext,
@@ -38,9 +33,15 @@ import {
 } from './CommandPaletteContext.tsx'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
-import { VirtualList } from 'components/utils/VirtualList.tsx'
-import { VListHandle } from 'virtua'
-import { CommandGroup, useCommands, useHistory } from './commands.ts'
+import { Command } from 'cmdk'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { isEmpty } from 'lodash'
+import {
+  type Command as CommandT,
+  CommandGroup,
+  useCommands,
+  useHistory,
+} from './commands.ts'
 
 export default function CommandPalette() {
   const aiEnabled = useAIEnabled()
@@ -48,15 +49,18 @@ export default function CommandPalette() {
   const { setCmdkOpen, initialTab } = use(CommandPaletteContext)
   const onCmdKClose = () => setCmdkOpen(false)
 
-  const [value, setValue] = useState('')
+  const [tab, setTab] = useState<CommandPaletteTab>(initialTab)
+  const [cmdValue, setCmdValue] = useState('')
+  const [historyValue, setHistoryValue] = useState('')
 
   // only show hidden commands if the user has typed something
-  const commands = useCommands({ showHidden: value.length > 0, filter: value })
-  const [tab, setTab] = useState<CommandPaletteTab>(initialTab)
+  const commands = useCommands({
+    showHidden: cmdValue.length > 0,
+    filter: cmdValue,
+  })
 
   const { loading, history, fetchNextPage, pageInfo } = useHistory({
-    skip: tab !== CommandPaletteTab.History,
-    filter: value,
+    filter: historyValue,
     component: (thread) => (
       <HistoryItem
         key={thread.id}
@@ -83,23 +87,20 @@ export default function CommandPalette() {
     [aiEnabled]
   )
 
-  const items: Array<CommandGroup> = useMemo(() => {
-    switch (tab) {
-      case CommandPaletteTab.History:
-        return history
-      case CommandPaletteTab.Commands:
-        return commands
-      default:
-        return commands
-    }
-  }, [commands, history, tab])
-
-  const hasItems =
-    items.length > 0 && items.some((item) => item.commands?.length > 0)
-
-  const showEmptyState = useMemo(
-    () => !loading && !hasItems,
-    [hasItems, loading]
+  const onScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const isNearBottom =
+        e.currentTarget.scrollTop + e.currentTarget.clientHeight >=
+        e.currentTarget.scrollHeight - 100
+      if (
+        isNearBottom &&
+        tab === CommandPaletteTab.History &&
+        pageInfo?.hasNextPage
+      ) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, pageInfo?.hasNextPage, tab]
   )
 
   return (
@@ -107,10 +108,10 @@ export default function CommandPalette() {
       <div id="cmdk-input-wrapper">
         <CommandAdvancedInput
           curTab={tab}
-          onValueChange={setValue}
-          value={value}
+          cmdValue={cmdValue}
+          onCmdValueChange={setCmdValue}
+          onHistoryValueChange={setHistoryValue}
           onCmdKClose={onCmdKClose}
-          aiEnabled={aiEnabled}
         />
         {directory.length > 1 && (
           <div id="cmdk-input-tabs">
@@ -122,41 +123,22 @@ export default function CommandPalette() {
           </div>
         )}
       </div>
-      {loading && !hasItems && <LoadingIndicator />}
-      {showEmptyState && (
-        <Flex
-          direction="column"
-          gap="xxsmall"
-          height="100%"
-          justifyContent="center"
-          padding="xlarge"
-          align="center"
-        >
-          <Body1BoldP>No results found.</Body1BoldP>
-          <Body2P
-            $color="text-xlight"
-            css={{ maxWidth: 480, textAlign: 'center' }}
-          >
-            Could not find any results matching: {value}
-          </Body2P>
-        </Flex>
-      )}
-      {tab === CommandPaletteTab.History ? (
-        <CommandPaletteHistory
-          items={items}
-          loading={loading}
-          onCmdKClose={onCmdKClose}
-          pageInfo={pageInfo}
-          fetchNextPage={fetchNextPage}
-        />
-      ) : (
-        <Command.List className="cmdk-commands">
+      <Command.List onScroll={onScroll}>
+        {tab === CommandPaletteTab.History && (
+          <CommandPaletteHistory
+            history={history}
+            loading={loading}
+            value={historyValue}
+          />
+        )}
+        {tab === CommandPaletteTab.Commands && (
           <CommandPaletteCommands
-            items={items}
+            value={cmdValue}
+            items={commands}
             onCmdKClose={onCmdKClose}
           />
-        </Command.List>
-      )}
+        )}
+      </Command.List>
       <div id="cmdk-footer">
         <div>
           <ArrowLeftIcon
@@ -185,112 +167,115 @@ export default function CommandPalette() {
 }
 
 function CommandPaletteHistory({
-  items,
+  history,
   loading,
-  pageInfo,
-  fetchNextPage,
-  onCmdKClose,
+  value,
 }: {
-  items: Array<CommandGroup>
+  history: CommandT[]
   loading: boolean
-  pageInfo: PageInfoFragment
-  fetchNextPage: Dispatch<void>
-  onCmdKClose: () => void
-  modalReady?: boolean
+  value: string
 }) {
-  const listRef = useRef<VListHandle | null>(null)
-  const commands = useMemo(() => items.flatMap((i) => i.commands), [items])
+  const { setCmdkOpen } = use(CommandPaletteContext)
 
-  return (
-    <VirtualList
-      data={commands}
-      listRef={listRef}
-      loadNextPage={fetchNextPage}
-      hasNextPage={pageInfo?.hasNextPage}
-      isLoadingNextPage={loading}
-      renderer={({ rowData: command }) => (
-        <Command.Item
-          className="cmdk-history-item"
-          tabIndex={0}
-          key={`${command?.component?.key ?? command?.label}`}
-          value={`${command?.prefix}${command?.label}`}
-          disabled={command?.disabled}
-          onSelect={() => {
-            command.callback()
-            onCmdKClose()
-          }}
-        >
-          {command?.component ? command?.component : null}
-        </Command.Item>
-      )}
-      isReversed={true}
-    />
-  )
+  if (loading)
+    return (
+      <TableSkeleton
+        centered
+        numColumns={1}
+        height={400}
+        width={750}
+      />
+    )
+  if (isEmpty(history)) return <CommandEmptyState value={value} />
+
+  return history.map((command) => (
+    <Command.Item
+      key={command.id}
+      className="cmdk-history-item"
+      tabIndex={0}
+      value={`${command.prefix}${command.label}-${command.id}`}
+      onSelect={() => {
+        command.callback()
+        setCmdkOpen(false)
+      }}
+    >
+      {command?.component ? command?.component : null}
+    </Command.Item>
+  ))
 }
 
 function CommandPaletteCommands({
+  value,
   items,
   onCmdKClose,
 }: {
+  value: string
   items: Array<CommandGroup>
   onCmdKClose: () => void
 }) {
-  return items?.map((group, i) => (
-    <div key={i}>
-      <Command.Group title={group.title}>
-        {group.commands.map((command, idx) => (
-          <Command.Item
-            tabIndex={0}
-            key={`${command.prefix}${command.label}${idx}`}
-            value={`${command.prefix}${command.label}${idx}`}
-            disabled={command.disabled}
-            onSelect={() => {
-              command.callback()
-              onCmdKClose()
-            }}
-          >
-            {command.component ? (
-              command.component
-            ) : (
-              <>
-                <command.icon marginRight="xsmall" />
-                <span className="fade">{command.prefix}</span>
-                <span>{command.label}</span>
-                {command.rightIcon && (
-                  <command.rightIcon
-                    size={12}
-                    marginLeft="xxsmall"
-                  />
-                )}
-                <div css={{ flex: 1 }} />
-                <CommandPaletteShortcuts shortcuts={command.hotkeys} />
-              </>
-            )}
-          </Command.Item>
-        ))}
-      </Command.Group>
-      {i < (items?.filter((item) => item.commands?.length > 0)).length - 1 && (
-        <Command.Separator />
-      )}
-    </div>
-  ))
+  const hasItems = items.some((group) => !isEmpty(group.commands))
+
+  return !hasItems ? (
+    <CommandEmptyState value={value} />
+  ) : (
+    items.map((group, i) => (
+      <div key={i}>
+        <Command.Group>
+          {group.commands.map((command, idx) => (
+            <Command.Item
+              tabIndex={0}
+              key={`${command.prefix}${command.label}${idx}`}
+              value={`${command.prefix}${command.label}${idx}`}
+              disabled={command.disabled}
+              onSelect={() => {
+                command.callback()
+                onCmdKClose()
+              }}
+            >
+              {command.component ? (
+                command.component
+              ) : (
+                <>
+                  <command.icon marginRight="xsmall" />
+                  <span className="fade">{command.prefix}</span>
+                  <span>{command.label}</span>
+                  {command.rightIcon && (
+                    <command.rightIcon
+                      size={12}
+                      marginLeft="xxsmall"
+                    />
+                  )}
+                  <div css={{ flex: 1 }} />
+                  <CommandPaletteShortcuts shortcuts={command.hotkeys} />
+                </>
+              )}
+            </Command.Item>
+          ))}
+        </Command.Group>
+        {i <
+          (items?.filter((item) => item.commands?.length > 0)).length - 1 && (
+          <Command.Separator />
+        )}
+      </div>
+    ))
+  )
 }
 
 function CommandAdvancedInput({
   curTab,
-  onValueChange,
-  value,
+  cmdValue,
+  onCmdValueChange,
+  onHistoryValueChange,
   onKeyDown,
   onCmdKClose,
-  aiEnabled,
   ...props
 }: {
   curTab: CommandPaletteTab
-  value: string
-  onValueChange: Dispatch<SetStateAction<string>>
+  cmdValue: string
+  onCmdValueChange: Dispatch<SetStateAction<string>>
+  onHistoryValueChange: Dispatch<SetStateAction<string>>
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
   onCmdKClose?: () => void
-  aiEnabled?: Nullable<boolean>
 }) {
   const { createNewThread } = useChatbot()
   const { setMessage: setPendingMessage } = useCommandPaletteMessage()
@@ -307,21 +292,21 @@ function CommandAdvancedInput({
     [createNewThread, setPendingMessage, onCmdKClose]
   )
 
-  return aiEnabled && curTab === CommandPaletteTab.History ? (
+  return curTab === CommandPaletteTab.History ? (
     <ChatInput
       enableExamplePrompts={false}
       onKeyDown={onKeyDown}
       sendMessage={sendMessage}
       placeholder="Search history or ask Plural AI a question..."
-      onValueChange={onValueChange}
+      onValueChange={onHistoryValueChange}
       stateless={true}
       {...props}
     />
   ) : (
     <Input
       placeholder="Search commands..."
-      value={value}
-      onChange={(e) => onValueChange(e.target.value)}
+      value={cmdValue}
+      onChange={(e) => onCmdValueChange(e.target.value)}
       onKeyDown={onKeyDown}
       {...props}
     />
@@ -370,4 +355,24 @@ export const useCommandPaletteMessage = () => {
   }, [message, setMessage])
 
   return { readValue, setMessage }
+}
+
+const CommandEmptyState = ({ value }: { value: string }) => {
+  return (
+    <Flex
+      direction="column"
+      gap="xxsmall"
+      padding="xlarge"
+      align="center"
+      textAlign="center"
+    >
+      <Body1BoldP>No results found.</Body1BoldP>
+      <Body2P
+        $color="text-xlight"
+        css={{ maxWidth: 480, wordBreak: 'break-word' }}
+      >
+        Could not find any results matching: {value}
+      </Body2P>
+    </Flex>
+  )
 }

@@ -144,7 +144,7 @@ export function CommandPaletteDialog() {
       onOpenChange={(open) => setCmdkOpen(open)}
       title="Command Palette"
     >
-      <Command>
+      <Command shouldFilter={false}>
         <CommandPalette />
       </Command>
     </WrapperModal>

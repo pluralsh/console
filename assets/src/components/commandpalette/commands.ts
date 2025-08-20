@@ -66,6 +66,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { useThrottle } from 'components/hooks/useThrottle.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -136,7 +137,7 @@ export function useCommands({
 }: {
   showHidden?: boolean
   filter?: string
-} = {}): CommandGroup[] {
+}): CommandGroup[] {
   const open = useShareSecretOpen()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
@@ -408,38 +409,34 @@ export function useCommands({
 }
 
 export function useHistory({
-  skip = false,
   filter,
   component,
 }: {
-  skip?: boolean
   filter: string
   component?: (thread: ChatThreadTinyFragment) => ReactElement
 }): {
   loading: boolean
-  history: Array<CommandGroup>
+  history: Command[]
   fetchNextPage: Dispatch<void>
   pageInfo: PageInfoFragment
 } {
   const { goToThread } = useChatbot()
+
+  const throttledFilter = useThrottle(filter, 300)
   const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
     {
-      skip,
       pollInterval: 60_000,
       queryHook: useChatThreadsQuery,
       keyPath: ['chatThreads'],
+      pageSize: 50,
     },
-    {
-      first: 25,
-      q: isEmpty(filter) ? undefined : filter,
-    }
+    { q: isEmpty(throttledFilter) ? undefined : throttledFilter }
   )
 
   const threads = useMemo(
     () => mapExistingNodes(data?.chatThreads),
     [data?.chatThreads]
   )
-
   const history = threads.map((thread) => {
     return {
       id: thread.id,
@@ -456,7 +453,7 @@ export function useHistory({
 
   return {
     loading: loading && !data,
-    history: [{ commands: history }],
+    history,
     fetchNextPage,
     pageInfo,
   }
