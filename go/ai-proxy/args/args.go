@@ -89,11 +89,11 @@ func ProviderCredentials() []string {
 		if len(*argsProviderAWSRegion) > 0 {
 			return []string{*argsProviderAWSRegion}
 		}
-		return nil
+		return []string{}
 	}
 
 	if Provider() == defaultProvider {
-		return nil
+		return []string{}
 	}
 
 	panic(fmt.Errorf("provider credentials must be provided when %s provider is used", Provider()))
