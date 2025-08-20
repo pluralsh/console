@@ -17,6 +17,7 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
     flexDirection: 'column',
     width: 840,
     maxHeight: '100%',
+    background: theme.colors['fill-zero'],
 
     '.plrl-chat-input-form': {
       padding: 0,
@@ -58,11 +59,6 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
       overflow: 'auto',
       padding: theme.spacing.small,
       transition: 'height 100ms ease',
-
-      '&.cmdk-history': {
-        height: 500,
-        padding: 0,
-      },
 
       '[cmdk-item]': {
         alignItems: 'center',
@@ -106,11 +102,6 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
 
         '&:hover': {
           backgroundColor: theme.colors['fill-one-hover'],
-        },
-
-        '&.cmdk-history-item': {
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-          margin: `0 ${theme.spacing.small}px`,
         },
       },
 

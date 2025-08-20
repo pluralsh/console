@@ -429,5 +429,10 @@ export function useHistory({
     } as Command
   })
 
-  return { loading, history: [{ commands: history }], fetchNextPage, pageInfo }
+  return {
+    loading: loading && !data,
+    history: [{ commands: history }],
+    fetchNextPage,
+    pageInfo,
+  }
 }

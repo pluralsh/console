@@ -40,7 +40,7 @@ export function ChatbotThreadMoreMenu() {
     mutationLoading: forkLoading,
     currentThread,
   } = useChatbot()
-  const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
+  const { setCmdkOpen } = use(CommandPaletteContext)
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
 
@@ -75,8 +75,7 @@ export function ChatbotThreadMoreMenu() {
         break
       case MenuItemKey.History:
         closeMenu()
-        setCmdkOpen(true)
-        setInitialTab(CommandPaletteTab.History)
+        setCmdkOpen(true, CommandPaletteTab.History)
         break
       default:
         blockClose.current = false

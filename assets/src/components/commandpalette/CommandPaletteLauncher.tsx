@@ -5,7 +5,10 @@ import { usePlatform } from 'components/hooks/usePlatform'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { use } from 'react'
 import CommandHotkeys from './CommandHotkeys'
-import { CommandPaletteContext } from './CommandPaletteContext.tsx'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from './CommandPaletteContext.tsx'
 import { CommandPaletteDialog } from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands.ts'
 
@@ -14,14 +17,16 @@ export default function CommandPaletteLauncher() {
   const commands = useCommandsWithHotkeys()
   const { setCmdkOpen } = use(CommandPaletteContext)
 
-  useHotkeys(['cmd K', 'ctrl K'], () => setCmdkOpen(true))
+  useHotkeys(['cmd K', 'ctrl K'], () =>
+    setCmdkOpen(true, CommandPaletteTab.Commands)
+  )
 
   return (
     <>
       <Chip
         clickable
         inactive
-        onClick={() => setCmdkOpen(true)}
+        onClick={() => setCmdkOpen(true, CommandPaletteTab.Commands)}
         size="small"
         userSelect="none"
         whiteSpace="nowrap"
