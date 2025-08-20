@@ -8,7 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/exp/rand"
+	"math/rand"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"

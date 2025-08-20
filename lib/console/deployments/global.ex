@@ -40,6 +40,12 @@ defmodule Console.Deployments.Global do
   end
   def fetch_contexts(_), do: []
 
+  def enqueue(%GlobalService{} = global) do
+    global
+    |> Ecto.Changeset.change(%{next_poll_at: Timex.now()})
+    |> Repo.update()
+  end
+
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
   """

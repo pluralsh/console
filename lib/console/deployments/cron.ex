@@ -274,7 +274,13 @@ defmodule Console.Deployments.Cron do
 
   def prune_dangling_templates() do
     ServiceTemplate.dangling()
-    |> Repo.delete_all(timeout: 300_000)
+    |> ServiceTemplate.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Task.async_stream(fn template ->
+      Logger.info "pruning dangling template #{template.id}"
+      Repo.delete(template, timeout: 10_000)
+    end, max_concurrency: 10)
+    |> Stream.run()
   end
 
   def add_ignore_crds(search) do

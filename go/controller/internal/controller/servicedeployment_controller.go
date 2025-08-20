@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -472,6 +473,9 @@ func (r *ServiceDeploymentReconciler) svcConfiguration(ctx context.Context, serv
 			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
 		}
 	}
+	slices.SortFunc(configuration, func(a, b *console.ConfigAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 	return configuration, hasConfig, nil
 }
 

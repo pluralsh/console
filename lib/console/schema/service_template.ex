@@ -39,6 +39,10 @@ defmodule Console.Schema.ServiceTemplate do
     )
   end
 
+  def ordered(query \\ __MODULE__, order \\ [asc: :id]) do
+    from(tpl in query, order_by: ^order)
+  end
+
   def attributes(%__MODULE__{} = tpl) do
     tpl = load_configuration(tpl)
 
