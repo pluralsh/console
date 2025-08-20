@@ -1,4 +1,4 @@
-import { Flex, MarkdocContextProvider, Toast } from '@pluralsh/design-system'
+import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
 
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
@@ -26,12 +26,11 @@ import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
-import { useTheme } from 'styled-components'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
-import WithApplicationUpdate from './WithApplicationUpdate'
 
 export default function Console() {
   return (
@@ -67,7 +66,6 @@ export default function Console() {
 
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
-  const theme = useTheme()
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const { setActionsPanelOpen } = useChatbot()
 
@@ -94,31 +92,7 @@ function ConsoleContent() {
         container="console / inline-size"
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
-        {isProduction && (
-          <WithApplicationUpdate>
-            {({ reloadApplication }) => (
-              <Toast
-                severity="info"
-                marginBottom="medium"
-                marginRight="xxxxlarge"
-              >
-                <span css={{ marginRight: theme.spacing.small }}>
-                  Time for a new update!
-                </span>
-                <a
-                  onClick={() => reloadApplication()}
-                  style={{
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                    color: theme.colors['action-link-inline'],
-                  }}
-                >
-                  Update now
-                </a>
-              </Toast>
-            )}
-          </WithApplicationUpdate>
-        )}
+        {isProduction && <ApplicationUpdateToast />}
         {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
         <Header />
         <Flex

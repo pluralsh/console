@@ -36,6 +36,7 @@ export default function Notification({
   return (
     <div
       css={{
+        width: '100%',
         backgroundColor: notification.readAt
           ? theme.colors['fill-one']
           : theme.colors['fill-two'],

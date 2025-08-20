@@ -127,6 +127,7 @@ export function NotificationsPanel({
           <Table
             flush
             hideHeader
+            fillLevel={1}
             fullHeightWrap
             padCells={false}
             rowBg="base"
