@@ -1,6 +1,6 @@
 apiVersion: v2
 name: datastore
 description: deploys the datastore operator for plural cd
-appVersion: 0.11.37
-version: 0.0.19
+appVersion: 0.11.38
+version: 0.0.20
 type: application
