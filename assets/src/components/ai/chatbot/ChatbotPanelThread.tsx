@@ -177,11 +177,11 @@ export function ChatbotPanelThread({
         />
       )}
       <ChatbotMessagesWrapperSC>
-        {isEmpty(messages) && !curThreadDetails?.session?.type ? (
+        {isEmpty(messages) &&
+        !sendingMessage &&
+        !curThreadDetails?.session?.type ? (
           error ? (
             <GqlError error={error} />
-          ) : sendingMessage ? (
-            <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
           ) : (
             <Body1P css={{ color: theme.colors['text-long-form'] }}>
               How can I help you?

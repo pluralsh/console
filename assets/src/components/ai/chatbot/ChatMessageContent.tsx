@@ -440,6 +440,7 @@ function ToolMessageContent({
       direction="column"
       gap="xsmall"
       align="flex-end"
+      width="100%"
     >
       <CaptionP $color="text-xlight">
         {pendingConfirmation
