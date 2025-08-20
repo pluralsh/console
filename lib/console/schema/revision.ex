@@ -18,6 +18,13 @@ defmodule Console.Schema.Revision do
     timestamps()
   end
 
+  def dangling(query \\ __MODULE__) do
+    from(r in query,
+      join: t in assoc(r, :template),
+      where: r.id != t.revision_id
+    )
+  end
+
   def for_sha(query \\ __MODULE__, sha) do
     from(r in query, where: r.sha == ^sha)
   end

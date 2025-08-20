@@ -590,7 +590,7 @@ defmodule Console.Deployments.Global do
     start_transaction()
     |> add_operation(:revision, fn _ ->
       case Repo.preload(template, [:revision]) do
-        %Revision{} = rev -> {:ok, rev}
+        %ServiceTemplate{revision: %Revision{} = rev} -> {:ok, rev}
         _ -> Repo.insert(%Revision{template_id: template.id, version: "0.1.0"})
       end
     end)
