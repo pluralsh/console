@@ -98,6 +98,7 @@ defmodule Console.Schema.Cluster do
     field :distro,          Distro, default: :generic
     field :metadata,        :map
     field :health_score,    :integer
+    field :ping_interval,   :integer
 
     field :version,         :string
     field :current_version, :string
@@ -167,6 +168,13 @@ defmodule Console.Schema.Cluster do
   end
 
   def healthy?(%__MODULE__{pinged_at: nil}), do: false
+
+  def healthy?(%__MODULE__{ping_interval: interval, pinged_at: pinged}) when is_integer(interval) do
+    Timex.now()
+    |> Timex.shift(seconds: -interval * 3)
+    |> Timex.before?(pinged)
+  end
+
   def healthy?(%__MODULE__{pinged_at: pinged}) do
     Timex.now()
     |> Timex.shift(minutes: -20)
@@ -476,7 +484,7 @@ defmodule Console.Schema.Cluster do
       attrs,
       ~w(pinged_at distro health_score kubelet_version current_version
          installed openshift_version node_count pod_count namespace_count
-         cpu_total memory_total cpu_util memory_util availability_zones)a
+         cpu_total memory_total cpu_util memory_util availability_zones ping_interval)a
     )
     |> cast_assoc(:insight_components)
     |> cast_assoc(:node_statistics)

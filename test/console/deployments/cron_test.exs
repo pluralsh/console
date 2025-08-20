@@ -304,7 +304,7 @@ defmodule Console.Deployments.CronTest do
 
       del = insert_list(3, :service_template)
 
-      {3, _} = Cron.prune_dangling_templates()
+      :ok = Cron.prune_dangling_templates()
 
       assert refetch(tpl)
       assert refetch(tpl2)

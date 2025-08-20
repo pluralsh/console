@@ -27,6 +27,6 @@ defmodule Console.AI.Tools.Agent.Role do
 
   def implement(%__MODULE__{role: role}) do
     with {:ok, _} <- update_session(%{type: role}),
-      do: {:ok, "Role changed to #{role}"}
+      do: Jason.encode(%{role: role})
   end
 end

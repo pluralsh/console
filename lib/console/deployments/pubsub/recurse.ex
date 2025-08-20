@@ -59,7 +59,7 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.GlobalServiceCreated, Console.PubSub.GlobalServiceUpdated] do
   alias Console.Deployments.Global
 
-  def process(%{item: global}), do: Global.sync_clusters(global)
+  def process(%{item: global}), do: Global.enqueue(global)
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.ManagedNamespaceCreated, Console.PubSub.ManagedNamespaceUpdated] do

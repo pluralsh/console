@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -216,7 +217,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -472,6 +473,9 @@ func (r *ServiceDeploymentReconciler) svcConfiguration(ctx context.Context, serv
 			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
 		}
 	}
+	slices.SortFunc(configuration, func(a, b *console.ConfigAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 	return configuration, hasConfig, nil
 }
 

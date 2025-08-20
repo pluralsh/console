@@ -1,9 +1,9 @@
 defmodule Console.Deployments.Global do
   use Console.Services.Base
   import Console.Deployments.Policies
-  import Console, only: [clean: 1, clamp: 1]
+  import Console, only: [clean: 1]
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services}
   alias Console.Services.Users
   alias Console.Schema.{
     GlobalService,
@@ -39,6 +39,12 @@ defmodule Console.Deployments.Global do
     |> Repo.all()
   end
   def fetch_contexts(_), do: []
+
+  def enqueue(%GlobalService{} = global) do
+    global
+    |> Ecto.Changeset.change(%{next_poll_at: Timex.now()})
+    |> Repo.update()
+  end
 
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
@@ -323,7 +329,7 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 10)
     |> Stream.map(fn
       {:ok, res} -> res
       _ -> nil
@@ -341,7 +347,6 @@ defmodule Console.Deployments.Global do
     |> (fn s -> MapSet.difference(service_ids, s) end).()
     |> MapSet.to_list()
     |> maybe_drain(global)
-    next_poll(global)
     :ok
   end
 
@@ -585,7 +590,7 @@ defmodule Console.Deployments.Global do
     start_transaction()
     |> add_operation(:revision, fn _ ->
       case Repo.preload(template, [:revision]) do
-        %Revision{} = rev -> {:ok, rev}
+        %ServiceTemplate{revision: %Revision{} = rev} -> {:ok, rev}
         _ -> Repo.insert(%Revision{template_id: template.id, version: "0.1.0"})
       end
     end)

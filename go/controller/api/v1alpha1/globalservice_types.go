@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"slices"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -162,6 +165,10 @@ func (gss *GlobalServiceSpec) TagsAttribute() []*console.TagAttributes {
 			Value: v,
 		})
 	}
+
+	slices.SortFunc(tags, func(a, b *console.TagAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 
 	return tags
 }

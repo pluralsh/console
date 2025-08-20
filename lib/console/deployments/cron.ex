@@ -21,7 +21,8 @@ defmodule Console.Deployments.Cron do
     ClusterAuditLog,
     PolicyConstraint,
     VulnerabilityReport,
-    ServiceTemplate
+    ServiceTemplate,
+    Revision
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -273,8 +274,25 @@ defmodule Console.Deployments.Cron do
   end
 
   def prune_dangling_templates() do
+    Revision.dangling()
+    |> Revision.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 1)
+    |> Task.async_stream(fn rev ->
+      Logger.info "pruning dangling revision #{rev.id}"
+      Repo.delete(rev, timeout: 10_000)
+    end, max_concurrency: 10)
+    |> Stream.run()
+
     ServiceTemplate.dangling()
-    |> Repo.delete_all(timeout: 300_000)
+    |> ServiceTemplate.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 1)
+    |> Task.async_stream(fn template ->
+      Logger.info "pruning dangling template #{template.id}"
+      Repo.delete(template, timeout: 10_000)
+    end, max_concurrency: 10)
+    |> Stream.run()
   end
 
   def add_ignore_crds(search) do

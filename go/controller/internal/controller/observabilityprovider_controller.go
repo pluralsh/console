@@ -231,7 +231,7 @@ func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Co
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (in *ObservabilityProviderReconciler) credentials(

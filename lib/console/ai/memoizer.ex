@@ -80,12 +80,15 @@ defmodule Console.AI.Memoizer do
       }
     else
       {:error, error} ->
-        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}}
+        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}, ai_poll_at: next_poll_at()}
     end
   end
 
   defp gen_error(%schema{} = model, error) do
-    schema.changeset(model, %{insight: %{errors: [%{source: "evidence", message: error}]}})
+    schema.changeset(model, %{
+      ai_poll_at: next_poll_at(),
+      insight: %{errors: [%{source: "evidence", message: error}]}
+    })
     |> Repo.update()
   end
 
@@ -98,8 +101,7 @@ defmodule Console.AI.Memoizer do
   @poll_duration 10 * 60 # 10 minutes
 
   defp next_poll_at() do
-    duration = Duration.new!(second: @poll_duration)
-    jittered = Duration.add(duration, Duration.new!(second: Console.jitter(floor(@poll_duration / 2))))
-    DateTime.shift(DateTime.utc_now(), jittered)
+    duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
+    DateTime.shift(DateTime.utc_now(), duration)
   end
 end

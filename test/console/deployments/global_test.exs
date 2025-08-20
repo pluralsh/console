@@ -72,6 +72,16 @@ defmodule Console.Deployments.GlobalTest do
 
       assert global.name == "templated"
 
+      {:ok, updated} = Global.update(%{
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "dev", folder: "k8s"},
+        }
+      }, global.id, admin_user())
+
+      assert updated.template.git.ref == "dev"
+      assert updated.template.revision_id == global.template.revision_id
+
       {:ok, deleted} = Global.delete(global.id, admin_user())
 
       assert deleted.id == global.id

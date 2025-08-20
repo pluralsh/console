@@ -193,7 +193,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {

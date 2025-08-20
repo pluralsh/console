@@ -8,7 +8,7 @@ defmodule Console do
 
   def version(), do: conf(:version)
 
-  def clamp(val, min \\ 5, max \\ 100) do
+  def clamp(val, min \\ 5, max \\ 50) do
     max(val, min)
     |> min(max)
   end

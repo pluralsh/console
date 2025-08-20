@@ -5770,6 +5770,9 @@ input ClusterPing {
 
   memoryUtil: Float
 
+  "the interval in seconds between pings to the cluster"
+  pingInterval: Int
+
   availabilityZones: [String]
 
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
@@ -6299,6 +6302,9 @@ type Cluster {
 
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
+
+  "the interval in seconds between pings to the cluster"
+  pingInterval: Int
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String

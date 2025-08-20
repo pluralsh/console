@@ -107,7 +107,7 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(persona.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(), nil
 }
 
 func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *v1alpha1.Persona) *ctrl.Result {

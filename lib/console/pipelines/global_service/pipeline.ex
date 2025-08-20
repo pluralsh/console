@@ -5,6 +5,7 @@ defmodule Console.Pipelines.GlobalService.Pipeline do
 
   def handle_event(global) do
     Logger.info "Syncing global service #{global.id}"
+    Global.next_poll(global)
     Global.sync_clusters(global)
   end
 end

@@ -11,6 +11,9 @@ const BUNDLED_GIT_COMMIT = import.meta.env.VITE_GIT_COMMIT
 export function ApplicationUpdateToast() {
   const theme = useTheme()
   const { configuration: config } = useContext(LoginContext)
+  console.log(
+    `Current git commit for frontend: ${BUNDLED_GIT_COMMIT}, server: ${config?.gitCommit}`
+  )
 
   return (
     <Toast
