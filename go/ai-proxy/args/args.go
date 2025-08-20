@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	envProviderToken          = "PROVIDER_TOKEN"
+	envProviderToken          = "PROVIDER_TOKENS"
 	envProviderServiceAccount = "PROVIDER_SERVICE_ACCOUNT"
 	envProviderAWSRegion      = "PROVIDER_AWS_REGION"
 
@@ -27,7 +27,7 @@ const (
 var (
 	argProvider               = pflag.String("provider", defaultProvider.String(), "Provider name. Must be one of: ollama, openai, vertex. Defaults to 'ollama' type API.")
 	argProviderHost           = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
-	argProviderTokens         = pflag.StringSlice("provider-tokens", []string{helpers.GetPluralEnv(envProviderToken, "")}, "Provider tokens used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
+	argProviderTokens         = pflag.StringSlice("provider-tokens", helpers.GetPluralEnvSlice(envProviderToken, []string{}), "Provider tokens used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
 	argProviderServiceAccount = pflag.String("provider-service-account", helpers.GetPluralEnv(envProviderServiceAccount, ""), "Provider service account file used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_SERVICE_ACCOUNT env var.")
 	argsProviderAWSRegion     = pflag.String("provider-aws-region", helpers.GetPluralEnv(envProviderAWSRegion, ""), "Provider AWS region used to connect to BedRock API.")
 	argPort                   = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")

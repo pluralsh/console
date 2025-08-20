@@ -2,7 +2,6 @@ package openai
 
 import (
 	"fmt"
-	"net/http"
 	"net/http/httputil"
 	"net/url"
 
@@ -27,10 +26,6 @@ func NewOpenAIEmbeddingsProxy(host string, tokenRotator *RoundRobinTokenRotator)
 	}
 
 	reverse := &httputil.ReverseProxy{
-		Transport: &RetryTransport{
-			tokenRotator: tokenRotator,
-			base:         http.DefaultTransport,
-		},
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.Out.Header.Set("Authorization", "Bearer "+tokenRotator.GetNextToken())
 
