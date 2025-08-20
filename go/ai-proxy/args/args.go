@@ -77,19 +77,8 @@ func ProviderHost() string {
 }
 
 func ProviderCredentials() []string {
-	// if len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
-	// 	return *argProviderTokens
-	// }
-	if Provider() == api.ProviderOpenAI {
-		klog.V(log.LogLevelDebug).InfoS(
-			"provider tokens debug",
-			"tokens", *argProviderTokens,
-			"flag_defined", pflag.Lookup("provider-tokens") != nil,
-			"flag_changed", pflag.Lookup("provider-tokens").Changed,
-		)
-		if len(*argProviderTokens) > 0 {
-			return *argProviderTokens
-		}
+	if len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
+		return *argProviderTokens
 	}
 
 	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
