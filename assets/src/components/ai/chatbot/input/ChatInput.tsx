@@ -11,7 +11,7 @@ import {
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
-import { AiRole, useAddChatContextMutation } from 'generated/graphql.ts'
+import { useAddChatContextMutation } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -23,10 +23,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { useInterval } from 'usehooks-ts'
+import styled from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
-import { ChatMessage } from '../ChatMessage.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
@@ -237,25 +235,3 @@ const ChipListSC = styled.div(({ theme }) => ({
   maxWidth: 256,
   minWidth: 0,
 }))
-
-export function GeneratingResponseMessage() {
-  const theme = useTheme()
-  const [dots, setDots] = useState('.')
-
-  useInterval(() => {
-    setDots((prev) => {
-      if (prev === '.') return '..'
-      if (prev === '..') return '...'
-      return '.'
-    })
-  }, 240)
-
-  return (
-    <ChatMessage
-      content={`Generating response${dots}`}
-      role={AiRole.Assistant}
-      disableActions
-      contentStyles={{ alignSelf: 'center', color: theme.colors['text-light'] }}
-    />
-  )
-}

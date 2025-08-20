@@ -48,7 +48,7 @@ export function VirtualList<T, M>({
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
-  const shouldStickToBottom = useRef(false)
+  const shouldStickToBottom = useRef(true)
 
   // initially align to top normally, or bottom if reversed
   useLayoutEffect(() => {
@@ -86,8 +86,12 @@ export function VirtualList<T, M>({
   )
   return (
     <VList
-      // only shift when infinite scrolling up
-      shift={isReversed && (internalRef.current?.scrollOffset ?? Infinity) < 50}
+      // only shift when infinite scrolling up (and not currently at the bottom)
+      shift={
+        isReversed &&
+        (internalRef.current?.scrollOffset ?? Infinity) < 50 &&
+        !shouldStickToBottom.current
+      }
       css={{ height: '100%', width: '100%' }}
       onScroll={onScroll}
       {...props}

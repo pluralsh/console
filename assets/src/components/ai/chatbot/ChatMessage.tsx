@@ -27,7 +27,7 @@ import {
 
 import { ComponentPropsWithRef, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
-import styled, { CSSObject, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
@@ -47,7 +47,6 @@ export function ChatMessage({
   serverName,
   disableActions,
   highlightToolContent,
-  contentStyles,
   updatedAt,
   session,
   ...props
@@ -65,7 +64,6 @@ export function ChatMessage({
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
   disableActions?: boolean
-  contentStyles?: CSSObject
   highlightToolContent?: boolean
   updatedAt?: Nullable<string>
   session?: Nullable<AgentSessionFragment>
@@ -82,49 +80,36 @@ export function ChatMessage({
     <ChatMessageSC
       $role={role}
       {...props}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
     >
-      <Flex
-        gap="medium"
-        justify={rightAlign ? 'flex-end' : 'flex-start'}
-      >
-        <div
-          onMouseEnter={() => setShowActions(true)}
-          onMouseLeave={() => setShowActions(false)}
-          css={{
-            overflow: 'hidden',
-            flex: rightAlign ? undefined : 1,
-            ...contentStyles,
-          }}
-        >
-          <ChatMessageContent
-            id={id ?? ''}
-            seq={seq}
-            showActions={showActions && !disableActions}
-            side={rightAlign ? 'right' : 'left'}
-            content={content ?? ''}
-            role={role}
-            threadId={threadId}
-            type={type}
-            attributes={attributes}
-            confirm={confirm}
-            confirmedAt={confirmedAt}
-            serverName={serverName}
-            highlightToolContent={highlightToolContent}
-            prAutomation={prAutomation}
-            session={session}
-          />
-          {type !== ChatType.File && (
-            <ChatMessageActions
-              id={id ?? ''}
-              seq={seq}
-              content={content ?? ''}
-              timestamp={updatedAt}
-              show={showActions && !disableActions}
-              side={rightAlign ? 'right' : 'left'}
-            />
-          )}
-        </div>
-      </Flex>
+      <ChatMessageContent
+        id={id ?? ''}
+        seq={seq}
+        showActions={showActions && !disableActions}
+        side={rightAlign ? 'right' : 'left'}
+        content={content ?? ''}
+        role={role}
+        threadId={threadId}
+        type={type}
+        attributes={attributes}
+        confirm={confirm}
+        confirmedAt={confirmedAt}
+        serverName={serverName}
+        highlightToolContent={highlightToolContent}
+        prAutomation={prAutomation}
+        session={session}
+      />
+      {type !== ChatType.File && (
+        <ChatMessageActions
+          id={id ?? ''}
+          seq={seq}
+          content={content ?? ''}
+          timestamp={updatedAt}
+          show={showActions && !disableActions}
+          side={rightAlign ? 'right' : 'left'}
+        />
+      )}
     </ChatMessageSC>
   )
 }
@@ -305,11 +290,12 @@ const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   containerType: 'inline-size',
   containerName: 'chat-message',
   display: 'flex',
+  overflow: 'hidden',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   position: 'relative',
   padding: theme.spacing.small,
   paddingBottom: $role === AiRole.Assistant ? theme.spacing.small : 0,
   width: '100%',
-  justifySelf: $role === AiRole.User ? 'flex-end' : 'flex-start',
+  alignItems: $role === AiRole.User ? 'flex-end' : 'flex-start',
 }))
