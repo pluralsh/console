@@ -1,14 +1,14 @@
 apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
-appVersion: 0.11.37
-version: 0.3.143
+appVersion: 0.11.39
+version: 0.3.144
 dependencies:
   - name: kas
     version: 0.3.0
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.142
+    version: 0.0.143
     repository: file://../controller
     condition: controller.enabled
   - name: kubernetes-dashboard
