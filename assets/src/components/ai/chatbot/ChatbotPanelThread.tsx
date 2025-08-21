@@ -12,7 +12,7 @@ import {
 import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -44,7 +44,13 @@ export function ChatbotPanelThread({
 }) {
   const theme = useTheme()
   const { readValue } = useCommandPaletteMessage()
-  const { currentThread: curThreadDetails, createNewThread } = useChatbot()
+  const {
+    currentThread: curThreadDetails,
+    currentThreadLoading,
+    createNewThread,
+    mutationLoading,
+  } = useChatbot()
+
   const threadId = curThreadDetails?.id
   const messageListRef = useRef<VListHandle | null>(null)
 
@@ -137,9 +143,16 @@ export function ChatbotPanelThread({
 
   // create a new thread if we're here and one doesn't exist
   useEffect(() => {
-    if (threadId) return
+    if (threadId || currentThreadLoading || mutationLoading || initLoading)
+      return
     createNewThread({ summary: 'New chat with Plural AI' })
-  }, [threadId, createNewThread])
+  }, [
+    createNewThread,
+    currentThreadLoading,
+    initLoading,
+    mutationLoading,
+    threadId,
+  ])
 
   useEffect(() => {
     const commandPalettePendingMessage = readValue()
@@ -147,7 +160,15 @@ export function ChatbotPanelThread({
     sendMessage(commandPalettePendingMessage)
   }, [readValue, sendMessage])
 
-  if (initLoading) return <LoadingIndicator />
+  if (initLoading || currentThreadLoading)
+    return (
+      <TableSkeleton
+        centered
+        numColumns={1}
+        width={500}
+        styles={{ padding: theme.spacing.xlarge }}
+      />
+    )
 
   return (
     <Flex
