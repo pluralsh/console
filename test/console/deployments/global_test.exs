@@ -67,6 +67,7 @@ defmodule Console.Deployments.GlobalTest do
         template: %{
           repository_id: git.id,
           git: %{ref: "main", folder: "k8s"},
+          configuration: [%{name: "name", value: "value"}]
         }
       }, admin_user())
 
@@ -76,6 +77,7 @@ defmodule Console.Deployments.GlobalTest do
         template: %{
           repository_id: git.id,
           git: %{ref: "dev", folder: "k8s"},
+          configuration: [%{name: "name", value: "value2"}]
         }
       }, global.id, admin_user())
 
