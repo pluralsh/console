@@ -8,9 +8,9 @@ import {
   Radio,
   RadioGroup,
   Select,
+  SelectPropsSingle,
   Switch,
   Toast,
-  SelectPropsSingle,
 } from '@pluralsh/design-system'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -22,14 +22,19 @@ import {
 import {
   AiProvider,
   AiSettingsAttributes,
-  useClearChatHistoryMutation,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
+import { produce } from 'immer'
+import merge from 'lodash/merge'
+import pick from 'lodash/pick'
 import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { produce } from 'immer'
 import { PartialDeep } from 'type-fest'
-import merge from 'lodash/merge'
+import {
+  AIVerbosityLevel,
+  useExplainWithAIContext,
+} from '../../ai/AIContext.tsx'
+import { GqlError } from '../../utils/Alert.tsx'
 import {
   AnthropicSettings,
   AzureSettings,
@@ -40,12 +45,6 @@ import {
   validateAttributes,
   VertexSettings,
 } from './GlobalSettingsAIProviders.tsx'
-import { GqlError } from '../../utils/Alert.tsx'
-import pick from 'lodash/pick'
-import {
-  AIVerbosityLevel,
-  useExplainWithAIContext,
-} from '../../ai/AIContext.tsx'
 
 const updateSettings = produce(
   (
@@ -171,11 +170,6 @@ export function GlobalSettingsAiProvider() {
     mutation()
   }
 
-  const [
-    clearChatHistory,
-    { loading: clearingChatHistory, error: errorClearingChatHistory },
-  ] = useClearChatHistoryMutation()
-
   return (
     <ScrollablePage>
       <Flex
@@ -187,9 +181,6 @@ export function GlobalSettingsAiProvider() {
           onSubmit={handleSubmit}
         >
           {error && <GqlError error={error} />}
-          {errorClearingChatHistory && (
-            <GqlError error={errorClearingChatHistory} />
-          )}
           <Flex justifyContent={'space-between'}>
             <Switch
               checked={enabled}
@@ -197,13 +188,6 @@ export function GlobalSettingsAiProvider() {
             >
               Enable AI insights
             </Switch>
-            <Button
-              secondary
-              loading={clearingChatHistory}
-              onClick={() => clearChatHistory()}
-            >
-              Clear chat history
-            </Button>
           </Flex>
           <FormField label="AI provider">
             <SelectWithDisable
