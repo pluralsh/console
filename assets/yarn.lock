@@ -245,9 +245,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.13.8":
-  version: 3.13.8
-  resolution: "@apollo/client@npm:3.13.8"
+"@apollo/client@npm:3.14.0":
+  version: 3.14.0
+  resolution: "@apollo/client@npm:3.14.0"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     "@wry/caches": ^1.0.0
@@ -277,7 +277,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 39f058c2681aaa1f95275d8e856976fb1e15f30bdac33758d3cf3c8dc08f111c1cdfa3a30a777ad1088b950cb94336197a81d136a43faa7470cbf2c9746f53ce
+  checksum: 682a8c8103c80940ee89e0f5d6a5dba3d47dd6915b7016f4d19bcebabbe8c6d0d52ca9ff9598d50d4bc0711f8ef66b4f9b8e832494244bcdf3b91377e489e293
   languageName: node
   linkType: hard
 
@@ -10188,7 +10188,7 @@ __metadata:
   resolution: "console@workspace:."
   dependencies:
     "@absinthe/socket": 0.2.1
-    "@apollo/client": 3.13.8
+    "@apollo/client": 3.14.0
     "@apollo/sandbox": 2.7.0
     "@cypress/webpack-preprocessor": 5.17.1
     "@dagrejs/dagre": 1.0.4
