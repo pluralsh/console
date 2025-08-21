@@ -58,7 +58,7 @@ export function TableSkeleton({
       <svg
         width={width + theme.spacing.large * numColumns}
         height={height}
-        viewBox={`0 0 ${width + theme.spacing.large * numColumns} ${height}`}
+        viewBox={`0 0 ${width + theme.spacing.large * (numColumns - 1)} ${height}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >

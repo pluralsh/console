@@ -1,11 +1,4 @@
-import {
-  Dispatch,
-  SetStateAction,
-  ReactNode,
-  useState,
-  useMemo,
-  createContext,
-} from 'react'
+import { createContext, ReactNode, useMemo, useState } from 'react'
 
 export enum CommandPaletteTab {
   History = 'History',
@@ -14,16 +7,14 @@ export enum CommandPaletteTab {
 
 type CommandPaletteContextType = {
   cmdkOpen: boolean
-  setCmdkOpen: Dispatch<SetStateAction<boolean>>
+  setCmdkOpen: (open: boolean, initialTab?: CommandPaletteTab) => void
   initialTab: CommandPaletteTab
-  setInitialTab: Dispatch<SetStateAction<CommandPaletteTab>>
 }
 
 export const CommandPaletteContext = createContext<CommandPaletteContextType>({
   cmdkOpen: false,
   setCmdkOpen: () => {},
   initialTab: CommandPaletteTab.Commands,
-  setInitialTab: () => {},
 })
 
 export function CommandPaletteProvider({ children }: { children: ReactNode }) {
@@ -34,9 +25,11 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
   const ctx = useMemo(
     () => ({
       cmdkOpen,
+      setCmdkOpen: (open, initialTab) => {
+        setCmdkOpen(open)
+        setInitialTab(initialTab ?? CommandPaletteTab.Commands)
+      },
       initialTab,
-      setCmdkOpen,
-      setInitialTab,
     }),
     [cmdkOpen, initialTab]
   )

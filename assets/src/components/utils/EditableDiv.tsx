@@ -15,6 +15,7 @@ export function EditableDiv({
   initialValue,
   setValue,
   onEnter,
+  onKeyDown: onKeyDownProp,
   placeholder,
   ...props
 }: {
@@ -49,6 +50,7 @@ export function EditableDiv({
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
+      onKeyDownProp?.(e)
       // for handling enter key when onEnter callback is defined
       // if any modifier key is pressed, just allow default behavior (which is adding a new line usually)
       if (e.key === 'Enter' && onEnter) {
@@ -57,7 +59,7 @@ export function EditableDiv({
         onEnter?.()
       }
     },
-    [onEnter]
+    [onEnter, onKeyDownProp]
   )
 
   const onPaste = useCallback(

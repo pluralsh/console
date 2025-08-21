@@ -11,10 +11,13 @@ import {
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
-import { useAddChatContextMutation } from 'generated/graphql.ts'
+import {
+  ChatThreadDetailsFragment,
+  useAddChatContextMutation,
+} from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
-  ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
   Dispatch,
   FormEvent,
   SetStateAction,
@@ -29,8 +32,11 @@ import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { mergeRefs } from 'react-merge-refs'
 
 export function ChatInput({
+  ref,
+  currentThread,
   sendMessage,
   serverNames,
   enableExamplePrompts = true,
@@ -41,6 +47,7 @@ export function ChatInput({
   stateless = false,
   ...props
 }: {
+  currentThread?: Nullable<ChatThreadDetailsFragment>
   sendMessage: (newMessage: string) => void
   serverNames?: string[]
   enableExamplePrompts?: boolean
@@ -49,9 +56,8 @@ export function ChatInput({
   placeholder?: string
   onValueChange?: Dispatch<string>
   stateless?: boolean
-} & ComponentPropsWithoutRef<'div'>) {
-  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen, currentThread } =
-    useChatbot()
+} & Partial<ComponentPropsWithRef<typeof EditableDiv>>) {
+  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId
@@ -142,7 +148,7 @@ export function ChatInput({
           onEnter={() => formRef.current?.requestSubmit()}
           css={{ maxHeight: 130 }}
           {...props}
-          ref={contentEditableRef}
+          ref={mergeRefs([contentEditableRef, ref])}
         />
         <Flex justifyContent="space-between">
           <Flex

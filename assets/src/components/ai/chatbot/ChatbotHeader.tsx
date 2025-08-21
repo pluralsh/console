@@ -28,7 +28,7 @@ import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
-  const { setCmdkOpen, setInitialTab } = use(CommandPaletteContext)
+  const { setCmdkOpen } = use(CommandPaletteContext)
   const {
     currentThreadId,
     currentThread,
@@ -96,10 +96,7 @@ export function ChatbotHeader() {
             icon={<HistoryIcon />}
             type="tertiary"
             tooltip="View chat history"
-            onClick={() => {
-              setCmdkOpen(true)
-              setInitialTab(CommandPaletteTab.History)
-            }}
+            onClick={() => setCmdkOpen(true, CommandPaletteTab.History)}
           />
           <ChatbotThreadMoreMenu />
           <IconFrame

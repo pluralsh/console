@@ -66,6 +66,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { useThrottle } from 'components/hooks/useThrottle.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -73,6 +74,9 @@ export type CommandGroup = {
 }
 
 export type Command = {
+  // Command unique id.
+  id: string
+
   // Command label.
   label: string
 
@@ -133,7 +137,7 @@ export function useCommands({
 }: {
   showHidden?: boolean
   filter?: string
-} = {}): CommandGroup[] {
+}): CommandGroup[] {
   const open = useShareSecretOpen()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
@@ -161,6 +165,7 @@ export function useCommands({
           ...(!featureFlags.Edge
             ? [
                 {
+                  id: 'enable-edge',
                   label: 'Enable Edge',
                   icon: EdgeComputeIcon,
                   callback: () => setFeatureFlag('Edge', true),
@@ -179,6 +184,7 @@ export function useCommands({
       {
         commands: [
           {
+            id: 'home',
             label: 'Home',
             icon: HomeIcon,
             callback: () => navigate('/'),
@@ -187,6 +193,7 @@ export function useCommands({
             autoFocus: true,
           },
           {
+            id: 'cd',
             label: 'Continuous deployment (CD)',
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
@@ -194,6 +201,7 @@ export function useCommands({
             hotkeys: ['shift C'],
           },
           {
+            id: 'stacks',
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
@@ -201,6 +209,7 @@ export function useCommands({
             hotkeys: ['shift S'],
           },
           {
+            id: 'service-catalog',
             label: 'Service catalog',
             icon: CatalogIcon,
             callback: () => navigate(CATALOGS_ABS_PATH),
@@ -208,6 +217,7 @@ export function useCommands({
             hotkeys: ['shift S+C'],
           },
           {
+            id: 'kubernetes-dashboard',
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
             callback: () => navigate(KUBERNETES_ROOT_PATH),
@@ -215,6 +225,7 @@ export function useCommands({
             hotkeys: ['shift K'],
           },
           {
+            id: 'plural-ai',
             label: 'Plural AI',
             icon: AiSparkleOutlineIcon,
             callback: () => navigate(AI_ABS_PATH),
@@ -223,6 +234,7 @@ export function useCommands({
           },
 
           {
+            id: 'flows',
             label: 'Flows',
             icon: FlowIcon,
             callback: () => navigate(FLOWS_ABS_PATH),
@@ -232,6 +244,7 @@ export function useCommands({
           ...(featureFlags.Edge
             ? [
                 {
+                  id: 'edge',
                   label: 'Edge',
                   icon: EdgeComputeIcon,
                   callback: () => navigate(EDGE_ABS_PATH),
@@ -241,6 +254,7 @@ export function useCommands({
               ]
             : []),
           {
+            id: 'pull-requests',
             label: "Pull requests (PR's)",
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
@@ -248,12 +262,14 @@ export function useCommands({
             hotkeys: ['shift P+R'],
           },
           {
+            id: 'security',
             label: 'Security',
             icon: WarningShieldIcon,
             callback: () => navigate(SECURITY_ABS_PATH),
             deps: [navigate],
           },
           {
+            id: 'cost-management',
             label: 'Cost Management',
             icon: CostManagementIcon,
             callback: () => navigate(COST_MANAGEMENT_ABS_PATH),
@@ -261,6 +277,7 @@ export function useCommands({
             hotkeys: ['shift C+M'],
           },
           {
+            id: 'settings',
             label: 'Settings',
             icon: GearTrainIcon,
             callback: () => navigate(SETTINGS_ABS_PATH),
@@ -271,6 +288,7 @@ export function useCommands({
       {
         commands: [
           {
+            id: 'clusters',
             prefix: 'CD >',
             label: 'Clusters',
             icon: ClusterIcon,
@@ -279,6 +297,7 @@ export function useCommands({
             hotkeys: ['G then C'],
           },
           {
+            id: 'pods',
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: PodContainerIcon,
@@ -295,6 +314,7 @@ export function useCommands({
             hotkeys: ['G then P'],
           },
           {
+            id: 'services',
             prefix: 'CD >',
             label: 'Services',
             icon: ToolsIcon,
@@ -303,6 +323,7 @@ export function useCommands({
             hotkeys: ['G then S'],
           },
           {
+            id: 'pr-automations',
             prefix: "PR's >",
             label: 'PR automations',
             icon: PrQueueIcon,
@@ -311,6 +332,7 @@ export function useCommands({
             hotkeys: ['G then A'],
           },
           {
+            id: 'user-management',
             prefix: 'Settings >',
             label: 'User management',
             icon: PeopleIcon,
@@ -323,6 +345,7 @@ export function useCommands({
       {
         commands: [
           {
+            id: 'open-docs',
             label: 'Open docs',
             icon: DocumentIcon,
             rightIcon: ArrowTopRightIcon,
@@ -335,6 +358,7 @@ export function useCommands({
       {
         commands: [
           {
+            id: 'share-secret',
             label: 'Share secret',
             icon: EyeIcon,
             callback: open,
@@ -342,6 +366,7 @@ export function useCommands({
             hotkeys: ['C then S'],
           },
           {
+            id: 'switch-mode',
             label: `Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`,
             icon: SprayIcon,
             callback: () =>
@@ -384,41 +409,38 @@ export function useCommands({
 }
 
 export function useHistory({
-  skip = false,
   filter,
   component,
 }: {
-  skip?: boolean
   filter: string
   component?: (thread: ChatThreadTinyFragment) => ReactElement
 }): {
   loading: boolean
-  history: Array<CommandGroup>
+  history: Command[]
   fetchNextPage: Dispatch<void>
   pageInfo: PageInfoFragment
 } {
   const { goToThread } = useChatbot()
+
+  const throttledFilter = useThrottle(filter, 300)
   const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
     {
-      skip,
       pollInterval: 60_000,
       queryHook: useChatThreadsQuery,
       keyPath: ['chatThreads'],
+      pageSize: 50,
     },
-    {
-      first: 25,
-      q: isEmpty(filter) ? undefined : filter,
-    }
+    { q: isEmpty(throttledFilter) ? undefined : throttledFilter }
   )
 
   const threads = useMemo(
     () => mapExistingNodes(data?.chatThreads),
     [data?.chatThreads]
   )
-
   const history = threads.map((thread) => {
     return {
-      label: thread?.summary ?? 'Untitled',
+      id: thread.id,
+      label: thread.summary,
       icon: ChatOutlineIcon,
       callback: () => {
         if (thread?.id) goToThread(thread.id)
@@ -429,5 +451,10 @@ export function useHistory({
     } as Command
   })
 
-  return { loading, history: [{ commands: history }], fetchNextPage, pageInfo }
+  return {
+    loading: loading && !data,
+    history,
+    fetchNextPage,
+    pageInfo,
+  }
 }

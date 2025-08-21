@@ -5,66 +5,60 @@ import {
   Flex,
   Input,
   ReturnIcon,
-  useResizeObserver,
 } from '@pluralsh/design-system'
-import { Command } from 'cmdk'
-import { isEmpty } from 'lodash'
 import {
   Dispatch,
   KeyboardEvent,
-  ReactElement,
   SetStateAction,
   use,
   useCallback,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import { VariableSizeList } from 'react-window'
 import { useTheme } from 'styled-components'
-import {
-  ChatThreadTinyFragment,
-  PageInfoFragment,
-} from '../../generated/graphql.ts'
+import { ChatThreadTinyFragment } from '../../generated/graphql.ts'
 import { fromNow } from '../../utils/datetime.ts'
 import { useChatbot } from '../ai/AIContext.tsx'
 import { AITableActions } from '../ai/AITableActions.tsx'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
-import usePersistedSessionState from '../hooks/usePersistedSessionState.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import { StandardScroller } from '../utils/SmoothScroller.tsx'
-import { Body1BoldP, CaptionP } from '../utils/typography/Text.tsx'
+import { Body1BoldP, Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import {
   CommandPaletteContext,
   CommandPaletteTab,
 } from './CommandPaletteContext.tsx'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
-import { CommandGroup, useCommands, useHistory } from './commands.ts'
+import { Command } from 'cmdk'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { isEmpty } from 'lodash'
+import {
+  type Command as CommandT,
+  CommandGroup,
+  useCommands,
+  useHistory,
+} from './commands.ts'
 
 export default function CommandPalette() {
   const aiEnabled = useAIEnabled()
   const theme = useTheme()
-  const { setCmdkOpen, initialTab, setInitialTab } = use(CommandPaletteContext)
-  const [value, setValue] = useState('')
+  const { setCmdkOpen, initialTab } = use(CommandPaletteContext)
+  const onCmdKClose = () => setCmdkOpen(false)
+
+  const [tab, setTab] = useState<CommandPaletteTab>(initialTab)
+  const [cmdValue, setCmdValue] = useState('')
+  const [historyValue, setHistoryValue] = useState('')
+
   // only show hidden commands if the user has typed something
-  const commands = useCommands({ showHidden: value.length > 0, filter: value })
-  const [tab, setTabState] = useState<CommandPaletteTab>(initialTab)
-  // helps persist tab state while still allowing override to launch a specific tab
-  const setTab = useCallback(
-    (tab: CommandPaletteTab) => {
-      setTabState(tab)
-      setInitialTab(tab)
-    },
-    [setInitialTab]
-  )
+  const commands = useCommands({
+    showHidden: cmdValue.length > 0,
+    filter: cmdValue,
+  })
 
   const { loading, history, fetchNextPage, pageInfo } = useHistory({
-    skip: tab !== CommandPaletteTab.History,
-    filter: value,
+    filter: historyValue,
     component: (thread) => (
       <HistoryItem
         key={thread.id}
@@ -91,38 +85,34 @@ export default function CommandPalette() {
     [aiEnabled]
   )
 
-  const items: Array<CommandGroup> = useMemo(() => {
-    switch (tab) {
-      case CommandPaletteTab.History:
-        return history
-      case CommandPaletteTab.Commands:
-        return commands
-      default:
-        return commands
-    }
-  }, [commands, history, tab])
-
-  const hasItems =
-    items.length > 0 && items.some((item) => item.commands?.length > 0)
-
-  const showEmptyState = useMemo(
-    () => !loading && !hasItems,
-    [hasItems, loading]
+  const onScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const isNearBottom =
+        e.currentTarget.scrollTop + e.currentTarget.clientHeight >=
+        e.currentTarget.scrollHeight - 100
+      if (
+        isNearBottom &&
+        tab === CommandPaletteTab.History &&
+        pageInfo?.hasNextPage
+      ) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, pageInfo?.hasNextPage, tab]
   )
 
   return (
     <>
       <div id="cmdk-input-wrapper">
         <CommandAdvancedInput
-          placeholder={
-            aiEnabled
-              ? 'Search history, commands, or ask Plural AI a question...'
-              : 'Search commands...'
+          curTab={tab}
+          cmdValue={cmdValue}
+          onCmdValueChange={setCmdValue}
+          onHistoryValueChange={setHistoryValue}
+          onCmdKClose={onCmdKClose}
+          numItems={
+            tab === CommandPaletteTab.History ? history.length : commands.length
           }
-          onValueChange={setValue}
-          value={value}
-          setCmdkOpen={setCmdkOpen}
-          aiEnabled={aiEnabled}
         />
         {directory.length > 1 && (
           <div id="cmdk-input-tabs">
@@ -134,49 +124,19 @@ export default function CommandPalette() {
           </div>
         )}
       </div>
-      <Command.List
-        className={
-          tab === CommandPaletteTab.History ? 'cmdk-history' : 'cmdk-commands'
-        }
-      >
-        {loading && !hasItems && <LoadingIndicator />}
-        {showEmptyState && (
-          <div
-            css={{
-              alignItems: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.xxsmall,
-              height: '100%',
-              justifyContent: 'center',
-              padding: theme.spacing.xlarge,
-            }}
-          >
-            <Body1BoldP>No results found.</Body1BoldP>
-            <p
-              css={{
-                color: theme.colors['text-xlight'],
-                maxWidth: 480,
-                textAlign: 'center',
-              }}
-            >
-              Could not find any results matching: {value}
-            </p>
-          </div>
-        )}
+      <Command.List onScroll={onScroll}>
         {tab === CommandPaletteTab.History && (
           <CommandPaletteHistory
-            items={items}
+            history={history}
             loading={loading}
-            setCmdkOpen={setCmdkOpen}
-            pageInfo={pageInfo}
-            fetchNextPage={fetchNextPage}
+            value={historyValue}
           />
         )}
         {tab === CommandPaletteTab.Commands && (
           <CommandPaletteCommands
-            items={items}
-            setCmdkOpen={setCmdkOpen}
+            value={cmdValue}
+            items={commands}
+            onCmdKClose={onCmdKClose}
           />
         )}
       </Command.List>
@@ -207,193 +167,162 @@ export default function CommandPalette() {
   )
 }
 
-interface CommandPaletteHistoryProps {
-  items: Array<CommandGroup>
-  loading: boolean
-  pageInfo: PageInfoFragment
-  fetchNextPage: Dispatch<void>
-  setCmdkOpen: Dispatch<SetStateAction<boolean>>
-  modalReady?: boolean
-}
-
 function CommandPaletteHistory({
-  items,
+  history,
   loading,
-  pageInfo,
-  fetchNextPage,
-  setCmdkOpen,
-}: CommandPaletteHistoryProps): ReactElement {
-  const wrapperRef = useRef<HTMLDivElement | null>(null)
-  const [height, setHeight] = useState(0)
-  const [width, setWidth] = useState(0)
+  value,
+}: {
+  history: CommandT[]
+  loading: boolean
+  value: string
+}) {
+  const { setCmdkOpen } = use(CommandPaletteContext)
 
-  const [listRef, setListRef] = useState<VariableSizeList | null>(null)
-  const commands = useMemo(() => items.flatMap((i) => i.commands), [items])
-  const theme = useTheme()
+  if (loading)
+    return (
+      <TableSkeleton
+        centered
+        numColumns={1}
+        height={400}
+        width={750}
+      />
+    )
+  if (isEmpty(history)) return <CommandEmptyState value={value} />
 
-  useResizeObserver(wrapperRef, (entry) => {
-    setHeight(entry.height)
-    setWidth(entry.width)
-  })
-
-  return (
-    <>
-      <div
-        ref={wrapperRef}
-        css={{ minHeight: 500 }}
-      >
-        {/* TODO: replace with VirtualList */}
-        <StandardScroller
-          customHeight={height}
-          customWidth={width}
-          listRef={listRef}
-          setListRef={setListRef}
-          items={commands}
-          loading={loading}
-          placeholder={() => <div style={{ height: 50 }}></div>}
-          hasNextPage={pageInfo?.hasNextPage}
-          mapper={(command, { prev }, { index: idx }) => {
-            return (
-              <div
-                key={`${command?.prefix}${command?.label}${idx}`}
-                css={{
-                  ...(isEmpty(prev) ? { marginTop: theme.spacing.small } : {}),
-                }}
-              >
-                <Command.Item
-                  className="cmdk-history-item"
-                  tabIndex={0}
-                  key={`${command?.prefix}${command?.label}${idx}`}
-                  value={`${command?.prefix}${command?.label}${idx}`}
-                  disabled={command?.disabled}
-                  onSelect={() => {
-                    command.callback()
-                    setCmdkOpen(false)
-                  }}
-                >
-                  {command?.component ? command?.component : null}
-                </Command.Item>
-              </div>
-            )
-          }}
-          loadNextPage={fetchNextPage}
-          handleScroll={undefined}
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-      </div>
-    </>
-  )
-}
-
-interface CommandPaletteCommandsProps {
-  items: Array<CommandGroup>
-  setCmdkOpen: Dispatch<SetStateAction<boolean>>
-}
-
-function CommandPaletteCommands({
-  items,
-  setCmdkOpen,
-}: CommandPaletteCommandsProps): Array<ReactElement> {
-  return items?.map((group, i) => (
-    <div key={i}>
-      <Command.Group title={group.title}>
-        {group.commands.map((command, idx) => (
-          <Command.Item
-            tabIndex={0}
-            key={`${command.prefix}${command.label}${idx}`}
-            value={`${command.prefix}${command.label}${idx}`}
-            disabled={command.disabled}
-            onSelect={() => {
-              command.callback()
-              setCmdkOpen(false)
-            }}
-          >
-            {command.component ? (
-              command.component
-            ) : (
-              <>
-                <command.icon marginRight="xsmall" />
-                <span className="fade">{command.prefix}</span>
-                <span>{command.label}</span>
-                {command.rightIcon && (
-                  <command.rightIcon
-                    size={12}
-                    marginLeft="xxsmall"
-                  />
-                )}
-                <div css={{ flex: 1 }} />
-                <CommandPaletteShortcuts shortcuts={command.hotkeys} />
-              </>
-            )}
-          </Command.Item>
-        ))}
-      </Command.Group>
-      {i < (items?.filter((item) => item.commands?.length > 0)).length - 1 && (
-        <Command.Separator />
-      )}
-    </div>
+  return history.map((command) => (
+    <Command.Item
+      key={command.id}
+      className="cmdk-history-item"
+      tabIndex={0}
+      value={`${command.prefix}${command.label}-${command.id}`}
+      onSelect={() => {
+        command.callback()
+        setCmdkOpen(false)
+      }}
+    >
+      {command?.component ? command?.component : null}
+    </Command.Item>
   ))
 }
 
-interface CommandAdvancedInputProps {
-  placeholder: string
+function CommandPaletteCommands({
+  value,
+  items,
+  onCmdKClose,
+}: {
   value: string
-  onValueChange: Dispatch<SetStateAction<string>>
-  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
-  setCmdkOpen?: Dispatch<SetStateAction<boolean>>
-  aiEnabled?: Nullable<boolean>
+  items: Array<CommandGroup>
+  onCmdKClose: () => void
+}) {
+  const hasItems = items.some((group) => !isEmpty(group.commands))
+
+  return !hasItems ? (
+    <CommandEmptyState value={value} />
+  ) : (
+    items.map((group, i) => (
+      <div key={i}>
+        <Command.Group>
+          {group.commands.map((command, idx) => (
+            <Command.Item
+              tabIndex={0}
+              key={`${command.prefix}${command.label}${idx}`}
+              value={`${command.prefix}${command.label}${idx}`}
+              disabled={command.disabled}
+              onSelect={() => {
+                command.callback()
+                onCmdKClose()
+              }}
+            >
+              {command.component ? (
+                command.component
+              ) : (
+                <>
+                  <command.icon marginRight="xsmall" />
+                  <span className="fade">{command.prefix}</span>
+                  <span>{command.label}</span>
+                  {command.rightIcon && (
+                    <command.rightIcon
+                      size={12}
+                      marginLeft="xxsmall"
+                    />
+                  )}
+                  <div css={{ flex: 1 }} />
+                  <CommandPaletteShortcuts shortcuts={command.hotkeys} />
+                </>
+              )}
+            </Command.Item>
+          ))}
+        </Command.Group>
+        {i <
+          (items?.filter((item) => item.commands?.length > 0)).length - 1 && (
+          <Command.Separator />
+        )}
+      </div>
+    ))
+  )
 }
 
 function CommandAdvancedInput({
-  placeholder,
-  onValueChange,
-  value,
-  onKeyDown,
-  setCmdkOpen,
-  aiEnabled,
-  ...props
-}: CommandAdvancedInputProps): ReactElement {
+  curTab,
+  cmdValue,
+  onCmdValueChange,
+  onHistoryValueChange,
+  onCmdKClose,
+  numItems,
+}: {
+  curTab: CommandPaletteTab
+  cmdValue: string
+  onCmdValueChange: Dispatch<SetStateAction<string>>
+  onHistoryValueChange: Dispatch<SetStateAction<string>>
+  onCmdKClose?: () => void
+  numItems: number
+}) {
+  const { colors, borderRadiuses } = useTheme()
   const { createNewThread } = useChatbot()
-  const { setMessage: setPendingMessage } = useCommandPaletteMessage()
 
   const sendMessage = useCallback(
     (message: string) => {
-      createNewThread({
-        summary: 'New Chat with Plural AI',
-      }).then(() => {
-        setPendingMessage(message)
-        setCmdkOpen?.(false)
-      })
+      createNewThread({ summary: 'New Chat with Plural AI' }, message)
+      onCmdKClose?.()
     },
-    [createNewThread, setPendingMessage, setCmdkOpen]
+    [createNewThread, onCmdKClose]
   )
 
-  return aiEnabled ? (
+  // setting focus on the parent wrapper here makes hitting enter go to the highlighted thread instead of sending a new chat message
+  // hard to strike exactly the right balance here but this works pretty well
+  const onChatKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'ArrowDown' && numItems > 0) {
+        const parentWrapper = e.currentTarget.closest('[cmdk-root]')
+        if (parentWrapper instanceof HTMLElement) parentWrapper.focus()
+      }
+    },
+    [numItems]
+  )
+
+  return curTab === CommandPaletteTab.History ? (
     <ChatInput
+      stateless
       enableExamplePrompts={false}
-      onKeyDown={onKeyDown}
+      onKeyDown={onChatKeyDown}
       sendMessage={sendMessage}
-      placeholder={placeholder}
-      onValueChange={onValueChange}
-      stateless={true}
-      {...props}
+      placeholder="Search history or ask Plural AI a question..."
+      onValueChange={onHistoryValueChange}
     />
   ) : (
     <Input
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onValueChange(e.target.value)}
-      onKeyDown={onKeyDown}
+      placeholder="Search commands..."
+      value={cmdValue}
+      onChange={(e) => onCmdValueChange(e.target.value)}
+      css={{
+        background: colors['fill-zero'],
+        borderRadius: borderRadiuses.large,
+      }}
     />
   )
 }
 
-interface HistoryItemProps {
-  thread: ChatThreadTinyFragment
-}
-
-function HistoryItem({ thread }: HistoryItemProps): ReactElement {
+function HistoryItem({ thread }: { thread: ChatThreadTinyFragment }) {
   const { currentThreadId } = useChatbot()
   const timestamp = getThreadOrPinTimestamp(thread)
 
@@ -417,22 +346,22 @@ function HistoryItem({ thread }: HistoryItemProps): ReactElement {
   )
 }
 
-export const useCommandPaletteMessage = () => {
-  const [message, setMessage] = usePersistedSessionState(
-    'commandPalettePendingChatMessage',
-    ''
+const CommandEmptyState = ({ value }: { value: string }) => {
+  return (
+    <Flex
+      direction="column"
+      gap="xxsmall"
+      padding="xlarge"
+      align="center"
+      textAlign="center"
+    >
+      <Body1BoldP>No results found.</Body1BoldP>
+      <Body2P
+        $color="text-xlight"
+        css={{ maxWidth: 480, wordBreak: 'break-word' }}
+      >
+        Could not find any results matching: {value}
+      </Body2P>
+    </Flex>
   )
-  const processedRef = useRef<string>('')
-
-  const readValue = useCallback(() => {
-    if (!message || processedRef.current === message) {
-      return ''
-    }
-
-    processedRef.current = message
-    setMessage('')
-    return message
-  }, [message, setMessage])
-
-  return { readValue, setMessage }
 }
