@@ -336,10 +336,6 @@ mutation ConfirmChatPlan($threadId: ID!) {
   }
 }
 
-mutation ClearChatHistory($before: Int) {
-  clearChatHistory(before: $before)
-}
-
 mutation DeleteChat($id: ID!) {
   deleteChat(id: $id) {
     ...Chat
