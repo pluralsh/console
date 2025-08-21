@@ -1,6 +1,6 @@
 import { type Edge, type Node } from '@xyflow/react'
 import { StackState } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 
 import { isNonNullable } from '../../../utils/isNonNullable'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
@@ -18,13 +18,8 @@ const nodeTypes = {
 }
 
 const searchOptions = {
-  keys: [
-    'name',
-    {
-      name: 'configuration',
-      getFn: (r) => JSON.stringify(r?.configuration ?? {}),
-    },
-  ],
+  keys: [{ name: 'all', getFn: (r) => JSON.stringify(r ?? {}) }],
+  ignoreLocation: true,
   threshold: 0.25,
 }
 
@@ -80,10 +75,11 @@ function getNodesAndEdges(state: StackState, query: string) {
 
 export function StackStateGraph({ state }: { state: StackState }) {
   const [query, setQuery] = useState('')
+  const deferredQuery = useDeferredValue(query)
 
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
-    () => getNodesAndEdges(state, query),
-    [state, query]
+    () => getNodesAndEdges(state, deferredQuery),
+    [state, deferredQuery]
   )
 
   return (
