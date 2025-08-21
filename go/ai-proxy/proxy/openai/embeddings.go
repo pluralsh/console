@@ -8,6 +8,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 )
 
@@ -15,8 +16,8 @@ const (
 	embeddingsEndpoint = "/v1/embeddings"
 )
 
-func NewOpenAIEmbeddingsProxy(host string, tokenRotator *RoundRobinTokenRotator) (api.OpenAIProxy, error) {
-	if len(tokenRotator.tokens) == 0 {
+func NewOpenAIEmbeddingsProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+	if len(tokenRotator.Tokens) == 0 {
 		return nil, fmt.Errorf("at least one token is required")
 	}
 

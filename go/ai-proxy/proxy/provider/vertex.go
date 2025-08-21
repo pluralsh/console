@@ -83,11 +83,8 @@ func (in *VertexProxy) modifyResponseBody(r *http.Response) error {
 	return nil
 }
 
-func NewVertexProxy(target string, serviceAccount []string) (api.TranslationProxy, error) {
-	if len(serviceAccount) == 0 {
-		return nil, fmt.Errorf("service account cannot be empty")
-	}
-	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount[0]), scope)
+func NewVertexProxy(target, serviceAccount string) (api.TranslationProxy, error) {
+	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount), scope)
 	if err != nil {
 		return nil, err
 	}

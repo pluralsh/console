@@ -30,12 +30,7 @@ type BedrockProxy struct {
 	bedrockClient *bedrockruntime.Client
 }
 
-func NewBedrockProxy(credentials []string) (api.OpenAIProxy, error) {
-	var region string
-	if len(credentials) > 0 {
-		region = credentials[0]
-	}
-
+func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
 	ctx := context.Background()
 
 	var loadOptions []func(options *config.LoadOptions) error

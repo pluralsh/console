@@ -9,18 +9,19 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
+	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 )
 
 type OpenAIProxy struct {
 	*baseTranslationProxy
 
-	token string
+	tokenRotator helpers.TokenRotator
 }
 
 func (in *OpenAIProxy) ModifyRequest(r *httputil.ProxyRequest) {
 	in.baseTranslationProxy.ModifyRequest(r)
 
-	r.Out.Header.Add("Authorization", "Bearer "+in.token)
+	r.Out.Header.Add("Authorization", "Bearer "+in.tokenRotator.GetNextToken())
 	r.SetXForwarded()
 
 	err := in.modifyRequestBody(r)
@@ -68,11 +69,11 @@ func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 	return nil
 }
 
-func NewOpenAIProxy(target string, tokens []string) (api.TranslationProxy, error) {
-	if len(tokens) == 0 {
+func NewOpenAIProxy(target string, tokenRotator *helpers.RoundRobinTokenRotator) (api.TranslationProxy, error) {
+	if len(tokenRotator.Tokens) == 0 {
 		return nil, fmt.Errorf("must have at least one openai token")
 	}
-	proxy := &OpenAIProxy{token: tokens[0]} // just use the first one for now; not trying to do open-heart surgery on these proxies today
+	proxy := &OpenAIProxy{tokenRotator: tokenRotator}
 	base, err := newBaseTranslationProxy(target, api.ProviderOpenAI, proxy.ModifyRequest, proxy.ModifyResponse, nil)
 	if err != nil {
 		return nil, err

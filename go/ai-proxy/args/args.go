@@ -76,27 +76,26 @@ func ProviderHost() string {
 	return *argProviderHost
 }
 
-func ProviderCredentials() []string {
+func ProviderServiceAccount() string {
+	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
+		return *argProviderServiceAccount
+	}
+	return ""
+}
+
+func ProviderAwsRegion() string {
+	if Provider() == api.ProviderBedrock && len(*argsProviderAWSRegion) > 0 {
+		return *argsProviderAWSRegion
+	}
+	return ""
+}
+
+func ProviderTokens() []string {
 	if len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
 		return *argProviderTokens
 	}
 
-	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
-		return []string{*argProviderServiceAccount}
-	}
-
-	if Provider() == api.ProviderBedrock {
-		if len(*argsProviderAWSRegion) > 0 {
-			return []string{*argsProviderAWSRegion}
-		}
-		return []string{}
-	}
-
-	if Provider() == defaultProvider {
-		return []string{}
-	}
-
-	panic(fmt.Errorf("provider credentials must be provided when %s provider is used", Provider()))
+	return []string{}
 }
 
 func Address() string {
