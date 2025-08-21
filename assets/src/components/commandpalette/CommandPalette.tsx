@@ -110,6 +110,9 @@ export default function CommandPalette() {
           onCmdValueChange={setCmdValue}
           onHistoryValueChange={setHistoryValue}
           onCmdKClose={onCmdKClose}
+          numItems={
+            tab === CommandPaletteTab.History ? history.length : commands.length
+          }
         />
         {directory.length > 1 && (
           <div id="cmdk-input-tabs">
@@ -264,17 +267,17 @@ function CommandAdvancedInput({
   cmdValue,
   onCmdValueChange,
   onHistoryValueChange,
-  onKeyDown,
   onCmdKClose,
-  ...props
+  numItems,
 }: {
   curTab: CommandPaletteTab
   cmdValue: string
   onCmdValueChange: Dispatch<SetStateAction<string>>
   onHistoryValueChange: Dispatch<SetStateAction<string>>
-  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
   onCmdKClose?: () => void
+  numItems: number
 }) {
+  const { colors, borderRadiuses } = useTheme()
   const { createNewThread } = useChatbot()
 
   const sendMessage = useCallback(
@@ -285,23 +288,36 @@ function CommandAdvancedInput({
     [createNewThread, onCmdKClose]
   )
 
+  // setting focus on the parent wrapper here makes hitting enter go to the highlighted thread instead of sending a new chat message
+  // hard to strike exactly the right balance here but this works pretty well
+  const onChatKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'ArrowDown' && numItems > 0) {
+        const parentWrapper = e.currentTarget.closest('[cmdk-root]')
+        if (parentWrapper instanceof HTMLElement) parentWrapper.focus()
+      }
+    },
+    [numItems]
+  )
+
   return curTab === CommandPaletteTab.History ? (
     <ChatInput
+      stateless
       enableExamplePrompts={false}
-      onKeyDown={onKeyDown}
+      onKeyDown={onChatKeyDown}
       sendMessage={sendMessage}
       placeholder="Search history or ask Plural AI a question..."
       onValueChange={onHistoryValueChange}
-      stateless={true}
-      {...props}
     />
   ) : (
     <Input
       placeholder="Search commands..."
       value={cmdValue}
       onChange={(e) => onCmdValueChange(e.target.value)}
-      onKeyDown={onKeyDown}
-      {...props}
+      css={{
+        background: colors['fill-zero'],
+        borderRadius: borderRadiuses.large,
+      }}
     />
   )
 }

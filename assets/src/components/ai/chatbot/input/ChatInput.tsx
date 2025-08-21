@@ -17,7 +17,7 @@ import {
 } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
-  ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
   Dispatch,
   FormEvent,
   SetStateAction,
@@ -32,8 +32,10 @@ import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { mergeRefs } from 'react-merge-refs'
 
 export function ChatInput({
+  ref,
   currentThread,
   sendMessage,
   serverNames,
@@ -54,7 +56,7 @@ export function ChatInput({
   placeholder?: string
   onValueChange?: Dispatch<string>
   stateless?: boolean
-} & ComponentPropsWithoutRef<'div'>) {
+} & Partial<ComponentPropsWithRef<typeof EditableDiv>>) {
   const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
   const { sourceId, source } = useCurrentPageChatContext()
@@ -146,7 +148,7 @@ export function ChatInput({
           onEnter={() => formRef.current?.requestSubmit()}
           css={{ maxHeight: 130 }}
           {...props}
-          ref={contentEditableRef}
+          ref={mergeRefs([contentEditableRef, ref])}
         />
         <Flex justifyContent="space-between">
           <Flex

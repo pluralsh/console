@@ -18,10 +18,9 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
     width: 840,
     maxHeight: '100%',
     background: theme.colors['fill-zero'],
+    '&:focus': { outline: 'none' },
 
-    '.plrl-chat-input-form': {
-      padding: 0,
-    },
+    '.plrl-chat-input-form': { padding: 0 },
 
     '#cmdk-input-wrapper': {
       display: 'flex',
