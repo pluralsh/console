@@ -13,7 +13,6 @@ import {
   use,
   useCallback,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { useTheme } from 'styled-components'
@@ -24,7 +23,6 @@ import { AITableActions } from '../ai/AITableActions.tsx'
 import { AIEntryLabel, getThreadOrPinTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
-import usePersistedSessionState from '../hooks/usePersistedSessionState.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
 import { Body1BoldP, Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import {
@@ -278,18 +276,13 @@ function CommandAdvancedInput({
   onCmdKClose?: () => void
 }) {
   const { createNewThread } = useChatbot()
-  const { setMessage: setPendingMessage } = useCommandPaletteMessage()
 
   const sendMessage = useCallback(
     (message: string) => {
-      createNewThread({
-        summary: 'New Chat with Plural AI',
-      }).then(() => {
-        setPendingMessage(message)
-        onCmdKClose?.()
-      })
+      createNewThread({ summary: 'New Chat with Plural AI' }, message)
+      onCmdKClose?.()
     },
-    [createNewThread, setPendingMessage, onCmdKClose]
+    [createNewThread, onCmdKClose]
   )
 
   return curTab === CommandPaletteTab.History ? (
@@ -335,26 +328,6 @@ function HistoryItem({ thread }: { thread: ChatThreadTinyFragment }) {
       <AITableActions thread={thread} />
     </Flex>
   )
-}
-
-export const useCommandPaletteMessage = () => {
-  const [message, setMessage] = usePersistedSessionState(
-    'commandPalettePendingChatMessage',
-    ''
-  )
-  const processedRef = useRef<string>('')
-
-  const readValue = useCallback(() => {
-    if (!message || processedRef.current === message) {
-      return ''
-    }
-
-    processedRef.current = message
-    setMessage('')
-    return message
-  }, [message, setMessage])
-
-  return { readValue, setMessage }
 }
 
 const CommandEmptyState = ({ value }: { value: string }) => {

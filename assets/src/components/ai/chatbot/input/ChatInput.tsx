@@ -11,7 +11,10 @@ import {
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
-import { useAddChatContextMutation } from 'generated/graphql.ts'
+import {
+  ChatThreadDetailsFragment,
+  useAddChatContextMutation,
+} from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -31,6 +34,7 @@ import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 
 export function ChatInput({
+  currentThread,
   sendMessage,
   serverNames,
   enableExamplePrompts = true,
@@ -41,6 +45,7 @@ export function ChatInput({
   stateless = false,
   ...props
 }: {
+  currentThread?: Nullable<ChatThreadDetailsFragment>
   sendMessage: (newMessage: string) => void
   serverNames?: string[]
   enableExamplePrompts?: boolean
@@ -50,8 +55,7 @@ export function ChatInput({
   onValueChange?: Dispatch<string>
   stateless?: boolean
 } & ComponentPropsWithoutRef<'div'>) {
-  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen, currentThread } =
-    useChatbot()
+  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
   const { sourceId, source } = useCurrentPageChatContext()
   const showContextBtn = !!source && !!sourceId

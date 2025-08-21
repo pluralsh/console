@@ -40,6 +40,8 @@ type ExplainWithAIContextT = {
   system: string
 }
 
+type QueuedChatMessage = { message: string; threadId: string }
+
 export const AUTO_AGENT_TYPES = [
   AgentSessionType.Kubernetes,
   AgentSessionType.Terraform,
@@ -83,6 +85,11 @@ type ChatbotContextT = {
   // The agent session type that is currently selected in the UI but not yet applied to the current thread.
   agentInitMode: AutoAgentSessionT
   setAgentInitMode: Dispatch<SetStateAction<AutoAgentSessionT>>
+
+  // the thread with the given ID will send this message, and then clear the value, next time it opens
+  // particularly useful for cases where we want to create a new thread with an initial message (and want to guarantee the message isn't sent to the wrong place)
+  queuedChatMessage: Nullable<QueuedChatMessage>
+  setQueuedChatMessage: Dispatch<SetStateAction<Nullable<QueuedChatMessage>>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -112,6 +119,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [agentInitMode, setAgentInitMode] =
     usePersistedState<AutoAgentSessionT>('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
+  const [queuedChatMessage, setQueuedChatMessage] =
+    useState<Nullable<QueuedChatMessage>>()
 
   const {
     data: threadData,
@@ -160,6 +169,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         setActionsPanelOpen,
         mcpPanelOpen,
         setMcpPanelOpen,
+        queuedChatMessage,
+        setQueuedChatMessage,
       }}
     >
       {children}
@@ -214,6 +225,7 @@ export function useChatbot() {
     lastNonAgentThreadId,
     setAgentInitMode,
     setShowForkToast,
+    setQueuedChatMessage,
     ...restChatbotCtx
   } = useChatbotContext()
 
@@ -223,19 +235,24 @@ export function useChatbot() {
     useCloneChatThreadMutation()
 
   const goToThread = useCallback(
-    (threadId: Nullable<string>) => {
+    (threadId: Nullable<string>, queuedMessage?: Nullable<string>) => {
       setCurrentThreadId(threadId)
       setAgentInitMode(null)
       setOpen(true)
+      if (queuedMessage && threadId)
+        setQueuedChatMessage({ message: queuedMessage, threadId })
     },
-    [setAgentInitMode, setCurrentThreadId, setOpen]
+    [setAgentInitMode, setCurrentThreadId, setOpen, setQueuedChatMessage]
   )
 
-  const createNewThread = (attributes: ChatThreadAttributes) => {
+  const createNewThread = (
+    attributes: ChatThreadAttributes,
+    initialMessage?: Nullable<string>
+  ) => {
     return createThread({
       variables: { attributes: { session: { done: true }, ...attributes } },
       onCompleted: ({ createThread }) => {
-        if (createThread?.id) goToThread(createThread?.id)
+        if (createThread?.id) goToThread(createThread.id, initialMessage)
       },
       update: (cache, { data }) => addThreadToCache(cache, data?.createThread),
     })
@@ -279,6 +296,7 @@ export function useChatbot() {
     lastNonAgentThreadId,
     setAgentInitMode,
     setShowForkToast,
+    setQueuedChatMessage,
     ...restChatbotCtx,
   }
 }

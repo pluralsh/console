@@ -18,7 +18,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { VListHandle } from 'virtua'
-import { useCommandPaletteMessage } from '../../commandpalette/CommandPalette.tsx'
 import TypingIndicator from '../../utils/TypingIndicator.tsx'
 import { Body1P } from '../../utils/typography/Text.tsx'
 import { useChatbot } from '../AIContext.tsx'
@@ -43,12 +42,12 @@ export function ChatbotPanelThread({
   isLoadingNextPage: boolean
 }) {
   const theme = useTheme()
-  const { readValue } = useCommandPaletteMessage()
   const {
     currentThread: curThreadDetails,
     currentThreadLoading,
     createNewThread,
-    mutationLoading,
+    queuedChatMessage,
+    setQueuedChatMessage,
   } = useChatbot()
 
   const threadId = curThreadDetails?.id
@@ -110,17 +109,21 @@ export function ChatbotPanelThread({
   })
 
   const sendMessage = useCallback(
-    (newMessage: string) => {
-      scrollToBottom()
-      setPendingMessage(newMessage)
-      mutateHybridChat({
-        variables: {
-          messages: [{ role: AiRole.User, content: newMessage }],
-          threadId,
-        },
-      })
+    (message: string) => {
+      if (!threadId) {
+        createNewThread({ summary: 'New chat with Plural AI' }, message)
+      } else {
+        scrollToBottom()
+        setPendingMessage(message)
+        mutateHybridChat({
+          variables: {
+            messages: [{ role: AiRole.User, content: message }],
+            threadId,
+          },
+        })
+      }
     },
-    [scrollToBottom, threadId, mutateHybridChat]
+    [threadId, createNewThread, scrollToBottom, mutateHybridChat]
   )
 
   // runs when new messages are added
@@ -141,24 +144,13 @@ export function ChatbotPanelThread({
     reset()
   }, [threadId, reset])
 
-  // create a new thread if we're here and one doesn't exist
+  // handles send and then clears the message queue if this is the right thread
   useEffect(() => {
-    if (threadId || currentThreadLoading || mutationLoading || initLoading)
-      return
-    createNewThread({ summary: 'New chat with Plural AI' })
-  }, [
-    createNewThread,
-    currentThreadLoading,
-    initLoading,
-    mutationLoading,
-    threadId,
-  ])
-
-  useEffect(() => {
-    const commandPalettePendingMessage = readValue()
-    if (!commandPalettePendingMessage) return
-    sendMessage(commandPalettePendingMessage)
-  }, [readValue, sendMessage])
+    if (queuedChatMessage && queuedChatMessage.threadId === threadId) {
+      sendMessage(queuedChatMessage.message)
+      setQueuedChatMessage(null)
+    }
+  }, [queuedChatMessage, sendMessage, setQueuedChatMessage, threadId])
 
   if (initLoading || currentThreadLoading)
     return (
@@ -263,6 +255,7 @@ export function ChatbotPanelThread({
         )}
       </ChatbotMessagesWrapperSC>
       <ChatInput
+        currentThread={curThreadDetails}
         sendMessage={sendMessage}
         serverNames={serverNames}
         showPrompts={showExamplePrompts}
