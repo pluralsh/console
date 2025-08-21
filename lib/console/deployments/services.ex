@@ -935,8 +935,21 @@ defmodule Console.Deployments.Services do
 
     Revision.ignore_ids(to_keep)
     |> Revision.for_service(id)
-    |> Repo.delete_all()
-    |> elem(0)
+    |> Revision.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 1000, pause: 10)
+    |> Stream.chunk_every(100)
+    |> Task.async_stream(fn revisions ->
+      Logger.info "pruning #{length(revisions)} stale revisions for service #{id}"
+      Enum.map(revisions, & &1.id)
+      |> Revision.for_ids()
+      |> Repo.delete_all(timeout: 5_000)
+      |> elem(0)
+    end, max_concurrency: 100)
+    |> Enum.reduce(0, fn
+      {:ok, count}, acc -> acc + count
+      _, acc -> acc
+    end)
     |> ok()
   end
 
