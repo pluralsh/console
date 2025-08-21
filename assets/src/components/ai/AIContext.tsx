@@ -66,6 +66,7 @@ type ChatbotContextT = {
   setShowForkToast: (show: boolean) => void
 
   currentThread: Nullable<ChatThreadDetailsFragment>
+  currentThreadLoading: boolean
 
   // this is the selected thread ID, updating it triggers currentThread to populate with its details
   currentThreadId: Nullable<string>
@@ -112,7 +113,11 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     usePersistedState<AutoAgentSessionT>('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
 
-  const { data: threadData, error: threadError } = useChatThreadDetailsQuery({
+  const {
+    data: threadData,
+    loading: currentThreadLoading,
+    error: threadError,
+  } = useChatThreadDetailsQuery({
     skip: !currentThreadId,
     variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
@@ -142,6 +147,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         open,
         setOpen,
         currentThread,
+        currentThreadLoading,
         currentThreadId,
         setCurrentThreadId,
         selectedAgent,
