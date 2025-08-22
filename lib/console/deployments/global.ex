@@ -537,8 +537,13 @@ defmodule Console.Deployments.Global do
   Fetches associated secure configuration of a service template
   """
   @spec configuration(ServiceTemplate.t) :: {:ok, map} | Console.error
+  def configuration(%ServiceTemplate{configuration: config}) when is_list(config) do
+    {:ok, Map.new(config, fn %{name: n, value: v} -> {n, v} end)}
+  end
+
   def configuration(%ServiceTemplate{revision_id: id}) when is_binary(id),
     do: secret_store().fetch(id)
+
   def configuration(_), do: {:ok, %{}}
 
   def load_configuration(%GlobalService{template: %ServiceTemplate{} = tpl} = global) do
@@ -569,6 +574,7 @@ defmodule Console.Deployments.Global do
          {:ok, dest_secrets} <- Services.configuration(dest),
       do: (fields_different?(spec, dest) || specs_different?(spec, dest) ||
             !contexts_equal?(spec, dest) || !deps_equal?(spec, dest) ||
+            sources_different?(spec, dest) || renderers_different?(spec, dest) ||
             missing_source?(source_secrets, dest_secrets))
   end
 
@@ -583,7 +589,9 @@ defmodule Console.Deployments.Global do
   def diff?(_, _), do: false
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
-    missing_source?(source, dest) || !deps_equal?(s, d) || specs_different?(s, d) || fields_different?(s, d)
+    (missing_source?(source, dest) || !deps_equal?(s, d) ||
+      specs_different?(s, d) || fields_different?(s, d) ||
+      sources_different?(s, d) || renderers_different?(s, d))
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do
@@ -638,7 +646,8 @@ defmodule Console.Deployments.Global do
     existing_by_name = Map.new(existing, & {&1.name, &1})
     Enum.map(dependencies, fn dep ->
       case Map.get(existing_by_name, dep.name) do
-        %ServiceDependency{id: id, name: n, status: s} -> %{name: n, id: id, status: s}
+        %ServiceDependency{id: id, name: n, status: s} ->
+          %{name: n, id: id, status: s}
         _ -> %{name: dep.name}
       end
     end)
@@ -651,6 +660,27 @@ defmodule Console.Deployments.Global do
       clean(s) != clean(d)
     end)
   end
+
+  defp sources_different?(%{sources: [_ | _] = sources}, dest) do
+    dest_sources = Map.new(Map.get(dest, :sources) || [], & {&1.path, &1})
+    Enum.any?(sources, fn %{path: path} = source ->
+      case Map.get(dest_sources, path) do
+        %{} = dest_source -> clean(source) != clean(dest_source)
+        _ -> true
+      end
+    end)
+  end
+  defp sources_different?(_, _), do: false
+
+  defp renderers_different?(%{renderers: [_ | _] = renderers}, dest) do
+    dest_renderers = Map.get(dest, :renderers) || []
+    Enum.any?(renderers, fn renderer ->
+      Enum.all?(dest_renderers, fn dest_renderer ->
+        clean(renderer) != clean(dest_renderer)
+      end)
+    end)
+  end
+  defp renderers_different?(_, _), do: false
 
   defp spec_fields(%{ignore_sync: true}), do: ~w(helm git kustomize)a
   defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
@@ -683,7 +713,8 @@ defmodule Console.Deployments.Global do
     Enum.map(fields, fn keys -> Enum.map(keys, &Access.key/1) end)
     |> Enum.reduce(attrs, fn path, acc ->
       case get_in(attrs, path) do
-        str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
+        str when is_binary(str) ->
+          put_in(acc, path, render_solid_raw(str, cluster, ctx))
         [%{value: v} | _] = vals when is_binary(v) ->
           put_in(acc, path, Enum.map(vals, fn %{name: n, value: v} -> %{name: n, value: render_solid_raw(v, cluster, ctx)} end))
         [v | _] = vals when is_binary(v) ->

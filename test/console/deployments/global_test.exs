@@ -253,6 +253,91 @@ defmodule Console.Deployments.GlobalTest do
       assert synced.git.ref == "main"
       assert synced.git.folder == "/"
     end
+
+    test "it can sync a template global service with sources" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "/"},
+          name: "svc",
+          namespace: "prod",
+          sources: [%{path: "k8s/sources/git", repository_id: git.id, git: %{ref: "main", folder: "/k8s"}}]
+        }
+      )
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+      assert hd(synced.sources).path == "k8s/sources/git"
+      assert hd(synced.sources).repository_id == git.id
+      assert hd(synced.sources).git.ref == "main"
+      assert hd(synced.sources).git.folder == "/k8s"
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin_user())
+      assert id == service.id
+    end
+
+    test "it can sync a template global service with renderers" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "/"},
+          name: "svc",
+          namespace: "prod",
+          renderers: [%{path: "k8s/renderers/helm", type: :helm}]
+        }
+      )
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+      assert hd(synced.renderers).path == "k8s/renderers/helm"
+      assert hd(synced.renderers).type == :helm
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin_user())
+      assert id == service.id
+    end
+
+    test "it can sync a template global service with configuration" do
+      git = insert(:git_repository)
+      admin = admin_user()
+      {:ok, global} = Global.create(%{
+        name: "templated",
+        template: %{
+          name: "svc",
+          namespace: "prod",
+          repository_id: git.id,
+          git: %{ref: "main", folder: "k8s"},
+          configuration: [%{name: "name", value: "value"}]
+        }
+      }, admin)
+
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin)
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "k8s"
+
+      {:ok, secrets} = Services.configuration(synced)
+      assert map_size(secrets) == 1
+      assert secrets["name"] == "value"
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin)
+      assert id == service.id
+    end
   end
 
   describe "#create_managed_namespace/2" do
