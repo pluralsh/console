@@ -4058,6 +4058,33 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.11.40
+    created: "2025-08-22T17:45:07.126457363Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.144
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.13.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 49076fd77b153d92cfdf959c79eec7c0bff5d95c716fdecae1f57a6cc1a6c4a8
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.145/console-rapid-0.3.145.tgz
+    version: 0.3.145
+  - apiVersion: v2
     appVersion: 0.11.39
     created: "2025-08-21T12:42:44.350375618Z"
     dependencies:
@@ -6837,6 +6864,16 @@ entries:
     version: 0.3.40
   controller:
   - apiVersion: v2
+    appVersion: 0.11.40
+    created: "2025-08-22T17:45:07.320569497Z"
+    description: deploys the deployment operator for plural cd
+    digest: 0adb47f09ed3ef883e83f095ceb72557b29e18ec2636fdc1cda1902e971e37ca
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.144/controller-0.0.144.tgz
+    version: 0.0.144
+  - apiVersion: v2
     appVersion: 0.11.39
     created: "2025-08-21T12:42:44.554568923Z"
     description: deploys the deployment operator for plural cd
@@ -8615,4 +8652,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-21T13:22:18.975117526Z"
+generated: "2025-08-22T17:45:07.321703056Z"
