@@ -574,7 +574,6 @@ defmodule Console.Deployments.Global do
          {:ok, dest_secrets} <- Services.configuration(dest),
       do: (fields_different?(spec, dest) || specs_different?(spec, dest) ||
             !contexts_equal?(spec, dest) || !deps_equal?(spec, dest) ||
-            sources_different?(spec, dest) || renderers_different?(spec, dest) ||
             missing_source?(source_secrets, dest_secrets))
   end
 
@@ -590,8 +589,7 @@ defmodule Console.Deployments.Global do
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
     (missing_source?(source, dest) || !deps_equal?(s, d) ||
-      specs_different?(s, d) || fields_different?(s, d) ||
-      sources_different?(s, d) || renderers_different?(s, d))
+      specs_different?(s, d) || fields_different?(s, d))
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do
@@ -661,29 +659,8 @@ defmodule Console.Deployments.Global do
     end)
   end
 
-  defp sources_different?(%{sources: [_ | _] = sources}, dest) do
-    dest_sources = Map.new(Map.get(dest, :sources) || [], & {&1.path, &1})
-    Enum.any?(sources, fn %{path: path} = source ->
-      case Map.get(dest_sources, path) do
-        %{} = dest_source -> clean(source) != clean(dest_source)
-        _ -> true
-      end
-    end)
-  end
-  defp sources_different?(_, _), do: false
-
-  defp renderers_different?(%{renderers: [_ | _] = renderers}, dest) do
-    dest_renderers = Map.get(dest, :renderers) || []
-    Enum.any?(renderers, fn renderer ->
-      Enum.all?(dest_renderers, fn dest_renderer ->
-        clean(renderer) != clean(dest_renderer)
-      end)
-    end)
-  end
-  defp renderers_different?(_, _), do: false
-
-  defp spec_fields(%{ignore_sync: true}), do: ~w(helm git kustomize)a
-  defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
+  defp spec_fields(%{ignore_sync: true}), do: ~w(helm sources renderers git kustomize)a
+  defp spec_fields(_), do: ~w(helm renderers sources git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
     template_fields(attrs, [
