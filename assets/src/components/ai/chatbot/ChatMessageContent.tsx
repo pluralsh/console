@@ -47,7 +47,6 @@ type ChatMessageContentProps = {
   role?: AiRole
   threadId?: string
   showActions?: boolean
-  side?: 'left' | 'right'
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
@@ -65,7 +64,6 @@ export function ChatMessageContent({
   role,
   threadId,
   showActions,
-  side,
   content,
   type = ChatType.Text,
   attributes,
@@ -84,7 +82,7 @@ export function ChatMessageContent({
           id={id}
           seq={seq}
           showActions={showActions}
-          side={side}
+          role={role}
           content={content}
           attributes={attributes}
         />
@@ -127,6 +125,7 @@ export function ChatMessageContent({
           wrapper={
             <Card
               css={{
+                width: '100%',
                 backgroundColor: theme.colors['fill-zero'],
                 border: theme.borders.default,
                 padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
@@ -144,7 +143,7 @@ function FileMessageContent({
   id,
   seq,
   showActions,
-  side,
+  role,
   content,
   attributes,
 }: ChatMessageContentProps) {
@@ -175,7 +174,7 @@ function FileMessageContent({
               seq={seq}
               content={fileName}
               show={showActions}
-              side={side ?? 'right'}
+              side={role === AiRole.User ? 'right' : 'left'}
               iconFrameType="floating"
               css={{ position: 'absolute', right: 16, top: 4 }}
             />
@@ -419,7 +418,7 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
-}: Omit<ChatMessageContentProps, 'side'>) {
+}: ChatMessageContentProps) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt
