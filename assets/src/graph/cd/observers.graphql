@@ -41,6 +41,7 @@ fragment ObserverTarget on ObserverTarget {
 fragment ServiceError on ServiceError {
   source
   message
+  warning
 }
 
 query Observers(
