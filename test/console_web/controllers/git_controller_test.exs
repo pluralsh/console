@@ -90,8 +90,13 @@ defmodule ConsoleWeb.GitControllerTest do
       |> get("/v1/git/tarballs", %{id: svc.id})
       |> response(402)
 
-      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      %{errors: [error]} = svc =
+        refetch(svc)
+        |> Console.Repo.preload([:errors])
+
+      assert svc.status == :stale
       assert error.source == "git"
+      assert error.warning
       assert error.message =~ "dependency #{dep.name} is not ready"
     end
 

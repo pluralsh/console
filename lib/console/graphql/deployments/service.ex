@@ -459,8 +459,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "an error sent from the deploy operator about sync progress"
   object :service_error do
-    field :source, non_null(:string)
+    field :source,  non_null(:string)
     field :message, non_null(:string)
+    field :warning, :boolean, description: "whether this is just a warning"
   end
 
   @desc "a file fetched from a git repository, eg a docs .md file"

@@ -5502,7 +5502,11 @@ type ApiDeprecation {
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
+
   message: String!
+
+  "whether this is just a warning"
+  warning: Boolean
 }
 
 "a file fetched from a git repository, eg a docs .md file"

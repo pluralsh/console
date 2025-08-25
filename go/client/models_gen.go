@@ -6186,6 +6186,8 @@ type ServiceDeploymentEdge struct {
 type ServiceError struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
+	// whether this is just a warning
+	Warning *bool `json:"warning,omitempty"`
 }
 
 type ServiceErrorAttributes struct {

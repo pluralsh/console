@@ -10247,6 +10247,8 @@ export type ServiceError = {
   __typename?: 'ServiceError';
   message: Scalars['String']['output'];
   source: Scalars['String']['output'];
+  /** whether this is just a warning */
+  warning?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type ServiceErrorAttributes = {
