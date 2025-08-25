@@ -69,7 +69,6 @@ export function ChatMessage({
   session?: Nullable<AgentSessionFragment>
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
-  const rightAlign = role === AiRole.User
 
   return pullRequest ? (
     <PrChatMesssage
@@ -87,7 +86,6 @@ export function ChatMessage({
         id={id ?? ''}
         seq={seq}
         showActions={showActions && !disableActions}
-        side={rightAlign ? 'right' : 'left'}
         content={content ?? ''}
         role={role}
         threadId={threadId}
@@ -107,7 +105,7 @@ export function ChatMessage({
           content={content ?? ''}
           timestamp={updatedAt}
           show={showActions && !disableActions}
-          side={rightAlign ? 'right' : 'left'}
+          side={role === AiRole.User ? 'right' : 'left'}
         />
       )}
     </ChatMessageSC>
