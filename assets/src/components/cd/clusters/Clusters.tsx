@@ -220,6 +220,7 @@ export default function Clusters() {
   const tableData: Edge<ClustersRowFragment>[] = isDemo
     ? DEMO_CLUSTERS
     : clusterEdges
+  const showGettingStarted = !onboarded && tableData && tableData?.length < 2
 
   useSetPageScrollable(isDemo)
 
@@ -250,7 +251,7 @@ export default function Clusters() {
         css={{ height: '100%', overflow: 'hidden' }}
       >
         <WrapWithIf
-          condition={!onboarded}
+          condition={showGettingStarted}
           wrapper={
             <div
               css={{
@@ -265,8 +266,8 @@ export default function Clusters() {
           }
         >
           <ClustersTable
-            flush={!onboarded}
-            fullHeightWrap={!!onboarded}
+            flush={showGettingStarted}
+            fullHeightWrap={!showGettingStarted}
             data={tableData || []}
             refetch={refetch}
             virtualizeRows
@@ -275,9 +276,7 @@ export default function Clusters() {
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
           />
-          {!onboarded && tableData && tableData?.length < 2 && (
-            <GettingStartedBlock />
-          )}
+          {showGettingStarted && <GettingStartedBlock />}
         </WrapWithIf>
       </TabPanel>
     </Flex>
