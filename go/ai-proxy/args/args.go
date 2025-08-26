@@ -77,21 +77,21 @@ func ProviderHost() string {
 }
 
 func ProviderServiceAccount() string {
-	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
+	if argProviderServiceAccount != nil && len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
 		return *argProviderServiceAccount
 	}
 	return ""
 }
 
 func ProviderAwsRegion() string {
-	if Provider() == api.ProviderBedrock && len(*argsProviderAWSRegion) > 0 {
+	if argsProviderAWSRegion != nil && len(*argsProviderAWSRegion) > 0 && Provider() == api.ProviderBedrock {
 		return *argsProviderAWSRegion
 	}
 	return ""
 }
 
 func ProviderTokens() []string {
-	if len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
+	if argProviderTokens != nil && len(*argProviderTokens) > 0 && Provider() == api.ProviderOpenAI {
 		return *argProviderTokens
 	}
 
