@@ -399,6 +399,7 @@ defmodule Console.Schema.Service do
     |> cast(attrs, @valid)
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
+    |> validate_length(:name, max: 510)
     |> validate_format(:interval, ~r/\d+[mhs]/, message: "interval must be a valid go interval string")
     |> cast_embed(:git)
     |> cast_embed(:helm)
