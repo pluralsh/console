@@ -189,6 +189,11 @@ defmodule Console.Schema.Service do
       field :enable_helm, :boolean, default: false
     end
 
+    embeds_one :metadata, Metadata, on_replace: :update do
+      field :images, {:array, :string}
+      field :fqdns, {:array, :string}
+    end
+
     embeds_many :sources, Source, on_replace: :delete
     embeds_many :renderers, Renderer, on_replace: :delete
 
@@ -405,6 +410,7 @@ defmodule Console.Schema.Service do
     |> cast_embed(:helm)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)
     |> cast_embed(:kustomize, with: &kustomize_changeset/2)
+    |> cast_embed(:metadata, with: &metadata_changeset/2)
     |> cast_embed(:sources)
     |> cast_embed(:renderers)
     |> cast_assoc(:components)
@@ -465,5 +471,10 @@ defmodule Console.Schema.Service do
     model
     |> cast(attrs, ~w(path enable_helm)a)
     |> validate_required(~w(path)a)
+  end
+
+  def metadata_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(images fqdns)a)
   end
 end

@@ -7983,6 +7983,7 @@ export type RootMutationTypeUpdateServiceComponentsArgs = {
   components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
   errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
   id: Scalars['ID']['input'];
+  metadata?: InputMaybe<ServiceMetadataAttributes>;
   revisionId?: InputMaybe<Scalars['ID']['input']>;
   sha?: InputMaybe<Scalars['String']['input']>;
 };
@@ -10092,6 +10093,8 @@ export type ServiceDeployment = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** the commit message currently in use */
   message?: Maybe<Scalars['String']['output']>;
+  /** metadata about the deployed contents of this service */
+  metadata?: Maybe<ServiceMetadata>;
   /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */
@@ -10278,6 +10281,23 @@ export enum ServiceMesh {
   Istio = 'ISTIO',
   Linkerd = 'LINKERD'
 }
+
+/** metadata about the deployed contents of a service */
+export type ServiceMetadata = {
+  __typename?: 'ServiceMetadata';
+  /** a list of fqdns to discover */
+  fqdns?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a list of images to deployed in this service */
+  images?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+/** metadata about the deployed contents of a service */
+export type ServiceMetadataAttributes = {
+  /** a list of fqdns to discover */
+  fqdns?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a list of images to deployed in this service */
+  images?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
 
 export type ServicePort = {
   __typename?: 'ServicePort';

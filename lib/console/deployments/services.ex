@@ -751,10 +751,10 @@ defmodule Console.Deployments.Services do
 
   defp base_status([_ | _] = components) do
     Enum.reduce_while(components, :healthy, fn
-      %ServiceComponent{state: :failed}, _ -> {:halt, :failed}
-      %ServiceComponent{state: :paused}, _ -> {:halt, :paused}
-      %ServiceComponent{state: :stale}, :healthy -> {:cont, :stale}
-      %ServiceComponent{synced: false}, :healthy -> {:cont, :stale}
+      %ServiceComponent{state: :failed},  _ ->        {:halt, :failed}
+      %ServiceComponent{state: :paused},  _ ->        {:halt, :paused}
+      %ServiceComponent{state: :pending}, :healthy -> {:cont, :stale}
+      %ServiceComponent{synced: false},   :healthy -> {:cont, :stale}
       _, v -> {:cont, v}
     end)
   end
