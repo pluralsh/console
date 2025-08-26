@@ -1,4 +1,4 @@
-name: Sync Compatibility Matrices to S3
+name: Sync Compatibility and Extended Support Matrices to S3
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - 'static/compatibilities/**'
       - 'static/compatibilities.yaml'
       - 'static/versions.yml'
+      - 'static/extended/**'
 
 permissions:
   id-token: write
@@ -47,3 +48,8 @@ jobs:
         run: |
           aws s3 cp ./static/versions.yml s3://plural-www-assets/matrices/compatability/static/versions.yml
         if: hashFiles('static/versions.yml') != ''
+
+      - name: Upload static/extended directory to S3
+        run: |
+          aws s3 sync ./static/extended s3://plural-www-assets/matrices/extended
+        if: hashFiles('static/extended/**') != ''
