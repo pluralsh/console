@@ -3,7 +3,7 @@ import { red } from './colors-base'
 
 export const editorThemeLight = {
   inherit: true,
-  base: 'vs',
+  base: 'vs' as const,
   rules: [
     {
       background: semanticColors['fill-one'],

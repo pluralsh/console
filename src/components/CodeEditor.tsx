@@ -1,8 +1,8 @@
-import { type Dispatch, useCallback, useEffect, useState } from 'react'
+import { type Dispatch, useCallback, useEffect, useMemo, useState } from 'react'
 import { Div, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
-import Editor, { useMonaco } from '@monaco-editor/react'
+import Editor, { useMonaco, type EditorProps } from '@monaco-editor/react'
 import { merge } from 'lodash'
 
 import { editorThemeDark } from '../theme/editorThemeDark'
@@ -16,7 +16,7 @@ type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string
   onChange?: Dispatch<string>
   language?: string
-  options?: object
+  options?: EditorProps['options']
   save?: boolean
   saving?: boolean
   onSave?: Dispatch<string>
@@ -24,20 +24,14 @@ type CodeEditorProps = Omit<CardProps, 'children'> & {
   height?: string | number
 }
 
-const defaultOptions = {
-  fontFamily: '"Monument Mono", monospace',
-  fontSize: '14px',
-  padding: {
-    bottom: '16px',
-    top: '16px',
-  },
-  scrollbar: {
-    useShadows: false,
-    verticalScrollbarSize: 5,
-  },
+const defaultOptions: EditorProps['options'] = {
+  fontFamily: 'ui-monospace, monospace',
+  fontSize: 14,
+  padding: { bottom: 16, top: 16 },
+  scrollbar: { useShadows: false, verticalScrollbarSize: 5 },
   scrollBeyondLastLine: false,
-  // Fixes cursor alignment issues when using custom font
-  fontLigatures: '',
+  fontLigatures: false,
+  automaticLayout: true,
 }
 
 export default function CodeEditor({
@@ -89,6 +83,11 @@ export default function CodeEditor({
     )
   }, [monaco, theme.mode])
 
+  const mergedOptions = useMemo(
+    () => merge({}, defaultOptions, options),
+    [options]
+  )
+
   return (
     <Card
       fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}
@@ -119,7 +118,7 @@ export default function CodeEditor({
             setCurrent(v)
             if (onChange) onChange(v)
           }}
-          options={merge(defaultOptions, options)}
+          options={mergedOptions}
           theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}
           onMount={onEditorMount}
         />
