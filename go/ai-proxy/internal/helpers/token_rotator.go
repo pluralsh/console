@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"sync"
 	"sync/atomic"
 )
 
@@ -11,7 +10,6 @@ type TokenRotator interface {
 
 type RoundRobinTokenRotator struct {
 	Tokens []string
-	mu     sync.RWMutex
 	index  atomic.Uint32
 }
 
@@ -25,8 +23,6 @@ func NewRoundRobinTokenRotator(tokens []string) *RoundRobinTokenRotator {
 }
 
 func (rr *RoundRobinTokenRotator) GetNextToken() string {
-	rr.mu.RLock()
-	defer rr.mu.RUnlock()
 
 	if len(rr.Tokens) == 0 {
 		return ""
