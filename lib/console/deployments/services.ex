@@ -696,8 +696,13 @@ defmodule Console.Deployments.Services do
       ServiceDependency.for_cluster(id)
       |> ServiceDependency.for_name(name)
       |> ServiceDependency.pending()
+      |> ServiceDependency.selected()
       |> Repo.update_all(set: [status: :healthy])
-      |> ok()
+      |> case do
+        {_, [_ | _] = deps} ->
+          handle_notify(PubSub.ServiceDependenciesUpdated, deps)
+        _ -> {:ok, []}
+      end
     else
       {:ok, []}
     end
