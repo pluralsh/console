@@ -5,6 +5,7 @@ defmodule Console.Schema.ServiceError do
   schema "service_errors" do
     field :source,  :string
     field :message, :binary
+    field :warning, :boolean, default: false
 
     belongs_to :cluster,        Cluster
     belongs_to :service,        Service
@@ -15,7 +16,7 @@ defmodule Console.Schema.ServiceError do
     timestamps()
   end
 
-  @valid ~w(source message service_id stack_run_id pipeline_stage_id observer_id cluster_id)a
+  @valid ~w(source message warning service_id stack_run_id pipeline_stage_id observer_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

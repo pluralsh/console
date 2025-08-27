@@ -76,6 +76,9 @@ defmodule ConsoleWeb.GitController do
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
         send_resp(conn, 429, "Rate limited")
+      {{:error, {:dependencies, err}}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: stringify(err), warning: true}])
+        send_resp(conn, 402, stringify(err))
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
         send_resp(conn, 402, stringify(err))

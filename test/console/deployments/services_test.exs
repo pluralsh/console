@@ -822,6 +822,9 @@ defmodule Console.Deployments.ServicesTest do
       end
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+      assert_receive {:event, %PubSub.ServiceDependenciesUpdated{item: found}}
+
+      assert ids_equal(found, dependencies)
 
       :timer.sleep(:timer.seconds(1))
       {:ok, updated} = Services.update_components(%{

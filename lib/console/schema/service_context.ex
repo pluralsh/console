@@ -26,6 +26,7 @@ defmodule Console.Schema.ServiceContext do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:secrets, with: &secret_changeset/2)
+    |> validate_length(:name, max: 1000)
     |> foreign_key_constraint(:project_id)
     |> validate_required([:name])
   end

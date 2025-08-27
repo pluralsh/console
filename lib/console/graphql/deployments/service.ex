@@ -198,6 +198,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
   end
 
+  @desc "metadata about the deployed contents of a service"
+  input_object :service_metadata_attributes do
+    field :images, list_of(:string), description: "a list of images to deployed in this service"
+    field :fqdns,  list_of(:string), description: "a list of fqdns to discover"
+  end
+
   @desc "a reference to a service deployed from a git repo into a cluster"
   object :service_deployment do
     field :id,               non_null(:id), description: "internal id of this service"
@@ -226,6 +232,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :dry_run,          :boolean, description: "whether this service should not actively reconcile state and instead simply report pending changes"
     field :sources,          list_of(:service_source), description: "the sources of this service"
     field :renderers,        list_of(:renderer), description: "the renderers of this service"
+    field :metadata,         :service_metadata, description: "metadata about the deployed contents of this service"
 
     @desc "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
     field :docs, list_of(:git_file), resolve: &Deployments.docs/3
@@ -459,8 +466,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "an error sent from the deploy operator about sync progress"
   object :service_error do
-    field :source, non_null(:string)
+    field :source,  non_null(:string)
     field :message, non_null(:string)
+    field :warning, :boolean, description: "whether this is just a warning"
   end
 
   @desc "a file fetched from a git repository, eg a docs .md file"
@@ -488,6 +496,12 @@ defmodule Console.GraphQl.Deployments.Service do
   object :namespace_metadata do
     field :labels,      :map
     field :annotations, :map
+  end
+
+  @desc "metadata about the deployed contents of a service"
+  object :service_metadata do
+    field :images, list_of(:string), description: "a list of images to deployed in this service"
+    field :fqdns,  list_of(:string), description: "a list of fqdns to discover"
   end
 
   @desc "Allows you to control whether a specific set of fields in a kubernetes object is drift detected"
@@ -593,6 +607,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :revision_id, :id
       arg :sha,         :string
       arg :errors,      list_of(:service_error_attributes)
+      arg :metadata,    :service_metadata_attributes
 
       resolve &Deployments.update_service_components/2
     end

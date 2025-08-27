@@ -1,15 +1,19 @@
 import {
   Chip,
+  ChipProps,
   ErrorIcon,
   Modal,
   Tooltip,
-  ChipProps,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
-import { ComponentProps, useState } from 'react'
 import pluralize from 'pluralize'
+import { ComponentProps, useState } from 'react'
 
-import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
+import {
+  ServiceDeploymentsRowFragment,
+  ServiceErrorFragment,
+} from 'generated/graphql'
 
 import { ServiceErrorsTable } from './service/ServiceErrors'
 
@@ -18,24 +22,31 @@ export function ServiceErrorsChip({
   alwaysShow = false,
   ...props
 }: {
-  errors: Nullable<Nullable<ServiceError>[]>
+  errors: Nullable<Nullable<ServiceErrorFragment>[]>
   alwaysShow?: boolean
 } & ComponentProps<typeof Chip>) {
-  const hasErrors = !isEmpty(errors)
+  const allWarnings =
+    !isEmpty(errors) && !!errors?.every((error) => error?.warning)
 
-  if (!alwaysShow && !hasErrors) {
-    return null
-  }
+  if (!alwaysShow && isEmpty(errors)) return null
 
   return (
     <Tooltip label="View errors">
       <Chip
-        severity={hasErrors ? 'danger' : 'neutral'}
-        icon={hasErrors ? <ErrorIcon /> : undefined}
+        severity={
+          isEmpty(errors) ? 'neutral' : allWarnings ? 'warning' : 'danger'
+        }
+        icon={
+          isEmpty(errors) ? undefined : allWarnings ? (
+            <WarningIcon />
+          ) : (
+            <ErrorIcon />
+          )
+        }
         {...props}
       >
         {errors?.length === 0 ? 'No' : errors?.length}
-        {pluralize(' error', errors?.length ?? 0)}
+        {pluralize(allWarnings ? ' warning' : ' error', errors?.length ?? 0)}
       </Chip>
     </Tooltip>
   )
