@@ -32,7 +32,7 @@ import { BasicLink } from 'components/utils/typography/BasicLink'
 import { filesize } from 'filesize'
 
 import { ClusterBasicFragment, ClustersRowFragment } from 'generated/graphql'
-import { ReactElement, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import semver from 'semver'
 import styled, { useTheme } from 'styled-components'
@@ -273,7 +273,11 @@ const SizeTextSc = styled.div<{
   ...theme.partials.text[$partialType],
 }))
 
-function ColClusterSizeContent({ cluster }): ReactElement {
+function ColClusterSizeContent({
+  cluster,
+}: {
+  cluster: Nullable<ClustersRowFragment>
+}) {
   const theme = useTheme()
   const isEmpty = useMemo(() => {
     return (
@@ -324,7 +328,7 @@ function ColClusterSizeContent({ cluster }): ReactElement {
       {cluster?.availabilityZones ? (
         <Chip
           size="small"
-          tooltip={`${cluster?.availabilityZones?.join(', ')} availability zones`}
+          tooltip={`availability zones: ${cluster?.availabilityZones?.join(', ')}`}
           icon={<SmallAZIcon />}
         >
           {cluster?.availabilityZones?.length}

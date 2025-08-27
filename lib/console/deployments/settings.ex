@@ -109,8 +109,11 @@ defmodule Console.Deployments.Settings do
   def create_default_project() do
     start_transaction()
     |> add_operation(:project, fn _ ->
-      %Project{}
-      |> Project.changeset(%{name: "default", description: "initial project created by plural", default: true})
+      Project.changeset(%Project{}, %{
+        name: Console.conf(:default_project_name),
+        description: "initial project created by plural",
+        default: true
+      })
       |> Repo.insert()
     end)
     |> add_operation(:clusters, fn %{project: proj} ->
