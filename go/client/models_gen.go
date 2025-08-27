@@ -6088,6 +6088,8 @@ type ServiceDeployment struct {
 	Sources []*ServiceSource `json:"sources,omitempty"`
 	// the renderers of this service
 	Renderers []*Renderer `json:"renderers,omitempty"`
+	// metadata about the deployed contents of this service
+	Metadata *ServiceMetadata `json:"metadata,omitempty"`
 	// fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries
 	Docs []*GitFile `json:"docs,omitempty"`
 	// the git repo of this service
@@ -6186,6 +6188,8 @@ type ServiceDeploymentEdge struct {
 type ServiceError struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
+	// whether this is just a warning
+	Warning *bool `json:"warning,omitempty"`
 }
 
 type ServiceErrorAttributes struct {
@@ -6206,6 +6210,22 @@ type ServiceImport struct {
 
 type ServiceImportAttributes struct {
 	StackID string `json:"stackId"`
+}
+
+// metadata about the deployed contents of a service
+type ServiceMetadata struct {
+	// a list of images to deployed in this service
+	Images []*string `json:"images,omitempty"`
+	// a list of fqdns to discover
+	Fqdns []*string `json:"fqdns,omitempty"`
+}
+
+// metadata about the deployed contents of a service
+type ServiceMetadataAttributes struct {
+	// a list of images to deployed in this service
+	Images []*string `json:"images,omitempty"`
+	// a list of fqdns to discover
+	Fqdns []*string `json:"fqdns,omitempty"`
 }
 
 type ServicePort struct {

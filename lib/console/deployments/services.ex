@@ -385,7 +385,7 @@ defmodule Console.Deployments.Services do
   def dependencies_ready(%Service{} = svc) do
     with %{dependencies: [_ | _] = deps} <- Repo.preload(svc, [:dependencies]),
          %ServiceDependency{name: name} <- Enum.find(deps, & &1.status != :healthy) do
-      {:error, "dependency #{name} is not ready"}
+      {:error, {:dependencies, "dependency #{name} is not ready"}}
     else
       _ -> {:ok, svc}
     end
@@ -398,7 +398,8 @@ defmodule Console.Deployments.Services do
     |> Repo.update()
   end
 
-  defp mark_failed(%{errors: [_ | _]} = attrs), do: Map.put(attrs, :status, :failed)
+  defp mark_failed(%{errors: [_ | _] = errors} = attrs),
+    do: Map.put(attrs, :status, status_from_errors(errors))
   defp mark_failed(attrs), do: attrs
 
   @doc """
@@ -695,8 +696,13 @@ defmodule Console.Deployments.Services do
       ServiceDependency.for_cluster(id)
       |> ServiceDependency.for_name(name)
       |> ServiceDependency.pending()
+      |> ServiceDependency.selected()
       |> Repo.update_all(set: [status: :healthy])
-      |> ok()
+      |> case do
+        {_, [_ | _] = deps} ->
+          handle_notify(PubSub.ServiceDependenciesUpdated, deps)
+        _ -> {:ok, []}
+      end
     else
       {:ok, []}
     end
@@ -719,18 +725,15 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
-      running     = Enum.all?(components, & &1.state == :running || is_nil(&1.state)) && !Enum.empty?(components)
-      failed      = Enum.any?(components, & &1.state == :failed) || !Enum.empty?(service.errors)
-      paused      = Enum.any?(components, & &1.state == :paused)
-      unsynced    = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, paused, running, latest_vsn(service, attrs), unsynced} do
-        {true, _, _, _, _}       -> update_status(service, :failed, component_status)
-        {_, true, _, _, _}       -> update_status(service, :paused, component_status)
-        {_, _, _, _, true}       -> update_status(service, :stale, component_status)
-        {_, _, true, true, _}    -> update_status(service, :healthy, component_status)
-        _ -> update_status(service, :stale, component_status)
+      case {base_status(components), latest_vsn(service, attrs), status_from_errors(service)} do
+        {_, _, status} when not is_nil(status) ->
+          update_status(service, status, component_status)
+        {:healthy, latest, _} ->
+          update_status(service, (if latest, do: :healthy, else: :stale), component_status)
+        {status, _, _} ->
+          update_status(service, status, component_status)
       end
     end)
     |> add_operation(:dependencies, fn %{updated: svc} -> flush_dependencies(svc) end)
@@ -745,6 +748,27 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(attrs, svc)
   end
+
+  defp base_status([_ | _] = components) do
+    Enum.reduce_while(components, :healthy, fn
+      %ServiceComponent{state: :failed},  _ ->        {:halt, :failed}
+      %ServiceComponent{state: :paused},  _ ->        {:halt, :paused}
+      %ServiceComponent{state: :pending}, :healthy -> {:cont, :stale}
+      %ServiceComponent{synced: false},   :healthy -> {:cont, :stale}
+      _, v -> {:cont, v}
+    end)
+  end
+  defp base_status(_), do: :stale
+
+  defp status_from_errors(%Service{errors: errors}),
+    do: status_from_errors(errors)
+  defp status_from_errors([_ | _] = errors) do
+    case Enum.all?(errors, &Map.get(&1, :warning, false)) do
+      true ->  :stale
+      false -> :failed
+    end
+  end
+  defp status_from_errors(_), do: nil
 
   defp latest_vsn(%Service{sha: sha, revision_id: rid}, %{sha: sha, revision_id: rid})
     when is_binary(sha) and is_binary(rid), do: true

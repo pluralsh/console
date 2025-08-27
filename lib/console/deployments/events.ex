@@ -4,6 +4,7 @@ defmodule Console.PubSub.ServiceDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ServiceComponentsUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ServiceHardDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ServiceManifestsRequested, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ServiceDependenciesUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ClusterCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterUpdated, do: use Piazza.PubSub.Event

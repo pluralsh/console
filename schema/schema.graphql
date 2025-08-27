@@ -829,7 +829,7 @@ type RootMutationType {
 
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(
-    id: ID!, components: [ComponentAttributes], revisionId: ID, sha: String, errors: [ServiceErrorAttributes]
+    id: ID!, components: [ComponentAttributes], revisionId: ID, sha: String, errors: [ServiceErrorAttributes], metadata: ServiceMetadataAttributes
   ): ServiceDeployment
 
   "save the manifests in cache to be retrieved by the requesting user"
@@ -5092,6 +5092,15 @@ input KustomizeAttributes {
   enableHelm: Boolean
 }
 
+"metadata about the deployed contents of a service"
+input ServiceMetadataAttributes {
+  "a list of images to deployed in this service"
+  images: [String]
+
+  "a list of fqdns to discover"
+  fqdns: [String]
+}
+
 "a reference to a service deployed from a git repo into a cluster"
 type ServiceDeployment {
   "internal id of this service"
@@ -5159,6 +5168,9 @@ type ServiceDeployment {
 
   "the renderers of this service"
   renderers: [Renderer]
+
+  "metadata about the deployed contents of this service"
+  metadata: ServiceMetadata
 
   "fetches the \/docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
   docs: [GitFile]
@@ -5502,7 +5514,11 @@ type ApiDeprecation {
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
+
   message: String!
+
+  "whether this is just a warning"
+  warning: Boolean
 }
 
 "a file fetched from a git repository, eg a docs .md file"
@@ -5538,6 +5554,15 @@ type SyncConfig {
 type NamespaceMetadata {
   labels: Map
   annotations: Map
+}
+
+"metadata about the deployed contents of a service"
+type ServiceMetadata {
+  "a list of images to deployed in this service"
+  images: [String]
+
+  "a list of fqdns to discover"
+  fqdns: [String]
 }
 
 "Allows you to control whether a specific set of fields in a kubernetes object is drift detected"

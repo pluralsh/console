@@ -11,9 +11,9 @@
         },
         "branch": {
             "type": "string",
-            "description": "The branch to create the PR on.  If not provided, the user will specify a branch name."
+            "description": "The branch to create the PR on.  It should be a concise name descriptive of the change being made."
         }
     },
-    "required": ["pr_automation_id"],
+    "required": ["pr_automation_id", "branch"],
     "additionalProperties": false
 }
