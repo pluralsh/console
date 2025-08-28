@@ -98,9 +98,7 @@ defmodule Console.AI.OpenAI do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
         {:ok, content}
       {:ok, content} when is_binary(content) -> {:ok, content}
-      {:ok, content, tools} when is_binary(content) ->
-        IO.inspect(tools, label: "openai tools")
-        {:ok, content, tools}
+      {:ok, content, tools} when is_binary(content) -> {:ok, content, tools}
       {:ok, _} -> {:error, "could not generate an ai completion for this context"}
       error -> error
     end
@@ -140,9 +138,15 @@ defmodule Console.AI.OpenAI do
   def tools?(), do: true
 
   defp msg_history(model, messages) do
-    Enum.map(messages, fn
-      {:tool, msg, id} -> %{role: :tool, content: msg, tool_call_id: id}
-      {role, msg} -> %{role: tool_role(role, model), content: msg}
+    Enum.flat_map(messages, fn
+      {:tool, msg, %{call_id: id, name: n, arguments: args}} when is_binary(id) ->
+        [
+          %{role: :assistant, tool_calls: [
+            %{type: "function", id: id, function: %{name: n, arguments: Jason.encode!(args)}}
+          ]},
+          %{role: :tool, content: msg, tool_call_id: id}
+        ]
+      {role, msg} -> [%{role: tool_role(role, model), content: msg}]
     end)
   end
 
