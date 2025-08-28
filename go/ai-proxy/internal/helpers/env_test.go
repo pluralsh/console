@@ -62,8 +62,14 @@ func TestGetPluralEnvSlice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
 			if tt.envValue != "" {
-				os.Setenv("PLRL_"+tt.key, tt.envValue)
-				defer os.Unsetenv("PLRL_" + tt.key)
+				if err := os.Setenv("PLRL_"+tt.key, tt.envValue); err != nil {
+					t.Fatalf("failed to set environment variable: %v", err)
+				}
+				defer func() {
+					if err := os.Unsetenv("PLRL_" + tt.key); err != nil {
+						t.Errorf("failed to unset environment variable: %v", err)
+					}
+				}()
 			}
 
 			// Test

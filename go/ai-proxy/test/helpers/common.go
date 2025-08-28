@@ -67,7 +67,9 @@ func SetupProviderServer(handlers map[string]http.HandlerFunc) (*httptest.Server
 		return nil, err
 	}
 
-	server.Listener.Close()
+	if err := server.Listener.Close(); err != nil {
+		klog.Warningf("failed to close test server listener: %v", err)
+	}
 	server.Listener = l
 	server.Start()
 
@@ -117,7 +119,11 @@ func CreateRequestWithResponse[T any](method string, endpoint string, body T) fu
 		if err != nil {
 			return nil, nil, err
 		}
-		defer res.Body.Close()
+		defer func() {
+			if cerr := res.Body.Close(); cerr != nil && err == nil {
+				err = cerr
+			}
+		}()
 
 		responseBytes, err := io.ReadAll(res.Body)
 		if err != nil {
