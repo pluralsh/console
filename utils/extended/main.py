@@ -33,7 +33,7 @@ def fetch_extended_versions(service):
                 if "Ended" in curr_support and "Ends" in extended_support:
                     is_extended = True
                 versions.append({
-                    "version": float(version),
+                    "version": version,
                     "extended": is_extended
                 })
     return versions
