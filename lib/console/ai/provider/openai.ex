@@ -138,9 +138,15 @@ defmodule Console.AI.OpenAI do
   def tools?(), do: true
 
   defp msg_history(model, messages) do
-    Enum.map(messages, fn
-      {:tool, msg, id} -> %{role: :tool, content: msg, tool_call_id: id}
-      {role, msg} -> %{role: tool_role(role, model), content: msg}
+    Enum.flat_map(messages, fn
+      {:tool, msg, %{call_id: id, name: n, arguments: args}} when is_binary(id) ->
+        [
+          %{role: :assistant, tool_calls: [
+            %{type: "function", id: id, function: %{name: n, arguments: Jason.encode!(args)}}
+          ]},
+          %{role: :tool, content: msg, tool_call_id: id}
+        ]
+      {role, msg} -> [%{role: tool_role(role, model), content: msg}]
     end)
   end
 
@@ -224,12 +230,19 @@ defmodule Console.AI.OpenAI do
   defp model(%__MODULE__{model: m}) when is_binary(m), do: m
   defp model(_), do: @model
 
+  defp window("gpt-5"), do: 500_000 * 4
   defp window("gpt-4.1" <> _), do: 1_000_000 * 4
   defp window("o" <> _), do: 1_000_000 * 4
   defp window(_), do: 128_000 * 4
 
-  defp tool_role(:system, "gpt-4.1" <> _), do: :developer
-  defp tool_role(:system, "o" <> _), do: :developer
+  defp tool_role(:system, model) do
+    case model do
+      "gpt-4.1" <> _ -> :developer
+      "gpt-4" <> _ -> :system
+      "gpt-3" <> _ -> :system
+      _ -> :developer
+    end
+  end
   defp tool_role(r, _), do: r
 
   defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || @model

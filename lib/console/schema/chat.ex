@@ -58,12 +58,13 @@ defmodule Console.Schema.Chat do
     do: wrap_tool("<implementation_plan>#{c}</implementation_plan>", attrs)
   def message(%{type: :pr_call, content: c} = attrs),
     do: wrap_tool("<pr_call>#{c}</pr_call>", attrs)
-  def message(%{type: t, content: c, attributes: %{tool: %{call_id: id}}}) when t in @tool_call_types and is_binary(id),
-    do: {:tool, c, id}
+  def message(%{type: t, content: c, attributes: %{tool: %{call_id: id} = tool}}) when t in @tool_call_types and is_binary(id),
+    do: {:tool, c, tool}
   def message(%{role: r, content: c}), do: {r, c}
+  def message({r, c, tool}), do: {r, c, tool}
   def message({r, c}), do: {r, c}
 
-  defp wrap_tool(msg, %{attributes: %{tool: %{call_id: id}}}) when is_binary(id), do: {:tool, msg, id}
+  defp wrap_tool(msg, %{attributes: %{tool: %{call_id: id} = tool}}) when is_binary(id), do: {:tool, msg, tool}
   defp wrap_tool(msg, _), do: {:user, msg}
 
   @spec attributes(msg | Provider.message) :: msg

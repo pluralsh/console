@@ -10,12 +10,25 @@ defmodule Console.AI.Stream.Exec do
 
   @spec handle_openai(map) :: stream_message
   defp handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c), do: c
-  defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}),
-    do: {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} -> {ind, call} end)}
+  defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}) do
+    {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} = func ->
+      {ind, Map.put(call, "id", func["id"])}
+    end)}
+  end
   defp handle_openai(_), do: :pass
 
-  @spec handle_openai(map) :: stream_message
+  @spec handle_anthropic(map) :: stream_message
   defp handle_anthropic(%{"type" => "content_block_start", "content_block" => %{"text" => t}}) when is_binary(t), do: t
+  defp handle_anthropic(%{
+    "type" => "content_block_start",
+    "index" => ind,
+    "content_block" => %{"type" => "tool_use"} = tool_use
+  }), do: {:tools, [{ind, tool_use}]}
+  defp handle_anthropic(%{
+    "type" => "content_block_delta",
+    "index" => ind,
+    "content_block" => %{"type" => "input_json_delta", "partial_json" => json}
+  }), do: {:tools, [{ind, %{"arguments" => json}}]}
   defp handle_anthropic(%{"type" => "content_block_delta", "delta" => %{"text" => t}}) when is_binary(t), do: t
   defp handle_anthropic(_), do: :pass
 
