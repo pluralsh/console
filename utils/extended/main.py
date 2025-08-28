@@ -23,15 +23,15 @@ def fetch_extended_versions(service):
             cols = row.find_all('td')
             if len(cols) >= 4:
                 version = cols[0].text.strip()
+                curr_support = cols[2].text.strip()
                 extended_support = cols[3].text.strip()
 
-                print(f"Service={service}, Found row: version={version}, support={extended_support}") 
-                
                 if not re.match(r'^\d+\.\d+$', version):
                     continue
                 
-                is_extended = "Ends" in extended_support
-                print(f"Service={service}, Found row: version={version}, extended?={is_extended}") 
+                is_extended = False
+                if "Ended" in curr_support and "Ends" in extended_support:
+                    is_extended = True
                 versions.append({
                     "version": float(version),
                     "extended": is_extended
