@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import requests
-from bs4 import BeautifulSoup
 import yaml
 import re
 
@@ -11,31 +10,48 @@ SERVICES = [
 ]
 
 def fetch_extended_versions(service):
-    url = f"https://endoflife.date/{service}"
+    url = f"https://endoflife.date/api/v1/products/{service}"
     response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    versions = []
-    table = soup.find('table')
-    if table:
-        rows = table.find_all('tr')[1:]
-        for row in rows:
-            cols = row.find_all('td')
-            if len(cols) >= 4:
-                version = cols[0].text.strip()
-                curr_support = cols[2].text.strip()
-                extended_support = cols[3].text.strip()
+    if response.status_code != 200:
+        print(f"Failed to fetch product extended info. Status code: {response.status_code}")
+        return []
 
-                if not re.match(r'^\d+\.\d+$', version):
-                    continue
+    versions = []
+    try:
+        data = response.json()
+        if not isinstance(data, dict) or 'result' not in data or 'releases' not in data['result']:
+            print(f"Unexpected API response format for {service}")
+            return []
+            
+        releases = data['result']['releases']
+        for release in releases:
+            if not isinstance(release, dict):
+                continue
+            version = release.get('name')
+            
+            if not re.match(r'^\d+\.\d+$', str(version)):
+                continue
                 
-                is_extended = False
-                if "Ended" in curr_support and "Ends" in extended_support:
-                    is_extended = True
-                versions.append({
-                    "version": version,
-                    "extended": is_extended
-                })
+            is_maintained = release.get('isMaintained', False)
+            is_eol = release.get('isEol', False)
+            is_eoas = release.get('isEoas', False)
+            
+            is_extended = False
+            if service in ['amazon-eks', 'azure-kubernetes-service']:
+                # For EKS and AKS, extended support is when it's maintained AND in EOL
+                is_extended = is_maintained and is_eol
+            elif service == 'google-kubernetes-engine':
+                # For GKE, extended support is when it's maintained AND in EOAS
+                is_extended = is_maintained and is_eoas
+                
+            versions.append({
+                "version": version,
+                "extended": is_extended
+            })
+    except (ValueError, KeyError) as e:
+        print(f"Failed to parse response for {service}: {str(e)}")
+        return []
+        
     return versions
 
 def write_yaml(file_path, data):
