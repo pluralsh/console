@@ -13,7 +13,11 @@ func replaceRequestBody[In any, Out any](r *httputil.ProxyRequest, mapFunc func(
 	if err != nil {
 		return err
 	}
-	defer r.Out.Body.Close()
+	defer func() {
+		if cerr := r.Out.Body.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	var in In
 	err = json.Unmarshal(b, &in)
@@ -29,7 +33,7 @@ func replaceRequestBody[In any, Out any](r *httputil.ProxyRequest, mapFunc func(
 
 	r.Out.ContentLength = int64(len(outBytes))
 	r.Out.Body = io.NopCloser(bytes.NewReader(outBytes))
-	return nil
+	return err
 }
 
 func replaceResponseBody[In any, Out any](r *http.Response, mapFunc func(In) Out) error {
@@ -37,7 +41,11 @@ func replaceResponseBody[In any, Out any](r *http.Response, mapFunc func(In) Out
 	if err != nil {
 		return err
 	}
-	defer r.Body.Close()
+	defer func() {
+		if cerr := r.Body.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	var in In
 	err = json.Unmarshal(b, &in)
@@ -53,5 +61,5 @@ func replaceResponseBody[In any, Out any](r *http.Response, mapFunc func(In) Out
 
 	r.ContentLength = int64(len(outBytes))
 	r.Body = io.NopCloser(bytes.NewReader(outBytes))
-	return nil
+	return err
 }

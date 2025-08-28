@@ -20,7 +20,7 @@ import (
 func init() {
 	_ = pflag.Set("provider", "ollama")
 	_ = pflag.Set("provider-host", "localhost:8081")
-	_ = pflag.Set("provider-token", "test")
+	_ = pflag.Set("provider-tokens", "test")
 }
 
 var (

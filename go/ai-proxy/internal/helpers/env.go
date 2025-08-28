@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -22,4 +23,11 @@ func GetEnv(key, fallback string) string {
 // with the provided key is not found, fallback will be used.
 func GetPluralEnv(key, fallback string) string {
 	return GetEnv(fmt.Sprintf("%s_%s", EnvPrefix, key), fallback)
+}
+
+func GetPluralEnvSlice(key string, fallback []string) []string {
+	if value := GetPluralEnv(key, ""); len(value) > 0 {
+		return strings.Split(value, ",")
+	}
+	return fallback
 }

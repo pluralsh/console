@@ -33,7 +33,7 @@ run: fmt vet ## run a proxy locally
 	go run ./ \
 		--provider=${PROVIDER} \
 		--provider-host=${PROVIDER_API_HOST} \
-		--provider-token=${PROVIDER_TOKEN} \
+		--provider-tokens=${PROVIDER_TOKEN} \
 		--v=4
 
 .PHONY: update-dependencies
