@@ -98,7 +98,9 @@ defmodule Console.AI.OpenAI do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
         {:ok, content}
       {:ok, content} when is_binary(content) -> {:ok, content}
-      {:ok, content, tools} when is_binary(content) -> {:ok, content, tools}
+      {:ok, content, tools} when is_binary(content) ->
+        IO.inspect(tools, label: "openai tools")
+        {:ok, content, tools}
       {:ok, _} -> {:error, "could not generate an ai completion for this context"}
       error -> error
     end
@@ -224,12 +226,19 @@ defmodule Console.AI.OpenAI do
   defp model(%__MODULE__{model: m}) when is_binary(m), do: m
   defp model(_), do: @model
 
+  defp window("gpt-5"), do: 500_000 * 4
   defp window("gpt-4.1" <> _), do: 1_000_000 * 4
   defp window("o" <> _), do: 1_000_000 * 4
   defp window(_), do: 128_000 * 4
 
-  defp tool_role(:system, "gpt-4.1" <> _), do: :developer
-  defp tool_role(:system, "o" <> _), do: :developer
+  defp tool_role(:system, model) do
+    case model do
+      "gpt-4.1" <> _ -> :developer
+      "gpt-4" <> _ -> :system
+      "gpt-3" <> _ -> :system
+      _ -> :developer
+    end
+  end
   defp tool_role(r, _), do: r
 
   defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || @model

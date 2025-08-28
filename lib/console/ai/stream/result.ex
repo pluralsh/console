@@ -5,6 +5,7 @@ defmodule Console.AI.Stream.Result do
     defstruct [:index, :id, :name, arguments: ""]
 
     def new(index, attrs) do
+      IO.inspect(attrs, label: "tool attrs")
       %__MODULE__{
         index: index,
         id: attrs["call_id"] || attrs["id"],
