@@ -32,8 +32,8 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
-import ClusterAddOnsEntry from './ClusterAddOnsEntry'
 import { useClusterContext } from './Cluster.tsx'
+import ClusterAddOnsEntry from './ClusterAddOnsEntry'
 
 export type AddonContextType = {
   cluster: ClusterFragment
@@ -65,7 +65,7 @@ export default function ClusterAddOns() {
   )
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-  const isCloudAddon = currentTab?.path !== CLUSTER_ALL_ADDONS_REL_PATH
+  const isCloudAddon = currentTab?.path == CLUSTER_CLOUD_ADDONS_REL_PATH
 
   const { data, error } = useRuntimeServicesQuery({
     variables: { kubeVersion, hasKubeVersion: !!kubeVersion, id: clusterId },
