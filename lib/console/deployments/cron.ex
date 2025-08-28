@@ -106,10 +106,16 @@ defmodule Console.Deployments.Cron do
 
     Service.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 100)
     |> Task.async_stream(fn svc ->
       Logger.info "pruning revisions for #{svc.id}"
-      Services.prune_revisions(svc)
-    end, max_concurrency: clamp(Services.count_all()))
+      try do
+        Services.prune_revisions(svc)
+      catch
+        error ->
+          Logger.error "error pruning revisions for #{svc.id}: #{inspect(error)}"
+      end
+    end, max_concurrency: 5, timeout: 300_000)
     |> Stream.run()
   end
 

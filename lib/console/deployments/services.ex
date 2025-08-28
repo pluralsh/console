@@ -961,7 +961,7 @@ defmodule Console.Deployments.Services do
     |> Revision.for_service(id)
     |> Revision.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 1000, pause: 10)
+    |> Console.throttle(count: 1000, pause: 100)
     |> Stream.chunk_every(100)
     |> Task.async_stream(fn revisions ->
       Logger.info "pruning #{length(revisions)} stale revisions for service #{id}"
@@ -969,7 +969,7 @@ defmodule Console.Deployments.Services do
       |> Revision.for_ids()
       |> Repo.delete_all(timeout: 5_000)
       |> elem(0)
-    end, max_concurrency: 100)
+    end, max_concurrency: 10)
     |> Enum.reduce(0, fn
       {:ok, count}, acc -> acc + count
       _, acc -> acc
