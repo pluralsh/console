@@ -769,6 +769,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-taskgovernance
   versions:
+  - version: v1.3.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.3.0-eksbuild.1
     compatibilities:
     - '1.33'
