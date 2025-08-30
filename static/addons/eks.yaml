@@ -2552,6 +2552,14 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.18.2-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.18.2-eksbuild.1
     compatibilities:
     - '1.33'
@@ -2672,6 +2680,9 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.12.3-eksbuild.1
+    compatibilities:
+    - '1.33'
   - version: v1.12.2-eksbuild.4
     compatibilities:
     - '1.33'
@@ -2681,6 +2692,13 @@
   - version: v1.12.1-eksbuild.2
     compatibilities:
     - '1.33'
+  - version: v1.11.4-eksbuild.22
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.20
     compatibilities:
     - '1.33'
@@ -2786,6 +2804,13 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.10.1-eksbuild.38
+    compatibilities:
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.10.1-eksbuild.36
     compatibilities:
     - '1.31'
@@ -5113,6 +5138,15 @@
   publisher: eks
 - name: netapp_trident-operator
   versions:
+  - version: v25.6.2-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v25.6.1-eksbuild.1
     compatibilities:
     - '1.33'
