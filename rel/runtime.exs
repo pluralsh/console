@@ -279,3 +279,8 @@ if is_set("CONSOLE_GITHUB_HTTP_PROXY") do
   config :tentacat,
     request_options: [proxy: to_charlist(get_env("CONSOLE_GITHUB_HTTP_PROXY"))]
 end
+
+if is_set("CONSOLE_SENTRY_DSN") do
+  config :console, :sentry,
+    dsn: get_env("CONSOLE_SENTRY_DSN")
+end

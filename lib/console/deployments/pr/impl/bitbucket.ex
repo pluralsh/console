@@ -107,6 +107,15 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [owner, repo | _] <- String.split(path, "/") do
+      {:ok, "#{owner}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse bitbucket url"}
+    end
+  end
+
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()

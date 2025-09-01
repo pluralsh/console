@@ -10,7 +10,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Stacks,
     Settings,
     Git,
-    Flows
+    Flows,
   }
   alias Console.Schema.{
     Cluster,
@@ -95,7 +95,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     TemplateContext,
     NodeStatistic,
     CloudConnection,
-    Sentinel
+    Sentinel,
+    AgentRuntime,
+    AgentRun
   }
 
   def query(Project, _), do: Project
@@ -180,6 +182,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(NodeStatistic, _), do: NodeStatistic
   def query(CloudConnection, _), do: CloudConnection
   def query(Sentinel, _), do: Sentinel
+  def query(AgentRuntime, _), do: AgentRuntime
+  def query(AgentRun, _), do: AgentRun
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -196,6 +200,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.OAuth
   delegates Console.GraphQl.Resolvers.Deployments.Flow
   delegates Console.GraphQl.Resolvers.Deployments.Sentinel
+  delegates Console.GraphQl.Resolvers.Deployments.Agent
 
   def list_addons(_, _), do: AddOns.addons()
 

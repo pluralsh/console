@@ -1336,6 +1336,7 @@ _Appears in:_
 | `icon` _string_ | Icon specifies an optional image icon for the flow to apply branding or improve identification. |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to be scoped to a specific project only. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: {} <br /> |
+| `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: {} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: {} <br /> |
 
 

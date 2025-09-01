@@ -40,7 +40,9 @@ defmodule Console.Deployments.Policies.Rbac do
     ComplianceReportGenerator,
     ServiceContext,
     CloudConnection,
-    Sentinel
+    Sentinel,
+    AgentRuntime,
+    AgentRun
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -148,6 +150,10 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%SharedSecret{} = share, %User{} = user, :consume), do: recurse(share, user, :notify)
   def evaluate(%CloudConnection{} = conn, %User{} = user, action),
     do: recurse(conn, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%AgentRuntime{} = runtime, %User{} = user, action),
+    do: recurse(runtime, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%AgentRun{} = run, %User{} = user, action),
+    do: recurse(run, user, action, & &1.runtime)
   def evaluate(l, user, action) when is_list(l), do: Enum.any?(l, &evaluate(&1, user, action))
   def evaluate(_, _, _), do: false
 
@@ -166,6 +172,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(project, @bindings)
   def preload(%OIDCProvider{} = oidc),
     do: Repo.preload(oidc, [:write_bindings])
+  def preload(%AgentRuntime{} = runtime),
+    do: Repo.preload(runtime, [:create_bindings])
+  def preload(%AgentRun{} = run),
+    do: Repo.preload(run, [runtime: [:create_bindings]])
   def preload(%RuntimeService{} = rs),
     do: Repo.preload(rs, [cluster: @top_preloads])
   def preload(%ClusterProvider{} = provider),

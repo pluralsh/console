@@ -113,6 +113,15 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+        [group, repo | _] <- String.split(path, "/", trim: true) do
+      {:ok, "#{group}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse gitlab url"}
+    end
+  end
+
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do

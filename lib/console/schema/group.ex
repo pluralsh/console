@@ -13,6 +13,10 @@ defmodule Console.Schema.Group do
     timestamps()
   end
 
+  def with_names(query \\ __MODULE__, names) when is_list(names) do
+    from(g in query, where: g.name in ^names)
+  end
+
   def search(query \\ __MODULE__, name) do
     from(g in query, where: ilike(g.name, ^"%#{name}%"))
   end

@@ -221,6 +221,8 @@ type RootQueryType {
 
   clusterIsoImages(after: String, first: Int, before: String, last: Int): ClusterIsoImageConnection
 
+  kubernetesVersionInfo(distro: ClusterDistro): [KubernetesVersionInfo]
+
   serviceDeployments(
     after: String
 
@@ -426,6 +428,14 @@ type RootQueryType {
   sentinel(id: ID, name: String): Sentinel
 
   sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
+
+  agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
+
+  agentRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
+
+  agentRuntime(id: ID!): AgentRuntime
+
+  agentRun(id: ID!): AgentRun
 
   aiInsight(id: ID!): AiInsight
 
@@ -997,6 +1007,18 @@ type RootMutationType {
 
   runSentinel(id: ID!): SentinelRun
 
+  cancelAgentRun(id: ID!): AgentRun
+
+  createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
+
+  agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
+
+  upsertAgentRuntime(attributes: AgentRuntimeAttributes!): AgentRuntime
+
+  deleteAgentRuntime(id: ID!): AgentRuntime
+
+  updateAgentRun(id: ID!, attributes: AgentRunStatusAttributes!): AgentRun
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1152,6 +1174,155 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum AgentRuntimeType {
+  CLAUDE
+  OPENCODE
+}
+
+enum AgentRunStatus {
+  PENDING
+  RUNNING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+}
+
+input AgentRuntimeAttributes {
+  "the name of this runtime"
+  name: String!
+
+  "the type of this runtime"
+  type: AgentRuntimeType!
+
+  "the policy for creating runs on this runtime"
+  createBindings: [AgentBindingAttributes]
+}
+
+input AgentBindingAttributes {
+  "the email of the user this binding is for"
+  userEmail: String
+
+  "the name of the group this binding is for"
+  groupName: String
+}
+
+input AgentRunAttributes {
+  "the prompt to give to the agent"
+  prompt: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the flow this agent run is associated with"
+  flowId: ID
+}
+
+input AgentRunStatusAttributes {
+  "the status of this agent run"
+  status: AgentRunStatus!
+
+  "the kubernetes pod this agent is running on"
+  podReference: NamespacedName
+}
+
+input AgentPullRequestAttributes {
+  "the title of the pull request"
+  title: String!
+
+  "the body of the pull request"
+  body: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the base branch of the pull request"
+  base: String!
+
+  "the head branch of the pull request"
+  head: String!
+}
+
+type AgentRuntime {
+  id: ID!
+
+  "the name of this runtime"
+  name: String!
+
+  "the type of this runtime"
+  type: AgentRuntimeType!
+
+  "the cluster this runtime is running on"
+  cluster: Cluster
+
+  "the policy for creating runs on this runtime"
+  createBindings: [PolicyBinding]
+
+  pendingRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentRun {
+  id: ID!
+
+  "the prompt this agent was given"
+  prompt: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the status of this agent run"
+  status: AgentRunStatus!
+
+  "the kubernetes pod this agent is running on"
+  podReference: AgentPodReference
+
+  scmCreds: ScmCreds
+
+  pluralCreds: PluralCreds
+
+  "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
+  pod: Pod
+
+  "the runtime this agent is using"
+  runtime: AgentRuntime
+
+  "the user who initiated this agent run"
+  user: User
+
+  "the flow this agent is associated with"
+  flow: Flow
+
+  "the pull requests this agent run has created"
+  pullRequests: [PullRequest]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ScmCreds {
+  username: String!
+  token: String!
+}
+
+type AgentPodReference {
+  name: String!
+  namespace: String!
+}
+
+type AgentRuntimeConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRuntimeEdge]
+}
+
+type AgentRunConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRunEdge]
 }
 
 enum SentinelCheckType {
@@ -1369,6 +1540,7 @@ input FlowAttributes {
   description: String
   icon: String
   projectId: ID
+  repositories: [String]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
   serverAssociations: [McpServerAssociationAttributes]
@@ -1434,6 +1606,9 @@ type Flow {
   description: String
 
   icon: String
+
+  "the git https urls of the application code repositories used in this flow"
+  repositories: [String]
 
   "servers that are bound to this flow"
   servers: [McpServer]
@@ -2330,6 +2505,7 @@ enum ObservabilityWebhookType {
   DATADOG
   PAGERDUTY
   NEWRELIC
+  SENTRY
 }
 
 enum AlertSeverity {
@@ -2449,6 +2625,9 @@ type Alert {
 
   "the project this alert was associated with"
   project: Project
+
+  "the flow this alert was associated with"
+  flow: Flow
 
   insertedAt: DateTime
 
@@ -7216,6 +7395,18 @@ type NodeStatistic {
   updatedAt: DateTime
 }
 
+"information about the kubernetes version for a given cluster"
+type KubernetesVersionInfo {
+  "the distribution of kubernetes this info pertains to"
+  distro: ClusterDistro
+
+  "the kubernetes version"
+  version: String
+
+  "whether this version is on extended support"
+  extended: Boolean
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -10160,6 +10351,8 @@ type ConsoleConfiguration {
 
   vpnEnabled: Boolean
 
+  sentryEnabled: Boolean
+
   "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean
 
@@ -10569,5 +10762,15 @@ type FlowEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type AgentRunEdge {
+  node: AgentRun
+  cursor: String
+}
+
+type AgentRuntimeEdge {
+  node: AgentRuntime
   cursor: String
 }

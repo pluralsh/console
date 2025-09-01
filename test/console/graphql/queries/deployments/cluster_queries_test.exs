@@ -561,6 +561,27 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     end
   end
 
+  describe "kubernetesVersionInfo" do
+    test "it can fetch kubernetes version info" do
+      user = admin_user()
+
+
+      {:ok, %{data: %{"kubernetesVersionInfo" => found}}} = run_query("""
+        query {
+          kubernetesVersionInfo(distro: EKS) {
+            distro
+            version
+            extended
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      refute Enum.empty?(found)
+      assert Enum.any?(found, & &1["extended"])
+      assert Enum.any?(found, & !&1["extended"])
+    end
+  end
+
   describe "runtimeService" do
     test "it can fetch an individual runtime service by id" do
       user = insert(:user)

@@ -1142,6 +1142,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  @desc "information about the kubernetes version for a given cluster"
+  object :kubernetes_version_info do
+    field :distro,   :cluster_distro, description: "the distribution of kubernetes this info pertains to"
+    field :version,  :string, description: "the kubernetes version"
+    field :extended, :boolean, description: "whether this version is on extended support"
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1371,6 +1378,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Authenticated
 
       resolve &Deployments.list_cluster_iso_images/2
+    end
+
+    field :kubernetes_version_info, list_of(:kubernetes_version_info) do
+      middleware Authenticated
+      arg :distro, :cluster_distro
+
+      resolve &Deployments.kubernetes_version_info/2
     end
   end
 

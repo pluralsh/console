@@ -110,6 +110,15 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [owner, repo | _] <- String.split(path, "/") do
+      {:ok, "#{owner}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse github url"}
+    end
+  end
+
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
   defp to_files(client, url, pr, files) do

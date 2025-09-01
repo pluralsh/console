@@ -102,6 +102,16 @@ defmodule Console.Services.Users do
   @spec get_invite!(binary) :: Invite.t
   def get_invite!(secure_id), do: Repo.get_by!(Invite, secure_id: secure_id)
 
+  def user_by_emails(emails) do
+    User.with_emails(emails)
+    |> Repo.all()
+  end
+
+  def group_by_names(names) do
+    Group.with_names(names)
+    |> Repo.all()
+  end
+
   @spec unread_notifications(User.t) :: integer
   def unread_notifications(%User{} = user) do
     Notification.unread(user)

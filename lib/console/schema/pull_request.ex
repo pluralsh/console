@@ -1,6 +1,15 @@
 defmodule Console.Schema.PullRequest do
   use Console.Schema.Base
-  alias Console.Schema.{Cluster, Service, PolicyBinding, Stack, Flow, PrGovernance, AgentSession}
+  alias Console.Schema.{
+    Cluster,
+    Service,
+    PolicyBinding,
+    Stack,
+    Flow,
+    PrGovernance,
+    AgentSession,
+    AgentRun
+  }
 
   defenum Status, open: 0, merged: 1, closed: 2
 
@@ -34,6 +43,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :flow,       Flow
     belongs_to :governance, PrGovernance
     belongs_to :session,    AgentSession
+    belongs_to :agent_run,  AgentRun
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -121,6 +131,7 @@ defmodule Console.Schema.PullRequest do
     governance_state
     next_poll_at
     session_id
+    agent_run_id
   )a
 
   def changeset(model, attrs \\ %{}) do

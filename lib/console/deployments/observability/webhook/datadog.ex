@@ -10,6 +10,7 @@ defmodule Console.Deployments.Observability.Webhook.Datadog do
     do: extract_from_tags(tags, ["plrl_project", "project", "plural_project"], acc, &Map.put(&1, :project_id, project(&2)))
   def associations(:project, _, acc), do: acc
 
+
   def associations(:cluster, %{"meta" => %{"cluster" => name}}, acc),
     do: Map.put(acc, :cluster_id, cluster(name))
   def associations(:cluster, %{"cluster" => name}, acc),
@@ -25,6 +26,8 @@ defmodule Console.Deployments.Observability.Webhook.Datadog do
   def associations(:service, %{"tags" => [_ | _] = tags}, %{cluster_id: id} = acc) when is_binary(id),
     do: extract_from_tags(tags, ["plrl_service", "service", "plural_service"], acc, &Map.put(&1, :service_id, service(id, &2)))
   def associations(:service, _, acc), do: acc
+
+  def associations(:flow, _, acc), do: acc
 
   defp extract_from_tags(tags, keys, acc, mapper) do
     tag_map = tags_to_map(tags)

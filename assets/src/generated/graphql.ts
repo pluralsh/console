@@ -157,6 +157,13 @@ export type AddonVersionReleaseUrlArgs = {
   version: Scalars['String']['input'];
 };
 
+export type AgentBindingAttributes = {
+  /** the name of the group this binding is for */
+  groupName?: InputMaybe<Scalars['String']['input']>;
+  /** the email of the user this binding is for */
+  userEmail?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** a representation of a bulk operation to be performed on all agent services */
 export type AgentMigration = {
   __typename?: 'AgentMigration';
@@ -174,6 +181,138 @@ export type AgentMigrationAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   ref?: InputMaybe<Scalars['String']['input']>;
 };
+
+export type AgentPodReference = {
+  __typename?: 'AgentPodReference';
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+};
+
+export type AgentPullRequestAttributes = {
+  /** the base branch of the pull request */
+  base: Scalars['String']['input'];
+  /** the body of the pull request */
+  body: Scalars['String']['input'];
+  /** the head branch of the pull request */
+  head: Scalars['String']['input'];
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['input'];
+  /** the title of the pull request */
+  title: Scalars['String']['input'];
+};
+
+export type AgentRun = {
+  __typename?: 'AgentRun';
+  /** the flow this agent is associated with */
+  flow?: Maybe<Flow>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pluralCreds?: Maybe<PluralCreds>;
+  /** the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation) */
+  pod?: Maybe<Pod>;
+  /** the kubernetes pod this agent is running on */
+  podReference?: Maybe<AgentPodReference>;
+  /** the prompt this agent was given */
+  prompt: Scalars['String']['output'];
+  /** the pull requests this agent run has created */
+  pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['output'];
+  /** the runtime this agent is using */
+  runtime?: Maybe<AgentRuntime>;
+  scmCreds?: Maybe<ScmCreds>;
+  /** the status of this agent run */
+  status: AgentRunStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who initiated this agent run */
+  user?: Maybe<User>;
+};
+
+export type AgentRunAttributes = {
+  /** the flow this agent run is associated with */
+  flowId?: InputMaybe<Scalars['ID']['input']>;
+  /** the prompt to give to the agent */
+  prompt: Scalars['String']['input'];
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['input'];
+};
+
+export type AgentRunConnection = {
+  __typename?: 'AgentRunConnection';
+  edges?: Maybe<Array<Maybe<AgentRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRunEdge = {
+  __typename?: 'AgentRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRun>;
+};
+
+export enum AgentRunStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export type AgentRunStatusAttributes = {
+  /** the kubernetes pod this agent is running on */
+  podReference?: InputMaybe<NamespacedName>;
+  /** the status of this agent run */
+  status: AgentRunStatus;
+};
+
+export type AgentRuntime = {
+  __typename?: 'AgentRuntime';
+  /** the cluster this runtime is running on */
+  cluster?: Maybe<Cluster>;
+  /** the policy for creating runs on this runtime */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this runtime */
+  name: Scalars['String']['output'];
+  pendingRuns?: Maybe<AgentRunConnection>;
+  /** the type of this runtime */
+  type: AgentRuntimeType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AgentRuntimePendingRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AgentRuntimeAttributes = {
+  /** the policy for creating runs on this runtime */
+  createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
+  /** the name of this runtime */
+  name: Scalars['String']['input'];
+  /** the type of this runtime */
+  type: AgentRuntimeType;
+};
+
+export type AgentRuntimeConnection = {
+  __typename?: 'AgentRuntimeConnection';
+  edges?: Maybe<Array<Maybe<AgentRuntimeEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRuntimeEdge = {
+  __typename?: 'AgentRuntimeEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRuntime>;
+};
+
+export enum AgentRuntimeType {
+  Claude = 'CLAUDE',
+  Opencode = 'OPENCODE'
+}
 
 /** A session for an AI agent to use when acting in a chat thread */
 export type AgentSession = {
@@ -404,6 +543,8 @@ export type Alert = {
   /** the cluster this alert was associated with */
   cluster?: Maybe<Cluster>;
   fingerprint?: Maybe<Scalars['String']['output']>;
+  /** the flow this alert was associated with */
+  flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this alert */
@@ -2437,6 +2578,7 @@ export type ConsoleConfiguration = {
   manifest?: Maybe<PluralManifest>;
   oidcName?: Maybe<Scalars['String']['output']>;
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;
+  sentryEnabled?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -3072,6 +3214,8 @@ export type Flow = {
   pullRequests?: Maybe<PullRequestConnection>;
   /** read policy for this flow */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git https urls of the application code repositories used in this flow */
+  repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** servers that are bound to this flow */
   servers?: Maybe<Array<Maybe<McpServer>>>;
   services?: Maybe<ServiceDeploymentConnection>;
@@ -3143,6 +3287,7 @@ export type FlowAttributes = {
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   serverAssociations?: InputMaybe<Array<InputMaybe<McpServerAssociationAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -4041,6 +4186,17 @@ export type KubernetesUnstructured = {
   version: Scalars['String']['output'];
 };
 
+/** information about the kubernetes version for a given cluster */
+export type KubernetesVersionInfo = {
+  __typename?: 'KubernetesVersionInfo';
+  /** the distribution of kubernetes this info pertains to */
+  distro?: Maybe<ClusterDistro>;
+  /** whether this version is on extended support */
+  extended?: Maybe<Scalars['Boolean']['output']>;
+  /** the kubernetes version */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
 /** metadata needed for configuring kustomize */
 export type Kustomize = {
   __typename?: 'Kustomize';
@@ -4860,7 +5016,8 @@ export enum ObservabilityWebhookType {
   Datadog = 'DATADOG',
   Grafana = 'GRAFANA',
   Newrelic = 'NEWRELIC',
-  Pagerduty = 'PAGERDUTY'
+  Pagerduty = 'PAGERDUTY',
+  Sentry = 'SENTRY'
 }
 
 export type ObservableMetric = {
@@ -6737,11 +6894,13 @@ export type RootMutationType = {
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
   addRunLogs?: Maybe<RunLogs>;
+  agentPullRequest?: Maybe<PullRequest>;
   aiFixPr?: Maybe<PullRequest>;
   applyScalingRecommendation?: Maybe<PullRequest>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
+  cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
   /** saves a set of messages and generates a new one transactionally */
@@ -6761,6 +6920,7 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
+  createAgentRun?: Maybe<AgentRun>;
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
   createAlertResolution?: Maybe<AlertResolution>;
@@ -6807,6 +6967,7 @@ export type RootMutationType = {
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   deleteAccessToken?: Maybe<AccessToken>;
+  deleteAgentRuntime?: Maybe<AgentRuntime>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
@@ -6928,6 +7089,7 @@ export type RootMutationType = {
   threadPr?: Maybe<Chat>;
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
+  updateAgentRun?: Maybe<AgentRun>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
   updateClusterProvider?: Maybe<ClusterProvider>;
@@ -6962,6 +7124,7 @@ export type RootMutationType = {
   updateStackRun?: Maybe<StackRun>;
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
+  upsertAgentRuntime?: Maybe<AgentRuntime>;
   upsertCatalog?: Maybe<Catalog>;
   upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
@@ -7006,6 +7169,12 @@ export type RootMutationTypeAddRunLogsArgs = {
 };
 
 
+export type RootMutationTypeAgentPullRequestArgs = {
+  attributes: AgentPullRequestAttributes;
+  runId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeAiFixPrArgs = {
   insightId: Scalars['ID']['input'];
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
@@ -7023,6 +7192,11 @@ export type RootMutationTypeApproveGateArgs = {
 
 
 export type RootMutationTypeApproveStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelAgentRunArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7093,6 +7267,12 @@ export type RootMutationTypeCreateAccessTokenArgs = {
 
 export type RootMutationTypeCreateAgentMigrationArgs = {
   attributes: AgentMigrationAttributes;
+};
+
+
+export type RootMutationTypeCreateAgentRunArgs = {
+  attributes: AgentRunAttributes;
+  runtimeId: Scalars['ID']['input'];
 };
 
 
@@ -7317,6 +7497,11 @@ export type RootMutationTypeCreateUserArgs = {
 export type RootMutationTypeDeleteAccessTokenArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootMutationTypeDeleteAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -7821,6 +8006,12 @@ export type RootMutationTypeTriggerRunArgs = {
 };
 
 
+export type RootMutationTypeUpdateAgentRunArgs = {
+  attributes: AgentRunStatusAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateClusterArgs = {
   attributes: ClusterUpdateAttributes;
   id: Scalars['ID']['input'];
@@ -8027,6 +8218,11 @@ export type RootMutationTypeUpdateUserArgs = {
 };
 
 
+export type RootMutationTypeUpsertAgentRuntimeArgs = {
+  attributes: AgentRuntimeAttributes;
+};
+
+
 export type RootMutationTypeUpsertCatalogArgs = {
   attributes?: InputMaybe<CatalogAttributes>;
 };
@@ -8118,6 +8314,10 @@ export type RootQueryType = {
   accessToken?: Maybe<AccessToken>;
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
+  agentRun?: Maybe<AgentRun>;
+  agentRuns?: Maybe<AgentRunConnection>;
+  agentRuntime?: Maybe<AgentRuntime>;
+  agentRuntimes?: Maybe<AgentRuntimeConnection>;
   agentSessions?: Maybe<AgentSessionConnection>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
@@ -8209,6 +8409,7 @@ export type RootQueryType = {
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
@@ -8324,6 +8525,34 @@ export type RootQueryTypeAccessTokensArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeAgentRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRuntimesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<AgentRuntimeType>;
 };
 
 
@@ -8827,6 +9056,11 @@ export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeKubernetesVersionInfoArgs = {
+  distro?: InputMaybe<ClusterDistro>;
 };
 
 
@@ -9674,6 +9908,12 @@ export type ScmConnectionEdge = {
   __typename?: 'ScmConnectionEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ScmConnection>;
+};
+
+export type ScmCreds = {
+  __typename?: 'ScmCreds';
+  token: Scalars['String']['output'];
+  username: Scalars['String']['output'];
 };
 
 export enum ScmType {

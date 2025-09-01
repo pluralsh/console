@@ -70,6 +70,17 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  defp verify(conn, %ObservabilityWebhook{type: :sentry, secret: secret}) do
+    with [signature] <- get_req_header(conn, "sentry-hook-signature"),
+         ["event_alert"] <- get_req_header(conn, "sentry-hook-resource"),
+         computed = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         true <- Plug.Crypto.secure_compare(signature, Base.encode16(computed, case: :lower)) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
   defp verify(conn, %ObservabilityWebhook{type: :pagerduty, secret: secret}) do
     with [signature] <- get_req_header(conn, "x-pagerduty-signature"),
          mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),

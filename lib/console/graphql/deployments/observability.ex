@@ -92,6 +92,7 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :cluster,    :cluster,          resolve: dataloader(Deployments), description: "the cluster this alert was associated with"
     field :service,    :service,          resolve: dataloader(Deployments), description: "the service this alert was associated with"
     field :project,    :project,          resolve: dataloader(Deployments), description: "the project this alert was associated with"
+    field :flow,       :flow,             resolve: dataloader(Deployments), description: "the flow this alert was associated with"
 
     timestamps()
   end

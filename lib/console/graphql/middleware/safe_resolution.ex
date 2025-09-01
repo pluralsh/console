@@ -29,6 +29,7 @@ defmodule Console.Middleware.SafeResolution do
     Resolution.call(resolution, resolver)
   rescue
     exception ->
+      Sentry.capture_exception(exception, stacktrace: __STACKTRACE__)
       {code, msg} = Console.GraphQl.Exception.error(exception)
       if code >= 500 do
         error = Exception.format(:error, exception, __STACKTRACE__)

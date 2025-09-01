@@ -39,6 +39,7 @@ defmodule Console.GraphQl.Configuration do
     field :is_sandbox,      :boolean
     field :plural_login,    :boolean
     field :vpn_enabled,     :boolean
+    field :sentry_enabled,  :boolean
     field :installed,       :boolean,
       resolve: fn _, _, _ -> {:ok, Console.Deployments.Clusters.installed?()} end,
       description: "whether at least one cluster has been installed, false if a user hasn't fully onboarded"

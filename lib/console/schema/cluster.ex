@@ -2,6 +2,7 @@ defmodule Console.Schema.Cluster do
   use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.{Policies.Rbac, Settings}
+  alias Console.Deployments.KubeVersions
   alias Console.Schema.{
     Service,
     ClusterNodePool,
@@ -339,11 +340,21 @@ defmodule Console.Schema.Cluster do
   end
 
   def with_version_compliance(query, :compliant) do
-    from(c in query, where: c.current_version >= ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version >= ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version >= ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version >= ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version >= ^extended[:gke]))
   end
 
   def with_version_compliance(query, :outdated) do
-    from(c in query, where: c.current_version < ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version < ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version < ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version < ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version < ^extended[:gke]))
   end
 
   def for_health_range(query \\ __MODULE__, min, max) do
