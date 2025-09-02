@@ -573,6 +573,44 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              secrets:
+                description: |-
+                  Configuration for setting a secret as part of this pr.  This will usually be used by k8s manifests defined and is
+                  securely handled by our api with RBAC validation.
+                properties:
+                  cluster:
+                    description: The cluster handle that will hold this secret
+                    type: string
+                  entries:
+                    description: The entries of the secret
+                    items:
+                      properties:
+                        autogenerate:
+                          description: Whether to autogenerate the secret entry
+                          type: boolean
+                        documentation:
+                          description: The documentation of the secret entry
+                          type: string
+                        name:
+                          description: The name of the secret entry
+                          type: string
+                      required:
+                      - documentation
+                      - name
+                      type: object
+                    type: array
+                  name:
+                    description: The name of the secret
+                    type: string
+                  namespace:
+                    description: The k8s namespace to place the secret in
+                    type: string
+                required:
+                - cluster
+                - entries
+                - name
+                - namespace
+                type: object
               serviceRef:
                 description: ServiceRef references a specific service that this PR
                   automation acts upon.

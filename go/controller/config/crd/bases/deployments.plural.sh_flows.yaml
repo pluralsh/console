@@ -142,6 +142,12 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              repositories:
+                description: Repositories contains a list of git https urls of the
+                  application code repositories used in this flow.
+                items:
+                  type: string
+                type: array
               serverAssociations:
                 description: |-
                   ServerAssociations contains a list of MCP services you wish to associate with this flow.

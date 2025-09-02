@@ -782,6 +782,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     test "it can aggregate statuses for all visible clusters" do
       admin = admin_user()
       vsn = Console.Deployments.Settings.kube_vsn()
+      extended = Console.Deployments.KubeVersions.Table.extended_versions()
+      eks_extended = Version.parse!("#{extended[:eks]}.0")
       %{minor: min} = parsed = Version.parse!("#{vsn}.0")
       insert_list(2, :cluster,
         current_version: Version.to_string(%{parsed | minor: min -  1}),
@@ -789,7 +791,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         upgrade_plan: %{compatibilities: true, kubelet_skew: true, deprecations: true}
       )
       insert_list(3, :cluster, current_version: Version.to_string(parsed), pinged_at: Timex.now() |> Timex.shift(days: -1))
-      insert_list(2, :cluster, current_version: Version.to_string(%{parsed | minor: min -  2}))
+      insert_list(2, :cluster, distro: :eks, current_version: Version.to_string(%{eks_extended | minor: eks_extended.minor - 1}))
 
       {:ok, %{data: %{"upgradeStatistics" => res}}} = run_query("""
         query {

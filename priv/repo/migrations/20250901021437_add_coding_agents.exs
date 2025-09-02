@@ -41,6 +41,10 @@ defmodule Console.Repo.Migrations.AddCodingAgents do
       add :flow_id, references(:flows, type: :uuid, on_delete: :delete_all)
     end
 
+    alter table(:pr_automations) do
+      add :secrets, :map
+    end
+
     create index(:agent_runs, [:runtime_id])
     create index(:agent_runs, [:user_id])
     create index(:agent_runs, [:flow_id])

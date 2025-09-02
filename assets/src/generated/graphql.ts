@@ -6125,6 +6125,8 @@ export type PrAutomation = {
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
   role?: Maybe<PrRole>;
+  /** the secrets to create as part of this pr */
+  secrets?: Maybe<PrSecrets>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -6169,6 +6171,7 @@ export type PrAutomationAttributes = {
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
+  secrets?: InputMaybe<PrSecretsAttributes>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -6355,6 +6358,46 @@ export enum PrRole {
   Update = 'UPDATE',
   Upgrade = 'UPGRADE'
 }
+
+export type PrSecretEntry = {
+  __typename?: 'PrSecretEntry';
+  /** whether to autogenerate the secret */
+  autogenerate?: Maybe<Scalars['Boolean']['output']>;
+  /** the documentation for the secret entry */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** the name of the secret entry */
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type PrSecretEntryAttributes = {
+  /** whether to autogenerate the secret entry */
+  autogenerate?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the documentation for the secret entry */
+  documentation?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the secret entry */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PrSecrets = {
+  __typename?: 'PrSecrets';
+  /** the cluster handle that will hold this secret */
+  cluster?: Maybe<Scalars['String']['output']>;
+  entries?: Maybe<Array<Maybe<PrSecretEntry>>>;
+  /** the name of the secret */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the k8s namespace to place the secret in */
+  namespace?: Maybe<Scalars['String']['output']>;
+};
+
+export type PrSecretsAttributes = {
+  /** the cluster handle that will hold this secret */
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  entries?: InputMaybe<Array<InputMaybe<PrSecretEntryAttributes>>>;
+  /** the name of the secret */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the k8s namespace to place the secret in */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
 
 export enum PrStatus {
   Closed = 'CLOSED',
@@ -7421,6 +7464,7 @@ export type RootMutationTypeCreatePullRequestArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   identifier?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  secrets?: InputMaybe<Scalars['Json']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 

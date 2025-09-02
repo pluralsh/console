@@ -635,6 +635,8 @@ type RootMutationType {
 
     context: Json
 
+    secrets: Json
+
     "a ai thread id this pr was spawned from, for associating with agentic workflows"
     threadId: ID
   ): PullRequest
@@ -7791,6 +7793,8 @@ input PrAutomationAttributes {
 
   configuration: [PrConfigurationAttributes]
 
+  secrets: PrSecretsAttributes
+
   confirmation: PrConfirmationAttributes
 
   "users who can update this automation"
@@ -7847,6 +7851,30 @@ input ConfigurationValidationAttributes {
 
   "configuration for name uniqueness"
   uniqBy: UniqByAttributes
+}
+
+input PrSecretsAttributes {
+  "the cluster handle that will hold this secret"
+  cluster: String
+
+  "the k8s namespace to place the secret in"
+  namespace: String
+
+  "the name of the secret"
+  name: String
+
+  entries: [PrSecretEntryAttributes]
+}
+
+input PrSecretEntryAttributes {
+  "the name of the secret entry"
+  name: String
+
+  "the documentation for the secret entry"
+  documentation: String
+
+  "whether to autogenerate the secret entry"
+  autogenerate: Boolean
 }
 
 "How to enforce uniqueness for a field"
@@ -8246,6 +8274,9 @@ type PrAutomation {
 
   configuration: [PrConfiguration]
 
+  "the secrets to create as part of this pr"
+  secrets: PrSecrets
+
   "optional confirmation block to express prerequisites for this PR"
   confirmation: PrConfirmation
 
@@ -8367,6 +8398,30 @@ type PrConfigurationCondition {
 
   "a fixed value to check against if its a binary operation"
   value: String
+}
+
+type PrSecrets {
+  "the cluster handle that will hold this secret"
+  cluster: String
+
+  "the k8s namespace to place the secret in"
+  namespace: String
+
+  "the name of the secret"
+  name: String
+
+  entries: [PrSecretEntry]
+}
+
+type PrSecretEntry {
+  "the name of the secret entry"
+  name: String
+
+  "the documentation for the secret entry"
+  documentation: String
+
+  "whether to autogenerate the secret"
+  autogenerate: Boolean
 }
 
 "Additional details to verify all prerequisites are satisfied before generating this pr"

@@ -106,6 +106,8 @@ defmodule Console.Deployments.Pr.Git do
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 
+  defp env(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}} = conn) when is_binary(url),
+    do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{conn | proxy: nil})]
   defp env(%ScmConnection{token: password}) when is_binary(password),
     do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]
   defp env(_), do: []

@@ -5009,6 +5009,8 @@ type PrAutomation struct {
 	// a darkmode icon url to use for this catalog
 	DarkIcon      *string            `json:"darkIcon,omitempty"`
 	Configuration []*PrConfiguration `json:"configuration,omitempty"`
+	// the secrets to create as part of this pr
+	Secrets *PrSecrets `json:"secrets,omitempty"`
 	// optional confirmation block to express prerequisites for this PR
 	Confirmation *PrConfirmation `json:"confirmation,omitempty"`
 	// write policy for this pr automation, also propagates to the notifications list for any created PRs
@@ -5069,6 +5071,7 @@ type PrAutomationAttributes struct {
 	// the governance controller to use for this pr
 	GovernanceID  *string                      `json:"governanceId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
+	Secrets       *PrSecretsAttributes         `json:"secrets,omitempty"`
 	Confirmation  *PrConfirmationAttributes    `json:"confirmation,omitempty"`
 	// users who can update this automation
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -5233,6 +5236,44 @@ type PrGovernanceConfiguration struct {
 // The settings for configuring a pr governance controller
 type PrGovernanceConfigurationAttributes struct {
 	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
+}
+
+type PrSecretEntry struct {
+	// the name of the secret entry
+	Name *string `json:"name,omitempty"`
+	// the documentation for the secret entry
+	Documentation *string `json:"documentation,omitempty"`
+	// whether to autogenerate the secret
+	Autogenerate *bool `json:"autogenerate,omitempty"`
+}
+
+type PrSecretEntryAttributes struct {
+	// the name of the secret entry
+	Name *string `json:"name,omitempty"`
+	// the documentation for the secret entry
+	Documentation *string `json:"documentation,omitempty"`
+	// whether to autogenerate the secret entry
+	Autogenerate *bool `json:"autogenerate,omitempty"`
+}
+
+type PrSecrets struct {
+	// the cluster handle that will hold this secret
+	Cluster *string `json:"cluster,omitempty"`
+	// the k8s namespace to place the secret in
+	Namespace *string `json:"namespace,omitempty"`
+	// the name of the secret
+	Name    *string          `json:"name,omitempty"`
+	Entries []*PrSecretEntry `json:"entries,omitempty"`
+}
+
+type PrSecretsAttributes struct {
+	// the cluster handle that will hold this secret
+	Cluster *string `json:"cluster,omitempty"`
+	// the k8s namespace to place the secret in
+	Namespace *string `json:"namespace,omitempty"`
+	// the name of the secret
+	Name    *string                    `json:"name,omitempty"`
+	Entries []*PrSecretEntryAttributes `json:"entries,omitempty"`
 }
 
 // the details of where to find and place a templated file

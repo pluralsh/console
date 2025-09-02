@@ -45,8 +45,8 @@ defmodule Console.Deployments.KubeVersions.Table do
   @spec extended_versions() :: %{distro => binary | nil}
   def extended_versions() do
     Map.new(@distros, fn distro ->
-      with %Entry{versions: [_ | _] = versions} <- fetch(distro),
-           %Version{version: v} <- Enum.find_value(versions, & &1.extended) do
+      with [_ | _] = versions <- fetch(distro),
+           %Version{version: v} <- Enum.find(versions, & &1.extended) do
         {distro, v}
       else
         _ -> {distro, nil}
@@ -56,8 +56,8 @@ defmodule Console.Deployments.KubeVersions.Table do
 
   @spec extended?(distro, binary) :: boolean
   def extended?(distro, version) do
-    with %Entry{versions: [_ | _] = versions} <- fetch(distro),
-         %Version{extended: xt} <- Enum.find_value(versions, &later?(version, &1.version)) do
+    with [_ | _] = versions <- fetch(distro),
+         %Version{extended: xt} <- Enum.find(versions, &later?(version, &1.version)) do
       !!xt
     else
       _ -> false

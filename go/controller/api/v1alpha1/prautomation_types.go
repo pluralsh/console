@@ -97,6 +97,7 @@ func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositor
 		ProjectID:     projectID,
 		Patch:         in.Spec.Patch,
 		Confirmation:  in.Spec.Confirmation.Attributes(),
+		Secrets:       in.Spec.Secrets.Attributes(),
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
 		}),
@@ -214,6 +215,11 @@ type PrAutomationSpec struct {
 	// to customize the generated PR. Each field can be templated into the PR content.
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
+
+	// Configuration for setting a secret as part of this pr.  This will usually be used by k8s manifests defined and is
+	// securely handled by our api with RBAC validation.
+	// +kubebuilder:validation:Optional
+	Secrets *PrAutomationSecretConfiguration `json:"secrets,omitempty"`
 
 	// Confirmation specifies additional verification steps or information to present
 	// to users before they can generate the PR, ensuring prerequisites are met.
@@ -591,5 +597,58 @@ func (in *Condition) Attributes() *console.ConditionAttributes {
 		Operation: in.Operation,
 		Field:     in.Field,
 		Value:     in.Value,
+	}
+}
+
+type PrAutomationSecretConfiguration struct {
+	// The cluster handle that will hold this secret
+	Cluster string `json:"cluster"`
+
+	// The k8s namespace to place the secret in
+	Namespace string `json:"namespace"`
+
+	// The name of the secret
+	Name string `json:"name"`
+
+	// The entries of the secret
+	Entries []PrAutomationSecretEntry `json:"entries"`
+}
+
+type PrAutomationSecretEntry struct {
+	// The name of the secret entry
+	Name string `json:"name"`
+
+	// The documentation of the secret entry
+	Documentation string `json:"documentation"`
+
+	// Whether to autogenerate the secret entry
+	// +kubebuilder:validation:Optional
+	Autogenerate *bool `json:"autogenerate,omitempty"`
+}
+
+func (in *PrAutomationSecretConfiguration) Attributes() *console.PrSecretsAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrSecretsAttributes{
+		Cluster:   lo.ToPtr(in.Cluster),
+		Namespace: lo.ToPtr(in.Namespace),
+		Name:      lo.ToPtr(in.Name),
+		Entries: algorithms.Map(in.Entries, func(entry PrAutomationSecretEntry) *console.PrSecretEntryAttributes {
+			return entry.Attributes()
+		}),
+	}
+}
+
+func (in *PrAutomationSecretEntry) Attributes() *console.PrSecretEntryAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrSecretEntryAttributes{
+		Name:          lo.ToPtr(in.Name),
+		Documentation: lo.ToPtr(in.Documentation),
+		Autogenerate:  in.Autogenerate,
 	}
 }

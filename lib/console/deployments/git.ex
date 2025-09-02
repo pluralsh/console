@@ -349,22 +349,42 @@ defmodule Console.Deployments.Git do
 
   def create_pull_request(attrs, ctx, %PrAutomation{} = pr, branch, identifier, %User{} = user) do
     pr = Repo.preload(pr, [:write_bindings, :create_bindings, :connection])
+    {secrets, ctx} = Map.pop(ctx, :secrets)
     with :ok <- Validation.validate(pr, ctx),
          {:ok, pr} <- allow(pr, user, :create),
          {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do
       Logger.info "creating pr #{pr_attrs[:url]}"
-
-      %PullRequest{}
-      |> PullRequest.changeset(
-        Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
-        |> Map.merge(attrs)
-        |> Map.put(:governance_id, pr.governance_id)
-        |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
-      )
-      |> Repo.insert()
+      start_transaction()
+      |> add_operation(:pr, fn _ ->
+        %PullRequest{}
+        |> PullRequest.changeset(
+          Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
+          |> Map.merge(attrs)
+          |> Map.put(:governance_id, pr.governance_id)
+          |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
+        )
+        |> Repo.insert()
+      end)
+      |> add_operation(:secrets, fn _ -> create_secrets(pr, user, secrets) end)
+      |> execute(extract: :pr)
       |> notify(:create, user)
     end
   end
+
+  defp create_secrets(
+    %PrAutomation{secrets: %PrAutomation.Secrets{cluster: cluster} = conf},
+    %{} = secrets,
+    %User{} = user
+  ) when is_binary(cluster) do
+    cluster = Clusters.get_cluster_by_handle!(cluster)
+    Kube.Utils.save_kubeconfig(Clusters.control_plane(cluster, user))
+    Kube.Utils.upsert_secret(
+      conf.namespace,
+      conf.name,
+      secrets
+    )
+  end
+  defp create_secrets(_, _, _), do: {:ok, %{}}
 
   defp prep(pr, %User{} = user, identifier) when is_binary(identifier) do
     prep(pr, user, nil)
