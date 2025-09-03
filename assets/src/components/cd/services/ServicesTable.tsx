@@ -26,10 +26,8 @@ export default function ServicesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
-  const { setRefetch, clusterId, setClusterId } =
-    useOutletContext<ServicesContextT>()
+  const { setRefetch, clusterId, q } = useOutletContext<ServicesContextT>()
   const tabStateRef = useRef<any>(null)
-  const [queryString, setQueryString] = useState()
   const [queryStatusFilter, setQueryStatusFilter] =
     useState<StatusTabKey>('ALL')
 
@@ -44,7 +42,7 @@ export default function ServicesTable() {
   } = useFetchPaginatedData(
     { queryHook: useServiceDeploymentsQuery, keyPath: ['serviceDeployments'] },
     {
-      q: queryString,
+      q,
       projectId,
       ...(clusterId ? { clusterId } : {}),
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
@@ -77,9 +75,6 @@ export default function ServicesTable() {
     >
       <ServicesFilters
         setQueryStatusFilter={setQueryStatusFilter}
-        setQueryString={setQueryString}
-        clusterId={clusterId}
-        setClusterId={setClusterId}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
       />

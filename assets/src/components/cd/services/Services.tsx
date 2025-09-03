@@ -71,8 +71,10 @@ export function getServiceStatuses(
 
 export type ServicesContextT = {
   setRefetch?: (refetch: () => void) => void
-  clusterId?: Nullable<string>
+  clusterId: Nullable<string>
   setClusterId?: (clusterId: string) => void
+  q: Nullable<string>
+  setQ: (q: string) => void
 }
 
 const directory = [
@@ -122,14 +124,23 @@ export default function Services() {
     )
   )
 
-  const context: ServicesContextT = useMemo(
-    () => ({
+  const context: ServicesContextT = useMemo(() => {
+    const clusterId = params.get('clusterId')
+    const q = params.get('q')
+    return {
       setRefetch,
-      clusterId: params.get('clusterId'),
-      setClusterId: (clusterId: string) => setParams({ clusterId }),
-    }),
-    [setRefetch, params, setParams]
-  )
+      clusterId,
+      // we want empty strings omitted from the new params objects
+      setClusterId: (newId: string) =>
+        setParams({ ...(q && { q }), ...(newId && { clusterId: newId }) }),
+      q,
+      setQ: (newQ: string) =>
+        setParams({
+          ...(clusterId && { clusterId }),
+          ...(newQ && { q: newQ }),
+        }),
+    }
+  }, [setRefetch, params, setParams])
 
   return <Outlet context={context} />
 }

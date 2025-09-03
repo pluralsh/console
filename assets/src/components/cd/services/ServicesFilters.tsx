@@ -27,6 +27,8 @@ import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
 } from './ServiceStatusChip'
+import { useOutletContext } from 'react-router-dom'
+import { ServicesContextT } from './Services'
 
 export type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
@@ -61,27 +63,25 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 
 export function ServicesFilters({
   setQueryStatusFilter,
-  setQueryString,
-  clusterId,
-  setClusterId,
+  hideSearch = false,
   tabStateRef,
   statusCounts,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
-  setQueryString?: (string) => void
-  clusterId?: Nullable<string>
-  setClusterId?: (clusterId: string) => void
+  hideSearch?: boolean
   tabStateRef: RefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
 }) {
-  const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useDebounce(searchString, 400)
+  const { q, setQ, clusterId, setClusterId } =
+    useOutletContext<ServicesContextT>()
+  const [searchString, setSearchString] = useState(q || '')
+  const debouncedSearchString = useDebounce(searchString, 250)
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
   const deferredStatusFilter = useDeferredValue(statusFilter)
 
   useEffect(() => {
-    setQueryString?.(debouncedSearchString)
-  }, [searchString, debouncedSearchString, setQueryString])
+    setQ?.(debouncedSearchString)
+  }, [searchString, debouncedSearchString, setQ])
 
   useEffect(() => {
     setQueryStatusFilter(deferredStatusFilter)
@@ -106,7 +106,7 @@ export function ServicesFilters({
         </div>
       )}
       <div css={{ minWidth: 120, flex: 1 }}>
-        {setQueryString && (
+        {!hideSearch && (
           <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
