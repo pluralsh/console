@@ -24,6 +24,10 @@ defmodule Console.Compliance.Datasource.Services do
         helm_url: Console.deep_get(s, [:helm, :url]),
         helm_chart: Console.deep_get(s, [:helm, :chart]),
         helm_version: Console.deep_get(s, [:helm, :version]),
+        image: case Console.deep_get(s, [:metadata, :images]) do
+          images when is_list(images) and length(images) > 0 -> Enum.join(images, ", ")
+          _ -> nil
+        end,
         created_at: s.inserted_at,
         updated_at: s.updated_at,
       }
