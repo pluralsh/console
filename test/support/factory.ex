@@ -1064,6 +1064,8 @@ defmodule Console.Factory do
     %Schema.AgentRun{
       runtime: build(:agent_runtime),
       user: build(:user),
+      status: :running,
+      mode: :write,
       prompt: "hello world",
       repository: "https://github.com/pluralsh/console.git"
     }

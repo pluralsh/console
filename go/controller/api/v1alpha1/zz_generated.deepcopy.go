@@ -5391,6 +5391,11 @@ func (in *PrAutomationConfiguration) DeepCopyInto(out *PrAutomationConfiguration
 		*out = new(bool)
 		**out = **in
 	}
+	if in.Page != nil {
+		in, out := &in.Page, &out.Page
+		*out = new(int64)
+		**out = **in
+	}
 	if in.Placeholder != nil {
 		in, out := &in.Placeholder, &out.Placeholder
 		*out = new(string)

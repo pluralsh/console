@@ -3067,6 +3067,7 @@ _Appears in:_
 | `longform` _string_ | Longform provides extended documentation or detailed explanation for complex configuration fields. |  | Optional: {} <br /> |
 | `displayName` _string_ | DisplayName provides a human-readable label for this field in the UI.<br />If not provided, the Name field is used as the display label. |  | Optional: {} <br /> |
 | `optional` _boolean_ | Optional indicates whether this field is required (false) or optional (true) for PR generation.<br />Required fields must be filled by the user. |  | Optional: {} <br /> |
+| `page` _integer_ | Page specifies the page to use for the pr configuration in the Plural web configuration wizard |  | Optional: {} <br /> |
 | `placeholder` _string_ | Placeholder text to show in the input field to guide users on the expected format or content. |  | Optional: {} <br /> |
 | `validation` _[PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)_ | Validation defines additional validation rules to apply to user input before allowing PR generation. |  | Optional: {} <br /> |
 | `values` _string array_ | Values provides the list of allowed values for ENUM type fields, creating a dropdown selection in the UI. |  | Optional: {} <br /> |

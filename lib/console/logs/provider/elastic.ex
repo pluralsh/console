@@ -9,6 +9,8 @@ defmodule Console.Logs.Provider.Elastic do
   @type t :: %__MODULE__{}
   @headers [{"Content-Type", "application/json"}]
 
+  @opts [recv_timeout: 10_000]
+
   defstruct [:connection, :client]
 
   def new(conn) do
@@ -25,7 +27,7 @@ defmodule Console.Logs.Provider.Elastic do
 
   def search(%Elastic{index: index} = conn, query) do
     Elastic.url(conn, "#{index}/_search")
-    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(conn, @headers))
+    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(conn, @headers), @opts)
     |> search_response()
   end
 

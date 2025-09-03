@@ -157,6 +157,25 @@ export type AddonVersionReleaseUrlArgs = {
   version: Scalars['String']['input'];
 };
 
+export type AgentAnalysis = {
+  __typename?: 'AgentAnalysis';
+  /** the analysis of the agent run */
+  analysis: Scalars['String']['output'];
+  /** quick bullet points to summarize the analysis */
+  bullets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the summary of the analysis */
+  summary: Scalars['String']['output'];
+};
+
+export type AgentAnalysisAttributes = {
+  /** the analysis of the agent run */
+  analysis: Scalars['String']['input'];
+  /** the bullets of the analysis */
+  bullets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the summary of the analysis */
+  summary: Scalars['String']['input'];
+};
+
 export type AgentBindingAttributes = {
   /** the name of the group this binding is for */
   groupName?: InputMaybe<Scalars['String']['input']>;
@@ -203,10 +222,16 @@ export type AgentPullRequestAttributes = {
 
 export type AgentRun = {
   __typename?: 'AgentRun';
+  /** the analysis of the agent run */
+  analysis?: Maybe<AgentAnalysis>;
+  /** the error reason of the agent run */
+  error?: Maybe<Scalars['String']['output']>;
   /** the flow this agent is associated with */
   flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the mode of the agent run */
+  mode: AgentRunMode;
   pluralCreds?: Maybe<PluralCreds>;
   /** the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation) */
   pod?: Maybe<Pod>;
@@ -223,6 +248,8 @@ export type AgentRun = {
   scmCreds?: Maybe<ScmCreds>;
   /** the status of this agent run */
   status: AgentRunStatus;
+  /** the todos of the agent run */
+  todos?: Maybe<Array<Maybe<AgentTodo>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the user who initiated this agent run */
   user?: Maybe<User>;
@@ -231,6 +258,8 @@ export type AgentRun = {
 export type AgentRunAttributes = {
   /** the flow this agent run is associated with */
   flowId?: InputMaybe<Scalars['ID']['input']>;
+  /** the mode of the agent run */
+  mode: AgentRunMode;
   /** the prompt to give to the agent */
   prompt: Scalars['String']['input'];
   /** the repository the agent will be working in */
@@ -249,6 +278,11 @@ export type AgentRunEdge = {
   node?: Maybe<AgentRun>;
 };
 
+export enum AgentRunMode {
+  Analyze = 'ANALYZE',
+  Write = 'WRITE'
+}
+
 export enum AgentRunStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
@@ -258,6 +292,8 @@ export enum AgentRunStatus {
 }
 
 export type AgentRunStatusAttributes = {
+  /** the error reason of the agent run */
+  error?: InputMaybe<Scalars['String']['input']>;
   /** the kubernetes pod this agent is running on */
   podReference?: InputMaybe<NamespacedName>;
   /** the status of this agent run */
@@ -409,6 +445,25 @@ export enum AgentSessionType {
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
+
+export type AgentTodo = {
+  __typename?: 'AgentTodo';
+  /** the description of the todo */
+  description: Scalars['String']['output'];
+  /** whether the todo is done */
+  done?: Maybe<Scalars['Boolean']['output']>;
+  /** the title of the todo */
+  title: Scalars['String']['output'];
+};
+
+export type AgentTodoAttributes = {
+  /** the description of the todo */
+  description: Scalars['String']['input'];
+  /** whether the todo is done */
+  done: Scalars['Boolean']['input'];
+  /** the title of the todo */
+  title: Scalars['String']['input'];
+};
 
 export type AiDelta = {
   __typename?: 'AiDelta';
@@ -6257,6 +6312,8 @@ export type PrConfiguration = {
   longform?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   optional?: Maybe<Scalars['Boolean']['output']>;
+  /** the page to use for the pr configuration */
+  page?: Maybe<Scalars['Int']['output']>;
   placeholder?: Maybe<Scalars['String']['output']>;
   type: ConfigurationType;
   values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -6271,6 +6328,8 @@ export type PrConfigurationAttributes = {
   longform?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   optional?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the page to use for the pr automation */
+  page?: InputMaybe<Scalars['Int']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
   validation?: InputMaybe<ConfigurationValidationAttributes>;
@@ -7133,6 +7192,8 @@ export type RootMutationType = {
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
   updateAgentRun?: Maybe<AgentRun>;
+  updateAgentRunAnalysis?: Maybe<AgentRun>;
+  updateAgentRunTodos?: Maybe<AgentRun>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
   updateClusterProvider?: Maybe<ClusterProvider>;
@@ -8053,6 +8114,18 @@ export type RootMutationTypeTriggerRunArgs = {
 export type RootMutationTypeUpdateAgentRunArgs = {
   attributes: AgentRunStatusAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentRunAnalysisArgs = {
+  attributes: AgentAnalysisAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentRunTodosArgs = {
+  id: Scalars['ID']['input'];
+  todos?: InputMaybe<Array<InputMaybe<AgentTodoAttributes>>>;
 };
 
 

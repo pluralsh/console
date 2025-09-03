@@ -62,7 +62,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
           }
         }
       """, %{
-        "attrs" => %{"prompt" => "test", "repository" => "https://github.com/pluralsh/console.git"},
+        "attrs" => %{"mode" => "WRITE", "prompt" => "test", "repository" => "https://github.com/pluralsh/console.git"},
         "runtimeId" => runtime.id,
       }, %{current_user: user})
 
@@ -144,6 +144,66 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
       assert pr["id"]
       assert pr["title"] == "a pr"
+    end
+  end
+
+  describe "updateAgentRunAnalysis" do
+    test "a user can update an agent run analysis" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, %{data: %{"updateAgentRunAnalysis" => found}}} = run_query("""
+        mutation Update($id: ID!, $attrs: AgentAnalysisAttributes!) {
+          updateAgentRunAnalysis(id: $id, attributes: $attrs) {
+            id
+            analysis {
+              summary
+              analysis
+              bullets
+            }
+          }
+        }
+      """, %{
+        "id" => run.id,
+        "attrs" => %{"analysis" => "a analysis", "summary" => "a summary", "bullets" => ["a bullet"]}
+      }, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert found["analysis"]["analysis"] == "a analysis"
+      assert found["analysis"]["summary"] == "a summary"
+      assert found["analysis"]["bullets"] == ["a bullet"]
+    end
+  end
+
+  describe "updateAgentRunTodos" do
+    test "a user can update an agent run todos" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, %{data: %{"updateAgentRunTodos" => found}}} = run_query("""
+        mutation Update($id: ID!, $todos: [AgentTodoAttributes!]) {
+          updateAgentRunTodos(id: $id, todos: $todos) {
+            id
+            todos {
+              title
+              description
+              done
+            }
+          }
+        }
+      """, %{
+        "id" => run.id,
+        "todos" => [
+          %{"title" => "a todo", "description" => "a description", "done" => true}
+        ]
+      }, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert hd(found["todos"])["title"] == "a todo"
+      assert hd(found["todos"])["description"] == "a description"
+      assert hd(found["todos"])["done"]
     end
   end
 end

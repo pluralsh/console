@@ -508,6 +508,10 @@ type PrAutomationConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Optional *bool `json:"optional,omitempty"`
 
+	// Page specifies the page to use for the pr configuration in the Plural web configuration wizard
+	// +kubebuilder:validation:Optional
+	Page *int64 `json:"page,omitempty"`
+
 	// Placeholder text to show in the input field to guide users on the expected format or content.
 	// +kubebuilder:validation:Optional
 	Placeholder *string `json:"placeholder,omitempty"`
@@ -560,6 +564,7 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 		Placeholder:   in.Placeholder,
 		Optional:      in.Optional,
 		DisplayName:   in.DisplayName,
+		Page:          in.Page,
 		Condition:     in.Condition.Attributes(),
 		Values:        in.Values,
 	}

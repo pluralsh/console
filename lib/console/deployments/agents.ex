@@ -3,8 +3,9 @@ defmodule Console.Deployments.Agents do
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1]
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Pr.Dispatcher}
+  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git}
   alias Console.AI.Tool
+  alias Console.PubSub
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.Schema.{
     AgentRuntime,
@@ -92,6 +93,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.insert()
     end)
     |> execute(extract: :run)
+    |> notify(:create)
   end
 
   @doc """
@@ -114,6 +116,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
   @doc """
@@ -134,8 +137,13 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
+  @doc """
+  Creates a pull request for an agent run, can only be performed by the user who initiated it
+  """
+  @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
   def agent_pull_request(%{title: t, body: b, repository: r, base: ba, head: he}, run_id, %User{} = user) do
     run = get_agent_run!(run_id)
     with {:ok, run} <- allow(run, user, :creds),
@@ -152,6 +160,40 @@ defmodule Console.Deployments.Agents do
       nil -> {:error, "no scm connection found"}
       err -> err
     end
+  end
+
+  @doc """
+  Updates the todos for an agent run, can only be performed by the user who initiated it
+  """
+  @spec update_todos([map], binary, User.t) :: agent_run_resp
+  def update_todos(todos, run_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> allow(user, :update)
+    end)
+    |> add_operation(:update, fn %{run: run} ->
+      AgentRun.changeset(run, %{todos: todos})
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+  end
+
+  @doc """
+  Updates the analysis for an agent run, can only be performed by the user who initiated it
+  """
+  @spec update_analysis(map, binary, User.t) :: agent_run_resp
+  def update_analysis(analysis, run_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> allow(user, :update)
+    end)
+    |> add_operation(:update, fn %{run: run} ->
+      AgentRun.changeset(run, %{analysis: analysis})
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
   end
 
   @doc """
@@ -186,4 +228,10 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
+
+  defp notify({:ok, %AgentRun{} = run}, :create),
+    do: handle_notify(PubSub.AgentRunCreated, run)
+  defp notify({:ok, %AgentRun{} = run}, :update),
+    do: handle_notify(PubSub.AgentRunUpdated, run)
+  defp notify(pass, _), do: pass
 end

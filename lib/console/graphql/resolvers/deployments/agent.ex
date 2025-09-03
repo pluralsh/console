@@ -60,6 +60,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def agent_pull_request(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.agent_pull_request(attrs, id, user)
 
+  def update_agent_run_analysis(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Agents.update_analysis(attrs, id, user)
+
+  def update_agent_run_todos(%{id: id, todos: todos}, %{context: %{current_user: user}}),
+    do: Agents.update_todos(todos, id, user)
+
   defp runtime_filters(query, args) do
     Enum.reduce(args, query, fn
       {:type, t}, q when not is_nil(t) -> AgentRuntime.for_type(q, t)

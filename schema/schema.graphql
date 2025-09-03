@@ -1015,6 +1015,10 @@ type RootMutationType {
 
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
+  updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
+
+  updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
+
   upsertAgentRuntime(attributes: AgentRuntimeAttributes!): AgentRuntime
 
   deleteAgentRuntime(id: ID!): AgentRuntime
@@ -1191,6 +1195,11 @@ enum AgentRunStatus {
   CANCELLED
 }
 
+enum AgentRunMode {
+  ANALYZE
+  WRITE
+}
+
 input AgentRuntimeAttributes {
   "the name of this runtime"
   name: String!
@@ -1217,6 +1226,9 @@ input AgentRunAttributes {
   "the repository the agent will be working in"
   repository: String!
 
+  "the mode of the agent run"
+  mode: AgentRunMode!
+
   "the flow this agent run is associated with"
   flowId: ID
 }
@@ -1224,6 +1236,9 @@ input AgentRunAttributes {
 input AgentRunStatusAttributes {
   "the status of this agent run"
   status: AgentRunStatus!
+
+  "the error reason of the agent run"
+  error: String
 
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
@@ -1244,6 +1259,28 @@ input AgentPullRequestAttributes {
 
   "the head branch of the pull request"
   head: String!
+}
+
+input AgentTodoAttributes {
+  "the title of the todo"
+  title: String!
+
+  "the description of the todo"
+  description: String!
+
+  "whether the todo is done"
+  done: Boolean!
+}
+
+input AgentAnalysisAttributes {
+  "the summary of the analysis"
+  summary: String!
+
+  "the analysis of the agent run"
+  analysis: String!
+
+  "the bullets of the analysis"
+  bullets: [String]
 }
 
 type AgentRuntime {
@@ -1280,8 +1317,20 @@ type AgentRun {
   "the status of this agent run"
   status: AgentRunStatus!
 
+  "the mode of the agent run"
+  mode: AgentRunMode!
+
   "the kubernetes pod this agent is running on"
   podReference: AgentPodReference
+
+  "the error reason of the agent run"
+  error: String
+
+  "the analysis of the agent run"
+  analysis: AgentAnalysis
+
+  "the todos of the agent run"
+  todos: [AgentTodo]
 
   scmCreds: ScmCreds
 
@@ -1315,6 +1364,28 @@ type ScmCreds {
 type AgentPodReference {
   name: String!
   namespace: String!
+}
+
+type AgentAnalysis {
+  "the summary of the analysis"
+  summary: String!
+
+  "the analysis of the agent run"
+  analysis: String!
+
+  "quick bullet points to summarize the analysis"
+  bullets: [String]
+}
+
+type AgentTodo {
+  "the title of the todo"
+  title: String!
+
+  "the description of the todo"
+  description: String!
+
+  "whether the todo is done"
+  done: Boolean
 }
 
 type AgentRuntimeConnection {
@@ -7822,15 +7893,28 @@ input PrChecklistAttributes {
 "the a configuration item for creating a new pr"
 input PrConfigurationAttributes {
   type: ConfigurationType!
+
   name: String!
+
   default: String
+
   documentation: String
+
   longform: String
+
   displayName: String
+
   placeholder: String
+
+  "the page to use for the pr automation"
+  page: Int
+
   optional: Boolean
+
   condition: ConditionAttributes
+
   validation: ConfigurationValidationAttributes
+
   values: [String]
 }
 
@@ -8377,14 +8461,26 @@ type RegexReplacement {
 "the a configuration item for creating a new pr, used for templating the ultimate code changes made"
 type PrConfiguration {
   type: ConfigurationType!
+
   name: String!
+
   default: String
+
   documentation: String
+
   longform: String
+
   placeholder: String
+
   displayName: String
+
+  "the page to use for the pr configuration"
+  page: Int
+
   optional: Boolean
+
   values: [String]
+
   condition: PrConfigurationCondition
 }
 

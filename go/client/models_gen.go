@@ -105,6 +105,24 @@ type AddonVersion struct {
 	Blocking *bool `json:"blocking,omitempty"`
 }
 
+type AgentAnalysis struct {
+	// the summary of the analysis
+	Summary string `json:"summary"`
+	// the analysis of the agent run
+	Analysis string `json:"analysis"`
+	// quick bullet points to summarize the analysis
+	Bullets []*string `json:"bullets,omitempty"`
+}
+
+type AgentAnalysisAttributes struct {
+	// the summary of the analysis
+	Summary string `json:"summary"`
+	// the analysis of the agent run
+	Analysis string `json:"analysis"`
+	// the bullets of the analysis
+	Bullets []*string `json:"bullets,omitempty"`
+}
+
 type AgentBindingAttributes struct {
 	// the email of the user this binding is for
 	UserEmail *string `json:"userEmail,omitempty"`
@@ -155,10 +173,18 @@ type AgentRun struct {
 	Repository string `json:"repository"`
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
+	// the mode of the agent run
+	Mode AgentRunMode `json:"mode"`
 	// the kubernetes pod this agent is running on
 	PodReference *AgentPodReference `json:"podReference,omitempty"`
-	ScmCreds     *ScmCreds          `json:"scmCreds,omitempty"`
-	PluralCreds  *PluralCreds       `json:"pluralCreds,omitempty"`
+	// the error reason of the agent run
+	Error *string `json:"error,omitempty"`
+	// the analysis of the agent run
+	Analysis *AgentAnalysis `json:"analysis,omitempty"`
+	// the todos of the agent run
+	Todos       []*AgentTodo `json:"todos,omitempty"`
+	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
+	PluralCreds *PluralCreds `json:"pluralCreds,omitempty"`
 	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
 	Pod *Pod `json:"pod,omitempty"`
 	// the runtime this agent is using
@@ -178,6 +204,8 @@ type AgentRunAttributes struct {
 	Prompt string `json:"prompt"`
 	// the repository the agent will be working in
 	Repository string `json:"repository"`
+	// the mode of the agent run
+	Mode AgentRunMode `json:"mode"`
 	// the flow this agent run is associated with
 	FlowID *string `json:"flowId,omitempty"`
 }
@@ -195,6 +223,8 @@ type AgentRunEdge struct {
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
+	// the error reason of the agent run
+	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
 }
@@ -283,6 +313,24 @@ type AgentSessionConnection struct {
 type AgentSessionEdge struct {
 	Node   *AgentSession `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type AgentTodo struct {
+	// the title of the todo
+	Title string `json:"title"`
+	// the description of the todo
+	Description string `json:"description"`
+	// whether the todo is done
+	Done *bool `json:"done,omitempty"`
+}
+
+type AgentTodoAttributes struct {
+	// the title of the todo
+	Title string `json:"title"`
+	// the description of the todo
+	Description string `json:"description"`
+	// whether the todo is done
+	Done bool `json:"done"`
 }
 
 type AiDelta struct {
@@ -5144,31 +5192,35 @@ type PrChecklistAttributes struct {
 
 // the a configuration item for creating a new pr, used for templating the ultimate code changes made
 type PrConfiguration struct {
-	Type          ConfigurationType         `json:"type"`
-	Name          string                    `json:"name"`
-	Default       *string                   `json:"default,omitempty"`
-	Documentation *string                   `json:"documentation,omitempty"`
-	Longform      *string                   `json:"longform,omitempty"`
-	Placeholder   *string                   `json:"placeholder,omitempty"`
-	DisplayName   *string                   `json:"displayName,omitempty"`
-	Optional      *bool                     `json:"optional,omitempty"`
-	Values        []*string                 `json:"values,omitempty"`
-	Condition     *PrConfigurationCondition `json:"condition,omitempty"`
+	Type          ConfigurationType `json:"type"`
+	Name          string            `json:"name"`
+	Default       *string           `json:"default,omitempty"`
+	Documentation *string           `json:"documentation,omitempty"`
+	Longform      *string           `json:"longform,omitempty"`
+	Placeholder   *string           `json:"placeholder,omitempty"`
+	DisplayName   *string           `json:"displayName,omitempty"`
+	// the page to use for the pr configuration
+	Page      *int64                    `json:"page,omitempty"`
+	Optional  *bool                     `json:"optional,omitempty"`
+	Values    []*string                 `json:"values,omitempty"`
+	Condition *PrConfigurationCondition `json:"condition,omitempty"`
 }
 
 // the a configuration item for creating a new pr
 type PrConfigurationAttributes struct {
-	Type          ConfigurationType                  `json:"type"`
-	Name          string                             `json:"name"`
-	Default       *string                            `json:"default,omitempty"`
-	Documentation *string                            `json:"documentation,omitempty"`
-	Longform      *string                            `json:"longform,omitempty"`
-	DisplayName   *string                            `json:"displayName,omitempty"`
-	Placeholder   *string                            `json:"placeholder,omitempty"`
-	Optional      *bool                              `json:"optional,omitempty"`
-	Condition     *ConditionAttributes               `json:"condition,omitempty"`
-	Validation    *ConfigurationValidationAttributes `json:"validation,omitempty"`
-	Values        []*string                          `json:"values,omitempty"`
+	Type          ConfigurationType `json:"type"`
+	Name          string            `json:"name"`
+	Default       *string           `json:"default,omitempty"`
+	Documentation *string           `json:"documentation,omitempty"`
+	Longform      *string           `json:"longform,omitempty"`
+	DisplayName   *string           `json:"displayName,omitempty"`
+	Placeholder   *string           `json:"placeholder,omitempty"`
+	// the page to use for the pr automation
+	Page       *int64                             `json:"page,omitempty"`
+	Optional   *bool                              `json:"optional,omitempty"`
+	Condition  *ConditionAttributes               `json:"condition,omitempty"`
+	Validation *ConfigurationValidationAttributes `json:"validation,omitempty"`
+	Values     []*string                          `json:"values,omitempty"`
 }
 
 // declaritive spec for whether a config item is relevant given prior config
@@ -7572,6 +7624,47 @@ type YamlOverlayAttributes struct {
 	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+}
+
+type AgentRunMode string
+
+const (
+	AgentRunModeAnalyze AgentRunMode = "ANALYZE"
+	AgentRunModeWrite   AgentRunMode = "WRITE"
+)
+
+var AllAgentRunMode = []AgentRunMode{
+	AgentRunModeAnalyze,
+	AgentRunModeWrite,
+}
+
+func (e AgentRunMode) IsValid() bool {
+	switch e {
+	case AgentRunModeAnalyze, AgentRunModeWrite:
+		return true
+	}
+	return false
+}
+
+func (e AgentRunMode) String() string {
+	return string(e)
+}
+
+func (e *AgentRunMode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentRunMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentRunMode", str)
+	}
+	return nil
+}
+
+func (e AgentRunMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AgentRunStatus string

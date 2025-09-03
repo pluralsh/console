@@ -1,6 +1,7 @@
 defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
+  alias Console.PubSub
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -78,12 +79,16 @@ defmodule Console.Deployments.AgentsTest do
 
       {:ok, run} = Agents.create_agent_run(%{
         prompt: "hello world",
+        mode: :write,
         repository: "https://github.com/pluralsh/console.git",
       }, runtime.id, user)
 
       assert run.runtime_id == runtime.id
       assert run.user_id == user.id
+      assert run.mode == :write
       assert run.status == :pending
+
+      assert_receive {:event, %PubSub.AgentRunCreated{item: ^run}}
     end
 
     test "users without permissions cannot create agent runs" do
@@ -185,6 +190,69 @@ defmodule Console.Deployments.AgentsTest do
         repository: "https://github.com/pluralsh/console.git",
         base: "main",
         head: "plrl/ai/pr-test"
+      }, run.id, user)
+    end
+  end
+
+  describe "update_todos/3" do
+    test "users can update their own todos" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, updated} = Agents.update_todos([%{
+        title: "a todo",
+        description: "a description",
+        done: false
+      }], run.id, user)
+
+      assert updated.id == run.id
+      assert length(updated.todos) == 1
+      assert hd(updated.todos).title == "a todo"
+      assert hd(updated.todos).description == "a description"
+      assert hd(updated.todos).done == false
+    end
+
+    test "non initiated users cannot update todos" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: insert(:user))
+
+      {:error, _} = Agents.update_todos([%{
+        title: "a todo",
+        description: "a description",
+        done: false
+      }], run.id, user)
+    end
+  end
+
+  describe "update_analysis/3" do
+    test "users can update their own analysis" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, updated} = Agents.update_analysis(%{
+        summary: "a summary",
+        analysis: "a analysis",
+        bullets: ["a bullet"]
+      }, run.id, user)
+
+      assert updated.id == run.id
+      assert updated.analysis.summary == "a summary"
+      assert updated.analysis.analysis == "a analysis"
+      assert updated.analysis.bullets == ["a bullet"]
+    end
+
+    test "non initiated users cannot update analysis" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: insert(:user))
+
+      {:error, _} = Agents.update_analysis(%{
+        summary: "a summary",
+        analysis: "a analysis",
+        bullets: ["a bullet"]
       }, run.id, user)
     end
   end

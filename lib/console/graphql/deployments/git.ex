@@ -187,6 +187,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :display_name,  :string
     field :placeholder,   :string
+    field :page,          :integer, description: "the page to use for the pr automation"
     field :optional,      :boolean
     field :condition,     :condition_attributes
     field :validation,    :configuration_validation_attributes
@@ -606,6 +607,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :placeholder,   :string
     field :display_name,  :string
+    field :page,          :integer, description: "the page to use for the pr configuration"
     field :optional,      :boolean
     field :values,        list_of(:string)
     field :condition,     :pr_configuration_condition
