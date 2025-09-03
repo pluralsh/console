@@ -1558,6 +1558,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v2.1.11-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v2.1.10-eksbuild.1
     compatibilities:
     - '1.33'
@@ -1993,6 +2002,22 @@
   publisher: eks
 - name: aws-guardduty-agent
   versions:
+  - version: v1.11.0-eksbuild.4
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.11.0-eksbuild.3
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.11.0-eksbuild.2
     compatibilities:
     - '1.33'
@@ -5117,6 +5142,14 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.8.0-eksbuild.2
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v0.8.0-eksbuild.1
     compatibilities:
     - '1.33'
