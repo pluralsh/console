@@ -4,7 +4,7 @@ import {
   NetworkInterfaceIcon,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useParams, useSearchParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
@@ -34,6 +34,8 @@ export default function ClusterServices() {
     `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/:tab`
   )
   const tab = pathMatch?.params?.tab || ''
+  const [searchParams, setSearchParams] = useSearchParams()
+  const q = searchParams.get('q')
 
   const {
     cluster,
@@ -77,9 +79,14 @@ export default function ClusterServices() {
     ])
   }, [setMoreMenuItems])
 
-  const context = useMemo(
-    () => ({ setRefetch, clusterId }) as ServicesContextT,
-    [setRefetch, clusterId]
+  const context: ServicesContextT = useMemo(
+    () => ({
+      setRefetch,
+      clusterId,
+      q,
+      setQ: (newQ: string) => setSearchParams({ ...(newQ && { q: newQ }) }),
+    }),
+    [setRefetch, clusterId, q, setSearchParams]
   )
 
   return (

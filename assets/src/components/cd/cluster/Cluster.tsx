@@ -390,7 +390,7 @@ export type ClusterContextType = {
   clusterLoading: boolean
   refetch: () => void
   refetchServices: () => void
-  setRefetchServices: (refetch: () => () => void) => void
+  setRefetchServices: (refetch: () => void) => void
 }
 
 export function useClusterContext() {

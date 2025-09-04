@@ -14,7 +14,6 @@ import {
   IconFrame,
   Markdown,
   PrOpenIcon,
-  WrapWithIf,
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
@@ -74,7 +73,6 @@ export function ChatMessageContent({
   highlightToolContent = true,
   session,
 }: ChatMessageContentProps) {
-  const theme = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -120,21 +118,9 @@ export function ChatMessageContent({
     case ChatType.Text:
     default:
       return (
-        <WrapWithIf
-          condition={!(role === AiRole.Assistant || role === AiRole.System)}
-          wrapper={
-            <Card
-              css={{
-                width: '100%',
-                backgroundColor: theme.colors['fill-zero'],
-                border: theme.borders.default,
-                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-              }}
-            />
-          }
-        >
+        <DefaultWrapperSC $role={role ?? AiRole.User}>
           <Markdown text={content ?? ''} />
-        </WrapWithIf>
+        </DefaultWrapperSC>
       )
   }
 }
@@ -607,3 +593,14 @@ function ToolMessageDetails({ content, attributes }): ReactElement | null {
       return null
   }
 }
+
+const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
+  maxWidth: '100%',
+  overflow: 'auto',
+  ...(!($role === AiRole.Assistant || $role === AiRole.System) && {
+    backgroundColor: theme.colors['fill-zero'],
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.large,
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  }),
+}))

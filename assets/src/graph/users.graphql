@@ -88,6 +88,15 @@ query Subscription {
   }
 }
 
+query MeGroups {
+  me {
+    id
+    groups {
+      ...Group
+    }
+  }
+}
+
 query Me {
   me {
     ...User
