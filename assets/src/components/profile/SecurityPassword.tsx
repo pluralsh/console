@@ -1,14 +1,10 @@
-import {
-  Button,
-  ContentCard,
-  Flex,
-  ValidatedInput,
-} from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
-import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
+import { Button, Flex, ValidatedInput } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
+import { UPDATE_USER } from 'components/graphql/users'
+import { useContext, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { ProfileCard } from './Profile'
 
 const validPassword = (pass) =>
   pass.length < 8
@@ -93,7 +89,7 @@ export default function SecurityPassword() {
   if (configuration?.pluralLogin) return null
 
   return (
-    <ContentCard overflowY="auto">
+    <ProfileCard>
       <Flex
         flexDirection="column"
         gap="large"
@@ -119,6 +115,6 @@ export default function SecurityPassword() {
           {pass && <UpdatePassword cancel={() => setPass(false)} />}
         </div>
       </Flex>
-    </ContentCard>
+    </ProfileCard>
   )
 }

@@ -14590,6 +14590,11 @@ export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
 
+export type MeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', id: string, groups?: Array<{ __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -31208,6 +31213,48 @@ export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery
 export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
 export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
 export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
+export const MeGroupsDocument = gql`
+    query MeGroups {
+  me {
+    id
+    groups {
+      ...Group
+    }
+  }
+}
+    ${GroupFragmentDoc}`;
+
+/**
+ * __useMeGroupsQuery__
+ *
+ * To run a query within a React component, call `useMeGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeGroupsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeGroupsQuery(baseOptions?: Apollo.QueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+      }
+export function useMeGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export function useMeGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export type MeGroupsQueryHookResult = ReturnType<typeof useMeGroupsQuery>;
+export type MeGroupsLazyQueryHookResult = ReturnType<typeof useMeGroupsLazyQuery>;
+export type MeGroupsSuspenseQueryHookResult = ReturnType<typeof useMeGroupsSuspenseQuery>;
+export type MeGroupsQueryResult = Apollo.QueryResult<MeGroupsQuery, MeGroupsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -31911,6 +31958,7 @@ export const namedOperations = {
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Subscription: 'Subscription',
+    MeGroups: 'MeGroups',
     Me: 'Me',
     Users: 'Users',
     SearchUsers: 'SearchUsers',

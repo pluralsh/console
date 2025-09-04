@@ -15,7 +15,7 @@ const directory = [
   { path: 'me', label: 'Profile' },
   { path: 'email-settings', label: 'Email settings' },
   { path: 'security', label: 'Security' },
-  { path: 'permissions', label: 'Permissions' },
+  { path: 'groups', label: 'Groups' },
   { path: 'access-tokens', label: 'Access tokens' },
 ]
 

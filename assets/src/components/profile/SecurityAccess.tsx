@@ -1,11 +1,12 @@
 import { useLazyQuery } from '@apollo/client'
-import { Button, Code, ContentCard, Flex } from '@pluralsh/design-system'
+import { Button, Code, Flex } from '@pluralsh/design-system'
 import { TEMP_TOKEN_Q } from 'components/graphql/users'
 import { GqlError } from 'components/utils/Alert'
 import { localized } from 'helpers/hostname'
 
-import { useTheme } from 'styled-components'
 import { InlineA } from 'components/utils/typography/Text'
+import { useTheme } from 'styled-components'
+import { ProfileCard } from './Profile'
 
 export default function SecurityAccess() {
   const theme = useTheme()
@@ -13,7 +14,7 @@ export default function SecurityAccess() {
   const url = localized('/access')
 
   return (
-    <ContentCard overflowY="auto">
+    <ProfileCard>
       <Flex
         flexDirection="column"
         gap="large"
@@ -53,6 +54,6 @@ export default function SecurityAccess() {
           <span>.</span>
         </p>
       </Flex>
-    </ContentCard>
+    </ProfileCard>
   )
 }

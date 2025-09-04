@@ -1,12 +1,13 @@
 import {
   Button,
-  ContentCard,
+  Card,
+  CardProps,
   Flex,
-  ValidatedInput,
   useSetBreadcrumbs,
+  ValidatedInput,
   ValidationResponse,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { useLogin } from 'components/contexts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -15,6 +16,7 @@ import { isValidEmail } from 'utils/email'
 
 import { Body2P } from 'components/utils/typography/Text'
 import { useUpdateUserMutation } from 'generated/graphql'
+import styled from 'styled-components'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 export function Profile() {
@@ -32,10 +34,7 @@ export function Profile() {
 
   return (
     <ScrollablePage heading="Profile">
-      <ContentCard
-        maxHeight="100%"
-        overflowY="auto"
-      >
+      <ProfileCard>
         <Flex
           direction="column"
           gap="large"
@@ -72,7 +71,26 @@ export function Profile() {
             </Button>
           </Flex>
         </Flex>
-      </ContentCard>
+      </ProfileCard>
     </ScrollablePage>
   )
 }
+
+export function ProfileCard({
+  children,
+  ...props
+}: { children: ReactNode } & CardProps) {
+  return (
+    <ProfileOuterCardSC {...props}>
+      <div css={{ width: '100%', maxWidth: 608 }}>{children}</div>
+    </ProfileOuterCardSC>
+  )
+}
+const ProfileOuterCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  overflow: 'auto',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+}))

@@ -2,7 +2,7 @@ import { Home } from 'components/home/Home'
 import { AccessTokens } from 'components/profile/AccessTokens'
 import { EmailSettings } from 'components/profile/EmailSettings'
 import MyProfile from 'components/profile/MyProfile'
-import { Permissions } from 'components/profile/Permissions'
+import { Groups } from 'components/profile/Groups'
 import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
 import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
@@ -47,8 +47,8 @@ const profileRoutes = [
       element={<Security />}
     />
     <Route
-      path="permissions"
-      element={<Permissions />}
+      path="groups"
+      element={<Groups />}
     />
     <Route
       path="access-tokens"
