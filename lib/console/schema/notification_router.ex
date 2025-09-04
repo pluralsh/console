@@ -49,6 +49,7 @@ defmodule Console.Schema.NotificationRouter do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:filters)
     |> cast_assoc(:router_sinks)
     |> validate_subset(:events, @events, message: @error_msg)

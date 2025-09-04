@@ -110,6 +110,15 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [owner, repo | _] <- String.split(path, "/") do
+      {:ok, "#{owner}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse github url"}
+    end
+  end
+
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
   defp to_files(client, url, pr, files) do
@@ -173,8 +182,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp owner(%{"user" => %{"login" => owner}}), do: owner
   defp owner(_), do: nil
 
-  defp add_opts({:ok, %Tentacat.Client{} = client}, [_ | _] = opts),
-    do: {:ok, %{client | request_options: opts}}
+  defp add_opts({:ok, %Tentacat.Client{request_options: prev} = client}, [_ | _] = opts),
+    do: {:ok, %{client | request_options: opts ++ prev}}
   defp add_opts(pass, _), do: pass
 
   defp request_options(%PrAutomation{connection: %ScmConnection{} = conn}), do: request_options(conn)

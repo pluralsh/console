@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Observability.Webhook.Base do
-  alias Console.Deployments.{Settings, Clusters, Services}
+  alias Console.Deployments.{Settings, Clusters, Services, Flows}
   use Nebulex.Caching
 
   @cache Console.conf(:cache_adapter)
@@ -10,6 +10,9 @@ defmodule Console.Deployments.Observability.Webhook.Base do
 
   @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :cluster, name}, opts: [ttl: @ttl])
   def cluster(name), do: Clusters.get_cluster_by_handle(name) |> maybe_id()
+
+  @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :flow, name}, opts: [ttl: @ttl])
+  def flow(name), do: Flows.get_by_name(name) |> maybe_id()
 
   @decorate cacheable(cache: @cache, key: {:obs_hook_associations, :svc, name}, opts: [ttl: @ttl])
   def service(name) do

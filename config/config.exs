@@ -177,4 +177,10 @@ config :phoenix, :filter_parameters, {:keep, ~w(id format)}
 
 config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.Req
 
+config :sentry,
+  environment_name: Mix.env(),
+  enable_source_code_context: true,
+  root_source_code_paths: [File.cwd!()],
+  tags: %{"plrl.flow": "console"}
+
 import_config "#{Mix.env()}.exs"

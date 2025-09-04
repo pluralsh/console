@@ -7,6 +7,7 @@ defmodule Console.Schema.Flow do
     field :name,        :string
     field :description, :string
     field :icon,        :string
+    field :repositories, {:array, :string}
 
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
@@ -58,12 +59,13 @@ defmodule Console.Schema.Flow do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description icon project_id)a)
+    |> cast(attrs, ~w(name description icon repositories project_id)a)
     |> cast_assoc(:server_associations)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
+    |> validate_repositories()
     |> foreign_key_constraint(:preview_environment_instances, name: :preview_environment, match: :prefix, message: "Cannot delete as there are preview environments using this flow still deployed")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -76,4 +78,16 @@ defmodule Console.Schema.Flow do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
   end
+
+  defp validate_repositories(cs) do
+    with [_ | _] = repositories <- get_change(cs, :repositories),
+         false <- Enum.all?(repositories, &is_https?/1) do
+      add_error(cs, :repositories, "repositories must be git https urls")
+    else
+      _ -> cs
+    end
+  end
+
+  defp is_https?("https://" <> _), do: true
+  defp is_https?(_), do: false
 end

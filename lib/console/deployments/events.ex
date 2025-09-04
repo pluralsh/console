@@ -93,3 +93,7 @@ defmodule Console.PubSub.PreviewEnvironmentTemplateDeleted, do: use Piazza.PubSu
 defmodule Console.PubSub.PreviewEnvironmentInstanceCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PreviewEnvironmentInstanceUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PreviewEnvironmentInstanceDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.AgentRunCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AgentRunUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AgentRunDeleted, do: use Piazza.PubSub.Event

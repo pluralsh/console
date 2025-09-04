@@ -1,4 +1,5 @@
 defmodule ConsoleWeb.Endpoint do
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :console
   use Absinthe.Phoenix.Endpoint
 
@@ -46,6 +47,8 @@ defmodule ConsoleWeb.Endpoint do
     length: 20_000_000,
     ready_length: 20_000_000,
     body_reader: {ConsoleWeb.CacheBodyReader, :read_body, []}
+
+  plug Sentry.PlugContext, body_scrubber: {ConsoleWeb.Sentry, :scrub_params}
 
   plug Plug.MethodOverride
   plug Plug.Head

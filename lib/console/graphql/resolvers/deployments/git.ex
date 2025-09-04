@@ -142,7 +142,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     with {:ok, pra} <- resolve_pr_automation(args, user) do
       Git.create_pull_request(
         %{agent_id: agent_id},
-        Map.merge(ctx, additional_context),
+        Map.merge(ctx, additional_context) |> Map.put(:secrets, args[:secrets]),
         pra,
         branch,
         args[:identifier],

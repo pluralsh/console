@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Clusters, Settings}
+  alias Console.Deployments.{Clusters, Settings, KubeVersions}
   alias Console.Cost.Pr
   alias Console.AI.Stream
   alias Console.Schema.{
@@ -219,6 +219,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       _ -> {:ok, nil}
     end
   end
+
+  def kubernetes_version_info(%{distro: distro}, _), do: {:ok, KubeVersions.Table.fetch(distro)}
 
   defp cores(val) when is_integer(val), do: val / 1000
   defp cores(_), do: nil

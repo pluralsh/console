@@ -5,6 +5,10 @@ defmodule Console.Application do
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
 
+    :logger.add_handler(:sentry_logger, Sentry.LoggerHandler, %{
+      config: %{metadata: [:file, :line]}
+    })
+
     children = [
       %{
         id: :pg,
@@ -45,6 +49,7 @@ defmodule Console.Application do
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
+      Console.Deployments.KubeVersions.Table,
       Console.Deployments.Compatibilities.CloudAddOns,
       Console.Buffers.Supervisor,
       Console.Bootstrapper,

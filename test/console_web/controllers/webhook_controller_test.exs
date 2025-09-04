@@ -320,4 +320,24 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     assert_receive {:event, %Console.PubSub.AlertCreated{}}
   end
+
+  test "it can handle sentry webhooks", %{conn: conn} do
+    hook = insert(:observability_webhook, type: :sentry)
+    flow = insert(:flow, name: "test-flow")
+    webhook = String.trim(Console.conf(:sentry_webhook_payload))
+
+    signature = :crypto.mac(:hmac, :sha256, hook.secret, webhook)
+                  |> Base.encode16(case: :lower)
+
+    conn
+    |> put_req_header("sentry-hook-signature", signature)
+    |> put_req_header("sentry-hook-resource", "event_alert")
+    |> put_req_header("content-type", "application/json")
+    |> post("/ext/v1/webhooks/observability/sentry/#{hook.external_id}", webhook)
+    |> json_response(200)
+
+    [alert] = Console.Repo.all(Console.Schema.Alert)
+
+    assert alert.flow_id == flow.id
+  end
 end

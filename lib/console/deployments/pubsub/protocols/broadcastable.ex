@@ -57,3 +57,12 @@ end
 defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.StackRunCreated, Console.PubSub.StackRunUpdated, Console.PubSub.StackRunDeleted] do
   def message(%{item: %{cluster_id: cid, id: id}}), do: {"cluster:#{cid}", "stack.run.event", %{"id" => id}}
 end
+
+defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.AgentRunCreated] do
+  alias Console.Schema.AgentRun
+
+  def message(%{item: %AgentRun{} = run}) do
+    %{runtime: %{cluster_id: cid}} = Console.Repo.preload(run, [:runtime])
+    {"cluster:#{cid}", "agent.run.event", %{"id" => run.id}}
+  end
+end

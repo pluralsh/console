@@ -1336,6 +1336,7 @@ _Appears in:_
 | `icon` _string_ | Icon specifies an optional image icon for the flow to apply branding or improve identification. |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a global service to be scoped to a specific project only. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: {} <br /> |
+| `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: {} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: {} <br /> |
 
 
@@ -3066,6 +3067,7 @@ _Appears in:_
 | `longform` _string_ | Longform provides extended documentation or detailed explanation for complex configuration fields. |  | Optional: {} <br /> |
 | `displayName` _string_ | DisplayName provides a human-readable label for this field in the UI.<br />If not provided, the Name field is used as the display label. |  | Optional: {} <br /> |
 | `optional` _boolean_ | Optional indicates whether this field is required (false) or optional (true) for PR generation.<br />Required fields must be filled by the user. |  | Optional: {} <br /> |
+| `page` _integer_ | Page specifies the page to use for the pr configuration in the Plural web configuration wizard |  | Optional: {} <br /> |
 | `placeholder` _string_ | Placeholder text to show in the input field to guide users on the expected format or content. |  | Optional: {} <br /> |
 | `validation` _[PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)_ | Validation defines additional validation rules to apply to user input before allowing PR generation. |  | Optional: {} <br /> |
 | `values` _string array_ | Values provides the list of allowed values for ENUM type fields, creating a dropdown selection in the UI. |  | Optional: {} <br /> |
@@ -3140,6 +3142,43 @@ _Appears in:_
 | `folders` _string array_ | Entire folders to delete. |  | Optional: {} <br /> |
 
 
+#### PrAutomationSecretConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cluster` _string_ | The cluster handle that will hold this secret |  |  |
+| `namespace` _string_ | The k8s namespace to place the secret in |  |  |
+| `name` _string_ | The name of the secret |  |  |
+| `entries` _[PrAutomationSecretEntry](#prautomationsecretentry) array_ | The entries of the secret |  |  |
+
+
+#### PrAutomationSecretEntry
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSecretConfiguration](#prautomationsecretconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | The name of the secret entry |  |  |
+| `documentation` _string_ | The documentation of the secret entry |  |  |
+| `autogenerate` _boolean_ | Whether to autogenerate the secret entry |  | Optional: {} <br /> |
+
+
 #### PrAutomationSpec
 
 
@@ -3172,6 +3211,7 @@ _Appears in:_
 | `catalogRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | CatalogRef references the catalog this automation belongs to for<br />organizational purposes and discoverability in the service catalog. |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings containing read and write policies of PR automation. |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration defines the self-service UI form fields that users fill out<br />to customize the generated PR. Each field can be templated into the PR content. |  | Optional: {} <br /> |
+| `secrets` _[PrAutomationSecretConfiguration](#prautomationsecretconfiguration)_ | Configuration for setting a secret as part of this pr.  This will usually be used by k8s manifests defined and is<br />securely handled by our api with RBAC validation. |  | Optional: {} <br /> |
 | `confirmation` _[PrAutomationConfirmation](#prautomationconfirmation)_ | Confirmation specifies additional verification steps or information to present<br />to users before they can generate the PR, ensuring prerequisites are met. |  | Optional: {} <br /> |
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: {} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: {} <br /> |

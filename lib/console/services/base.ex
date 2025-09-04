@@ -128,4 +128,6 @@ defmodule Console.Services.Base do
     end
     |> Console.mapify()
   end
+
+  def update_map(val, key, %{} = map), do: Map.put(map, key, val)
 end

@@ -89,6 +89,15 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [_, repo] <- String.split(path, "/_git/") do
+      {:ok, repo}
+    else
+      _ -> {:error, "could not parse azure devops url"}
+    end
+  end
+
   defp post(conn, url, body) do
     url(conn, url)
     |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))

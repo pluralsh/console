@@ -2,6 +2,7 @@ defmodule Console.Schema.Cluster do
   use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.{Policies.Rbac, Settings}
+  alias Console.Deployments.KubeVersions
   alias Console.Schema.{
     Service,
     ClusterNodePool,
@@ -322,13 +323,24 @@ defmodule Console.Schema.Cluster do
   end
 
   def upgrade_statistics(query \\ __MODULE__) do
+    extended = KubeVersions.Table.extended_versions()
     from(c in query,
       select: %{
         count: count(c.id),
         upgradeable: sum(fragment("CASE WHEN ? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb THEN 1 ELSE 0 END",
           c.upgrade_plan["compatibilities"], c.upgrade_plan["kubelet_skew"], c.upgrade_plan["deprecations"])),
         latest: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.kube_vsn())),
-        compliant: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.compliant_vsn())),
+        compliant: sum(fragment("""
+          CASE WHEN ? = 3 and ? >= ? THEN 1
+               WHEN ? = 1 and ? >= ? THEN 1
+               WHEN ? = 2 and ? >= ? THEN 1
+               WHEN ? not in (1, 2, 3) and ? >= ? THEN 1
+               ELSE 0
+          END
+        """, c.distro, c.current_version, ^extended[:gke],
+             c.distro, c.current_version, ^extended[:eks],
+             c.distro, c.current_version, ^extended[:aks],
+             c.distro, c.current_version, ^extended[:gke])),
       }
     )
   end
@@ -339,11 +351,21 @@ defmodule Console.Schema.Cluster do
   end
 
   def with_version_compliance(query, :compliant) do
-    from(c in query, where: c.current_version >= ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version >= ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version >= ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version >= ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version >= ^extended[:gke]))
   end
 
   def with_version_compliance(query, :outdated) do
-    from(c in query, where: c.current_version < ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version < ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version < ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version < ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version < ^extended[:gke]))
   end
 
   def for_health_range(query \\ __MODULE__, min, max) do
@@ -439,6 +461,7 @@ defmodule Console.Schema.Cluster do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> kubernetes_name(:name)
     |> semver(:version)
     |> cast_embed(:kubeconfig)

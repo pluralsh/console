@@ -36,6 +36,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
 
+  @callback slug(url :: binary) :: {:ok, binary} | Console.error
+
   @doc """
   Fully creates a pr against the working dispatcher implementation
   """
@@ -63,6 +65,17 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl = dispatcher(conn)
     with {:ok, _} <- push(conn, branch),
       do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
+  end
+
+  def pr(%ScmConnection{} = conn, title, body, url, base, head) do
+    impl = dispatcher(conn)
+    impl.create(%PrAutomation{
+      title: title,
+      connection: conn,
+      message: body,
+      branch: base,
+      identifier: impl.slug(url)
+    }, head, %{})
   end
 
   def webhook(%ScmConnection{} = conn, %ScmWebhook{} = hook) do

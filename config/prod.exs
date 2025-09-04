@@ -11,7 +11,7 @@ config :console, ConsoleWeb.Endpoint,
     ]
   ],
   # force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
-  cache_static_manifest: "priv/static/cache_manifest.json",
+  # cache_static_manifest: "priv/static/cache_manifest.json",
   server: true
 
 config :logger, level: :info

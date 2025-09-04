@@ -122,6 +122,11 @@ spec:
                         Optional indicates whether this field is required (false) or optional (true) for PR generation.
                         Required fields must be filled by the user.
                       type: boolean
+                    page:
+                      description: Page specifies the page to use for the pr configuration
+                        in the Plural web configuration wizard
+                      format: int64
+                      type: integer
                     placeholder:
                       description: Placeholder text to show in the input field to
                         guide users on the expected format or content.

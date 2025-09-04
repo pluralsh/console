@@ -159,6 +159,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :governance_id, :id, description: "the governance controller to use for this pr"
 
     field :configuration, list_of(:pr_configuration_attributes)
+    field :secrets,       :pr_secrets_attributes
 
     field :confirmation,  :pr_confirmation_attributes
 
@@ -186,6 +187,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :display_name,  :string
     field :placeholder,   :string
+    field :page,          :integer, description: "the page to use for the pr automation"
     field :optional,      :boolean
     field :condition,     :condition_attributes
     field :validation,    :configuration_validation_attributes
@@ -204,6 +206,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :regex,    :string, description: "regex a string value should match"
     field :json,     :boolean, description: "whether the string is json encoded"
     field :uniq_by,  :uniq_by_attributes, description: "configuration for name uniqueness"
+  end
+
+  input_object :pr_secrets_attributes do
+    field :cluster,       :string, description: "the cluster handle that will hold this secret"
+    field :namespace,     :string, description: "the k8s namespace to place the secret in"
+    field :name,          :string, description: "the name of the secret"
+    field :entries,       list_of(:pr_secret_entry_attributes)
+  end
+
+  input_object :pr_secret_entry_attributes do
+    field :name,          :string, description: "the name of the secret entry"
+    field :documentation, :string, description: "the documentation for the secret entry"
+    field :autogenerate,  :boolean, description: "whether to autogenerate the secret entry"
   end
 
   @desc "How to enforce uniqueness for a field"
@@ -500,6 +515,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
 
     field :configuration, list_of(:pr_configuration)
+    field :secrets,       :pr_secrets, description: "the secrets to create as part of this pr"
     field :confirmation,  :pr_confirmation, description: "optional confirmation block to express prerequisites for this PR"
 
     field :write_bindings, list_of(:policy_binding),
@@ -591,6 +607,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :placeholder,   :string
     field :display_name,  :string
+    field :page,          :integer, description: "the page to use for the pr configuration"
     field :optional,      :boolean
     field :values,        list_of(:string)
     field :condition,     :pr_configuration_condition
@@ -601,6 +618,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :operation, non_null(:operation), description: "a boolean operation to apply"
     field :field,     non_null(:string), description: "the prior field to check"
     field :value,     :string, description: "a fixed value to check against if its a binary operation"
+  end
+
+  object :pr_secrets do
+    field :cluster,   :string, description: "the cluster handle that will hold this secret"
+    field :namespace, :string, description: "the k8s namespace to place the secret in"
+    field :name,      :string, description: "the name of the secret"
+    field :entries,   list_of(:pr_secret_entry)
+  end
+
+  object :pr_secret_entry do
+    field :name,          :string, description: "the name of the secret entry"
+    field :documentation, :string, description: "the documentation for the secret entry"
+    field :autogenerate,  :boolean, description: "whether to autogenerate the secret"
   end
 
   @desc "Additional details to verify all prerequisites are satisfied before generating this pr"
@@ -1088,6 +1118,7 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :identifier, :string
       arg :branch,     :string
       arg :context,    :json
+      arg :secrets,    :json
       arg :thread_id,  :id, description: "a ai thread id this pr was spawned from, for associating with agentic workflows"
 
       safe_resolve &Deployments.create_pull_request/2

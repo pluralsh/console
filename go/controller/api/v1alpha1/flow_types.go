@@ -6,6 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
 func init() {
@@ -66,6 +67,7 @@ func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpS
 		Icon:               in.Spec.Icon,
 		ProjectID:          projectID,
 		ServerAssociations: serverAssociations,
+		Repositories:       lo.ToSlicePtr(in.Spec.Repositories),
 	}
 
 	if in.Spec.Bindings != nil {
@@ -106,6 +108,10 @@ type FlowSpec struct {
 	// Bindings contain read and write policies of this Flow.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
+
+	// Repositories contains a list of git https urls of the application code repositories used in this flow.
+	// +kubebuilder:validation:Optional
+	Repositories []string `json:"repositories,omitempty"`
 
 	// ServerAssociations contains a list of MCP services you wish to associate with this flow.
 	// Can also be managed within the Plural Console UI securely.
