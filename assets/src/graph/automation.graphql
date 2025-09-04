@@ -65,12 +65,14 @@ query PrAutomations(
   $after: String
   $catalogId: ID
   $role: PrRole
+  $q: String
 ) {
   prAutomations(
     first: $first
     after: $after
     catalogId: $catalogId
     role: $role
+    q: $q
   ) {
     pageInfo {
       ...PageInfo

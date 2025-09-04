@@ -12036,6 +12036,7 @@ export type PrAutomationsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   catalogId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -20326,8 +20327,14 @@ export type AuditMetricsLazyQueryHookResult = ReturnType<typeof useAuditMetricsL
 export type AuditMetricsSuspenseQueryHookResult = ReturnType<typeof useAuditMetricsSuspenseQuery>;
 export type AuditMetricsQueryResult = Apollo.QueryResult<AuditMetricsQuery, AuditMetricsQueryVariables>;
 export const PrAutomationsDocument = gql`
-    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID, $role: PrRole) {
-  prAutomations(first: $first, after: $after, catalogId: $catalogId, role: $role) {
+    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID, $role: PrRole, $q: String) {
+  prAutomations(
+    first: $first
+    after: $after
+    catalogId: $catalogId
+    role: $role
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -20357,6 +20364,7 @@ ${PrAutomationFragmentDoc}`;
  *      after: // value for 'after'
  *      catalogId: // value for 'catalogId'
  *      role: // value for 'role'
+ *      q: // value for 'q'
  *   },
  * });
  */
