@@ -712,6 +712,10 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  requireOwnership:
+                    description: Whether to require all resources are owned by this
+                      service and fail if they are owned by another. Default is true.
+                    type: boolean
                 type: object
               templated:
                 description: Templated enables Liquid templating for raw YAML files,
