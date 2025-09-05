@@ -41,7 +41,7 @@ function GitProviderSelect({
               if (key !== ScmType.Github) setGhAppAuth?.(false)
             }}
           >
-            {[ScmType.Github, ScmType.Gitlab, ScmType.Bitbucket].map((type) => (
+            {Object.values(ScmType).map((type) => (
               <ListBoxItem
                 key={type}
                 leftContent={scmTypeToIcon[type]}
