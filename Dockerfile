@@ -5,7 +5,7 @@ ARG OS_VERSION=3.21.3
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
 ARG RUNNER_IMAGE=${OS_VARIANT}:${OS_VERSION}
 
-FROM node:16.16-alpine3.15 as node
+FROM node:20-alpine as node
 
 WORKDIR /app
 
@@ -14,7 +14,6 @@ COPY assets/yarn.lock ./yarn.lock
 COPY assets/.yarn ./.yarn
 COPY assets/.yarnrc.yml ./.yarnrc.yml
 
-RUN npm config set unsafe-perm true
 RUN yarn install
 
 COPY assets/ ./
