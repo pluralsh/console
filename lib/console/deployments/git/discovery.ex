@@ -70,11 +70,15 @@ defmodule Console.Deployments.Git.Discovery do
 
   def maybe_rpc(%GitRepository{} = repo, fun) when is_function(fun, 1) do
     me = node()
-    case agent_node(repo) do
-      ^me -> start_and_run(repo, fun)
-      n ->
-        :erpc.call(n, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
-        |> Console.handle_rpc()
+    try do
+      case agent_node(repo) do
+        ^me -> start_and_run(repo, fun)
+        n ->
+          :erpc.call(n, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
+          |> Console.handle_rpc()
+      end
+    catch
+      :exit, reason -> {:error, {:rpc, reason}}
     end
   end
 

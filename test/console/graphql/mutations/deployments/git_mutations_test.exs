@@ -422,22 +422,22 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
   describe "kickObserver" do
     test "admins can kick an observer" do
       observer = insert(:observer)
-      expect(Console.Deployments.Observer.Runner, :run, fn observer -> {:ok, observer} end)
 
       {:ok, %{data: %{"kickObserver" => kicked}}} = run_query("""
         mutation Delete($id: ID!) {
           kickObserver(id: $id) {
             id
+            nextRunAt
           }
         }
       """, %{"id" => observer.id}, %{current_user: admin_user()})
 
       assert kicked["id"] == observer.id
+      assert kicked["nextRunAt"]
     end
 
     test "nonadmins cannot kick an observer" do
       observer = insert(:observer)
-      reject(Console.Deployments.Observer.Runner, :run, 1)
 
       {:ok, %{errors: [_ | _]}} = run_query("""
         mutation Delete($id: ID!) {
