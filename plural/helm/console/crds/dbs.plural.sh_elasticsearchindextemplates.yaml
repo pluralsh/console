@@ -63,6 +63,8 @@ spec:
                     items:
                       type: string
                     type: array
+                  priority:
+                    type: integer
                   template:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true

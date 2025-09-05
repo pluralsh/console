@@ -126,6 +126,21 @@ defmodule Console.Deployments.ServicesTest do
       }, cluster.id, user)
     end
 
+    test "you cannot create a service with an invalid helm url" do
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      {:error, _} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        helm: %{
+          url: "pluralsh.github.io/bootstrap",
+          chart: "stateless",
+          version: "0.1.0",
+        }
+      }, cluster.id, user)
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])

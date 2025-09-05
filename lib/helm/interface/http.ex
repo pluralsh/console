@@ -1,6 +1,8 @@
 defmodule Console.Helm.Interface.HTTP do
   alias Console.Schema.{HelmRepository, OCIAuth}
 
+  @type t :: %__MODULE__{client: Req.Client.t, repo: HelmRepository.t}
+
   defstruct [:client, :repo]
 
   def client(%HelmRepository{} = repo) do
@@ -25,9 +27,10 @@ end
 
 defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   import Console.Helm.Utils, only: [match_version: 2]
+  alias Console.Schema.HelmRepository
   alias Console.Helm.{Index, Chart}
 
-  def index(%{client: client}) do
+  def index(%@for{client: client, repo: %HelmRepository{url: "http" <> _}}) do
     with {:ok, %Req.Response{status: 200} = resp} <- Req.get(client, url: "/index.yaml"),
          {:ok, yaml} <- handle_body(resp) do
       {:ok, Index.transform(%Index{entries: yaml["entries"]})}
@@ -35,12 +38,13 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
       _ -> {:error, "fould not fetch helm index"}
     end
   end
+  def index(_), do: {:error, "repository url requires a valid scheme (either http, https or oci)"}
 
   defp handle_body(%Req.Response{status: 200, body: %{} = body}), do: {:ok, body}
   defp handle_body(%Req.Response{status: 200, body: body}) when is_binary(body),
     do: YamlElixir.read_from_string(body)
 
-  def chart(client, %Index{entries: entries}, chart, vsn) do
+  def chart(%@for{repo: %HelmRepository{url: "http" <> _}} = client, %Index{entries: entries}, chart, vsn) do
     entries = Map.new(entries, & {&1.name, &1.versions})
     with {:chart, %{^chart => charts}} <- {:chart, entries},
          {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)} do
@@ -50,6 +54,7 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
       {:version, _} -> {:error, "could not find version #{vsn}"}
     end
   end
+  def chart(_, _, _, _), do: {:error, "repository url requires a valid scheme (either http, https or oci)"}
 
   def download(%{client: client}, "https://" <> _ = url, to) do
     Req.Request.delete_option(client, :base_url)
