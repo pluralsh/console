@@ -1,33 +1,40 @@
 import {
+  ArrowTopRightIcon,
   Chip,
   Flex,
+  GitPullIcon,
   IconFrame,
+  PrOpenIcon,
   RobotIcon,
   Spinner,
+  StackIcon,
   Table,
 } from '@pluralsh/design-system'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { createColumnHelper } from '@tanstack/react-table'
+import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent.tsx'
+import { isEmpty } from 'lodash'
+import { useMemo, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts.tsx'
+import { getStacksAbsPath } from 'routes/stacksRoutesConsts.tsx'
+import { useTheme } from 'styled-components'
 import {
   AgentSessionFragment,
   useAgentSessionsQuery,
 } from '../../generated/graphql.ts'
-import { isEmpty } from 'lodash'
-import { EmptyStateCompact } from './AIThreads.tsx'
-import { useMemo, useRef } from 'react'
-import { mapExistingNodes } from '../../utils/graphql.ts'
-import { GqlError } from '../utils/Alert.tsx'
-import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
-import { useTheme } from 'styled-components'
-import { createColumnHelper } from '@tanstack/react-table'
-import { Body2P, CaptionP } from '../utils/typography/Text.tsx'
-import { AgentIcon } from './chatbot/AgentSelect.tsx'
 import {
   dayjsExtended as dayjs,
   fromNow,
   isAfter,
 } from '../../utils/datetime.ts'
+import { mapExistingNodes } from '../../utils/graphql.ts'
+import { GqlError } from '../utils/Alert.tsx'
+import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import { useChatbot } from './AIContext.tsx'
-import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent.tsx'
+import { EmptyStateCompact } from './AIThreads.tsx'
+import { AgentIcon } from './chatbot/AgentSelect.tsx'
 
 export const CLOSE_CHAT_ACTION_PANEL_EVENT = 'pointerdown'
 
@@ -116,11 +123,14 @@ const columns = [
     id: 'row',
     cell: function Cell({ getValue }) {
       const theme = useTheme()
+      const rowChipsWrapperRef = useRef<HTMLDivElement>(null)
       const { goToThread } = useChatbot()
 
       // need to do this natively so it stops propagation correctly, see Console.tsx
       const wrapperRef = useRef<HTMLDivElement>(null)
       useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, (e) => {
+        // a little hacky but allows us to still hit the links in the chips
+        if (rowChipsWrapperRef.current?.contains(e.target as Node)) return
         if (agentSession?.thread) {
           e.stopPropagation()
           goToThread(agentSession.thread.id)
@@ -128,6 +138,7 @@ const columns = [
       })
 
       const agentSession = getValue()
+      const { pullRequest, stack, service } = agentSession
 
       const timestamp =
         agentSession?.thread?.lastMessageAt ??
@@ -173,6 +184,55 @@ const columns = [
               <Body2P css={{ opacity: isStale ? 0.6 : 1 }}>
                 {agentSession.thread?.summary}
               </Body2P>
+              <Flex
+                gap="xsmall"
+                ref={rowChipsWrapperRef}
+              >
+                {stack?.name && (
+                  <IconFrame
+                    as={Link}
+                    type="floating"
+                    to={getStacksAbsPath(stack.id)}
+                    icon={<StackIcon />}
+                    tooltip={`View '${stack.name}' stack`}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {stack.name}
+                  </IconFrame>
+                )}
+                {pullRequest?.url && (
+                  <IconFrame
+                    as={Link}
+                    to={pullRequest.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    type="floating"
+                    icon={<PrOpenIcon />}
+                    tooltip={
+                      <Flex
+                        alignItems="center"
+                        gap="xsmall"
+                      >
+                        {`View pull request `} <ArrowTopRightIcon />
+                      </Flex>
+                    }
+                    style={{ flexShrink: 0 }}
+                  />
+                )}
+                {service?.name && (
+                  <IconFrame
+                    as={Link}
+                    type="floating"
+                    to={getServiceDetailsPath({
+                      serviceId: service?.id,
+                      clusterId: service?.cluster?.id,
+                    })}
+                    icon={<GitPullIcon />}
+                    tooltip={`View ${service.name}`}
+                    style={{ flexShrink: 0 }}
+                  />
+                )}
+              </Flex>
             </Flex>
             <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
               Last updated {fromNow(timestamp)}

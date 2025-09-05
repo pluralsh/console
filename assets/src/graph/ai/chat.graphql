@@ -131,6 +131,18 @@ fragment AgentSession on AgentSession {
   }
   pullRequest {
     id
+    url
+  }
+  stack {
+    id
+    name
+  }
+  service {
+    id
+    name
+    cluster {
+      id
+    }
   }
 }
 
