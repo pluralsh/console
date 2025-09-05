@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react'
 import {
+  AzureDevopsLogoIcon,
   BitBucketIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
@@ -79,7 +80,7 @@ export const scmTypeToIcon = {
   [ScmType.Github]: <GitHubLogoIcon fullColor />,
   [ScmType.Gitlab]: <GitLabLogoIcon fullColor />,
   [ScmType.Bitbucket]: <BitBucketIcon fullColor />,
-  [ScmType.AzureDevops]: <PrOpenIcon />,
+  [ScmType.AzureDevops]: <AzureDevopsLogoIcon fullColor />,
   '': <PrOpenIcon />,
 } as const satisfies Record<ScmType | '', ReactElement<any>>
 

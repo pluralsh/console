@@ -112,6 +112,11 @@ fragment ScmConnection on ScmConnection {
   username
   baseUrl
   apiUrl
+  azure {
+    username
+    organization
+    project
+  }
 }
 
 query ScmConnections($first: Int = 100, $after: String) {

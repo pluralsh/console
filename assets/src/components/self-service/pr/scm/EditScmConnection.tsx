@@ -7,11 +7,11 @@ import {
   Input2,
   Modal,
 } from '@pluralsh/design-system'
-import pick from 'lodash/pick'
-import { type ComponentProps, ReactNode, useCallback, useState } from 'react'
+import { type ComponentProps, ReactNode, useCallback } from 'react'
 import { useTheme } from 'styled-components'
 
 import {
+  AzureDevopsAttributes,
   GithubAppAttributes,
   ScmConnectionAttributes,
   ScmConnectionFragment,
@@ -28,8 +28,14 @@ import { ApolloError } from '@apollo/client'
 
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 
-import { DEFAULT_SCM_ATTRIBUTES } from './CreateScmConnection'
+import { DeepPartial } from '@apollo/client/utilities'
+import { pick } from 'lodash'
+import { isValidScmForm, sanitizeScmAttributes } from './CreateScmConnection'
 import GitProviderSelect from './GitProviderSelect'
+
+type ScmFormAuthType = 'basic' | 'ghApp' | 'azureDevops'
+type GhFormField = keyof GithubAppAttributes
+type AzureFormField = keyof AzureDevopsAttributes
 
 function EditScmConnectionModalBase({
   open,
@@ -45,8 +51,8 @@ function EditScmConnectionModalBase({
     state: formState,
     update: updateFormState,
     hasUpdates,
-  } = useUpdateState<Partial<ScmConnectionAttributes>>({
-    ...pick(scmConnection, [
+  } = useUpdateState<ScmConnectionAttributes>({
+    ...(pick(scmConnection, [
       'apiUrl',
       'baseUrl',
       'name',
@@ -55,7 +61,8 @@ function EditScmConnectionModalBase({
       'type',
       'username',
       'github',
-    ]),
+      'azure',
+    ]) as ScmConnectionAttributes),
   })
 
   const [mutation, { loading, error }] = useUpdateScmConnectionMutation({
@@ -64,31 +71,20 @@ function EditScmConnectionModalBase({
     },
   })
 
-  const { name, type } = formState
-  const allowSubmit = name && type && hasUpdates
+  const allowSubmit = hasUpdates && isValidScmForm(formState, false)
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
       if (allowSubmit) {
-        const attributes = {
-          name,
-          type,
-          ...(formState.apiUrl ? { apiUrl: formState.apiUrl } : {}),
-          ...(formState.baseUrl ? { baseUrl: formState.baseUrl } : {}),
-          ...(formState.username ? { username: formState.username } : {}),
-          ...(formState.token ? { token: formState.token } : {}),
-          ...(formState.github && type === ScmType.Github
-            ? { github: formState.github }
-            : {}),
-          ...(formState.signingPrivateKey
-            ? { signingPrivateKey: formState.signingPrivateKey }
-            : {}),
-        }
-
-        mutation({ variables: { id: scmConnection.id, attributes } })
+        mutation({
+          variables: {
+            id: scmConnection.id,
+            attributes: sanitizeScmAttributes(formState),
+          },
+        })
       }
     },
-    [allowSubmit, formState, mutation, name, scmConnection.id, type]
+    [allowSubmit, formState, mutation, scmConnection.id]
   )
 
   return (
@@ -139,29 +135,25 @@ export function ScmConnectionForm({
   readOnlyName,
 }: {
   type: 'update' | 'create'
-  formState: Partial<ScmConnectionAttributes>
-  updateFormState: (update: Partial<ScmConnectionAttributes>) => void
+  formState: ScmConnectionAttributes
+  updateFormState: (update: DeepPartial<ScmConnectionAttributes>) => void
   error: ApolloError | undefined
   readOnlyName?: boolean
 }) {
   const { colors } = useTheme()
-  const [ghAppAuth, setGhAppAuthState] = useState(!!formState.github?.appId)
+  const authType = authTypeFromFormState(formState)
 
   const setGhAppAuth = (isToggled: boolean) => {
-    setGhAppAuthState(isToggled)
-    updateFormState({
-      token: !isToggled ? undefined : DEFAULT_SCM_ATTRIBUTES.token,
-      github: isToggled ? DEFAULT_SCM_ATTRIBUTES.github : undefined,
-    })
+    updateFormState(
+      isToggled ? { github: { appId: '' }, token: null } : { github: null }
+    )
   }
 
-  const updateGhFormField = (key: string, val: Nullable<string>) => {
-    updateFormState({
-      github: {
-        ...formState.github,
-        [key]: val,
-      } as GithubAppAttributes,
-    })
+  const updateGhFormField = (key: GhFormField, val: Nullable<string>) => {
+    updateFormState({ github: { ...formState.github, [key]: val } })
+  }
+  const updateAzureFormField = (key: AzureFormField, val: Nullable<string>) => {
+    updateFormState({ azure: { ...formState.azure, [key]: val } })
   }
 
   return (
@@ -171,8 +163,10 @@ export function ScmConnectionForm({
     >
       <GitProviderSelect
         selectedKey={formState.type}
-        updateSelectedKey={(type) => updateFormState({ type })}
-        ghAppAuth={ghAppAuth}
+        updateSelectedKey={(type) =>
+          updateFormState({ type, github: null, azure: null })
+        }
+        ghAppAuth={authType === 'ghApp'}
         setGhAppAuth={setGhAppAuth}
       />
       <StretchedInputRow>
@@ -188,7 +182,7 @@ export function ScmConnectionForm({
             onChange={(e) => updateFormState({ name: e.target.value })}
           />
         </FormField>
-        {!ghAppAuth && (
+        {authType !== 'ghApp' && (
           <FormField
             label="Token"
             required={type === 'create'}
@@ -203,7 +197,52 @@ export function ScmConnectionForm({
           </FormField>
         )}
       </StretchedInputRow>
-      {ghAppAuth && (
+      {authType === 'azureDevops' && (
+        <>
+          <StretchedInputRow>
+            <FormField
+              required
+              label="Username"
+            >
+              <Input2
+                css={{ background: colors['fill-two'] }}
+                placeholder="Enter username"
+                value={formState.azure?.username ?? ''}
+                onChange={(e) =>
+                  updateAzureFormField('username', e.target.value)
+                }
+              />
+            </FormField>
+            <FormField
+              required
+              label="Organization"
+            >
+              <Input2
+                css={{ background: colors['fill-two'] }}
+                placeholder="Enter organization"
+                value={formState.azure?.organization ?? ''}
+                onChange={(e) =>
+                  updateAzureFormField('organization', e.target.value)
+                }
+              />
+            </FormField>
+            <FormField
+              required
+              label="Project"
+            >
+              <Input2
+                css={{ background: colors['fill-two'] }}
+                placeholder="Enter project"
+                value={formState.azure?.project ?? ''}
+                onChange={(e) =>
+                  updateAzureFormField('project', e.target.value)
+                }
+              />
+            </FormField>
+          </StretchedInputRow>
+        </>
+      )}
+      {authType === 'ghApp' && (
         <>
           <StretchedInputRow>
             <FormField
@@ -307,4 +346,17 @@ function StretchedInputRow({ children }: { children: ReactNode }) {
       {children}
     </Flex>
   )
+}
+
+const authTypeFromFormState = (
+  formState: ScmConnectionAttributes
+): ScmFormAuthType => {
+  switch (formState.type) {
+    case ScmType.AzureDevops:
+      return 'azureDevops'
+    case ScmType.Github:
+      return formState.github?.appId !== undefined ? 'ghApp' : 'basic'
+    default:
+      return 'basic'
+  }
 }

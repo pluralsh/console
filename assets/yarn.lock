@@ -4125,7 +4125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@monaco-editor/loader@npm:^1.4.0":
+"@monaco-editor/loader@npm:^1.5.0":
   version: 1.5.0
   resolution: "@monaco-editor/loader@npm:1.5.0"
   dependencies:
@@ -4134,16 +4134,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@monaco-editor/react@npm:4.6.0":
-  version: 4.6.0
-  resolution: "@monaco-editor/react@npm:4.6.0"
+"@monaco-editor/react@npm:4.7.0":
+  version: 4.7.0
+  resolution: "@monaco-editor/react@npm:4.7.0"
   dependencies:
-    "@monaco-editor/loader": ^1.4.0
+    "@monaco-editor/loader": ^1.5.0
   peerDependencies:
     monaco-editor: ">= 0.25.0 < 1"
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 9d44e76c5baad6db5f84c90a5540fbd3c9af691b97d76cf2a99b3c8273004d0efe44c2572d80e9d975c9af10022c21e4a66923924950a5201e82017c8b20428c
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 8b3bd8adfcd6af70dc5f965e986932269e1e2c2a0f6beb5a3c632c8c7942c1341f6086d9664f9a949983bdf4a04a706e529a93bfec3b5884642915dfcc0354c3
   languageName: node
   linkType: hard
 
@@ -4551,16 +4551,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.23.2":
-  version: 5.23.2
-  resolution: "@pluralsh/design-system@npm:5.23.2"
+"@pluralsh/design-system@npm:5.24.0":
+  version: 5.24.0
+  resolution: "@pluralsh/design-system@npm:5.24.0"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
     "@markdoc/markdoc": 0.4.0
-    "@monaco-editor/react": 4.6.0
+    "@monaco-editor/react": 4.7.0
     "@radix-ui/react-accordion": 1.2.0
     "@radix-ui/react-dialog": 1.1.1
     "@radix-ui/react-focus-scope": 1.1.0
@@ -4570,7 +4570,7 @@ __metadata:
     "@react-stately/utils": 3.9.0
     "@tanstack/match-sorter-utils": 8.8.4
     "@tanstack/react-table": 8.20.5
-    "@tanstack/react-virtual": 3.0.1
+    "@tanstack/react-virtual": 3.13.12
     chroma-js: 2.4.2
     classnames: 2.3.2
     dayjs: 1.11.13
@@ -4598,7 +4598,7 @@ __metadata:
     react-dom: ">=19.0.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 7d7274a6be4a25783bbf99cb682a43905e109162d11a080e1ae651f9e161e6cff46814496183d9312da339380cb894cbdbd7c6b4364e877b85a8ba9d89d3a90a
+  checksum: 54a5ea8a40679ac79b158837ce005ff51f74f1663ee13aea99977ade96d220edf6c3837f6edb2a1f511decc18530c9ceb77422f887ffba6f8ed24b3a98bf82ee
   languageName: node
   linkType: hard
 
@@ -7164,15 +7164,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-virtual@npm:3.0.1":
-  version: 3.0.1
-  resolution: "@tanstack/react-virtual@npm:3.0.1"
+"@tanstack/react-virtual@npm:3.13.12":
+  version: 3.13.12
+  resolution: "@tanstack/react-virtual@npm:3.13.12"
   dependencies:
-    "@tanstack/virtual-core": 3.0.0
+    "@tanstack/virtual-core": 3.13.12
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 11534a23100de14a7e0a95da667381181e60a24e29a71246aeed174f8d5f6e176216de6639e6e1f403722ae30d8b92b21ed75ea131529b1417fb81f433468ef0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 7b64c728ae3666c22f6a1727d464f877c04ae02347480eab482c7a002c2a340167ded856e3dd52b19de34f965aeb01a1e223acdab44d646251c0aa89c3d69539
   languageName: node
   linkType: hard
 
@@ -7183,10 +7183,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-core@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@tanstack/virtual-core@npm:3.0.0"
-  checksum: 7283d50fc7b7a56608c37a8e94a93b85890ff7e39c6281633a19c4d6f6f4fbf25f8418f1eec302a008a8746a0d1d0cd00630137b55e6cf019818d68af8ed16b6
+"@tanstack/virtual-core@npm:3.13.12":
+  version: 3.13.12
+  resolution: "@tanstack/virtual-core@npm:3.13.12"
+  checksum: bef2c3138543a2088fff7d4fa46624d07403b18d92ec5a7271e187457851535031a79bc78ac655355a221d5549ef3b5674a3b249d2531f4c17c93107498c8438
   languageName: node
   linkType: hard
 
@@ -10213,7 +10213,7 @@ __metadata:
     "@nivo/radial-bar": 0.99.0
     "@nivo/tooltip": 0.99.0
     "@nivo/treemap": 0.99.0
-    "@pluralsh/design-system": 5.23.2
+    "@pluralsh/design-system": 5.24.0
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
