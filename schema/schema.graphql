@@ -5038,6 +5038,7 @@ input ComponentAttributes {
   uid: String
   content: ComponentContentAttributes
   children: [ComponentChildAttributes]
+  images: [ComponentImageAttributes]
 }
 
 input ComponentChildAttributes {
@@ -5049,6 +5050,15 @@ input ComponentChildAttributes {
   group: String
   version: String!
   kind: String!
+}
+
+input ComponentImageAttributes {
+  container: String!
+  image: String!
+  registry: String
+  repository: String!
+  tag: String
+  digest: String
 }
 
 "the content of a component when visualized in dry run state"
@@ -5443,6 +5453,9 @@ type ServiceComponent {
   "any kubernetes objects created as a descendent of this component"
   children: [ServiceComponentChild]
 
+  "container images used by this component"  # ADD THIS LINE
+  images: [ComponentImage]   
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -5474,6 +5487,27 @@ type ServiceComponentChild {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"represents a container image used by a service component"
+type ComponentImage {
+  "name of the container"
+  container: String!
+  
+  "full image string as specified in the container spec"
+  image: String!
+  
+  "registry hostname (e.g., ghcr.io, docker.io)"
+  registry: String
+  
+  "image repository/name (e.g., nginx, myorg/myapp)"
+  repository: String!
+  
+  "image tag (e.g., latest, v1.0.0)"
+  tag: String
+  
+  "image digest if available (e.g., sha256:abc123...)"
+  digest: String
 }
 
 "dry run content of a service component"

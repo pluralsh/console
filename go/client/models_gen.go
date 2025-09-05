@@ -1850,6 +1850,7 @@ type ComponentAttributes struct {
 	UID       *string                     `json:"uid,omitempty"`
 	Content   *ComponentContentAttributes `json:"content,omitempty"`
 	Children  []*ComponentChildAttributes `json:"children,omitempty"`
+	Images    []*ComponentImageAttributes `json:"images,omitempty"`
 }
 
 type ComponentChildAttributes struct {
@@ -1878,6 +1879,31 @@ type ComponentContentAttributes struct {
 	// the desired state of a service component as determined from the configured manifests
 	Desired *string `json:"desired,omitempty"`
 	Live    *string `json:"live,omitempty"`
+}
+
+// represents a container image used by a service component
+type ComponentImage struct {
+	// name of the container
+	Container string `json:"container"`
+	// full image string as specified in the container spec
+	Image string `json:"image"`
+	// registry hostname (e.g., ghcr.io, docker.io)
+	Registry *string `json:"registry,omitempty"`
+	// image repository/name (e.g., nginx, myorg/myapp)
+	Repository string `json:"repository"`
+	// image tag (e.g., latest, v1.0.0)
+	Tag *string `json:"tag,omitempty"`
+	// image digest if available (e.g., sha256:abc123...)
+	Digest *string `json:"digest,omitempty"`
+}
+
+type ComponentImageAttributes struct {
+	Container  string  `json:"container"`
+	Image      string  `json:"image"`
+	Registry   *string `json:"registry,omitempty"`
+	Repository string  `json:"repository"`
+	Tag        *string `json:"tag,omitempty"`
+	Digest     *string `json:"digest,omitempty"`
 }
 
 // A tree view of the kubernetes object hierarchy beneath a component
@@ -5973,9 +5999,11 @@ type ServiceComponent struct {
 	// any api deprecations discovered from this component
 	APIDeprecations []*APIDeprecation `json:"apiDeprecations,omitempty"`
 	// any kubernetes objects created as a descendent of this component
-	Children   []*ServiceComponentChild `json:"children,omitempty"`
-	InsertedAt *string                  `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
+	Children []*ServiceComponentChild `json:"children,omitempty"`
+	// container images used by this component
+	Images     []*ComponentImage `json:"images,omitempty"`
+	InsertedAt *string           `json:"insertedAt,omitempty"`
+	UpdatedAt  *string           `json:"updatedAt,omitempty"`
 }
 
 // a kubernetes object that was created as a descendent of this service component
