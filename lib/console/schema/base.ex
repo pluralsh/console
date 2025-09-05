@@ -34,6 +34,14 @@ defmodule Console.Schema.Base do
     end
   end
 
+  def helm_url(cs, field) do
+    validate_change(cs, field, fn
+      ^field, "http" <> _ -> []
+      ^field, "oci" <> _ -> []
+      _, _ -> [{field, "invalid helm url, must have a scheme of http://, https:// or oci://"}]
+    end)
+  end
+
   def jitter(%Duration{} = duration) do
     Console.jitter(floor(seconds(duration) / 2))
   end

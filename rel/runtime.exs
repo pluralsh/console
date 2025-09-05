@@ -281,6 +281,6 @@ if is_set("CONSOLE_GITHUB_HTTP_PROXY") do
 end
 
 if is_set("CONSOLE_SENTRY_DSN") do
-  config :console, :sentry,
+  config :sentry,
     dsn: get_env("CONSOLE_SENTRY_DSN")
 end

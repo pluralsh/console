@@ -49,6 +49,7 @@ defmodule Console.Schema.Service do
 
   defmodule Helm do
     use Piazza.Ecto.Schema
+    import Console.Schema.Base, only: [helm_url: 2]
     alias Console.Schema.{NamespacedName, Service.Git}
 
     embedded_schema do
@@ -79,6 +80,7 @@ defmodule Console.Schema.Service do
       |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script lua_folder lua_file)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
+      |> helm_url(:url)
       |> cast_embed(:git)
       |> validate_change(:values_files, fn :values_files, files ->
         case Enum.member?(files, "values.yaml") do
