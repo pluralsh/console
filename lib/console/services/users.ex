@@ -178,7 +178,7 @@ defmodule Console.Services.Users do
     |> bootstrap_user_impl()
   end
 
-  def bootstrap_user_impl(%{"email" => email} = attrs) do
+  def bootstrap_user_impl(%{"email" => email} = attrs) when is_binary(email) do
     email = sanitize_email(email)
     attrs = token_attrs(attrs)
             |> Map.put("email", email)
@@ -202,7 +202,23 @@ defmodule Console.Services.Users do
     |> bootstrap_user()
   end
 
-  def bootstrap_user_impl(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
+  def bootstrap_user_impl(%{"sub" => sub} = attrs) do
+    case Console.conf(:service_account_domain) do
+      domain when is_binary(domain) and byte_size(domain) > 0 ->
+        Map.put(attrs, "email", "#{to_email(sub)}@#{domain}")
+        |> bootstrap_user_impl()
+      _ ->
+        {:error, "Failed to bootstrap user, missing email claim in OIDC id token"}
+    end
+  end
+
+  def bootstrap_user_impl(_), do: {:error, "Failed to bootstrap user, email and sub claims are required in OIDC id token"}
+
+  defp to_email(sub) do
+    sub
+    |> String.replace(~r/\s+/, "-")
+    |> String.downcase()
+  end
 
   defp sanitize_email(email) do
     case Console.conf(:org_email_suffix) do
