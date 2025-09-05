@@ -8444,6 +8444,16 @@ entries:
   datastore:
   - apiVersion: v2
     appVersion: 0.11.42
+    created: "2025-09-05T14:43:40.152772103Z"
+    description: deploys the datastore operator for plural cd
+    digest: c24d9b3982f1eaa667976c96e0e895f94e7fa389f5df42f966f94b00f1572734
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.24/datastore-0.0.24.tgz
+    version: 0.0.24
+  - apiVersion: v2
+    appVersion: 0.11.42
     created: "2025-09-04T20:20:28.362568977Z"
     description: deploys the datastore operator for plural cd
     digest: 9996f2d538015af315b1919f49ab09eb4c8fc352cd16f6300e6d1d113866fb9d
@@ -8840,4 +8850,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-04T20:20:28.363575002Z"
+generated: "2025-09-05T14:43:40.153996107Z"
