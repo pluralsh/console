@@ -3,9 +3,9 @@ import { useState } from 'react'
 
 import ErrorIcon from '../components/icons/ErrorIcon'
 
-import ContentCard from '../components/ContentCard'
 import Tab from '../components/Tab'
 import SubTab from '../components/SubTab'
+import Card from '../components/Card'
 
 export default {
   title: 'Tab',
@@ -182,17 +182,24 @@ function SubTabTemplate(args: any) {
       gap="large"
     >
       <SubTabs {...args} />
-      <ContentCard>
+      <Card style={contentCardStyle}>
         <SubTabs {...args} />
-      </ContentCard>
-      <ContentCard fillLevel={2}>
+      </Card>
+      <Card style={contentCardStyle}>
         <SubTabs {...args} />
-      </ContentCard>
-      <ContentCard fillLevel={3}>
+      </Card>
+      <Card style={contentCardStyle}>
         <SubTabs {...args} />
-      </ContentCard>
+      </Card>
     </Flex>
   )
+}
+const contentCardStyle = {
+  padding: 32,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
 }
 
 export const Subtab = SubTabTemplate.bind({})
