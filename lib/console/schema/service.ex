@@ -184,6 +184,7 @@ defmodule Console.Schema.Service do
       field :enforce_namespace, :boolean, default: false
       field :create_namespace,  :boolean, default: true
       field :delete_namespace,  :boolean, default: false
+      field :require_ownership, :boolean, default: true
     end
 
     embeds_one :kustomize, Kustomize, on_replace: :update do

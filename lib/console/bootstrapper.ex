@@ -15,6 +15,7 @@ defmodule Console.Bootstrapper do
   def init(_) do
     Process.flag(:trap_exit, true)
     if Console.conf(:initialize) do
+      :timer.send_interval(:timer.minutes(30), :migrate)
       send self(), :migrate
     end
 

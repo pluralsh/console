@@ -128,6 +128,10 @@ type SyncConfigAttributes struct {
 	// +kubebuilder:validation:Optional
 	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
 
+	// Whether to require all resources are owned by this service and fail if they are owned by another. Default is true.
+	// +kubebuilder:validation:Optional
+	RequireOwnership *bool `json:"requireOwnership,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
@@ -215,6 +219,7 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 		CreateNamespace:  &createNamespace,
 		EnforceNamespace: &enforceNamespace,
 		DeleteNamespace:  &deleteNamespace,
+		RequireOwnership: sca.RequireOwnership,
 		NamespaceMetadata: &console.MetadataAttributes{
 			Labels:      labels,
 			Annotations: annotations,

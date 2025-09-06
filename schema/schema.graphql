@@ -5120,6 +5120,8 @@ input SyncConfigAttributes {
 
   deleteNamespace: Boolean
 
+  requireOwnership: Boolean
+
   namespaceMetadata: MetadataAttributes
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -5795,6 +5797,9 @@ type SyncConfig {
 
   "Whether to require all resources are placed in the same namespace"
   enforceNamespace: Boolean
+
+  "Whether to require all resources are owned by this service and fail if they are owned by another"
+  requireOwnership: Boolean
 
   namespaceMetadata: NamespaceMetadata
 

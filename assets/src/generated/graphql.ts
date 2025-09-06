@@ -11385,6 +11385,8 @@ export type SyncConfig = {
   /** Whether to require all resources are placed in the same namespace */
   enforceNamespace?: Maybe<Scalars['Boolean']['output']>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
+  /** Whether to require all resources are owned by this service and fail if they are owned by another */
+  requireOwnership?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SyncConfigAttributes = {
@@ -11394,6 +11396,7 @@ export type SyncConfigAttributes = {
   diffNormalizers?: InputMaybe<Array<InputMaybe<DiffNormalizerAttributes>>>;
   enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   namespaceMetadata?: InputMaybe<MetadataAttributes>;
+  requireOwnership?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type Tag = {

@@ -169,6 +169,22 @@ defmodule Console.Services.UsersTest do
       assert found.profile == "some.profile.com"
       assert found.plural_id == "abcdef-123456789-ghijkl"
     end
+
+    test "it can infer a valid email from the sub claim" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "sub" => "Some User",
+        "profile" => "https://some.image.com",
+      })
+
+      assert user.email == "some-user@srv.plural.sh"
+
+      {:ok, again} = Users.bootstrap_user(%{
+        "sub" => "Some User",
+        "profile" => "https://some.image.com",
+      })
+
+      assert again.id == user.id
+    end
   end
 
   describe "update_user/2" do

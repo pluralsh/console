@@ -34,6 +34,7 @@ end
 
 config :console,
   workspace_root: secrets_path,
+  service_account_domain: "srv.plural.sh",
   git_url: "git@github.com:michaeljguarino/forge-installations.git",
   repo_root: "forge-installations",
   forge_config: "/Users/michaelguarino/.forge",
