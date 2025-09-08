@@ -165,6 +165,12 @@ mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
   }
 }
 
+mutation DeleteUser($id: ID!) {
+  deleteUser(id: $id) {
+    ...User
+  }
+}
+
 mutation CreateInvite($attributes: InviteAttributes!) {
   createInvite(attributes: $attributes) {
     ...Invite
