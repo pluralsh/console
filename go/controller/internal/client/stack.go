@@ -13,6 +13,11 @@ import (
 )
 
 func (c *client) GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error) {
+	// we assume that an empty id means the stack does not exist
+	// this is to avoid making a call to the backend with an empty id
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
 	response, err := c.consoleClient.GetInfrastructureStack(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
@@ -28,6 +33,9 @@ func (c *client) GetStack(ctx context.Context, id string) (*console.Infrastructu
 }
 
 func (c *client) GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
 	response, err := c.consoleClient.GetInfrastructureStackID(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
@@ -43,6 +51,9 @@ func (c *client) GetStackById(ctx context.Context, id string) (*console.Infrastr
 }
 
 func (c *client) GetStackStatus(ctx context.Context, id string) (*console.InfrastructureStackStatusFragment, error) {
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
 	response, err := c.consoleClient.GetInfrastructureStackStatus(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
@@ -58,11 +69,17 @@ func (c *client) GetStackStatus(ctx context.Context, id string) (*console.Infras
 }
 
 func (c *client) DeleteStack(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.NewNotFound(schema.GroupResource{}, "")
+	}
 	_, err := c.consoleClient.DeleteStack(ctx, id)
 	return err
 }
 
 func (c *client) DetachStack(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.NewNotFound(schema.GroupResource{}, "")
+	}
 	_, err := c.consoleClient.DetachStack(ctx, id)
 	return err
 }
