@@ -1,4 +1,4 @@
-FROM golang:1.23.7 as builder
+FROM golang:1.24.7 as builder
 ARG TARGETOS
 ARG TARGETARCH
 

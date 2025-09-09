@@ -2,6 +2,9 @@ filename: "{{.InterfaceName}}_mock.go"
 dir: "internal/test/mocks"
 mockname: "{{.InterfaceName}}Mock"
 outpkg: "mocks"
+resolve-type-alias: False
+issue-845-fix: True
+disable-version-string: True
 packages:
   github.com/pluralsh/console/go/controller/internal/client:
     interfaces:
