@@ -31,6 +31,7 @@ import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
+import { SentryInitializer } from '../SentryInitializer'
 
 export default function Console() {
   return (
@@ -38,25 +39,27 @@ export default function Console() {
       <MarkdocContextProvider value={{ variant: 'console' }}>
         <ConsoleNavContextProvider>
           <EnsureLogin>
-            <ProjectsProvider>
-              <BillingSubscriptionProvider>
-                <BreadcrumbsProvider>
-                  <TerminalThemeProvider>
-                    <ShareSecretProvider>
-                      <DeploymentSettingsProvider>
-                        <AIContextProvider>
-                          <FeatureFlagProvider>
-                            <CommandPaletteProvider>
-                              <ConsoleContent />
-                            </CommandPaletteProvider>
-                          </FeatureFlagProvider>
-                        </AIContextProvider>
-                      </DeploymentSettingsProvider>
-                    </ShareSecretProvider>
-                  </TerminalThemeProvider>
-                </BreadcrumbsProvider>
-              </BillingSubscriptionProvider>
-            </ProjectsProvider>
+            <SentryInitializer>
+              <ProjectsProvider>
+                <BillingSubscriptionProvider>
+                  <BreadcrumbsProvider>
+                    <TerminalThemeProvider>
+                      <ShareSecretProvider>
+                        <DeploymentSettingsProvider>
+                          <AIContextProvider>
+                            <FeatureFlagProvider>
+                              <CommandPaletteProvider>
+                                <ConsoleContent />
+                              </CommandPaletteProvider>
+                            </FeatureFlagProvider>
+                          </AIContextProvider>
+                        </DeploymentSettingsProvider>
+                      </ShareSecretProvider>
+                    </TerminalThemeProvider>
+                  </BreadcrumbsProvider>
+                </BillingSubscriptionProvider>
+              </ProjectsProvider>
+            </SentryInitializer>
           </EnsureLogin>
         </ConsoleNavContextProvider>
       </MarkdocContextProvider>

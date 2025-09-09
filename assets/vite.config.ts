@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
@@ -31,6 +32,7 @@ export default defineConfig({
     // }),
     tsconfigPaths({ loose: true }),
     pluginRewriteAll(), // Fix 404 error for urls with dots in their path
+    sentryVitePlugin({ org: 'plural-labs', project: 'console-frontend' }),
   ],
   server: {
     port: 3000,
@@ -52,12 +54,15 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         manualChunks(id: string) {
-          if (id.includes('lodash')) {
-            return 'lodash'
-          }
+          if (id.includes('/src/generated')) return 'generated'
+          if (id.includes('@pluralsh/design-system')) return 'design-system'
+          if (id.includes('lodash')) return 'lodash'
+          if (id.includes('apollo')) return 'apollo'
+          if (id.includes('elkjs')) return 'elkjs'
         },
       },
     },

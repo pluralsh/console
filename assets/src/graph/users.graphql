@@ -120,6 +120,7 @@ query Me {
     cloud
     installed
     consoleVersion
+    sentryEnabled
     manifest {
       ...Manifest
     }
