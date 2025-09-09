@@ -465,6 +465,14 @@ export type AgentTodoAttributes = {
   title: Scalars['String']['input'];
 };
 
+export type AiAnalysisRates = {
+  __typename?: 'AiAnalysisRates';
+  /** the rate in seconds for fast analysis, eg when the prompt has seen a material change */
+  fast?: Maybe<Scalars['Int']['output']>;
+  /** the rate in seconds for slow analysis, eg when the prompt has not seen a material change */
+  slow?: Maybe<Scalars['Int']['output']>;
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -561,6 +569,7 @@ export enum AiRole {
 /** Settings for configuring access to common LLM providers */
 export type AiSettings = {
   __typename?: 'AiSettings';
+  analysisRates?: Maybe<AiAnalysisRates>;
   anthropic?: Maybe<AnthropicSettings>;
   azure?: Maybe<AzureOpenaiSettings>;
   bedrock?: Maybe<BedrockAiSettings>;
@@ -575,6 +584,7 @@ export type AiSettings = {
 };
 
 export type AiSettingsAttributes = {
+  analysisRates?: InputMaybe<AnalysisRatesAttributes>;
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
   bedrock?: InputMaybe<BedrockAiAttributes>;
@@ -668,6 +678,13 @@ export enum AlertState {
   Firing = 'FIRING',
   Resolved = 'RESOLVED'
 }
+
+export type AnalysisRatesAttributes = {
+  /** the rate in seconds for fast analysis, eg when the prompt has seen a material change */
+  fast?: InputMaybe<Scalars['Int']['input']>;
+  /** the rate in seconds for slow analysis, eg when the prompt has not seen a material change */
+  slow?: InputMaybe<Scalars['Int']['input']>;
+};
 
 /** Anthropic connection information */
 export type AnthropicSettings = {

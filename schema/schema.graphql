@@ -2013,6 +2013,8 @@ input AiSettingsAttributes {
 
   tools: ToolConfigAttributes
 
+  analysisRates: AnalysisRatesAttributes
+
   provider: AiProvider
 
   "ai provider to use with tool calls"
@@ -2036,6 +2038,14 @@ input AiSettingsAttributes {
   vectorStore: VectorStoreAttributes
 
   graph: GraphStoreAttributes
+}
+
+input AnalysisRatesAttributes {
+  "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+  fast: Int
+
+  "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
+  slow: Int
 }
 
 input ToolConfigAttributes {
@@ -2345,6 +2355,8 @@ type CostSettings {
 type AiSettings {
   enabled: Boolean
 
+  analysisRates: AiAnalysisRates
+
   toolsEnabled: Boolean
 
   provider: AiProvider
@@ -2363,6 +2375,14 @@ type AiSettings {
   bedrock: BedrockAiSettings
 
   vertex: VertexAiSettings
+}
+
+type AiAnalysisRates {
+  "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+  fast: Int
+
+  "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
+  slow: Int
 }
 
 "OpenAI connection information"

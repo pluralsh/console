@@ -333,6 +333,13 @@ type AgentTodoAttributes struct {
 	Done bool `json:"done"`
 }
 
+type AiAnalysisRates struct {
+	// the rate in seconds for fast analysis, eg when the prompt has seen a material change
+	Fast *int64 `json:"fast,omitempty"`
+	// the rate in seconds for slow analysis, eg when the prompt has not seen a material change
+	Slow *int64 `json:"slow,omitempty"`
+}
+
 type AiDelta struct {
 	Seq     int64      `json:"seq"`
 	Content string     `json:"content"`
@@ -406,9 +413,10 @@ type AiPinEdge struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled      *bool       `json:"enabled,omitempty"`
-	ToolsEnabled *bool       `json:"toolsEnabled,omitempty"`
-	Provider     *AiProvider `json:"provider,omitempty"`
+	Enabled       *bool            `json:"enabled,omitempty"`
+	AnalysisRates *AiAnalysisRates `json:"analysisRates,omitempty"`
+	ToolsEnabled  *bool            `json:"toolsEnabled,omitempty"`
+	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider          `json:"toolProvider,omitempty"`
 	Openai       *OpenaiSettings      `json:"openai,omitempty"`
@@ -420,9 +428,10 @@ type AiSettings struct {
 }
 
 type AiSettingsAttributes struct {
-	Enabled  *bool                 `json:"enabled,omitempty"`
-	Tools    *ToolConfigAttributes `json:"tools,omitempty"`
-	Provider *AiProvider           `json:"provider,omitempty"`
+	Enabled       *bool                    `json:"enabled,omitempty"`
+	Tools         *ToolConfigAttributes    `json:"tools,omitempty"`
+	AnalysisRates *AnalysisRatesAttributes `json:"analysisRates,omitempty"`
+	Provider      *AiProvider              `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
@@ -494,6 +503,13 @@ type AlertResolution struct {
 
 type AlertResolutionAttributes struct {
 	Resolution string `json:"resolution"`
+}
+
+type AnalysisRatesAttributes struct {
+	// the rate in seconds for fast analysis, eg when the prompt has seen a material change
+	Fast *int64 `json:"fast,omitempty"`
+	// the rate in seconds for slow analysis, eg when the prompt has not seen a material change
+	Slow *int64 `json:"slow,omitempty"`
 }
 
 // Anthropic connection information

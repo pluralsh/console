@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -384,6 +385,11 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
 
+	// Configure the pace at which AI insight analysis should run. Useful if you want to minimize impacts on inference costs.
+	//
+	// +kubebuilder:validation:Optional
+	AnalysisRates *AnalysisRates `json:"analysisRates,omitempty"`
+
 	// Tools holds the configuration for the tools that can be used with the AI integration.
 	//
 	// +kubebuilder:validation:Optional
@@ -449,6 +455,18 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Graph *GraphStore `json:"graph,omitempty"`
+}
+
+type AnalysisRates struct {
+	// Fast is the rate in seconds for fast analysis, eg when the prompt used has seen a material change. Example 1h
+	//
+	// +kubebuilder:validation:Optional
+	Fast *string `json:"fast,omitempty"`
+
+	// Slow is the rate in seconds for slow analysis, eg when the prompt used has not seen a material change. Example 2h
+	//
+	// +kubebuilder:validation:Optional
+	Slow *string `json:"slow,omitempty"`
 }
 
 type Tools struct {
@@ -532,6 +550,12 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			}
 		}
 	}
+
+	analysisRates, err := in.AnalysisRates.Attributes()
+	if err != nil {
+		return nil, err
+	}
+	attr.AnalysisRates = analysisRates
 
 	switch *in.Provider {
 	case console.AiProviderOpenai:
@@ -779,6 +803,34 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef,omitempty"`
+}
+
+func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	var fast, slow *int64
+	if in.Fast != nil {
+		fDur, err := time.ParseDuration(*in.Fast)
+		if err != nil {
+			return nil, err
+		}
+		fast = lo.ToPtr(int64(fDur.Minutes()))
+
+	}
+	if in.Slow != nil {
+		sDur, err := time.ParseDuration(*in.Fast)
+		if err != nil {
+			return nil, err
+		}
+		slow = lo.ToPtr(int64(sDur.Minutes()))
+	}
+
+	return &console.AnalysisRatesAttributes{
+		Fast: fast,
+		Slow: slow,
+	}, nil
 }
 
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
