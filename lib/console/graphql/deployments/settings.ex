@@ -81,6 +81,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :ai_settings_attributes do
     field :enabled,            :boolean
     field :tools,              :tool_config_attributes
+    field :analysis_rates,     :analysis_rates_attributes
     field :provider,           :ai_provider
     field :tool_provider,      :ai_provider, description: "ai provider to use with tool calls"
     field :embedding_provider, :ai_provider, description: "ai provider to use with embeddings (for vector indexing)"
@@ -92,6 +93,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :vertex,             :vertex_ai_attributes
     field :vector_store,       :vector_store_attributes
     field :graph,              :graph_store_attributes
+  end
+
+  input_object :analysis_rates_attributes do
+    field :fast, :integer, description: "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+    field :slow, :integer, description: "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
   end
 
   input_object :tool_config_attributes do
@@ -299,16 +305,22 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring access to common LLM providers"
   object :ai_settings do
-    field :enabled,       :boolean
-    field :tools_enabled, :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
-    field :provider,      :ai_provider
-    field :tool_provider, :ai_provider, description: "ai provider to use with tool calls"
-    field :openai,        :openai_settings
-    field :anthropic,     :anthropic_settings
-    field :ollama,        :ollama_settings
-    field :azure,         :azure_openai_settings
-    field :bedrock,       :bedrock_ai_settings
-    field :vertex,        :vertex_ai_settings
+    field :enabled,        :boolean
+    field :analysis_rates, :ai_analysis_rates
+    field :tools_enabled,  :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
+    field :provider,       :ai_provider
+    field :tool_provider,  :ai_provider, description: "ai provider to use with tool calls"
+    field :openai,         :openai_settings
+    field :anthropic,      :anthropic_settings
+    field :ollama,         :ollama_settings
+    field :azure,          :azure_openai_settings
+    field :bedrock,        :bedrock_ai_settings
+    field :vertex,         :vertex_ai_settings
+  end
+
+  object :ai_analysis_rates do
+    field :fast, :integer, description: "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+    field :slow, :integer, description: "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
   end
 
   @desc "OpenAI connection information"

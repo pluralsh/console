@@ -85,6 +85,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: {} <br /> |
+| `analysisRates` _[AnalysisRates](#analysisrates)_ | Configure the pace at which AI insight analysis should run. Useful if you want to minimize impacts on inference costs. |  | Optional: {} <br /> |
 | `tools` _[Tools](#tools)_ | Tools holds the configuration for the tools that can be used with the AI integration. |  | Optional: {} <br /> |
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
@@ -117,6 +118,23 @@ _Appears in:_
 | `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 | `region` _string_ | The region this connection applies to |  | Optional: {} <br /> |
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: {} <br /> |
+
+
+#### AnalysisRates
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `fast` _string_ | Fast is the rate in seconds for fast analysis, eg when the prompt used has seen a material change. Example 1h |  | Optional: {} <br /> |
+| `slow` _string_ | Slow is the rate in seconds for slow analysis, eg when the prompt used has not seen a material change. Example 2h |  | Optional: {} <br /> |
 
 
 

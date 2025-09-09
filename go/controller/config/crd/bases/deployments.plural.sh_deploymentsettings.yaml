@@ -66,6 +66,20 @@ spec:
                 description: AI settings specifies a configuration for LLM provider
                   clients
                 properties:
+                  analysisRates:
+                    description: Configure the pace at which AI insight analysis should
+                      run. Useful if you want to minimize impacts on inference costs.
+                    properties:
+                      fast:
+                        description: Fast is the rate in seconds for fast analysis,
+                          eg when the prompt used has seen a material change. Example
+                          1h
+                        type: string
+                      slow:
+                        description: Slow is the rate in seconds for slow analysis,
+                          eg when the prompt used has not seen a material change.
+                        type: string
+                    type: object
                   anthropic:
                     description: Anthropic holds the Anthropic provider configuration.
                     properties:
