@@ -43,14 +43,15 @@ defmodule Console.Schema.AiInsight do
     at = ts(insight)
     slow_minutes = expiry_minutes(:slow)
     cond do
-      Timex.before?(at, Timex.shift(Timex.now(), minutes: -round(slow_minutes * 1.5))) -> :expired
-      Timex.before?(at, Timex.shift(Timex.now(), minutes: -slow_minutes)) -> :stale
+      Timex.before?(at, Timex.shift(Timex.now(), minutes: round(slow_minutes * 1.5))) -> :expired
+      Timex.before?(at, Timex.shift(Timex.now(), minutes: slow_minutes)) -> :stale
       true -> :fresh
     end
   end
 
   def expired(query \\ __MODULE__) do
-    too_old = Timex.now() |> Timex.shift(hours: -1)
+    too_old = Timex.now()
+              |> Timex.shift(minutes: expiry_minutes(:slow) * 3)
     from(i in query, where: coalesce(i.updated_at, i.inserted_at) <= ^too_old)
   end
 
