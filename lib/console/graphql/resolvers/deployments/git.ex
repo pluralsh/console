@@ -181,11 +181,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def upsert_observer(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.upsert_observer(attrs, user)
 
-  def reset_observer(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Git.reset_observer(attrs, id, user)
-
   def kick_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.kick_observer(id, user)
+
+  def reset_observer(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.reset_observer(attrs, id, user)
 
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)

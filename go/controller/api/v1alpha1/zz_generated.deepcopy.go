@@ -7705,6 +7705,11 @@ func (in *SyncConfigAttributes) DeepCopyInto(out *SyncConfigAttributes) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.RequireOwnership != nil {
+		in, out := &in.RequireOwnership, &out.RequireOwnership
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Labels != nil {
 		in, out := &in.Labels, &out.Labels
 		*out = make(map[string]string, len(*in))

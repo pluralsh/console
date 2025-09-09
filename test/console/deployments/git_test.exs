@@ -663,6 +663,22 @@ defmodule Console.Deployments.GitTest do
     end
   end
 
+  describe "#kick_observer/2" do
+    test "it can kick an observer" do
+      obs = insert(:observer)
+      now = Timex.now()
+      {:ok, kicked} = Git.kick_observer(obs.id, admin_user())
+
+      assert kicked.id == obs.id
+      assert Timex.after?(kicked.next_run_at, now)
+    end
+
+    test "randos cannot kick" do
+      obs = insert(:observer)
+      {:error, _} = Git.kick_observer(obs.id, insert(:user))
+    end
+  end
+
   describe "#delete_observer/2" do
     test "writers can delete observers" do
       obs = insert(:observer)

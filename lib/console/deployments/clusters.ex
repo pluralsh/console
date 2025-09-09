@@ -954,10 +954,15 @@ defmodule Console.Deployments.Clusters do
     Service.agent()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 100)
     |> Task.async_stream(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
-      AgentMigration.updates(migration, svc)
-      |> Services.update_service(svc.id, bot)
+      updates = AgentMigration.updates(migration, svc)
+      case Service.changeset(svc, updates) do
+        %Ecto.Changeset{changes: %{} = changes} when map_size(changes) > 0 ->
+          Services.update_service(updates, svc.id, bot)
+        _ -> {:ok, svc}
+      end
     end, max_concurrency: 30)
     |> Enum.reduce_while(:ok, fn
       {:ok, {:ok, _}}, acc -> {:cont, acc}

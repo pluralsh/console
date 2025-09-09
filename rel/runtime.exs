@@ -275,6 +275,11 @@ if is_set("CONSOLE_DEFAULT_PROJECT_NAME") do
     default_project_name: get_env("CONSOLE_DEFAULT_PROJECT_NAME")
 end
 
+if is_set("CONSOLE_SERVICE_ACCOUNT_DOMAIN") do
+  config :console,
+    service_account_domain: get_env("CONSOLE_SERVICE_ACCOUNT_DOMAIN")
+end
+
 if is_set("CONSOLE_GITHUB_HTTP_PROXY") do
   config :tentacat,
     request_options: [proxy: to_charlist(get_env("CONSOLE_GITHUB_HTTP_PROXY"))]

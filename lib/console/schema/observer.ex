@@ -1,5 +1,5 @@
 defmodule Console.Schema.Observer do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Project, OCIAuth, HelmRepository, ServiceError}
 
   defenum Action,        pipeline: 0, pr: 1

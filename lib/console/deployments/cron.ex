@@ -16,7 +16,6 @@ defmodule Console.Deployments.Cron do
     PullRequest,
     RunLog,
     AppNotification,
-    Observer,
     Alert,
     ClusterAuditLog,
     PolicyConstraint,
@@ -259,14 +258,6 @@ defmodule Console.Deployments.Cron do
   def prune_cluster_audit_logs() do
     ClusterAuditLog.expired()
     |> Repo.delete_all(timeout: 300_000)
-  end
-
-  def run_observers() do
-    Observer.runnable()
-    |> Observer.ordered(asc: :id)
-    |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&Console.Deployments.Observer.Discovery.runner/1, max_concurrency: 50)
-    |> Stream.run()
   end
 
   def prune_policy() do

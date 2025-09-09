@@ -7090,7 +7090,9 @@ type SyncConfig struct {
 	// whether the agent should delete the namespace for this service upon deletion
 	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
 	// Whether to require all resources are placed in the same namespace
-	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
+	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
+	// Whether to require all resources are owned by this service and fail if they are owned by another
+	RequireOwnership  *bool              `json:"requireOwnership,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizer `json:"diffNormalizers,omitempty"`
@@ -7100,6 +7102,7 @@ type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
 	DeleteNamespace   *bool               `json:"deleteNamespace,omitempty"`
+	RequireOwnership  *bool               `json:"requireOwnership,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`

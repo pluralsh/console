@@ -39,10 +39,10 @@ def fetch_extended_versions(service):
             is_extended = False
             if service in ['amazon-eks', 'azure-kubernetes-service']:
                 # For EKS and AKS, extended support is when it's maintained AND in EOL
-                is_extended = is_maintained and is_eol
+                is_extended = not is_maintained or is_eol or is_eoas
             elif service == 'google-kubernetes-engine':
                 # For GKE, extended support is when it's maintained AND in EOAS
-                is_extended = is_maintained and is_eoas
+                is_extended = not is_maintained or is_eoas or is_eol
                 
             versions.append({
                 "version": version,

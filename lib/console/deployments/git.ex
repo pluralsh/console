@@ -8,7 +8,6 @@ defmodule Console.Deployments.Git do
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
   alias Console.Deployments.Pr.Governance.Provider, as: GovernanceProvider
-  alias Console.Deployments.Observer.Runner
   alias Console.Schema.{
     GitRepository,
     User,
@@ -572,6 +571,17 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Forcibly retriggers an observer to run immediately
+  """
+  @spec kick_observer(binary, User.t) :: observer_resp
+  def kick_observer(id, %User{} = user) do
+    get_observer!(id)
+    |> Ecto.Changeset.change(%{next_run_at: Timex.now()})
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
   Deletes an observer record
   """
   @spec delete_observer(binary, User.t) :: observer_resp
@@ -590,16 +600,6 @@ defmodule Console.Deployments.Git do
     |> Observer.reset_changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
-  end
-
-  @doc """
-  Forcibly retriggers an observer to run
-  """
-  @spec kick_observer(binary, User.t) :: observer_resp
-  def kick_observer(id, %User{} = user) do
-    get_observer!(id)
-    |> allow(user, :write)
-    |> when_ok(&Runner.run/1)
   end
 
   @doc """
