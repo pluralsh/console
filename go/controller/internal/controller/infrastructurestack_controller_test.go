@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	batchv1 "k8s.io/api/batch/v1"
@@ -13,6 +12,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/go/controller/internal/credentials"
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -236,7 +237,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("LCVAFEP522SH5NZC4ZGHTLUK4EPKMCTMAGVH35UBWOAD6YBBOPFA===="),
+					SHA: lo.ToPtr("G6IOXGIMZVRJRZX47TLWQ6LZV72A4I2AU7ZRER7EDPIO7ZVL7LCQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -290,7 +291,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("7M6L6CSTMKY5X7KRKEFKOW2RNYLCT6IX7BUAD2R3JTWC4HJ2PQJA===="),
+					SHA: lo.ToPtr("MMK4XN5OT3XDP7PYFIQ4R7I7EVM73SYPB6Q5TOMN5EEZLMAFTX5A===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
