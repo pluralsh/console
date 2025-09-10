@@ -53,6 +53,10 @@ type RootQueryType {
 
   logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
+  logAggregationBuckets(
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
+  ): [LogAggregationBucket]
+
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
@@ -9328,6 +9332,10 @@ input LogFacetInput {
   value: String!
 }
 
+input LogAggregationInput {
+  bucketSize: String
+}
+
 type Dashboard {
   id: String!
   spec: DashboardSpec!
@@ -9377,6 +9385,11 @@ type LogLine {
 type LogFacet {
   key: String!
   value: String
+}
+
+type LogAggregationBucket {
+  timestamp: DateTime
+  count: Int
 }
 
 type Metadata {

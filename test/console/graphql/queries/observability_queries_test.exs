@@ -223,6 +223,70 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       assert second_line["log"] == "valid log message"
     end
 
+    test "it can fetch log aggregations with time buckets from elasticsearch" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      # Index logs across different time periods for bucketing
+      base_time = Timex.now()
+
+      # Create logs at different times to test time bucketing
+      Enum.each(1..6, fn i ->
+        timestamp = Timex.shift(base_time, minutes: -i * 2) # 2 minute intervals
+        doc = %{
+          "@timestamp" => timestamp,
+          "message" => "log message #{i}",
+          "kubernetes" => %{
+            "namespace" => svc.namespace
+          },
+          "cluster" => %{
+            "handle" => svc.cluster.handle
+          }
+        }
+        index_doc(doc)
+      end)
+      refresh()
+
+      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
+        host: @host,
+        index: @index
+      }})
+
+      # Test the new aggregation functionality
+      {:ok, %{data: %{"logAggregationBuckets" => buckets}}} = run_query("""
+        query LogAggregationBuckets($serviceId: ID!, $bucketSize: String) {
+          logAggregationBuckets(
+            serviceId: $serviceId,
+            aggregation: { bucketSize: $bucketSize }
+          ) {
+            timestamp
+            count
+          }
+        }
+      """, %{
+        "serviceId" => svc.id,
+        "bucketSize" => "5m"
+      }, %{current_user: user})
+
+      # Verify we got aggregation buckets
+      assert is_list(buckets)
+      assert length(buckets) > 0
+
+      # Verify each bucket has the expected structure
+      Enum.each(buckets, fn bucket ->
+        assert Map.has_key?(bucket, "timestamp")
+        assert Map.has_key?(bucket, "count")
+        assert is_integer(bucket["count"])
+        assert bucket["count"] >= 0
+      end)
+
+      # Verify total count matches our indexed documents
+      total_count = Enum.reduce(buckets, 0, fn bucket, acc ->
+        acc + bucket["count"]
+      end)
+      assert total_count == 6
+    end
+
     test "it will authz" do
       user = insert(:user)
       svc = insert(:service)

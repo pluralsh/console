@@ -31,6 +31,13 @@ defmodule Console.GraphQl.Resolvers.Observability do
     Observability.get_logs(query, end_ts, start, limit)
   end
 
+  def list_log_aggregations(args, %{context: %{current_user: user}}) do
+    args = Map.merge(args, args[:aggregation] || %{})
+    query = Query.new(args)
+    with {:ok, query} <- Provider.accessible(query, user),
+      do: Provider.aggregate(query)
+  end
+
   def resolve_metric(%{query: query} = args, _) do
     now   = Timex.now()
     start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))

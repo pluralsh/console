@@ -6,11 +6,18 @@ defmodule Console.Logs.Provider do
   @type error :: Console.error
 
   @callback query(struct, Query.t) :: {:ok, [Line.t]} | error
+  @callback aggregate(struct, Query.t) :: {:ok, [map()]} | error
 
   @spec query(Query.t) :: {:ok, [Line.t]} | error
   def query(%Query{} = q) do
     with {:ok, %{__struct__: provider} = prov} <- client(),
       do: provider.query(prov, q)
+  end
+
+  @spec aggregate(Query.t) :: {:ok, [map()]} | error
+  def aggregate(%Query{} = q) do
+    with {:ok, %{__struct__: provider} = prov} <- client(),
+      do: provider.aggregate(prov, q)
   end
 
   @spec accessible(Query.t, User.t) :: {:ok, Query.t} | error
