@@ -10631,6 +10631,7 @@ export type ServiceError = {
 export type ServiceErrorAttributes = {
   message: Scalars['String']['input'];
   source: Scalars['String']['input'];
+  warning?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Import of stack data into a service's context */
