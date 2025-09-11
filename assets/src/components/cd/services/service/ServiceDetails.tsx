@@ -12,6 +12,7 @@ import { useTheme } from 'styled-components'
 import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentQuery,
+  ServiceError,
   useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
@@ -96,28 +97,49 @@ export const getServiceDetailsBreadcrumbs = ({
   ]
 }
 
+export const ErrorsLabelWithChip = memo(
+  ({ errors }: { errors: Nullable<Nullable<ServiceError>[]> }) => {
+    const warnings = errors?.filter((e) => e?.warning) ?? []
+
+    const severity =
+      errors?.length === 0
+        ? 'success'
+        : warnings.length === errors?.length
+          ? 'warning'
+          : 'danger'
+
+    return (
+      <Flex gap="small">
+        Errors
+        <Chip
+          size="small"
+          severity={severity}
+        >
+          {errors?.length}
+        </Chip>
+      </Flex>
+    )
+  }
+)
+
 export const DirLabelWithChip = memo(
   ({
     count,
     type,
   }: {
     count: Nullable<number>
-    type: 'Error' | 'Alerts' | 'Recommendations'
-  }) => {
-    const severity =
-      type === 'Error' ? ((count || 0) > 0 ? 'danger' : 'success') : 'neutral'
-    return (
-      <Flex gap="small">
-        {type}
-        <Chip
-          size="small"
-          severity={severity}
-        >
-          {count || 0}
-        </Chip>
-      </Flex>
-    )
-  }
+    type: 'Alerts' | 'Recommendations'
+  }) => (
+    <Flex gap="small">
+      {type}
+      <Chip
+        size="small"
+        severity="neutral"
+      >
+        {count || 0}
+      </Chip>
+    </Flex>
+  )
 )
 
 export const getDirectory = ({
@@ -152,12 +174,7 @@ export const getDirectory = ({
     },
     {
       path: 'errors',
-      label: (
-        <DirLabelWithChip
-          count={serviceDeployment.errors?.length}
-          type="Error"
-        />
-      ),
+      label: <ErrorsLabelWithChip errors={serviceDeployment.errors} />,
       enabled: true,
     },
     {
