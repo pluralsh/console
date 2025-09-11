@@ -256,9 +256,9 @@ const columns = [
         >
           <KickButton
             icon
+            pulledAt={node?.lastRunAt}
             kickMutationHook={useKickObserverMutation}
-            message="Resync"
-            tooltipMessage="Sync this observer now instead of at the next poll interval"
+            tooltipMessage="Resync"
             variables={{ id: node?.id }}
           />
           <IconFrame
