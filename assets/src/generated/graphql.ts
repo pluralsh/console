@@ -13257,6 +13257,13 @@ export type DeleteObserverMutationVariables = Exact<{
 
 export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
+export type KickObserverMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type KickObserverMutation = { __typename?: 'RootMutationType', kickObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, revision?: { __typename?: 'Revision', id: string } | null };
 
 export type ContainerSpecFragment = { __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null };
@@ -24360,6 +24367,39 @@ export function useDeleteObserverMutation(baseOptions?: Apollo.MutationHookOptio
 export type DeleteObserverMutationHookResult = ReturnType<typeof useDeleteObserverMutation>;
 export type DeleteObserverMutationResult = Apollo.MutationResult<DeleteObserverMutation>;
 export type DeleteObserverMutationOptions = Apollo.BaseMutationOptions<DeleteObserverMutation, DeleteObserverMutationVariables>;
+export const KickObserverDocument = gql`
+    mutation KickObserver($id: ID!) {
+  kickObserver(id: $id) {
+    ...Observer
+  }
+}
+    ${ObserverFragmentDoc}`;
+export type KickObserverMutationFn = Apollo.MutationFunction<KickObserverMutation, KickObserverMutationVariables>;
+
+/**
+ * __useKickObserverMutation__
+ *
+ * To run a mutation, you first call `useKickObserverMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickObserverMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickObserverMutation, { data, loading, error }] = useKickObserverMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKickObserverMutation(baseOptions?: Apollo.MutationHookOptions<KickObserverMutation, KickObserverMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickObserverMutation, KickObserverMutationVariables>(KickObserverDocument, options);
+      }
+export type KickObserverMutationHookResult = ReturnType<typeof useKickObserverMutation>;
+export type KickObserverMutationResult = Apollo.MutationResult<KickObserverMutation>;
+export type KickObserverMutationOptions = Apollo.BaseMutationOptions<KickObserverMutation, KickObserverMutationVariables>;
 export const PipelinesDocument = gql`
     query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
   pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
@@ -32490,6 +32530,7 @@ export const namedOperations = {
     DissmissOnboarding: 'DissmissOnboarding',
     UpsertObserver: 'UpsertObserver',
     DeleteObserver: 'DeleteObserver',
+    KickObserver: 'KickObserver',
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
