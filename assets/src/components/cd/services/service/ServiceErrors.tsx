@@ -20,6 +20,14 @@ export const ColSource = columnHelper.accessor((row) => row?.source, {
   cell: ({ getValue }) => getValue(),
 })
 
+export const ColSeverity = columnHelper.accessor((row) => row?.warning, {
+  id: 'severity',
+  header: 'Severity',
+  enableSorting: true,
+  meta: { gridTemplate: '1fr' },
+  cell: ({ getValue }) => (getValue() ? 'Warning' : 'Error'),
+})
+
 export const ColMessage = columnHelper.accessor((row) => row?.message, {
   id: 'message',
   header: 'Message',
@@ -43,7 +51,7 @@ export const ColMessage = columnHelper.accessor((row) => row?.message, {
   },
 })
 
-const columns = [ColSource, ColMessage]
+const columns = [ColSource, ColSeverity, ColMessage]
 
 export function ServiceErrorsTable({
   errors,

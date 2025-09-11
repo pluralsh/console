@@ -86,3 +86,9 @@ mutation DeleteObserver($id: ID!) {
     ...Observer
   }
 }
+
+mutation KickObserver($id: ID!) {
+  kickObserver(id: $id) {
+    ...Observer
+  }
+}

@@ -16,6 +16,7 @@ import {
   ObserverFragment,
   ObserverTargetType,
   useDeleteObserverMutation,
+  useKickObserverMutation,
   useObserversQuery,
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
@@ -36,6 +37,7 @@ import { Overline } from '../utils/PermissionsModal'
 import ObserverStatusChip from './ObserverStatusChip'
 import ObserverTargetChip from './ObserverTargetChip'
 import ObserverTargetOrderChip from './ObserverTargetOrderChip'
+import KickButton from '../../utils/KickButton.tsx'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -229,12 +231,13 @@ const columns = [
   columnHelper.accessor(() => null, {
     id: 'actions',
     header: '',
-    meta: { gridTemplate: 'minmax(auto, 80px)' },
+    meta: { gridTemplate: 'minmax(auto, 100px)' },
     cell: function Cell({
       row: {
         original: { node },
       },
     }) {
+      const theme = useTheme()
       const [confirm, setConfirm] = useState(false)
       const [mutation, { loading }] = useDeleteObserverMutation({
         variables: { id: node?.id ?? '' },
@@ -244,7 +247,20 @@ const columns = [
       })
 
       return (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.small,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <KickButton
+            icon
+            pulledAt={node?.lastRunAt}
+            kickMutationHook={useKickObserverMutation}
+            tooltipMessage="Resync"
+            variables={{ id: node?.id }}
+          />
           <IconFrame
             clickable
             icon={<TrashCanIcon color="icon-danger" />}
