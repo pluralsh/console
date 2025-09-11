@@ -22,10 +22,6 @@ export default defineConfig({
         'honorable-theme-default',
         'react-transition-group',
       ],
-      output: {
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-      },
     },
   },
   plugins: [
