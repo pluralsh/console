@@ -58,6 +58,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   errors {
     message
     source
+    warning
   }
   globalService {
     id
