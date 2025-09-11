@@ -2452,8 +2452,30 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+<<<<<<< HEAD
 | `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references the Git repository resource to monitor.<br />The repository must be configured in Plural Console with appropriate access credentials. |  | Required: \{\} <br /> |
 | `type` _[ObserverGitTargetType](#observergittargettype)_ | Type specifies what Git resources to monitor within the repository.<br />Currently only TAGS is supported, which monitors for new Git tags. |  | Enum: [TAGS] <br />Required: \{\} <br />Type: string <br /> |
+=======
+| `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references the Git repository resource to monitor.<br />The repository must be configured in Plural Console with appropriate access credentials. |  | Required: {} <br /> |
+| `type` _[ObserverGitTargetType](#observergittargettype)_ | Type specifies what Git resources to monitor within the repository.<br />Currently only TAGS is supported, which monitors for new Git tags. |  | Enum: [TAGS] <br />Required: {} <br />Type: string <br /> |
+| `filter` _[ObserverGitFilter](#observergitfilter)_ | Filter specifies a regex to filter the git repository tags for the observed value. |  | Optional: {} <br /> |
+
+
+#### ObserverGitFilter
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverGit](#observergit)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regex` _string_ | Regex specifies a regex to filter the git repository tags for the observed value.<br />Useful if you want to filter out tags within a larger monorepo or across multiple channels, eg: prod-1.2.3 vs. dev-1.2.3 |  | Optional: {} <br /> |
+>>>>>>> f8d661863 (Add regex filtering to tags in observer git targeting)
 
 
 #### ObserverHelm

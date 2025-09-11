@@ -8165,6 +8165,13 @@ input ObserverOciAttributes {
 input ObserverGitAttributes {
   repositoryId: ID!
   type: ObserverGitTargetType!
+  filter: ObserverGitFilterAttributes
+}
+
+"a spec for filtering a git repository tags in an observer"
+input ObserverGitFilterAttributes {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"
@@ -8699,6 +8706,14 @@ type ObserverGitRepo {
 
   "the resource within the git repository you want to poll"
   type: ObserverGitTargetType!
+
+  filter: ObserverGitFilter
+}
+
+"a spec for filtering a git repository tags in an observer"
+type ObserverGitFilter {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"

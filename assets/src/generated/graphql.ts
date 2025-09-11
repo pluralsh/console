@@ -5195,13 +5195,28 @@ export type ObserverEdge = {
 };
 
 export type ObserverGitAttributes = {
+  filter?: InputMaybe<ObserverGitFilterAttributes>;
   repositoryId: Scalars['ID']['input'];
   type: ObserverGitTargetType;
+};
+
+/** a spec for filtering a git repository tags in an observer */
+export type ObserverGitFilter = {
+  __typename?: 'ObserverGitFilter';
+  /** a regex to filter the git repository tags for the observed value */
+  regex?: Maybe<Scalars['String']['output']>;
+};
+
+/** a spec for filtering a git repository tags in an observer */
+export type ObserverGitFilterAttributes = {
+  /** a regex to filter the git repository tags for the observed value */
+  regex?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** a spec for polling a git repository for recent updates */
 export type ObserverGitRepo = {
   __typename?: 'ObserverGitRepo';
+  filter?: Maybe<ObserverGitFilter>;
   repositoryId: Scalars['ID']['output'];
   /** the resource within the git repository you want to poll */
   type: ObserverGitTargetType;

@@ -4248,15 +4248,29 @@ type ObserverEdge struct {
 }
 
 type ObserverGitAttributes struct {
-	RepositoryID string                `json:"repositoryId"`
-	Type         ObserverGitTargetType `json:"type"`
+	RepositoryID string                       `json:"repositoryId"`
+	Type         ObserverGitTargetType        `json:"type"`
+	Filter       *ObserverGitFilterAttributes `json:"filter,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilter struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilterAttributes struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
 }
 
 // a spec for polling a git repository for recent updates
 type ObserverGitRepo struct {
 	RepositoryID string `json:"repositoryId"`
 	// the resource within the git repository you want to poll
-	Type ObserverGitTargetType `json:"type"`
+	Type   ObserverGitTargetType `json:"type"`
+	Filter *ObserverGitFilter    `json:"filter,omitempty"`
 }
 
 // a spec for querying a helm repository in an observer
