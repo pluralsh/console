@@ -4312,6 +4312,16 @@ export type LoadBalancerStatus = {
   ingress?: Maybe<Array<Maybe<LoadBalancerIngressStatus>>>;
 };
 
+export type LogAggregationBucket = {
+  __typename?: 'LogAggregationBucket';
+  count?: Maybe<Scalars['Int']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type LogAggregationInput = {
+  bucketSize?: InputMaybe<Scalars['String']['input']>;
+};
+
 export enum LogDriver {
   Elastic = 'ELASTIC',
   Opensearch = 'OPENSEARCH',
@@ -8545,6 +8555,7 @@ export type RootQueryType = {
   job?: Maybe<Job>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
+  logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
@@ -9202,6 +9213,16 @@ export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+};
+
+
+export type RootQueryTypeLogAggregationBucketsArgs = {
+  aggregation?: InputMaybe<LogAggregationInput>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;

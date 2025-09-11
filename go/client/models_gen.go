@@ -3501,6 +3501,15 @@ type LoadBalancerStatus struct {
 	Ingress []*LoadBalancerIngressStatus `json:"ingress,omitempty"`
 }
 
+type LogAggregationBucket struct {
+	Timestamp *string `json:"timestamp,omitempty"`
+	Count     *int64  `json:"count,omitempty"`
+}
+
+type LogAggregationInput struct {
+	BucketSize *string `json:"bucketSize,omitempty"`
+}
+
 type LogFacet struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value,omitempty"`
