@@ -6445,6 +6445,7 @@ type ServiceError struct {
 type ServiceErrorAttributes struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
+	Warning *bool  `json:"warning,omitempty"`
 }
 
 // Import of stack data into a service's context

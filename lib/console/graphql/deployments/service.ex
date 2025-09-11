@@ -175,6 +175,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :service_error_attributes do
     field :source,  non_null(:string)
     field :message, non_null(:string)
+    field :warning, :boolean
   end
 
   @desc "A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc"

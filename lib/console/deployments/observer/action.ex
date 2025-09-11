@@ -4,7 +4,7 @@ defmodule Console.Deployments.Observer.Action do
   alias Console.Services.Users
 
   def act(observer, %Observer.ObserverAction{type: :pr, configuration: %{pr: %{} = pr}}, input) do
-    tpl = pr.branch_template || "plrl/auto/#{observer.name}-$value"
+    tpl = pr.branch_template || "plrl/auto/#{observer.name}-$value-#{Console.rand_alphanum(6)}"
     branch = String.replace(tpl, "$value", input)
     ctx = replace_map(pr.context, input)
     case Git.get_pr_automation(pr.automation_id) do

@@ -5340,6 +5340,7 @@ input ComponentContentAttributes {
 input ServiceErrorAttributes {
   source: String!
   message: String!
+  warning: Boolean
 }
 
 "A reusable configuration context, useful for plumbing data from external tools like terraform\/pulumi\/etc"
