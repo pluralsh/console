@@ -56,6 +56,7 @@ export function PrAutomations() {
           target="_blank"
           rel="noopener noreferrer"
           endIcon={<ArrowTopRightIcon />}
+          style={{ width: 'max-content' }}
         >
           Create automation
         </Button>

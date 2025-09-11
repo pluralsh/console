@@ -18,13 +18,10 @@ import {
 
 import { isEmpty } from 'lodash'
 import { ComponentProps, Dispatch, useState } from 'react'
+import { PrConfigurationFields } from './PrConfigurationFields'
 import { usePrAutomationForm } from './prConfigurationUtils'
 import { CreatePrActions } from './wizard/CreatePrActions'
-import {
-  ConfigPrStep,
-  CreateSuccessPrStep,
-  ReviewPrStep,
-} from './wizard/CreatePrSteps'
+import { CreateSuccessPrStep, ReviewPrStep } from './wizard/CreatePrSteps'
 
 export type PrStepKey =
   | 'selectType'
@@ -129,6 +126,7 @@ function CreatePrModalBase({
       <Flex
         direction="column"
         gap="large"
+        minHeight={0}
       >
         {currentStep !== 'success' && hasConfiguration && (
           <Flex>
@@ -140,7 +138,7 @@ function CreatePrModalBase({
           </Flex>
         )}
         {currentStep === 'config' && (
-          <ConfigPrStep
+          <PrConfigurationFields
             configuration={configuration}
             configVals={curConfigVals}
             setConfigVals={setCurConfigVals}

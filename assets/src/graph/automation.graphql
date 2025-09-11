@@ -51,6 +51,7 @@ fragment PrConfiguration on PrConfiguration {
   optional
   placeholder
   type
+  page
 }
 
 fragment PrConfirmation on PrConfirmation {

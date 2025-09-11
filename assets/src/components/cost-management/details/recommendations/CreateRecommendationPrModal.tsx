@@ -21,7 +21,6 @@ import { PrStepKey } from 'components/self-service/pr/automations/CreatePrModal'
 import { usePrAutomationForm } from 'components/self-service/pr/automations/prConfigurationUtils'
 import { CreatePrActions } from 'components/self-service/pr/automations/wizard/CreatePrActions'
 import {
-  ConfigPrStep,
   CreateSuccessPrStep,
   ReviewPrStep,
 } from 'components/self-service/pr/automations/wizard/CreatePrSteps'
@@ -32,6 +31,7 @@ import {
   SelectPrAutomationStep,
   SelectPrTypeStep,
 } from './CreateRecommendationPrSteps'
+import { PrConfigurationFields } from 'components/self-service/pr/automations/PrConfigurationFields'
 
 export type MethodType = 'pra' | 'aiGen'
 
@@ -199,7 +199,7 @@ function CreateRecommendationPrModalBase({
           />
         )}
         {currentStep === 'config' && (
-          <ConfigPrStep
+          <PrConfigurationFields
             configuration={configuration}
             configVals={curConfigVals}
             setConfigVals={setCurConfigVals}
