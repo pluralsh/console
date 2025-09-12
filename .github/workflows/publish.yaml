@@ -116,6 +116,8 @@ jobs:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Build and push
         uses: docker/build-push-action@v3
+        env:
+          BUILDKIT_PROGRESS: plain
         with:
           context: "."
           file: "./Dockerfile"
