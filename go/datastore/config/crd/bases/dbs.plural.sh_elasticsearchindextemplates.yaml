@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: elasticsearchindextemplates.dbs.plural.sh
 spec:
   group: dbs.plural.sh
@@ -64,6 +64,8 @@ spec:
                       type: string
                     type: array
                   priority:
+                    description: The priority of this index template in case multiple
+                      templates match the index pattern.  Highest priority wins.
                     type: integer
                   template:
                     type: object
