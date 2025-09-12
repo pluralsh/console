@@ -1,0 +1,162 @@
+query GetAgentRuntime($id: ID!) {
+    agentRuntime(id: $id) {
+        ...AgentRuntimeFragment
+    }
+}
+
+mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
+    upsertAgentRuntime(attributes: $attributes) {
+        ...AgentRuntimeFragment
+    }
+}
+
+mutation DeleteAgentRuntime($id: ID!) {
+    deleteAgentRuntime(id: $id) {
+        id
+    }
+}
+
+query ListAgentRuntimes($after: String, $first: Int, $before: String, $last: Int, $q: String, $type: AgentRuntimeType) {
+    agentRuntimes(after: $after, first: $first, before: $before, last: $last, q: $q, type: $type) {
+        ...AgentRuntimeConnectionFragment
+    }
+}
+
+query GetAgentRun($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunFragment
+    }
+}
+
+query ListAgentRuns($after: String, $first: Int, $before: String, $last: Int) {
+    agentRuns(after: $after, first: $first, before: $before, last: $last) {
+        edges {
+            node {
+                ...AgentRunFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+mutation CancelAgentRun($id: ID!) {
+    cancelAgentRun(id: $id) {
+        id
+    }
+}
+
+mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+    createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+        ...AgentRunFragment
+    }
+}
+
+mutation UpdateAgentRun($id: ID!, $attributes: AgentRunStatusAttributes!) {
+    updateAgentRun(id: $id, attributes: $attributes) {
+        ...AgentRunFragment
+    }
+}
+
+mutation UpdateAgentRunAnalysis($id: ID!, $attributes: AgentAnalysisAttributes!) {
+    updateAgentRunAnalysis(id: $id, attributes: $attributes) {
+        ...AgentRunFragment
+    }
+}
+
+mutation UpdateAgentRunTodos($id: ID!, $todos: [AgentTodoAttributes]) {
+    updateAgentRunTodos(id: $id, todos: $todos) {
+        ...AgentRunFragment
+    }
+}
+
+fragment AgentRuntimeFragment on AgentRuntime {
+    id
+    name
+    type
+    cluster {
+        ...TinyClusterFragment
+    }
+    createBindings {
+        ...PolicyBindingFragment
+    }
+}
+
+
+fragment AgentRuntimeConnectionFragment on AgentRuntimeConnection {
+    edges {
+        node {
+            ...AgentRuntimeFragment
+        }
+    }
+    pageInfo {
+        ...PageInfoFragment
+    }
+}
+
+fragment AgentPodReferenceFragment on AgentPodReference {
+    name
+    namespace
+}
+
+fragment AgentAnalysisFragment on AgentAnalysis {
+    summary
+    analysis
+    bullets
+}
+
+fragment AgentTodoFragment on AgentTodo {
+    description
+    done
+    title
+}
+
+fragment ScmCredentialFragment on ScmCreds {
+    token
+    username
+}
+
+fragment PluralCredsFragment on PluralCreds {
+    token
+    url
+}
+
+fragment AgentRunFragment on AgentRun {
+    id
+    prompt
+    repository
+    status
+    mode
+    podReference {
+        ...AgentPodReferenceFragment
+    }
+    error
+    analysis {
+        ...AgentAnalysisFragment
+    }
+    todos {
+        ...AgentTodoFragment
+    }
+    scmCreds {
+        ...ScmCredentialFragment
+    }
+    pluralCreds {
+        ...PluralCredsFragment
+    }
+    runtime {
+        ...AgentRuntimeFragment
+    }
+    user {
+        id
+        name
+        email
+    }
+    flow {
+        id
+        name
+    }
+    pullRequests {
+        ...PullRequestFragment
+    }
+}
