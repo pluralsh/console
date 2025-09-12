@@ -1,8 +1,8 @@
 module github.com/pluralsh/console/go/ai-proxy
 
-go 1.24.0
+go 1.25.1
 
-toolchain go1.24.2
+toolchain go1.25.1
 
 require (
 	github.com/andybalholm/brotli v1.1.1
