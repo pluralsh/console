@@ -1,7 +1,7 @@
 name: CI / Console
 
 env:
-  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  DOCKER_METADATA_PR_HEAD_SHA: "true"
 
 on:
   push:
@@ -76,6 +76,9 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+            VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+
       # - name: Build and push ubuntu images
       #   uses: docker/build-push-action@v3
       #   with:
