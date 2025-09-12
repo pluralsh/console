@@ -2889,6 +2889,9 @@ input StackConfigurationAttributes {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
+
+  "the ansible configuration for this stack"
+  ansible: AnsibleConfigurationAttributes
 }
 
 input StackOverridesAttributes {
@@ -2913,6 +2916,17 @@ input TerraformConfigurationAttributes {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+}
+
+input AnsibleConfigurationAttributes {
+  "the playbook to run"
+  playbook: String
+
+  "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+  inventory: String
+
+  "additional args for the playbook"
+  additionalArgs: [String]
 }
 
 input StackCronAttributes {
@@ -3238,6 +3252,9 @@ type StackConfiguration {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the ansible configuration for this stack"
+  ansible: AnsibleConfiguration
 }
 
 "Configuration for applying policy enforcement to a stack"
@@ -3266,6 +3283,17 @@ type TerraformConfiguration {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+}
+
+type AnsibleConfiguration {
+  "The playbook to run"
+  playbook: String
+
+  "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+  inventory: String
+
+  "Additional args for the playbook"
+  additionalArgs: [String]
 }
 
 type StackRun {
@@ -8165,6 +8193,13 @@ input ObserverOciAttributes {
 input ObserverGitAttributes {
   repositoryId: ID!
   type: ObserverGitTargetType!
+  filter: ObserverGitFilterAttributes
+}
+
+"a spec for filtering a git repository tags in an observer"
+input ObserverGitFilterAttributes {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"
@@ -8699,6 +8734,14 @@ type ObserverGitRepo {
 
   "the resource within the git repository you want to poll"
   type: ObserverGitTargetType!
+
+  filter: ObserverGitFilter
+}
+
+"a spec for filtering a git repository tags in an observer"
+type ObserverGitFilter {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"

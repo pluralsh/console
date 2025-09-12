@@ -197,6 +197,10 @@ type StackConfiguration struct {
 	// Terraform configuration for this stack.
 	// +kubebuilder:validation:Optional
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+
+	// Ansible configuration for this stack.
+	// +kubebuilder:validation:Optional
+	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 }
 
 type TerraformConfiguration struct {
@@ -209,6 +213,20 @@ type TerraformConfiguration struct {
 	// equivalent to the -refresh flag in Terraform.
 	// +kubebuilder:validation:Optional
 	Refresh *bool `json:"refresh,omitempty"`
+}
+
+type AnsibleConfiguration struct {
+	// Playbook is the ansible playbook to run.
+	// +kubebuilder:validation:Optional
+	Playbook *string `json:"playbook,omitempty"`
+
+	// Inventory is the ansible inventory file to use.  We recommend checking this into git alongside your playbook files, and referencing it with a relative path.
+	// +kubebuilder:validation:Optional
+	Inventory *string `json:"inventory,omitempty"`
+
+	// Additional args for the ansible playbook command.
+	// +kubebuilder:validation:Optional
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
 }
 
 type StackCron struct {

@@ -361,6 +361,12 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_git_attributes do
     field :repository_id, non_null(:id)
     field :type,          non_null(:observer_git_target_type)
+    field :filter,        :observer_git_filter_attributes
+  end
+
+  @desc "a spec for filtering a git repository tags in an observer"
+  input_object :observer_git_filter_attributes do
+    field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
   end
 
   @desc "configuration for an observer action"
@@ -756,6 +762,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :repository_id, non_null(:id)
     field :type,          non_null(:observer_git_target_type),
       description: "the resource within the git repository you want to poll"
+    field :filter,        :observer_git_filter
+  end
+
+  @desc "a spec for filtering a git repository tags in an observer"
+  object :observer_git_filter do
+    field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
   end
 
   @desc "configuration for an observer action"

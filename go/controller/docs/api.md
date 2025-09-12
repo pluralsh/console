@@ -137,6 +137,24 @@ _Appears in:_
 | `slow` _string_ | Slow is the rate in seconds for slow analysis, eg when the prompt used has not seen a material change. Example 2h |  | Optional: \{\} <br /> |
 
 
+#### AnsibleConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `playbook` _string_ | Playbook is the ansible playbook to run. |  | Optional: \{\} <br /> |
+| `inventory` _string_ | Inventory is the ansible inventory file to use.  We recommend checking this into git alongside your playbook files, and referencing it with a relative path. |  | Optional: \{\} <br /> |
+| `additionalArgs` _string array_ | Additional args for the ansible playbook command. |  | Optional: \{\} <br /> |
+
+
 
 
 #### AzureCloudConnection
@@ -2454,6 +2472,23 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references the Git repository resource to monitor.<br />The repository must be configured in Plural Console with appropriate access credentials. |  | Required: \{\} <br /> |
 | `type` _[ObserverGitTargetType](#observergittargettype)_ | Type specifies what Git resources to monitor within the repository.<br />Currently only TAGS is supported, which monitors for new Git tags. |  | Enum: [TAGS] <br />Required: \{\} <br />Type: string <br /> |
+| `filter` _[ObserverGitFilter](#observergitfilter)_ | Filter specifies a regex to filter the git repository tags for the observed value. |  | Optional: \{\} <br /> |
+
+
+#### ObserverGitFilter
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverGit](#observergit)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regex` _string_ | Regex specifies a regex to filter the git repository tags for the observed value.<br />Useful if you want to filter out tags within a larger monorepo or across multiple channels, eg: prod-1.2.3 vs. dev-1.2.3 |  | Optional: \{\} <br /> |
 
 
 #### ObserverHelm
@@ -4092,6 +4127,7 @@ _Appears in:_
 | `tag` _string_ | Tag of the IaC tool Docker image to use. |  | Optional: \{\} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
+| `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
 
 
 #### StackCron

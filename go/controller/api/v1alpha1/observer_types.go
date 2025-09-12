@@ -292,6 +292,17 @@ type ObserverGit struct {
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum:=TAGS
 	Type console.ObserverGitTargetType `json:"type"`
+
+	// Filter specifies a regex to filter the git repository tags for the observed value.
+	// +kubebuilder:validation:Optional
+	Filter *ObserverGitFilter `json:"filter,omitempty"`
+}
+
+type ObserverGitFilter struct {
+	// Regex specifies a regex to filter the git repository tags for the observed value.
+	// Useful if you want to filter out tags within a larger monorepo or across multiple channels, eg: prod-1.2.3 vs. dev-1.2.3
+	// +kubebuilder:validation:Optional
+	Regex *string `json:"regex,omitempty"`
 }
 
 // ObserverHelm defines configuration for monitoring Helm chart repositories.

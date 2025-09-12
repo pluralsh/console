@@ -7,7 +7,7 @@ defmodule Console.Helm.Utils do
     Enum.sort(semvers, &Version.compare(clean_vsn(&1.version), clean_vsn(&2.version)) == :gt) ++ tags
   end
 
-  def is_semver?(tag) do
+  def is_semver?(tag) when is_binary(tag) do
     clean_vsn(tag)
     |> Version.parse()
     |> case do
@@ -15,6 +15,7 @@ defmodule Console.Helm.Utils do
       _ -> false
     end
   end
+  def is_semver?(_), do: false
 
   def compare_versions(_, nil), do: :gt
   def compare_versions(vsn1, vsn2) do

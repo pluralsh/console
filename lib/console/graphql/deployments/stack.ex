@@ -47,6 +47,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :tag,       :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,     list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
     field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+    field :ansible,   :ansible_configuration_attributes, description: "the ansible configuration for this stack"
   end
 
   input_object :stack_overrides_attributes do
@@ -62,6 +63,12 @@ defmodule Console.GraphQl.Deployments.Stack do
   input_object :terraform_configuration_attributes do
     field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
     field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
+  end
+
+  input_object :ansible_configuration_attributes do
+    field :playbook, :string, description: "the playbook to run"
+    field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+    field :additional_args, list_of(:string), description: "additional args for the playbook"
   end
 
   input_object :stack_cron_attributes do
@@ -278,11 +285,12 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_configuration do
-    field :image,   :string, description: "optional custom image you might want to use"
-    field :version, :string, description: "the semver of the tool you wish to use"
-    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
-    field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
+    field :image,     :string, description: "optional custom image you might want to use"
+    field :version,   :string, description: "the semver of the tool you wish to use"
+    field :tag,       :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,     list_of(:stack_hook), description: "the hooks to customize execution for this stack"
     field :terraform, :terraform_configuration, description: "the terraform configuration for this stack"
+    field :ansible,   :ansible_configuration, description: "the ansible configuration for this stack"
   end
 
   @desc "Configuration for applying policy enforcement to a stack"
@@ -300,6 +308,12 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :terraform_configuration do
     field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
     field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
+  end
+
+  object :ansible_configuration do
+    field :playbook,  :string, description: "The playbook to run"
+    field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+    field :additional_args, list_of(:string), description: "Additional args for the playbook"
   end
 
   object :stack_run do

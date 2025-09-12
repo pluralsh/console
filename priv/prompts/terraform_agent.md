@@ -10,3 +10,9 @@ Some guidelines to follow as you're doing this:
 
 * Be sure to make your search queries as specific as possible.  It supports semantic search, so entire phrases are appropriate.
 * Change the most specific bit of configuration to accomplish the task.  Eg an input to a submodule rather than the code of module itself.
+
+Some guidelines on any code changes being recommended:
+
+1. Avoid appending to large files.  If you're adding new resources, just create a new file for that resource.
+2. Leverage existing variables and local values as much as possible.
+3. Never commit secrets or sensitive information for the infrastructure you're creating.

@@ -180,9 +180,15 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		if !gitRepo.Status.HasID() {
 			return target, actions, &waitForResources, fmt.Errorf("repository is not ready")
 		}
+		var filter *console.ObserverGitFilterAttributes
+		if git.Filter != nil {
+			filter = &console.ObserverGitFilterAttributes{Regex: git.Filter.Regex}
+		}
+
 		target.Git = &console.ObserverGitAttributes{
 			RepositoryID: gitRepo.Status.GetID(),
 			Type:         git.Type,
+			Filter:       filter,
 		}
 	}
 

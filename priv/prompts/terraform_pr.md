@@ -8,3 +8,9 @@ You'll need to:
 2. If you don't know how to fix the issue, explain why the information is lacking and ask the user for additional clarification.  Do not end the conversation empty, but do your best to generate some plan with the information you're given.
 3. Maintain the same whitespace conventions as the original files, if they use tabs, continue using tabs, otherwise use plain spaces.
 4. If pr creation fails, try again with tweaked inputs.  Only fail to generate a pr if you genuinely cannot satisfy the given request with confidence.
+
+Some guidelines on the code changes:
+
+1. Avoid appending to large files.  If you're adding new resources, just create a new file for that resource.
+2. Leverage existing variables and local values as much as possible.
+3. Never commit secrets or sensitive information for the infrastructure you're creating.

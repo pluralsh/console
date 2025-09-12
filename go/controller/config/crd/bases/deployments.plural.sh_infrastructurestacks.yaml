@@ -149,6 +149,23 @@ spec:
                 description: Configuration specifies version/image config for the
                   IaC tool being used.
                 properties:
+                  ansible:
+                    description: Ansible configuration for this stack.
+                    properties:
+                      additionalArgs:
+                        description: Additional args for the ansible playbook command.
+                        items:
+                          type: string
+                        type: array
+                      inventory:
+                        description: Inventory is the ansible inventory file to use.  We
+                          recommend checking this into git alongside your playbook
+                          files, and referencing it with a relative path.
+                        type: string
+                      playbook:
+                        description: Playbook is the ansible playbook to run.
+                        type: string
+                    type: object
                   hooks:
                     description: Hooks to run at various stages of the stack run.
                     items:

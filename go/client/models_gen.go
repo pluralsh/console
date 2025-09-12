@@ -512,6 +512,24 @@ type AnalysisRatesAttributes struct {
 	Slow *int64 `json:"slow,omitempty"`
 }
 
+type AnsibleConfiguration struct {
+	// The playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// Additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
+type AnsibleConfigurationAttributes struct {
+	// the playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
 // Anthropic connection information
 type AnthropicSettings struct {
 	// the anthropic model version to use
@@ -4248,15 +4266,29 @@ type ObserverEdge struct {
 }
 
 type ObserverGitAttributes struct {
-	RepositoryID string                `json:"repositoryId"`
-	Type         ObserverGitTargetType `json:"type"`
+	RepositoryID string                       `json:"repositoryId"`
+	Type         ObserverGitTargetType        `json:"type"`
+	Filter       *ObserverGitFilterAttributes `json:"filter,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilter struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilterAttributes struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
 }
 
 // a spec for polling a git repository for recent updates
 type ObserverGitRepo struct {
 	RepositoryID string `json:"repositoryId"`
 	// the resource within the git repository you want to poll
-	Type ObserverGitTargetType `json:"type"`
+	Type   ObserverGitTargetType `json:"type"`
+	Filter *ObserverGitFilter    `json:"filter,omitempty"`
 }
 
 // a spec for querying a helm repository in an observer
@@ -6728,6 +6760,8 @@ type StackConfiguration struct {
 	Hooks []*StackHook `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 }
 
 type StackConfigurationAttributes struct {
@@ -6741,6 +6775,8 @@ type StackConfigurationAttributes struct {
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 }
 
 type StackCron struct {
