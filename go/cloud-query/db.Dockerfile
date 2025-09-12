@@ -1,7 +1,7 @@
 ARG POSTGRES_MAJOR_VERSION=15
 ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.13
 
-FROM golang:1.24.2 AS libraries
+FROM golang:1.25.1 AS libraries
 
 # Configure versions for Steampipe extensions
 # Do not use latest versions here, as they may not be compatible
