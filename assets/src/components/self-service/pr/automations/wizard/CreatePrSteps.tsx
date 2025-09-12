@@ -7,39 +7,14 @@ import {
   Input2,
   Markdown,
 } from '@pluralsh/design-system'
-import { ComponentPropsWithoutRef } from 'react'
 import { useTheme } from 'styled-components'
 
 import { PrAutomationFragment, PullRequestFragment } from 'generated/graphql'
 
 import { Body1BoldP, Body1P } from 'components/utils/typography/Text'
 
-import { PrConfigurationFields } from '../PrConfigurationFields'
-import { FilteredPrConfig } from '../prConfigurationUtils'
 import { produce } from 'immer'
-
-export function ConfigPrStep({
-  configuration,
-  configVals,
-  setConfigVals,
-}: ComponentPropsWithoutRef<typeof PrConfigurationFields>) {
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-      overflow="auto"
-    >
-      <Body1P>Provide some basic configuration for this PR:</Body1P>
-      <PrConfigurationFields
-        {...{
-          configuration,
-          configVals,
-          setConfigVals,
-        }}
-      />
-    </Flex>
-  )
-}
+import { FilteredPrConfig } from '../prConfigurationUtils'
 
 export type ReviewPrFormState = {
   identifier: string

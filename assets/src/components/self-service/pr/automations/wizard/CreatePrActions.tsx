@@ -136,7 +136,7 @@ function CreatePrActionsInner({
               disabled={!configIsValid}
               type="submit"
             >
-              Next
+              Review
             </Button>
           </Flex>
         </>

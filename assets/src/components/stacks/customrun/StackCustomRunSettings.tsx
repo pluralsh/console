@@ -1,4 +1,4 @@
-import { Button } from '@pluralsh/design-system'
+import { Button, Flex } from '@pluralsh/design-system'
 import {
   CustomStackRunFragment,
   StackCommand,
@@ -78,13 +78,13 @@ export function StackCustomRunSettings({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.medium,
-        }}
+    <form
+      onSubmit={handleSubmit}
+      css={{ height: '100%', overflow: 'auto' }}
+    >
+      <Flex
+        direction="column"
+        gap="medium"
       >
         <PrConfigurationFields
           {...{
@@ -94,7 +94,7 @@ export function StackCustomRunSettings({
           }}
         />
         {error && <GqlError error={error} />}
-      </div>
+      </Flex>
       <ModalActionsSC>
         <Button
           secondary

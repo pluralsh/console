@@ -32,7 +32,11 @@ export default defineConfig({
     // }),
     tsconfigPaths({ loose: true }),
     pluginRewriteAll(), // Fix 404 error for urls with dots in their path
-    sentryVitePlugin({ org: 'plural-labs', project: 'console-frontend' }),
+    sentryVitePlugin({
+      org: 'plural-labs',
+      project: 'console-frontend',
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
   ],
   server: {
     port: 3000,
