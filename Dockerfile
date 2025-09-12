@@ -28,5 +28,10 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY} \
     VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
     SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
-RUN echo "=== SENTRY CHECK ===" && node -e "console.log('SENTRY LENGTH:', (process.env.SENTRY_AUTH_TOKEN||'').length)" && echo "=== END CHECK ==="
+RUN echo "=== ENV CHECK ===" && \
+    node -e "console.log('GIT_COMMIT:', (process.env.GIT_COMMIT||'').length)" && \
+    node -e "console.log('VITE_PROD_SECRET_KEY:', (process.env.VITE_PROD_SECRET_KEY||'').length)" && \
+    node -e "console.log('VITE_SENTRY_DSN:', (process.env.VITE_SENTRY_DSN||'').length)" && \
+    node -e "console.log('SENTRY_AUTH_TOKEN:', (process.env.SENTRY_AUTH_TOKEN||'').length)" && \
+    echo "=== END CHECK ==="
 RUN NODE_OPTIONS="--max-old-space-size=4096" yarn run build:no-tsc
