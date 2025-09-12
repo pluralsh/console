@@ -686,6 +686,25 @@ export type AnalysisRatesAttributes = {
   slow?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type AnsibleConfiguration = {
+  __typename?: 'AnsibleConfiguration';
+  /** Additional args for the playbook */
+  additionalArgs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
+  inventory?: Maybe<Scalars['String']['output']>;
+  /** The playbook to run */
+  playbook?: Maybe<Scalars['String']['output']>;
+};
+
+export type AnsibleConfigurationAttributes = {
+  /** additional args for the playbook */
+  additionalArgs?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
+  inventory?: InputMaybe<Scalars['String']['input']>;
+  /** the playbook to run */
+  playbook?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Anthropic connection information */
 export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
@@ -10981,6 +11000,8 @@ export type StackCommand = {
 
 export type StackConfiguration = {
   __typename?: 'StackConfiguration';
+  /** the ansible configuration for this stack */
+  ansible?: Maybe<AnsibleConfiguration>;
   /** the hooks to customize execution for this stack */
   hooks?: Maybe<Array<Maybe<StackHook>>>;
   /** optional custom image you might want to use */
@@ -10994,6 +11015,8 @@ export type StackConfiguration = {
 };
 
 export type StackConfigurationAttributes = {
+  /** the ansible configuration for this stack */
+  ansible?: InputMaybe<AnsibleConfigurationAttributes>;
   /** the hooks to customize execution for this stack */
   hooks?: InputMaybe<Array<InputMaybe<StackHookAttributes>>>;
   /** optional custom image you might want to use */

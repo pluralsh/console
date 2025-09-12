@@ -512,6 +512,24 @@ type AnalysisRatesAttributes struct {
 	Slow *int64 `json:"slow,omitempty"`
 }
 
+type AnsibleConfiguration struct {
+	// The playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// Additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
+type AnsibleConfigurationAttributes struct {
+	// the playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
 // Anthropic connection information
 type AnthropicSettings struct {
 	// the anthropic model version to use
@@ -6742,6 +6760,8 @@ type StackConfiguration struct {
 	Hooks []*StackHook `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 }
 
 type StackConfigurationAttributes struct {
@@ -6755,6 +6775,8 @@ type StackConfigurationAttributes struct {
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 }
 
 type StackCron struct {

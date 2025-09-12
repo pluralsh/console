@@ -55,6 +55,12 @@ defmodule Console.Schema.Stack do
         field :parallelism, :integer
         field :refresh,     :boolean
       end
+
+      embeds_one :ansible, Ansible, on_replace: :update do
+        field :playbook,        :string
+        field :inventory,       :string
+        field :additional_args, {:array, :string}
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
@@ -62,6 +68,7 @@ defmodule Console.Schema.Stack do
       |> cast(attrs, ~w(image version tag)a)
       |> cast_embed(:hooks, with: &hook_changeset/2)
       |> cast_embed(:terraform, with: &terraform_changeset/2)
+      |> cast_embed(:ansible, with: &ansible_changeset/2)
     end
 
     defp hook_changeset(model, attrs) do
@@ -73,6 +80,11 @@ defmodule Console.Schema.Stack do
     def terraform_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(parallelism refresh)a)
+    end
+
+    def ansible_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(playbook inventory additional_args)a)
     end
   end
 

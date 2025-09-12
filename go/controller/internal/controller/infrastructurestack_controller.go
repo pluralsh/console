@@ -467,6 +467,14 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 		}
 	}
 
+	if conf.Ansible != nil {
+		attrs.Ansible = &console.AnsibleConfigurationAttributes{
+			Playbook:       conf.Ansible.Playbook,
+			Inventory:      conf.Ansible.Inventory,
+			AdditionalArgs: conf.Ansible.AdditionalArgs,
+		}
+	}
+
 	if conf.Hooks != nil {
 		attrs.Hooks = algorithms.Map(conf.Hooks, func(h *v1alpha1.StackHook) *console.StackHookAttributes {
 			return &console.StackHookAttributes{Cmd: h.Cmd, Args: lo.ToSlicePtr(h.Args), AfterStage: h.AfterStage}
