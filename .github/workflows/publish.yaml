@@ -131,7 +131,7 @@ jobs:
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
             VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            SENTRY_AUTH_TOKEN="${{ secrets.SENTRY_AUTH_TOKEN }}"
       - name: slack webhook
         uses: 8398a7/action-slack@v3
         with:
