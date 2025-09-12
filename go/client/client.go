@@ -9,6 +9,17 @@ import (
 )
 
 type ConsoleClient interface {
+	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
+	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
+	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
+	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
+	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
+	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
+	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
+	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
+	UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error)
+	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -255,6 +266,276 @@ type Client struct {
 
 func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+}
+
+type AgentRuntimeFragment struct {
+	ID             string                   "json:\"id\" graphql:\"id\""
+	Name           string                   "json:\"name\" graphql:\"name\""
+	Type           AgentRuntimeType         "json:\"type\" graphql:\"type\""
+	Cluster        *TinyClusterFragment     "json:\"cluster,omitempty\" graphql:\"cluster\""
+	CreateBindings []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
+}
+
+func (t *AgentRuntimeFragment) GetID() string {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRuntimeFragment) GetName() string {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.Name
+}
+func (t *AgentRuntimeFragment) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return &t.Type
+}
+func (t *AgentRuntimeFragment) GetCluster() *TinyClusterFragment {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.Cluster
+}
+func (t *AgentRuntimeFragment) GetCreateBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.CreateBindings
+}
+
+type AgentRuntimeConnectionFragment struct {
+	Edges    []*AgentRuntimeConnectionFragment_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                        "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *AgentRuntimeConnectionFragment) GetEdges() []*AgentRuntimeConnectionFragment_Edges {
+	if t == nil {
+		t = &AgentRuntimeConnectionFragment{}
+	}
+	return t.Edges
+}
+func (t *AgentRuntimeConnectionFragment) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &AgentRuntimeConnectionFragment{}
+	}
+	return &t.PageInfo
+}
+
+type AgentPodReferenceFragment struct {
+	Name      string "json:\"name\" graphql:\"name\""
+	Namespace string "json:\"namespace\" graphql:\"namespace\""
+}
+
+func (t *AgentPodReferenceFragment) GetName() string {
+	if t == nil {
+		t = &AgentPodReferenceFragment{}
+	}
+	return t.Name
+}
+func (t *AgentPodReferenceFragment) GetNamespace() string {
+	if t == nil {
+		t = &AgentPodReferenceFragment{}
+	}
+	return t.Namespace
+}
+
+type AgentAnalysisFragment struct {
+	Summary  string    "json:\"summary\" graphql:\"summary\""
+	Analysis string    "json:\"analysis\" graphql:\"analysis\""
+	Bullets  []*string "json:\"bullets,omitempty\" graphql:\"bullets\""
+}
+
+func (t *AgentAnalysisFragment) GetSummary() string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Summary
+}
+func (t *AgentAnalysisFragment) GetAnalysis() string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Analysis
+}
+func (t *AgentAnalysisFragment) GetBullets() []*string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Bullets
+}
+
+type AgentTodoFragment struct {
+	Description string "json:\"description\" graphql:\"description\""
+	Done        *bool  "json:\"done,omitempty\" graphql:\"done\""
+	Title       string "json:\"title\" graphql:\"title\""
+}
+
+func (t *AgentTodoFragment) GetDescription() string {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Description
+}
+func (t *AgentTodoFragment) GetDone() *bool {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Done
+}
+func (t *AgentTodoFragment) GetTitle() string {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Title
+}
+
+type ScmCredentialFragment struct {
+	Token    string "json:\"token\" graphql:\"token\""
+	Username string "json:\"username\" graphql:\"username\""
+}
+
+func (t *ScmCredentialFragment) GetToken() string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.Token
+}
+func (t *ScmCredentialFragment) GetUsername() string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.Username
+}
+
+type PluralCredsFragment struct {
+	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *PluralCredsFragment) GetToken() *string {
+	if t == nil {
+		t = &PluralCredsFragment{}
+	}
+	return t.Token
+}
+func (t *PluralCredsFragment) GetURL() *string {
+	if t == nil {
+		t = &PluralCredsFragment{}
+	}
+	return t.URL
+}
+
+type AgentRunFragment struct {
+	ID           string                     "json:\"id\" graphql:\"id\""
+	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
+	Repository   string                     "json:\"repository\" graphql:\"repository\""
+	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
+	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User         *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow         *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+}
+
+func (t *AgentRunFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return &t.Status
+}
+func (t *AgentRunFragment) GetMode() *AgentRunMode {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return &t.Mode
+}
+func (t *AgentRunFragment) GetPodReference() *AgentPodReferenceFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PodReference
+}
+func (t *AgentRunFragment) GetError() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Error
+}
+func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Analysis
+}
+func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Todos
+}
+func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ScmCreds
+}
+func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PluralCreds
+}
+func (t *AgentRunFragment) GetRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunFragment) GetUser() *AgentRunFragment_User {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.User
+}
+func (t *AgentRunFragment) GetFlow() *AgentRunFragment_Flow {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Flow
+}
+func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PullRequests
 }
 
 type ScmWebhookFragment struct {
@@ -5534,6 +5815,60 @@ func (t *AccessTokenFragment) GetToken() *string {
 	return t.Token
 }
 
+type AgentRuntimeConnectionFragment_Edges struct {
+	Node *AgentRuntimeFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *AgentRuntimeConnectionFragment_Edges) GetNode() *AgentRuntimeFragment {
+	if t == nil {
+		t = &AgentRuntimeConnectionFragment_Edges{}
+	}
+	return t.Node
+}
+
+type AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
 type ClusterBackupFragment_Cluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -8704,6 +9039,326 @@ func (t *StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 		t = &StackDefinitionFragment_Steps{}
 	}
 	return t.RequireApproval
+}
+
+type DeleteAgentRuntime_DeleteAgentRuntime struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteAgentRuntime_DeleteAgentRuntime) GetID() string {
+	if t == nil {
+		t = &DeleteAgentRuntime_DeleteAgentRuntime{}
+	}
+	return t.ID
+}
+
+type ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges struct {
+	Node *AgentRuntimeFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges) GetNode() *AgentRuntimeFragment {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges{}
+	}
+	return t.Node
+}
+
+type GetAgentRun_AgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type GetAgentRun_AgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges struct {
+	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges) GetNode() *AgentRunFragment {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRuns_AgentRuns struct {
+	Edges    []*ListAgentRuns_AgentRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                 "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuns_AgentRuns) GetEdges() []*ListAgentRuns_AgentRuns_Edges {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns{}
+	}
+	return &t.PageInfo
+}
+
+type CancelAgentRun_CancelAgentRun struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CancelAgentRun_CancelAgentRun) GetID() string {
+	if t == nil {
+		t = &CancelAgentRun_CancelAgentRun{}
+	}
+	return t.ID
+}
+
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
+	}
+	return t.Name
 }
 
 type ListScmWebhooks_ScmWebhooks_Edges struct {
@@ -18650,6 +19305,127 @@ func (t *DeleteGroupMember_DeleteGroupMember_GroupMemberFragment_Group) GetID() 
 	return t.ID
 }
 
+type GetAgentRuntime struct {
+	AgentRuntime *AgentRuntimeFragment "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *GetAgentRuntime) GetAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &GetAgentRuntime{}
+	}
+	return t.AgentRuntime
+}
+
+type UpsertAgentRuntime struct {
+	UpsertAgentRuntime *AgentRuntimeFragment "json:\"upsertAgentRuntime,omitempty\" graphql:\"upsertAgentRuntime\""
+}
+
+func (t *UpsertAgentRuntime) GetUpsertAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &UpsertAgentRuntime{}
+	}
+	return t.UpsertAgentRuntime
+}
+
+type DeleteAgentRuntime struct {
+	DeleteAgentRuntime *DeleteAgentRuntime_DeleteAgentRuntime "json:\"deleteAgentRuntime,omitempty\" graphql:\"deleteAgentRuntime\""
+}
+
+func (t *DeleteAgentRuntime) GetDeleteAgentRuntime() *DeleteAgentRuntime_DeleteAgentRuntime {
+	if t == nil {
+		t = &DeleteAgentRuntime{}
+	}
+	return t.DeleteAgentRuntime
+}
+
+type ListAgentRuntimes struct {
+	AgentRuntimes *AgentRuntimeConnectionFragment "json:\"agentRuntimes,omitempty\" graphql:\"agentRuntimes\""
+}
+
+func (t *ListAgentRuntimes) GetAgentRuntimes() *AgentRuntimeConnectionFragment {
+	if t == nil {
+		t = &ListAgentRuntimes{}
+	}
+	return t.AgentRuntimes
+}
+
+type GetAgentRun struct {
+	AgentRun *AgentRunFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &GetAgentRun{}
+	}
+	return t.AgentRun
+}
+
+type ListAgentRuns struct {
+	AgentRuns *ListAgentRuns_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
+}
+
+func (t *ListAgentRuns) GetAgentRuns() *ListAgentRuns_AgentRuns {
+	if t == nil {
+		t = &ListAgentRuns{}
+	}
+	return t.AgentRuns
+}
+
+type CancelAgentRun struct {
+	CancelAgentRun *CancelAgentRun_CancelAgentRun "json:\"cancelAgentRun,omitempty\" graphql:\"cancelAgentRun\""
+}
+
+func (t *CancelAgentRun) GetCancelAgentRun() *CancelAgentRun_CancelAgentRun {
+	if t == nil {
+		t = &CancelAgentRun{}
+	}
+	return t.CancelAgentRun
+}
+
+type CreateAgentRun struct {
+	CreateAgentRun *AgentRunFragment "json:\"createAgentRun,omitempty\" graphql:\"createAgentRun\""
+}
+
+func (t *CreateAgentRun) GetCreateAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &CreateAgentRun{}
+	}
+	return t.CreateAgentRun
+}
+
+type UpdateAgentRun struct {
+	UpdateAgentRun *AgentRunFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
+}
+
+func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRun{}
+	}
+	return t.UpdateAgentRun
+}
+
+type UpdateAgentRunAnalysis struct {
+	UpdateAgentRunAnalysis *AgentRunFragment "json:\"updateAgentRunAnalysis,omitempty\" graphql:\"updateAgentRunAnalysis\""
+}
+
+func (t *UpdateAgentRunAnalysis) GetUpdateAgentRunAnalysis() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis{}
+	}
+	return t.UpdateAgentRunAnalysis
+}
+
+type UpdateAgentRunTodos struct {
+	UpdateAgentRunTodos *AgentRunFragment "json:\"updateAgentRunTodos,omitempty\" graphql:\"updateAgentRunTodos\""
+}
+
+func (t *UpdateAgentRunTodos) GetUpdateAgentRunTodos() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRunTodos{}
+	}
+	return t.UpdateAgentRunTodos
+}
+
 type AddClusterAuditLog struct {
 	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
 }
@@ -21266,6 +22042,1123 @@ func (t *UpsertVulnerabilities) GetUpsertVulnerabilities() *int64 {
 		t = &UpsertVulnerabilities{}
 	}
 	return t.UpsertVulnerabilities
+}
+
+const GetAgentRuntimeDocument = `query GetAgentRuntime ($id: ID!) {
+	agentRuntime(id: $id) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRuntime
+	if err := c.Client.Post(ctx, "GetAgentRuntime", GetAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertAgentRuntimeDocument = `mutation UpsertAgentRuntime ($attributes: AgentRuntimeAttributes!) {
+	upsertAgentRuntime(attributes: $attributes) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertAgentRuntime
+	if err := c.Client.Post(ctx, "UpsertAgentRuntime", UpsertAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteAgentRuntimeDocument = `mutation DeleteAgentRuntime ($id: ID!) {
+	deleteAgentRuntime(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteAgentRuntime
+	if err := c.Client.Post(ctx, "DeleteAgentRuntime", DeleteAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRuntimesDocument = `query ListAgentRuntimes ($after: String, $first: Int, $before: String, $last: Int, $q: String, $type: AgentRuntimeType) {
+	agentRuntimes(after: $after, first: $first, before: $before, last: $last, q: $q, type: $type) {
+		... AgentRuntimeConnectionFragment
+	}
+}
+fragment AgentRuntimeConnectionFragment on AgentRuntimeConnection {
+	edges {
+		node {
+			... AgentRuntimeFragment
+		}
+	}
+	pageInfo {
+		... PageInfoFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+		"q":      q,
+		"type":   typeArg,
+	}
+
+	var res ListAgentRuntimes
+	if err := c.Client.Post(ctx, "ListAgentRuntimes", ListAgentRuntimesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunDocument = `query GetAgentRun ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRun
+	if err := c.Client.Post(ctx, "GetAgentRun", GetAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRunsDocument = `query ListAgentRuns ($after: String, $first: Int, $before: String, $last: Int) {
+	agentRuns(after: $after, first: $first, before: $before, last: $last) {
+		edges {
+			node {
+				... AgentRunFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRuns
+	if err := c.Client.Post(ctx, "ListAgentRuns", ListAgentRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CancelAgentRunDocument = `mutation CancelAgentRun ($id: ID!) {
+	cancelAgentRun(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CancelAgentRun
+	if err := c.Client.Post(ctx, "CancelAgentRun", CancelAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentRunDocument = `mutation CreateAgentRun ($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+	createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error) {
+	vars := map[string]any{
+		"runtimeId":  runtimeID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentRun
+	if err := c.Client.Post(ctx, "CreateAgentRun", CreateAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunDocument = `mutation UpdateAgentRun ($id: ID!, $attributes: AgentRunStatusAttributes!) {
+	updateAgentRun(id: $id, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateAgentRun
+	if err := c.Client.Post(ctx, "UpdateAgentRun", UpdateAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunAnalysisDocument = `mutation UpdateAgentRunAnalysis ($id: ID!, $attributes: AgentAnalysisAttributes!) {
+	updateAgentRunAnalysis(id: $id, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateAgentRunAnalysis
+	if err := c.Client.Post(ctx, "UpdateAgentRunAnalysis", UpdateAgentRunAnalysisDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunTodosDocument = `mutation UpdateAgentRunTodos ($id: ID!, $todos: [AgentTodoAttributes]) {
+	updateAgentRunTodos(id: $id, todos: $todos) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error) {
+	vars := map[string]any{
+		"id":    id,
+		"todos": todos,
+	}
+
+	var res UpdateAgentRunTodos
+	if err := c.Client.Post(ctx, "UpdateAgentRunTodos", UpdateAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($attributes: ClusterAuditAttributes!) {
@@ -38824,6 +40717,17 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 }
 
 var DocumentOperationNames = map[string]string{
+	GetAgentRuntimeDocument:                           "GetAgentRuntime",
+	UpsertAgentRuntimeDocument:                        "UpsertAgentRuntime",
+	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
+	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
+	GetAgentRunDocument:                               "GetAgentRun",
+	ListAgentRunsDocument:                             "ListAgentRuns",
+	CancelAgentRunDocument:                            "CancelAgentRun",
+	CreateAgentRunDocument:                            "CreateAgentRun",
+	UpdateAgentRunDocument:                            "UpdateAgentRun",
+	UpdateAgentRunAnalysisDocument:                    "UpdateAgentRunAnalysis",
+	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",
