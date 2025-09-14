@@ -6,9 +6,12 @@ defmodule Console.Schema.AgentRuntime do
   defenum Type, claude: 0, opencode: 1
 
   schema "agent_runtimes" do
-    field :name, :string
-    field :type, Type
+    field :name,             :string
+    field :type,             Type
+    field :default,          :boolean, default: false
     field :create_policy_id, :binary_id
+
+    field :ai_proxy, :boolean, default: false
 
     belongs_to :cluster, Cluster
 
@@ -43,11 +46,13 @@ defmodule Console.Schema.AgentRuntime do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(name type)a
+  @valid ~w(name type ai_proxy default)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> unique_constraint(:default, message: "only one default runtime can be set at once")
+    |> unique_constraint(:name, name: :agent_runtimes_cluster_id_name_uniq_index, message: "a runtime with this name already exists for this cluster")
     |> validate_length(:name, max: 255)
     |> validate_required(@valid)
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)

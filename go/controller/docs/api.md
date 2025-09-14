@@ -231,8 +231,9 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use. |  | Required: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
-| `accessKeyId` _string_ | AccessKeyId is an AWS Access Key ID to use, can also use IRSA to acquire credentials |  | Optional: \{\} <br /> |
-| `secretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | SecretAccessKeyRef is an AWS Secret Access Key to use, can also use IRSA to acquire credentials |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
 #### Binding
@@ -4436,6 +4437,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `model` _string_ | Model is the Vertex AI model to use |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |

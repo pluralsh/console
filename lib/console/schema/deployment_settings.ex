@@ -217,8 +217,8 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :bedrock, Bedrock, on_replace: :update do
         field :model_id,          :string
         field :tool_model_id,     :string
-        field :access_key_id,     :string
-        field :secret_access_key, EncryptedString
+        field :access_token,      EncryptedString
+        field :region,            :string
         field :embedding_model,   :string
       end
 
@@ -345,8 +345,8 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_key_id secret_access_key)a)
-    |> validate_required(~w(model_id)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model)a)
+    |> validate_required(~w(model_id access_token region)a)
   end
 
   defp vertex_changeset(model, attrs) do

@@ -171,45 +171,6 @@ defmodule Console.AI.CronTest do
       assert child.insight.text
     end
 
-    test "it will call aws bedrock correctly" do
-      deployment_settings(ai: %{enabled: true, provider: :bedrock, bedrock: %{model_id: "test"}})
-      service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])
-      insert(:service_component,
-        service: service,
-        state: :pending,
-        group: "cert-manager.io",
-        version: "v1",
-        kind: "Certificate",
-        namespace: "ns",
-        name: "name"
-      )
-      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
-      expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
-      expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
-      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(ExAws, :request, 4, fn
-        %ExAws.Operation.JSON{
-          data: %{
-            system: [%{text: _}],
-            messages: [%{role: :user, content: [%{text: _}]} | _]
-          }
-        }, _ ->
-        {:ok, %{"output" => %{"message" => %{"content" => [%{"text" => "bedrock completion"}]}}}}
-      end)
-
-      Cron.services()
-
-      %{id: id} = svc = Console.Repo.preload(refetch(service), [:insight, components: :insight])
-
-      assert svc.insight.text
-
-      %{components: [component]} = svc
-
-      assert component.insight.text
-
-      assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
-    end
-
     test "it will preserve prior insight ids" do
       insight = insert(:ai_insight, updated_at: Timex.now() |> Timex.shift(days: -1))
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})

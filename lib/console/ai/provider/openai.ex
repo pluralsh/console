@@ -87,6 +87,15 @@ defmodule Console.AI.OpenAI do
     }
   end
 
+  def proxy(%__MODULE__{} = openai) do
+    {:ok, %Console.AI.Proxy{
+      backend: :openai,
+      url: openai.base_url,
+      token: openai.access_key,
+      params: %{}
+    }}
+  end
+
   @doc """
   Generate a openai completion
   """

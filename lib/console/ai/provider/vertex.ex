@@ -25,6 +25,16 @@ defmodule Console.AI.Vertex do
     }
   end
 
+  def proxy(%__MODULE__{} = vertex) do
+    with {:ok, %{token: token}} <- client(vertex) do
+      {:ok, %Console.AI.Proxy{
+        url: openai_url(vertex),
+        backend: :openai,
+        token: token,
+      }}
+    end
+  end
+
   @doc """
   Generate a openai completion from
   """

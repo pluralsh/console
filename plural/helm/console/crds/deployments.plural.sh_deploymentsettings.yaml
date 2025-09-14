@@ -187,16 +187,20 @@ spec:
                     description: Bedrock holds configuration for using AWS Bedrock
                       to generate LLM insights
                     properties:
-                      accessKeyId:
-                        description: AccessKeyId is an AWS Access Key ID to use, can
-                          also use IRSA to acquire credentials
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
                         type: string
                       modelId:
                         description: ModelID is the AWS Bedrock Model ID to use.
                         type: string
-                      secretAccessKeyRef:
-                        description: SecretAccessKeyRef is an AWS Secret Access Key
-                          to use, can also use IRSA to acquire credentials
+                      region:
+                        description: Region is the AWS region the model is hosted
+                          in
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -225,6 +229,8 @@ spec:
                         type: string
                     required:
                     - modelId
+                    - region
+                    - tokenSecretRef
                     type: object
                   embeddingProvider:
                     description: |-
@@ -578,6 +584,9 @@ spec:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights
                     properties:
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
+                        type: string
                       endpoint:
                         description: Endpoint is a custom endpoint for self-deployed
                           models

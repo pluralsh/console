@@ -141,11 +141,13 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :bedrock_ai_attributes do
-    field :model_id,          non_null(:string), description: "the bedrock model id to use"
-    field :tool_model_id,     :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :access_key_id,     :string, description: "aws access key id to use, you can also use IRSA for self-hosted consoles"
-    field :secret_access_key, :string, description: "aws secret access key to use, you can also use IRSA for self-hosted consoles"
-    field :embedding_model,   :string, description: "the model to use for vector embeddings"
+    field :model_id,              non_null(:string), description: "the bedrock model id to use"
+    field :tool_model_id,         :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :access_token,          :string, description: "the openai bedrock access token to use"
+    field :region,                :string, description: "the aws region the model is hosted in"
+    field :aws_access_key_id,     :string, description: "the aws access key id to use (DEPRECATED)"
+    field :aws_secret_access_key, :string, description: "the aws secret access key to use (DEPRECATED)"
+    field :embedding_model,       :string, description: "the model to use for vector embeddings"
   end
 
   input_object :vertex_ai_attributes do
@@ -325,9 +327,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "OpenAI connection information"
   object :openai_settings do
-    field :base_url,   :string, description: "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
-    field :model,      :string, description: "the openai model version to use"
-    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :base_url,        :string, description: "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
+    field :model,           :string, description: "the openai model version to use"
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
   end
 
   @desc "Anthropic connection information"
@@ -345,25 +348,29 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring against Azure OpenAI"
   object :azure_openai_settings do
-    field :endpoint,    non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
-    field :model,       :string
-    field :tool_model,  :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :api_version, :string, description: "the api version you want to use"
+    field :endpoint,        non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :model,           :string
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :api_version,     :string, description: "the api version you want to use"
   end
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
-    field :model_id,      non_null(:string), description: "the bedrock model to use"
-    field :tool_model_id, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :access_key_id, :string, description: "the aws access key to use, can also use IRSA when console is self-hosted"
+    field :model_id,        non_null(:string), description: "the bedrock model to use"
+    field :tool_model_id,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)"
+    field :region,          :string, description: "the aws region the model is hosted in"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"
   object :vertex_ai_settings do
-    field :model,      :string, description: "the vertex ai model to use"
-    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :project,    non_null(:string), description: "the gcp project id to use"
-    field :location,   non_null(:string), description: "the gcp region the model"
+    field :model,           :string, description: "the vertex ai model to use"
+    field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :project,         non_null(:string), description: "the gcp project id to use"
+    field :location,        non_null(:string), description: "the gcp region the model"
   end
 
   @desc "Settings for configuring log aggregation throughout Plural"

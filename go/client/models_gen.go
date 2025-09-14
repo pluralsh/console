@@ -152,6 +152,15 @@ type AgentPodReference struct {
 	Namespace string `json:"namespace"`
 }
 
+// A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering
+type AgentPromptHistory struct {
+	ID string `json:"id"`
+	// the prompt to give this agent run
+	Prompt     string  `json:"prompt"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
 type AgentPullRequestAttributes struct {
 	// the title of the pull request
 	Title string `json:"title"`
@@ -187,6 +196,8 @@ type AgentRun struct {
 	PluralCreds *PluralCreds `json:"pluralCreds,omitempty"`
 	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
 	Pod *Pod `json:"pod,omitempty"`
+	// the prompts this agent run has received
+	Prompts []*AgentPromptHistory `json:"prompts,omitempty"`
 	// the runtime this agent is using
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	// the user who initiated this agent run
@@ -235,6 +246,8 @@ type AgentRuntime struct {
 	Name string `json:"name"`
 	// the type of this runtime
 	Type AgentRuntimeType `json:"type"`
+	// whether this runtime uses the built-in Plural AI proxy
+	AiProxy *bool `json:"aiProxy,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -251,6 +264,8 @@ type AgentRuntimeAttributes struct {
 	Type AgentRuntimeType `json:"type"`
 	// the policy for creating runs on this runtime
 	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
+	// whether this runtime uses the built-in Plural AI proxy
+	AiProxy *bool `json:"aiProxy,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -797,6 +812,8 @@ type AzureOpenaiSettings struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
 	Endpoint string  `json:"endpoint"`
 	Model    *string `json:"model,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
@@ -843,10 +860,14 @@ type BedrockAiAttributes struct {
 	ModelID string `json:"modelId"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
-	// aws access key id to use, you can also use IRSA for self-hosted consoles
-	AccessKeyID *string `json:"accessKeyId,omitempty"`
-	// aws secret access key to use, you can also use IRSA for self-hosted consoles
-	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	// the openai bedrock access token to use
+	AccessToken *string `json:"accessToken,omitempty"`
+	// the aws region the model is hosted in
+	Region *string `json:"region,omitempty"`
+	// the aws access key id to use (DEPRECATED)
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// the aws secret access key to use (DEPRECATED)
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
@@ -857,8 +878,12 @@ type BedrockAiSettings struct {
 	ModelID string `json:"modelId"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
-	// the aws access key to use, can also use IRSA when console is self-hosted
+	// the openai bedrock aws access key id to use (DEPRECATED)
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
+	// the aws region the model is hosted in
+	Region *string `json:"region,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type BindingAttributes struct {
@@ -4461,6 +4486,8 @@ type OpenaiSettings struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -7475,6 +7502,8 @@ type VertexAiAttributes struct {
 type VertexAiSettings struct {
 	// the vertex ai model to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the gcp project id to use

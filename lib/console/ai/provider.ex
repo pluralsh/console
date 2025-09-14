@@ -43,6 +43,8 @@ defmodule Console.AI.Provider do
 
   @callback context_window(struct) :: integer
 
+  @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
+
   def tools?() do
     Console.Deployments.Settings.cached()
     |> tool_client()
@@ -59,6 +61,12 @@ defmodule Console.AI.Provider do
       {:ok, %mod{} = client} -> mod.context_window(client)
       _ -> @default_context_window
     end
+  end
+
+  def proxy() do
+    settings = Console.Deployments.Settings.cached()
+    with {:ok, %mod{} = client} <- client(settings),
+      do: mod.proxy(client)
   end
 
   def completion(history, opts \\ []) do

@@ -1213,6 +1213,9 @@ input AgentRuntimeAttributes {
 
   "the policy for creating runs on this runtime"
   createBindings: [AgentBindingAttributes]
+
+  "whether this runtime uses the built-in Plural AI proxy"
+  aiProxy: Boolean
 }
 
 input AgentBindingAttributes {
@@ -1296,6 +1299,9 @@ type AgentRuntime {
   "the type of this runtime"
   type: AgentRuntimeType!
 
+  "whether this runtime uses the built-in Plural AI proxy"
+  aiProxy: Boolean
+
   "the cluster this runtime is running on"
   cluster: Cluster
 
@@ -1343,6 +1349,9 @@ type AgentRun {
   "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
   pod: Pod
 
+  "the prompts this agent run has received"
+  prompts: [AgentPromptHistory]
+
   "the runtime this agent is using"
   runtime: AgentRuntime
 
@@ -1354,6 +1363,18 @@ type AgentRun {
 
   "the pull requests this agent run has created"
   pullRequests: [PullRequest]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering"
+type AgentPromptHistory {
+  id: ID!
+
+  "the prompt to give this agent run"
+  prompt: String!
 
   insertedAt: DateTime
 
@@ -2129,11 +2150,17 @@ input BedrockAiAttributes {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
 
-  "aws access key id to use, you can also use IRSA for self-hosted consoles"
-  accessKeyId: String
+  "the openai bedrock access token to use"
+  accessToken: String
 
-  "aws secret access key to use, you can also use IRSA for self-hosted consoles"
-  secretAccessKey: String
+  "the aws region the model is hosted in"
+  region: String
+
+  "the aws access key id to use (DEPRECATED)"
+  awsAccessKeyId: String
+
+  "the aws secret access key to use (DEPRECATED)"
+  awsSecretAccessKey: String
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -2399,6 +2426,9 @@ type OpenaiSettings {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 "Anthropic connection information"
@@ -2428,6 +2458,9 @@ type AzureOpenaiSettings {
 
   model: String
 
+  "the model to use for vector embeddings"
+  embeddingModel: String
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -2443,14 +2476,23 @@ type BedrockAiSettings {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
 
-  "the aws access key to use, can also use IRSA when console is self-hosted"
+  "the openai bedrock aws access key id to use (DEPRECATED)"
   accessKeyId: String
+
+  "the aws region the model is hosted in"
+  region: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
 type VertexAiSettings {
   "the vertex ai model to use"
   model: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String

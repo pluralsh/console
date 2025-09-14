@@ -3,8 +3,8 @@ module github.com/pluralsh/console/go/tools
 go 1.25.1
 
 require (
-	github.com/99designs/gqlgen v0.17.78
-	github.com/Yamashou/gqlgenc v0.33.0
+	github.com/99designs/gqlgen v0.17.73
+	github.com/Yamashou/gqlgenc v0.29.0
 	github.com/a8m/envsubst v1.4.3
 	github.com/arttor/helmify v0.4.18
 	github.com/elastic/crd-ref-docs v0.2.0

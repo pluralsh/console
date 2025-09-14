@@ -625,22 +625,25 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Project:            in.Vertex.Project,
 			Location:           in.Vertex.Location,
 			Endpoint:           in.Vertex.Endpoint,
+			EmbeddingModel:     in.Vertex.EmbeddingModel,
+			ToolModel:          in.Vertex.ToolModel,
 		}
 	case console.AiProviderBedrock:
 		if in.Bedrock == nil {
 			return nil, fmt.Errorf("must provide bedrock configuration to set the provider to BEDROCK")
 		}
 
-		secret, err := in.Bedrock.SecretAccessKey(ctx, c, namespace)
+		secret, err := in.Bedrock.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		attr.Bedrock = &console.BedrockAiAttributes{
-			ModelID:         in.Bedrock.ModelID,
-			ToolModelID:     in.Bedrock.ToolModelId,
-			AccessKeyID:     in.Bedrock.AccessKeyId,
-			SecretAccessKey: secret,
+			ModelID:        in.Bedrock.ModelID,
+			ToolModelID:    in.Bedrock.ToolModelId,
+			AccessToken:    lo.ToPtr(secret),
+			Region:         lo.ToPtr(in.Bedrock.Region),
+			EmbeddingModel: in.Bedrock.EmbeddingModel,
 		}
 	case console.AiProviderOllama:
 		if in.Ollama == nil {
@@ -762,15 +765,21 @@ type BedrockSettings struct {
 	// +kubebuilder:validation:Optional
 	ToolModelId *string `json:"toolModelId,omitempty"`
 
-	// AccessKeyId is an AWS Access Key ID to use, can also use IRSA to acquire credentials
+	// EmbeddingModel to use for generating embeddings
 	//
 	// +kubebuilder:validation:Optional
-	AccessKeyId *string `json:"accessKeyId,omitempty"`
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
-	// SecretAccessKeyRef is an AWS Secret Access Key to use, can also use IRSA to acquire credentials
+	// Region is the AWS region the model is hosted in
 	//
-	// +kubebuilder:validation:Optional
-	SecretAccessKeyRef *corev1.SecretKeySelector `json:"secretAccessKeyRef"`
+	// +kubebuilder:validation:Required
+	Region string `json:"region"`
+
+	// TokenSecretRef is a reference to the local secret holding the token to access
+	// the configured AI provider.
+	//
+	// +kubebuilder:validation:Required
+	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
 }
 
 type VertexSettings struct {
@@ -783,6 +792,11 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
+
+	// EmbeddingModel to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
 	// Project is the GCP project you'll be using
 	//
@@ -862,17 +876,12 @@ func (in *OllamaSettings) Authorization(ctx context.Context, c client.Client, na
 	return lo.ToPtr(res), err
 }
 
-func (in *BedrockSettings) SecretAccessKey(ctx context.Context, c client.Client, namespace string) (*string, error) {
+func (in *BedrockSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
 	if in == nil {
-		return nil, fmt.Errorf("configured ollama settings cannot be nil")
+		return "", fmt.Errorf("configured bedrock settings cannot be nil")
 	}
 
-	if in.SecretAccessKeyRef == nil {
-		return nil, nil
-	}
-
-	res, err := utils.GetSecretKey(ctx, c, in.SecretAccessKeyRef, namespace)
-	return lo.ToPtr(res), err
+	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
 }
 
 func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Client, namespace string) (*string, error) {

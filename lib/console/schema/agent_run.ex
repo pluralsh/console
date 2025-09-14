@@ -1,6 +1,13 @@
 defmodule Console.Schema.AgentRun do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{AgentRuntime, User, Flow, NamespacedName, PullRequest}
+  alias Console.Schema.{
+    AgentRuntime,
+    AgentPromptHistory,
+    User,
+    Flow,
+    NamespacedName,
+    PullRequest
+  }
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Mode, analyze: 0, write: 1
@@ -31,6 +38,7 @@ defmodule Console.Schema.AgentRun do
     belongs_to :flow,    Flow
 
     has_many :pull_requests, PullRequest
+    has_many :prompts, AgentPromptHistory, foreign_key: :agent_run_id
 
     timestamps()
   end

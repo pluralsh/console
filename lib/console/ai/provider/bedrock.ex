@@ -3,88 +3,70 @@ defmodule Console.AI.Bedrock do
   Implements our basic llm behaviour against a self-hosted ollama deployment
   """
   @behaviour Console.AI.Provider
+  alias Console.AI.OpenAI
 
   require Logger
 
-  defstruct [:model_id, :tool_model_id, :access_key_id, :secret_access_key]
+  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model]
 
   @type t :: %__MODULE__{}
-
-  @base_headers [{"content-type", "application/json"}]
 
   def new(opts) do
     %__MODULE__{
       model_id: opts.model_id,
       tool_model_id: opts.tool_model_id,
-      access_key_id: opts.access_key_id,
-      secret_access_key: opts.secret_access_key
+      embedding_model: opts.embedding_model,
+      access_token: opts.access_token,
+      region: opts.region,
     }
+  end
+
+  def proxy(%__MODULE__{access_token: token} = bedrock) do
+    {:ok, %Console.AI.Proxy{
+      url: openai_url(bedrock),
+      backend: :openai,
+      token: token,
+    }}
   end
 
   @doc """
   Generate a anthropic completion from
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{model_id: model} = bedrock, messages, _) do
-    %ExAws.Operation.JSON{
-      http_method: :post,
-      path: "/model/#{model}/converse",
-      headers: @base_headers,
-      data: build_req(messages),
-      service: :"bedrock-runtime",
-    }
-    |> ExAws.request(aws_opts(bedrock) ++ [service_override: :bedrock])
-    |> handle_response()
+  def completion(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, opts) do
+    OpenAI.new(%{
+      base_url: openai_url(bedrock),
+      access_token: token,
+      model: model,
+      tool_model: bedrock.tool_model_id
+    })
+    |> OpenAI.completion(messages, opts)
   end
 
-  def context_window(_), do: 128_000 * 4
+  def context_window(_), do: 250_000 * 4
 
-  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
-
-  def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
-
-  def tools?(), do: false
-
-  defp build_req([{:system, system} | rest]) do
-    %{
-      system: [%{text: system}],
-      messages: msgs(rest)
-    }
-  end
-  defp build_req(msgs), do: %{messages: msgs(msgs)}
-
-  defp msgs(msgs) do
-    Enum.map(msgs, fn
-      {:tool, msg, _} -> %{role: :user, content: [%{text: msg}]}
-      {role, msg} -> %{role: role(role), content: [%{text: msg}]}
-    end)
+  def tool_call(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, tools) do
+    OpenAI.new(%{
+      base_url: openai_url(bedrock),
+      access_token: token,
+      model: model,
+      tool_model: bedrock.tool_model_id
+    })
+    |> OpenAI.tool_call(messages, tools)
   end
 
-  defp role(:assistant), do: :assistant
-  defp role(_), do: :user
-
-  defp aws_opts(%__MODULE__{access_key_id: aki, secret_access_key: sak}) when is_binary(aki) and is_binary(sak),
-    do: [aws_access_key_id: aki, aws_secret_access_key: sak]
-  defp aws_opts(_), do: []
-
-  defp handle_response({:ok, %{"output" => %{"message" => %{"content" => [_ | _] = content}}}}),
-    do: {:ok, from_aws_message(content)}
-  defp handle_response({:ok, res}),
-    do: logged_error("Unrecognized aws bedrock output: #{Jason.encode!(res)}")
-  defp handle_response({:error, {_, code, msg}}),
-    do: logged_error("Error calling AWS Bedrock: code=#{code}, message=#{msg}")
-
-  defp from_aws_message(content) do
-    content
-    |> Enum.map(fn
-      %{"text" => t} when is_binary(t) -> t
-       _ -> ""
-    end)
-    |> Enum.join("\n\n")
+  def embeddings(%__MODULE__{model_id: model, access_token: token} = bedrock, text) do
+    OpenAI.new(%{
+      base_url: openai_url(bedrock),
+      access_token: token,
+      model: model,
+      embedding_model: bedrock.embedding_model
+    })
+    |> OpenAI.embeddings(text)
   end
 
-  defp logged_error(msg) do
-    Logger.error msg
-    {:error, msg}
-  end
+  def tools?(), do: true
+
+  defp openai_url(%__MODULE__{region: region}),
+    do: "https://bedrock-runtime.#{region}.amazonaws.com/openai/v1"
 end
