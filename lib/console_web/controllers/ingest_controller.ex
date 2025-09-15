@@ -46,14 +46,14 @@ defmodule ConsoleWeb.IngestController do
     |> halt()
   end
 
-  defp to_method("GET"), do: :get
-  defp to_method("POST"), do: :post
-  defp to_method("PUT"), do: :put
-  defp to_method("DELETE"), do: :delete
-  defp to_method("PATCH"), do: :patch
-  defp to_method(_), do: :get
+  def to_method("GET"), do: :get
+  def to_method("POST"), do: :post
+  def to_method("PUT"), do: :put
+  def to_method("DELETE"), do: :delete
+  def to_method("PATCH"), do: :patch
+  def to_method(_), do: :get
 
-  defp convert_headers(conn, url) do
+  def convert_headers(conn, url) do
     headers =
       conn.req_headers
       |> remove_hop_by_hop_headers()

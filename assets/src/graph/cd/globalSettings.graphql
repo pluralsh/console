@@ -17,21 +17,26 @@ fragment AiSettings on AiSettings {
   }
   openai {
     model
+    embeddingModel
   }
   azure {
     apiVersion
     endpoint
+    model
+    embeddingModel
   }
   ollama {
     model
     url
   }
   bedrock {
+    region
     modelId
-    accessKeyId
+    embeddingModel
   }
   vertex {
     model
+    embeddingModel
     project
     location
   }

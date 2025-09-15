@@ -25,6 +25,15 @@ defmodule Console.AI.Azure do
     }
   end
 
+  def proxy(%__MODULE__{} = azure) do
+    {:ok, %Console.AI.Proxy{
+      backend: :openai,
+      url: Path.join(azure.base_url, azure.model || OpenAI.default_model()),
+      token: azure.azure_token,
+      params: %{"api-version" => azure.api_version || @api_vsn}
+    }}
+  end
+
   @doc """
   Generate a openai completion from the azure openai credentials chain
   """

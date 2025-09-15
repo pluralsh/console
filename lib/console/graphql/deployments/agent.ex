@@ -12,6 +12,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :name,                non_null(:string), description: "the name of this runtime"
     field :type,                non_null(:agent_runtime_type), description: "the type of this runtime"
     field :create_bindings,     list_of(:agent_binding_attributes), description: "the policy for creating runs on this runtime"
+    field :ai_proxy,            :boolean, description: "whether this runtime uses the built-in Plural AI proxy"
   end
 
   input_object :agent_binding_attributes do
@@ -56,6 +57,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :id,              non_null(:id)
     field :name,            non_null(:string), description: "the name of this runtime"
     field :type,            non_null(:agent_runtime_type), description: "the type of this runtime"
+    field :ai_proxy,        :boolean, description: "whether this runtime uses the built-in Plural AI proxy"
 
     field :cluster,         :cluster, resolve: dataloader(Deployments), description: "the cluster this runtime is running on"
     field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "the policy for creating runs on this runtime"
@@ -90,6 +92,7 @@ defmodule Console.GraphQl.Deployments.Agent do
       middleware ErrorHandler
     end
 
+    field :prompts, list_of(:agent_prompt_history), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
     field :runtime, :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
     field :user,    :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,    :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
@@ -97,6 +100,14 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :pull_requests, list_of(:pull_request),
       resolve: dataloader(Deployments),
       description: "the pull requests this agent run has created"
+
+    timestamps()
+  end
+
+  @desc "A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering"
+  object :agent_prompt_history do
+    field :id,          non_null(:id)
+    field :prompt,      non_null(:string), description: "the prompt to give this agent run"
 
     timestamps()
   end

@@ -10,6 +10,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Schema.{
     AgentRuntime,
     AgentRun,
+    AgentPromptHistory,
     Cluster,
     User,
     Group,
@@ -20,6 +21,7 @@ defmodule Console.Deployments.Agents do
   @type error :: Console.error
   @type agent_run_resp :: {:ok, AgentRun.t} | error
   @type agent_runtime_resp :: {:ok, AgentRuntime.t} | error
+  @type history_resp :: {:ok, AgentPromptHistory.t} | error
 
   def get_agent_runtime!(id), do: Repo.get!(AgentRuntime, id)
 
@@ -27,6 +29,15 @@ defmodule Console.Deployments.Agents do
     do: Repo.get_by(AgentRuntime, cluster_id: cluster_id, name: name)
 
   def get_agent_run!(id), do: Repo.get!(AgentRun, id)
+
+  @doc """
+  Checks if an agent runtime exists for a cluster
+  """
+  @spec has_runtime?(Cluster.t) :: boolean
+  def has_runtime?(%Cluster{id: cluster_id}) do
+    AgentRuntime.for_cluster(cluster_id)
+    |> Repo.exists?()
+  end
 
   @doc """
   Upserts an agent runtime, can only be performed by deployment operators
@@ -138,6 +149,16 @@ defmodule Console.Deployments.Agents do
     end)
     |> execute(extract: :update)
     |> notify(:update)
+  end
+
+  @doc """
+  Creates a new prompt for this agent run
+  """
+  @spec create_prompt(binary, binary) :: history_resp
+  def create_prompt(prompt, run_id) do
+    %AgentPromptHistory{}
+    |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
+    |> Repo.insert()
   end
 
   @doc """

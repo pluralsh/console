@@ -48,6 +48,16 @@ defmodule Console.Deployments.AgentsTest do
       assert Enum.any?(updated.create_bindings, & &1.user_id == user.id)
       assert Enum.any?(updated.create_bindings, & &1.group_id == group.id)
     end
+
+    test "it cannot create multiple default runtimes" do
+      cluster = insert(:cluster)
+      insert(:agent_runtime, cluster: cluster, default: true)
+
+      {:error, _} = Agents.upsert_agent_runtime(%{
+        name: "test",
+        default: true
+      }, cluster)
+    end
   end
 
   describe "delete_agent_runtime/2" do
@@ -254,6 +264,17 @@ defmodule Console.Deployments.AgentsTest do
         analysis: "a analysis",
         bullets: ["a bullet"]
       }, run.id, user)
+    end
+  end
+
+  describe "#create_prompt/2" do
+    test "it can create a prompt" do
+      run = insert(:agent_run)
+
+      {:ok, prompt} = Agents.create_prompt("a prompt", run.id)
+
+      assert prompt.prompt == "a prompt"
+      assert prompt.agent_run_id == run.id
     end
   end
 end

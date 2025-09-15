@@ -207,6 +207,16 @@ export type AgentPodReference = {
   namespace: Scalars['String']['output'];
 };
 
+/** A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering */
+export type AgentPromptHistory = {
+  __typename?: 'AgentPromptHistory';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt to give this agent run */
+  prompt: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type AgentPullRequestAttributes = {
   /** the base branch of the pull request */
   base: Scalars['String']['input'];
@@ -239,6 +249,8 @@ export type AgentRun = {
   podReference?: Maybe<AgentPodReference>;
   /** the prompt this agent was given */
   prompt: Scalars['String']['output'];
+  /** the prompts this agent run has received */
+  prompts?: Maybe<Array<Maybe<AgentPromptHistory>>>;
   /** the pull requests this agent run has created */
   pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
   /** the repository the agent will be working in */
@@ -302,6 +314,8 @@ export type AgentRunStatusAttributes = {
 
 export type AgentRuntime = {
   __typename?: 'AgentRuntime';
+  /** whether this runtime uses the built-in Plural AI proxy */
+  aiProxy?: Maybe<Scalars['Boolean']['output']>;
   /** the cluster this runtime is running on */
   cluster?: Maybe<Cluster>;
   /** the policy for creating runs on this runtime */
@@ -325,6 +339,8 @@ export type AgentRuntimePendingRunsArgs = {
 };
 
 export type AgentRuntimeAttributes = {
+  /** whether this runtime uses the built-in Plural AI proxy */
+  aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
   /** the name of this runtime */
@@ -1039,6 +1055,8 @@ export type AzureOpenaiSettings = {
   __typename?: 'AzureOpenaiSettings';
   /** the api version you want to use */
   apiVersion?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
@@ -1083,14 +1101,18 @@ export type BackupAttributes = {
 };
 
 export type BedrockAiAttributes = {
-  /** aws access key id to use, you can also use IRSA for self-hosted consoles */
-  accessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the openai bedrock access token to use */
+  accessToken?: InputMaybe<Scalars['String']['input']>;
+  /** the aws access key id to use (DEPRECATED) */
+  awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the aws secret access key to use (DEPRECATED) */
+  awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
   modelId: Scalars['String']['input'];
-  /** aws secret access key to use, you can also use IRSA for self-hosted consoles */
-  secretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** the aws region the model is hosted in */
+  region?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModelId?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1098,10 +1120,14 @@ export type BedrockAiAttributes = {
 /** Settings for usage of AWS Bedrock for LLMs */
 export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
-  /** the aws access key to use, can also use IRSA when console is self-hosted */
+  /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the bedrock model to use */
   modelId: Scalars['String']['output'];
+  /** the aws region the model is hosted in */
+  region?: Maybe<Scalars['String']['output']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModelId?: Maybe<Scalars['String']['output']>;
 };
@@ -5454,6 +5480,8 @@ export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
   /** the base url to use when querying an OpenAI compatible API, leave blank for OpenAI */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
@@ -11831,6 +11859,8 @@ export type VertexAiAttributes = {
 /** Settings for usage of GCP VertexAI for LLMs */
 export type VertexAiSettings = {
   __typename?: 'VertexAiSettings';
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the gcp region the model */
   location: Scalars['String']['output'];
   /** the vertex ai model to use */
@@ -13151,9 +13181,9 @@ export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: stri
 
 export type SmtpSettingsFragment = { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean };
 
-export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null };
+export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -13162,7 +13192,7 @@ export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook'
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -13185,7 +13215,7 @@ export type UpdateDeploymentSettingsMutationVariables = Exact<{
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type UpsertObservabilityProviderMutationVariables = Exact<{
   attributes: ObservabilityProviderAttributes;
@@ -16639,21 +16669,26 @@ export const AiSettingsFragmentDoc = gql`
   }
   openai {
     model
+    embeddingModel
   }
   azure {
     apiVersion
     endpoint
+    model
+    embeddingModel
   }
   ollama {
     model
     url
   }
   bedrock {
+    region
     modelId
-    accessKeyId
+    embeddingModel
   }
   vertex {
     model
+    embeddingModel
     project
     location
   }
