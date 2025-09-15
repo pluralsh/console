@@ -79,7 +79,7 @@ type ConsoleClient interface {
 	CloneServiceDeployment(ctx context.Context, clusterID string, id string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeployment, error)
 	CloneServiceDeploymentWithHandle(ctx context.Context, clusterID string, cluster string, name string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeploymentWithHandle, error)
 	RollbackService(ctx context.Context, id string, revisionID string, interceptors ...clientv2.RequestInterceptor) (*RollbackService, error)
-	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
+	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, metadata *ServiceMetadataAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
 	AddServiceError(ctx context.Context, id string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*AddServiceError, error)
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
@@ -28747,8 +28747,8 @@ func (c *Client) RollbackService(ctx context.Context, id string, revisionID stri
 	return &res, nil
 }
 
-const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes]) {
-	updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors) {
+const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes], $metadata: ServiceMetadataAttributes) {
+	updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors, metadata: $metadata) {
 		... ServiceDeploymentFragment
 	}
 }
@@ -28845,13 +28845,14 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 }
 `
 
-func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
+func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, metadata *ServiceMetadataAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
 	vars := map[string]any{
 		"id":         id,
 		"components": components,
 		"revisionId": revisionID,
 		"sha":        sha,
 		"errors":     errors,
+		"metadata":   metadata,
 	}
 
 	var res UpdateServiceComponents
