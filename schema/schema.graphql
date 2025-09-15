@@ -1189,6 +1189,8 @@ input RbacAttributes {
 enum AgentRuntimeType {
   CLAUDE
   OPENCODE
+  GEMINI
+  CUSTOM
 }
 
 enum AgentRunStatus {

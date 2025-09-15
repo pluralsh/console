@@ -7813,16 +7813,20 @@ type AgentRuntimeType string
 const (
 	AgentRuntimeTypeClaude   AgentRuntimeType = "CLAUDE"
 	AgentRuntimeTypeOpencode AgentRuntimeType = "OPENCODE"
+	AgentRuntimeTypeGemini   AgentRuntimeType = "GEMINI"
+	AgentRuntimeTypeCustom   AgentRuntimeType = "CUSTOM"
 )
 
 var AllAgentRuntimeType = []AgentRuntimeType{
 	AgentRuntimeTypeClaude,
 	AgentRuntimeTypeOpencode,
+	AgentRuntimeTypeGemini,
+	AgentRuntimeTypeCustom,
 }
 
 func (e AgentRuntimeType) IsValid() bool {
 	switch e {
-	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode:
+	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom:
 		return true
 	}
 	return false
