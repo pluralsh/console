@@ -173,7 +173,7 @@ defmodule Console.Deployments.Agents do
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, r, ba, he) do
       %PullRequest{}
       |> PullRequest.changeset(
-        Map.merge(pr_info, Map.take(run, ~w(flow_id)a))
+        Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
       )
       |> Repo.insert()

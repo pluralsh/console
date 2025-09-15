@@ -75,6 +75,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :id,            non_null(:id)
     field :prompt,        non_null(:string), description: "the prompt this agent was given"
     field :repository,    non_null(:string), description: "the repository the agent will be working in"
+    field :branch,        :string, description: "the branch this agent run is operating on (if not set, use default branch on clone)"
     field :status,        non_null(:agent_run_status), description: "the status of this agent run"
     field :mode,          non_null(:agent_run_mode), description: "the mode of the agent run"
     field :pod_reference, :agent_pod_reference, description: "the kubernetes pod this agent is running on"

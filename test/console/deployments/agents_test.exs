@@ -188,6 +188,32 @@ defmodule Console.Deployments.AgentsTest do
       assert pr.agent_run_id == run.id
     end
 
+    test "it can create a pull request associated with a runs agent session" do
+      user    = insert(:user)
+      session = insert(:agent_session)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run     = insert(:agent_run, runtime: runtime, flow: insert(:flow), user: user, session: session)
+      insert(:scm_connection, default: true)
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "plrl/ai/pr-test" ->
+        {:ok, %{url: "https://github.com/pr/url", title: "a pr"}}
+      end)
+
+      {:ok, pr} = Agents.agent_pull_request(%{
+        title: "a pr",
+        body: "a body",
+        repository: "https://github.com/pluralsh/console.git",
+        base: "main",
+        head: "plrl/ai/pr-test"
+      }, run.id, user)
+
+      assert pr.status == :open
+      assert pr.title == "a pr"
+      assert pr.flow_id == run.flow_id
+      assert pr.agent_run_id == run.id
+      assert pr.session_id == session.id
+    end
+
     test "other users cannot create pull requests" do
       user = insert(:user)
       runtime = insert(:agent_runtime, cluster: insert(:cluster))

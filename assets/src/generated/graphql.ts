@@ -234,6 +234,8 @@ export type AgentRun = {
   __typename?: 'AgentRun';
   /** the analysis of the agent run */
   analysis?: Maybe<AgentAnalysis>;
+  /** the branch this agent run is operating on (if not set, use default branch on clone) */
+  branch?: Maybe<Scalars['String']['output']>;
   /** the error reason of the agent run */
   error?: Maybe<Scalars['String']['output']>;
   /** the flow this agent is associated with */
@@ -384,6 +386,7 @@ export type AgentSession = {
   pullRequest?: Maybe<PullRequest>;
   /** the pull requests associated with this chat, usually from an agentic workflow */
   pullRequests?: Maybe<PullRequestConnection>;
+  runs?: Maybe<AgentRunConnection>;
   service?: Maybe<ServiceDeployment>;
   /** the services associated with this chat, usually from an agentic workflow */
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -405,6 +408,15 @@ export type AgentSessionPullRequestsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   open?: InputMaybe<Scalars['Boolean']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSessionRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

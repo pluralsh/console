@@ -179,6 +179,10 @@ defmodule Console.GraphQl.AI do
       resolve &Deployments.agent_prs/3
     end
 
+    connection field :runs, node_type: :agent_run do
+      resolve &Deployments.session_runs/3
+    end
+
     timestamps()
   end
 

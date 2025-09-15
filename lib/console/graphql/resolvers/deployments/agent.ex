@@ -22,6 +22,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     |> allow(actor(ctx), :read)
   end
 
+  def session_runs(%{id: id}, args, _) do
+    AgentRun.for_session(id)
+    |> paginate(args)
+  end
+
   def agent_scm_credentials(%AgentRun{} = run, _, %{context: %{cluster: cluster}}),
     do: Agents.scm_creds(run, cluster)
   def agent_scm_credentials(_, _, _),
