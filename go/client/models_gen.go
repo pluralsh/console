@@ -180,6 +180,8 @@ type AgentRun struct {
 	Prompt string `json:"prompt"`
 	// the repository the agent will be working in
 	Repository string `json:"repository"`
+	// the branch this agent run is operating on (if not set, use default branch on clone)
+	Branch *string `json:"branch,omitempty"`
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
 	// the mode of the agent run
@@ -301,6 +303,7 @@ type AgentSession struct {
 	Stacks *InfrastructureStackConnection `json:"stacks,omitempty"`
 	// the pull requests associated with this chat, usually from an agentic workflow
 	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
+	Runs         *AgentRunConnection    `json:"runs,omitempty"`
 	InsertedAt   *string                `json:"insertedAt,omitempty"`
 	UpdatedAt    *string                `json:"updatedAt,omitempty"`
 }
@@ -7813,16 +7816,20 @@ type AgentRuntimeType string
 const (
 	AgentRuntimeTypeClaude   AgentRuntimeType = "CLAUDE"
 	AgentRuntimeTypeOpencode AgentRuntimeType = "OPENCODE"
+	AgentRuntimeTypeGemini   AgentRuntimeType = "GEMINI"
+	AgentRuntimeTypeCustom   AgentRuntimeType = "CUSTOM"
 )
 
 var AllAgentRuntimeType = []AgentRuntimeType{
 	AgentRuntimeTypeClaude,
 	AgentRuntimeTypeOpencode,
+	AgentRuntimeTypeGemini,
+	AgentRuntimeTypeCustom,
 }
 
 func (e AgentRuntimeType) IsValid() bool {
 	switch e {
-	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode:
+	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom:
 		return true
 	}
 	return false

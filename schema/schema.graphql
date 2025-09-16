@@ -1189,6 +1189,8 @@ input RbacAttributes {
 enum AgentRuntimeType {
   CLAUDE
   OPENCODE
+  GEMINI
+  CUSTOM
 }
 
 enum AgentRunStatus {
@@ -1323,6 +1325,9 @@ type AgentRun {
 
   "the repository the agent will be working in"
   repository: String!
+
+  "the branch this agent run is operating on (if not set, use default branch on clone)"
+  branch: String
 
   "the status of this agent run"
   status: AgentRunStatus!
@@ -9167,6 +9172,8 @@ type AgentSession {
 
   "the pull requests associated with this chat, usually from an agentic workflow"
   pullRequests(after: String, first: Int, before: String, last: Int, open: Boolean, q: String): PullRequestConnection
+
+  runs(after: String, first: Int, before: String, last: Int): AgentRunConnection
 
   insertedAt: DateTime
 
