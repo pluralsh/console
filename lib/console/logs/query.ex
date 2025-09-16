@@ -45,6 +45,8 @@ defmodule Console.Logs.Query do
 
   def preload(%__MODULE__{resource: %Service{} = svc} = query),
     do: %{query | resource: Repo.preload(svc, [:cluster])}
+  def preload(%__MODULE__{resource: %Cluster{} = cluster} = query),
+    do: %{query | resource: Repo.preload(cluster, [:project])}
   def preload(q), do: q
 
   def accessible(%__MODULE__{project_id: project_id} = q, %User{} = user) when is_binary(project_id),
