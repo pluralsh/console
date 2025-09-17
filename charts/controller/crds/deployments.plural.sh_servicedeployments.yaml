@@ -473,9 +473,6 @@ spec:
                   - stackRef
                   type: object
                 type: array
-                x-kubernetes-validations:
-                - message: Imports are immutable
-                  rule: self == oldSelf
               kustomize:
                 description: Kustomize configuration for applying Kustomize transformations
                   to manifests.
