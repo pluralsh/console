@@ -10,66 +10,30 @@ import upperFirst from 'lodash/upperFirst'
 import { PrAutomationFragment } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 
-import { Body1P, Body2P } from 'components/utils/typography/Text'
-import { isEmpty } from 'lodash'
-import { useState } from 'react'
 import { PrConfigurationInput } from './PrConfigurationInput'
-import { conditionIsMet } from './prConfigurationUtils'
+import { conditionIsMet, PrConfigPageData } from './prConfigurationUtils'
+import { Body2P, Body1P } from 'components/utils/typography/Text'
 
 export function PrConfigurationFields({
   configuration,
   configVals,
   setConfigVals,
+  pageData,
 }: {
   configuration?: PrAutomationFragment['configuration']
   configVals: Record<string, string>
   setConfigVals: (vals: Record<string, string>) => void
+  pageData?: PrConfigPageData
 }) {
-  const theme = useTheme()
-  const pages = Array.from(
-    new Set(configuration?.map((cfg) => cfg?.page ?? 0))
-  ).sort()
-  const firstPage = isEmpty(pages) ? 0 : Math.min(...pages)
-
-  const [vistedPages, setVistedPages] = useState<Set<number>>(
-    new Set([firstPage])
-  )
-  const [curPage, setCurPage] = useState(firstPage)
-  const goToPage = (page: number) => {
-    setVistedPages((prev) => prev.add(page))
-    setCurPage(page)
-  }
-
+  const { colors } = useTheme()
   return (
     <Flex
       direction="column"
       overflow="hidden"
       gap="medium"
     >
-      {pages.length > 1 ? (
-        <Flex
-          gap="xsmall"
-          align="center"
-          alignSelf="flex-end"
-        >
-          <Body2P $color="text-xlight">Page:</Body2P>
-          {pages.map((page) => (
-            <Chip
-              key={page}
-              condensed
-              onClick={() => goToPage(page)}
-              severity={curPage === page ? 'info' : 'success'}
-              inactive={!vistedPages.has(page)}
-              clickable={curPage !== page}
-              css={{
-                transition: 'background 0.16s ease-in-out',
-                '&:hover': { background: theme.colors['fill-one-hover'] },
-              }}
-            >
-              {page}
-            </Chip>
-          ))}
-        </Flex>
+      {pageData && pageData.pages.length > 1 ? (
+        <PageSelector pageData={pageData} />
       ) : (
         <Body1P>Provide some basic configuration for this PR:</Body1P>
       )}
@@ -79,7 +43,9 @@ export function PrConfigurationFields({
         overflow="auto"
       >
         {(configuration || [])
-          .filter((cfg) => (cfg?.page ?? 0) === curPage)
+          .filter((cfg) =>
+            pageData ? (cfg?.page ?? 0) === pageData.curPage : true
+          )
           .map((cfg) => {
             if (!cfg) return null
 
@@ -111,7 +77,7 @@ export function PrConfigurationFields({
                       >
                         <HelpIcon
                           size={16}
-                          color={theme.colors['action-link-inline']}
+                          color={colors['action-link-inline']}
                         >
                           Help
                         </HelpIcon>
@@ -129,6 +95,45 @@ export function PrConfigurationFields({
             )
           })}
       </Flex>
+    </Flex>
+  )
+}
+
+function PageSelector({
+  pageData,
+}: {
+  pageData: {
+    pages: number[]
+    curPage: number
+    goToPage: (page: number) => void
+    vistedPages: Set<number>
+  }
+}) {
+  const { colors } = useTheme()
+  const { pages, curPage, goToPage, vistedPages } = pageData
+  return (
+    <Flex
+      gap="xsmall"
+      align="center"
+      alignSelf="flex-end"
+    >
+      <Body2P $color="text-xlight">Page:</Body2P>
+      {pages.map((page) => (
+        <Chip
+          key={page}
+          condensed
+          onClick={() => goToPage(page)}
+          severity={curPage === page ? 'info' : 'success'}
+          inactive={!vistedPages.has(page)}
+          clickable={curPage !== page}
+          css={{
+            transition: 'background 0.16s ease-in-out',
+            '&:hover': { background: colors['fill-one-hover'] },
+          }}
+        >
+          {page}
+        </Chip>
+      ))}
     </Flex>
   )
 }

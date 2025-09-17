@@ -8,6 +8,7 @@ import {
   PullRequestFragment,
   useCreatePullRequestMutation,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 import { parseToBool } from 'utils/parseToBool'
@@ -16,6 +17,13 @@ import { ReviewPrFormState } from './wizard/CreatePrSteps'
 export type FilteredPrConfig = {
   name: string
   value: string | boolean
+}
+
+export type PrConfigPageData = {
+  pages: number[]
+  curPage: number
+  goToPage: (page: number) => void
+  vistedPages: Set<number>
 }
 
 export function conditionIsMet(
@@ -103,11 +111,26 @@ export function usePrAutomationForm({
   const [reviewFormState, setReviewFormState] = useState<ReviewPrFormState>(
     defaults.reviewFormState
   )
+  const pages = useMemo(
+    () =>
+      Array.from(
+        new Set(prAutomation?.configuration?.map((cfg) => cfg?.page ?? 0))
+      ).sort(),
+    [prAutomation?.configuration]
+  )
+  const firstPage = isEmpty(pages) ? 0 : Math.min(...pages)
+  const [vistedPages, setVistedPages] = useState<Set<number>>(
+    new Set([firstPage])
+  )
+  const [curPage, setCurPage] = useState(firstPage)
+
   // reapply default states if the prAutomation changes
   useEffect(() => {
     setCurConfigVals(defaults.curConfigVals)
     setReviewFormState(defaults.reviewFormState)
-  }, [defaults.curConfigVals, defaults.reviewFormState, prAutomation])
+    setVistedPages(new Set([firstPage]))
+    setCurPage(firstPage)
+  }, [defaults, firstPage, prAutomation])
 
   const { isValid: configIsValid, values: filteredConfig } =
     validateAndFilterConfig(prAutomation?.configuration ?? [], curConfigVals)
@@ -135,6 +158,19 @@ export function usePrAutomationForm({
     },
   })
 
+  const pageData = useMemo(
+    () => ({
+      pages,
+      curPage,
+      goToPage: (page: number) => {
+        setVistedPages((prev) => new Set(prev).add(page))
+        setCurPage(page)
+      },
+      vistedPages,
+    }),
+    [pages, curPage, vistedPages]
+  )
+
   return {
     curConfigVals,
     setCurConfigVals,
@@ -143,6 +179,7 @@ export function usePrAutomationForm({
     reviewFormState,
     setReviewFormState,
     allowSubmit,
+    pageData,
     successPr,
     createPr: () => {
       if (allowSubmit) mutation()
