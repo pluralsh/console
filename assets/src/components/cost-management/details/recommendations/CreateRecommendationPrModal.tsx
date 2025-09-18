@@ -95,6 +95,7 @@ function CreateRecommendationPrModalBase({
     reviewFormState,
     setReviewFormState,
     allowSubmit,
+    pageData,
     successPr: successPraPr,
     createPr: createPraPr,
     createPrLoading: createPraPrLoading,
@@ -162,6 +163,7 @@ function CreateRecommendationPrModalBase({
             hasConfiguration,
             configIsValid,
             isScalingRec: true,
+            pageData,
           }}
         />
       }
@@ -203,6 +205,7 @@ function CreateRecommendationPrModalBase({
             configuration={configuration}
             configVals={curConfigVals}
             setConfigVals={setCurConfigVals}
+            pageData={pageData}
           />
         )}
         {currentStep === 'review' && (

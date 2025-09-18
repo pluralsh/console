@@ -64,6 +64,7 @@ function CreatePrModalBase({
     curConfigVals,
     setCurConfigVals,
     configIsValid,
+    pageData,
     filteredConfig,
     reviewFormState,
     setReviewFormState,
@@ -119,6 +120,7 @@ function CreatePrModalBase({
             onClose,
             hasConfiguration,
             configIsValid,
+            pageData,
           }}
         />
       }
@@ -142,6 +144,7 @@ function CreatePrModalBase({
             configuration={configuration}
             configVals={curConfigVals}
             setConfigVals={setCurConfigVals}
+            pageData={pageData}
           />
         )}
         {currentStep === 'review' && (
