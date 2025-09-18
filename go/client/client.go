@@ -15,6 +15,7 @@ type ConsoleClient interface {
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
+	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
 	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
 	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
@@ -305,24 +306,6 @@ func (t *AgentRuntimeFragment) GetCreateBindings() []*PolicyBindingFragment {
 		t = &AgentRuntimeFragment{}
 	}
 	return t.CreateBindings
-}
-
-type AgentRuntimeConnectionFragment struct {
-	Edges    []*AgentRuntimeConnectionFragment_Edges "json:\"edges,omitempty\" graphql:\"edges\""
-	PageInfo PageInfoFragment                        "json:\"pageInfo\" graphql:\"pageInfo\""
-}
-
-func (t *AgentRuntimeConnectionFragment) GetEdges() []*AgentRuntimeConnectionFragment_Edges {
-	if t == nil {
-		t = &AgentRuntimeConnectionFragment{}
-	}
-	return t.Edges
-}
-func (t *AgentRuntimeConnectionFragment) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &AgentRuntimeConnectionFragment{}
-	}
-	return &t.PageInfo
 }
 
 type AgentPodReferenceFragment struct {
@@ -5815,17 +5798,6 @@ func (t *AccessTokenFragment) GetToken() *string {
 	return t.Token
 }
 
-type AgentRuntimeConnectionFragment_Edges struct {
-	Node *AgentRuntimeFragment "json:\"node,omitempty\" graphql:\"node\""
-}
-
-func (t *AgentRuntimeConnectionFragment_Edges) GetNode() *AgentRuntimeFragment {
-	if t == nil {
-		t = &AgentRuntimeConnectionFragment_Edges{}
-	}
-	return t.Node
-}
-
 type AgentRunFragment_User struct {
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
@@ -9052,15 +9024,33 @@ func (t *DeleteAgentRuntime_DeleteAgentRuntime) GetID() string {
 	return t.ID
 }
 
-type ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges struct {
+type ListAgentRuntimes_AgentRuntimes_Edges struct {
 	Node *AgentRuntimeFragment "json:\"node,omitempty\" graphql:\"node\""
 }
 
-func (t *ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges) GetNode() *AgentRuntimeFragment {
+func (t *ListAgentRuntimes_AgentRuntimes_Edges) GetNode() *AgentRuntimeFragment {
 	if t == nil {
-		t = &ListAgentRuntimes_AgentRuntimes_AgentRuntimeConnectionFragment_Edges{}
+		t = &ListAgentRuntimes_AgentRuntimes_Edges{}
 	}
 	return t.Node
+}
+
+type ListAgentRuntimes_AgentRuntimes struct {
+	Edges    []*ListAgentRuntimes_AgentRuntimes_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuntimes_AgentRuntimes) GetEdges() []*ListAgentRuntimes_AgentRuntimes_Edges {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuntimes_AgentRuntimes) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes{}
+	}
+	return &t.PageInfo
 }
 
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
@@ -9176,6 +9166,89 @@ func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
 		t = &ListAgentRuns_AgentRuns{}
 	}
 	return &t.PageInfo
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
+	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunFragment {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns struct {
+	Edges    []*ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                              "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns) GetEdges() []*ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns{}
+	}
+	return &t.PageInfo
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime struct {
+	PendingRuns *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns "json:\"pendingRuns,omitempty\" graphql:\"pendingRuns\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime) GetPendingRuns() *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime{}
+	}
+	return t.PendingRuns
 }
 
 type CancelAgentRun_CancelAgentRun struct {
@@ -19339,10 +19412,10 @@ func (t *DeleteAgentRuntime) GetDeleteAgentRuntime() *DeleteAgentRuntime_DeleteA
 }
 
 type ListAgentRuntimes struct {
-	AgentRuntimes *AgentRuntimeConnectionFragment "json:\"agentRuntimes,omitempty\" graphql:\"agentRuntimes\""
+	AgentRuntimes *ListAgentRuntimes_AgentRuntimes "json:\"agentRuntimes,omitempty\" graphql:\"agentRuntimes\""
 }
 
-func (t *ListAgentRuntimes) GetAgentRuntimes() *AgentRuntimeConnectionFragment {
+func (t *ListAgentRuntimes) GetAgentRuntimes() *ListAgentRuntimes_AgentRuntimes {
 	if t == nil {
 		t = &ListAgentRuntimes{}
 	}
@@ -19369,6 +19442,17 @@ func (t *ListAgentRuns) GetAgentRuns() *ListAgentRuns_AgentRuns {
 		t = &ListAgentRuns{}
 	}
 	return t.AgentRuns
+}
+
+type ListAgentRuntimePendingRuns struct {
+	AgentRuntime *ListAgentRuntimePendingRuns_AgentRuntime "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *ListAgentRuntimePendingRuns) GetAgentRuntime() *ListAgentRuntimePendingRuns_AgentRuntime {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns{}
+	}
+	return t.AgentRuntime
 }
 
 type CancelAgentRun struct {
@@ -22210,17 +22294,14 @@ func (c *Client) DeleteAgentRuntime(ctx context.Context, id string, interceptors
 
 const ListAgentRuntimesDocument = `query ListAgentRuntimes ($after: String, $first: Int, $before: String, $last: Int, $q: String, $type: AgentRuntimeType) {
 	agentRuntimes(after: $after, first: $first, before: $before, last: $last, q: $q, type: $type) {
-		... AgentRuntimeConnectionFragment
-	}
-}
-fragment AgentRuntimeConnectionFragment on AgentRuntimeConnection {
-	edges {
-		node {
-			... AgentRuntimeFragment
+		edges {
+			node {
+				... AgentRuntimeFragment
+			}
 		}
-	}
-	pageInfo {
-		... PageInfoFragment
+		pageInfo {
+			... PageInfoFragment
+		}
 	}
 }
 fragment AgentRuntimeFragment on AgentRuntime {
@@ -22575,6 +22656,160 @@ func (c *Client) ListAgentRuns(ctx context.Context, after *string, first *int64,
 
 	var res ListAgentRuns
 	if err := c.Client.Post(ctx, "ListAgentRuns", ListAgentRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns ($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+	agentRuntime(id: $id) {
+		pendingRuns(after: $after, first: $first, before: $before, last: $last) {
+			edges {
+				node {
+					... AgentRunFragment
+				}
+			}
+			pageInfo {
+				... PageInfoFragment
+			}
+		}
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error) {
+	vars := map[string]any{
+		"id":     id,
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRuntimePendingRuns
+	if err := c.Client.Post(ctx, "ListAgentRuntimePendingRuns", ListAgentRuntimePendingRunsDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -40723,6 +40958,7 @@ var DocumentOperationNames = map[string]string{
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
 	GetAgentRunDocument:                               "GetAgentRun",
 	ListAgentRunsDocument:                             "ListAgentRuns",
+	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
 	CancelAgentRunDocument:                            "CancelAgentRun",
 	CreateAgentRunDocument:                            "CreateAgentRun",
 	UpdateAgentRunDocument:                            "UpdateAgentRun",

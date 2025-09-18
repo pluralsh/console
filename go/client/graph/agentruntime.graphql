@@ -18,7 +18,14 @@ mutation DeleteAgentRuntime($id: ID!) {
 
 query ListAgentRuntimes($after: String, $first: Int, $before: String, $last: Int, $q: String, $type: AgentRuntimeType) {
     agentRuntimes(after: $after, first: $first, before: $before, last: $last, q: $q, type: $type) {
-        ...AgentRuntimeConnectionFragment
+        edges {
+            node {
+                ...AgentRuntimeFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
     }
 }
 
@@ -37,6 +44,21 @@ query ListAgentRuns($after: String, $first: Int, $before: String, $last: Int) {
         }
         pageInfo {
             ...PageInfoFragment
+        }
+    }
+}
+
+query ListAgentRuntimePendingRuns($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+    agentRuntime(id: $id) {
+        pendingRuns(after: $after, first: $first, before: $before, last: $last) {
+            edges {
+                node {
+                    ...AgentRunFragment
+                }
+            }
+            pageInfo {
+                ...PageInfoFragment
+            }
         }
     }
 }
@@ -83,17 +105,6 @@ fragment AgentRuntimeFragment on AgentRuntime {
     }
 }
 
-
-fragment AgentRuntimeConnectionFragment on AgentRuntimeConnection {
-    edges {
-        node {
-            ...AgentRuntimeFragment
-        }
-    }
-    pageInfo {
-        ...PageInfoFragment
-    }
-}
 
 fragment AgentPodReferenceFragment on AgentPodReference {
     name
