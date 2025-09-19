@@ -3666,6 +3666,9 @@ input GlobalServiceAttributes {
 
   "additional context used to template service metadata during global service reconciliation"
   context: TemplateContextAttributes
+
+  "the id of the clusters to ignore"
+  ignoreClusters: [ID]
 }
 
 "Attributes for configuring a managed namespace"
@@ -3788,6 +3791,9 @@ type GlobalService {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "the id of the clusters to ignore"
+  ignoreClusters: [ID]
 
   "the service which created this global service"
   parent: ServiceDeployment

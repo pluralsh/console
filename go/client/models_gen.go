@@ -2966,6 +2966,8 @@ type GlobalService struct {
 	Reparent *bool `json:"reparent,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *Cascade `json:"cascade,omitempty"`
+	// the id of the clusters to ignore
+	IgnoreClusters []*string `json:"ignoreClusters,omitempty"`
 	// the service which created this global service
 	Parent *ServiceDeployment `json:"parent,omitempty"`
 	// a project this global service is bound to
@@ -3008,6 +3010,8 @@ type GlobalServiceAttributes struct {
 	Cascade *CascadeAttributes `json:"cascade,omitempty"`
 	// additional context used to template service metadata during global service reconciliation
 	Context *TemplateContextAttributes `json:"context,omitempty"`
+	// the id of the clusters to ignore
+	IgnoreClusters []*string `json:"ignoreClusters,omitempty"`
 }
 
 type GlobalServiceConnection struct {
