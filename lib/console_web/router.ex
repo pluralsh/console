@@ -30,8 +30,8 @@ defmodule ConsoleWeb.Router do
       pipe_through [:api]
 
       scope "/v1", ConsoleWeb do
-        scope "/ai/" do
-          scope "openai" do
+        scope "/ai" do
+          scope "/openai" do
             post "/v1/chat/completions", AIController, :openai_chat_completions
             post "/v1/embeddings", AIController, :openai_embeddings
           end
