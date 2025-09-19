@@ -2730,6 +2730,9 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.12.4-eksbuild.1
+    compatibilities:
+    - '1.33'
   - version: v1.12.3-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3293,6 +3296,15 @@
   publisher: Cribl
 - name: datadog_operator
   versions:
+  - version: v0.1.18-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.1.16-eksbuild.1
     compatibilities:
     - '1.33'
@@ -3399,6 +3411,14 @@
   publisher: datree
 - name: dynatrace_dynatrace-operator
   versions:
+  - version: v1.7.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.6.2-eksbuild.1
     compatibilities:
     - '1.33'
