@@ -9,7 +9,7 @@ defmodule ConsoleWeb.WebhookController do
     with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
          ["plrl", id, auth] <- String.split(token, ":"),
          {:ok, _, _} <- Console.Guardian.resource_from_token(auth),
-         %Cluster{id: id} = Clusters.get_cluster(id) do
+         %Cluster{id: id} <- Clusters.get_cluster(id) do
       send_resp(conn, 200, id)
     else
       _ -> send_resp(conn, 400, "invalid token")
