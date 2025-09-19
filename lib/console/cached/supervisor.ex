@@ -8,11 +8,11 @@ defmodule Console.Cached.Supervisor do
   @impl true
   def init(_init_arg) do
     children = [
-      Console.Cached.Namespace,
-      Console.Cached.Pod,
+      # Console.Cached.Namespace,
+      # Console.Cached.Pod,
       # Console.Cached.VPN,
-      Console.Cached.Node,
-      Console.Cached.Cluster,
+      # Console.Cached.Node,
+      # Console.Cached.Cluster,
       Console.Cached.ClusterNodes,
       Console.Cached.HelmChart,
       # Console.Cached.Secret,

@@ -4,6 +4,7 @@ defmodule Console.Cached.NamespaceTest do
   import KubernetesScaffolds
 
   describe "#fetch/0" do
+    @tag :skip
     test "it can properly cache and fetch namespaces" do
       pid = Process.whereis(Namespace)
 

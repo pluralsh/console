@@ -514,6 +514,62 @@ defmodule Console.Deployments.GlobalSyncTest do
       end
     end
 
+    test "it will sync to all targeted clusters with ignored clusters" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync3 = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      ignore1 = insert(:cluster, provider: cluster.provider)
+      ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+
+      global = insert(:global_service,
+        service: source,
+        provider: cluster.provider,
+        tags: [%{name: "sync", value: "test"}],
+        cascade: %{delete: true},
+        ignore_clusters: [sync3.id]
+      )
+
+      svc = insert(:service, owner: global, cluster: ignore1)
+      keep = insert(:service, name: "source", owner: global, cluster: sync2)
+
+      :ok = Global.sync_clusters(global)
+
+      refute Services.get_service_by_name(ignore1.id, "source")
+      refute Services.get_service_by_name(ignore2.id, "source")
+      refute Services.get_service_by_name(sync3.id, "source")
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      refute Global.diff?(source, synced)
+
+      keep = refetch(keep)
+      refute keep.deleted_at
+      refute Global.diff?(source, keep)
+
+      assert refetch(svc).deleted_at
+
+      :ok = Global.sync_clusters(global)
+
+      for cluster <- [sync, sync2] do
+        synced = Services.get_service_by_name(cluster.id, "source")
+        refute Global.diff?(source, synced)
+        refute synced.deleted_at
+      end
+    end
+
     test "it will sync by distro" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)

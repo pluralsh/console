@@ -4,6 +4,7 @@ defmodule Console.Cached.PodTest do
   import KubernetesScaffolds
 
   describe "#fetch/0" do
+    @tag :skip
     test "it can properly cache and fetch namespaces" do
       pid = Process.whereis(Pod)
 

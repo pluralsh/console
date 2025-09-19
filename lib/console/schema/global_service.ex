@@ -13,12 +13,13 @@ defmodule Console.Schema.GlobalService do
   alias Console.Deployments.Policies.Rbac
 
   schema "global_services" do
-    field :reparent, :boolean
-    field :name,     :string
-    field :distro,   Cluster.Distro
-    field :mgmt,     :boolean
-    field :interval, :string
-    field :next_poll_at, :utc_datetime_usec
+    field :reparent,        :boolean
+    field :name,            :string
+    field :distro,          Cluster.Distro
+    field :mgmt,            :boolean
+    field :interval,        :string
+    field :next_poll_at,    :utc_datetime_usec
+    field :ignore_clusters, {:array, :binary_id}
 
     embeds_one :cascade, Cascade, on_replace: :update do
       field :delete, :boolean
@@ -88,7 +89,7 @@ defmodule Console.Schema.GlobalService do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name reparent mgmt service_id parent_id project_id distro provider_id interval)a
+  @valid ~w(name reparent mgmt service_id parent_id project_id distro provider_id interval ignore_clusters)a
 
   def changeset(model, attrs \\ %{}) do
     model
