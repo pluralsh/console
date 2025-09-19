@@ -8,10 +8,10 @@ import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { AcceptLoginDocument, useMeQuery, User } from 'generated/graphql'
 import gql from 'graphql-tag'
+import queryString from 'query-string'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
-import queryString from 'query-string'
 
 import { useTheme } from 'styled-components'
 
@@ -21,8 +21,6 @@ import {
   setRefreshToken,
   setToken,
   wipeChallenge,
-  wipeRefreshToken,
-  wipeToken,
 } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { LoginContextProvider } from '../contexts'
@@ -34,6 +32,7 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import ShowAfterDelay from '../utils/ShowAfterDelay'
 
 import { Body1P } from 'components/utils/typography/Text'
+import { getLoginReturnPath, logoutWithReturnTo } from 'helpers/refreshToken'
 import { LoginPortal } from './LoginPortal'
 
 // 30 seconds
@@ -63,11 +62,7 @@ function LoginError({
 }) {
   useEffect(() => {
     if (!error?.networkError && !me) {
-      const to = setTimeout(() => {
-        wipeToken()
-        wipeRefreshToken()
-        ;(window as Window).location = '/login'
-      }, 2000)
+      const to = setTimeout(() => logoutWithReturnTo(), 2000)
 
       return () => clearTimeout(to)
     }
@@ -194,14 +189,14 @@ export default function Login() {
       onCompleted: ({ signIn: { jwt, refreshToken } }) => {
         setToken(jwt)
         setRefreshToken(refreshToken?.token)
-        navigate('/')
+        navigate(getLoginReturnPath())
       },
       onError: console.error,
     })
 
-  if (!loginMError && data?.me) {
-    ;(window as Window).location = '/'
-  }
+  useEffect(() => {
+    if (!loginMError && data?.me) navigate(getLoginReturnPath())
+  }, [loginMError, data?.me, navigate])
 
   if (loading)
     return (

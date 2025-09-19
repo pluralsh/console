@@ -1,15 +1,17 @@
-import { RefreshDocument, RefreshQuery } from 'generated/graphql'
 import { FetchResult, Observable } from '@apollo/client'
 import { NetworkError } from '@apollo/client/errors'
 import { ErrorHandler } from '@apollo/client/link/error'
+import { RefreshDocument, RefreshQuery } from 'generated/graphql'
 
-import { authlessClient } from './client'
 import {
   fetchRefreshToken,
   setToken,
   wipeRefreshToken,
   wipeToken,
 } from './auth'
+import { authlessClient } from './client'
+
+const RETURN_TO_KEY = 'plural-return-to'
 
 export const getRefreshedToken = async () => {
   const refreshToken = fetchRefreshToken()
@@ -49,7 +51,7 @@ export const onErrorHandler: ErrorHandler = ({
           const jwt = await getRefreshedToken()
 
           if (!jwt) {
-            logout()
+            logoutWithReturnTo()
           } else {
             setToken(jwt)
           }
@@ -77,19 +79,35 @@ export const onErrorHandler: ErrorHandler = ({
           ) {
             return
           }
-          logout()
+          logoutWithReturnTo()
         }
       })()
     })
   }
 
   if (is401) {
-    logout()
+    logoutWithReturnTo()
   }
 }
 
-export function logout() {
+export function logoutWithReturnTo() {
+  const returnPath = window.location.pathname + window.location.search
+  if (returnPath) localStorage.setItem(RETURN_TO_KEY, returnPath)
+
   wipeToken()
   wipeRefreshToken()
   ;(window as Window).location = '/login'
+}
+
+export function getLoginReturnPath() {
+  const returnTo = localStorage.getItem(RETURN_TO_KEY)
+  localStorage.removeItem(RETURN_TO_KEY)
+  if (
+    typeof returnTo === 'string' &&
+    returnTo.startsWith('/') &&
+    !returnTo.startsWith('//')
+  )
+    return returnTo
+
+  return '/'
 }
