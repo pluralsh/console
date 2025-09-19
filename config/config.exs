@@ -180,6 +180,7 @@ config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.R
 config :sentry,
   environment_name: Mix.env(),
   enable_source_code_context: true,
+  before_send: {Console.Sentry, :filter_non_500},
   root_source_code_paths: [File.cwd!()],
   tags: %{"plrl.flow": "console"}
 
