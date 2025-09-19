@@ -1,8 +1,8 @@
+import { Button, Callout } from '@pluralsh/design-system'
+import qs from 'query-string'
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
-import qs from 'query-string'
 import { useNavigate } from 'react-router-dom'
-import { Button, Callout } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
@@ -11,13 +11,14 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { getChallenge, setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 
-import { LoginPortal } from './LoginPortal'
+import { useApolloClient } from '@apollo/client'
 import {
   OauthCallbackMutationVariables,
   useOauthCallbackMutation,
 } from 'generated/graphql'
+import { getLoginReturnPath } from 'helpers/refreshToken'
 import { handleOauthChallenge } from './Login'
-import { useApolloClient } from '@apollo/client'
+import { LoginPortal } from './LoginPortal'
 
 function OAuthError({ error: { error, error_description: description } }: any) {
   return (
@@ -58,7 +59,7 @@ export function OAuthCallback() {
         return
       }
 
-      navigate('/')
+      navigate(getLoginReturnPath())
     },
   })
 
