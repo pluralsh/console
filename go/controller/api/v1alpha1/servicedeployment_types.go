@@ -306,7 +306,6 @@ type ServiceSpec struct {
 
 	// Imports enable importing outputs from InfrastructureStack resources for use in templating.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Imports are immutable"
 	Imports []ServiceImport `json:"imports"`
 
 	// Detach when true, detaches the service on deletion instead of destroying it.
