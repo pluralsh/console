@@ -62,3 +62,55 @@ spec:
       annotations:
         summary: Console postgres memory has gotten too high
         description: the memory utilization of your console deployment's postgres db is higher than recommended
+    - alert: ElasticsearchDiskUtilization
+      expr: |
+        (
+          elasticsearch_filesystem_data_used_percent > 80
+        )
+      for: 5m
+      labels:
+        severity: warning
+        plrl_cluster: legacy
+        plrl_service: plural
+      annotations:
+        summary: Elasticsearch disk utilization is high
+        description: "Elasticsearch disk utilization is {{ "{{ $value }}" }}% on cluster {{ "{{ $labels.cluster }}" }}"
+        
+    - alert: ElasticsearchDown
+      expr: |
+        up{job=~".*elasticsearch.*"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        plrl_cluster: legacy
+        plrl_service: plural
+      annotations:
+        summary: Elasticsearch is down
+        description: "Elasticsearch instance {{ "{{ $labels.instance }}" }} is down"
+        
+    - alert: VictoriaMetricsDiskUtilization
+      expr: |
+        (
+          node_filesystem_avail_bytes{mountpoint="/victoria-metrics-data"} 
+          / node_filesystem_size_bytes{mountpoint="/victoria-metrics-data"} * 100
+        ) < 20
+      for: 5m
+      labels:
+        severity: warning
+        plrl_cluster: legacy
+        plrl_service: plural
+      annotations:
+        summary: VictoriaMetrics disk utilization is high
+        description: "VictoriaMetrics disk utilization is {{ "{{ $value }}" }}% on cluster {{ "{{ $labels.cluster }}" }}"
+        
+    - alert: VictoriaMetricsDown
+      expr: |
+        up{job=~".*victoria.*metrics.*"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        plrl_cluster: legacy
+        plrl_service: plural
+      annotations:
+        summary: VictoriaMetrics is down
+        description: "VictoriaMetrics instance {{ "{{ $labels.instance }}" }} is down"
