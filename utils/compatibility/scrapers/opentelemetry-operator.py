@@ -13,7 +13,7 @@ from utils import (
     update_compatibility_info,
 )
 
-app_name = "opentelemetry"
+app_name = "opentelemetry-operator"
 markdown_url = (
     "https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/docs/compatibility.md"
 )
