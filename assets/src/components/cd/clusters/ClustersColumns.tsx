@@ -375,7 +375,7 @@ export const ColHealthScore = columnHelper.accessor(
     },
     cell: ({ table, row: { original } }) => {
       const cluster = original.node
-      const { setFlyoverTab, setSelectedCluster } = table.options
+      const { now, setFlyoverTab, setSelectedCluster } = table.options
         .meta as ClustersTableMeta
 
       if (!cluster) return null
@@ -387,6 +387,7 @@ export const ColHealthScore = columnHelper.accessor(
             setSelectedCluster?.(cluster)
             setFlyoverTab?.(ClusterInfoFlyoverTab.HealthScore)
           }}
+          {...(isClusterHealthy(now, cluster) ? {} : { severity: 'neutral' })}
         />
       )
     },

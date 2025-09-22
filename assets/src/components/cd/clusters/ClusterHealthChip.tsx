@@ -86,10 +86,11 @@ function ClusterHealthChip({
 export function ClusterHealthScoreChip({
   healthScore,
   onClick,
+  ...props
 }: {
   healthScore?: Nullable<number>
   onClick?: () => void
-}) {
+} & ChipProps) {
   const severity: ChipSeverity = healthScoreToSeverity(healthScore)
 
   return (
@@ -102,6 +103,7 @@ export function ClusterHealthScoreChip({
         onClick?.()
       }}
       severity={severity}
+      {...props}
     >
       {healthScore ?? '-'}
     </Chip>
