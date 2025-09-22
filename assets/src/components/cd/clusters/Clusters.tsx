@@ -12,7 +12,14 @@ import {
 import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
 import chroma from 'chroma-js'
-import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  Key,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -67,6 +74,10 @@ import {
   ClusterInfoFlyoverTab,
 } from './info-flyover/ClusterInfoFlyover.tsx'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import {
+  dayjsExtended,
+  dayjsExtended as dayjs,
+} from '../../../utils/datetime.ts'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -78,6 +89,7 @@ type TableWrapperSCProps = {
 }
 
 export type ClustersTableMeta = {
+  now: dayjsExtended.Dayjs
   refetch: () => void
   setFlyoverTab: (tab: ClusterInfoFlyoverTab) => void
   setSelectedCluster: (cluster: ClustersRowFragment) => void
@@ -312,8 +324,15 @@ export function ClustersTable({
   const setSelectedCluster =
     setSelectedClusterProp ?? setSelectedClusterInternal
 
+  const [now, setNow] = useState(dayjs())
+
+  useEffect(() => {
+    const int = setInterval(() => setNow(dayjs()), 1000)
+    return () => clearInterval(int)
+  }, [])
+
   const reactTableOptions: { meta: ClustersTableMeta } = {
-    meta: { refetch, setFlyoverTab, setSelectedCluster },
+    meta: { now, refetch, setFlyoverTab, setSelectedCluster },
   }
 
   return (

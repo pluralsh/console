@@ -48,7 +48,11 @@ import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
-import { ClusterHealth, ClusterHealthScoreChip } from './ClusterHealthChip'
+import {
+  ClusterHealth,
+  ClusterHealthScoreChip,
+  isClusterHealthy,
+} from './ClusterHealthChip'
 import { ClustersTableMeta } from './Clusters.tsx'
 import { ClusterUpgradeButton } from './ClusterUpgradeButton.tsx'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
@@ -371,7 +375,7 @@ export const ColHealthScore = columnHelper.accessor(
     },
     cell: ({ table, row: { original } }) => {
       const cluster = original.node
-      const { setFlyoverTab, setSelectedCluster } = table.options
+      const { now, setFlyoverTab, setSelectedCluster } = table.options
         .meta as ClustersTableMeta
 
       if (!cluster) return null
@@ -383,6 +387,7 @@ export const ColHealthScore = columnHelper.accessor(
             setSelectedCluster?.(cluster)
             setFlyoverTab?.(ClusterInfoFlyoverTab.HealthScore)
           }}
+          inactive={!isClusterHealthy(now, cluster)}
         />
       )
     },
