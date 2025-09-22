@@ -1,6 +1,7 @@
 import {
   CheckRoundedIcon,
   Chip,
+  ChipProps,
   ChipSeverity,
   ErrorIcon,
   WarningIcon,
@@ -10,10 +11,11 @@ import { ClusterTinyFragment, ClustersRowFragment } from 'generated/graphql'
 export function ClusterUpgradeButton({
   cluster,
   onClick,
+  ...props
 }: {
   cluster?: Nullable<ClustersRowFragment>
   onClick: () => void
-}) {
+} & ChipProps) {
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
 
   return (
@@ -35,6 +37,7 @@ export function ClusterUpgradeButton({
         e.stopPropagation()
         onClick()
       }}
+      {...props}
     >
       {chipLabel}
     </Chip>
