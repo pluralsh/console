@@ -3,7 +3,6 @@ import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
-import { dayjsExtended } from '../../../utils/datetime.ts'
 
 export function ClusterHealth({
   cluster,
@@ -35,7 +34,7 @@ export function ClusterHealth({
 }
 
 export function isClusterHealthy(
-  now: dayjsExtended.Dayjs,
+  now: dayjs.Dayjs,
   cluster?: ClustersRowFragment
 ) {
   return (
