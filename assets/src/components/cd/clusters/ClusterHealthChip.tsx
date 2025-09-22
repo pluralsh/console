@@ -3,6 +3,7 @@ import { TooltipTime } from 'components/utils/TooltipTime'
 import { ClustersRowFragment } from 'generated/graphql'
 import { useEffect, useState } from 'react'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
+import { dayjsExtended } from '../../../utils/datetime.ts'
 
 export function ClusterHealth({
   cluster,
@@ -29,18 +30,26 @@ export function ClusterHealth({
     <ClusterHealthChip
       size={size}
       cluster={cluster}
-      pingedAt={cluster?.pingedAt}
     />
+  )
+}
+
+export function isClusterHealthy(
+  now: dayjsExtended.Dayjs,
+  cluster?: ClustersRowFragment
+) {
+  return (
+    cluster?.healthy ||
+    (cluster?.pingedAt &&
+      now.subtract(10, 'minutes').isBefore(dayjs(cluster.pingedAt)))
   )
 }
 
 function ClusterHealthChip({
   size,
   cluster,
-  pingedAt,
 }: {
   cluster?: ClustersRowFragment
-  pingedAt?: string | null
   size: ChipProps['size']
 }) {
   const [now, setNow] = useState(dayjs())
@@ -50,19 +59,17 @@ function ClusterHealthChip({
     return () => clearInterval(int)
   }, [])
 
-  const pinged = pingedAt !== null
-  const healthy =
-    cluster?.healthy ||
-    (pingedAt && now.subtract(10, 'minutes').isBefore(dayjs(pingedAt)))
+  const pinged = cluster?.pingedAt !== null
+  const healthy = isClusterHealthy(now, cluster)
 
   return (
     <TooltipTime
       startContent={
         pinged
-          ? `Pinged: ${formatDateTime(pingedAt, 'MMM D, h:mm')}`
+          ? `Pinged: ${formatDateTime(cluster?.pingedAt, 'MMM D, h:mm')}`
           : `This cluster was not pinged yet`
       }
-      date={pingedAt}
+      date={cluster?.pingedAt}
       css={{ alignSelf: 'center' }}
     >
       <Chip
