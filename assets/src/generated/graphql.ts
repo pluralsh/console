@@ -13981,6 +13981,15 @@ export type FlowMcpServersQueryVariables = Exact<{
 
 export type FlowMcpServersQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, servers?: Array<{ __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null> | null } | null };
 
+export type FlowVulnerabilityReportsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type FlowVulnerabilityReportsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null } | null };
+
 export type UpsertFlowMutationVariables = Exact<{
   attributes: FlowAttributes;
 }>;
@@ -15161,6 +15170,8 @@ export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatis
 export type ClusterVulnAggregateFragment = { __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null };
 
 export type CvssBundleFragment = { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
+
+export type VulnerabilityReportConnectionFragment = { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null };
 
 export type VulnerabilityReportsQueryVariables = Exact<{
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
@@ -19309,6 +19320,19 @@ export const ClusterVulnAggregateFragmentDoc = gql`
   count
 }
     `;
+export const VulnerabilityReportConnectionFragmentDoc = gql`
+    fragment VulnerabilityReportConnection on VulnerabilityReportConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...VulnerabilityReportTiny
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${VulnerabilityReportTinyFragmentDoc}`;
 export const AiPinsDocument = gql`
     query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
   aiPins(first: $first, last: $last, after: $after, before: $before) {
@@ -27194,6 +27218,51 @@ export type FlowMcpServersQueryHookResult = ReturnType<typeof useFlowMcpServersQ
 export type FlowMcpServersLazyQueryHookResult = ReturnType<typeof useFlowMcpServersLazyQuery>;
 export type FlowMcpServersSuspenseQueryHookResult = ReturnType<typeof useFlowMcpServersSuspenseQuery>;
 export type FlowMcpServersQueryResult = Apollo.QueryResult<FlowMcpServersQuery, FlowMcpServersQueryVariables>;
+export const FlowVulnerabilityReportsDocument = gql`
+    query FlowVulnerabilityReports($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    vulnerabilityReports(first: $first, after: $after) {
+      ...VulnerabilityReportConnection
+    }
+  }
+}
+    ${VulnerabilityReportConnectionFragmentDoc}`;
+
+/**
+ * __useFlowVulnerabilityReportsQuery__
+ *
+ * To run a query within a React component, call `useFlowVulnerabilityReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlowVulnerabilityReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlowVulnerabilityReportsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useFlowVulnerabilityReportsQuery(baseOptions: Apollo.QueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+      }
+export function useFlowVulnerabilityReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+        }
+export function useFlowVulnerabilityReportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+        }
+export type FlowVulnerabilityReportsQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsQuery>;
+export type FlowVulnerabilityReportsLazyQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsLazyQuery>;
+export type FlowVulnerabilityReportsSuspenseQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsSuspenseQuery>;
+export type FlowVulnerabilityReportsQueryResult = Apollo.QueryResult<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>;
 export const UpsertFlowDocument = gql`
     mutation UpsertFlow($attributes: FlowAttributes!) {
   upsertFlow(attributes: $attributes) {
@@ -32207,18 +32276,10 @@ export const VulnerabilityReportsDocument = gql`
     first: $first
     after: $after
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...VulnerabilityReportTiny
-      }
-    }
+    ...VulnerabilityReportConnection
   }
 }
-    ${PageInfoFragmentDoc}
-${VulnerabilityReportTinyFragmentDoc}`;
+    ${VulnerabilityReportConnectionFragmentDoc}`;
 
 /**
  * __useVulnerabilityReportsQuery__
@@ -32489,6 +32550,7 @@ export const namedOperations = {
     FlowPreviewEnvironmentInstances: 'FlowPreviewEnvironmentInstances',
     FlowPreviewEnvironmentTemplates: 'FlowPreviewEnvironmentTemplates',
     FlowMcpServers: 'FlowMcpServers',
+    FlowVulnerabilityReports: 'FlowVulnerabilityReports',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -32939,6 +33001,7 @@ export const namedOperations = {
     Vulnerability: 'Vulnerability',
     VulnerabilityStatistic: 'VulnerabilityStatistic',
     ClusterVulnAggregate: 'ClusterVulnAggregate',
-    CvssBundle: 'CvssBundle'
+    CvssBundle: 'CvssBundle',
+    VulnerabilityReportConnection: 'VulnerabilityReportConnection'
   }
 }

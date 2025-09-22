@@ -1,8 +1,9 @@
 import { ComponentProps, ReactNode, memo } from 'react'
 import styled, { DefaultTheme } from 'styled-components'
 
-import { TRUNCATE } from '../truncate'
 import { SemanticColorKey } from '@pluralsh/design-system'
+import { TRUNCATE } from '../truncate'
+import { RectangleSkeleton } from '../SkeletonLoaders'
 
 type PartialType = keyof DefaultTheme['partials']['text']
 type SpacingType = keyof DefaultTheme['spacing']
@@ -54,6 +55,7 @@ export const StackedText = memo(
     firstColor,
     secondColor,
     gap,
+    loading = false,
     ...props
   }: {
     first: ReactNode
@@ -64,10 +66,11 @@ export const StackedText = memo(
     firstColor?: SemanticColorKey
     secondColor?: SemanticColorKey
     gap?: SpacingType
+    loading?: boolean
   } & ComponentProps<typeof StackedTextSC>) => (
     <StackedTextSC
       $truncate={truncate}
-      $gap={gap}
+      $gap={loading ? 'xxsmall' : gap}
       {...props}
     >
       <FirstSC
@@ -75,7 +78,7 @@ export const StackedText = memo(
         $truncate={truncate}
         $color={firstColor}
       >
-        {first}
+        {loading ? <RectangleSkeleton /> : first}
       </FirstSC>
       {second && (
         <SecondSC
@@ -83,7 +86,7 @@ export const StackedText = memo(
           $partialType={secondPartialType}
           $color={secondColor}
         >
-          {second}
+          {loading ? <RectangleSkeleton /> : second}
         </SecondSC>
       )}
     </StackedTextSC>

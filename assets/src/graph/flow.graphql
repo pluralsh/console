@@ -170,6 +170,15 @@ query FlowMcpServers($id: ID!) {
   }
 }
 
+query FlowVulnerabilityReports($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    vulnerabilityReports(first: $first, after: $after) {
+      ...VulnerabilityReportConnection
+    }
+  }
+}
+
 mutation UpsertFlow($attributes: FlowAttributes!) {
   upsertFlow(attributes: $attributes) {
     ...FlowBasicWithBindings
