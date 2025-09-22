@@ -387,7 +387,7 @@ export const ColHealthScore = columnHelper.accessor(
             setSelectedCluster?.(cluster)
             setFlyoverTab?.(ClusterInfoFlyoverTab.HealthScore)
           }}
-          {...(isClusterHealthy(now, cluster) ? {} : { inactive: true })}
+          inactive={!isClusterHealthy(now, cluster)}
         />
       )
     },
