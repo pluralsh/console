@@ -93,18 +93,16 @@ export function usePrAutomationForm({
   prAutomation,
   onSuccess,
   threadId,
-  preFilledContext,
-  preFilledBranch,
+  prCallAttributes,
 }: {
   prAutomation: Nullable<PrAutomationFragment>
   onSuccess?: () => void
   threadId?: string
-  preFilledContext?: PrCallAttributes['context']
-  preFilledBranch?: PrCallAttributes['branch']
+  prCallAttributes?: Nullable<PrCallAttributes>
 }) {
   const defaults = useMemo(
-    () => getStateDefaults(prAutomation, preFilledContext, preFilledBranch),
-    [prAutomation, preFilledContext, preFilledBranch]
+    () => getStateDefaults(prAutomation, prCallAttributes),
+    [prAutomation, prCallAttributes]
   )
 
   const [curConfigVals, setCurConfigVals] = useState(defaults.curConfigVals)
@@ -191,21 +189,21 @@ export function usePrAutomationForm({
 
 const getStateDefaults = (
   prAutomation: Nullable<PrAutomationFragment>,
-  preFilledContext?: PrCallAttributes['context'],
-  preFilledBranch?: PrCallAttributes['branch']
+  prCallAttributes?: Nullable<PrCallAttributes>
 ) => {
   const { configuration, confirmation } = prAutomation ?? {}
+  const { branch, context } = prCallAttributes ?? {}
   return {
     curConfigVals: Object.fromEntries(
       configuration
         ?.filter(isNonNullable)
         .map((cfg) => [
           cfg.name,
-          `${preFilledContext?.[cfg.name] || cfg.default || ''}`,
+          `${context?.[cfg.name] || cfg.default || ''}`,
         ]) ?? []
     ),
     reviewFormState: {
-      branch: preFilledBranch ?? '',
+      branch: branch ?? '',
       identifier: prAutomation?.identifier ?? '',
       checkedItems: Object.fromEntries(
         confirmation?.checklist

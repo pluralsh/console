@@ -111,8 +111,7 @@ export function ChatMessageContent({
           prAutomation={prAutomation}
           threadId={threadId}
           session={session}
-          context={attributes?.prCall?.context}
-          branch={attributes?.prCall?.branch}
+          attributes={attributes?.prCall}
         />
       )
     case ChatType.Text:
@@ -267,14 +266,12 @@ export function ChatbotCreatePrButton({
   prAutomation,
   threadId,
   session,
-  context,
-  branch,
+  attributes,
 }: {
   prAutomation?: Nullable<PrAutomationFragment>
   threadId?: string
   session?: Nullable<AgentSessionFragment>
-  context?: PrCallAttributes['context']
-  branch?: PrCallAttributes['branch']
+  attributes?: Nullable<PrCallAttributes>
 }) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -297,8 +294,7 @@ export function ChatbotCreatePrButton({
         open={open}
         onClose={() => setOpen(false)}
         onSuccess={() => setCreated(true)}
-        preFilledContext={context}
-        preFilledBranch={branch}
+        prCallAttributes={attributes}
       />
     </>
   ) : (
@@ -324,11 +320,9 @@ function PrCallContent({
   prAutomation,
   threadId,
   session,
-  context,
-  branch,
+  attributes,
 }: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId' | 'session'> & {
-  context?: PrCallAttributes['context']
-  branch?: PrCallAttributes['branch']
+  attributes?: Nullable<PrCallAttributes>
 }) {
   const theme = useTheme()
 
@@ -370,8 +364,7 @@ function PrCallContent({
           prAutomation={prAutomation}
           threadId={threadId}
           session={session}
-          context={context}
-          branch={branch}
+          attributes={attributes}
         />
       </Flex>
     </Card>

@@ -154,7 +154,7 @@ export function ChatbotActionsPanel({
                   prAutomation={prAutomation}
                   threadId={currentThreadId}
                   session={curSession}
-                  context={attributes?.prCall?.context}
+                  attributes={attributes?.prCall}
                 />
               </ActionItemSC>
             ))}
