@@ -71,19 +71,21 @@ defmodule Console.OCI.Client do
   end
 
   defp authed_get(%__MODULE__{client: req, auth_client: auth} = client, url, opts \\ []) do
-    case Req.get(req, add_opts(req, [url: url], opts)) do
-      {:ok, %Req.Response{status: 200}} = resp -> resp
-      {:ok, %Req.Response{status: 401, headers: %{"www-authenticate" => [www_auth | _]}}} ->
+    {no_recurse, opts} = Keyword.pop(opts, :no_recurse, false)
+    case {Req.get(req, add_opts(req, [url: url], opts)), no_recurse} do
+      {{:ok, %Req.Response{status: 200}} = resp, true} -> resp
+      {{:ok, %Req.Response{status: 401, headers: %{"www-authenticate" => [www_auth | _]}}}, false} ->
         with [bearer: auth_params] <- :cow_http_hd.parse_www_authenticate(www_auth),
              %{"realm" => auth_url, "service" => svc, "scope" => scope} = Map.new(auth_params),
             {:ok, token} <- authenticate(auth_url, svc, scope, auth) do
           with_token(client, token)
-          |> authed_get(url, opts)
+          |> authed_get(url, Keyword.put(opts, :no_recurse, true))
         else
           {:error, _} = err -> err
           _ -> {:error, "could not resolve authentication for #{url}"}
         end
-      err -> err
+      {_, true} -> {:error, "could not resolve authentication for #{url}"}
+      {err, _} -> err
     end
   end
 
@@ -124,6 +126,10 @@ defmodule Console.OCI.Client do
   defp handle_error({:ok, %Req.Response{body: body}}), do: {:error, "OCI error: #{inspect(body)}"}
   defp handle_error(err) do
     Logger.warning "oci client error: #{inspect(err)}"
-    {:error, "oci client error"}
+    {:error, "oci client error #{format(err)}"}
   end
+
+  defp format({:error, err}) when is_binary(err), do: err
+  defp format({:error, err}), do: "unknown error: #{inspect(err)}"
+  defp format(_), do: "unknown error"
 end
