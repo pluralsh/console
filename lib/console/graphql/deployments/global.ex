@@ -4,18 +4,19 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "A reference for a globalized service, which targets clusters based on the configured criteria"
   input_object :global_service_attributes do
-    field :name,        non_null(:string), description: "name for this global service"
-    field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
-    field :distro,      :cluster_distro, description: "kubernetes distribution to target"
-    field :mgmt,        :boolean, description: "whether to include management clusters in the target set"
-    field :provider_id, :id, description: "cluster api provider to target"
-    field :project_id,  :id, description: "a project this global service will sync across"
-    field :parent_id,   :id, description: "the id of the service creating this"
-    field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
-    field :template,    :service_template_attributes
-    field :interval,    :string, description: "the interval at which the global service will be reconciled, default is 10m"
-    field :cascade,     :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
-    field :context,     :template_context_attributes, description: "additional context used to template service metadata during global service reconciliation"
+    field :name,            non_null(:string), description: "name for this global service"
+    field :tags,            list_of(:tag_attributes), description: "the cluster tags to target"
+    field :distro,          :cluster_distro, description: "kubernetes distribution to target"
+    field :mgmt,            :boolean, description: "whether to include management clusters in the target set"
+    field :provider_id,     :id, description: "cluster api provider to target"
+    field :project_id,      :id, description: "a project this global service will sync across"
+    field :parent_id,       :id, description: "the id of the service creating this"
+    field :reparent,        :boolean, description: "whether you want the global service to take ownership of existing plural services"
+    field :template,        :service_template_attributes
+    field :interval,        :string, description: "the interval at which the global service will be reconciled, default is 10m"
+    field :cascade,         :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
+    field :context,         :template_context_attributes, description: "additional context used to template service metadata during global service reconciliation"
+    field :ignore_clusters, list_of(:id), description: "the id of the clusters to ignore"
   end
 
   @desc "Attributes for configuring a managed namespace"
@@ -71,13 +72,14 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
-    field :id,       non_null(:id), description: "internal id of this global service"
-    field :name,     non_null(:string), description: "a human readable name for this global service"
-    field :tags,     list_of(:tag), description: "a set of tags to select clusters for this global service"
-    field :distro,   :cluster_distro, description: "the kubernetes distribution to target with this global service"
-    field :mgmt,     :boolean, description: "whether to include management clusters in the target set"
-    field :reparent, :boolean, description: "whether you want to reparent existing plural services under this global service"
-    field :cascade,  :cascade, description: "behavior for all owned resources when this global service is deleted"
+    field :id,              non_null(:id), description: "internal id of this global service"
+    field :name,            non_null(:string), description: "a human readable name for this global service"
+    field :tags,            list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :distro,          :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :mgmt,            :boolean, description: "whether to include management clusters in the target set"
+    field :reparent,        :boolean, description: "whether you want to reparent existing plural services under this global service"
+    field :cascade,         :cascade, description: "behavior for all owned resources when this global service is deleted"
+    field :ignore_clusters, list_of(:id), description: "the id of the clusters to ignore"
 
     field :parent,   :service_deployment, resolve: dataloader(Deployments), description: "the service which created this global service"
     field :project,  :project,            resolve: dataloader(Deployments), description: "a project this global service is bound to"

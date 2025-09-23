@@ -1,6 +1,7 @@
 import {
   Button,
   CaretUpIcon,
+  ChatOutlineIcon,
   KubernetesIcon,
   ListBoxItem,
   RocketIcon,
@@ -120,5 +121,10 @@ const options = [
     type: AgentSessionType.Search,
     description: 'Query your existing infra',
     icon: <SearchIcon />,
+  },
+  {
+    type: AgentSessionType.Chat,
+    description: 'Chat about your existing infra',
+    icon: <ChatOutlineIcon />,
   },
 ]

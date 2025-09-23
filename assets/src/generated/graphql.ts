@@ -469,6 +469,7 @@ export type AgentSessionEdge = {
 };
 
 export enum AgentSessionType {
+  Chat = 'CHAT',
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',
@@ -3664,6 +3665,8 @@ export type GlobalService = {
   distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
   id: Scalars['ID']['output'];
+  /** the id of the clusters to ignore */
+  ignoreClusters?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether to include management clusters in the target set */
   mgmt?: Maybe<Scalars['Boolean']['output']>;
@@ -3705,6 +3708,8 @@ export type GlobalServiceAttributes = {
   context?: InputMaybe<TemplateContextAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
+  /** the id of the clusters to ignore */
+  ignoreClusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   /** the interval at which the global service will be reconciled, default is 10m */
   interval?: InputMaybe<Scalars['String']['input']>;
   /** whether to include management clusters in the target set */

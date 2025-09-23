@@ -23,6 +23,7 @@ defmodule Console.AI.Tools.Agent.Role do
   - search: The assistant will help the user understand their kubernetes and cloud estate, and provide links to the Plural Console to dive into it further.
   - provisioning: The assistant will help the user provision new kubernetes or cloud infrastructure or destroy existing resources, use this whenever the user asks to deploy something new or deprovision something already created.
   - manifests: The assistant will help the user write new kubernetes yaml manifests within the context of a cluster.
+  - chat: The assistant will handle a generic q&a conversation about the devops related question the user is asking.
   """
 
   def implement(%__MODULE__{role: role}) do

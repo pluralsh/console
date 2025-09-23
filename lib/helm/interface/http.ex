@@ -47,8 +47,9 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   def chart(%@for{repo: %HelmRepository{url: "http" <> _}} = client, %Index{entries: entries}, chart, vsn) do
     entries = Map.new(entries, & {&1.name, &1.versions})
     with {:chart, %{^chart => charts}} <- {:chart, entries},
-         {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)} do
-      {:ok, client, hd(chart.urls), chart.digest}
+         {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)},
+         {:ok, url} <- check_url(chart.urls) do
+      {:ok, client, url, chart.digest}
     else
       {:chart, _} -> {:error, "could not find chart #{chart}"}
       {:version, _} -> {:error, "could not find version #{vsn}"}
@@ -62,4 +63,8 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   end
 
   def download(%{client: client}, url, to), do: Req.get(client, url: url, into: to)
+
+  defp check_url(["oci://" <> _ = url | _]), do: {:error, "invalid oci helm url: #{url}"}
+  defp check_url([url | _]) when is_binary(url), do: {:ok, url}
+  defp check_url(_), do: {:error, "no urls found for chart"}
 end

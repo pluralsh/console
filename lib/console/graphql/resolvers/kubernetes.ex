@@ -281,7 +281,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_response()
   end
 
-  def list_namespaces(_, _), do: {:ok, Console.namespaces()}
+  # def list_namespaces(_, _), do: {:ok, Console.namespaces()}
 
   defp namespace_params(%{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)
