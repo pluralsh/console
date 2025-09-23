@@ -469,6 +469,7 @@ export type AgentSessionEdge = {
 };
 
 export enum AgentSessionType {
+  Chat = 'CHAT',
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',

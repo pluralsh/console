@@ -8953,6 +8953,7 @@ enum AgentSessionType {
   PROVISIONING
   SEARCH
   MANIFESTS
+  CHAT
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"

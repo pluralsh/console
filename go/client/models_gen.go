@@ -7868,6 +7868,7 @@ const (
 	AgentSessionTypeProvisioning AgentSessionType = "PROVISIONING"
 	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
+	AgentSessionTypeChat         AgentSessionType = "CHAT"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -7876,11 +7877,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeProvisioning,
 	AgentSessionTypeSearch,
 	AgentSessionTypeManifests,
+	AgentSessionTypeChat,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat:
 		return true
 	}
 	return false

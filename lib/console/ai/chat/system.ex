@@ -8,6 +8,7 @@ defmodule Console.AI.Chat.System do
   @agent_pre Console.priv_file!("prompts/agent_pre.md")
   @agent_search Console.priv_file!("prompts/agent_search.md")
   @agent_manifests Console.priv_file!("prompts/agent_manifests.md")
+  @agent_chat Console.priv_file!("prompts/agent_chat.md")
   @provisioning Console.priv_file!("prompts/provisioning.md")
   @code_agent Console.priv_file!("prompts/terraform_agent.md")
   @code_pr Console.priv_file!("prompts/terraform_pr.md")
@@ -26,6 +27,7 @@ defmodule Console.AI.Chat.System do
   def prompt(%ChatThread{session: %AgentSession{type: :search}}), do: @agent_search
   def prompt(%ChatThread{session: %AgentSession{type: :provisioning}}), do: @provisioning
   def prompt(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests
+  def prompt(%ChatThread{session: %AgentSession{type: :chat}}), do: @agent_chat
   def prompt(%ChatThread{session: %AgentSession{}}), do: @agent_pre
   def prompt(_), do: @chat
 end
