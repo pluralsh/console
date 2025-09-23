@@ -1,3 +1,5 @@
+import { getFlowDetailsPath } from './flowRoutesConsts'
+
 export const SECURITY_REL_PATH = 'security' as const
 export const SECURITY_ABS_PATH = `/${SECURITY_REL_PATH}` as const
 
@@ -33,18 +35,26 @@ export function getPolicyPath({
 
 export function getVulnerabilityReportsPath({
   clusterId,
+  flowId,
 }: {
-  clusterId: string | null | undefined
+  clusterId?: Nullable<string>
+  flowId?: Nullable<string>
 }) {
-  return `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId ?? ''}`
+  return flowId
+    ? `${getFlowDetailsPath({ flowId })}/${VULNERABILITY_REPORTS_REL_PATH}`
+    : `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId ?? ''}`
 }
 
 export function getVulnerabilityReportDetailsPath({
   clusterId,
+  flowId,
   vulnerabilityReportId,
 }: {
-  clusterId: string
+  clusterId?: Nullable<string>
+  flowId?: Nullable<string>
   vulnerabilityReportId: string
 }) {
-  return `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId}/report/${vulnerabilityReportId}`
+  return flowId
+    ? `${getFlowDetailsPath({ flowId })}/${VULNERABILITY_REPORTS_REL_PATH}/${vulnerabilityReportId}`
+    : `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId}/report/${vulnerabilityReportId}`
 }

@@ -31,7 +31,7 @@ import {
   VulnReportGrade,
 } from 'generated/graphql'
 import { useState } from 'react'
-import { gradeToTextColorMap } from '../vulnerabilities/VulnReports'
+import { gradeToTextColorMap } from '../vulnerabilities/VulnReportsTableCols'
 import {
   SecurityChartData,
   SecurityChartDatum,

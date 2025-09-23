@@ -21,6 +21,14 @@ import {
   getPodDetailsRoutes,
   getServiceDetailsRoutes,
 } from './cdRoutes.tsx'
+import { FlowVulnerabilityReports } from 'components/flows/flow/FlowVulnerabilityReports.tsx'
+import {
+  VULNERABILITY_REPORT_PARAM_ID,
+  VULNERABILITY_REPORTS_REL_PATH,
+} from './securityRoutesConsts.tsx'
+import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails.tsx'
+
+const FLOW_ABS_PREFIX = `${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}`
 
 export const flowRoutes = [
   <Route
@@ -28,7 +36,7 @@ export const flowRoutes = [
     element={<Flows />}
   />,
   <Route
-    path={`${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}`}
+    path={FLOW_ABS_PREFIX}
     element={<Flow />}
   >
     <Route
@@ -64,10 +72,18 @@ export const flowRoutes = [
       path={FLOW_MCP_CONNECTIONS_REL_PATH}
       element={<FlowMcpConnections />}
     />
+    <Route
+      path={VULNERABILITY_REPORTS_REL_PATH}
+      element={<FlowVulnerabilityReports />}
+    />
   </Route>,
   <Route
-    path={`${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}/${ALERT_INSIGHT_REL_PATH}`}
+    path={`${FLOW_ABS_PREFIX}/${ALERT_INSIGHT_REL_PATH}`}
     element={<FlowAlertInsight />}
+  />,
+  <Route
+    path={`${FLOW_ABS_PREFIX}/${VULNERABILITY_REPORTS_REL_PATH}/:${VULNERABILITY_REPORT_PARAM_ID}`}
+    element={<VulnerabilityReportDetails />}
   />,
   getServiceDetailsRoutes('flow'),
   getPodDetailsRoutes('flow'),

@@ -94,6 +94,17 @@ fragment CvssBundle on CvssBundle {
   }
 }
 
+fragment VulnerabilityReportConnection on VulnerabilityReportConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...VulnerabilityReportTiny
+    }
+  }
+}
+
 query VulnerabilityReports(
   $clusters: [ID]
   $namespaces: [String]
@@ -110,14 +121,7 @@ query VulnerabilityReports(
     first: $first
     after: $after
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...VulnerabilityReportTiny
-      }
-    }
+    ...VulnerabilityReportConnection
   }
 }
 

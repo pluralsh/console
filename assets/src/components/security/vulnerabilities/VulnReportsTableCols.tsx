@@ -3,15 +3,18 @@ import {
   ChipProps,
   Flex,
   semanticColorCssVars,
+  SemanticColorKey,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { TableCaretLink } from 'components/cluster/TableElements'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
-import { VulnerabilityReportTinyFragment } from 'generated/graphql'
+import {
+  VulnerabilityReportTinyFragment,
+  VulnReportGrade,
+} from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
 import { useTheme } from 'styled-components'
-import { gradeToSeverityMap } from './VulnReports'
 
 const columnHelper = createColumnHelper<VulnerabilityReportTinyFragment>()
 
@@ -169,3 +172,23 @@ export const ColActions = columnHelper.display({
     )
   },
 })
+
+export const gradeToSeverityMap: Record<
+  VulnReportGrade | 'All',
+  ChipProps['severity']
+> = {
+  [VulnReportGrade.A]: 'success',
+  [VulnReportGrade.B]: 'neutral',
+  [VulnReportGrade.C]: 'warning',
+  [VulnReportGrade.D]: 'danger',
+  [VulnReportGrade.F]: 'critical',
+  All: 'neutral',
+}
+
+export const gradeToTextColorMap: Record<VulnReportGrade, SemanticColorKey> = {
+  [VulnReportGrade.A]: 'text-success',
+  [VulnReportGrade.B]: 'text',
+  [VulnReportGrade.C]: 'text-warning',
+  [VulnReportGrade.D]: 'text-danger-light',
+  [VulnReportGrade.F]: 'text-danger',
+}
