@@ -14,29 +14,16 @@ export enum SinceSecondsOptions {
   HalfHour = SinceSecondsOptions.Minute * 30,
   Hour = SinceSecondsOptions.Minute * 60,
   Day = SinceSecondsOptions.Hour * 24,
+  Week = SinceSecondsOptions.Day * 7,
 }
 
 export const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
-  {
-    key: SinceSecondsOptions.Minute,
-    label: '1 minute',
-  },
-  {
-    key: SinceSecondsOptions.QuarterHour,
-    label: '15 minutes',
-  },
-  {
-    key: SinceSecondsOptions.HalfHour,
-    label: '30 minutes',
-  },
-  {
-    key: SinceSecondsOptions.Hour,
-    label: '1 hour',
-  },
-  {
-    key: SinceSecondsOptions.Day,
-    label: '1 day',
-  },
+  { key: SinceSecondsOptions.Minute, label: '1 minute' },
+  { key: SinceSecondsOptions.QuarterHour, label: '15 minutes' },
+  { key: SinceSecondsOptions.HalfHour, label: '30 minutes' },
+  { key: SinceSecondsOptions.Hour, label: '1 hour' },
+  { key: SinceSecondsOptions.Day, label: '1 day' },
+  { key: SinceSecondsOptions.Week, label: '7 days' },
 ]
 
 function Logs(): ReactElement<any> {
