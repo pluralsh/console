@@ -3,6 +3,7 @@ import {
   Card,
   Chip,
   ChipList,
+  EmptyState,
   Flex,
   SidecarItem,
   Table,
@@ -17,18 +18,17 @@ import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
-  Common_Event as EventT,
   Common_EventList as EventListT,
-  Node_NodeDetail as NodeT,
+  Common_Event as EventT,
   NodeEventsDocument,
   NodeEventsQuery,
   NodeEventsQueryVariables,
   NodePodsDocument,
   NodePodsQuery,
   NodePodsQueryVariables,
-  NodeQueryVariables,
-  Pod_Pod as PodT,
+  Node_NodeDetail as NodeT,
   Pod_PodList as PodListT,
+  Pod_Pod as PodT,
   useNodeQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -49,6 +49,7 @@ import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
 
+import { GqlError } from 'components/utils/Alert.tsx'
 import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { usePodsColumns } from '../workloads/Pods'
 import { useEventsColumns } from './Events'
@@ -64,20 +65,19 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Node() {
+  const { spacing } = useTheme()
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const [open, setOpen] = useState(false)
 
-  const { data, loading } = useNodeQuery({
+  const { data, loading, error } = useNodeQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-    } as NodeQueryVariables,
+    variables: { name },
   })
 
-  const node = data?.handleGetNodeDetail as NodeT
+  const node = data?.handleGetNodeDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -92,7 +92,17 @@ export default function Node() {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (!node)
+    return error ? (
+      <GqlError
+        error={error}
+        css={{ margin: spacing.large }}
+      />
+    ) : loading ? (
+      <LoadingIndicator />
+    ) : (
+      <EmptyState message="Node not found" />
+    )
 
   return (
     <ResourceDetails
@@ -129,9 +139,7 @@ export default function Node() {
                 {node?.unschedulable ? 'True' : 'False'}
               </Chip>
             </SidecarItem>
-            {node.podCIDR && (
-              <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
-            )}
+            <SidecarItem heading="Pod CIDR">{node.podCIDR}</SidecarItem>
           </MetadataSidecar>
         </Flex>
       }
@@ -295,7 +303,7 @@ export function NodeInfo() {
 }
 
 export function NodeConditions() {
-  const node = useOutletContext() as NodeT
+  const node = useOutletContext<NodeT>()
 
   return <Conditions conditions={node.conditions} />
 }
@@ -311,7 +319,7 @@ const columns = [
 ]
 
 export function NodeContainerImages() {
-  const node = useOutletContext() as NodeT
+  const node = useOutletContext<NodeT>()
 
   return (
     <Table
