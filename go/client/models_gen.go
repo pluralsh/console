@@ -130,6 +130,135 @@ type AgentBindingAttributes struct {
 	GroupName *string `json:"groupName,omitempty"`
 }
 
+type AgentMessage struct {
+	ID string `json:"id"`
+	// the message to send to the agent
+	Message string `json:"message"`
+	// the sequence number of the message
+	Seq int64 `json:"seq"`
+	// the cost of the message
+	Cost *AgentMessageCost `json:"cost,omitempty"`
+	// the metadata of the message
+	Metadata   *AgentMessageMetadata `json:"metadata,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type AgentMessageAttributes struct {
+	// the message to send to the agent
+	Message  string                          `json:"message"`
+	Cost     *AgentMessageCostAttributes     `json:"cost,omitempty"`
+	Metadata *AgentMessageMetadataAttributes `json:"metadata,omitempty"`
+}
+
+type AgentMessageCost struct {
+	// the total cost of the message
+	Total float64 `json:"total"`
+	// the tokens of the message
+	Tokens *AgentMessageTokens `json:"tokens,omitempty"`
+}
+
+type AgentMessageCostAttributes struct {
+	// the total cost of the message
+	Total float64 `json:"total"`
+	// the tokens of the message
+	Tokens *AgentMessageTokensAttributes `json:"tokens,omitempty"`
+}
+
+type AgentMessageFile struct {
+	// the name of the file
+	Name *string `json:"name,omitempty"`
+	// the text of the file
+	Text *string `json:"text,omitempty"`
+	// the start of the file
+	Start *int64 `json:"start,omitempty"`
+	// the end of the file
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageFileAttributes struct {
+	// the name of the file
+	Name *string `json:"name,omitempty"`
+	// the text of the file
+	Text *string `json:"text,omitempty"`
+	// the start of the file
+	Start *int64 `json:"start,omitempty"`
+	// the end of the file
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageMetadata struct {
+	// the reasoning of the message
+	Reasoning *AgentMessageReasoning `json:"reasoning,omitempty"`
+	// the file of the message
+	File *AgentMessageFile `json:"file,omitempty"`
+	// the tool of the message
+	Tool *AgentMessageTool `json:"tool,omitempty"`
+}
+
+type AgentMessageMetadataAttributes struct {
+	// the reasoning of the message
+	Reasoning *AgentMessageReasoningAttributes `json:"reasoning,omitempty"`
+	// the file of the message
+	File *AgentMessageFileAttributes `json:"file,omitempty"`
+	// the tool of the message
+	Tool *AgentMessageToolAttributes `json:"tool,omitempty"`
+}
+
+type AgentMessageReasoning struct {
+	// the text of the reasoning
+	Text *string `json:"text,omitempty"`
+	// the start of the reasoning
+	Start *int64 `json:"start,omitempty"`
+	// the end of the reasoning
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageReasoningAttributes struct {
+	// the text of the reasoning
+	Text *string `json:"text,omitempty"`
+	// the start of the reasoning
+	Start *int64 `json:"start,omitempty"`
+	// the end of the reasoning
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageTokens struct {
+	// the input tokens of the message
+	Input *float64 `json:"input,omitempty"`
+	// the output tokens of the message
+	Output *float64 `json:"output,omitempty"`
+	// the reasoning tokens of the message
+	Reasoning *float64 `json:"reasoning,omitempty"`
+}
+
+type AgentMessageTokensAttributes struct {
+	// the input tokens of the message
+	Input *float64 `json:"input,omitempty"`
+	// the output tokens of the message
+	Output *float64 `json:"output,omitempty"`
+	// the reasoning tokens of the message
+	Reasoning *float64 `json:"reasoning,omitempty"`
+}
+
+type AgentMessageTool struct {
+	// the name of the tool
+	Name *string `json:"name,omitempty"`
+	// the state of the tool
+	State *AgentMessageToolState `json:"state,omitempty"`
+	// the output of the tool
+	Output *string `json:"output,omitempty"`
+}
+
+type AgentMessageToolAttributes struct {
+	// the name of the tool
+	Name *string `json:"name,omitempty"`
+	// the state of the tool
+	State *AgentMessageToolState `json:"state,omitempty"`
+	// the output of the tool
+	Output *string `json:"output,omitempty"`
+}
+
 // a representation of a bulk operation to be performed on all agent services
 type AgentMigration struct {
 	ID            string         `json:"id"`
@@ -152,11 +281,12 @@ type AgentPodReference struct {
 	Namespace string `json:"namespace"`
 }
 
-// A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering
-type AgentPromptHistory struct {
+type AgentPrompt struct {
 	ID string `json:"id"`
 	// the prompt to give this agent run
-	Prompt     string  `json:"prompt"`
+	Prompt string `json:"prompt"`
+	// the sequence number of the prompt
+	Seq        int64   `json:"seq"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
@@ -199,7 +329,9 @@ type AgentRun struct {
 	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
 	Pod *Pod `json:"pod,omitempty"`
 	// the prompts this agent run has received
-	Prompts []*AgentPromptHistory `json:"prompts,omitempty"`
+	Prompts []*AgentPrompt `json:"prompts,omitempty"`
+	// the messages this agent run has generated during its run
+	Messages []*AgentMessage `json:"messages,omitempty"`
 	// the runtime this agent is using
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	// the user who initiated this agent run
@@ -236,6 +368,8 @@ type AgentRunEdge struct {
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
+	// the messages this agent run has generated during its run
+	Messages []*AgentMessageAttributes `json:"messages,omitempty"`
 	// the error reason of the agent run
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
@@ -7725,6 +7859,51 @@ type YamlOverlayAttributes struct {
 	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+}
+
+type AgentMessageToolState string
+
+const (
+	AgentMessageToolStatePending   AgentMessageToolState = "PENDING"
+	AgentMessageToolStateRunning   AgentMessageToolState = "RUNNING"
+	AgentMessageToolStateCompleted AgentMessageToolState = "COMPLETED"
+	AgentMessageToolStateError     AgentMessageToolState = "ERROR"
+)
+
+var AllAgentMessageToolState = []AgentMessageToolState{
+	AgentMessageToolStatePending,
+	AgentMessageToolStateRunning,
+	AgentMessageToolStateCompleted,
+	AgentMessageToolStateError,
+}
+
+func (e AgentMessageToolState) IsValid() bool {
+	switch e {
+	case AgentMessageToolStatePending, AgentMessageToolStateRunning, AgentMessageToolStateCompleted, AgentMessageToolStateError:
+		return true
+	}
+	return false
+}
+
+func (e AgentMessageToolState) String() string {
+	return string(e)
+}
+
+func (e *AgentMessageToolState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentMessageToolState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentMessageToolState", str)
+	}
+	return nil
+}
+
+func (e AgentMessageToolState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AgentRunMode string

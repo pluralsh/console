@@ -183,6 +183,149 @@ export type AgentBindingAttributes = {
   userEmail?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AgentMessage = {
+  __typename?: 'AgentMessage';
+  /** the cost of the message */
+  cost?: Maybe<AgentMessageCost>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the message to send to the agent */
+  message: Scalars['String']['output'];
+  /** the metadata of the message */
+  metadata?: Maybe<AgentMessageMetadata>;
+  /** the sequence number of the message */
+  seq: Scalars['Int']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentMessageAttributes = {
+  cost?: InputMaybe<AgentMessageCostAttributes>;
+  /** the message to send to the agent */
+  message: Scalars['String']['input'];
+  metadata?: InputMaybe<AgentMessageMetadataAttributes>;
+};
+
+export type AgentMessageCost = {
+  __typename?: 'AgentMessageCost';
+  /** the tokens of the message */
+  tokens?: Maybe<AgentMessageTokens>;
+  /** the total cost of the message */
+  total: Scalars['Float']['output'];
+};
+
+export type AgentMessageCostAttributes = {
+  /** the tokens of the message */
+  tokens?: InputMaybe<AgentMessageTokensAttributes>;
+  /** the total cost of the message */
+  total: Scalars['Float']['input'];
+};
+
+export type AgentMessageFile = {
+  __typename?: 'AgentMessageFile';
+  /** the end of the file */
+  end?: Maybe<Scalars['Int']['output']>;
+  /** the name of the file */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the start of the file */
+  start?: Maybe<Scalars['Int']['output']>;
+  /** the text of the file */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentMessageFileAttributes = {
+  /** the end of the file */
+  end?: InputMaybe<Scalars['Int']['input']>;
+  /** the name of the file */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the start of the file */
+  start?: InputMaybe<Scalars['Int']['input']>;
+  /** the text of the file */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessageMetadata = {
+  __typename?: 'AgentMessageMetadata';
+  /** the file of the message */
+  file?: Maybe<AgentMessageFile>;
+  /** the reasoning of the message */
+  reasoning?: Maybe<AgentMessageReasoning>;
+  /** the tool of the message */
+  tool?: Maybe<AgentMessageTool>;
+};
+
+export type AgentMessageMetadataAttributes = {
+  /** the file of the message */
+  file?: InputMaybe<AgentMessageFileAttributes>;
+  /** the reasoning of the message */
+  reasoning?: InputMaybe<AgentMessageReasoningAttributes>;
+  /** the tool of the message */
+  tool?: InputMaybe<AgentMessageToolAttributes>;
+};
+
+export type AgentMessageReasoning = {
+  __typename?: 'AgentMessageReasoning';
+  /** the end of the reasoning */
+  end?: Maybe<Scalars['Int']['output']>;
+  /** the start of the reasoning */
+  start?: Maybe<Scalars['Int']['output']>;
+  /** the text of the reasoning */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentMessageReasoningAttributes = {
+  /** the end of the reasoning */
+  end?: InputMaybe<Scalars['Int']['input']>;
+  /** the start of the reasoning */
+  start?: InputMaybe<Scalars['Int']['input']>;
+  /** the text of the reasoning */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessageTokens = {
+  __typename?: 'AgentMessageTokens';
+  /** the input tokens of the message */
+  input?: Maybe<Scalars['Float']['output']>;
+  /** the output tokens of the message */
+  output?: Maybe<Scalars['Float']['output']>;
+  /** the reasoning tokens of the message */
+  reasoning?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AgentMessageTokensAttributes = {
+  /** the input tokens of the message */
+  input?: InputMaybe<Scalars['Float']['input']>;
+  /** the output tokens of the message */
+  output?: InputMaybe<Scalars['Float']['input']>;
+  /** the reasoning tokens of the message */
+  reasoning?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type AgentMessageTool = {
+  __typename?: 'AgentMessageTool';
+  /** the name of the tool */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the output of the tool */
+  output?: Maybe<Scalars['String']['output']>;
+  /** the state of the tool */
+  state?: Maybe<AgentMessageToolState>;
+};
+
+export type AgentMessageToolAttributes = {
+  /** the name of the tool */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the output of the tool */
+  output?: InputMaybe<Scalars['String']['input']>;
+  /** the state of the tool */
+  state?: InputMaybe<AgentMessageToolState>;
+};
+
+export enum AgentMessageToolState {
+  Completed = 'COMPLETED',
+  Error = 'ERROR',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
 /** a representation of a bulk operation to be performed on all agent services */
 export type AgentMigration = {
   __typename?: 'AgentMigration';
@@ -207,13 +350,14 @@ export type AgentPodReference = {
   namespace: Scalars['String']['output'];
 };
 
-/** A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering */
-export type AgentPromptHistory = {
-  __typename?: 'AgentPromptHistory';
+export type AgentPrompt = {
+  __typename?: 'AgentPrompt';
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the prompt to give this agent run */
   prompt: Scalars['String']['output'];
+  /** the sequence number of the prompt */
+  seq: Scalars['Int']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -242,6 +386,8 @@ export type AgentRun = {
   flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the messages this agent run has generated during its run */
+  messages?: Maybe<Array<Maybe<AgentMessage>>>;
   /** the mode of the agent run */
   mode: AgentRunMode;
   pluralCreds?: Maybe<PluralCreds>;
@@ -252,7 +398,7 @@ export type AgentRun = {
   /** the prompt this agent was given */
   prompt: Scalars['String']['output'];
   /** the prompts this agent run has received */
-  prompts?: Maybe<Array<Maybe<AgentPromptHistory>>>;
+  prompts?: Maybe<Array<Maybe<AgentPrompt>>>;
   /** the pull requests this agent run has created */
   pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
   /** the repository the agent will be working in */
@@ -308,6 +454,8 @@ export enum AgentRunStatus {
 export type AgentRunStatusAttributes = {
   /** the error reason of the agent run */
   error?: InputMaybe<Scalars['String']['input']>;
+  /** the messages this agent run has generated during its run */
+  messages?: InputMaybe<Array<InputMaybe<AgentMessageAttributes>>>;
   /** the kubernetes pod this agent is running on */
   podReference?: InputMaybe<NamespacedName>;
   /** the status of this agent run */

@@ -2,7 +2,8 @@ defmodule Console.Schema.AgentRun do
   use Piazza.Ecto.Schema
   alias Console.Schema.{
     AgentRuntime,
-    AgentPromptHistory,
+    AgentMessage,
+    AgentPrompt,
     User,
     Flow,
     NamespacedName,
@@ -43,7 +44,8 @@ defmodule Console.Schema.AgentRun do
     belongs_to :session, AgentSession
 
     has_many :pull_requests, PullRequest
-    has_many :prompts, AgentPromptHistory, foreign_key: :agent_run_id
+    has_many :messages, AgentMessage, foreign_key: :agent_run_id
+    has_many :prompts, AgentPrompt, foreign_key: :agent_run_id
 
     timestamps()
   end
@@ -85,6 +87,7 @@ defmodule Console.Schema.AgentRun do
     |> cast_embed(:pod_reference)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
+    |> cast_assoc(:messages)
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
 
