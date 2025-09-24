@@ -47,6 +47,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     |> paginate(args)
   end
 
+  def shared_agent_run(%{id: id}, %{context: %{current_user: _}}) do
+    case Agents.get_agent_run!(id) do
+      %AgentRun{shared: true} = run -> {:ok, run}
+      _ -> {:error, "Agent run is not shared"}
+    end
+  end
+
   def upsert_agent_runtime(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Agents.upsert_agent_runtime(attrs, cluster)
 
@@ -70,6 +77,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
 
   def update_agent_run_todos(%{id: id, todos: todos}, %{context: %{current_user: user}}),
     do: Agents.update_todos(todos, id, user)
+
+  def share_agent_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Agents.share_agent_run(id, user)
 
   defp runtime_filters(query, args) do
     Enum.reduce(args, query, fn

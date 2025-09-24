@@ -5,6 +5,7 @@ defmodule Console.Schema.AgentMessage do
   defenum ToolState, pending: 0, running: 1, completed: 2, error: 3
 
   schema "agent_messages" do
+    field :role,    Console.Schema.Chat.Role
     field :message, :binary
     field :seq,     :integer
 

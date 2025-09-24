@@ -433,6 +433,8 @@ type RootQueryType {
 
   sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
 
+  sharedAgentRun(id: ID!): AgentRun
+
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
 
   agentRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
@@ -1017,6 +1019,8 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
+  shareAgentRun(id: ID!): AgentRun
+
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
   updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
@@ -1306,6 +1310,9 @@ input AgentMessageAttributes {
   "the message to send to the agent"
   message: String!
 
+  "the role of the message"
+  role: AiRole!
+
   cost: AgentMessageCostAttributes
 
   metadata: AgentMessageMetadataAttributes
@@ -1426,6 +1433,9 @@ type AgentRun {
   "the error reason of the agent run"
   error: String
 
+  "whether this agent run is shared"
+  shared: Boolean
+
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
@@ -1496,6 +1506,9 @@ type AgentTodo {
 
 type AgentMessage {
   id: ID!
+
+  "the role of the message (system, assistant, user)"
+  role: AiRole!
 
   "the message to send to the agent"
   message: String!

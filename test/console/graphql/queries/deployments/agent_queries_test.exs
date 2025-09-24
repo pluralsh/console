@@ -164,4 +164,33 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
              |> ids_equal(runs)
     end
   end
+
+  describe "sharedAgentRun" do
+    test "a user can fetch a shared agent run" do
+      run = insert(:agent_run, shared: true)
+
+      {:ok, %{data: %{"sharedAgentRun" => found}}} = run_query("""
+        query SharedAgentRun($id: ID!) {
+          sharedAgentRun(id: $id) {
+            id
+            shared
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: insert(:user)})
+
+      assert found["id"] == run.id
+      assert found["shared"]
+    end
+
+    test "a random user cannot fetch a non-shared agent run" do
+      user = insert(:user)
+      run = insert(:agent_run)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query SharedAgentRun($id: ID!) {
+          sharedAgentRun(id: $id) { id }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+    end
+  end
 end

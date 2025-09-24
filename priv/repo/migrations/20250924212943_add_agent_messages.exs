@@ -6,6 +6,7 @@ defmodule Console.Repo.Migrations.AddAgentMessages do
 
     create table(:agent_messages, primary_key: false) do
       add :id,           :uuid, primary_key: true
+      add :role,         :integer
       add :agent_run_id, references(:agent_runs, type: :uuid, on_delete: :delete_all)
       add :seq,          :integer, default: fragment("nextval('agent_messages_sequence_number_seq')")
       add :message,      :binary
@@ -29,5 +30,9 @@ defmodule Console.Repo.Migrations.AddAgentMessages do
     end
 
     create index(:agent_prompts, [:agent_run_id])
+
+    alter table(:agent_runs) do
+      add :shared, :boolean, default: false
+    end
   end
 end

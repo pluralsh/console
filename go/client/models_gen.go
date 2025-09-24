@@ -132,6 +132,8 @@ type AgentBindingAttributes struct {
 
 type AgentMessage struct {
 	ID string `json:"id"`
+	// the role of the message (system, assistant, user)
+	Role AiRole `json:"role"`
 	// the message to send to the agent
 	Message string `json:"message"`
 	// the sequence number of the message
@@ -146,7 +148,9 @@ type AgentMessage struct {
 
 type AgentMessageAttributes struct {
 	// the message to send to the agent
-	Message  string                          `json:"message"`
+	Message string `json:"message"`
+	// the role of the message
+	Role     AiRole                          `json:"role"`
 	Cost     *AgentMessageCostAttributes     `json:"cost,omitempty"`
 	Metadata *AgentMessageMetadataAttributes `json:"metadata,omitempty"`
 }
@@ -320,6 +324,8 @@ type AgentRun struct {
 	PodReference *AgentPodReference `json:"podReference,omitempty"`
 	// the error reason of the agent run
 	Error *string `json:"error,omitempty"`
+	// whether this agent run is shared
+	Shared *bool `json:"shared,omitempty"`
 	// the analysis of the agent run
 	Analysis *AgentAnalysis `json:"analysis,omitempty"`
 	// the todos of the agent run

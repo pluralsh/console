@@ -206,4 +206,24 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert hd(found["todos"])["done"]
     end
   end
+
+  describe "shareAgentRun" do
+    test "a user can share their own agent run" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, %{data: %{"shareAgentRun" => shared}}} = run_query("""
+        mutation Share($id: ID!) {
+          shareAgentRun(id: $id) {
+            id
+            shared
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert shared["id"] == run.id
+      assert shared["shared"]
+    end
+  end
+
 end

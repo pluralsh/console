@@ -193,6 +193,8 @@ export type AgentMessage = {
   message: Scalars['String']['output'];
   /** the metadata of the message */
   metadata?: Maybe<AgentMessageMetadata>;
+  /** the role of the message (system, assistant, user) */
+  role: AiRole;
   /** the sequence number of the message */
   seq: Scalars['Int']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -203,6 +205,8 @@ export type AgentMessageAttributes = {
   /** the message to send to the agent */
   message: Scalars['String']['input'];
   metadata?: InputMaybe<AgentMessageMetadataAttributes>;
+  /** the role of the message */
+  role: AiRole;
 };
 
 export type AgentMessageCost = {
@@ -406,6 +410,8 @@ export type AgentRun = {
   /** the runtime this agent is using */
   runtime?: Maybe<AgentRuntime>;
   scmCreds?: Maybe<ScmCreds>;
+  /** whether this agent run is shared */
+  shared?: Maybe<Scalars['Boolean']['output']>;
   /** the status of this agent run */
   status: AgentRunStatus;
   /** the todos of the agent run */
@@ -7437,6 +7443,7 @@ export type RootMutationType = {
   selfManage?: Maybe<ServiceDeployment>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
+  shareAgentRun?: Maybe<AgentRun>;
   /** Shares a one-time-viewable secret to a list of eligible users */
   shareSecret?: Maybe<SharedSecret>;
   signIn?: Maybe<User>;
@@ -8330,6 +8337,11 @@ export type RootMutationTypeSetupRenovateArgs = {
 };
 
 
+export type RootMutationTypeShareAgentRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeShareSecretArgs = {
   attributes: SharedSecretAttributes;
 };
@@ -8864,6 +8876,7 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   /** Renders a filtered list of services and all their descendents returned as a paginated connection */
   serviceTree?: Maybe<ServiceDeploymentConnection>;
+  sharedAgentRun?: Maybe<AgentRun>;
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
@@ -9980,6 +9993,11 @@ export type RootQueryTypeServiceTreeArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
+};
+
+
+export type RootQueryTypeSharedAgentRunArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

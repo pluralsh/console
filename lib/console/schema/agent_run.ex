@@ -19,6 +19,7 @@ defmodule Console.Schema.AgentRun do
   schema "agent_runs" do
     field :status,        Status
     field :mode,          Mode, default: :write
+    field :shared,        :boolean, default: false
     field :prompt,        :binary
     field :repository,    :string
     field :branch,        :string
@@ -75,7 +76,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status prompt repository runtime_id user_id flow_id session_id mode branch error)a
+  @valid ~w(status shared prompt repository runtime_id user_id flow_id session_id mode branch error)a
 
   def changeset(model, attrs \\ %{}) do
     model

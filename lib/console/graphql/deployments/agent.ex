@@ -57,8 +57,9 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_message_attributes do
-    field :message, non_null(:string), description: "the message to send to the agent"
-    field :cost,    :agent_message_cost_attributes
+    field :message,  non_null(:string), description: "the message to send to the agent"
+    field :role,     non_null(:ai_role), description: "the role of the message"
+    field :cost,     :agent_message_cost_attributes
     field :metadata, :agent_message_metadata_attributes
   end
 
@@ -125,6 +126,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :mode,          non_null(:agent_run_mode), description: "the mode of the agent run"
     field :pod_reference, :agent_pod_reference, description: "the kubernetes pod this agent is running on"
     field :error,         :string, description: "the error reason of the agent run"
+    field :shared,        :boolean, description: "whether this agent run is shared"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
     field :todos,    list_of(:agent_todo), description: "the todos of the agent run"
@@ -183,6 +185,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   object :agent_message do
     field :id,       non_null(:id)
+    field :role,     non_null(:ai_role), description: "the role of the message (system, assistant, user)"
     field :message,  non_null(:string), description: "the message to send to the agent"
     field :seq,      non_null(:integer), description: "the sequence number of the message"
     field :cost,     :agent_message_cost, description: "the cost of the message"
@@ -279,6 +282,13 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_queries do
+    field :shared_agent_run, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.shared_agent_run/2
+    end
+
     connection field :agent_runtimes, node_type: :agent_runtime do
       middleware Authenticated
       arg :q,    :string
@@ -308,6 +318,13 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_run_attributes)
 
       resolve &Deployments.create_agent_run/2
+    end
+
+    field :share_agent_run, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.share_agent_run/2
     end
 
     field :agent_pull_request, :pull_request do
