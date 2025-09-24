@@ -1,19 +1,17 @@
 import { Flex } from '@pluralsh/design-system'
 
 import { CaptionP } from 'components/utils/typography/Text'
-import { formatDateTime, fromNow } from 'utils/datetime'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { AiInsight } from '../../../../generated/graphql.ts'
-import { AIPinButton } from '../../../ai/AIPinButton.tsx'
+import { formatDateTime, fromNow } from 'utils/datetime'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
-import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
@@ -56,7 +54,6 @@ export function StackRunInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <AIPinButton insight={stackRun?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={stackRun?.insight?.id}

@@ -20,7 +20,7 @@ import { ChatThreadTinyFragment } from '../../generated/graphql.ts'
 import { fromNow } from '../../utils/datetime.ts'
 import { useChatbot } from '../ai/AIContext.tsx'
 import { AITableActions } from '../ai/AITableActions.tsx'
-import { AIEntryLabel, getThreadOrPinTimestamp } from '../ai/AITableEntry.tsx'
+import { AIEntryLabel, getThreadTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
@@ -324,9 +324,6 @@ function CommandAdvancedInput({
 
 function HistoryItem({ thread }: { thread: ChatThreadTinyFragment }) {
   const { currentThreadId } = useChatbot()
-  const timestamp = getThreadOrPinTimestamp(thread)
-
-  const insight = thread.insight
 
   return (
     <Flex
@@ -337,10 +334,11 @@ function HistoryItem({ thread }: { thread: ChatThreadTinyFragment }) {
       <AIEntryLabel
         isStale={false}
         thread={thread}
-        insight={insight}
       />
       {thread.id === currentThreadId && <Chip severity="info">Selected</Chip>}
-      <CaptionP css={{ flexShrink: 0 }}>{fromNow(timestamp)}</CaptionP>
+      <CaptionP css={{ flexShrink: 0 }}>
+        {fromNow(getThreadTimestamp(thread))}
+      </CaptionP>
       <AITableActions thread={thread} />
     </Flex>
   )

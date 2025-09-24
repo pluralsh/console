@@ -29,7 +29,6 @@ import {
 } from '../../utils/datetime.ts'
 import { mapExistingNodes } from '../../utils/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
-import { TableSkeleton } from '../utils/SkeletonLoaders.tsx'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 import { Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import { useChatbot } from './AIContext.tsx'
@@ -39,7 +38,6 @@ import { AgentIcon } from './chatbot/AgentSelect.tsx'
 export const CLOSE_CHAT_ACTION_PANEL_EVENT = 'pointerdown'
 
 export function AIAgent() {
-  const theme = useTheme()
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       queryHook: useAgentSessionsQuery,
@@ -52,23 +50,6 @@ export function AIAgent() {
   )
 
   if (error) return <GqlError error={error} />
-
-  if (!data)
-    return (
-      <TableSkeleton
-        numColumns={1}
-        height={70}
-        centered={true}
-        styles={{
-          height: '100%',
-          padding: theme.spacing.xlarge,
-          '> svg': {
-            width: '100%',
-          },
-        }}
-      />
-    )
-
   if (data && isEmpty(agentSessions)) {
     return (
       <EmptyStateCompact
@@ -80,39 +61,31 @@ export function AIAgent() {
         }
         message="No agent sessions"
         description="You can create a new agent session from the Plural AI side panel."
-        cssProps={{ overflow: 'auto' }}
       />
     )
   }
 
+  const tableLoading = !data && loading
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-      overflow="hidden"
-    >
-      <Flex
-        direction="column"
-        gap="large"
-        height="100%"
-      >
-        <Table
-          rowBg="raised"
-          fullHeightWrap
-          virtualizeRows
-          padCells={false}
-          data={agentSessions}
-          columns={columns}
-          hideHeader
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          emptyStateProps={{ message: 'No entries found.' }}
-        />
-      </Flex>
-    </Flex>
+    <Table
+      rowBg="raised"
+      hideHeader
+      fullHeightWrap
+      virtualizeRows
+      loading={tableLoading}
+      data={agentSessions}
+      columns={columns}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'No agent sessions found.' }}
+      // hacky, should update logic in DS
+      {...(tableLoading && {
+        '& td div, & td span': { width: '100%', maxWidth: '100%' },
+      })}
+      padCells={tableLoading}
+    />
   )
 }
 

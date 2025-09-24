@@ -1,17 +1,3 @@
-fragment AiPin on AiPin {
-  id
-  name
-  insight {
-    id
-    ...AiInsight
-  }
-  thread {
-    ...ChatThreadTiny
-  }
-  insertedAt
-  updatedAt
-}
-
 fragment Chat on Chat {
   id
   content
@@ -172,25 +158,6 @@ fragment AiDelta on AiDelta {
   }
 }
 
-query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
-  aiPins(first: $first, last: $last, after: $after, before: $before) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...AiPin
-      }
-    }
-  }
-}
-
-query AIPin($insightId: ID, $threadId: ID) {
-  aiPin(insightId: $insightId, threadId: $threadId) {
-    ...AiPin
-  }
-}
-
 query ChatThreads(
   $first: Int = 100
   $last: Int
@@ -315,18 +282,6 @@ query CloudConnections(
         ...CloudConnectionTiny
       }
     }
-  }
-}
-
-mutation CreateAIPin($attributes: AiPinAttributes!) {
-  createPin(attributes: $attributes) {
-    ...AiPin
-  }
-}
-
-mutation DeleteAIPin($id: ID!) {
-  deletePin(id: $id) {
-    ...AiPin
   }
 }
 
