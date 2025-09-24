@@ -108,7 +108,12 @@ export function McpServers() {
         header="Generate JWT"
         actions={
           <Flex gap="medium">
-            <Button secondary>Close</Button>
+            <Button
+              secondary
+              onClick={() => setShowJwtModal(false)}
+            >
+              Close
+            </Button>
             <Button
               onClick={() =>
                 navigator.clipboard
