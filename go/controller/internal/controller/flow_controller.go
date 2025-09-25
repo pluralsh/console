@@ -196,7 +196,7 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 		}
 
 		if !mcpServer.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("MCP server %s is not ready", ref.Name)
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("MCP server %s is not ready", ref.Name)
 		}
 
 		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{

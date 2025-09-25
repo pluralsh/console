@@ -35,7 +35,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 	if connectionID == nil {
-		return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})

@@ -196,7 +196,7 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		}
 
 		if !stack.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("stack is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack is not ready")
 		}
 
 		attr.StackID = stack.Status.ID

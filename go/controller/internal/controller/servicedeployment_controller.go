@@ -299,7 +299,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
@@ -358,7 +358,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			}
 
 			if !repo.Status.HasID() {
-				return nil, &waitForResources, fmt.Errorf("repository is not ready")
+				return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -607,7 +607,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
@@ -626,7 +626,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 
 		// If our finalizer is present, remove it.
