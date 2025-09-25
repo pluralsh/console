@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -181,7 +182,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 		// If object is already being deleted from Console API requeue
 		if r.ConsoleClient.IsProviderDeleting(ctx, provider.Status.GetID()) {
 			logger.Info("Waiting for provider to be deleted from Console API")
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
@@ -200,7 +201,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

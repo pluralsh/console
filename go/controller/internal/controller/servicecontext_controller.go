@@ -137,7 +137,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	if !exists {
 		sc.Status.ID = nil
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())

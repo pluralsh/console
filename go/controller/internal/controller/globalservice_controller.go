@@ -168,18 +168,18 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 	if errors.IsNotFound(err) {
 		globalService.Status.ID = nil
-		return requeue, r.handleCreate(sha, globalService, service, attr)
+		return jitterRequeue(requeueDefault), r.handleCreate(sha, globalService, service, attr)
 	}
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return jitterRequeue(requeueDefault), err
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
 		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
 		if err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, err
+			return jitterRequeue(requeueDefault), err
 		}
 	}
 

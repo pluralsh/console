@@ -27,6 +27,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -160,7 +161,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 		if pipeline.Status.GetID() != "" {
 			exists, err = r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 			if err != nil {
-				return &requeue
+				return lo.ToPtr(jitterRequeue(requeueDefault))
 			}
 		}
 
@@ -175,7 +176,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// If our finalizer is present, remove it.

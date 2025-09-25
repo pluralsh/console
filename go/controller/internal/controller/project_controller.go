@@ -132,7 +132,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 
 		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Status.ID, nil)
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove project from Console API if it exists.
@@ -141,7 +141,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &requeue
+				return lo.ToPtr(jitterRequeue(requeueDefault))
 			}
 		}
 
@@ -192,7 +192,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	if !exists {
 		project.Status.ID = nil
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))

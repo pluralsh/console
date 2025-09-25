@@ -125,7 +125,7 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, bo
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(bootstrapToken.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return lo.ToPtr(jitterRequeue(requeueDefault))
 	}
 
 	// stop reconciliation as the item has been deleted

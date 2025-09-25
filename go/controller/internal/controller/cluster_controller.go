@@ -10,6 +10,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -220,12 +221,12 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 		// If object is already being deleted from Console API requeue.
 		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove Cluster from Console API if it exists and is not read-only.
@@ -239,7 +240,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// If our finalizer is present, remove it.

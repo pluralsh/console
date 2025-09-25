@@ -146,7 +146,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 	if !exists {
 		scm.Status.ID = nil
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
@@ -219,7 +219,7 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 
 			// If deletion process started requeue so that we can make sure scm
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

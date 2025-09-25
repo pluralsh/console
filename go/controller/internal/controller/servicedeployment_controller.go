@@ -114,7 +114,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 
 	if !cluster.Status.HasID() {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
@@ -128,16 +128,16 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 
 		if !repository.Status.HasID() {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 	}
 
@@ -213,7 +213,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
@@ -612,7 +612,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove service from Console API if it exists and is not read-only.
