@@ -282,7 +282,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
@@ -296,7 +296,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		}
 		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
-			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
 			return nil, &waitForResources, fmt.Errorf("flow is not ready")
@@ -306,7 +306,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 
 	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
 	if err != nil {
-		return nil, &requeue, err
+		return nil, lo.ToPtr(jitterRequeue(requeueDefault)), err
 	}
 
 	// we only want to explicitly set the configuration field in attr if the user specified it via
@@ -354,7 +354,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			ref := service.Spec.Helm.RepositoryRef
 			var repo v1alpha1.GitRepository
 			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting repository: %s", err.Error())
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
 			if !repo.Status.HasID() {
@@ -367,7 +367,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting values config map: %s", err.Error())
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting values config map: %s", err.Error())
 			}
 			attr.Helm.Values = &val
 		}

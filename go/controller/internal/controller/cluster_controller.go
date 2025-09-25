@@ -275,7 +275,7 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 				return nil, nil, fmt.Errorf("could not delete %s cluster, got error: %+v", cluster.Name, err)
 			}
 
-			return nil, &requeue, nil
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		if !provider.Status.HasID() {

@@ -46,7 +46,6 @@ const (
 )
 
 var (
-	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
 

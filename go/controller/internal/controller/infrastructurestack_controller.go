@@ -573,7 +573,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, &requeue, nil
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{
