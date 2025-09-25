@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def threads(args, %{context: %{current_user: user}}) do
     ChatThread.for_user(user.id)
+    |> ChatThread.nonagent()
     |> ChatThread.ordered()
     |> thread_filters(args)
     |> maybe_search(ChatThread, args)

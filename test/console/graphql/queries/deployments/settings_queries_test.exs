@@ -104,6 +104,33 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     end
   end
 
+  describe "serviceContext" do
+    test "it can fetch a service context by name" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      ctx = insert(:service_context, project: project)
+
+      {:ok, %{data: %{"serviceContext" => found}}} = run_query("""
+        query ServiceContext($name: String!) {
+          serviceContext(name: $name) { id name }
+        }
+      """, %{"name" => ctx.name}, %{current_user: user})
+
+      assert found["id"] == ctx.id
+      assert found["name"] == ctx.name
+    end
+
+    test "non readers cannot fetch" do
+      ctx = insert(:service_context)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query ServiceContext($name: String!) {
+          serviceContext(name: $name) { id name }
+        }
+      """, %{"name" => ctx.name}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "cloudConnections" do
     test "it can list cloud connections" do
       conns = insert_list(3, :cloud_connection)

@@ -7,6 +7,8 @@ defmodule Console.GraphQl.Deployments.Agent do
   ecto_enum :agent_runtime_type, AgentRuntime.Type
   ecto_enum :agent_run_status, AgentRun.Status
   ecto_enum :agent_run_mode, AgentRun.Mode
+  ecto_enum :agent_message_tool_state, Console.Schema.AgentMessage.ToolState
+
 
   input_object :agent_runtime_attributes do
     field :name,                non_null(:string), description: "the name of this runtime"
@@ -29,6 +31,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   input_object :agent_run_status_attributes do
     field :status,        non_null(:agent_run_status), description: "the status of this agent run"
+    field :messages,      list_of(:agent_message_attributes), description: "the messages this agent run has generated during its run"
     field :error,         :string, description: "the error reason of the agent run"
     field :pod_reference, :namespaced_name, description: "the kubernetes pod this agent is running on"
   end
@@ -51,6 +54,49 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :summary,  non_null(:string), description: "the summary of the analysis"
     field :analysis, non_null(:string), description: "the analysis of the agent run"
     field :bullets,  list_of(:string), description: "the bullets of the analysis"
+  end
+
+  input_object :agent_message_attributes do
+    field :message,  non_null(:string), description: "the message to send to the agent"
+    field :role,     non_null(:ai_role), description: "the role of the message"
+    field :cost,     :agent_message_cost_attributes
+    field :metadata, :agent_message_metadata_attributes
+  end
+
+  input_object :agent_message_cost_attributes do
+    field :total,  non_null(:float), description: "the total cost of the message"
+    field :tokens, :agent_message_tokens_attributes, description: "the tokens of the message"
+  end
+
+  input_object :agent_message_tokens_attributes do
+    field :input,     :float, description: "the input tokens of the message"
+    field :output,    :float, description: "the output tokens of the message"
+    field :reasoning, :float, description: "the reasoning tokens of the message"
+  end
+
+  input_object :agent_message_metadata_attributes do
+    field :reasoning, :agent_message_reasoning_attributes, description: "the reasoning of the message"
+    field :file,      :agent_message_file_attributes, description: "the file of the message"
+    field :tool,      :agent_message_tool_attributes, description: "the tool of the message"
+  end
+
+  input_object :agent_message_reasoning_attributes do
+    field :text,  :string, description: "the text of the reasoning"
+    field :start, :integer, description: "the start of the reasoning"
+    field :end,   :integer, description: "the end of the reasoning"
+  end
+
+  input_object :agent_message_file_attributes do
+    field :name,  :string, description: "the name of the file"
+    field :text,  :string, description: "the text of the file"
+    field :start, :integer, description: "the start of the file"
+    field :end,   :integer, description: "the end of the file"
+  end
+
+  input_object :agent_message_tool_attributes do
+    field :name,   :string, description: "the name of the tool"
+    field :state,  :agent_message_tool_state, description: "the state of the tool"
+    field :output, :string, description: "the output of the tool"
   end
 
   object :agent_runtime do
@@ -80,6 +126,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :mode,          non_null(:agent_run_mode), description: "the mode of the agent run"
     field :pod_reference, :agent_pod_reference, description: "the kubernetes pod this agent is running on"
     field :error,         :string, description: "the error reason of the agent run"
+    field :shared,        :boolean, description: "whether this agent run is shared"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
     field :todos,    list_of(:agent_todo), description: "the todos of the agent run"
@@ -93,10 +140,11 @@ defmodule Console.GraphQl.Deployments.Agent do
       middleware ErrorHandler
     end
 
-    field :prompts, list_of(:agent_prompt_history), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
-    field :runtime, :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
-    field :user,    :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
-    field :flow,    :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
+    field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
+    field :messages, list_of(:agent_message), resolve: dataloader(Deployments), description: "the messages this agent run has generated during its run"
+    field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
+    field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
+    field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
 
     field :pull_requests, list_of(:pull_request),
       resolve: dataloader(Deployments),
@@ -133,6 +181,61 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :title,       non_null(:string), description: "the title of the todo"
     field :description, non_null(:string), description: "the description of the todo"
     field :done,        :boolean, description: "whether the todo is done"
+  end
+
+  object :agent_message do
+    field :id,       non_null(:id)
+    field :role,     non_null(:ai_role), description: "the role of the message (system, assistant, user)"
+    field :message,  non_null(:string), description: "the message to send to the agent"
+    field :seq,      non_null(:integer), description: "the sequence number of the message"
+    field :cost,     :agent_message_cost, description: "the cost of the message"
+    field :metadata, :agent_message_metadata, description: "the metadata of the message"
+
+    timestamps()
+  end
+
+  object :agent_prompt do
+    field :id,     non_null(:id)
+    field :prompt, non_null(:string), description: "the prompt to give this agent run"
+    field :seq,    non_null(:integer), description: "the sequence number of the prompt"
+
+    timestamps()
+  end
+
+  object :agent_message_cost do
+    field :total,  non_null(:float), description: "the total cost of the message"
+    field :tokens, :agent_message_tokens, description: "the tokens of the message"
+  end
+
+  object :agent_message_tokens do
+    field :input,     :float, description: "the input tokens of the message"
+    field :output,    :float, description: "the output tokens of the message"
+    field :reasoning, :float, description: "the reasoning tokens of the message"
+  end
+
+  object :agent_message_metadata do
+    field :reasoning, :agent_message_reasoning, description: "the reasoning of the message"
+    field :file,      :agent_message_file, description: "the file of the message"
+    field :tool,      :agent_message_tool, description: "the tool of the message"
+  end
+
+  object :agent_message_reasoning do
+    field :text,  :string, description: "the text of the reasoning"
+    field :start, :integer, description: "the start of the reasoning"
+    field :end,   :integer, description: "the end of the reasoning"
+  end
+
+  object :agent_message_file do
+    field :name,  :string, description: "the name of the file"
+    field :text,  :string, description: "the text of the file"
+    field :start, :integer, description: "the start of the file"
+    field :end,   :integer, description: "the end of the file"
+  end
+
+  object :agent_message_tool do
+    field :name,   :string, description: "the name of the tool"
+    field :state,  :agent_message_tool_state, description: "the state of the tool"
+    field :output, :string, description: "the output of the tool"
   end
 
   connection node_type: :agent_runtime
@@ -179,6 +282,13 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_queries do
+    field :shared_agent_run, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.shared_agent_run/2
+    end
+
     connection field :agent_runtimes, node_type: :agent_runtime do
       middleware Authenticated
       arg :q,    :string
@@ -208,6 +318,13 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_run_attributes)
 
       resolve &Deployments.create_agent_run/2
+    end
+
+    field :share_agent_run, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.share_agent_run/2
     end
 
     field :agent_pull_request, :pull_request do

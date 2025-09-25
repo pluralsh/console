@@ -3686,7 +3686,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a human-readable name of the ScmConnection. |  | Required: \{\} <br /> |
-| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB BITBUCKET] <br />Required: \{\} <br />Type: string <br /> |
+| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [GITHUB, GITLAB, AZURE_DEVOPS, BITBUCKET] |  | Enum: [GITHUB GITLAB BITBUCKET AZURE_DEVOPS] <br />Required: \{\} <br />Type: string <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | A secret containing this access token you will use, stored in the `token` data field. |  | Optional: \{\} <br /> |
 | `username` _string_ | Username ... |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: \{\} <br /> |
