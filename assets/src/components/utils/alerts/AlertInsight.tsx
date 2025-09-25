@@ -3,25 +3,24 @@ import { useAiInsightQuery } from 'generated/graphql'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 
-import { AIPinButton } from 'components/ai/AIPinButton'
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix'
 import {
   ChatWithAIButton,
   insightMessage,
 } from 'components/ai/chatbot/ChatbotButton'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame'
 import { StackedText } from 'components/utils/table/StackedText'
+import { ComponentPropsWithoutRef } from 'react'
 import {
   getClusterDetailsPath,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import styled from 'styled-components'
-import { ComponentPropsWithoutRef } from 'react'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
+import styled from 'styled-components'
 
 export function AlertInsight({
   type,
@@ -98,7 +97,6 @@ export function AlertInsight({
             loading={loading}
             refetch={refetch}
           />
-          <AIPinButton insight={insight} />
           <ChatWithAIButton
             floating
             insightId={insight.id}

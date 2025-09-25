@@ -2,100 +2,76 @@ import {
   Button,
   Card,
   ChatOutlineIcon,
-  Flex,
   GearTrainIcon,
+  Table,
 } from '@pluralsh/design-system'
-import {
-  FetchPaginatedDataResult,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ChatThreadTinyFragment,
-  ChatThreadsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
+import { createColumnHelper } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
 import { CSSProperties, useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql.ts'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
-import { AITable } from './AITable.tsx'
-import { sortThreadsOrPins } from './AITableEntry.tsx'
+import { AITableEntry, sortThreadsOrPins } from './AITableEntry.tsx'
+
+const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
 export function AIThreads() {
-  const threadsQuery = useFetchPaginatedData({
-    queryHook: useChatThreadsQuery,
-    keyPath: ['chatThreads'],
-  })
+  const { error, data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useChatThreadsQuery,
+      keyPath: ['chatThreads'],
+    })
 
   const filteredThreads = useMemo(
-    () =>
-      threadsQuery.data?.chatThreads?.edges
-        ?.map((edge) => edge?.node)
-        ?.sort(sortThreadsOrPins)
-        ?.filter((thread): thread is ChatThreadTinyFragment =>
-          Boolean(thread)
-        ) ?? [],
-    [threadsQuery.data?.chatThreads?.edges]
+    () => mapExistingNodes(data?.chatThreads)?.sort(sortThreadsOrPins),
+    [data?.chatThreads]
   )
 
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-      overflow="hidden"
-    >
-      <Flex
-        direction="column"
-        gap="large"
-        height="100%"
-      >
-        <ThreadsSection
-          filteredThreads={filteredThreads}
-          threadsQuery={threadsQuery}
-        />
-      </Flex>
-    </Flex>
-  )
-}
+  if (error) return <GqlError error={error} />
+  if (data && isEmpty(filteredThreads))
+    return (
+      <EmptyStateCompact
+        icon={
+          <ChatOutlineIcon
+            color="icon-primary"
+            size={24}
+          />
+        }
+        message="No chat threads found."
+        description="Conversations with Plural AI will appear here."
+      />
+    )
 
-function ThreadsSection({
-  filteredThreads,
-  threadsQuery,
-}: {
-  filteredThreads: ChatThreadTinyFragment[]
-  threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
-}) {
+  const tableLoading = !data && loading
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      flex={1}
-      overflow="hidden"
-      paddingBottom={36} // this is a magic number to make the table fit
-    >
-      {isEmpty(filteredThreads) && threadsQuery.data ? (
-        <EmptyStateCompact
-          icon={
-            <ChatOutlineIcon
-              color="icon-primary"
-              size={24}
-            />
-          }
-          message="No threads or insights"
-          description="Insights will be automatically created and appear here when potential fixes are found."
-          cssProps={{ overflow: 'auto' }}
-        />
-      ) : (
-        <AITable
-          query={threadsQuery}
-          rowData={filteredThreads}
-        />
-      )}
-    </Flex>
+    <Table
+      rowBg="raised"
+      hideHeader
+      fullHeightWrap
+      virtualizeRows
+      data={filteredThreads}
+      columns={columns}
+      loading={tableLoading}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'No threads found.' }}
+      // hacky, should update logic in DS
+      {...(tableLoading && {
+        '& td div, & td span': { width: '100%', maxWidth: '100%' },
+      })}
+      padCells={tableLoading}
+    />
   )
 }
 
@@ -168,3 +144,13 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
     </EmptyStateCompact>
   )
 }
+
+// putting the whole row into a single column, easier to customize
+export const columns = [
+  columnHelper.accessor((thread) => thread, {
+    id: 'row',
+    cell: function Cell({ getValue }) {
+      return <AITableEntry thread={getValue()} />
+    },
+  }),
+]

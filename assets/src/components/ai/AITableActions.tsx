@@ -174,7 +174,7 @@ export function DeleteAiThreadModal({
   const [mutation, { loading, error }] = useDeleteChatThreadMutation({
     variables: { id: thread.id },
     awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreads', 'AiPins'],
+    refetchQueries: ['ChatThreads'],
     onCompleted: () => {
       if (thread.id === currentThreadId) setCurrentThreadId(undefined)
       onClose?.()

@@ -2,8 +2,6 @@ import { Flex } from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
-import { AiInsight } from '../../generated/graphql.ts'
-import { AIPinButton } from '../ai/AIPinButton.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -40,7 +38,6 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AIPinButton insight={component?.insight as AiInsight} />
         <ChatWithAIButton
           floating
           insightId={component?.insight?.id}

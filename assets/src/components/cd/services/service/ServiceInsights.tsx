@@ -1,9 +1,8 @@
 import { Flex } from '@pluralsh/design-system'
 import { fromNow } from 'utils/datetime'
 
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import { useTheme } from 'styled-components'
-import { AiInsight } from '../../../../generated/graphql.ts'
-import { AIPinButton } from '../../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
@@ -12,7 +11,6 @@ import {
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { useServiceContext } from './ServiceDetails'
-import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 
 export function ServiceInsights() {
   const theme = useTheme()
@@ -43,7 +41,6 @@ export function ServiceInsights() {
           gap="small"
         >
           {service?.insight && <InsightRefresh insight={service?.insight} />}
-          <AIPinButton insight={service?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={service?.insight?.id}

@@ -23,7 +23,9 @@ export function GqlError({
         ? error
         : typeof error === 'boolean'
           ? ''
-          : error?.graphQLErrors?.[0]?.message || ''}
+          : error?.graphQLErrors?.[0]?.message ||
+            error?.message ||
+            'Error: check logs for more details'}
     </Callout>
   )
 }

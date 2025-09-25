@@ -1,10 +1,11 @@
 import { Code, Divider, Flex, IconFrame, Switch } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, useMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { stringify } from 'yaml'
 import {
-  AiInsight,
   ClusterInsightComponent as ClusterInsightComponentAPI,
   useClusterInsightComponentQuery,
 } from '../../../generated/graphql.ts'
@@ -12,11 +13,11 @@ import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_PATH,
 } from '../../../routes/cdRoutesConsts.tsx'
-import { AIPinButton } from '../../ai/AIPinButton.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import { ClusterProviderIcon } from '../../utils/Provider.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { BasicLink } from '../../utils/typography/BasicLink.tsx'
@@ -26,9 +27,6 @@ import {
   useSetNavigationContent,
 } from './ClusterInsights.tsx'
 import { ClusterInsightComponentLabel } from './ClusterInsightsComponents.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
-import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 
 export default function ClusterInsightComponent(): ReactNode {
   const theme = useTheme()
@@ -95,7 +93,6 @@ export default function ClusterInsightComponent(): ReactNode {
             loading={clusterLoading}
             refetch={refetch}
           />
-          <AIPinButton insight={component?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={component?.insight?.id}
