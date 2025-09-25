@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/samber/lo"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
@@ -86,7 +87,7 @@ func (r *PostgresCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	if err := r.PostgresClient.Ping(); err != nil {
 		logger.V(5).Error(err, "failed to connect to Postgres")
-		return handleRequeue(&requeue, err, credentials.SetCondition)
+		return handleRequeue(lo.ToPtr(jitterRequeue(requeueDefault)), err, credentials.SetCondition)
 	}
 
 	logger.Info("Successfully connected to Postgres")
@@ -124,7 +125,7 @@ func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, creden
 			}
 		}
 		if deletingAny {
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		utils.RemoveFinalizer(credentials, PostgresDatabaseProtectionFinalizerName)
 	}
@@ -146,7 +147,7 @@ func (r *PostgresCredentialsReconciler) handleDelete(ctx context.Context, creden
 			}
 		}
 		if deletingAny {
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		utils.RemoveFinalizer(credentials, PostgresUserProtectionFinalizerName)
 	}

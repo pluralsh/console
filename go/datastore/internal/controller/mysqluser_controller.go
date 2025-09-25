@@ -87,7 +87,7 @@ func (r *MySqlUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		err := fmt.Errorf("unauthorized or unhealthy MySql")
 		logger.V(5).Info(err.Error())
 		utils.MarkCondition(user.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	if err = r.MySqlClient.Init(ctx, r.Client, credentials); err != nil {
