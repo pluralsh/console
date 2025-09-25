@@ -94,7 +94,7 @@ func (r *PostgresCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

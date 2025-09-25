@@ -92,7 +92,7 @@ func (r *MySqlCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *MySqlCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.MySqlCredentials) (ctrl.Result, error) {

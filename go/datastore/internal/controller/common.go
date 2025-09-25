@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"math/rand"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +28,10 @@ var (
 	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
+
+func jitterRequeue(t time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2)))}
+}
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
