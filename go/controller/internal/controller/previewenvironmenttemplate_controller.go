@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	console "github.com/pluralsh/console/go/client"
