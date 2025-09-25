@@ -132,7 +132,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
 			if err != nil {
 				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return requeue, err
+				return jitterRequeue(requeueDefault), err
 			}
 			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
 		}
@@ -291,7 +291,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 
 		if !repository.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("repository is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

@@ -127,7 +127,7 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 	if !exists {
 		catalog.Status.ID = nil
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
@@ -140,7 +140,7 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alpha1.Catalog) (bool, error) {
@@ -177,12 +177,12 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 	if !catalog.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove Pipeline from Console API if it exists.
@@ -191,7 +191,7 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &requeue
+				return lo.ToPtr(jitterRequeue(requeueDefault))
 			}
 
 			// catalog deletion is synchronous so can just fall back to removing the finalizer and reconciling

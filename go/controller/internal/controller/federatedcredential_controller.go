@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -112,7 +113,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &requeue
+		return lo.ToPtr(jitterRequeue(requeueDefault))
 	}
 
 	// stop reconciliation as the item has been deleted

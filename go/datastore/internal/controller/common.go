@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"math/rand"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -23,10 +24,9 @@ const (
 	MySqlSecretProtectionFinalizerName         = "projects.deployments.plural.sh/mysql-secret-protection"
 )
 
-var (
-	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
-	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
-)
+func jitterRequeue(t time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2)))}
+}
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
@@ -41,7 +41,7 @@ var (
 // nolint:unparam
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
 	if err != nil && apierrors.IsNotFound(err) {
-		result = &waitForResources
+		result = lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,

@@ -7,6 +7,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -124,7 +125,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &waitForResources
+		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	// try to delete the resource
@@ -132,7 +133,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &waitForResources
+		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -154,7 +155,7 @@ func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v
 		return nil, nil, err
 	}
 	if !connection.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
 	}
 	attributes.ConnectionID = *connection.Status.ID
 

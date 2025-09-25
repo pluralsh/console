@@ -85,7 +85,7 @@ func (r *PostgresDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		err := fmt.Errorf("unauthorized or unhealthy Postgres")
 		logger.V(5).Info(err.Error())
 		utils.MarkCondition(db.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	if err = r.PostgresClient.Init(ctx, r.Client, credentials); err != nil {

@@ -11,6 +11,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -196,7 +197,7 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 		}
 
 		if !mcpServer.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("MCP server %s is not ready", ref.Name)
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("MCP server %s is not ready", ref.Name)
 		}
 
 		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{

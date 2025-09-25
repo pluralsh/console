@@ -137,7 +137,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	if !exists {
 		sc.Status.ID = nil
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())
@@ -150,7 +150,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ServiceContextReconciler) isAlreadyExists(ctx context.Context, serviceContext *v1alpha1.ServiceContext) (bool, error) {
@@ -201,7 +201,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return &waitForResources
+		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	if !serviceContext.Status.IsReadonly() && serviceContext.Status.HasID() {
@@ -210,7 +210,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			// If it fails to delete the external dependency here, return with error
 			// so that it can be retried.
 			utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 	}
 
