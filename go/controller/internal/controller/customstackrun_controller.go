@@ -138,7 +138,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

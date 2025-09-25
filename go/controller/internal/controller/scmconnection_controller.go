@@ -94,7 +94,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if r.shouldMarkAsReadonly(scm) {
 		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(), nil
+		return jitterRequeue(requeueDefault), nil
 	}
 
 	// Mark resource as managed by this operator.
@@ -135,7 +135,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
@@ -170,7 +170,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ScmConnectionReconciler) isAlreadyExists(ctx context.Context, scm *v1alpha1.ScmConnection) (bool, error) {

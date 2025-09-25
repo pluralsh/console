@@ -143,7 +143,7 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 	pipeline.Status.SHA = &sha
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *ctrl.Result {

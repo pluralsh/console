@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"slices"
 	"strings"
 	"time"
-
-	"math/rand"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -51,8 +50,8 @@ var (
 	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
 )
 
-func jitterRequeue() ctrl.Result {
-	return ctrl.Result{RequeueAfter: requeueDefault + time.Duration(rand.Intn(int(requeueDefault/2)))}
+func jitterRequeue(t time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2)))}
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,

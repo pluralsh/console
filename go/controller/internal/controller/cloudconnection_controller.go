@@ -179,7 +179,7 @@ func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context
 	utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connection *v1alpha1.CloudConnection) (bool, error) {

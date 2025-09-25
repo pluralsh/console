@@ -122,7 +122,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	}
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.Provider) (reconcile.Result, error) {
@@ -142,7 +142,7 @@ func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provide
 		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running.")
 	}
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ProviderReconciler) isAlreadyExists(ctx context.Context, provider *v1alpha1.Provider) (bool, error) {

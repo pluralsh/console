@@ -93,7 +93,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {

@@ -259,7 +259,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 			}
 			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return jitterRequeue(), nil
+				return jitterRequeue(requeueDefault), nil
 			}
 			if existingNotificationSink != nil {
 				if stack.Spec.Detach {
@@ -273,7 +273,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return jitterRequeue(), nil
+				return jitterRequeue(requeueDefault), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)

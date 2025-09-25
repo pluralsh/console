@@ -126,7 +126,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionTrue, v1alpha1.ReadyTokenConditionReason, "")
 	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
@@ -151,7 +151,7 @@ func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Cont
 	// utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	// utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1alpha1.ServiceAccount) (bool, error) {
