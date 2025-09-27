@@ -368,7 +368,13 @@ defmodule Console.Services.Users do
   end
 
   defp hydrate_groups(transaction, [_ | _] = groups) do
-    Enum.uniq(groups)
+    Enum.map(groups, fn
+      group when is_binary(group) -> group
+      %{"name" => name} when is_binary(name) -> name
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+    |> Enum.uniq()
     |> Enum.reduce(transaction, fn group, xaction ->
       xaction
       |> add_operation({:group, group}, fn _ ->
