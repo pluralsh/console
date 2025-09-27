@@ -29,7 +29,7 @@ import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
-import Sidebar from './Sidebar'
+import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
 import { SentryInitializer } from '../SentryInitializer'
 
@@ -46,13 +46,15 @@ export default function Console() {
                     <TerminalThemeProvider>
                       <ShareSecretProvider>
                         <DeploymentSettingsProvider>
-                          <AIContextProvider>
-                            <FeatureFlagProvider>
-                              <CommandPaletteProvider>
-                                <ConsoleContent />
-                              </CommandPaletteProvider>
-                            </FeatureFlagProvider>
-                          </AIContextProvider>
+                          <SidebarProvider>
+                            <AIContextProvider>
+                              <FeatureFlagProvider>
+                                <CommandPaletteProvider>
+                                  <ConsoleContent />
+                                </CommandPaletteProvider>
+                              </FeatureFlagProvider>
+                            </AIContextProvider>
+                          </SidebarProvider>
                         </DeploymentSettingsProvider>
                       </ShareSecretProvider>
                     </TerminalThemeProvider>
@@ -92,7 +94,6 @@ function ConsoleContent() {
         overflow="hidden"
         flexDirection="column"
         flexGrow={1}
-        container="console / inline-size"
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
         {isProduction && <ApplicationUpdateToast />}
@@ -111,6 +112,7 @@ function ConsoleContent() {
             flexGrow={1}
             overflowX="hidden"
             position="relative"
+            container="console / inline-size"
           >
             <Subheader />
             <Suspense fallback={<LoadingIndicator />}>

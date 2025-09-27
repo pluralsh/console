@@ -3,12 +3,13 @@ import {
   CaretLeftIcon,
   IconFrame,
   IconFrameProps,
-  useSidebar,
 } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
 import { CountBadge } from '../utils/CountBadge'
+import { use } from 'react'
+import { SidebarContext } from 'components/layout/Sidebar'
 
 export function HelpLauncherBtn({
   variant,
@@ -19,7 +20,7 @@ export function HelpLauncherBtn({
   { variant: 'help' | 'minimize'; count?: number }
 >) {
   const theme = useTheme()
-  const { isExpanded } = useSidebar()
+  const { isExpanded } = use(SidebarContext)
 
   const translate = count > 10 ? -7 : -6
 

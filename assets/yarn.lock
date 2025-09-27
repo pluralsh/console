@@ -313,9 +313,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/sandbox@npm:2.7.0":
-  version: 2.7.0
-  resolution: "@apollo/sandbox@npm:2.7.0"
+"@apollo/sandbox@npm:2.7.2":
+  version: 2.7.2
+  resolution: "@apollo/sandbox@npm:2.7.2"
   dependencies:
     "@types/whatwg-mimetype": ^3.0.0
     eventemitter3: 3.1.0
@@ -331,7 +331,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 5ff663a13537999520652500a617831e67fc8e41ec6cda0bc397cad87bdf0fdcf7bbe1b3083f3c4f1414d3aab7ed45f21ae3d1eb633eaaf9d56c21e4dc3f29ed
+  checksum: bcf1d1c7ce2253547d93b057f3e3c8fa5822f358682f73c6bcb7f201f1abe8f22f6b6fe6a0168838010787243252ba73298a562b69f0b4ab47908468e63c0ee6
   languageName: node
   linkType: hard
 
@@ -10426,7 +10426,7 @@ __metadata:
   dependencies:
     "@absinthe/socket": 0.2.1
     "@apollo/client": 3.14.0
-    "@apollo/sandbox": 2.7.0
+    "@apollo/sandbox": 2.7.2
     "@cypress/webpack-preprocessor": 5.17.1
     "@dagrejs/dagre": 1.0.4
     "@docsearch/js": 3.5.2
