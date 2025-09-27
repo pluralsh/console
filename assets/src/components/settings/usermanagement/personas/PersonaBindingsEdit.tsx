@@ -124,6 +124,7 @@ export function EditPersonaBindingsModal({
           </Button>
           <Button
             secondary
+            type="button"
             onClick={onClose}
           >
             Cancel
