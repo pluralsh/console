@@ -25,6 +25,7 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
+import { SidebarContext } from 'components/layout/Sidebar.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -108,7 +109,8 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = usePersistedState('plural-ai-chat-open', false)
+  const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
+  const [open, setOpenState] = usePersistedState('plural-ai-chat-open', false)
   const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
   const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
   const [currentThreadId, setCurrentThreadId] = usePersistedState<
@@ -154,7 +156,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     <ChatbotContext
       value={{
         open,
-        setOpen,
+        setOpen: (open) => {
+          setOpenState(open)
+          if (open) setSidebarExpanded(false)
+        },
         currentThread,
         currentThreadLoading,
         currentThreadId,
