@@ -762,6 +762,12 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.0.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.0-eksbuild.2
     compatibilities:
     - '1.33'
@@ -4216,6 +4222,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.33.3-eksbuild.10
+    compatibilities:
+    - '1.33'
   - version: v1.33.3-eksbuild.6
     compatibilities:
     - '1.33'
@@ -4225,6 +4234,10 @@
   - version: v1.33.0-eksbuild.2
     compatibilities:
     - '1.33'
+  - version: v1.32.6-eksbuild.12
+    compatibilities:
+    - '1.33'
+    - '1.32'
   - version: v1.32.6-eksbuild.8
     compatibilities:
     - '1.33'
@@ -4253,6 +4266,11 @@
     compatibilities:
     - '1.33'
     - '1.32'
+  - version: v1.31.10-eksbuild.12
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.10-eksbuild.8
     compatibilities:
     - '1.33'
@@ -6048,6 +6066,24 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.134.1-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  - version: v0.134.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.129.1-eksbuild.1
     compatibilities:
     - '1.33'
