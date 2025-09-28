@@ -20,8 +20,6 @@ export function SidebarItem({
   ...props
 }: SidebarItemProps) {
   const { isExpanded } = use(SidebarContext)
-  if (expandedLabel?.toLowerCase() === 'home')
-    console.log(expandedLabel, active)
   return (
     <WrapWithIf
       condition={!!tooltip && !isExpanded}

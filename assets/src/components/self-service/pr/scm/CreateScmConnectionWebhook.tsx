@@ -104,6 +104,7 @@ export function CreateScmConectionWebhookModalBase({
           )}
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             {success ? 'Close' : 'Cancel'}
