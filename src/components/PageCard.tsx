@@ -1,16 +1,17 @@
-import { Div, type DivProps, Flex, H1, H2 } from 'honorable'
-import { type ComponentProps, type ReactNode } from 'react'
+import { ComponentPropsWithRef, type ReactNode } from 'react'
 
+import styled from 'styled-components'
 import AppIcon, { type AppIconProps } from './AppIcon'
+import Flex, { type FlexProps } from './Flex'
 
 type PageCardProps = {
   icon: Omit<AppIconProps, 'size'>
   heading?: ReactNode
   subheading?: ReactNode
   subheadingIcon?: ReactNode
-  headingProps?: ComponentProps<'h1'>
-  subheadingProps?: ComponentProps<'h2'>
-} & DivProps
+  headingProps?: ComponentPropsWithRef<'h1'>
+  subheadingProps?: ComponentPropsWithRef<'h2'>
+} & FlexProps
 
 function PageCard({
   ref,
@@ -24,39 +25,24 @@ function PageCard({
   ...props
 }: PageCardProps) {
   return (
-    <Div paddingLeft="medium">
+    <WrapperSC>
       <Flex
         ref={ref}
         gap="medium"
-        alignItems="center"
+        align="center"
         {...props}
       >
         <AppIcon
           size="small"
           {...icon}
         />
-        <Div>
-          {heading && (
-            <H1
-              subtitle1
-              {...headingProps}
-            >
-              {heading}
-            </H1>
-          )}
+        <div>
+          {heading && <HeadingSC {...headingProps}>{heading}</HeadingSC>}
           {subheading && (
-            <H2
-              caption
-              color="text-xlight"
-              display="flex"
-              flexDirection="row"
-              alignItems="center"
-              {...subheadingProps}
-            >
+            <SubheadingSC {...subheadingProps}>
               {subheadingIcon && (
                 <Flex
                   width={12}
-                  marginRight="xxsmall"
                   alignItems="center"
                   color="action-link-inline"
                   {...{ '& svg': { width: '100%' } }}
@@ -64,23 +50,35 @@ function PageCard({
                   {subheadingIcon}
                 </Flex>
               )}
-              <Div>{subheading}</Div>
-            </H2>
+              <div>{subheading}</div>
+            </SubheadingSC>
           )}
-        </Div>
+        </div>
       </Flex>
-      {children && (
-        <Div
-          body2
-          color="text-xlight"
-          marginTop="small"
-        >
-          {children}
-        </Div>
-      )}
-    </Div>
+      {children && <ChildrenSC>{children}</ChildrenSC>}
+    </WrapperSC>
   )
 }
+const WrapperSC = styled.div(({ theme }) => ({
+  paddingLeft: theme.spacing.medium,
+  'h1, h2': { margin: 0 },
+  wordBreak: 'break-word',
+}))
+const HeadingSC = styled.h1(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+}))
+const SubheadingSC = styled.h2(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+}))
+const ChildrenSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-xlight'],
+  marginTop: theme.spacing.small,
+}))
 
 export default PageCard
 export type { PageCardProps }

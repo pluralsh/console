@@ -24,11 +24,11 @@ type AppIconProps = {
   spacing?: AppIconSpacing
   hue?: AppIconHue
   clickable?: boolean
-  url?: string
+  url?: Nullable<string>
   icon?: ReactElement<any>
-  alt?: string
-  name?: string
-  initials?: string
+  alt?: Nullable<string>
+  name?: Nullable<string>
+  initials?: Nullable<string>
   className?: string
   onClose?: () => void
 }

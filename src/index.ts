@@ -102,20 +102,6 @@ export type {
   SelectPropsSingle,
 } from './components/Select'
 export { SetInert } from './components/SetInert'
-export {
-  default as Sidebar,
-  SIDEBAR_WIDTH,
-  useSidebar,
-  type SidebarLayout,
-  type SidebarVariant,
-} from './components/Sidebar'
-export { default as SidebarExpandButton } from './components/SidebarExpandButton'
-export {
-  SIDEBAR_EXPANDED_WIDTH,
-  default as SidebarExpandWrapper,
-} from './components/SidebarExpandWrapper'
-export { default as SidebarItem } from './components/SidebarItem'
-export { default as SidebarSection } from './components/SidebarSection'
 export { default as Sidecar, SidecarItem } from './components/Sidecar'
 export type { SidecarProps } from './components/Sidecar'
 export { default as Slider } from './components/Slider'
