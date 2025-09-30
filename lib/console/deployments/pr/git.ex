@@ -86,23 +86,26 @@ defmodule Console.Deployments.Pr.Git do
   end
   defp _to_http(_, "https://" <> _ = url), do: url
 
+  defp url(%ScmConnection{azure: %ScmConnection.Azure{organization: organization}, username: uname} = conn, id)
+    when uname != organization, do: url(%{conn | username: organization}, id)
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
-
   defp url(%ScmConnection{username: username}, "https://" <> _ = url) do
     uri = URI.parse(url)
     URI.to_string(%{uri | userinfo: username})
   end
-
   defp url(%ScmConnection{username: username} = conn, id) do
-    base = url(conn)
-    uri = URI.parse("#{base}/#{id}.git")
-    URI.to_string(%{uri | userinfo: username})
+    URI.parse("#{url(conn)}/#{id}#{if conn.type == :azure_devops, do: "", else: ".git"}")
+    |> Map.put(:userinfo, username)
+    |> URI.to_string()
+    |> IO.inspect()
   end
 
   defp url(%ScmConnection{base_url: base}) when is_binary(base), do: base
   defp url(%ScmConnection{type: :github}), do: "https://github.com"
   defp url(%ScmConnection{type: :gitlab}), do: "https://gitlab.com"
   defp url(%ScmConnection{type: :bitbucket}), do: "https://bitbucket.org"
+  defp url(%ScmConnection{type: :azure_devops, azure: %ScmConnection.Azure{organization: org, project: project}}),
+    do: "https://dev.azure.com/#{org}/#{project}/_git"
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 
