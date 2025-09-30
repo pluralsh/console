@@ -62,6 +62,7 @@ rules:
   - projects
   - providers
   - scmconnections
+  - sentinels
   - serviceaccounts
   - servicecontexts
   - servicedeployments
@@ -112,6 +113,7 @@ rules:
   - projects/finalizers
   - providers/finalizers
   - scmconnections/finalizers
+  - sentinels/finalizers
   - serviceaccounts/finalizers
   - servicecontexts/finalizers
   - servicedeployments/finalizers
@@ -156,6 +158,7 @@ rules:
   - projects/status
   - providers/status
   - scmconnections/status
+  - sentinels/status
   - serviceaccounts/status
   - servicecontexts/status
   - servicedeployments/status
