@@ -1094,6 +1094,65 @@ func (_c *ConsoleClientMock_CreateScmConnection_Call) RunAndReturn(run func(cont
 	return _c
 }
 
+// CreateSentinel provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) CreateSentinel(ctx context.Context, attr *client.SentinelAttributes) (*client.SentinelFragment, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateSentinel")
+	}
+
+	var r0 *client.SentinelFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *client.SentinelAttributes) (*client.SentinelFragment, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *client.SentinelAttributes) *client.SentinelFragment); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.SentinelFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *client.SentinelAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateSentinel_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateSentinel'
+type ConsoleClientMock_CreateSentinel_Call struct {
+	*mock.Call
+}
+
+// CreateSentinel is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr *client.SentinelAttributes
+func (_e *ConsoleClientMock_Expecter) CreateSentinel(ctx interface{}, attr interface{}) *ConsoleClientMock_CreateSentinel_Call {
+	return &ConsoleClientMock_CreateSentinel_Call{Call: _e.mock.On("CreateSentinel", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_CreateSentinel_Call) Run(run func(ctx context.Context, attr *client.SentinelAttributes)) *ConsoleClientMock_CreateSentinel_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*client.SentinelAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateSentinel_Call) Return(_a0 *client.SentinelFragment, _a1 error) *ConsoleClientMock_CreateSentinel_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateSentinel_Call) RunAndReturn(run func(context.Context, *client.SentinelAttributes) (*client.SentinelFragment, error)) *ConsoleClientMock_CreateSentinel_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateService provides a mock function with given fields: clusterId, attributes
 func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes client.ServiceDeploymentAttributes) (*client.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterId, attributes)
@@ -2594,6 +2653,53 @@ func (_c *ConsoleClientMock_DeleteScmConnection_Call) Return(_a0 error) *Console
 }
 
 func (_c *ConsoleClientMock_DeleteScmConnection_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteScmConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteSentinel provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteSentinel(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteSentinel")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteSentinel_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteSentinel'
+type ConsoleClientMock_DeleteSentinel_Call struct {
+	*mock.Call
+}
+
+// DeleteSentinel is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteSentinel(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteSentinel_Call {
+	return &ConsoleClientMock_DeleteSentinel_Call{Call: _e.mock.On("DeleteSentinel", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteSentinel_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteSentinel_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteSentinel_Call) Return(_a0 error) *ConsoleClientMock_DeleteSentinel_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteSentinel_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteSentinel_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5050,6 +5156,65 @@ func (_c *ConsoleClientMock_GetScmConnectionByName_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// GetSentinel provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetSentinel(ctx context.Context, id string) (*client.SentinelFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSentinel")
+	}
+
+	var r0 *client.SentinelFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.SentinelFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.SentinelFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.SentinelFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetSentinel_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSentinel'
+type ConsoleClientMock_GetSentinel_Call struct {
+	*mock.Call
+}
+
+// GetSentinel is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetSentinel(ctx interface{}, id interface{}) *ConsoleClientMock_GetSentinel_Call {
+	return &ConsoleClientMock_GetSentinel_Call{Call: _e.mock.On("GetSentinel", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetSentinel_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetSentinel_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetSentinel_Call) Return(_a0 *client.SentinelFragment, _a1 error) *ConsoleClientMock_GetSentinel_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetSentinel_Call) RunAndReturn(run func(context.Context, string) (*client.SentinelFragment, error)) *ConsoleClientMock_GetSentinel_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetService provides a mock function with given fields: clusterID, serviceName
 func (_m *ConsoleClientMock) GetService(clusterID string, serviceName string) (*client.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterID, serviceName)
@@ -6582,6 +6747,63 @@ func (_c *ConsoleClientMock_IsScmConnectionExists_Call) RunAndReturn(run func(co
 	return _c
 }
 
+// IsSentinelExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsSentinelExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsSentinelExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsSentinelExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsSentinelExists'
+type ConsoleClientMock_IsSentinelExists_Call struct {
+	*mock.Call
+}
+
+// IsSentinelExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsSentinelExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsSentinelExists_Call {
+	return &ConsoleClientMock_IsSentinelExists_Call{Call: _e.mock.On("IsSentinelExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsSentinelExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsSentinelExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsSentinelExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsSentinelExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsSentinelExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsSentinelExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsServiceAccountExists provides a mock function with given fields: ctx, email
 func (_m *ConsoleClientMock) IsServiceAccountExists(ctx context.Context, email string) (bool, error) {
 	ret := _m.Called(ctx, email)
@@ -8037,6 +8259,66 @@ func (_c *ConsoleClientMock_UpdateScmConnection_Call) Return(_a0 *client.ScmConn
 }
 
 func (_c *ConsoleClientMock_UpdateScmConnection_Call) RunAndReturn(run func(context.Context, string, client.ScmConnectionAttributes) (*client.ScmConnectionFragment, error)) *ConsoleClientMock_UpdateScmConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateSentinel provides a mock function with given fields: ctx, id, attr
+func (_m *ConsoleClientMock) UpdateSentinel(ctx context.Context, id string, attr *client.SentinelAttributes) (*client.SentinelFragment, error) {
+	ret := _m.Called(ctx, id, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateSentinel")
+	}
+
+	var r0 *client.SentinelFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.SentinelAttributes) (*client.SentinelFragment, error)); ok {
+		return rf(ctx, id, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.SentinelAttributes) *client.SentinelFragment); ok {
+		r0 = rf(ctx, id, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.SentinelFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *client.SentinelAttributes) error); ok {
+		r1 = rf(ctx, id, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateSentinel_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateSentinel'
+type ConsoleClientMock_UpdateSentinel_Call struct {
+	*mock.Call
+}
+
+// UpdateSentinel is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attr *client.SentinelAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateSentinel(ctx interface{}, id interface{}, attr interface{}) *ConsoleClientMock_UpdateSentinel_Call {
+	return &ConsoleClientMock_UpdateSentinel_Call{Call: _e.mock.On("UpdateSentinel", ctx, id, attr)}
+}
+
+func (_c *ConsoleClientMock_UpdateSentinel_Call) Run(run func(ctx context.Context, id string, attr *client.SentinelAttributes)) *ConsoleClientMock_UpdateSentinel_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*client.SentinelAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateSentinel_Call) Return(_a0 *client.SentinelFragment, _a1 error) *ConsoleClientMock_UpdateSentinel_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateSentinel_Call) RunAndReturn(run func(context.Context, string, *client.SentinelAttributes) (*client.SentinelFragment, error)) *ConsoleClientMock_UpdateSentinel_Call {
 	_c.Call.Return(run)
 	return _c
 }
