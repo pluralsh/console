@@ -97,7 +97,6 @@ defmodule Console.Deployments.Pr.Git do
     URI.parse("#{url(conn)}/#{id}#{if conn.type == :azure_devops, do: "", else: ".git"}")
     |> Map.put(:userinfo, username)
     |> URI.to_string()
-    |> IO.inspect()
   end
 
   defp url(%ScmConnection{base_url: base}) when is_binary(base), do: base

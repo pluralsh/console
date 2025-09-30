@@ -5,6 +5,11 @@ defmodule Console.Repo do
 
   use Bourne
 
+  def locked(%mod{id: id}) do
+    mod.with_lock()
+    |> get(id)
+  end
+
   def rds_ssl_opts(:aws, url) do
     [
       verify: :verify_peer,

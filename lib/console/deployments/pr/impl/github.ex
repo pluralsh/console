@@ -119,6 +119,34 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def commit_status(%ScmConnection{} = conn, %PullRequest{url: url}, id, status, attrs) do
+    with {:ok, owner, repo, _} <- get_pull_id(url),
+         {:ok, client} <- client(conn) do
+      {status, body} = to_commit_status(status)
+
+      do_status(client, owner, repo, id, Map.merge(body, %{
+        status: status,
+        head_sha: attrs.sha,
+        details_url: attrs.url,
+        name: attrs.name,
+        output: %{title: attrs.description, summary: Map.get(attrs, :summary, "")},
+      }))
+      |> case do
+        {_, %{"id" => id}, _} -> {:ok, "#{id}"}
+        {_, body, _} -> {:error, "failed to create commit status: #{Jason.encode!(body)}"}
+      end
+    end
+  end
+
+  defp do_status(client, owner, repo, nil, body), do: Tentacat.post("repos/#{owner}/#{repo}/check-runs", client, body)
+  defp do_status(client, owner, repo, id, body), do: Tentacat.patch("repos/#{owner}/#{repo}/check-runs/#{id}", client, body)
+
+  defp to_commit_status(:queued), do: {:pending, %{}}
+  defp to_commit_status(:failed), do: {:completed, %{completed_at: Timex.now(), conclusion: :failure}}
+  defp to_commit_status(:successful), do: {:completed, %{completed_at: Timex.now(), conclusion: :success}}
+  defp to_commit_status(:pending_approval), do: {:completed, %{completed_at: Timex.now(), conclusion: :success}}
+  defp to_commit_status(_), do: {:in_progress, %{started_at: Timex.now()}}
+
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
   defp to_files(client, url, pr, files) do

@@ -9,6 +9,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @type pr_attrs :: %{title: binary, body: binary, branch: binary}
   @type pr_resp :: {:ok, pr_attrs} | Console.error
+  @type commit_status_attrs :: %{sha: binary, url: binary, name: binary, description: binary}
+  @type commit_status :: :queued | :pending | :running | :failed | :successful
 
   @doc """
   Create a pull request for the given SCM, and return the title + url of the pr if successful
@@ -33,6 +35,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
   @callback approve(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
   @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
+
+  @callback commit_status(conn :: ScmConnection.t, pr :: PullRequest.t, id :: binary | nil, status :: commit_status, attrs :: commit_status_attrs) :: :ok | Console.error
 
   @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
 
@@ -96,6 +100,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def approve(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.approve(conn, pr, body)
+  end
+
+  def commit_status(%ScmConnection{} = conn, %PullRequest{} = pr, sha, status, attrs) do
+    impl = dispatcher(conn)
+    impl.commit_status(conn, pr, sha, status, attrs)
   end
 
   def files(%ScmConnection{} = conn, url) do

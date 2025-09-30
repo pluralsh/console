@@ -44,7 +44,6 @@ defmodule Console.Deployments.Pr.Impl.Azure do
         title: title,
         description: body,
       })
-      |> IO.inspect(label: "post result:")
       |> case do
         {:ok, pr} -> {:ok, %{title: title, ref: branch, body: body, url: web_url(pr), owner: owner(pr)}}
         err -> err
@@ -85,6 +84,8 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   def approve(_, _, _), do: {:error, "not implemented"}
 
   def files(_, _), do: {:ok, []}
+
+  def commit_status(_, _, _, _, _), do: :ok
 
   def pr_info(url) do
     with {:ok, repo_id, number} <- get_pull_id(url) do
