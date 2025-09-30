@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,8 +85,8 @@ type SentinelCheckLogConfiguration struct {
 	Namespaces []*string `json:"namespaces,omitempty"`
 	// Query a search query this will run against the logs.
 	Query string `json:"query"`
-	// ClusterID the cluster to run the query against.
-	ClusterID *string `json:"clusterId,omitempty"`
+	// ClusterRef the cluster to run the query against.
+	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 	// Duration of the log analysis run.
 	Duration string `json:"duration"`
 	// Facets the log facets to run the query against.
@@ -110,6 +111,7 @@ type SentinelCheckKubernetesConfiguration struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the ServiceAccount in the Console API."
 
 // Sentinel is the Schema for the sentinels API
@@ -132,4 +134,22 @@ type SentinelList struct {
 
 func init() {
 	SchemeBuilder.Register(&Sentinel{}, &SentinelList{})
+}
+
+// ConsoleID implements NamespacedPluralResource interface
+func (s *Sentinel) ConsoleID() *string {
+	return s.Status.ID
+}
+
+// ConsoleName implements NamespacedPluralResource interface
+func (s *Sentinel) ConsoleName() string {
+	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
+		return *s.Spec.Name
+	}
+
+	return s.Name
+}
+
+func (s *Sentinel) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
