@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   CloseIcon,
   Divider,
@@ -10,7 +11,6 @@ import {
   LoopingLogo,
   MoreIcon,
   PeopleIcon,
-  PlusIcon,
   ReturnIcon,
   SearchIcon,
   SubTab,
@@ -29,7 +29,13 @@ import usePersistedState from 'components/hooks/usePersistedState'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { isEmpty } from 'lodash'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { keySetToTagArray } from 'utils/clusterTags'
@@ -69,7 +75,6 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
 import StackStatusChip from './common/StackStatusChip.tsx'
-import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
 import RestoreStackButton from './RestoreStackButton.tsx'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
@@ -233,7 +238,15 @@ export default function Stacks() {
   ) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
-        <CreateStack refetch={refetch} />
+        <Button
+          as={Link}
+          to="https://docs.plural.sh/plural-features/stacks-iac-management"
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Create a stack
+        </Button>
       </EmptyState>
     )
   }
@@ -290,11 +303,6 @@ export default function Stacks() {
               <FiltersIcon />
             </Button>
           )}
-          <CreateStack
-            buttonContent={<PlusIcon />}
-            buttonProps={{ floating: true, height: 40, width: 40 }}
-            refetch={refetch}
-          />
         </div>
         {filterExpanded && (
           <TagsFilter
