@@ -6783,9 +6783,9 @@ func (in *SentinelCheckLogConfiguration) DeepCopyInto(out *SentinelCheckLogConfi
 			}
 		}
 	}
-	if in.ClusterID != nil {
-		in, out := &in.ClusterID, &out.ClusterID
-		*out = new(string)
+	if in.ClusterRef != nil {
+		in, out := &in.ClusterRef, &out.ClusterRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
 	if in.Facets != nil {
