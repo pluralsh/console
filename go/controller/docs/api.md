@@ -3830,7 +3830,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `namespaces` _string array_ | Namespaces the namespaces to run the query against. |  |  |
 | `query` _string_ | Query a search query this will run against the logs. |  |  |
-| `clusterId` _string_ | ClusterID the cluster to run the query against. |  |  |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef the cluster to run the query against. |  |  |
 | `duration` _string_ | Duration of the log analysis run. |  |  |
 | `facets` _object (keys:string, values:string)_ | Facets the log facets to run the query against. |  |  |
 
