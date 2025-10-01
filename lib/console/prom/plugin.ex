@@ -12,6 +12,8 @@ defmodule Console.Prom.Plugin do
   def metric_scope(:file_count), do: ~w(console file count)a
   def metric_scope(:file_size), do: ~w(console file size)a
   def metric_scope(:erlang_nodes), do: ~w(console erlang nodes count)a
+  def metric_scope(:persisted_query_hit), do: ~w(console persisted query hit)a
+  def metric_scope(:persisted_query_miss), do: ~w(console persisted query miss)a
 
   @impl true
   def event_metrics(_opts) do
@@ -24,6 +26,18 @@ defmodule Console.Prom.Plugin do
           measurement: :count,
           description: "The number of running git agents.",
           tags: [:url]
+        ),
+        sum(
+          [:persisted, :query, :hit],
+          event_name: metric_scope(:persisted_query_hit),
+          measurement: :count,
+          description: "The number of persisted query hits."
+        ),
+        sum(
+          [:persisted, :query, :miss],
+          event_name: metric_scope(:persisted_query_miss),
+          measurement: :count,
+          description: "The number of persisted query misses."
         )
       ]
     )

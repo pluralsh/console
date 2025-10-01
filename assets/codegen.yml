@@ -12,6 +12,24 @@ generates:
           content:
             - '/* eslint-disable */'
             - '/* prettier-ignore */'
+  src/generated/persisted-queries/client.json:
+    schema: '../schema/schema.graphql'
+    documents: 
+    - './src/graph/**/*.graphql'
+    plugins:
+      - '@replit/graphql-codegen-persisted-queries'
+    config:
+      output: server
+      includeAlgorithmPrefix: true
+  src/generated/persisted-queries/goclient.json:
+    schema: '../schema/schema.graphql'
+    documents: 
+    - '../go/client/**/*.graphql'
+    plugins:
+      - '@replit/graphql-codegen-persisted-queries'
+    config:
+      output: server
+      includeAlgorithmPrefix: true
   src/generated/fragments.json:
     schema: '../schema/schema.graphql'
     plugins:
