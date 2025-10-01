@@ -823,6 +823,28 @@ defmodule Console.Deployments.GitTest do
     end
   end
 
+  describe "#auto_merge/1" do
+    test "it can auto merge a pull request" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", status: :open, approver: "someone@example.com")
+      expect(Tentacat.Pulls, :merge, fn _, "pluralsh", "console", "1", _ -> {:ok, %{"merged" => true}, :ok} end)
+
+      :ok = Git.auto_merge(pr)
+    end
+
+    test "it errors if the pr is not approved" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, status: :open, approver: nil)
+      {:error, _} = Git.auto_merge(pr)
+    end
+
+    test "it errors if the pr is in a terminal state" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, status: :merged)
+      {:error, _} = Git.auto_merge(pr)
+    end
+  end
+
   describe "#delete_pr_governance/2" do
     test "it can delete a governance controller" do
       governance = insert(:pr_governance)

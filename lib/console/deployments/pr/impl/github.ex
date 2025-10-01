@@ -59,6 +59,16 @@ defmodule Console.Deployments.Pr.Impl.Github do
   end
   def pr(_), do: :ignore
 
+  def merge(conn, %PullRequest{} = pr) do
+    with {:ok, client} <- client(conn),
+         {:ok, owner, repo, number} <- get_pull_id(pr.url) do
+      case Tentacat.Pulls.merge(client, owner, repo, number, %{merge_method: "squash"}) do
+        {_, %{"merged" => true}, _} -> :ok
+        {_, body, _} -> {:error, "failed to merge pull request: #{Jason.encode!(body)}"}
+      end
+    end
+  end
+
   defp add_approver(attrs, %{"review" => %{"state" => "approved", "user" => u}}),
     do: Map.put(attrs, :approver, u["email"] || u["login"])
   defp add_approver(attrs, _), do: attrs
