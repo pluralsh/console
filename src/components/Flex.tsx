@@ -7,37 +7,31 @@ type FlexBaseProps = {
   /**
    * Alias for flexDirection
    */
-  direction?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
+  direction?: CSSProperties['flexDirection']
   /**
    * wrap flex property
    */
-  wrap?: 'wrap' | 'nowrap' | 'wrap-reverse' | boolean
+  wrap?: CSSProperties['flexWrap']
   /**
    * Alias for flexBasis
    */
-  basis?: string | number
+  basis?: CSSProperties['flexBasis']
   /**
    * Alias for flexGrow
    */
-  grow?: boolean | number
+  grow?: CSSProperties['flexGrow']
   /**
    * Alias for flexShrink
    */
-  shrink?: boolean | number
+  shrink?: CSSProperties['flexShrink']
   /**
    * Alias for alignItems
    */
-  align?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch'
+  align?: CSSProperties['alignItems']
   /**
    * Alias for justifyContent
    */
-  justify?:
-    | 'flex-start'
-    | 'flex-end'
-    | 'center'
-    | 'space-between'
-    | 'space-around'
-    | 'space-evenly'
+  justify?: CSSProperties['justifyContent']
 
   gap?: keyof DefaultTheme['spacing']
   padding?: keyof DefaultTheme['spacing']

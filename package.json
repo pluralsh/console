@@ -52,7 +52,7 @@
     "@radix-ui/react-focus-scope": "1.1.0",
     "@react-aria/utils": "3.23.0",
     "@react-hooks-library/core": "0.6.0",
-    "@react-spring/web": "10.0.1",
+    "@react-spring/web": "10.0.3",
     "@react-stately/utils": "3.9.0",
     "@tanstack/match-sorter-utils": "8.8.4",
     "@tanstack/react-table": "8.20.5",

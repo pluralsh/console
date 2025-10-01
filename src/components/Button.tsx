@@ -12,7 +12,7 @@ import {
 import { CSSProperties, styled, useTheme } from 'styled-components'
 import { resolveSpacersAndSanitizeCss, SpacerProps } from '../theme/spacing'
 import { applyNodeToRefs } from '../utils/applyNodeToRefs'
-import Flex from './Flex'
+import Flex, { FlexProps } from './Flex'
 import { Spinner } from './Spinner'
 
 type ButtonSize = 'small' | 'medium' | 'large'
@@ -30,6 +30,7 @@ export type ButtonProps = {
   loading?: Nullable<boolean>
   loadingIndicator?: ReactNode
   children?: ReactNode
+  innerFlexProps?: FlexProps
   // flags- keeping this pattern instead of using "size" and "type" for backwards compatibility
   small?: boolean
   large?: boolean
@@ -52,7 +53,13 @@ export type ButtonProps = {
   // a few commonly used css props for QOL
   Pick<
     CSSProperties,
-    'width' | 'minWidth' | 'height' | 'minHeight' | 'flex' | 'alignSelf'
+    | 'width'
+    | 'minWidth'
+    | 'height'
+    | 'minHeight'
+    | 'flex'
+    | 'alignSelf'
+    | 'justifyContent'
   >
 
 const Button = memo(
@@ -77,6 +84,8 @@ const Button = memo(
     minWidth,
     flex,
     alignSelf,
+    justifyContent = 'center',
+    innerFlexProps,
     ...props
   }: ButtonProps) => {
     const theme = useTheme()
@@ -113,7 +122,16 @@ const Button = memo(
         $type={buttonType}
         $noPadding={props.padding === 'none'}
         disabled={disabled}
-        css={{ width, minWidth, height, minHeight, flex, alignSelf, ...css }}
+        css={{
+          width,
+          minWidth,
+          height,
+          minHeight,
+          flex,
+          alignSelf,
+          justifyContent,
+          ...css,
+        }}
         {...(loading && { inert: true })}
         {...rest}
       >
@@ -141,9 +159,10 @@ const Button = memo(
           </LoadingIndicatorWrapperSC>
         )}
         <Flex
-          align="center"
-          justify="center"
+          alignItems="center"
           visibility={loading ? 'hidden' : 'inherit'}
+          width={justifyContent === 'flex-start' ? '100%' : undefined}
+          {...innerFlexProps}
         >
           {children}
         </Flex>

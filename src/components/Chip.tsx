@@ -1,4 +1,3 @@
-import { type FlexProps } from 'honorable'
 import {
   type ComponentProps,
   type ComponentPropsWithRef,
@@ -16,6 +15,7 @@ import Card, {
 import CloseIcon from './icons/CloseIcon'
 import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
+import { FlexProps } from './Flex'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 export type ChipSize = 'small' | 'medium' | 'large'
