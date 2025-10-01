@@ -7,8 +7,8 @@ defmodule Console.Pipelines.PullRequest.Pipeline do
     Logger.info "Attempting pr auto merge for #{pr.url}"
     case Git.auto_merge(pr) do
       :ok -> :ok
-      {:error, err} -> Logger.error "Failed to auto merge pr #{pr.url}: #{inspect(err)}"
-      _ -> Logger.error "scm integration not set up to perform auto merge"
+      {:error, err} -> Logger.info "Failed to auto merge pr #{pr.url}: #{inspect(err)}"
+      _ -> Logger.info "scm integration not set up to perform auto merge"
     end
   end
 end

@@ -834,8 +834,10 @@ defmodule Console.Deployments.GitTest do
 
     test "it errors if the pr is not approved" do
       insert(:scm_connection, default: true)
-      pr = insert(:pull_request, status: :open, approver: nil)
+      pr = insert(:pull_request, status: :open, approver: nil, merge_cron: "*/5 * * * *")
       {:error, _} = Git.auto_merge(pr)
+
+      assert refetch(pr).merge_attempt_at
     end
 
     test "it errors if the pr is in a terminal state" do

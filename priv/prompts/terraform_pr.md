@@ -14,3 +14,6 @@ Some guidelines on the code changes:
 1. Avoid appending to large files.  If you're adding new resources, just create a new file for that resource.
 2. Leverage existing variables and local values as much as possible.
 3. Never commit secrets or sensitive information for the infrastructure you're creating.
+
+- Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+- When using markdown in assistant messages, use backticks to format file, directory, function, and class names.

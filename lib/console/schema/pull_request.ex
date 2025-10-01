@@ -67,7 +67,7 @@ defmodule Console.Schema.PullRequest do
   def mergeable(query \\ __MODULE__) do
     now = DateTime.utc_now()
     from(pr in query,
-      where: not is_nil(pr.merge_attempt_at) and pr.merge_attempt_at <= ^now,
+      where: not is_nil(pr.merge_attempt_at) and pr.merge_attempt_at <= ^now and pr.status == ^:open,
       order_by: [asc: :merge_attempt_at]
     )
   end
@@ -177,8 +177,8 @@ defmodule Console.Schema.PullRequest do
   end
   def poll_duration(_), do: Duration.new!(minute: 5)
 
-  defp next_merge_attempt(cs) do
-    case get_next_attempt(get_change(cs, :merge_cron), get_field(cs, :merge_attempt_at)) do
+  def next_merge_attempt(cs, cron \\ nil) do
+    case get_next_attempt(cron || get_change(cs, :merge_cron), get_field(cs, :merge_attempt_at)) do
       {:ok, changes} -> Enum.reduce(changes, cs, fn {k, v}, cs -> put_change(cs, k, v) end)
       {:error, err} -> add_error(cs, :merge_cron, "Failed to generate next run date: #{inspect(err)}")
     end

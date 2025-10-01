@@ -9,8 +9,12 @@ defmodule Console.Cost.Pr do
 
   @pr """
   The following is the description of how a Kubernetes service is configured using Plural as a GitOps engine.  I want to reconfigure one
-  of its containers resource requests to match an optimal setup determined by our cost management solution.  First, the manifests for
-  the service are listed below:
+  of its containers resource requests to match an optimal setup determined by our cost management solution.  The manifests for
+  the service will be listed for your fully.
+
+  General guidelines to follow:
+  - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+  - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """
 
   @spec suggestion(binary | ClusterScalingRecommendation.t, User.t) :: Fixer.resp

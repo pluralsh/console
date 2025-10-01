@@ -5,6 +5,8 @@ defmodule ConsoleWeb.AIController do
   alias Console.Schema.Cluster
   alias Console.Deployments.Agents
 
+  @timeouts [receive_timeout: :timer.seconds(300)]
+
   plug :verify
 
   def openai_chat_completions(conn, _) do
@@ -12,8 +14,7 @@ defmodule ConsoleWeb.AIController do
       modify_conn(conn, proxy)
       |> do_proxy(Path.join(proxy.url, "/chat/completions"))
     else
-      {:error, err} ->
-        send_resp(conn, 402, "no valid ai proxy configuration found: #{err}")
+      {:error, err} -> send_resp(conn, 402, "ai proxy config error: #{err}")
     end
   end
 
@@ -22,13 +23,13 @@ defmodule ConsoleWeb.AIController do
       modify_conn(conn, proxy)
       |> do_proxy(Path.join(proxy.url, "/embeddings"))
     else
-      {:error, err} ->
-        send_resp(conn, 402, "no valid ai proxy configuration found: #{err}")
+      {:error, err} -> send_resp(conn, 402, "ai proxy config error: #{err}")
     end
   end
 
   def modify_conn(conn, proxy) do
-    %{conn | req_headers: [{"Authorization", "Bearer #{proxy.token}"} | conn.req_headers]}
+    old_headers = Enum.reject(conn.req_headers, fn {k, _} -> k == "authorization" end)
+    %{conn | req_headers: [{"Authorization", "Bearer #{proxy.token}"} | old_headers]}
     |> maybe_add_params(proxy)
   end
 
@@ -46,7 +47,8 @@ defmodule ConsoleWeb.AIController do
       method: to_method(conn.method),
       url: upstream,
       headers: convert_headers(conn, upstream),
-      body: body
+      body: body,
+      options: @timeouts
     }
     |> Req.request_stream()
     |> ReverseProxyPlug.response(conn, opts)
@@ -59,9 +61,7 @@ defmodule ConsoleWeb.AIController do
          true <- Agents.has_runtime?(cluster) do
       conn
     else
-      _ ->
-        send_resp(conn, 401, "unauthenticated")
-        |> halt()
+      _ -> send_resp(conn, 401, "unauthenticated") |> halt()
     end
   end
 

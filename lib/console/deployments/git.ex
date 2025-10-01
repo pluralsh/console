@@ -634,7 +634,12 @@ defmodule Console.Deployments.Git do
     with %ScmConnection{} = conn <- default_scm_connection(),
       do: Dispatcher.merge(conn, pr)
   end
-  def auto_merge(%PullRequest{approver: nil}), do: {:error, "no pr approver found"}
+  def auto_merge(%PullRequest{approver: nil, status: :open} = pr) do
+    PullRequest.changeset(pr)
+    |> PullRequest.next_merge_attempt(pr.merge_cron)
+    |> Repo.update()
+    |> then(fn _ -> {:error, "pr is still pending approval"} end)
+  end
   def auto_merge(_), do: {:error, "pr is already in a terminal state"}
 
   @doc """

@@ -28,7 +28,6 @@ defmodule Console.Deployments.Policies do
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
-    IO.inspect(scopes, label: "current scopes")
     case Console.Users.AccessTokens.scopes_match?(scopes, api, Map.get(res, :id)) do
       true -> can?(%{user | scopes: nil}, res, action)
       false -> {:error, "token scopes not satisfied"}

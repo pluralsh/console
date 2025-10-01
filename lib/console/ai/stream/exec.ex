@@ -47,6 +47,7 @@ defmodule Console.AI.Stream.Exec do
           _ -> {:cont, acc}
         end
 
+      {{:error, error}, _}, _ when is_binary(error) -> {:halt, {:error, "ai service error: #{error}"}}
       {{:error, error}, _}, _ -> {:halt, {:error, "ai service error: #{inspect(error)}"}}
 
       _, acc -> {:cont, acc}
@@ -64,38 +65,42 @@ defmodule Console.AI.Stream.Exec do
       start_fun,
       fn
         {:error, %HTTPoison.Error{} = error} -> {[{:error, error}], :error}
+        {:error, _} -> {:halt, :error}
+        :error -> {:halt, :error}
+        {:halt, res} -> {:halt, res}
+        {:ok, %HTTPoison.AsyncResponse{}} = resp  -> {[], {resp, ""}}
+
         {{:error, err}, _} -> {[{:error, err}], :error}
-
-        {:ok, %HTTPoison.AsyncResponse{}} = resp  ->
-          {[], {resp, ""}}
-
         {{:ok, %HTTPoison.AsyncResponse{id: id} = res}, acc}  ->
           receive do
             %HTTPoison.AsyncStatus{id: ^id, code: code} when code >= 200 and code < 400 ->
               {[], stream_next(res, acc)}
 
             %HTTPoison.AsyncStatus{id: ^id, code: code} ->
-              {[{:error, "error code: #{code}"}], :error}
+              {[], stream_next(res, {:error, "error code #{code}\n"})}
 
-            %HTTPoison.AsyncHeaders{id: ^id, headers: _headers} ->
-              {[], stream_next(res, acc)}
-
-            %HTTPoison.AsyncChunk{chunk: chunk} ->
-              {items, remaining} = AIStream.SSE.parse(acc <> chunk)
-              {items, stream_next(res, remaining)}
-
-            %HTTPoison.AsyncEnd{id: ^id} ->
-              {:halt, res}
+            %HTTPoison.AsyncHeaders{id: ^id, headers: _headers} -> {[], stream_next(res, acc)}
+            %HTTPoison.AsyncChunk{chunk: chunk} -> handle_chunk(chunk, res, acc)
+            %HTTPoison.AsyncEnd{id: ^id} -> finalize(res, acc)
           end
-        {:error, _} -> {:halt, :error}
-        :error -> {:halt, :error}
       end,
       fn
+        {:halt, %HTTPoison.AsyncResponse{id: id}} -> :hackney.stop_async(id)
         %{id: id} -> :hackney.stop_async(id)
         :error -> :ok
       end
     )
   end
 
-  defp stream_next(resp, acc), do: {HTTPoison.stream_next(resp), acc}
+  defp finalize(res, acc) when is_binary(acc), do: {:halt, res}
+  defp finalize(res, {:error, acc}), do: {[{:error, acc}], {:halt, res}}
+
+  defp handle_chunk(chunk, %HTTPoison.AsyncResponse{} = res, acc) when is_binary(acc) do
+    {items, remaining} = AIStream.SSE.parse(acc <> chunk)
+    {items, stream_next(res, remaining)}
+  end
+  defp handle_chunk(chunk, %HTTPoison.AsyncResponse{} = res, {:error, acc}) when is_binary(acc),
+    do: {[], stream_next(res, {:error, acc <> chunk})}
+
+  defp stream_next(%HTTPoison.AsyncResponse{} = resp, acc), do: {HTTPoison.stream_next(resp), acc}
 end
