@@ -196,7 +196,7 @@ type ConsoleClient interface {
 
 func New(url, token string) ConsoleClient {
 	return &client{
-		consoleClient: console.NewClient(NewHttpClient(token), url, nil),
+		consoleClient: console.NewClient(NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
 		url:           url,
 		ctx:           context.Background(),
 	}

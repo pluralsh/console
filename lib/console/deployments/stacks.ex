@@ -337,6 +337,40 @@ defmodule Console.Deployments.Stacks do
     end
   end
 
+  @doc """
+  Updates the commit status for a given stack run
+  """
+  @spec commit_status(StackRun.t) :: :ok | Console.error
+  def commit_status(%StackRun{git: %{ref: ref}, type: type} = run) do
+    start_transaction()
+    |> add_operation(:run, fn _ -> {:ok, Repo.locked(run)} end)
+    |> add_operation(:persist, fn %{run: run} ->
+      case {Repo.preload(run, [:pull_request]), scm_connection(run)} do
+        {%StackRun{pull_request: %PullRequest{} = pr, check_id: check_id}, %ScmConnection{} = conn} ->
+          status = _commit_status(run)
+          Dispatcher.commit_status(conn, pr, check_id, status, %{
+            url: Console.url("/stacks/#{run.stack_id}/runs/#{run.id}"),
+            sha: ref,
+            name: "Plural: #{type} plan",
+            description: "Plan Status: #{status}",
+            summary: "View full details here: #{Console.url("/stacks/#{run.stack_id}/runs/#{run.id}")}",
+          })
+          |> maybe_persist(run)
+        _ -> {:ok, %{}}
+      end
+    end)
+    |> execute(extract: :persist)
+  end
+
+  defp maybe_persist({:ok, id}, %StackRun{} = run) when is_binary(id) do
+    StackRun.changeset(run, %{check_id: id})
+    |> Repo.update()
+  end
+  defp maybe_persist(err, _), do: err
+
+  defp _commit_status(%StackRun{dry_run: true, status: :pending_approval}), do: :successful
+  defp _commit_status(%StackRun{status: status}), do: status
+
   defp scm_connection(%StackRun{} = run) do
     case {run, Settings.fetch()} do
       {%StackRun{stack: %{connection: %ScmConnection{} = conn}}, _} -> conn
@@ -500,24 +534,19 @@ defmodule Console.Deployments.Stacks do
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
+            |> PullRequest.next_poll_changeset(stack.interval)
             |> Repo.update()
           end)
           |> execute(extract: :run)
         err ->
-          add_polled_sha(pr, new_sha)
+          PullRequest.next_poll_changeset(pr, stack.interval)
+          |> add_polled_sha(new_sha)
           err
       end
     end)
-    |> polled(pr, stack.interval)
   end
 
   def poll(_), do: {:error, "invalid parent"}
-
-  defp polled(result, %schema{} = resource, interval) do
-    schema.next_poll_changeset(resource, interval)
-    |> Repo.update()
-    result
-  end
 
   defp on_new_sha(repo, ref, sha, ps, fun) do
     case Discovery.sha(repo, ref) do

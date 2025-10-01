@@ -7,6 +7,10 @@ defmodule Console.Schema.Base do
       use Piazza.Ecto.Schema
       import Console.Schema.Base
 
+      def with_lock(query \\ __MODULE__) do
+        from(q in query, lock: "FOR UPDATE")
+      end
+
       def with_limit(query \\ __MODULE__, limit) do
         from(q in query, limit: ^limit)
       end
