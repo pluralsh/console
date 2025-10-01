@@ -9,4 +9,5 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: sentinel-sample
 spec:
-  # TODO(user): Add fields here
+  name: test
+  description: "test sentinel description"

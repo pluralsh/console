@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -25,8 +27,9 @@ const SentinelFinalizer = "deployments.plural.sh/sentinel-protection"
 // SentinelReconciler reconciles a Sentinel object
 type SentinelReconciler struct {
 	client.Client
-	Scheme        *runtime.Scheme
-	ConsoleClient consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=sentinels,verbs=get;list;watch;create;update;patch;delete
@@ -39,6 +42,8 @@ type SentinelReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	logger := ctrl.LoggerFrom(ctx)
+
 	sentinel := &v1alpha1.Sentinel{}
 	if err := r.Get(ctx, req.NamespacedName, sentinel); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -56,6 +61,15 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 			reterr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	credentials.SyncCredentialsInfo(sentinel, sentinel.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
 
 	if result := r.addOrRemoveFinalizer(ctx, sentinel); result != nil {
 		return *result, nil
@@ -173,7 +187,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					Duration:   check.Configuration.Log.Duration,
 				}
 				if len(check.Configuration.Log.Facets) > 0 {
-					configuration.Log.Facets = make([]*console.LogFacetInput, len(check.Configuration.Log.Facets))
+					configuration.Log.Facets = make([]*console.LogFacetInput, 0, len(check.Configuration.Log.Facets))
 					for k, v := range check.Configuration.Log.Facets {
 						configuration.Log.Facets = append(configuration.Log.Facets, &console.LogFacetInput{
 							Key:   k,
@@ -295,7 +309,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 			return &waitForResources
 		}
 		// If our finalizer is present, remove it.
-		controllerutil.RemoveFinalizer(sentinel, ServiceFinalizer)
+		controllerutil.RemoveFinalizer(sentinel, SentinelFinalizer)
 
 		// Stop reconciliation as the item does no longer exist.
 		return &ctrl.Result{}
@@ -308,6 +322,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 func (r *SentinelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.Sentinel{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
