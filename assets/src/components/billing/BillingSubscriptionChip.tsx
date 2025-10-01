@@ -1,22 +1,31 @@
 import { useContext } from 'react'
-import { Chip } from '@pluralsh/design-system'
+import { Chip, ChipProps, WrapWithIf } from '@pluralsh/design-system'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import styled from 'styled-components'
 
 const Link = styled.a({ textDecoration: 'none' })
 
-export default function BillingSubscriptionChip() {
+export function BillingSubscriptionChip({
+  asLink = false,
+  ...props
+}: { asLink?: boolean } & ChipProps) {
   const { isProPlan, isEnterprisePlan } = useContext(SubscriptionContext)
 
   return (
-    <Link
-      href="https://app.plural.sh/account/billing"
-      target="_blank"
-      rel="noopener noreferrer"
+    <WrapWithIf
+      condition={!!asLink}
+      wrapper={
+        <Link
+          href="https://app.plural.sh/account/billing"
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+      }
     >
       <Chip
         severity={isEnterprisePlan || isProPlan ? 'info' : 'neutral'}
         fillLevel={2}
+        {...props}
       >
         {isEnterprisePlan
           ? 'Enterprise'
@@ -24,6 +33,6 @@ export default function BillingSubscriptionChip() {
             ? 'Professional'
             : 'Open-source'}
       </Chip>
-    </Link>
+    </WrapWithIf>
   )
 }

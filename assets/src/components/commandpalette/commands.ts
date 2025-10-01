@@ -1,6 +1,5 @@
 import {
   AiSparkleOutlineIcon,
-  ArrowTopRightIcon,
   CatalogIcon,
   ChatOutlineIcon,
   ClusterIcon,
@@ -33,6 +32,7 @@ import { isEmpty } from 'lodash'
 import { ComponentType, Dispatch, ReactElement, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useThrottle } from 'components/hooks/useThrottle.tsx'
 import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts.tsx'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import {
@@ -66,7 +66,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
-import { useThrottle } from 'components/hooks/useThrottle.tsx'
+import { CommandPaletteContext } from './CommandPaletteContext.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -139,6 +139,7 @@ export function useCommands({
   filter?: string
 }): CommandGroup[] {
   const open = useShareSecretOpen()
+  const { setDocsSearchOpen } = use(CommandPaletteContext)
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
@@ -345,12 +346,10 @@ export function useCommands({
       {
         commands: [
           {
-            id: 'open-docs',
-            label: 'Open docs',
+            id: 'search-docs',
+            label: 'Search docs',
             icon: DocumentIcon,
-            rightIcon: ArrowTopRightIcon,
-            callback: () =>
-              window.open('https://docs.plural.sh', '_blank', 'noopener'),
+            callback: () => setDocsSearchOpen(true),
             hotkeys: ['shift D'],
           },
         ],
@@ -387,6 +386,7 @@ export function useCommands({
       mode,
       showHidden,
       hiddenCommands,
+      setDocsSearchOpen,
     ]
   )
 

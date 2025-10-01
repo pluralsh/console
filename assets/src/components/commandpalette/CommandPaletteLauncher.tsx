@@ -1,9 +1,9 @@
-import { Chip, Flex } from '@pluralsh/design-system'
+import { Button, Flex, SearchIcon } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
 import { usePlatform } from 'components/hooks/usePlatform'
 
-import { Body2BoldP } from 'components/utils/typography/Text'
 import { use } from 'react'
+import styled from 'styled-components'
 import CommandHotkeys from './CommandHotkeys'
 import {
   CommandPaletteContext,
@@ -12,7 +12,7 @@ import {
 import { CommandPaletteDialog } from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands.ts'
 
-export default function CommandPaletteLauncher() {
+export function CommandPaletteLauncher() {
   const { modKeyString, keyCombinerString } = usePlatform()
   const commands = useCommandsWithHotkeys()
   const { setCmdkOpen } = use(CommandPaletteContext)
@@ -23,19 +23,23 @@ export default function CommandPaletteLauncher() {
 
   return (
     <>
-      <Chip
-        clickable
-        inactive
+      <InputButtonSC
+        small
+        secondary
         onClick={() => setCmdkOpen(true, CommandPaletteTab.Commands)}
-        size="small"
-        userSelect="none"
-        whiteSpace="nowrap"
       >
-        <Flex gap="xxsmall">
-          <Body2BoldP $color="text-light">{modKeyString}</Body2BoldP>
-          <Body2BoldP $color="text-xlight">{keyCombinerString}K</Body2BoldP>
+        <Flex
+          gap="xsmall"
+          flex={1}
+        >
+          <SearchIcon />
+          <span>Search</span>
         </Flex>
-      </Chip>
+        <CmdKChipSC>
+          {modKeyString}
+          {keyCombinerString}K
+        </CmdKChipSC>
+      </InputButtonSC>
       <CommandPaletteDialog />
       {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
@@ -49,3 +53,22 @@ export default function CommandPaletteLauncher() {
     </>
   )
 }
+
+const CmdKChipSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  borderRadius: theme.borderRadiuses.medium,
+  border: theme.borders['fill-three'],
+  background: theme.colors['fill-zero'],
+  padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
+}))
+
+const InputButtonSC = styled(Button)(({ theme }) => ({
+  ...theme.partials.text.caption,
+  width: 160,
+  height: 20,
+  paddingLeft: theme.spacing.small,
+  paddingRight: theme.spacing.xsmall,
+  justifyContent: 'flex-start',
+  gap: theme.spacing.small,
+  '& > *': { width: '100%' },
+}))
