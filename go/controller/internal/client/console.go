@@ -187,6 +187,11 @@ type ConsoleClient interface {
 	UpdateFederatedCredential(ctx context.Context, id string, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error)
 	DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error)
 	IsFederatedCredentialExists(ctx context.Context, id string) (bool, error)
+	GetSentinel(ctx context.Context, id string) (*console.SentinelFragment, error)
+	IsSentinelExists(ctx context.Context, id string) (bool, error)
+	DeleteSentinel(ctx context.Context, id string) error
+	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
+	UpdateSentinel(ctx context.Context, id string, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
