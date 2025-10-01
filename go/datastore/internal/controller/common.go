@@ -17,15 +17,15 @@ import (
 )
 
 const (
-	requeueDefault                             = 30 * time.Second
-	requeueWaitForResources                    = 5 * time.Second
+	requeueDefault                             = 60 * time.Second
+	requeueWaitForResources                    = 30 * time.Second
 	ElasticSearchSecretProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-secret-protection"
 	PostgresSecretProtectionFinalizerName      = "projects.deployments.plural.sh/postgres-secret-protection"
 	MySqlSecretProtectionFinalizerName         = "projects.deployments.plural.sh/mysql-secret-protection"
 )
 
 func jitterRequeue(t time.Duration) ctrl.Result {
-	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2)))}
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))}
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
