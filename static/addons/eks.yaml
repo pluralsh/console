@@ -3490,6 +3490,14 @@
     - '1.30'
     - '1.29'
     - '1.28'
+  - version: v1.6.3-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.6.2-eksbuild.1
     compatibilities:
     - '1.33'
@@ -6114,6 +6122,15 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.135.0-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.134.1-eksbuild.1
     compatibilities:
     - '1.33'
