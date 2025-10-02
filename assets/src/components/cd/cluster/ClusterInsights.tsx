@@ -15,7 +15,6 @@ import {
 import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
-  AiInsight,
   ClusterFragment,
   ClusterInsightFragment,
   useClusterInsightQuery,
@@ -26,7 +25,8 @@ import {
   CLUSTER_INSIGHTS_PATH,
   CLUSTER_INSIGHTS_SUMMARY_PATH,
 } from '../../../routes/cdRoutesConsts.tsx'
-import { AIPinButton } from '../../ai/AIPinButton.tsx'
+
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -35,7 +35,6 @@ import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
-import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 
 const DIRECTORY: Array<DirectoryEntry> = [
   { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },
@@ -47,7 +46,7 @@ interface DirectoryEntry {
   label?: string
 }
 
-export default function ClusterInsights(): ReactNode {
+export default function ClusterInsights() {
   const theme = useTheme()
   const { cluster, clusterLoading } = useClusterContext()
   const tabStateRef = useRef<any>(null)
@@ -145,15 +144,14 @@ export default function ClusterInsights(): ReactNode {
   )
 }
 
-export function ClusterInsightsSummary(): ReactNode {
-  const { cluster, refetch, clusterLoading } = useClusterContext()
+export function ClusterInsightsSummary() {
+  const { cluster } = useClusterContext()
 
   useSetActionContent(
     useMemo(
       () => (
         <>
           {cluster?.insight && <InsightRefresh insight={cluster?.insight} />}
-          <AIPinButton insight={cluster?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={cluster?.insight?.id}
@@ -161,7 +159,7 @@ export function ClusterInsightsSummary(): ReactNode {
           />
         </>
       ),
-      [cluster?.insight, clusterLoading, refetch]
+      [cluster?.insight]
     )
   )
 

@@ -15,5 +15,7 @@ defmodule Console.Deployments.Pr.Impl.Pass do
 
   def approve(_, _, _), do: {:ok, ""}
 
+  def commit_status(_, _, _, _, _), do: :ok
+
   def slug(_), do: {:ok, ""}
 end

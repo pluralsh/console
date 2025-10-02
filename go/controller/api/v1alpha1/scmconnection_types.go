@@ -115,11 +115,11 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// Type is the name of the scm service for the ScmConnection.
-	// One of (ScmType): [github, gitlab]
+	// One of (ScmType): [GITHUB, GITLAB, AZURE_DEVOPS, BITBUCKET]
 	// +kubebuilder:example:=GITHUB
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=GITHUB;GITLAB;BITBUCKET
+	// +kubebuilder:validation:Enum:=GITHUB;GITLAB;BITBUCKET;AZURE_DEVOPS
 	Type console.ScmType `json:"type"`
 	// A secret containing this access token you will use, stored in the `token` data field.
 	// +kubebuilder:validation:Optional

@@ -98,6 +98,7 @@ export function CreateScmWebhookModal({
           )}
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             {newWebHook || error ? 'Close' : 'Cancel'}

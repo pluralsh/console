@@ -98,7 +98,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Sentinel,
     AgentRuntime,
     AgentRun,
-    AgentPromptHistory
+    AgentPromptHistory,
+    AgentPrompt,
+    AgentMessage
   }
 
   def query(Project, _), do: Project
@@ -186,6 +188,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(AgentRuntime, _), do: AgentRuntime
   def query(AgentRun, _), do: AgentRun
   def query(AgentPromptHistory, _), do: AgentPromptHistory
+  def query(AgentPrompt, _), do: AgentPrompt.ordered()
+  def query(AgentMessage, _), do: AgentMessage.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

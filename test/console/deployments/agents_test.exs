@@ -303,4 +303,23 @@ defmodule Console.Deployments.AgentsTest do
       assert prompt.agent_run_id == run.id
     end
   end
+
+  describe "share_agent_run/2" do
+    test "it can share an agent run" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, shared} = Agents.share_agent_run(run.id, user)
+
+      assert shared.id == run.id
+      assert shared.shared
+    end
+
+    test "you can't share other users threads" do
+      user = insert(:user)
+      run = insert(:agent_run)
+
+      {:error, _} = Agents.share_agent_run(run.id, user)
+    end
+  end
 end

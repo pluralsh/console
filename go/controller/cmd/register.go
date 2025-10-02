@@ -436,4 +436,19 @@ func init() {
 			UserGroupCache: userGroupCache,
 		}
 	})
+
+	types.RegisterController(types.SentinelReconciler, func(
+		mgr ctrl.Manager,
+		consoleClient client.ConsoleClient,
+		userGroupCache cache.UserGroupCache,
+		credentialsCache credentials.NamespaceCredentialsCache,
+	) types.Controller {
+		return &controller.SentinelReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
+
 }

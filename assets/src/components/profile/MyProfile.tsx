@@ -1,14 +1,14 @@
 import { PageCard, Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
-import { useContext, useRef } from 'react'
+import { useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { useLogin } from 'components/contexts'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { LoginContext } from 'components/contexts'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { useTheme } from 'styled-components'
 
 const directory = [
@@ -24,7 +24,7 @@ export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: '/profile' }]
 export default function MyProfile() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const { me } = useContext<any>(LoginContext)
+  const { me } = useLogin()
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
 
@@ -39,7 +39,7 @@ export default function MyProfile() {
       <ResponsiveLayoutSidenavContainer>
         <PageCard
           heading={me.name}
-          icon={{ name: me.name, url: me.avatar, spacing: 'none' }}
+          icon={{ name: me.name, url: me.profile, spacing: 'none' }}
           subheading={me?.email}
           marginBottom="medium"
         />

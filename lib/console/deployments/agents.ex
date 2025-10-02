@@ -108,6 +108,17 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
+  Shares an agent run, can only be performed by the user who initiated it
+  """
+  @spec share_agent_run(binary, User.t) :: agent_run_resp
+  def share_agent_run(run_id, %User{} = user) do
+    get_agent_run!(run_id)
+    |> AgentRun.changeset(%{shared: true})
+    |> allow(user, :share)
+    |> when_ok(:update)
+  end
+
+  @doc """
   Updates an agent run, can only be performed by deployment operators
   """
   @spec update_agent_run(map, binary, Cluster.t) :: agent_run_resp
@@ -119,7 +130,8 @@ defmodule Console.Deployments.Agents do
       |> case do
         %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
           {:ok, run}
-        _ -> {:error, "clusters can only update their own agent runs"}
+        _ ->
+          {:error, "clusters can only update their own agent runs"}
       end
     end)
     |> add_operation(:update, fn %{run: run} ->

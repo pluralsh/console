@@ -433,6 +433,8 @@ type RootQueryType {
 
   sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
 
+  sharedAgentRun(id: ID!): AgentRun
+
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
 
   agentRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
@@ -1017,6 +1019,8 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
+  shareAgentRun(id: ID!): AgentRun
+
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
   updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
@@ -1206,6 +1210,13 @@ enum AgentRunMode {
   WRITE
 }
 
+enum AgentMessageToolState {
+  PENDING
+  RUNNING
+  COMPLETED
+  ERROR
+}
+
 input AgentRuntimeAttributes {
   "the name of this runtime"
   name: String!
@@ -1245,6 +1256,9 @@ input AgentRunAttributes {
 input AgentRunStatusAttributes {
   "the status of this agent run"
   status: AgentRunStatus!
+
+  "the messages this agent run has generated during its run"
+  messages: [AgentMessageAttributes]
 
   "the error reason of the agent run"
   error: String
@@ -1290,6 +1304,84 @@ input AgentAnalysisAttributes {
 
   "the bullets of the analysis"
   bullets: [String]
+}
+
+input AgentMessageAttributes {
+  "the message to send to the agent"
+  message: String!
+
+  "the role of the message"
+  role: AiRole!
+
+  cost: AgentMessageCostAttributes
+
+  metadata: AgentMessageMetadataAttributes
+}
+
+input AgentMessageCostAttributes {
+  "the total cost of the message"
+  total: Float!
+
+  "the tokens of the message"
+  tokens: AgentMessageTokensAttributes
+}
+
+input AgentMessageTokensAttributes {
+  "the input tokens of the message"
+  input: Float
+
+  "the output tokens of the message"
+  output: Float
+
+  "the reasoning tokens of the message"
+  reasoning: Float
+}
+
+input AgentMessageMetadataAttributes {
+  "the reasoning of the message"
+  reasoning: AgentMessageReasoningAttributes
+
+  "the file of the message"
+  file: AgentMessageFileAttributes
+
+  "the tool of the message"
+  tool: AgentMessageToolAttributes
+}
+
+input AgentMessageReasoningAttributes {
+  "the text of the reasoning"
+  text: String
+
+  "the start of the reasoning"
+  start: Int
+
+  "the end of the reasoning"
+  end: Int
+}
+
+input AgentMessageFileAttributes {
+  "the name of the file"
+  name: String
+
+  "the text of the file"
+  text: String
+
+  "the start of the file"
+  start: Int
+
+  "the end of the file"
+  end: Int
+}
+
+input AgentMessageToolAttributes {
+  "the name of the tool"
+  name: String
+
+  "the state of the tool"
+  state: AgentMessageToolState
+
+  "the output of the tool"
+  output: String
 }
 
 type AgentRuntime {
@@ -1341,6 +1433,9 @@ type AgentRun {
   "the error reason of the agent run"
   error: String
 
+  "whether this agent run is shared"
+  shared: Boolean
+
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
@@ -1355,7 +1450,10 @@ type AgentRun {
   pod: Pod
 
   "the prompts this agent run has received"
-  prompts: [AgentPromptHistory]
+  prompts: [AgentPrompt]
+
+  "the messages this agent run has generated during its run"
+  messages: [AgentMessage]
 
   "the runtime this agent is using"
   runtime: AgentRuntime
@@ -1368,18 +1466,6 @@ type AgentRun {
 
   "the pull requests this agent run has created"
   pullRequests: [PullRequest]
-
-  insertedAt: DateTime
-
-  updatedAt: DateTime
-}
-
-"A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering"
-type AgentPromptHistory {
-  id: ID!
-
-  "the prompt to give this agent run"
-  prompt: String!
 
   insertedAt: DateTime
 
@@ -1416,6 +1502,109 @@ type AgentTodo {
 
   "whether the todo is done"
   done: Boolean
+}
+
+type AgentMessage {
+  id: ID!
+
+  "the role of the message (system, assistant, user)"
+  role: AiRole!
+
+  "the message to send to the agent"
+  message: String!
+
+  "the sequence number of the message"
+  seq: Int!
+
+  "the cost of the message"
+  cost: AgentMessageCost
+
+  "the metadata of the message"
+  metadata: AgentMessageMetadata
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentPrompt {
+  id: ID!
+
+  "the prompt to give this agent run"
+  prompt: String!
+
+  "the sequence number of the prompt"
+  seq: Int!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentMessageCost {
+  "the total cost of the message"
+  total: Float!
+
+  "the tokens of the message"
+  tokens: AgentMessageTokens
+}
+
+type AgentMessageTokens {
+  "the input tokens of the message"
+  input: Float
+
+  "the output tokens of the message"
+  output: Float
+
+  "the reasoning tokens of the message"
+  reasoning: Float
+}
+
+type AgentMessageMetadata {
+  "the reasoning of the message"
+  reasoning: AgentMessageReasoning
+
+  "the file of the message"
+  file: AgentMessageFile
+
+  "the tool of the message"
+  tool: AgentMessageTool
+}
+
+type AgentMessageReasoning {
+  "the text of the reasoning"
+  text: String
+
+  "the start of the reasoning"
+  start: Int
+
+  "the end of the reasoning"
+  end: Int
+}
+
+type AgentMessageFile {
+  "the name of the file"
+  name: String
+
+  "the text of the file"
+  text: String
+
+  "the start of the file"
+  start: Int
+
+  "the end of the file"
+  end: Int
+}
+
+type AgentMessageTool {
+  "the name of the tool"
+  name: String
+
+  "the state of the tool"
+  state: AgentMessageToolState
+
+  "the output of the tool"
+  output: String
 }
 
 type AgentRuntimeConnection {

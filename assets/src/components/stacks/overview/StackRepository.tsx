@@ -23,7 +23,6 @@ import { GqlError } from '../../utils/Alert'
 
 import { StackOutletContextT } from '../Stacks'
 
-import { cleanRefs } from '../create/CreateStackModalFormRepository'
 import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackRepository() {
@@ -158,4 +157,8 @@ export default function StackRepository() {
       </div>
     </Card>
   )
+}
+
+const cleanRefs = (refs: string[] | null) => {
+  return refs?.map((ref) => ref.replace(/^(?:\/)?(?:refs\/heads\/)?/, '')) ?? []
 }

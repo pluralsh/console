@@ -1,0 +1,13 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Sentinel
+metadata:
+  labels:
+    app.kubernetes.io/name: sentinel
+    app.kubernetes.io/instance: sentinel-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: sentinel-sample
+spec:
+  name: test
+  description: "test sentinel description"

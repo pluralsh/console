@@ -22,8 +22,8 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { AIDisabledState } from './AIThreads'
 
 const directory: SubtabDirectory = [
-  { label: 'Agent', path: AI_AGENT_REL_PATH },
-  { label: 'Threads', path: AI_THREADS_REL_PATH },
+  { label: 'Agent sessions', path: AI_AGENT_REL_PATH },
+  { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
 ]
 

@@ -68,6 +68,13 @@ defmodule Console.Schema.ChatThread do
     )
   end
 
+  def nonagent(query \\ __MODULE__) do
+    from(t in query,
+      left_join: s in assoc(t, :session),
+        where: is_nil(s.id) or s.type not in ^[:terraform, :kubernetes]
+    )
+  end
+
   def unsummarized(query \\ __MODULE__) do
     from(t in query, where: is_nil(t.summarized) or not t.summarized)
   end

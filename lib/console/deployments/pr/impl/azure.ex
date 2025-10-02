@@ -34,18 +34,18 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   end
 
   def create(pra, branch, ctx) do
+    name = URI.encode(pra.identifier)
     with {:ok, conn} <- connection(pra),
-         {:ok, title, body} <- description(pra, ctx) do
-      id = URI.encode(pra.identifier)
+         {:ok, title, body} <- description(pra, ctx),
+         {:ok, id} <- get_repo_id(conn, name) do
       post(conn, "/git/repositories/#{id}/pullrequests", %{
-        sourceRefName: branch,
-        targetRefName: pra.branch || "master",
+        sourceRefName: "refs/heads/#{branch}",
+        targetRefName: "refs/heads/#{pra.branch || "main"}",
         title: title,
         description: body,
       })
       |> case do
-        {:ok, %{"url" => url} = pr} ->
-          {:ok, %{title: title, ref: branch, body: body, url: url, owner: owner(pr)}}
+        {:ok, pr} -> {:ok, %{title: title, ref: branch, body: body, url: web_url(pr), owner: owner(pr)}}
         err -> err
       end
     end
@@ -53,7 +53,8 @@ defmodule Console.Deployments.Pr.Impl.Azure do
 
   def webhook(_, _), do: {:error, "not implemented"}
 
-  def pr(%{"eventType" => "git.pullrequest" <> _, "resource" => %{"url" => url} = pr}) do
+  def pr(%{"eventType" => "git.pullrequest" <> _, "resource" => pr}) do
+    url = web_url(pr)
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["sourceRefName"],
@@ -68,8 +69,9 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   def pr(_), do: :ignore
 
   def review(conn, %PullRequest{url: url} = pr, body) do
-    with {:ok, repo_id, number} <- get_pull_id(url),
-         {:ok, conn} <- connection(conn) do
+    with {:ok, name, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, repo_id} <- get_repo_id(conn, name) do
       case pr do
         %PullRequest{comment_id: id} when is_binary(id) ->
           update_existing_comment(conn, repo_id, number, id, body)
@@ -82,6 +84,8 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   def approve(_, _, _), do: {:error, "not implemented"}
 
   def files(_, _), do: {:ok, []}
+
+  def commit_status(_, _, _, _, _), do: :ok
 
   def pr_info(url) do
     with {:ok, repo_id, number} <- get_pull_id(url) do
@@ -98,6 +102,19 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
+  defp get_repo_id(conn, name) do
+    case get(conn, "/git/repositories/#{name}") do
+      {:ok, %{"id" => id}} -> {:ok, id}
+      _ -> {:error, "could not find repo id for name #{name}"}
+    end
+  end
+
+  defp get(conn, url) do
+    url(conn, url)
+    |> HTTPoison.get(Connection.headers(conn))
+    |> handle_response()
+  end
+
   defp post(conn, url, body) do
     url(conn, url)
     |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
@@ -109,6 +126,8 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     |> HTTPoison.patch(Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
+
+  defp web_url(%{"repository" => %{"webUrl" => web_url}, "pullRequestId" => id}), do: "#{web_url}/pullrequest/#{id}"
 
   defp url(conn, url) do
     Path.join([

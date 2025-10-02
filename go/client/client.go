@@ -210,6 +210,10 @@ type ConsoleClient interface {
 	DeleteProviderCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteProviderCredential, error)
 	ListProviders(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListProviders, error)
 	UpdateRbac(ctx context.Context, rbac RbacAttributes, serviceID *string, clusterID *string, providerID *string, interceptors ...clientv2.RequestInterceptor) (*UpdateRbac, error)
+	CreateSentinel(ctx context.Context, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateSentinel, error)
+	UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error)
+	DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error)
+	GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error)
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
@@ -4460,6 +4464,194 @@ func (t *ProviderCredentialFragment) GetKind() string {
 	return t.Kind
 }
 
+type SentinelFragment struct {
+	ID          string                   "json:\"id\" graphql:\"id\""
+	Name        string                   "json:\"name\" graphql:\"name\""
+	Description *string                  "json:\"description,omitempty\" graphql:\"description\""
+	Git         *GitRefFragment          "json:\"git,omitempty\" graphql:\"git\""
+	Repository  *GitRepositoryFragment   "json:\"repository,omitempty\" graphql:\"repository\""
+	Project     *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	Checks      []*SentinelCheckFragment "json:\"checks,omitempty\" graphql:\"checks\""
+}
+
+func (t *SentinelFragment) GetID() string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.ID
+}
+func (t *SentinelFragment) GetName() string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelFragment) GetDescription() *string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Description
+}
+func (t *SentinelFragment) GetGit() *GitRefFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Git
+}
+func (t *SentinelFragment) GetRepository() *GitRepositoryFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Repository
+}
+func (t *SentinelFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Project
+}
+func (t *SentinelFragment) GetChecks() []*SentinelCheckFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Checks
+}
+
+type SentinelCheckFragment struct {
+	ID            string                              "json:\"id\" graphql:\"id\""
+	Name          string                              "json:\"name\" graphql:\"name\""
+	Type          SentinelCheckType                   "json:\"type\" graphql:\"type\""
+	RuleFile      *string                             "json:\"ruleFile,omitempty\" graphql:\"ruleFile\""
+	Configuration *SentinelCheckConfigurationFragment "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *SentinelCheckFragment) GetID() string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.ID
+}
+func (t *SentinelCheckFragment) GetName() string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelCheckFragment) GetType() *SentinelCheckType {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return &t.Type
+}
+func (t *SentinelCheckFragment) GetRuleFile() *string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.RuleFile
+}
+func (t *SentinelCheckFragment) GetConfiguration() *SentinelCheckConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.Configuration
+}
+
+type SentinelCheckConfigurationFragment struct {
+	Log        *SentinelCheckLogConfigurationFragment        "json:\"log,omitempty\" graphql:\"log\""
+	Kubernetes *SentinelCheckKubernetesConfigurationFragment "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+}
+
+func (t *SentinelCheckConfigurationFragment) GetLog() *SentinelCheckLogConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment{}
+	}
+	return t.Log
+}
+func (t *SentinelCheckConfigurationFragment) GetKubernetes() *SentinelCheckKubernetesConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment{}
+	}
+	return t.Kubernetes
+}
+
+type SentinelCheckLogConfigurationFragment struct {
+	Namespaces []*string                                       "json:\"namespaces,omitempty\" graphql:\"namespaces\""
+	Query      string                                          "json:\"query\" graphql:\"query\""
+	ClusterID  *string                                         "json:\"clusterId,omitempty\" graphql:\"clusterId\""
+	Facets     []*SentinelCheckLogConfigurationFragment_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Duration   string                                          "json:\"duration\" graphql:\"duration\""
+}
+
+func (t *SentinelCheckLogConfigurationFragment) GetNamespaces() []*string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Namespaces
+}
+func (t *SentinelCheckLogConfigurationFragment) GetQuery() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Query
+}
+func (t *SentinelCheckLogConfigurationFragment) GetClusterID() *string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.ClusterID
+}
+func (t *SentinelCheckLogConfigurationFragment) GetFacets() []*SentinelCheckLogConfigurationFragment_Facets {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Facets
+}
+func (t *SentinelCheckLogConfigurationFragment) GetDuration() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Duration
+}
+
+type SentinelCheckKubernetesConfigurationFragment struct {
+	Group     *string "json:\"group,omitempty\" graphql:\"group\""
+	Version   string  "json:\"version\" graphql:\"version\""
+	Kind      string  "json:\"kind\" graphql:\"kind\""
+	Name      string  "json:\"name\" graphql:\"name\""
+	Namespace *string "json:\"namespace,omitempty\" graphql:\"namespace\""
+}
+
+func (t *SentinelCheckKubernetesConfigurationFragment) GetGroup() *string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Group
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetVersion() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Version
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetKind() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Kind
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetName() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetNamespace() *string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Namespace
+}
+
 type InfrastructureStackEdgeFragment struct {
 	Node *InfrastructureStackFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -8191,6 +8383,78 @@ func (t *PreviewEnvironmentTemplateFragment_Template) GetName() *string {
 		t = &PreviewEnvironmentTemplateFragment_Template{}
 	}
 	return t.Name
+}
+
+type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -17207,6 +17471,71 @@ func (t *ListProviders_ClusterProviders) GetEdges() []*ListProviders_ClusterProv
 	return t.Edges
 }
 
+type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type DeleteSentinel_DeleteSentinel struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteSentinel_DeleteSentinel) GetID() string {
+	if t == nil {
+		t = &DeleteSentinel_DeleteSentinel{}
+	}
+	return t.ID
+}
+
+type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
 type ServiceAccounts_ServiceAccounts_Edges struct {
 	Node *UserFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -21587,6 +21916,50 @@ func (t *UpdateRbac) GetUpdateRbac() *bool {
 		t = &UpdateRbac{}
 	}
 	return t.UpdateRbac
+}
+
+type CreateSentinel struct {
+	CreateSentinel *SentinelFragment "json:\"createSentinel,omitempty\" graphql:\"createSentinel\""
+}
+
+func (t *CreateSentinel) GetCreateSentinel() *SentinelFragment {
+	if t == nil {
+		t = &CreateSentinel{}
+	}
+	return t.CreateSentinel
+}
+
+type UpdateSentinel struct {
+	UpdateSentinel *SentinelFragment "json:\"updateSentinel,omitempty\" graphql:\"updateSentinel\""
+}
+
+func (t *UpdateSentinel) GetUpdateSentinel() *SentinelFragment {
+	if t == nil {
+		t = &UpdateSentinel{}
+	}
+	return t.UpdateSentinel
+}
+
+type DeleteSentinel struct {
+	DeleteSentinel *DeleteSentinel_DeleteSentinel "json:\"deleteSentinel,omitempty\" graphql:\"deleteSentinel\""
+}
+
+func (t *DeleteSentinel) GetDeleteSentinel() *DeleteSentinel_DeleteSentinel {
+	if t == nil {
+		t = &DeleteSentinel{}
+	}
+	return t.DeleteSentinel
+}
+
+type GetSentinel struct {
+	Sentinel *SentinelFragment "json:\"sentinel,omitempty\" graphql:\"sentinel\""
+}
+
+func (t *GetSentinel) GetSentinel() *SentinelFragment {
+	if t == nil {
+		t = &GetSentinel{}
+	}
+	return t.Sentinel
 }
 
 type ServiceAccounts struct {
@@ -36636,6 +37009,307 @@ func (c *Client) UpdateRbac(ctx context.Context, rbac RbacAttributes, serviceID 
 	return &res, nil
 }
 
+const CreateSentinelDocument = `mutation CreateSentinel ($attributes: SentinelAttributes) {
+	createSentinel(attributes: $attributes) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) CreateSentinel(ctx context.Context, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateSentinel, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateSentinel
+	if err := c.Client.Post(ctx, "CreateSentinel", CreateSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateSentinelDocument = `mutation UpdateSentinel ($id: ID!, $attributes: SentinelAttributes) {
+	updateSentinel(id: $id, attributes: $attributes) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateSentinel
+	if err := c.Client.Post(ctx, "UpdateSentinel", UpdateSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteSentinelDocument = `mutation DeleteSentinel ($id: ID!) {
+	deleteSentinel(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteSentinel
+	if err := c.Client.Post(ctx, "DeleteSentinel", DeleteSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetSentinelDocument = `query GetSentinel ($id: ID!) {
+	sentinel(id: $id) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetSentinel
+	if err := c.Client.Post(ctx, "GetSentinel", GetSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ServiceAccountsDocument = `query ServiceAccounts ($after: String, $first: Int, $before: String, $last: Int, $q: String) {
 	serviceAccounts(after: $after, first: $first, before: $before, last: $last, q: $q) {
 		pageInfo {
@@ -41153,6 +41827,10 @@ var DocumentOperationNames = map[string]string{
 	DeleteProviderCredentialDocument:                  "DeleteProviderCredential",
 	ListProvidersDocument:                             "ListProviders",
 	UpdateRbacDocument:                                "UpdateRbac",
+	CreateSentinelDocument:                            "CreateSentinel",
+	UpdateSentinelDocument:                            "UpdateSentinel",
+	DeleteSentinelDocument:                            "DeleteSentinel",
+	GetSentinelDocument:                               "GetSentinel",
 	ServiceAccountsDocument:                           "ServiceAccounts",
 	CreateServiceAccountDocument:                      "CreateServiceAccount",
 	UpdateServiceAccountDocument:                      "UpdateServiceAccount",

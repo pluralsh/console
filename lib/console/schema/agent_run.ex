@@ -2,7 +2,8 @@ defmodule Console.Schema.AgentRun do
   use Piazza.Ecto.Schema
   alias Console.Schema.{
     AgentRuntime,
-    AgentPromptHistory,
+    AgentMessage,
+    AgentPrompt,
     User,
     Flow,
     NamespacedName,
@@ -18,6 +19,7 @@ defmodule Console.Schema.AgentRun do
   schema "agent_runs" do
     field :status,        Status
     field :mode,          Mode, default: :write
+    field :shared,        :boolean, default: false
     field :prompt,        :binary
     field :repository,    :string
     field :branch,        :string
@@ -43,7 +45,8 @@ defmodule Console.Schema.AgentRun do
     belongs_to :session, AgentSession
 
     has_many :pull_requests, PullRequest
-    has_many :prompts, AgentPromptHistory, foreign_key: :agent_run_id
+    has_many :messages, AgentMessage, foreign_key: :agent_run_id
+    has_many :prompts, AgentPrompt, foreign_key: :agent_run_id
 
     timestamps()
   end
@@ -73,7 +76,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status prompt repository runtime_id user_id flow_id session_id mode branch error)a
+  @valid ~w(status shared prompt repository runtime_id user_id flow_id session_id mode branch error)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -85,6 +88,7 @@ defmodule Console.Schema.AgentRun do
     |> cast_embed(:pod_reference)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
+    |> cast_assoc(:messages)
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
 

@@ -44,6 +44,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Project](#project)
 - [Provider](#provider)
 - [ScmConnection](#scmconnection)
+- [Sentinel](#sentinel)
 - [ServiceAccount](#serviceaccount)
 - [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
@@ -1470,6 +1471,30 @@ _Appears in:_
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef references a Secret containing configuration data used to populate template variables. |  | Optional: \{\} <br /> |
 
 
+
+
+#### Git
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelSpec](#sentinelspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL the url of this repository. |  |  |
+| `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PrivateKeyRef reference to a secret containing ssh private key. |  |  |
+| `passphraseRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PassphraseRef reference to a secret containing passphrase for the private key. |  |  |
+| `usernameRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | UsernameRef reference to a secret containing http username. |  |  |
+| `passwordRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordRef reference to a secret containing http password. |  |  |
+| `httpsPath` _string_ | HTTPSPath a manually supplied https path for non standard git setups. |  |  |
+| `urlFormat` _string_ | URLFormat custom URL format, e.g. \{url\}/tree/\{ref\}/\{folder\}. |  |  |
+| `connectionId` _string_ | ConnectionID id of a scm connection to use for authentication. |  |  |
+| `decrypt` _boolean_ | Decrypt whether to run plural crypto on this repo. |  |  |
 
 
 #### GitHealth
@@ -3686,7 +3711,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a human-readable name of the ScmConnection. |  | Required: \{\} <br /> |
-| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB BITBUCKET] <br />Required: \{\} <br />Type: string <br /> |
+| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [GITHUB, GITLAB, AZURE_DEVOPS, BITBUCKET] |  | Enum: [GITHUB GITLAB BITBUCKET AZURE_DEVOPS] <br />Required: \{\} <br />Type: string <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | A secret containing this access token you will use, stored in the `token` data field. |  | Optional: \{\} <br /> |
 | `username` _string_ | Username ... |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: \{\} <br /> |
@@ -3713,6 +3738,122 @@ _Appears in:_
 | `appId` _string_ | The Github App ID to use for authentication (can be found on the Github Apps settings page) |  |  |
 | `installationId` _string_ | The installation ID of your install of the Github App (found on the Github Apps section of your github repo/organization, located in the url path) |  |  |
 | `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: \{\} <br /> |
+
+
+#### Sentinel
+
+
+
+Sentinel is the Schema for the sentinels API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Sentinel` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[SentinelSpec](#sentinelspec)_ |  |  |  |
+
+
+#### SentinelCheck
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelSpec](#sentinelspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[SentinelCheckType](#sentinelchecktype)_ | Type the type of check to run. |  | Enum: [LOG KUBERNETES] <br /> |
+| `name` _string_ | Name the name of the check. |  |  |
+| `ruleFile` _string_ | RuleFile the rule file to use for this check. |  |  |
+| `configuration` _[SentinelCheckConfiguration](#sentinelcheckconfiguration)_ | Configuration the configuration to use for this check. |  |  |
+
+
+#### SentinelCheckConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheck](#sentinelcheck)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `log` _[SentinelCheckLogConfiguration](#sentinelchecklogconfiguration)_ | the log configuration to use for this check |  |  |
+| `kubernetes` _[SentinelCheckKubernetesConfiguration](#sentinelcheckkubernetesconfiguration)_ | the kubernetes configuration to use for this check |  |  |
+
+
+#### SentinelCheckKubernetesConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckConfiguration](#sentinelcheckconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `group` _string_ | Group to use when fetching this resource. |  |  |
+| `version` _string_ | Version the api version to use when fetching this resource. |  |  |
+| `kind` _string_ | Kind the kind to use when fetching this resource. |  |  |
+| `name` _string_ | Name to use when fetching this resource. |  |  |
+| `namespace` _string_ | Namespace to use when fetching this resource |  |  |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef the cluster to run the query against |  | Required: \{\} <br /> |
+
+
+#### SentinelCheckLogConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckConfiguration](#sentinelcheckconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `namespaces` _string array_ | Namespaces the namespaces to run the query against. |  |  |
+| `query` _string_ | Query a search query this will run against the logs. |  |  |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef the cluster to run the query against. |  |  |
+| `duration` _string_ | Duration of the log analysis run. |  |  |
+| `facets` _object (keys:string, values:string)_ | Facets the log facets to run the query against. |  |  |
+
+
+#### SentinelSpec
+
+
+
+SentinelSpec defines the desired state of Sentinel
+
+
+
+_Appears in:_
+- [Sentinel](#sentinel)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this Sentinel.<br />If not provided, the name from Sentinel.ObjectMeta will be used. |  | Optional: \{\} <br /> |
+| `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
+| `git` _[Git](#git)_ | Git the git repository to use for this sentinel. |  |  |
+| `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
 
 
 #### ServiceAccount
