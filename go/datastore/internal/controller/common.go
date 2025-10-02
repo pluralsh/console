@@ -18,7 +18,7 @@ import (
 
 const (
 	requeueDefault                             = 60 * time.Second
-	requeueWaitForResources                    = 30 * time.Second
+	requeueWaitForResources                    = 15 * time.Second
 	ElasticSearchSecretProtectionFinalizerName = "projects.deployments.plural.sh/elastic-search-secret-protection"
 	PostgresSecretProtectionFinalizerName      = "projects.deployments.plural.sh/postgres-secret-protection"
 	MySqlSecretProtectionFinalizerName         = "projects.deployments.plural.sh/mysql-secret-protection"
