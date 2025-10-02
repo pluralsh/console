@@ -137,7 +137,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
@@ -156,7 +156,7 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 					return ctrl.Result{}, err
 				}
 				logger.Info("waiting for the services")
-				return jitterRequeue(), nil
+				return jitterRequeue(requeueDefault), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(repo, RepoFinalizer)
@@ -173,7 +173,7 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, nil, err
 		}
 		if !connection.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("scm connection is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
@@ -242,7 +242,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 		repo.Status.Message = &msg
 		repo.Status.Health = v1alpha1.GitHealthFailed
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, msg)
-		return jitterRequeue(), nil
+		return jitterRequeue(requeueDefault), nil
 	}
 
 	repo.Status.Message = existingRepo.Error
@@ -257,7 +257,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 	}
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

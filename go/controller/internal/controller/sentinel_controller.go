@@ -82,11 +82,11 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		}
 		if !repository.Status.HasID() {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 	}
 	project := &v1alpha1.Project{}
@@ -297,7 +297,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 
 		exists, err := r.ConsoleClient.IsSentinelExists(ctx, sentinel.Status.GetID())
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 		if exists {
 			if err := r.ConsoleClient.DeleteSentinel(ctx, sentinel.Status.GetID()); err != nil {
@@ -306,7 +306,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 			}
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 		// If our finalizer is present, remove it.
 		controllerutil.RemoveFinalizer(sentinel, SentinelFinalizer)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/samber/lo"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
@@ -84,7 +85,7 @@ func (r *MySqlCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	if err := r.MySqlClient.Ping(); err != nil {
 		logger.V(5).Error(err, "failed to connect to MySQL")
-		return handleRequeue(&requeue, err, credentials.SetCondition)
+		return handleRequeue(lo.ToPtr(jitterRequeue(requeueDefault)), err, credentials.SetCondition)
 	}
 
 	logger.Info("Successfully connected to MySQL")
@@ -92,7 +93,7 @@ func (r *MySqlCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(credentials.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *MySqlCredentialsReconciler) handleDelete(ctx context.Context, credentials *v1alpha1.MySqlCredentials) (ctrl.Result, error) {
@@ -113,7 +114,7 @@ func (r *MySqlCredentialsReconciler) handleDelete(ctx context.Context, credentia
 			}
 		}
 		if deletingAny {
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		utils.RemoveFinalizer(credentials, MySqlDatabaseProtectionFinalizerName)
 	}
@@ -135,7 +136,7 @@ func (r *MySqlCredentialsReconciler) handleDelete(ctx context.Context, credentia
 			}
 		}
 		if deletingAny {
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		utils.RemoveFinalizer(credentials, MySqlUserProtectionFinalizerName)
 	}

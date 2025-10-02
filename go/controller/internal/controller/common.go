@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"slices"
 	"strings"
 	"time"
-
-	"math/rand"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -37,8 +36,8 @@ import (
 )
 
 const (
-	requeueDefault          = 30 * time.Second
-	requeueWaitForResources = 5 * time.Second
+	requeueDefault          = 60 * time.Second
+	requeueWaitForResources = 15 * time.Second
 
 	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
@@ -46,13 +45,8 @@ const (
 	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
 )
 
-var (
-	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
-	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
-)
-
-func jitterRequeue() ctrl.Result {
-	return ctrl.Result{RequeueAfter: requeueDefault + time.Duration(rand.Intn(int(requeueDefault/2)))}
+func jitterRequeue(t time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))}
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
@@ -67,7 +61,7 @@ func jitterRequeue() ctrl.Result {
 // It is important that at least one from a result or an error have to be non-nil.
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
 	if err != nil && apierrors.IsNotFound(err) {
-		result = &waitForResources
+		result = lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
@@ -448,7 +442,7 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	}
 
 	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, objMeta, scheme); err != nil {

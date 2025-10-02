@@ -10,6 +10,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -138,7 +139,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
@@ -169,11 +170,11 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	if errors.IsNotFound(err) {
 		cluster.Status.ID = nil
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Cluster in Console API")
-		return jitterRequeue(), nil
+		return jitterRequeue(requeueDefault), nil
 	}
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return jitterRequeue(), err
+		return jitterRequeue(requeueDefault), err
 	}
 	if err := r.ensure(cluster); err != nil {
 		return handleRequeue(nil, err, cluster.SetCondition)
@@ -201,7 +202,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(), nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
@@ -220,12 +221,12 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 		// If object is already being deleted from Console API requeue.
 		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove Cluster from Console API if it exists and is not read-only.
@@ -239,7 +240,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// If our finalizer is present, remove it.
@@ -274,11 +275,11 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 				return nil, nil, fmt.Errorf("could not delete %s cluster, got error: %+v", cluster.Name, err)
 			}
 
-			return nil, &requeue, nil
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		if !provider.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("provider does not have ID set yet")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("provider does not have ID set yet")
 		}
 
 		err := controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
