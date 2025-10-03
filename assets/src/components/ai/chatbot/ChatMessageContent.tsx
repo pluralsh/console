@@ -13,7 +13,7 @@ import {
   Flex,
   IconFrame,
   Markdown,
-  PrOpenIcon,
+  PrQueueIcon,
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
@@ -35,8 +35,10 @@ import {
 import isJson from 'is-json'
 import { ReactElement, useState } from 'react'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { useTheme } from 'styled-components'
-import { iconUrl } from 'utils/icon'
+import { iconUrl as getIconUrl } from 'utils/icon'
 import { ChatMessageActions } from './ChatMessage'
 import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
@@ -329,44 +331,54 @@ function PrCallContent({
   if (!prAutomation) return <GqlError error="PR automation not found." />
 
   const { icon, darkIcon, name } = prAutomation
+  const iconUrl = getIconUrl(icon, darkIcon, theme.mode)
 
   return (
     <Card
       css={{
         padding: theme.spacing.medium,
         minWidth: 150,
+        maxWidth: '100%',
         background: theme.colors['fill-zero'],
         border: theme.borders.default,
       }}
     >
-      <Flex
-        alignItems="center"
-        gap="xsmall"
-      >
-        <IconFrame
-          icon={<PrOpenIcon />}
-          size="small"
-        />
-        <Body2BoldP $color="text">PR automation</Body2BoldP>
-        <IconFrame
-          icon={
-            <img
-              width={20}
-              height={20}
-              src={iconUrl(icon, darkIcon, theme.mode)}
-            />
-          }
-          size="small"
-        />
-        <Body2P $color="text">{name}</Body2P>
-        <div css={{ flex: 1 }} />
+      <StretchedFlex gap="xlarge">
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+          minWidth={0}
+        >
+          <IconFrame
+            icon={
+              iconUrl ? (
+                <img
+                  width={24}
+                  height={24}
+                  src={iconUrl}
+                />
+              ) : (
+                <PrQueueIcon />
+              )
+            }
+            size="xlarge"
+            css={{ width: 32, height: 32 }}
+          />
+          <StackedText
+            truncate
+            first={name}
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="PR automation"
+          />
+        </Flex>
         <ChatbotCreatePrButton
           prAutomation={prAutomation}
           threadId={threadId}
           session={session}
           attributes={attributes}
         />
-      </Flex>
+      </StretchedFlex>
     </Card>
   )
 }

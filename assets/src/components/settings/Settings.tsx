@@ -5,7 +5,7 @@ import {
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
-import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
+import { BillingSubscriptionChip } from 'components/billing/BillingSubscriptionChip'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { useLogin } from 'components/contexts'
 import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
@@ -89,7 +89,7 @@ export default function Settings() {
         <Sidecar>
           <SidecarItem heading="Account name">{me?.name}</SidecarItem>
           <SidecarItem heading="Plan">
-            <BillingSubscriptionChip />
+            <BillingSubscriptionChip asLink />
           </SidecarItem>
         </Sidecar>
       </SidecarColWrapperSC>

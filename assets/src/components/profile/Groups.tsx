@@ -42,7 +42,7 @@ export function Groups() {
       <ScrollablePage heading="Groups">
         <ProfileCard>
           <Flex
-            wrap
+            wrap="wrap"
             gap="small"
           >
             {data?.me?.groups?.map((group, i) => (
