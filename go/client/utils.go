@@ -41,6 +41,7 @@ func PersistedQueryInterceptor(ctx context.Context, req *http.Request, gqlInfo *
 		return err
 	}
 	req.Body = io.NopCloser(bytes.NewBuffer(newBodyBytes))
+	req.ContentLength = int64(len(newBodyBytes))
 
 	return next(ctx, req, gqlInfo, res)
 }
