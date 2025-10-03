@@ -1,13 +1,12 @@
-import { ComponentType } from 'react'
 import {
   AppIcon,
   StackRunIcon as DefaultStackRunIcon,
+  IconProps,
   StackRunCanceledIcon,
   StackRunPausedIcon,
   StackRunPendingIcon,
-  ChipProps,
-  IconProps,
 } from '@pluralsh/design-system'
+import { ComponentPropsWithRef, ComponentType } from 'react'
 
 import { StackStatus } from '../../../generated/graphql'
 
@@ -37,7 +36,7 @@ export default function StackRunIcon({
 }: {
   status: StackStatus
   deleting?: boolean
-} & ChipProps) {
+} & ComponentPropsWithRef<typeof AppIcon>) {
   const Icon = statusToIcon[status]
   const color = statusToColor(status, deleting)
 
