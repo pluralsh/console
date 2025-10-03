@@ -277,6 +277,7 @@ type AgentRuntimeFragment struct {
 	ID             string                   "json:\"id\" graphql:\"id\""
 	Name           string                   "json:\"name\" graphql:\"name\""
 	Type           AgentRuntimeType         "json:\"type\" graphql:\"type\""
+	AiProxy        *bool                    "json:\"aiProxy,omitempty\" graphql:\"aiProxy\""
 	Cluster        *TinyClusterFragment     "json:\"cluster,omitempty\" graphql:\"cluster\""
 	CreateBindings []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
 }
@@ -298,6 +299,12 @@ func (t *AgentRuntimeFragment) GetType() *AgentRuntimeType {
 		t = &AgentRuntimeFragment{}
 	}
 	return &t.Type
+}
+func (t *AgentRuntimeFragment) GetAiProxy() *bool {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.AiProxy
 }
 func (t *AgentRuntimeFragment) GetCluster() *TinyClusterFragment {
 	if t == nil {
@@ -22510,6 +22517,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -22580,6 +22588,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -22681,6 +22690,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -22820,6 +22830,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -22964,6 +22975,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -23117,6 +23129,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -23286,6 +23299,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -23424,6 +23438,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -23562,6 +23577,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
@@ -23700,6 +23716,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	aiProxy
 	cluster {
 		... TinyClusterFragment
 	}
