@@ -4,6 +4,7 @@ defmodule Console.GraphQl.PersistedQuery do
   """
   use Absinthe.Plug.DocumentProvider.Compiled
   import Console.Prom.Plugin, only: [metric_scope: 1]
+  require Logger
 
   @not_found_error %Absinthe.Blueprint{
     errors: [
@@ -31,15 +32,16 @@ defmodule Console.GraphQl.PersistedQuery do
   def process(req, _), do: {:cont, req}
 
   defp handle_doc_id(sha256Hash, req) do
+    Logger.info("Handling persisted query with sha256Hash: #{sha256Hash}")
     case {find_document(sha256Hash), get_query(req)} do
-      {nil, nil} -> {:jump, @not_found_error, Absinthe.Phase.Document.Validation.Result}
+      {nil, nil} -> {:halt, %{req | document: @not_found_error}}
       {nil, _} -> {:cont, req}
       {document, _} -> {:halt, %{req | document: document, document_provider_key: sha256Hash}}
     end
   end
 
   defp find_document(hash) do
-    case __absinthe_plug_doc__(:compliled, hash) do
+    case __absinthe_plug_doc__(:compiled, hash) do
       nil ->
         :telemetry.execute(metric_scope(:persisted_query_miss), %{count: 1}, %{})
         nil

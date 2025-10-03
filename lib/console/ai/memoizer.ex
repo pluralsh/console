@@ -80,7 +80,10 @@ defmodule Console.AI.Memoizer do
       }
     else
       {:error, error} ->
-        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}, ai_poll_at: next_poll_at()}
+        %{
+          insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha},
+          ai_poll_at: next_poll_at()
+        }
     end
   end
 
