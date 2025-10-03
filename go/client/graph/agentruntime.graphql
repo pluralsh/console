@@ -97,6 +97,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
     id
     name
     type
+    aiProxy
     cluster {
         ...TinyClusterFragment
     }
