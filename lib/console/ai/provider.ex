@@ -26,11 +26,17 @@ defmodule Console.AI.Provider do
   1. Almost all kubernetes resources in the group deployments.plural.sh are meant to be deployeed on a management cluster, not workload clusters.
   2. Terraform should be managed via Plural stacks, and they are usually instantiated via an InfrastructureStack crd.  This guarantees a gitops flow.
   3. All Plural resources should also be managed via gitops, leveraging ServiceDeployment or GlobalService crds to provision resources in kubernetes.
+
+  - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+  - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """}
 
   @summary """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure as Code.  The following is a detailed explanation of how to debug an issue in a user's kubernetes or cloud infrastructure.
   Please provide a brief, easily digestable summary. The whole summary should be two sentences. Summarize the problem in a single sentence, then explain the solution at a high level in a single sentence.
+
+  - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+  - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """
 
   @callback completion(struct, history, keyword) :: completion_result

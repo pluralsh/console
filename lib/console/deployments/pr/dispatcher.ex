@@ -38,6 +38,8 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @callback commit_status(conn :: ScmConnection.t, pr :: PullRequest.t, id :: binary | nil, status :: commit_status, attrs :: commit_status_attrs) :: :ok | Console.error
 
+  @callback merge(conn :: ScmConnection.t, pr :: PullRequest.t) :: :ok | Console.error
+
   @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
 
   @callback slug(url :: binary) :: {:ok, binary} | Console.error
@@ -100,6 +102,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def approve(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.approve(conn, pr, body)
+  end
+
+  def merge(%ScmConnection{} = conn, %PullRequest{} = pr) do
+    impl = dispatcher(conn)
+    impl.merge(conn, pr)
   end
 
   def commit_status(%ScmConnection{} = conn, %PullRequest{} = pr, sha, status, attrs) do

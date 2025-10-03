@@ -17,5 +17,7 @@ defmodule Console.Deployments.Pr.Impl.Pass do
 
   def commit_status(_, _, _, _, _), do: :ok
 
+  def merge(_, _), do: :ok
+
   def slug(_), do: {:ok, ""}
 end

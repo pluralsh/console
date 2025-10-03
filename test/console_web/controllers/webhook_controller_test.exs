@@ -162,6 +162,31 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       assert_receive {:event, %Console.PubSub.PullRequestCreated{item: %{id: ^id}}}
     end
+
+    test "it can detect merge crons", %{conn: conn} do
+      hook = insert(:scm_webhook)
+      url = "https://github.com/pr/url"
+      pr = insert(:pull_request, url: url)
+
+      payload = Jason.encode!(%{"pull_request" => %{
+        "html_url" => url,
+        "title" => "some title",
+        "body" => "some body\nPlural merge cron: 0 0 * * *",
+        "head" => %{"ref" => "some-branch"}
+      }})
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      updated = refetch(pr)
+      assert updated.merge_cron == "0 0 * * *"
+      assert updated.merge_attempt_at
+    end
   end
 
   describe "#observability/2" do

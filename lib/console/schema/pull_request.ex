@@ -14,24 +14,26 @@ defmodule Console.Schema.PullRequest do
   defenum Status, open: 0, merged: 1, closed: 2
 
   schema "pull_requests" do
-    field :url,        :string
-    field :status,     Status, default: :open
-    field :title,      :string
-    field :body,       :string
-    field :creator,    :string
-    field :labels,     {:array, :string}
-    field :ref,        :string
-    field :sha,        :string
-    field :polled_sha, :string
-    field :commit_sha, :string
-    field :approver,   :string
-    field :preview,    :string
-    field :attributes, :map
-    field :patch,      :binary
-    field :agent_id,   :string
-    field :approved,   :boolean, default: false
+    field :url,              :string
+    field :status,           Status, default: :open
+    field :title,            :string
+    field :body,             :string
+    field :creator,          :string
+    field :labels,           {:array, :string}
+    field :ref,              :string
+    field :sha,              :string
+    field :polled_sha,       :string
+    field :commit_sha,       :string
+    field :approver,         :string
+    field :preview,          :string
+    field :attributes,       :map
+    field :patch,            :binary
+    field :agent_id,         :string
+    field :approved,         :boolean, default: false
     field :governance_state, :map
-    field :next_poll_at, :utc_datetime_usec
+    field :next_poll_at,     :utc_datetime_usec
+    field :merge_cron,       :string
+    field :merge_attempt_at, :utc_datetime_usec
 
     field :notifications_policy_id, :binary_id
 
@@ -60,6 +62,14 @@ defmodule Console.Schema.PullRequest do
       where: (is_nil(pr.next_poll_at) or pr.next_poll_at < ^now) and
              coalesce(pr.updated_at, pr.inserted_at) >= ^stale,
       order_by: [asc: :next_poll_at])
+  end
+
+  def mergeable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(pr in query,
+      where: not is_nil(pr.merge_attempt_at) and pr.merge_attempt_at <= ^now and pr.status == ^:open,
+      order_by: [asc: :merge_attempt_at]
+    )
   end
 
   def icon(%__MODULE__{status: :merged}), do: "✔"
@@ -132,6 +142,8 @@ defmodule Console.Schema.PullRequest do
     next_poll_at
     session_id
     agent_run_id
+    merge_cron
+    merge_attempt_at
   )a
 
   def changeset(model, attrs \\ %{}) do
@@ -144,6 +156,7 @@ defmodule Console.Schema.PullRequest do
     |> foreign_key_constraint(:flow_id)
     |> put_new_change(:notifications_policy_id, &Ecto.UUID.generate/0)
     |> unique_constraint(:url)
+    |> next_merge_attempt()
     |> validate_required(~w(url title)a)
   end
 
@@ -163,4 +176,23 @@ defmodule Console.Schema.PullRequest do
     end
   end
   def poll_duration(_), do: Duration.new!(minute: 5)
+
+  def next_merge_attempt(cs, cron \\ nil) do
+    case get_next_attempt(cron || get_change(cs, :merge_cron), get_field(cs, :merge_attempt_at)) do
+      {:ok, changes} -> Enum.reduce(changes, cs, fn {k, v}, cs -> put_change(cs, k, v) end)
+      {:error, err} -> add_error(cs, :merge_cron, "Failed to generate next run date: #{inspect(err)}")
+    end
+  end
+
+  defp get_next_attempt(nil, _), do: {:ok, %{}}
+  defp get_next_attempt(crontab, last_run) when is_binary(crontab) do
+    with {:ok, cron} <- Crontab.CronExpression.Parser.parse(crontab),
+         {:ok, ts} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(last_run || Timex.now())),
+      do: {:ok, %{merge_attempt_at: convert_naive(ts)}}
+  end
+
+  defp convert_naive(ndt) do
+    DateTime.from_naive!(ndt, "Etc/UTC")
+    |> Map.put(:microsecond, {0, 6})
+  end
 end

@@ -551,6 +551,39 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert error["source"] == "sync"
       assert error["message"] == "wtf"
     end
+
+    test "it can persist service metadata" do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      attrs = %{
+        "name" => "name",
+        "namespace" => "namespace",
+        "group" => "networking.k8s.io",
+        "version" => "v1",
+        "kind" => "ingress",
+        "synced" => true,
+        "state" => "RUNNING"
+      }
+
+      {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
+        mutation Update($components: [ComponentAttributes], $metadata: ServiceMetadataAttributes, $id: ID!) {
+          updateServiceComponents(id: $id, components: $components, metadata: $metadata) {
+            id
+            components { name kind namespace group version kind synced state }
+            metadata { images fqdns }
+          }
+        }
+      """, %{"id" => service.id, "components" => [attrs], "metadata" => %{"images" => ["image1", "image2"]}}, %{cluster: cluster})
+
+      assert svc["id"] == service.id
+      [component] = svc["components"]
+
+      for {k, v} <- attrs,
+        do: assert component[k] == v
+
+      %{"images" => images} = svc["metadata"]
+      assert images == ["image1", "image2"]
+    end
   end
 
   describe "proceed" do
