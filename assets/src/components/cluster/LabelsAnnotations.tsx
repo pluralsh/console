@@ -26,8 +26,7 @@ export function LabelsAnnotationsRow({
         {name}
       </div>
       <Flex
-        direction="row"
-        wrap
+        wrap="wrap"
         gap="xsmall"
       >
         {children}
