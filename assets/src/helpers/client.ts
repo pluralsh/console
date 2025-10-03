@@ -1,6 +1,8 @@
 import { ApolloClient, InMemoryCache, split } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
+import { generatePersistedQueryIdsFromManifest } from '@apollo/persisted-query-lists'
 import { RetryLink } from '@apollo/client/link/retry'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { hasSubscription } from '@jumpn/utils-graphql'
@@ -81,7 +83,22 @@ export function buildClient(
       },
     })
   )
-  const gqlLink = errorLink.concat(httpLink)
+
+  const persistedQueryLink = createPersistedQueryLink(
+    generatePersistedQueryIdsFromManifest({
+      // transform Replit object format to array format expected by Apollo
+      loadManifest: () =>
+        import('../generated/persisted-queries/client.json').then((m) => ({
+          format: m.default.format,
+          version: m.default.version,
+          operations: Object.entries(m.default.operations).map(
+            ([id, { body, name, type }]) => ({ id, body, name, type })
+          ),
+        })),
+    })
+  )
+
+  const gqlLink = errorLink.concat(persistedQueryLink).concat(httpLink)
 
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
