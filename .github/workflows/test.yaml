@@ -155,6 +155,11 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go/client/go.mod
+          cache: true
       - name: Restore dependencies cache
         uses: actions/cache@v3
         with:

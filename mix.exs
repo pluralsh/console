@@ -133,7 +133,7 @@ defmodule Console.MixProject do
       {:zstream, "~> 0.6"},
       {:csv, "~> 3.2"},
       {:yaml_elixir, "~> 2.9"},
-      {:google_api_ai_platform, "~> 0.22.0"},
+      {:google_api_ai_platform, "~> 0.27"},
       {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup", commit: "4958159d1e9acec2154590ecacc732ecd58f8312"},
       {:poison, "~> 6.0", override: true},
       {:ets, "~> 0.9"},

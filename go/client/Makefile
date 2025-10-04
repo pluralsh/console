@@ -13,6 +13,7 @@ help: ## show help
 generate: TOOL = gqlgenc
 generate: --tool ## generate Go client from GraphQL schema
 	@$(GQLGENC)
+	@go run cmd/main.go > generated/persisted-queries/queries.json
 
 .PHONY: release
 release: ## create and push a tag with new client version

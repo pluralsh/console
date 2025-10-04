@@ -22,3 +22,13 @@ func PersistedQueryInterceptor(ctx context.Context, req *http.Request, gqlInfo *
 	req.URL.RawQuery = query.Encode()
 	return next(ctx, req, gqlInfo, res)
 }
+
+func GeneratePersistedQueries() map[string]string {
+	result := map[string]string{}
+	for doc, _ := range DocumentOperationNames {
+		hash := HashQuery(doc)
+		result[hash] = doc
+	}
+
+	return result
+}
