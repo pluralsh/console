@@ -53,6 +53,7 @@ defmodule Console.Schema.ScmConnection do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> cast_embed(:github, with: &github_changeset/2)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> cast_embed(:azure, with: &azure_changeset/2)

@@ -2916,11 +2916,13 @@ type FluxHelmRepository struct {
 type GateJobAttributes struct {
 	Namespace string `json:"namespace"`
 	// if you'd rather define the job spec via straight k8s yaml
-	Raw            *string                `json:"raw,omitempty"`
-	Containers     []*ContainerAttributes `json:"containers,omitempty"`
-	Labels         *string                `json:"labels,omitempty"`
-	Annotations    *string                `json:"annotations,omitempty"`
-	ServiceAccount *string                `json:"serviceAccount,omitempty"`
+	Raw            *string                    `json:"raw,omitempty"`
+	Containers     []*ContainerAttributes     `json:"containers,omitempty"`
+	Labels         *string                    `json:"labels,omitempty"`
+	Annotations    *string                    `json:"annotations,omitempty"`
+	NodeSelector   *string                    `json:"nodeSelector,omitempty"`
+	Tolerations    []*PodTolerationAttributes `json:"tolerations,omitempty"`
+	ServiceAccount *string                    `json:"serviceAccount,omitempty"`
 	// request overrides if you don't want to manually configure individual containers
 	Resources *ContainerResourcesAttributes `json:"resources,omitempty"`
 }
@@ -3601,6 +3603,10 @@ type JobGateSpec struct {
 	Labels map[string]any `json:"labels,omitempty"`
 	// any pod annotations to apply
 	Annotations map[string]any `json:"annotations,omitempty"`
+	// any pod node selector to apply
+	NodeSelector map[string]any `json:"nodeSelector,omitempty"`
+	// any pod tolerations to apply
+	Tolerations []*PodToleration `json:"tolerations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
 	// equivalent to resources, present for backwards compatibility
@@ -5185,6 +5191,20 @@ type PodStatus struct {
 	Conditions            []*PodCondition    `json:"conditions,omitempty"`
 	ContainerStatuses     []*ContainerStatus `json:"containerStatuses,omitempty"`
 	InitContainerStatuses []*ContainerStatus `json:"initContainerStatuses,omitempty"`
+}
+
+type PodToleration struct {
+	Key      *string `json:"key,omitempty"`
+	Operator *string `json:"operator,omitempty"`
+	Value    *string `json:"value,omitempty"`
+	Effect   *string `json:"effect,omitempty"`
+}
+
+type PodTolerationAttributes struct {
+	Key      *string `json:"key,omitempty"`
+	Operator *string `json:"operator,omitempty"`
+	Value    *string `json:"value,omitempty"`
+	Effect   *string `json:"effect,omitempty"`
 }
 
 type PolicyBinding struct {

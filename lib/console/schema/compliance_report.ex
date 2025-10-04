@@ -28,5 +28,6 @@ defmodule Console.Schema.ComplianceReport do
     |> cast(attrs, @valid)
     |> validate_required([:name])
     |> unique_constraint([:name])
+    |> validate_length(:name, max: 255)
   end
 end

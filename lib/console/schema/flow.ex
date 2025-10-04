@@ -60,6 +60,7 @@ defmodule Console.Schema.Flow do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name description icon repositories project_id)a)
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:server_associations)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)

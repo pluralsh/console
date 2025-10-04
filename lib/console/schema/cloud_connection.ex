@@ -61,6 +61,7 @@ defmodule Console.Schema.CloudConnection do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:provider, :name])
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:read_bindings)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)

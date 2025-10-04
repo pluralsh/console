@@ -4931,10 +4931,21 @@ input GateJobAttributes {
 
   annotations: Json
 
+  nodeSelector: Json
+
+  tolerations: [PodTolerationAttributes]
+
   serviceAccount: String
 
   "request overrides if you don't want to manually configure individual containers"
   resources: ContainerResourcesAttributes
+}
+
+input PodTolerationAttributes {
+  key: String
+  operator: String
+  value: String
+  effect: String
 }
 
 "the attributes for a container"
@@ -5166,6 +5177,12 @@ type JobGateSpec {
   "any pod annotations to apply"
   annotations: Map
 
+  "any pod node selector to apply"
+  nodeSelector: Map
+
+  "any pod tolerations to apply"
+  tolerations: [PodToleration]
+
   "the service account the pod will use"
   serviceAccount: String
 
@@ -5174,6 +5191,13 @@ type JobGateSpec {
 
   "requests overrides for cases where direct container configuration is unnecessary"
   resources: ContainerResources
+}
+
+type PodToleration {
+  key: String
+  operator: String
+  value: String
+  effect: String
 }
 
 "a shortform spec for job containers, designed for ease-of-use"

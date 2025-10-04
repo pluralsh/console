@@ -41,6 +41,14 @@ defmodule Console.Schema.Gates.JobSpec do
     field :service_account, :string
     field :labels,          :map
     field :annotations,     :map
+    field :node_selector,   :map
+
+    embeds_many :tolerations, Toleration, on_replace: :delete do
+      field :key,       :string
+      field :operator,  :string
+      field :value,     :string
+      field :effect,    :string
+    end
 
     embeds_one :resources, Resources, on_replace: :update
 
@@ -63,12 +71,13 @@ defmodule Console.Schema.Gates.JobSpec do
     end
   end
 
-  @valid ~w(namespace raw labels annotations service_account)a
+  @valid ~w(namespace raw labels annotations service_account node_selector)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:containers, with: &container_changeset/2)
+    |> cast_embed(:tolerations, with: &toleration_changeset/2)
     |> cast_embed(:resources)
     |> validate_required([:namespace])
   end
@@ -92,5 +101,11 @@ defmodule Console.Schema.Gates.JobSpec do
     model
     |> cast(attrs, ~w(secret config_map)a)
     |> validate_required(~w(secret config_map)a)
+  end
+
+  def toleration_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(key operator value effect)a)
+    |> validate_required(~w(key operator value effect)a)
   end
 end

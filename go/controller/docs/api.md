@@ -1946,6 +1946,8 @@ _Appears in:_
 | `containers` _[Container](#container) array_ | Containers to run as part of the job, such as test runners or validation scripts. |  | Optional: \{\} <br /> |
 | `labels` _object (keys:string, values:string)_ | Labels to apply to the job for organization and selection. |  | Optional: \{\} <br /> |
 | `annotations` _object (keys:string, values:string)_ | Annotations to apply to the job for additional metadata. |  | Optional: \{\} <br /> |
+| `nodeSelector` _object (keys:string, values:string)_ | NodeSelector to apply to the job for scheduling. |  | Optional: \{\} <br /> |
+| `tolerations` _[Toleration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#toleration-v1-core) array_ | Tolerations to apply to the job for scheduling. |  | Optional: \{\} <br /> |
 | `serviceAccount` _string_ | ServiceAccount to use for the job execution. |  | Optional: \{\} <br />Type: string <br /> |
 | `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw allows defining the job using a full Kubernetes JobSpec manifest<br />instead of the simplified container-based approach. |  | Optional: \{\} <br /> |
 | `resources` _[ContainerResources](#containerresources)_ | Resources specification that overrides implicit container resources<br />when containers are not directly configured. |  | Optional: \{\} <br /> |

@@ -3607,11 +3607,13 @@ export type GateJobAttributes = {
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
   labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
+  nodeSelector?: InputMaybe<Scalars['Json']['input']>;
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
   /** request overrides if you don't want to manually configure individual containers */
   resources?: InputMaybe<ContainerResourcesAttributes>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
+  tolerations?: InputMaybe<Array<InputMaybe<PodTolerationAttributes>>>;
 };
 
 /** detailed gate specifications */
@@ -4423,6 +4425,8 @@ export type JobGateSpec = {
   labels?: Maybe<Scalars['Map']['output']>;
   /** the namespace the job will run in */
   namespace: Scalars['String']['output'];
+  /** any pod node selector to apply */
+  nodeSelector?: Maybe<Scalars['Map']['output']>;
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
   /** equivalent to resources, present for backwards compatibility */
@@ -4431,6 +4435,8 @@ export type JobGateSpec = {
   resources?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
+  /** any pod tolerations to apply */
+  tolerations?: Maybe<Array<Maybe<PodToleration>>>;
 };
 
 export type JobReference = {
@@ -6306,6 +6312,21 @@ export type PodStatus = {
   phase?: Maybe<Scalars['String']['output']>;
   podIp?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
+};
+
+export type PodToleration = {
+  __typename?: 'PodToleration';
+  effect?: Maybe<Scalars['String']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  operator?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export type PodTolerationAttributes = {
+  effect?: InputMaybe<Scalars['String']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  operator?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum PolicyAggregate {
