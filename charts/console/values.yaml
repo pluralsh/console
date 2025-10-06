@@ -91,7 +91,7 @@ image:
 # ociAuth is used to configure the image for the oci-auth container as follows: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
 ociAuth:
   repository: oci-auth
-  tag: v0.10.23
+  tag: ~
   imagePullPolicy: IfNotPresent
 
 # initContainers is used to create a list of init containers for your console deployment
