@@ -1,7 +1,6 @@
-import { useMutation } from '@apollo/client'
 import { Button, Flex, ValidatedInput } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
-import { UPDATE_USER } from 'components/graphql/users'
+import { useUpdateUserMutation } from 'generated/graphql'
 import { useContext, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { ProfileCard } from './Profile'
@@ -15,7 +14,7 @@ function UpdatePassword({ cancel }: any) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [second, setSecond] = useState('')
-  const [mutation, { loading }] = useMutation(UPDATE_USER, {
+  const [mutation, { loading }] = useUpdateUserMutation({
     variables: { attributes: { password } },
   })
 

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { asQuery } from 'components/utils/query'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 
 import { componentsWithLogs } from './ComponentInfo'
@@ -36,4 +35,14 @@ export function ViewLogsButton({ metadata, kind }: any) {
       View logs
     </Button>
   )
+}
+
+function asQuery(params: Record<string, string>) {
+  const search = new URLSearchParams()
+
+  for (const [k, v] of Object.entries(params)) {
+    search.set(k, v)
+  }
+
+  return search.toString()
 }

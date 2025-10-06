@@ -1,18 +1,16 @@
-import { useMutation } from '@apollo/client'
 import { ListBoxItem } from '@pluralsh/design-system'
-import { Dispatch, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
+import { Dispatch, useContext, useState } from 'react'
 
 import { removeConnection, updateCache } from '../../../../utils/graphql'
 import { Info } from '../../../utils/Info'
 
 import { Permissions, hasRbac } from '../misc'
 
+import { RolesDocument, useDeleteRoleMutation } from 'generated/graphql'
 import RoleEdit from './RoleEdit'
-
-import { DELETE_ROLE, ROLES_Q } from './queries'
 
 interface MenuItem {
   label: string
@@ -33,13 +31,13 @@ export default function Role({ role, q }: any) {
   const [confirm, setConfirm] = useState(false)
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
-  const [mutation, { loading, error }] = useMutation(DELETE_ROLE, {
+  const [mutation, { loading, error }] = useDeleteRoleMutation({
     variables: { id: role.id },
     update: (cache, { data }) =>
       updateCache(cache, {
-        query: ROLES_Q,
+        query: RolesDocument,
         variables: { q },
-        update: (prev) => removeConnection(prev, data.deleteRole, 'roles'),
+        update: (prev) => removeConnection(prev, data?.deleteRole, 'roles'),
       }),
     onCompleted: () => setConfirm(false),
   })

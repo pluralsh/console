@@ -1,15 +1,15 @@
-import { useCallback, useContext, useMemo, useState } from 'react'
-import { useMutation } from '@apollo/client'
 import { Button, Modal } from '@pluralsh/design-system'
-import uniqWith from 'lodash/uniqWith'
-import isEqual from 'lodash/isEqual'
-import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import isEqual from 'lodash/isEqual'
+import uniqWith from 'lodash/uniqWith'
+import { useCallback, useContext, useMemo, useState } from 'react'
 
 import { appendConnection, updateCache } from '../../../../utils/graphql'
 
 import { bindingToBindingAttributes } from './misc'
-import { CREATE_ROLE, ROLES_Q } from './queries'
+
+import { RolesDocument, useCreateRoleMutation } from 'generated/graphql'
 import RoleForm from './RoleForm'
 
 const defaultAttributes = {
@@ -35,18 +35,18 @@ export default function RoleCreate({ q }: any) {
     setRoleBindings([])
     setCreateModalVisible(false)
   }, [])
-  const [mutation, { loading, error }] = useMutation(CREATE_ROLE, {
+  const [mutation, { loading, error }] = useCreateRoleMutation({
     variables: {
       attributes: {
         ...attributes,
         roleBindings: roleBindings.map(bindingToBindingAttributes),
       },
     },
-    update: (cache, { data: { createRole } }) =>
+    update: (cache, { data }) =>
       updateCache(cache, {
-        query: ROLES_Q,
+        query: RolesDocument,
         variables: { q },
-        update: (prev) => appendConnection(prev, createRole, 'roles'),
+        update: (prev) => appendConnection(prev, data?.createRole, 'roles'),
       }),
     onCompleted: () => resetAndClose(),
   })

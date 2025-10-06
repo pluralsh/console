@@ -1,16 +1,15 @@
-import { useLazyQuery } from '@apollo/client'
 import { Button, Code, Flex } from '@pluralsh/design-system'
-import { TEMP_TOKEN_Q } from 'components/graphql/users'
 import { GqlError } from 'components/utils/Alert'
 import { localized } from 'helpers/hostname'
 
 import { InlineA } from 'components/utils/typography/Text'
+import { useTemporaryTokenLazyQuery } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { ProfileCard } from './Profile'
 
 export default function SecurityAccess() {
   const theme = useTheme()
-  const [fetch, { error, data }] = useLazyQuery(TEMP_TOKEN_Q)
+  const [fetch, { error, data }] = useTemporaryTokenLazyQuery()
   const url = localized('/access')
 
   return (

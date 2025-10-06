@@ -1,15 +1,13 @@
-import { useMutation } from '@apollo/client'
 import { Modal } from '@pluralsh/design-system'
-import { useEffect, useMemo, useState } from 'react'
-import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
+import uniqWith from 'lodash/uniqWith'
+import { useEffect, useMemo, useState } from 'react'
 
 import pick from 'lodash/pick'
 
 import { bindingToBindingAttributes } from './misc'
 
-import { UPDATE_ROLE } from './queries'
-
+import { useUpdateRoleMutation } from 'generated/graphql'
 import RoleForm from './RoleForm'
 
 export default function RoleEdit({ role, open, setOpen }: any) {
@@ -21,7 +19,7 @@ export default function RoleEdit({ role, open, setOpen }: any) {
     () => uniqWith(roleBindings, isEqual),
     [roleBindings]
   )
-  const [mutation, { loading, error }] = useMutation(UPDATE_ROLE, {
+  const [mutation, { loading, error }] = useUpdateRoleMutation({
     variables: {
       id: role.id,
       attributes: {
