@@ -1794,27 +1794,6 @@ type ClusterNodeMetrics struct {
 	MemoryUsage []*MetricResponse `json:"memoryUsage,omitempty"`
 }
 
-type ClusterPing struct {
-	CurrentVersion   string         `json:"currentVersion"`
-	KubeletVersion   *string        `json:"kubeletVersion,omitempty"`
-	Distro           *ClusterDistro `json:"distro,omitempty"`
-	HealthScore      *int64         `json:"healthScore,omitempty"`
-	OpenshiftVersion *string        `json:"openshiftVersion,omitempty"`
-	NodeCount        *int64         `json:"nodeCount,omitempty"`
-	PodCount         *int64         `json:"podCount,omitempty"`
-	NamespaceCount   *int64         `json:"namespaceCount,omitempty"`
-	CPUTotal         *float64       `json:"cpuTotal,omitempty"`
-	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
-	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
-	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
-	// the interval in seconds between pings to the cluster
-	PingInterval      *int64    `json:"pingInterval,omitempty"`
-	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
-	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
-	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
-	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
-}
-
 // a CAPI provider for a cluster, cloud is inferred from name if not provided manually
 type ClusterProvider struct {
 	// the id of this provider

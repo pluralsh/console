@@ -21,6 +21,11 @@ models:
     model: github.com/99designs/gqlgen/graphql.String
   UploadOrUrl:
     model: github.com/99designs/gqlgen/graphql.String
+
+  # Custom type mapping for ClusterPing
+  ClusterPing:
+    model: github.com/pluralsh/console/go/client.ClusterPing
+
 schema:
   - "../../schema/*.graphql"
 query:
