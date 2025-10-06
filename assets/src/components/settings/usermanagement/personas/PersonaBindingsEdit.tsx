@@ -19,7 +19,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from '../../../utils/Alert'
-import RoleFormBindings from '../roles/RoleFormBindings'
+import { FormBindings } from 'components/utils/bindings'
 
 export function PersonaBindings({
   bindings,
@@ -29,14 +29,12 @@ export function PersonaBindings({
   setBindings: (bindings: PolicyBinding[]) => void
 }) {
   return (
-    <RoleFormBindings
+    <FormBindings
       bindings={bindings}
       setBindings={setBindings}
       showUsers={false}
       showGroups
-      hints={{
-        group: 'Groups to assign to this persona',
-      }}
+      hints={{ group: 'Groups to assign to this persona' }}
     />
   )
 }
