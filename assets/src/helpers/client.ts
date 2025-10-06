@@ -1,8 +1,12 @@
-import { ApolloClient, InMemoryCache, split } from '@apollo/client'
+import {
+  ApolloClient,
+  DocumentNode,
+  InMemoryCache,
+  split,
+} from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
-import { generatePersistedQueryIdsFromManifest } from '@apollo/persisted-query-lists'
 import { RetryLink } from '@apollo/client/link/retry'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { hasSubscription } from '@jumpn/utils-graphql'
@@ -85,17 +89,7 @@ export function buildClient(
   )
 
   const persistedQueryLink = createPersistedQueryLink(
-    generatePersistedQueryIdsFromManifest({
-      // transform Replit object format to array format expected by Apollo
-      loadManifest: () =>
-        import('../generated/persisted-queries/client.json').then((m) => ({
-          format: m.default.format,
-          version: m.default.version,
-          operations: Object.entries(m.default.operations).map(
-            ([id, { body, name, type }]) => ({ id, body, name, type })
-          ),
-        })),
-    })
+    getPersistedQueryLinkOptions()
   )
 
   const gqlLink = errorLink.concat(persistedQueryLink).concat(httpLink)
@@ -123,6 +117,7 @@ export function buildClient(
             },
           },
         },
+        // TODO: re-evaluate if this logic is actually being used correctly
         // Only configure specific merge behavior for the problematic connection
         ChatThread: {
           fields: {
@@ -161,3 +156,47 @@ const { client, socket } = buildClient(
 )
 
 export { client, socket }
+
+// partially adapted from https://github.com/apollographql/apollo-utils/blob/main/packages/persisted-query-lists/
+function getPersistedQueryLinkOptions() {
+  const operationIdsByNamePromise = Promise.resolve(
+    import('../generated/persisted-queries/client.json')
+  ).then(
+    (manifest) =>
+      new Map(
+        Object.entries(manifest.operations).map(([id, { name }]) => [name, id])
+      )
+  )
+  // errors here will still be caught and handled when we await the promise below, when we actually run an operation
+  operationIdsByNamePromise.catch(() => {})
+
+  async function generateHash(document: DocumentNode) {
+    const operationIdsByName = await operationIdsByNamePromise
+
+    let operationName: string | null = null
+    for (const definition of document.definitions) {
+      if (definition.kind === 'OperationDefinition') {
+        if (!definition.name)
+          throw new Error('Anonymous operations are not supported')
+        if (operationName !== null)
+          throw new Error('Multi-operation GraphQL documents are not supported')
+        operationName = definition.name.value
+      }
+    }
+    if (!operationName)
+      throw new Error('Documents without operations are not supported')
+
+    const operationId = operationIdsByName.get(operationName)
+    // if we don't find the operation in the manifest, we want to log the error because it should be looked into
+    // but it should still return a string for the hash so Apollo still triggers a retry with the full query string
+    if (!operationId)
+      console.error(`Operation ${operationName} not found in manifest`)
+    return operationId || 'not-found'
+  }
+
+  return {
+    generateHash,
+    // keep sending query IDs even if the other side doesn't know them
+    disable: () => false,
+  }
+}
