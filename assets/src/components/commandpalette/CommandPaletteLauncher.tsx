@@ -1,9 +1,9 @@
-import { Chip, Flex } from '@pluralsh/design-system'
+import { Chip } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
 import { usePlatform } from 'components/hooks/usePlatform'
 
-import { Body2BoldP } from 'components/utils/typography/Text'
 import { use } from 'react'
+import styled from 'styled-components'
 import CommandHotkeys from './CommandHotkeys'
 import {
   CommandPaletteContext,
@@ -12,7 +12,7 @@ import {
 import { CommandPaletteDialog } from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands.ts'
 
-export default function CommandPaletteLauncher() {
+export function CommandPaletteLauncher() {
   const { modKeyString, keyCombinerString } = usePlatform()
   const commands = useCommandsWithHotkeys()
   const { setCmdkOpen } = use(CommandPaletteContext)
@@ -23,19 +23,13 @@ export default function CommandPaletteLauncher() {
 
   return (
     <>
-      <Chip
+      <CmdKChipSC
         clickable
-        inactive
         onClick={() => setCmdkOpen(true, CommandPaletteTab.Commands)}
-        size="small"
-        userSelect="none"
-        whiteSpace="nowrap"
       >
-        <Flex gap="xxsmall">
-          <Body2BoldP $color="text-light">{modKeyString}</Body2BoldP>
-          <Body2BoldP $color="text-xlight">{keyCombinerString}K</Body2BoldP>
-        </Flex>
-      </Chip>
+        {modKeyString}
+        {keyCombinerString}K
+      </CmdKChipSC>
       <CommandPaletteDialog />
       {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
@@ -49,3 +43,11 @@ export default function CommandPaletteLauncher() {
     </>
   )
 }
+
+const CmdKChipSC = styled(Chip)(({ theme }) => ({
+  transition: 'background 0.16s ease-in-out',
+
+  background: theme.colors['fill-accent'],
+  '&& *': { color: theme.colors['text-xlight'] },
+  '&:hover': { background: theme.colors['fill-zero'] },
+}))

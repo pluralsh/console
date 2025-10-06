@@ -42,7 +42,7 @@ defmodule ConsoleWeb.AIController do
   def do_proxy(conn, upstream) do
     opts = ReverseProxyPlug.init(upstream: upstream, response_mode: :stream)
     {body, conn} = ReverseProxyPlug.read_body(conn)
-
+    conn = add_nginx_headers(conn)
     %ReverseProxyPlug.HTTPClient.Request{
       method: to_method(conn.method),
       url: upstream,
@@ -70,5 +70,10 @@ defmodule ConsoleWeb.AIController do
       [_, match] -> match
       _ -> token
     end
+  end
+
+  defp add_nginx_headers(conn) do
+    conn
+    |> put_resp_header("x-accel-buffering", "no")
   end
 end

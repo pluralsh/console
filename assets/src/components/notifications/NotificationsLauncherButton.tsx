@@ -15,7 +15,7 @@ export function NotificationsLauncherButton({
   const translate = count > 10 ? -7 : -6
 
   return (
-    <div css={{ position: 'relative' }}>
+    <div css={{ position: 'relative', marginRight: count > 0 ? 6 : 0 }}>
       <IconFrame
         clickable
         icon={<LightningIcon />}
