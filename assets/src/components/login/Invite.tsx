@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
@@ -7,10 +6,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 
-import { INVITE_Q, SIGNUP } from '../graphql/users'
 import { LabelledInput } from '../utils/LabelledInput'
 
 import { Body1P, CaptionP } from 'components/utils/typography/Text'
+import { useInviteQuery, useSignUpMutation } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { LoginPortal } from './LoginPortal'
 import {
@@ -92,16 +91,17 @@ export default function Invite() {
   const { inviteId } = useParams()
   const [attributes, setAttributes] = useState({ name: '', password: '' })
   const [confirm, setConfirm] = useState('')
-  const [mutation, { loading, error: signupError }] = useMutation(SIGNUP, {
-    variables: { inviteId, attributes },
-    onCompleted: ({ signup: { jwt, refreshToken } }) => {
+  const [mutation, { loading, error: signupError }] = useSignUpMutation({
+    variables: { inviteId: inviteId ?? '', attributes },
+    onCompleted: ({ signup }) => {
+      const { jwt, refreshToken } = signup ?? {}
       setToken(jwt)
       setRefreshToken(refreshToken?.token)
       navigate('/')
     },
     onError: console.error,
   })
-  const { data, error } = useQuery(INVITE_Q, { variables: { id: inviteId } })
+  const { data, error } = useInviteQuery({ variables: { id: inviteId ?? '' } })
 
   if (error || (data && !data.invite)) return <InvalidInvite />
   if (!data) return null
@@ -152,7 +152,7 @@ export default function Invite() {
         >
           <LabelledInput
             label="Email"
-            value={email}
+            value={email ?? ''}
             disabled
           />
           <LabelledInput

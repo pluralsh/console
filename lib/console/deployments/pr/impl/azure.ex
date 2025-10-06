@@ -62,6 +62,7 @@ defmodule Console.Deployments.Pr.Impl.Azure do
       body: pr["description"],
       commit_sha: get_in(pr, ["lastMergeCommit", "commitId"])
     }, pr_associations(pr_content(pr)))
+    |> Map.merge(approval(pr))
     |> Console.drop_nils()
 
     {:ok, url, attrs}
@@ -86,6 +87,22 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   def files(_, _), do: {:ok, []}
 
   def commit_status(_, _, _, _, _), do: :ok
+
+  def merge(conn, %PullRequest{url: url}) do
+    body = %{
+      status: :completed,
+      completionOptions: %{
+        deleteSourceBranch: true,
+        mergeStrategy: "squash"
+      }
+    }
+
+    with {:ok, name, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, repo_id} <- get_repo_id(conn, name),
+         {:ok, _} <- patch(conn, "/git/repositories/#{repo_id}/pullrequests/#{number}", body),
+      do: :ok
+  end
 
   def pr_info(url) do
     with {:ok, repo_id, number} <- get_pull_id(url) do
@@ -145,6 +162,14 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   defp owner(_), do: nil
 
   defp pr_content(pr), do: "#{pr["sourceRefName"]}\n#{pr["title"]}\n#{pr["description"]}"
+
+  defp approval(%{"reviewers" => [_ | _] = reviewers}) do
+    approver = Enum.max_by(reviewers, & &1["vote"] || 0)
+    case Enum.sum_by(reviewers, & &1["vote"] || 0) do
+      v when v > 5 -> %{approver: approver["displayName"], approved: true}
+      _ -> %{}
+    end
+  end
 
   defp get_pull_id(url) do
     url = String.downcase(url)

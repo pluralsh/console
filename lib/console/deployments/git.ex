@@ -627,6 +627,22 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Attempts to automatically merge a pr if its already been approved
+  """
+  @spec auto_merge(PullRequest.t) :: :ok | Console.error
+  def auto_merge(%PullRequest{status: s, approver: a} = pr) when is_binary(a) and s not in [:merged, :closed] do
+    with %ScmConnection{} = conn <- default_scm_connection(),
+      do: Dispatcher.merge(conn, pr)
+  end
+  def auto_merge(%PullRequest{approver: nil, status: :open} = pr) do
+    PullRequest.changeset(pr)
+    |> PullRequest.next_merge_attempt(pr.merge_cron)
+    |> Repo.update()
+    |> then(fn _ -> {:error, "pr is still pending approval"} end)
+  end
+  def auto_merge(_), do: {:error, "pr is already in a terminal state"}
+
+  @doc """
   Sets up a service to run the renovate cron given an scm connection and target repositories
   """
   @spec setup_renovate(binary, [binary], User.t) :: Services.service_resp

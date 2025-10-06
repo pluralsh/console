@@ -325,7 +325,7 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		return nil, nil
 	}
 
-	var annotations, labels, raw *string
+	var annotations, labels, nodeSelector, raw *string
 	if job.Annotations != nil {
 		result, err := json.Marshal(job.Annotations)
 		if err != nil {
@@ -340,12 +340,33 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		}
 		labels = lo.ToPtr(string(result))
 	}
+
+	if job.NodeSelector != nil {
+		result, err := json.Marshal(job.NodeSelector)
+		if err != nil {
+			return nil, err
+		}
+		nodeSelector = lo.ToPtr(string(result))
+	}
+
 	if job.Raw != nil {
 		rawData, err := json.Marshal(job.Raw)
 		if err != nil {
 			return nil, err
 		}
 		raw = lo.ToPtr(string(rawData))
+	}
+
+	var tolerations []*console.PodTolerationAttributes
+	if job.Tolerations != nil {
+		tolerations = algorithms.Map(job.Tolerations, func(t corev1.Toleration) *console.PodTolerationAttributes {
+			return &console.PodTolerationAttributes{
+				Key:      lo.ToPtr(t.Key),
+				Operator: lo.ToPtr(string(t.Operator)),
+				Value:    lo.ToPtr(t.Value),
+				Effect:   lo.ToPtr(string(t.Effect)),
+			}
+		})
 	}
 
 	return &console.GateJobAttributes{
@@ -374,6 +395,8 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 			}),
 		Labels:         labels,
 		Annotations:    annotations,
+		NodeSelector:   nodeSelector,
+		Tolerations:    tolerations,
 		ServiceAccount: job.ServiceAccount,
 	}, nil
 }

@@ -73,6 +73,7 @@ defmodule Console.Schema.Sentinel do
     |> cast(attrs, @valid)
     |> cast_embed(:git)
     |> cast_embed(:checks, with: &check_changeset/2)
+    |> validate_length(:name, max: 255)
     |> validate_required([:name])
   end
 

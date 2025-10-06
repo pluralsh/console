@@ -182,7 +182,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     do: Services.kick(id, user)
 
   def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}) do
-    Map.take(args, ~w(errors components sha revision_id)a)
+    Map.take(args, ~w(errors components sha revision_id metadata)a)
     |> Services.update_components(id, cluster)
   end
 

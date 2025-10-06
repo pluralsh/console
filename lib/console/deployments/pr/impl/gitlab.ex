@@ -124,6 +124,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
+  def merge(_, _), do: :ok
+
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do

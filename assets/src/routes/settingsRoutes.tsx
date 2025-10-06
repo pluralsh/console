@@ -16,10 +16,6 @@ import Users from 'components/settings/usermanagement/users/Users'
 
 import Settings from 'components/settings/Settings'
 
-import EmailSettings from 'components/settings/usermanagement/email/EmailSettings'
-import Roles from 'components/settings/usermanagement/roles/Roles'
-import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
-
 import Observability from 'components/settings/global/observability/Observability'
 
 import ProjectSettings from 'components/settings/projectsettings/ProjectSettings'
@@ -39,6 +35,7 @@ import NotificationRouters from '../components/settings/notifications/routers/No
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider'
 import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
 import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
+import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 import { RequireCdEnabled } from './cdRoutes'
 import {
   ACCESS_TOKENS_REL_PATH,
@@ -52,7 +49,6 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
-import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 
 const userManagementRoutes = (
   <Route
@@ -83,18 +79,6 @@ const userManagementRoutes = (
     <Route
       path="personas"
       element={<Personas />}
-    />
-    <Route
-      path="roles"
-      element={<Roles />}
-    />
-    <Route
-      path="webhooks"
-      element={<Webhooks />}
-    />
-    <Route
-      path="email-settings"
-      element={<EmailSettings />}
     />
   </Route>
 )

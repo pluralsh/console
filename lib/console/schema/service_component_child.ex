@@ -42,6 +42,8 @@ defmodule Console.Schema.ServiceComponentChild do
     |> cast(attrs, @valid)
     |> cast_assoc(:insight)
     |> validate_required(@required)
+    |> validate_length(:name, max: 1_000)
+    |> validate_length(:namespace, max: 255)
     |> foreign_key_constraint(:component_id)
   end
 end

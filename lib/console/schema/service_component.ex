@@ -60,6 +60,8 @@ defmodule Console.Schema.ServiceComponent do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 1_000)
+    |> validate_length(:namespace, max: 255)
     |> cast_assoc(:content)
     |> cast_assoc(:insight)
     |> cast_assoc(:children)

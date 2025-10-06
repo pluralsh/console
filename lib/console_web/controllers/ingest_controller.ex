@@ -39,7 +39,8 @@ defmodule ConsoleWeb.IngestController do
       method: to_method(conn.method),
       url: upstream,
       headers: convert_headers(conn, upstream),
-      body: body
+      body: body,
+      options: [receive_timeout: :timer.seconds(30)]
     }
     |> Req.request_stream()
     |> ReverseProxyPlug.response(conn, opts)

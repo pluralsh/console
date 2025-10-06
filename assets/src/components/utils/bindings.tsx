@@ -7,18 +7,7 @@ import { PolicyBindingFragment } from 'generated/graphql'
 
 type Binding = Pick<PolicyBindingFragment, 'user' | 'group'>
 
-export function splitBindings(bindings: (Binding | null | undefined)[]) {
-  return groupBy(bindings, (binding) => {
-    if (binding?.group) {
-      return 'groupBindings'
-    }
-    if (binding?.user) {
-      return 'userBindings'
-    }
-  }) as { groupBindings?: Binding[]; userBindings?: Binding[] }
-}
-
-export default function RoleFormBindings({
+export function FormBindings({
   attributes,
   setAttributes,
   bindings,
@@ -97,3 +86,23 @@ export default function RoleFormBindings({
     </div>
   )
 }
+
+export const bindingToBindingAttributes = ({
+  id,
+  user,
+  group,
+}: {
+  id?: string | null | undefined
+  user?: { id?: string } | null | undefined
+  group?: { id?: string } | null | undefined
+}) => ({
+  ...(id && { id }),
+  ...(user?.id && { userId: user.id }),
+  ...(group?.id && { groupId: group.id }),
+})
+
+export const splitBindings = (bindings: Nullable<Binding>[]) =>
+  groupBy(bindings, (binding) => {
+    if (binding?.group) return 'groupBindings'
+    if (binding?.user) return 'userBindings'
+  }) as { groupBindings?: Binding[]; userBindings?: Binding[] }

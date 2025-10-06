@@ -118,6 +118,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   def commit_status(_, _, _, _, _), do: :ok
 
+  def merge(_, _), do: :ok
+
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()

@@ -3,7 +3,7 @@ defmodule Console.Users.AccessTokens do
 
   @spec scopes_match?([Scope.t], binary, binary | nil) :: boolean
   def scopes_match?(scopes, api, id) when is_list(scopes) do
-    Enum.all?(scopes, &matches_api?(&1, api) && matches_id?(&1, id))
+    Enum.any?(scopes, &matches_api?(&1, api) && matches_id?(&1, id))
   end
 
   defp matches_api?(%Scope{api: api}, api) when is_binary(api), do: true

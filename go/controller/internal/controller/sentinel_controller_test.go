@@ -20,7 +20,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
 
-var _ = Describe("ServiceContext Controller", Ordered, func() {
+var _ = Describe("Sentinel Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
 			name        = "test"

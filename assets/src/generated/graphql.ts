@@ -3607,11 +3607,13 @@ export type GateJobAttributes = {
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
   labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
+  nodeSelector?: InputMaybe<Scalars['Json']['input']>;
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
   /** request overrides if you don't want to manually configure individual containers */
   resources?: InputMaybe<ContainerResourcesAttributes>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
+  tolerations?: InputMaybe<Array<InputMaybe<PodTolerationAttributes>>>;
 };
 
 /** detailed gate specifications */
@@ -4423,6 +4425,8 @@ export type JobGateSpec = {
   labels?: Maybe<Scalars['Map']['output']>;
   /** the namespace the job will run in */
   namespace: Scalars['String']['output'];
+  /** any pod node selector to apply */
+  nodeSelector?: Maybe<Scalars['Map']['output']>;
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
   /** equivalent to resources, present for backwards compatibility */
@@ -4431,6 +4435,8 @@ export type JobGateSpec = {
   resources?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
+  /** any pod tolerations to apply */
+  tolerations?: Maybe<Array<Maybe<PodToleration>>>;
 };
 
 export type JobReference = {
@@ -6306,6 +6312,21 @@ export type PodStatus = {
   phase?: Maybe<Scalars['String']['output']>;
   podIp?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
+};
+
+export type PodToleration = {
+  __typename?: 'PodToleration';
+  effect?: Maybe<Scalars['String']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  operator?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export type PodTolerationAttributes = {
+  effect?: InputMaybe<Scalars['String']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  operator?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum PolicyAggregate {
@@ -14507,6 +14528,88 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
+export type RefreshTokenFragment = { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null };
+
+export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null };
+
+export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
+
+export type MeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', id: string, groups?: Array<{ __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
+
+export type LoginInfoQueryVariables = Exact<{
+  redirect?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type LoginInfoQuery = { __typename?: 'RootQueryType', loginInfo?: { __typename?: 'LoginInfo', oidcUri?: string | null, external?: boolean | null, oidcName?: string | null } | null };
+
+export type InviteQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type InviteQuery = { __typename?: 'RootQueryType', invite?: { __typename?: 'Invite', email?: string | null } | null };
+
+export type RefreshQueryVariables = Exact<{
+  token: Scalars['String']['input'];
+}>;
+
+
+export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type TemporaryTokenQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TemporaryTokenQuery = { __typename?: 'RootQueryType', temporaryToken?: string | null };
+
+export type SignInMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+}>;
+
+
+export type SignInMutation = { __typename?: 'RootMutationType', signIn?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type OauthCallbackMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+  redirect?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type OauthCallbackMutation = { __typename?: 'RootMutationType', oauthCallback?: { __typename?: 'User', jwt?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'RootMutationType', logout?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type SignUpMutationVariables = Exact<{
+  inviteId: Scalars['String']['input'];
+  attributes: UserAttributes;
+}>;
+
+
+export type SignUpMutation = { __typename?: 'RootMutationType', signup?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type LoginLinkMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type LoginLinkMutation = { __typename?: 'RootMutationType', loginLink?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
 export type LogLineFragment = { __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null };
 
 export type LogAggregationQueryVariables = Exact<{
@@ -15218,23 +15321,6 @@ export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audi
 
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
 
-export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null };
-
-export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
-
-export type MeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', id: string, groups?: Array<{ __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
-
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
-
 export type UsersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -15272,29 +15358,6 @@ export type CreateInviteMutationVariables = Exact<{
 
 
 export type CreateInviteMutation = { __typename?: 'RootMutationType', createInvite?: { __typename?: 'Invite', secureId: string } | null };
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = { __typename?: 'RootMutationType', logout?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
-
-export type RefreshTokenFragment = { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null };
-
-export type RefreshQueryVariables = Exact<{
-  token: Scalars['String']['input'];
-}>;
-
-
-export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
-
-export type OauthCallbackMutationVariables = Exact<{
-  code: Scalars['String']['input'];
-  redirect?: InputMaybe<Scalars['String']['input']>;
-  state?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type OauthCallbackMutation = { __typename?: 'RootMutationType', oauthCallback?: { __typename?: 'User', jwt?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
@@ -18762,6 +18825,33 @@ export const UnstructuredResourceFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${EventFragmentDoc}`;
+export const RefreshTokenFragmentDoc = gql`
+    fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
+}
+    `;
+export const AccountFragmentDoc = gql`
+    fragment Account on Account {
+  grandfatheredUntil
+  delinquentAt
+  availableFeatures {
+    audits
+    userManagement
+    databaseManagement
+  }
+  subscription {
+    id
+    plan {
+      id
+      name
+      period
+    }
+  }
+}
+    `;
 export const MetricPointResponseFragmentDoc = gql`
     fragment MetricPointResponse on MetricPointResponse {
   metric
@@ -19309,33 +19399,6 @@ export const ManifestFragmentDoc = gql`
   }
   cluster
   bucketPrefix
-}
-    `;
-export const AccountFragmentDoc = gql`
-    fragment Account on Account {
-  grandfatheredUntil
-  delinquentAt
-  availableFeatures {
-    audits
-    userManagement
-    databaseManagement
-  }
-  subscription {
-    id
-    plan {
-      id
-      name
-      period
-    }
-  }
-}
-    `;
-export const RefreshTokenFragmentDoc = gql`
-    fragment RefreshToken on RefreshToken {
-  id
-  token
-  insertedAt
-  updatedAt
 }
     `;
 export const VulnerabilityReportTinyFragmentDoc = gql`
@@ -28639,6 +28702,506 @@ export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructu
 export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
 export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
 export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export const SubscriptionDocument = gql`
+    query Subscription {
+  account {
+    ...Account
+  }
+}
+    ${AccountFragmentDoc}`;
+
+/**
+ * __useSubscriptionQuery__
+ *
+ * To run a query within a React component, call `useSubscriptionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSubscriptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscriptionQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscriptionQuery(baseOptions?: Apollo.QueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+      }
+export function useSubscriptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export function useSubscriptionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery>;
+export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
+export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
+export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
+export const MeGroupsDocument = gql`
+    query MeGroups {
+  me {
+    id
+    groups {
+      ...Group
+    }
+  }
+}
+    ${GroupFragmentDoc}`;
+
+/**
+ * __useMeGroupsQuery__
+ *
+ * To run a query within a React component, call `useMeGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeGroupsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeGroupsQuery(baseOptions?: Apollo.QueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+      }
+export function useMeGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export function useMeGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export type MeGroupsQueryHookResult = ReturnType<typeof useMeGroupsQuery>;
+export type MeGroupsLazyQueryHookResult = ReturnType<typeof useMeGroupsLazyQuery>;
+export type MeGroupsSuspenseQueryHookResult = ReturnType<typeof useMeGroupsSuspenseQuery>;
+export type MeGroupsQueryResult = Apollo.QueryResult<MeGroupsQuery, MeGroupsQueryVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...User
+    boundRoles {
+      ...Role
+    }
+    unreadNotifications
+  }
+  clusterInfo {
+    version
+    platform
+    gitCommit
+  }
+  configuration {
+    gitCommit
+    isDemoProject
+    isSandbox
+    pluralLogin
+    byok
+    externalOidc
+    cloud
+    installed
+    consoleVersion
+    sentryEnabled
+    manifest {
+      ...Manifest
+    }
+    gitStatus {
+      cloned
+      output
+    }
+    features {
+      ...AvailableFeatures
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RoleFragmentDoc}
+${ManifestFragmentDoc}
+${AvailableFeaturesFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+      }
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const LoginInfoDocument = gql`
+    query LoginInfo($redirect: String) {
+  loginInfo(redirect: $redirect) {
+    oidcUri
+    external
+    oidcName
+  }
+}
+    `;
+
+/**
+ * __useLoginInfoQuery__
+ *
+ * To run a query within a React component, call `useLoginInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoginInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoginInfoQuery({
+ *   variables: {
+ *      redirect: // value for 'redirect'
+ *   },
+ * });
+ */
+export function useLoginInfoQuery(baseOptions?: Apollo.QueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+      }
+export function useLoginInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+        }
+export function useLoginInfoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+        }
+export type LoginInfoQueryHookResult = ReturnType<typeof useLoginInfoQuery>;
+export type LoginInfoLazyQueryHookResult = ReturnType<typeof useLoginInfoLazyQuery>;
+export type LoginInfoSuspenseQueryHookResult = ReturnType<typeof useLoginInfoSuspenseQuery>;
+export type LoginInfoQueryResult = Apollo.QueryResult<LoginInfoQuery, LoginInfoQueryVariables>;
+export const InviteDocument = gql`
+    query Invite($id: String!) {
+  invite(id: $id) {
+    email
+  }
+}
+    `;
+
+/**
+ * __useInviteQuery__
+ *
+ * To run a query within a React component, call `useInviteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInviteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInviteQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useInviteQuery(baseOptions: Apollo.QueryHookOptions<InviteQuery, InviteQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+      }
+export function useInviteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InviteQuery, InviteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+        }
+export function useInviteSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InviteQuery, InviteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+        }
+export type InviteQueryHookResult = ReturnType<typeof useInviteQuery>;
+export type InviteLazyQueryHookResult = ReturnType<typeof useInviteLazyQuery>;
+export type InviteSuspenseQueryHookResult = ReturnType<typeof useInviteSuspenseQuery>;
+export type InviteQueryResult = Apollo.QueryResult<InviteQuery, InviteQueryVariables>;
+export const RefreshDocument = gql`
+    query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useRefreshQuery__
+ *
+ * To run a query within a React component, call `useRefreshQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRefreshQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRefreshQuery({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useRefreshQuery(baseOptions: Apollo.QueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+      }
+export function useRefreshLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export function useRefreshSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
+export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
+export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
+export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
+export const TemporaryTokenDocument = gql`
+    query TemporaryToken {
+  temporaryToken
+}
+    `;
+
+/**
+ * __useTemporaryTokenQuery__
+ *
+ * To run a query within a React component, call `useTemporaryTokenQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTemporaryTokenQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTemporaryTokenQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useTemporaryTokenQuery(baseOptions?: Apollo.QueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+      }
+export function useTemporaryTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+        }
+export function useTemporaryTokenSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+        }
+export type TemporaryTokenQueryHookResult = ReturnType<typeof useTemporaryTokenQuery>;
+export type TemporaryTokenLazyQueryHookResult = ReturnType<typeof useTemporaryTokenLazyQuery>;
+export type TemporaryTokenSuspenseQueryHookResult = ReturnType<typeof useTemporaryTokenSuspenseQuery>;
+export type TemporaryTokenQueryResult = Apollo.QueryResult<TemporaryTokenQuery, TemporaryTokenQueryVariables>;
+export const SignInDocument = gql`
+    mutation signIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type SignInMutationFn = Apollo.MutationFunction<SignInMutation, SignInMutationVariables>;
+
+/**
+ * __useSignInMutation__
+ *
+ * To run a mutation, you first call `useSignInMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignInMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signInMutation, { data, loading, error }] = useSignInMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *      password: // value for 'password'
+ *   },
+ * });
+ */
+export function useSignInMutation(baseOptions?: Apollo.MutationHookOptions<SignInMutation, SignInMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument, options);
+      }
+export type SignInMutationHookResult = ReturnType<typeof useSignInMutation>;
+export type SignInMutationResult = Apollo.MutationResult<SignInMutation>;
+export type SignInMutationOptions = Apollo.BaseMutationOptions<SignInMutation, SignInMutationVariables>;
+export const OauthCallbackDocument = gql`
+    mutation OauthCallback($code: String!, $redirect: String, $state: String) {
+  oauthCallback(code: $code, redirect: $redirect, state: $state) {
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${RefreshTokenFragmentDoc}`;
+export type OauthCallbackMutationFn = Apollo.MutationFunction<OauthCallbackMutation, OauthCallbackMutationVariables>;
+
+/**
+ * __useOauthCallbackMutation__
+ *
+ * To run a mutation, you first call `useOauthCallbackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOauthCallbackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [oauthCallbackMutation, { data, loading, error }] = useOauthCallbackMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *      redirect: // value for 'redirect'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useOauthCallbackMutation(baseOptions?: Apollo.MutationHookOptions<OauthCallbackMutation, OauthCallbackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OauthCallbackMutation, OauthCallbackMutationVariables>(OauthCallbackDocument, options);
+      }
+export type OauthCallbackMutationHookResult = ReturnType<typeof useOauthCallbackMutation>;
+export type OauthCallbackMutationResult = Apollo.MutationResult<OauthCallbackMutation>;
+export type OauthCallbackMutationOptions = Apollo.BaseMutationOptions<OauthCallbackMutation, OauthCallbackMutationVariables>;
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+
+/**
+ * __useLogoutMutation__
+ *
+ * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLogoutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
+      }
+export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
+export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const SignUpDocument = gql`
+    mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
+  signup(inviteId: $inviteId, attributes: $attributes) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMutationVariables>;
+
+/**
+ * __useSignUpMutation__
+ *
+ * To run a mutation, you first call `useSignUpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignUpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signUpMutation, { data, loading, error }] = useSignUpMutation({
+ *   variables: {
+ *      inviteId: // value for 'inviteId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignUpMutation, SignUpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
+      }
+export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
+export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
+export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
+export const LoginLinkDocument = gql`
+    mutation LoginLink($key: String!) {
+  loginLink(key: $key) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type LoginLinkMutationFn = Apollo.MutationFunction<LoginLinkMutation, LoginLinkMutationVariables>;
+
+/**
+ * __useLoginLinkMutation__
+ *
+ * To run a mutation, you first call `useLoginLinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginLinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginLinkMutation, { data, loading, error }] = useLoginLinkMutation({
+ *   variables: {
+ *      key: // value for 'key'
+ *   },
+ * });
+ */
+export function useLoginLinkMutation(baseOptions?: Apollo.MutationHookOptions<LoginLinkMutation, LoginLinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginLinkMutation, LoginLinkMutationVariables>(LoginLinkDocument, options);
+      }
+export type LoginLinkMutationHookResult = ReturnType<typeof useLoginLinkMutation>;
+export type LoginLinkMutationResult = Apollo.MutationResult<LoginLinkMutation>;
+export type LoginLinkMutationOptions = Apollo.BaseMutationOptions<LoginLinkMutation, LoginLinkMutationVariables>;
 export const LogAggregationDocument = gql`
     query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {
   logAggregation(
@@ -31766,160 +32329,6 @@ export function useConsumeSecretMutation(baseOptions?: Apollo.MutationHookOption
 export type ConsumeSecretMutationHookResult = ReturnType<typeof useConsumeSecretMutation>;
 export type ConsumeSecretMutationResult = Apollo.MutationResult<ConsumeSecretMutation>;
 export type ConsumeSecretMutationOptions = Apollo.BaseMutationOptions<ConsumeSecretMutation, ConsumeSecretMutationVariables>;
-export const SubscriptionDocument = gql`
-    query Subscription {
-  account {
-    ...Account
-  }
-}
-    ${AccountFragmentDoc}`;
-
-/**
- * __useSubscriptionQuery__
- *
- * To run a query within a React component, call `useSubscriptionQuery` and pass it any options that fit your needs.
- * When your component renders, `useSubscriptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSubscriptionQuery({
- *   variables: {
- *   },
- * });
- */
-export function useSubscriptionQuery(baseOptions?: Apollo.QueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-      }
-export function useSubscriptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-        }
-export function useSubscriptionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-        }
-export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery>;
-export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
-export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
-export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
-export const MeGroupsDocument = gql`
-    query MeGroups {
-  me {
-    id
-    groups {
-      ...Group
-    }
-  }
-}
-    ${GroupFragmentDoc}`;
-
-/**
- * __useMeGroupsQuery__
- *
- * To run a query within a React component, call `useMeGroupsQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeGroupsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeGroupsQuery(baseOptions?: Apollo.QueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
-      }
-export function useMeGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
-        }
-export function useMeGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
-        }
-export type MeGroupsQueryHookResult = ReturnType<typeof useMeGroupsQuery>;
-export type MeGroupsLazyQueryHookResult = ReturnType<typeof useMeGroupsLazyQuery>;
-export type MeGroupsSuspenseQueryHookResult = ReturnType<typeof useMeGroupsSuspenseQuery>;
-export type MeGroupsQueryResult = Apollo.QueryResult<MeGroupsQuery, MeGroupsQueryVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    ...User
-    boundRoles {
-      ...Role
-    }
-    unreadNotifications
-  }
-  clusterInfo {
-    version
-    platform
-    gitCommit
-  }
-  configuration {
-    gitCommit
-    isDemoProject
-    isSandbox
-    pluralLogin
-    byok
-    externalOidc
-    cloud
-    installed
-    consoleVersion
-    sentryEnabled
-    manifest {
-      ...Manifest
-    }
-    gitStatus {
-      cloned
-      output
-    }
-    features {
-      ...AvailableFeatures
-    }
-  }
-}
-    ${UserFragmentDoc}
-${RoleFragmentDoc}
-${ManifestFragmentDoc}
-${AvailableFeaturesFragmentDoc}`;
-
-/**
- * __useMeQuery__
- *
- * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
-export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
-export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
-export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
-export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const UsersDocument = gql`
     query Users($q: String, $after: String) {
   users(q: $q, first: 20, after: $after) {
@@ -32118,117 +32527,6 @@ export function useCreateInviteMutation(baseOptions?: Apollo.MutationHookOptions
 export type CreateInviteMutationHookResult = ReturnType<typeof useCreateInviteMutation>;
 export type CreateInviteMutationResult = Apollo.MutationResult<CreateInviteMutation>;
 export type CreateInviteMutationOptions = Apollo.BaseMutationOptions<CreateInviteMutation, CreateInviteMutationVariables>;
-export const LogoutDocument = gql`
-    mutation Logout {
-  logout {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
-
-/**
- * __useLogoutMutation__
- *
- * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLogoutMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
- *   variables: {
- *   },
- * });
- */
-export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
-      }
-export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
-export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
-export const RefreshDocument = gql`
-    query Refresh($token: String!) {
-  refresh(token: $token) {
-    ...User
-    jwt
-  }
-}
-    ${UserFragmentDoc}`;
-
-/**
- * __useRefreshQuery__
- *
- * To run a query within a React component, call `useRefreshQuery` and pass it any options that fit your needs.
- * When your component renders, `useRefreshQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRefreshQuery({
- *   variables: {
- *      token: // value for 'token'
- *   },
- * });
- */
-export function useRefreshQuery(baseOptions: Apollo.QueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-      }
-export function useRefreshLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-        }
-export function useRefreshSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-        }
-export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
-export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
-export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
-export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
-export const OauthCallbackDocument = gql`
-    mutation OauthCallback($code: String!, $redirect: String, $state: String) {
-  oauthCallback(code: $code, redirect: $redirect, state: $state) {
-    jwt
-    refreshToken {
-      ...RefreshToken
-    }
-  }
-}
-    ${RefreshTokenFragmentDoc}`;
-export type OauthCallbackMutationFn = Apollo.MutationFunction<OauthCallbackMutation, OauthCallbackMutationVariables>;
-
-/**
- * __useOauthCallbackMutation__
- *
- * To run a mutation, you first call `useOauthCallbackMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useOauthCallbackMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [oauthCallbackMutation, { data, loading, error }] = useOauthCallbackMutation({
- *   variables: {
- *      code: // value for 'code'
- *      redirect: // value for 'redirect'
- *      state: // value for 'state'
- *   },
- * });
- */
-export function useOauthCallbackMutation(baseOptions?: Apollo.MutationHookOptions<OauthCallbackMutation, OauthCallbackMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<OauthCallbackMutation, OauthCallbackMutationVariables>(OauthCallbackDocument, options);
-      }
-export type OauthCallbackMutationHookResult = ReturnType<typeof useOauthCallbackMutation>;
-export type OauthCallbackMutationResult = Apollo.MutationResult<OauthCallbackMutation>;
-export type OauthCallbackMutationOptions = Apollo.BaseMutationOptions<OauthCallbackMutation, OauthCallbackMutationVariables>;
 export const VulnerabilityReportsDocument = gql`
     query VulnerabilityReports($clusters: [ID], $namespaces: [String], $q: String, $grade: VulnReportGrade, $first: Int, $after: String) {
   vulnerabilityReports(
@@ -32536,6 +32834,13 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    Subscription: 'Subscription',
+    MeGroups: 'MeGroups',
+    Me: 'Me',
+    LoginInfo: 'LoginInfo',
+    Invite: 'Invite',
+    Refresh: 'Refresh',
+    TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
@@ -32574,12 +32879,8 @@ export const namedOperations = {
     CustomStackRuns: 'CustomStackRuns',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
-    Subscription: 'Subscription',
-    MeGroups: 'MeGroups',
-    Me: 'Me',
     Users: 'Users',
     SearchUsers: 'SearchUsers',
-    Refresh: 'Refresh',
     VulnerabilityReports: 'VulnerabilityReports',
     VulnerabilityReport: 'VulnerabilityReport',
     VulnerabilityStatistics: 'VulnerabilityStatistics',
@@ -32675,6 +32976,11 @@ export const namedOperations = {
     UnpinCustomResource: 'UnpinCustomResource',
     DeleteJob: 'DeleteJob',
     DeletePod: 'DeletePod',
+    signIn: 'signIn',
+    OauthCallback: 'OauthCallback',
+    Logout: 'Logout',
+    SignUp: 'SignUp',
+    LoginLink: 'LoginLink',
     UpsertNotificationRouter: 'UpsertNotificationRouter',
     DeleteNotificationRouter: 'DeleteNotificationRouter',
     UpsertNotificationSink: 'UpsertNotificationSink',
@@ -32714,9 +33020,7 @@ export const namedOperations = {
     ConsumeSecret: 'ConsumeSecret',
     UpdateUser: 'UpdateUser',
     DeleteUser: 'DeleteUser',
-    CreateInvite: 'CreateInvite',
-    Logout: 'Logout',
-    OauthCallback: 'OauthCallback'
+    CreateInvite: 'CreateInvite'
   },
   Subscription: {
     AIChatStream: 'AIChatStream',
@@ -32907,6 +33211,8 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    RefreshToken: 'RefreshToken',
+    Account: 'Account',
     LogLine: 'LogLine',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
@@ -32952,8 +33258,6 @@ export const namedOperations = {
     Role: 'Role',
     AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest',
-    Account: 'Account',
-    RefreshToken: 'RefreshToken',
     VulnerabilityReportTiny: 'VulnerabilityReportTiny',
     VulnerabilityReport: 'VulnerabilityReport',
     Vulnerability: 'Vulnerability',

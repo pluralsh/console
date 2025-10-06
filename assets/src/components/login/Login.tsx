@@ -1,13 +1,13 @@
-import {
-  ApolloError,
-  useApolloClient,
-  useMutation,
-  useQuery,
-} from '@apollo/client'
+import { ApolloError, useApolloClient } from '@apollo/client'
 import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { AcceptLoginDocument, useMeQuery, User } from 'generated/graphql'
-import gql from 'graphql-tag'
+import {
+  AcceptLoginDocument,
+  useLoginInfoQuery,
+  useMeQuery,
+  User,
+  useSignInMutation,
+} from 'generated/graphql'
 import queryString from 'query-string'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -24,7 +24,6 @@ import {
 } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { LoginContextProvider } from '../contexts'
-import { ME_Q, SIGNIN } from '../graphql/users'
 
 import { GqlError } from '../utils/Alert'
 import { LabelledInput } from '../utils/LabelledInput'
@@ -37,15 +36,6 @@ import { LoginPortal } from './LoginPortal'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
-const LOGIN_INFO = gql`
-  query LoginInfo($redirect: String) {
-    loginInfo(redirect: $redirect) {
-      oidcUri
-      external
-      oidcName
-    }
-  }
-`
 
 const setInputFocus = (ref: RefObject<any>) => {
   requestAnimationFrame(() => {
@@ -178,15 +168,16 @@ export default function Login() {
     }
   }, [jwt, challenge, client])
 
-  const { data } = useQuery(ME_Q)
-  const { data: loginData, loading } = useQuery(LOGIN_INFO, {
+  const { data } = useMeQuery()
+  const { data: loginData, loading } = useLoginInfoQuery({
     variables: { redirect: localized('/oauth/callback') },
   })
 
   const [loginMutation, { loading: loginMLoading, error: loginMError }] =
-    useMutation(SIGNIN, {
+    useSignInMutation({
       variables: form,
-      onCompleted: ({ signIn: { jwt, refreshToken } }) => {
+      onCompleted: ({ signIn }) => {
+        const { jwt, refreshToken } = signIn || {}
         setToken(jwt)
         setRefreshToken(refreshToken?.token)
         navigate(getLoginReturnPath())
