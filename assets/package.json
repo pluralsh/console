@@ -34,7 +34,6 @@
   "dependencies": {
     "@absinthe/socket": "0.2.1",
     "@apollo/client": "3.14.0",
-    "@apollo/persisted-query-lists": "1.0.0",
     "@dagrejs/dagre": "1.0.4",
     "@docsearch/js": "3.5.2",
     "@docsearch/react": "3.5.2",

@@ -15,9 +15,8 @@ import { useTheme } from 'styled-components'
 
 import { Body2P } from 'components/utils/typography/Text'
 
-import { splitBindings } from '../roles/RoleFormBindings'
-
 import { PersonaAttributes } from './PersonaAttributesEdit'
+import { splitBindings } from 'components/utils/bindings'
 
 const tabs = [
   {

@@ -14996,40 +14996,6 @@ export type UpdateRbacMutationVariables = Exact<{
 
 export type UpdateRbacMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
 
-export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
-
-export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null };
-
-export type RolesQueryVariables = Exact<{
-  q?: InputMaybe<Scalars['String']['input']>;
-  cursor?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type RolesQuery = { __typename?: 'RootQueryType', roles?: { __typename?: 'RoleConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'RoleEdge', node?: { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null> | null } | null };
-
-export type CreateRoleMutationVariables = Exact<{
-  attributes: RoleAttributes;
-}>;
-
-
-export type CreateRoleMutation = { __typename?: 'RootMutationType', createRole?: { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
-
-export type UpdateRoleMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  attributes: RoleAttributes;
-}>;
-
-
-export type UpdateRoleMutation = { __typename?: 'RootMutationType', updateRole?: { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
-
-export type DeleteRoleMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeleteRoleMutation = { __typename?: 'RootMutationType', deleteRole?: { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
-
 export type ServiceAccountsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15346,6 +15312,10 @@ export type UserFragment = { __typename?: 'User', id: string, pluralId?: string 
 export type UserTinyFragment = { __typename?: 'User', name: string, email: string, profile?: string | null };
 
 export type InviteFragment = { __typename?: 'Invite', secureId: string };
+
+export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null };
 
 export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null };
 
@@ -19046,30 +19016,6 @@ export const ProjectBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
-export const RoleBindingFragmentDoc = gql`
-    fragment RoleBinding on RoleBinding {
-  id
-  user {
-    ...User
-  }
-  group {
-    ...Group
-  }
-}
-    ${UserFragmentDoc}
-${GroupFragmentDoc}`;
-export const RoleFragmentDoc = gql`
-    fragment Role on Role {
-  id
-  name
-  description
-  repositories
-  permissions
-  roleBindings {
-    ...RoleBinding
-  }
-}
-    ${RoleBindingFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
     fragment StackRun on StackRun {
   id
@@ -19413,6 +19359,30 @@ export const InviteFragmentDoc = gql`
   secureId
 }
     `;
+export const RoleBindingFragmentDoc = gql`
+    fragment RoleBinding on RoleBinding {
+  id
+  user {
+    ...User
+  }
+  group {
+    ...Group
+  }
+}
+    ${UserFragmentDoc}
+${GroupFragmentDoc}`;
+export const RoleFragmentDoc = gql`
+    fragment Role on Role {
+  id
+  name
+  description
+  repositories
+  permissions
+  roleBindings {
+    ...RoleBinding
+  }
+}
+    ${RoleBindingFragmentDoc}`;
 export const AvailableFeaturesFragmentDoc = gql`
     fragment AvailableFeatures on AvailableFeatures {
   audits
@@ -30951,155 +30921,6 @@ export function useUpdateRbacMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdateRbacMutationHookResult = ReturnType<typeof useUpdateRbacMutation>;
 export type UpdateRbacMutationResult = Apollo.MutationResult<UpdateRbacMutation>;
 export type UpdateRbacMutationOptions = Apollo.BaseMutationOptions<UpdateRbacMutation, UpdateRbacMutationVariables>;
-export const RolesDocument = gql`
-    query Roles($q: String, $cursor: String) {
-  roles(q: $q, first: 20, after: $cursor) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...Role
-      }
-    }
-  }
-}
-    ${PageInfoFragmentDoc}
-${RoleFragmentDoc}`;
-
-/**
- * __useRolesQuery__
- *
- * To run a query within a React component, call `useRolesQuery` and pass it any options that fit your needs.
- * When your component renders, `useRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRolesQuery({
- *   variables: {
- *      q: // value for 'q'
- *      cursor: // value for 'cursor'
- *   },
- * });
- */
-export function useRolesQuery(baseOptions?: Apollo.QueryHookOptions<RolesQuery, RolesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-      }
-export function useRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RolesQuery, RolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-        }
-export function useRolesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RolesQuery, RolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-        }
-export type RolesQueryHookResult = ReturnType<typeof useRolesQuery>;
-export type RolesLazyQueryHookResult = ReturnType<typeof useRolesLazyQuery>;
-export type RolesSuspenseQueryHookResult = ReturnType<typeof useRolesSuspenseQuery>;
-export type RolesQueryResult = Apollo.QueryResult<RolesQuery, RolesQueryVariables>;
-export const CreateRoleDocument = gql`
-    mutation CreateRole($attributes: RoleAttributes!) {
-  createRole(attributes: $attributes) {
-    ...Role
-  }
-}
-    ${RoleFragmentDoc}`;
-export type CreateRoleMutationFn = Apollo.MutationFunction<CreateRoleMutation, CreateRoleMutationVariables>;
-
-/**
- * __useCreateRoleMutation__
- *
- * To run a mutation, you first call `useCreateRoleMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateRoleMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createRoleMutation, { data, loading, error }] = useCreateRoleMutation({
- *   variables: {
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useCreateRoleMutation(baseOptions?: Apollo.MutationHookOptions<CreateRoleMutation, CreateRoleMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateRoleMutation, CreateRoleMutationVariables>(CreateRoleDocument, options);
-      }
-export type CreateRoleMutationHookResult = ReturnType<typeof useCreateRoleMutation>;
-export type CreateRoleMutationResult = Apollo.MutationResult<CreateRoleMutation>;
-export type CreateRoleMutationOptions = Apollo.BaseMutationOptions<CreateRoleMutation, CreateRoleMutationVariables>;
-export const UpdateRoleDocument = gql`
-    mutation UpdateRole($id: ID!, $attributes: RoleAttributes!) {
-  updateRole(id: $id, attributes: $attributes) {
-    ...Role
-  }
-}
-    ${RoleFragmentDoc}`;
-export type UpdateRoleMutationFn = Apollo.MutationFunction<UpdateRoleMutation, UpdateRoleMutationVariables>;
-
-/**
- * __useUpdateRoleMutation__
- *
- * To run a mutation, you first call `useUpdateRoleMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateRoleMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateRoleMutation, { data, loading, error }] = useUpdateRoleMutation({
- *   variables: {
- *      id: // value for 'id'
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useUpdateRoleMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRoleMutation, UpdateRoleMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateRoleMutation, UpdateRoleMutationVariables>(UpdateRoleDocument, options);
-      }
-export type UpdateRoleMutationHookResult = ReturnType<typeof useUpdateRoleMutation>;
-export type UpdateRoleMutationResult = Apollo.MutationResult<UpdateRoleMutation>;
-export type UpdateRoleMutationOptions = Apollo.BaseMutationOptions<UpdateRoleMutation, UpdateRoleMutationVariables>;
-export const DeleteRoleDocument = gql`
-    mutation DeleteRole($id: ID!) {
-  deleteRole(id: $id) {
-    ...Role
-  }
-}
-    ${RoleFragmentDoc}`;
-export type DeleteRoleMutationFn = Apollo.MutationFunction<DeleteRoleMutation, DeleteRoleMutationVariables>;
-
-/**
- * __useDeleteRoleMutation__
- *
- * To run a mutation, you first call `useDeleteRoleMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteRoleMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteRoleMutation, { data, loading, error }] = useDeleteRoleMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeleteRoleMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRoleMutation, DeleteRoleMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteRoleMutation, DeleteRoleMutationVariables>(DeleteRoleDocument, options);
-      }
-export type DeleteRoleMutationHookResult = ReturnType<typeof useDeleteRoleMutation>;
-export type DeleteRoleMutationResult = Apollo.MutationResult<DeleteRoleMutation>;
-export type DeleteRoleMutationOptions = Apollo.BaseMutationOptions<DeleteRoleMutation, DeleteRoleMutationVariables>;
 export const ServiceAccountsDocument = gql`
     query ServiceAccounts($q: String, $first: Int = 100, $after: String) {
   serviceAccounts(q: $q, first: $first, after: $after) {
@@ -33042,7 +32863,6 @@ export const namedOperations = {
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
     ProjectBindings: 'ProjectBindings',
-    Roles: 'Roles',
     ServiceAccounts: 'ServiceAccounts',
     StackPrs: 'StackPrs',
     Stacks: 'Stacks',
@@ -33180,9 +33000,6 @@ export const namedOperations = {
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
     UpdateRbac: 'UpdateRbac',
-    CreateRole: 'CreateRole',
-    UpdateRole: 'UpdateRole',
-    DeleteRole: 'DeleteRole',
     CreateServiceAccount: 'CreateServiceAccount',
     UpdateServiceAccount: 'UpdateServiceAccount',
     CreateStack: 'CreateStack',
@@ -33415,8 +33232,6 @@ export const namedOperations = {
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',
-    RoleBinding: 'RoleBinding',
-    Role: 'Role',
     StackPolicyViolation: 'StackPolicyViolation',
     StackMinimal: 'StackMinimal',
     StackTiny: 'StackTiny',
@@ -33439,6 +33254,8 @@ export const namedOperations = {
     User: 'User',
     UserTiny: 'UserTiny',
     Invite: 'Invite',
+    RoleBinding: 'RoleBinding',
+    Role: 'Role',
     AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest',
     VulnerabilityReportTiny: 'VulnerabilityReportTiny',

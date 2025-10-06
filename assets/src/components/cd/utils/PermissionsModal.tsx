@@ -14,11 +14,13 @@ import upperFirst from 'lodash/upperFirst'
 import { PolicyBindingFragment, useUpdateRbacMutation } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import RoleFormBindings from 'components/settings/usermanagement/roles/RoleFormBindings'
-import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
 import { GqlError } from 'components/utils/Alert'
 
 import { StepBody } from '../ModalAlt'
+import {
+  bindingToBindingAttributes,
+  FormBindings,
+} from 'components/utils/bindings'
 
 export const Overline = styled.h3(({ theme }) => ({
   ...theme.partials.text.overline,
@@ -44,7 +46,7 @@ export function Permissions({
   return (
     <PermissionsColumnSC>
       <Overline>{upperFirst(permissionType)} permissions</Overline>
-      <RoleFormBindings
+      <FormBindings
         bindings={bindings}
         setBindings={setBindings}
         hints={{

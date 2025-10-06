@@ -12,12 +12,15 @@ import {
   ComplianceReportGeneratorFragment,
   useUpsertComplianceReportGeneratorMutation,
 } from '../../../generated/graphql.ts'
-import RoleFormBindings from '../../settings/usermanagement/roles/RoleFormBindings.tsx'
+
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 import { isNonNullable } from '../../../utils/isNonNullable.ts'
-import { bindingToBindingAttributes } from '../../settings/usermanagement/roles/misc.ts'
 import { GqlError } from '../../utils/Alert.tsx'
+import {
+  bindingToBindingAttributes,
+  FormBindings,
+} from 'components/utils/bindings.tsx'
 
 export function PermissionsModal({
   generator,
@@ -100,7 +103,7 @@ export function PermissionsModal({
         gap={'medium'}
         direction={'column'}
       >
-        <RoleFormBindings
+        <FormBindings
           bindings={uniqueBindings}
           setBindings={setBindings}
         />

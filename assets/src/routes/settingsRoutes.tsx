@@ -16,8 +16,6 @@ import Users from 'components/settings/usermanagement/users/Users'
 
 import Settings from 'components/settings/Settings'
 
-import Roles from 'components/settings/usermanagement/roles/Roles'
-
 import Observability from 'components/settings/global/observability/Observability'
 
 import ProjectSettings from 'components/settings/projectsettings/ProjectSettings'
@@ -81,10 +79,6 @@ const userManagementRoutes = (
     <Route
       path="personas"
       element={<Personas />}
-    />
-    <Route
-      path="roles"
-      element={<Roles />}
     />
   </Route>
 )
