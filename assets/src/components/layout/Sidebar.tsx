@@ -55,6 +55,7 @@ import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { SELF_SERVICE_ABS_PATH } from 'routes/selfServiceRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
 
 const SIDEBAR_WIDTH = 64
 const SIDEBAR_EXPANDED_WIDTH = 180
@@ -262,6 +263,7 @@ export function Sidebar() {
           </SidebarItem>
         ))}
         <Flex flex={1} />
+        <HelpLauncher />
         <SidebarItem
           tooltip="Expand"
           expandedLabel="Collapse"

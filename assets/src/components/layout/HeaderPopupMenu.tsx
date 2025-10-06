@@ -4,13 +4,15 @@ import { animated, useTransition } from '@react-spring/web'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import styled from 'styled-components'
 
-export function HeaderPopupMenu({
+export function SimplePopupMenu({
   isOpen,
   setIsOpen,
+  type = 'header',
   children,
 }: {
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
+  type?: 'header' | 'sidebar'
   children: ReactNode
 }) {
   useKeyDown(['Escape'], () => setIsOpen(false))
@@ -24,6 +26,7 @@ export function HeaderPopupMenu({
 
   return transitions((styles) => (
     <AnimatedWrapperSC
+      $type={type}
       // allows us to put the outside click handler on the launch button instead of the menu
       onClick={(e) => e.stopPropagation()}
       style={styles}
@@ -49,13 +52,15 @@ const MenuCardSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
-  position: 'absolute',
-  top: 40,
-  right: 0,
-  zIndex: theme.zIndexes.modal,
-  minWidth: 175,
-  display: 'flex',
-  flexDirection: 'column',
-  transformOrigin: 'top right',
-}))
+const AnimatedWrapperSC = styled(animated.div)<{ $type: 'header' | 'sidebar' }>(
+  ({ theme, $type }) => ({
+    position: 'absolute',
+    zIndex: theme.zIndexes.modal,
+    minWidth: 175,
+    display: 'flex',
+    flexDirection: 'column',
+    ...($type === 'header'
+      ? { top: 40, right: 0, transformOrigin: 'top right' }
+      : { bottom: 0, left: 40, transformOrigin: 'bottom left' }),
+  })
+)

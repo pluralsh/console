@@ -1,4 +1,4 @@
-import { Button, Flex, SearchIcon } from '@pluralsh/design-system'
+import { Chip } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
 import { usePlatform } from 'components/hooks/usePlatform'
 
@@ -23,23 +23,13 @@ export function CommandPaletteLauncher() {
 
   return (
     <>
-      <InputButtonSC
-        small
-        secondary
+      <CmdKChipSC
+        clickable
         onClick={() => setCmdkOpen(true, CommandPaletteTab.Commands)}
       >
-        <Flex
-          gap="xsmall"
-          flex={1}
-        >
-          <SearchIcon />
-          <span>Search</span>
-        </Flex>
-        <CmdKChipSC>
-          {modKeyString}
-          {keyCombinerString}K
-        </CmdKChipSC>
-      </InputButtonSC>
+        {modKeyString}
+        {keyCombinerString}K
+      </CmdKChipSC>
       <CommandPaletteDialog />
       {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
@@ -54,21 +44,10 @@ export function CommandPaletteLauncher() {
   )
 }
 
-const CmdKChipSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  borderRadius: theme.borderRadiuses.medium,
-  border: theme.borders['fill-three'],
-  background: theme.colors['fill-zero'],
-  padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
-}))
+const CmdKChipSC = styled(Chip)(({ theme }) => ({
+  transition: 'background 0.16s ease-in-out',
 
-const InputButtonSC = styled(Button)(({ theme }) => ({
-  ...theme.partials.text.caption,
-  width: 160,
-  height: 20,
-  paddingLeft: theme.spacing.small,
-  paddingRight: theme.spacing.xsmall,
-  justifyContent: 'flex-start',
-  gap: theme.spacing.small,
-  '& > *': { width: '100%' },
+  background: theme.colors['fill-accent'],
+  '&& *': { color: theme.colors['text-xlight'] },
+  '&:hover': { background: theme.colors['fill-zero'] },
 }))

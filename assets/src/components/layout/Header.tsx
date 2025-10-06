@@ -6,8 +6,7 @@ import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessag
 
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
-import { CommandPaletteLauncher } from 'components/commandpalette/CommandPaletteLauncher'
-import { HelpLauncher } from 'components/help/HelpLauncher'
+import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './HeaderProjectSelect'
 import { ProfileMenu } from './ProfileMenu'
@@ -23,7 +22,7 @@ const HeaderSC = styled.div(({ theme }) => ({
 const HeaderContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.small,
   padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
 }))
 
@@ -52,8 +51,7 @@ export default function Header() {
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <NotificationsLauncher />
-        <HelpLauncher />
-        <CommandPaletteLauncher />
+        <ChatbotLauncher />
         <ProfileMenu />
       </HeaderContentSC>
     </HeaderSC>

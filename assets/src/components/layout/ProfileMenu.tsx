@@ -13,7 +13,7 @@ import {
 import { BillingSubscriptionChip } from 'components/billing/BillingSubscriptionChip'
 import { useLogin } from 'components/contexts'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
-import { HeaderPopupMenu } from 'components/layout/HeaderPopupMenu'
+import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { OverlineH1 } from 'components/utils/typography/Text'
 import { useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -52,7 +52,7 @@ export function ProfileMenu() {
           size={32}
         />
       </Button>
-      <HeaderPopupMenu
+      <SimplePopupMenu
         isOpen={isMenuOpen}
         setIsOpen={setIsMenuOpen}
       >
@@ -116,7 +116,7 @@ export function ProfileMenu() {
         >
           Logout
         </Button>
-      </HeaderPopupMenu>
+      </SimplePopupMenu>
     </div>
   )
 }

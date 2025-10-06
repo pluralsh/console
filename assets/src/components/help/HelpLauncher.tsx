@@ -2,10 +2,10 @@ import { use, useRef, useState } from 'react'
 
 import {
   Button,
+  CaretRightIcon,
   Divider,
   DocumentIcon,
   GitHubLogoIcon,
-  HelpIcon,
   IconFrame,
   LinkoutIcon,
   SearchDocsIcon,
@@ -15,7 +15,7 @@ import CommandPaletteShortcuts from 'components/commandpalette/CommandPaletteSho
 import { DocSearch } from './DocSearch'
 
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
-import { HeaderPopupMenu } from 'components/layout/HeaderPopupMenu'
+import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -32,16 +32,21 @@ export function HelpLauncher() {
         <IconFrame
           clickable
           ref={menuBtnRef}
-          icon={<HelpIcon />}
-          onClick={() => setIsMenuOpen((open) => !open)}
-          tooltip="Open help menu"
+          type="secondary"
+          icon={isMenuOpen ? <CaretRightIcon /> : <span>?</span>}
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsMenuOpen((open) => !open)
+          }}
+          tooltip={isMenuOpen ? undefined : 'Open help menu'}
           aria-haspopup="menu"
           aria-expanded={isMenuOpen}
           aria-label="Open help menu"
         />
-        <HeaderPopupMenu
+        <SimplePopupMenu
           isOpen={isMenuOpen}
           setIsOpen={setIsMenuOpen}
+          type="sidebar"
         >
           <Button
             small
@@ -93,7 +98,7 @@ export function HelpLauncher() {
             <GitHubLogoIcon />
             GitHub
           </Button>
-        </HeaderPopupMenu>
+        </SimplePopupMenu>
       </div>
       <DocSearch
         isOpen={docsSearchOpen}
