@@ -178,6 +178,14 @@ type JobSpec struct {
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 
+	// NodeSelector to apply to the job for scheduling.
+	// +kubebuilder:validation:Optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// Tolerations to apply to the job for scheduling.
+	// +kubebuilder:validation:Optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
 	// ServiceAccount to use for the job execution.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string

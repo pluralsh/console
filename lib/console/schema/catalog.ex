@@ -60,6 +60,7 @@ defmodule Console.Schema.Catalog do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name icon dark_icon author description category project_id)a)
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:tags)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
