@@ -80,7 +80,7 @@ type ConsoleClient interface {
 	CloneServiceDeployment(ctx context.Context, clusterID string, id string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeployment, error)
 	CloneServiceDeploymentWithHandle(ctx context.Context, clusterID string, cluster string, name string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeploymentWithHandle, error)
 	RollbackService(ctx context.Context, id string, revisionID string, interceptors ...clientv2.RequestInterceptor) (*RollbackService, error)
-	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
+	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, metadata *ServiceMetadataAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
 	AddServiceError(ctx context.Context, id string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*AddServiceError, error)
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
@@ -2190,6 +2190,7 @@ type ServiceDeploymentFragment struct {
 	Configuration []*ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Flow          *ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
 	SyncConfig    *ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
+	Metadata      *ServiceDeploymentFragment_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
 }
 
 func (t *ServiceDeploymentFragment) GetID() string {
@@ -2306,6 +2307,12 @@ func (t *ServiceDeploymentFragment) GetSyncConfig() *ServiceDeploymentFragment_S
 	}
 	return t.SyncConfig
 }
+func (t *ServiceDeploymentFragment) GetMetadata() *ServiceDeploymentFragment_Metadata {
+	if t == nil {
+		t = &ServiceDeploymentFragment{}
+	}
+	return t.Metadata
+}
 
 type ServiceDeploymentExtended struct {
 	Cluster       *BaseClusterFragment                                                 "json:\"cluster,omitempty\" graphql:\"cluster\""
@@ -2331,6 +2338,7 @@ type ServiceDeploymentExtended struct {
 	Configuration []*ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Flow          *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
 	SyncConfig    *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
+	Metadata      *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
 }
 
 func (t *ServiceDeploymentExtended) GetCluster() *BaseClusterFragment {
@@ -2470,6 +2478,12 @@ func (t *ServiceDeploymentExtended) GetSyncConfig() *ServiceDeploymentExtended_S
 		t = &ServiceDeploymentExtended{}
 	}
 	return t.SyncConfig
+}
+func (t *ServiceDeploymentExtended) GetMetadata() *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata {
+	if t == nil {
+		t = &ServiceDeploymentExtended{}
+	}
+	return t.Metadata
 }
 
 type ErrorFragment struct {
@@ -6215,6 +6229,24 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 	return t.DiffNormalizers
 }
 
+type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -6366,6 +6398,24 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) G
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ServiceDeploymentForAgent_Cluster struct {
@@ -7079,6 +7129,24 @@ func (t *ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNorma
 	return t.DiffNormalizers
 }
 
+type ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -7248,6 +7316,24 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiff
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type RevisionFragment_Git struct {
@@ -7463,6 +7549,24 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
@@ -9982,6 +10086,24 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 	return t.DiffNormalizers
 }
 
+type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type CreateCluster_CreateCluster struct {
 	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 	ID             string                   "json:\"id\" graphql:\"id\""
@@ -10286,6 +10408,24 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 	return t.DiffNormalizers
 }
 
+type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type DeleteCluster_DeleteCluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -10461,6 +10601,24 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 	return t.DiffNormalizers
 }
 
+type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -10614,6 +10772,24 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 	return t.DiffNormalizers
 }
 
+type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -10765,6 +10941,24 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type PingCluster_PingCluster struct {
@@ -10938,6 +11132,24 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 	return t.DiffNormalizers
 }
 
+type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type ListClusters_Clusters struct {
 	Edges []*ClusterEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
 }
@@ -11100,6 +11312,24 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ListClustersWithParameters_Clusters struct {
@@ -11273,6 +11503,24 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 	return t.DiffNormalizers
 }
 
+type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type GetAgentUrl_Cluster struct {
 	AgentURL *string "json:\"agentUrl,omitempty\" graphql:\"agentUrl\""
 }
@@ -11435,6 +11683,24 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type GetClusterWithToken_Cluster struct {
@@ -11741,6 +12007,24 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	return t.DiffNormalizers
 }
 
+type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -11892,6 +12176,24 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -12047,6 +12349,24 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 	return t.DiffNormalizers
 }
 
+type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -12198,6 +12518,24 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ListServiceDeployments_ServiceDeployments_Edges struct {
@@ -12416,6 +12754,24 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster struct {
@@ -12850,6 +13206,24 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	return t.DiffNormalizers
 }
 
+type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -13021,6 +13395,24 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 	return t.DiffNormalizers
 }
 
+type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -13174,6 +13566,24 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 	return t.DiffNormalizers
 }
 
+type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -13325,6 +13735,24 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -13498,6 +13926,24 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	return t.DiffNormalizers
 }
 
+type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -13669,6 +14115,24 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 	return t.DiffNormalizers
 }
 
+type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -13820,6 +14284,24 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfi
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components struct {
@@ -13975,6 +14457,24 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 	return t.DiffNormalizers
 }
 
+type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type RollbackService_RollbackService_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -14126,6 +14626,24 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) G
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type RollbackService_RollbackService_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
@@ -14281,6 +14799,24 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 	return t.DiffNormalizers
 }
 
+type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -14432,6 +14968,24 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncC
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
@@ -14647,6 +15201,24 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type GetServiceDeploymentComponents_ServiceDeployment_Components struct {
@@ -15160,6 +15732,24 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ListServiceDeployment_ServiceDeployments struct {
@@ -15781,6 +16371,24 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 	return t.DiffNormalizers
 }
 
+type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
+}
+
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
@@ -15950,6 +16558,24 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type GetClusterRegistrations_ClusterRegistrations_Edges struct {
@@ -17454,6 +18080,24 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+
+type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
+	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+}
+
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Fqdns
 }
 
 type ListProviders_ClusterProviders_Edges struct {
@@ -24866,6 +25510,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -25095,6 +25743,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -25335,6 +25987,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -25472,6 +26128,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -25611,6 +26271,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -25846,6 +26510,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -26093,6 +26761,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -26327,6 +26999,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -26622,6 +27298,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -26853,6 +27533,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -27043,6 +27727,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -27180,6 +27868,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -27357,6 +28049,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -27584,6 +28280,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -28103,6 +28803,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -28311,6 +29015,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -28418,6 +29126,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -28533,6 +29245,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -28749,6 +29465,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -28957,6 +29677,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -29065,6 +29789,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -29182,6 +29910,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -29301,6 +30033,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -29372,8 +30108,8 @@ func (c *Client) RollbackService(ctx context.Context, id string, revisionID stri
 	return &res, nil
 }
 
-const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes]) {
-	updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors) {
+const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes], $metadata: ServiceMetadataAttributes) {
+	updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors, metadata: $metadata) {
 		... ServiceDeploymentFragment
 	}
 }
@@ -29416,6 +30152,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -29470,13 +30210,14 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 }
 `
 
-func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
+func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha *string, errors []*ServiceErrorAttributes, metadata *ServiceMetadataAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
 	vars := map[string]any{
 		"id":         id,
 		"components": components,
 		"revisionId": revisionID,
 		"sha":        sha,
 		"errors":     errors,
+		"metadata":   metadata,
 	}
 
 	var res UpdateServiceComponents
@@ -29535,6 +30276,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -29922,6 +30667,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -30277,6 +31026,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -31130,6 +31883,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 			... DiffNormalizerFragment
 		}
 	}
+	metadata {
+		images
+		fqdns
+	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	id
@@ -31336,6 +32093,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
@@ -36934,6 +37695,10 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
 		diffNormalizers {
 			... DiffNormalizerFragment
 		}
+	}
+	metadata {
+		images
+		fqdns
 	}
 }
 fragment ServiceDeploymentBaseFragment on ServiceDeployment {
