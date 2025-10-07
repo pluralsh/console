@@ -63,6 +63,8 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
 
       assert status.status == :success
       assert status.reason == "lgtm"
+
+      assert refetch(sentinel).status == :success
     end
   end
 end

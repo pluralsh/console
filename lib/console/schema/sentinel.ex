@@ -1,13 +1,15 @@
 defmodule Console.Schema.Sentinel do
   use Console.Schema.Base
-  alias Console.Schema.{GitRepository, Service, Project, PolicyBinding, User}
+  alias Console.Schema.{SentinelRun, GitRepository, Service, Project, PolicyBinding, User}
   alias Console.Deployments.Policies.Rbac
 
   defenum CheckType, log: 0, kubernetes: 1
 
   schema "sentinels" do
-    field :name, :string
+    field :name,        :string
+    field :status,      SentinelRun.Status
     field :description, :string
+    field :last_run_at, :utc_datetime_usec
 
     belongs_to :repository, GitRepository
     belongs_to :project,    Project
@@ -46,6 +48,10 @@ defmodule Console.Schema.Sentinel do
     timestamps()
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(f in query,
@@ -66,7 +72,7 @@ defmodule Console.Schema.Sentinel do
     from(s in query, order_by: ^order)
   end
 
-  @valid ~w(name description repository_id project_id)a
+  @valid ~w(name description status last_run_at repository_id project_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

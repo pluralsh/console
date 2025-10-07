@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Sentinels
-  alias Console.Schema.Sentinel
+  alias Console.Schema.{Sentinel, SentinelRun}
 
   def sentinel(%{id: id}, ctx) when is_binary(id) do
     Sentinels.get_sentinel!(id)
@@ -17,6 +17,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
     Sentinel.ordered()
     |> Sentinel.for_user(user)
     |> maybe_search(Sentinel, args)
+    |> sentinel_filters(args)
+    |> paginate(args)
+  end
+
+  def sentinel_runs(%{id: id}, args, _) do
+    SentinelRun.for_sentinel(id)
+    |> SentinelRun.ordered()
     |> paginate(args)
   end
 
@@ -31,4 +38,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
 
   def run_sentinel(%{id: id}, %{context: %{current_user: user}}),
     do: Sentinels.run_sentinel(id, user)
+
+  def sentinel_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:status, status}, q -> Sentinel.for_status(q, status)
+      _, q -> q
+    end)
+  end
 end

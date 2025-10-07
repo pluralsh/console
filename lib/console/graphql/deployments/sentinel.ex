@@ -47,10 +47,17 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :id,           non_null(:string), description: "the id of the sentinel"
     field :name,         non_null(:string), description: "the name of the sentinel"
     field :description, :string, description: "the description of the sentinel"
+    field :status,      :sentinel_run_status, description: "the status of the sentinel's last run"
     field :git,         :git_ref, description: "the git location for rules files from the associated repository"
     field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the git repository to use for fetching rules files for AI enabled analysis"
     field :project,     :project, resolve: dataloader(Deployments), description: "the project of this sentinel"
     field :checks,      list_of(:sentinel_check), description: "the checks to run for this sentinel"
+    field :last_run_at, :datetime, description: "the last time this sentinel was run"
+
+    @desc "the runs of this sentinel, do not query w/in list fields"
+    connection field :runs, node_type: :sentinel_run do
+      resolve &Deployments.sentinel_runs/3
+    end
 
     timestamps()
   end
@@ -113,7 +120,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     connection field :sentinels, node_type: :sentinel do
       middleware Authenticated
-      arg :q, :string
+      arg :q,      :string
+      arg :status, :sentinel_run_status
 
       resolve &Deployments.sentinels/2
     end

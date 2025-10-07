@@ -9964,6 +9964,7 @@ export type RootQueryTypeSentinelsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<SentinelRunStatus>;
 };
 
 
@@ -10419,13 +10420,27 @@ export type Sentinel = {
   /** the id of the sentinel */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this sentinel was run */
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the sentinel */
   name: Scalars['String']['output'];
   /** the project of this sentinel */
   project?: Maybe<Project>;
   /** the git repository to use for fetching rules files for AI enabled analysis */
   repository?: Maybe<GitRepository>;
+  /** the runs of this sentinel, do not query w/in list fields */
+  runs?: Maybe<SentinelRunConnection>;
+  /** the status of the sentinel's last run */
+  status?: Maybe<SentinelRunStatus>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SentinelRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SentinelAttributes = {
@@ -10568,6 +10583,18 @@ export type SentinelRun = {
   /** the status of the run */
   status: SentinelRunStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SentinelRunConnection = {
+  __typename?: 'SentinelRunConnection';
+  edges?: Maybe<Array<Maybe<SentinelRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelRunEdge = {
+  __typename?: 'SentinelRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<SentinelRun>;
 };
 
 export type SentinelRunResult = {

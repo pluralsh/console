@@ -6254,6 +6254,8 @@ type Sentinel struct {
 	Name string `json:"name"`
 	// the description of the sentinel
 	Description *string `json:"description,omitempty"`
+	// the status of the sentinel's last run
+	Status *SentinelRunStatus `json:"status,omitempty"`
 	// the git location for rules files from the associated repository
 	Git *GitRef `json:"git,omitempty"`
 	// the git repository to use for fetching rules files for AI enabled analysis
@@ -6261,9 +6263,13 @@ type Sentinel struct {
 	// the project of this sentinel
 	Project *Project `json:"project,omitempty"`
 	// the checks to run for this sentinel
-	Checks     []*SentinelCheck `json:"checks,omitempty"`
-	InsertedAt *string          `json:"insertedAt,omitempty"`
-	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+	Checks []*SentinelCheck `json:"checks,omitempty"`
+	// the last time this sentinel was run
+	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// the runs of this sentinel, do not query w/in list fields
+	Runs       *SentinelRunConnection `json:"runs,omitempty"`
+	InsertedAt *string                `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                `json:"updatedAt,omitempty"`
 }
 
 type SentinelAttributes struct {
@@ -6394,6 +6400,16 @@ type SentinelRun struct {
 	Results    []*SentinelRunResult `json:"results,omitempty"`
 	InsertedAt *string              `json:"insertedAt,omitempty"`
 	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*SentinelRunEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunEdge struct {
+	Node   *SentinelRun `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
 }
 
 type SentinelRunResult struct {

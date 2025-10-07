@@ -71,6 +71,27 @@ defmodule Console.GraphQl.Deployments.SentinelQueriesTest do
       assert found["description"] == sentinel.description
     end
 
+    test "it can fetch a sentinels runs" do
+      sentinel = insert(:sentinel)
+      runs = insert_list(3, :sentinel_run, sentinel: sentinel)
+      insert_list(3, :sentinel_run)
+
+      {:ok, %{data: %{"sentinel" => found}}} = run_query("""
+        query Sentinel($id: ID!) {
+          sentinel(id: $id) {
+            id
+            name
+            runs(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => sentinel.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["runs"])
+             |> ids_equal(runs)
+    end
+
     test "it can fetch by name" do
       sentinel = insert(:sentinel)
 

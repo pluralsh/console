@@ -92,6 +92,8 @@ defmodule Console.Deployments.SentinelTest do
 
       assert run.sentinel_id == sentinel.id
       assert run.status == :pending
+
+      assert refetch(sentinel).last_run_at
     end
 
     test "non project readers cannot run a sentinel" do
