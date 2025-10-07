@@ -123,7 +123,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
            _ <- sleep(stack.repository),
            _ <- Discovery.kick(stack.repository),
         do: Stacks.poll(Repo.get(PullRequest, pr.id))
-    end, ttl: :timer.minutes(2))
+    end, ttl: :timer.seconds(30))
   end
 
   def process(_), do: :ok

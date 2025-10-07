@@ -71,8 +71,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   end
   defp service_errors(_), do: []
 
-  defp git_source(%Service{git: %{folder: f, ref: ref}, repository: %{url: url}}),
-    do: "It is sourcing manifests from the git repository #{url} under the folder #{f} in the git reference #{ref}"
+  defp git_source(%Service{git: %{folder: f, ref: ref}, repository: %{url: url} = repo}) do
+    """
+    It is sourcing manifests from the git repository #{url} under the folder #{f} in the git reference #{ref}
+
+    The current status of the git repository is:
+
+    #{json_blob(Map.take(repo, ~w(url auth_method health error pulled_at)a))}
+    """
+  end
   defp git_source(_), do: ""
 
   defp helm_source(%Service{helm: %{version: _} = helm}) do
