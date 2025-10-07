@@ -93,6 +93,12 @@ mutation UpdateAgentRunTodos($id: ID!, $todos: [AgentTodoAttributes]) {
     }
 }
 
+mutation CreateAgentPullRequest($runId: ID!, $attributes: AgentPullRequestAttributes!) {
+    agentPullRequest(runId: $runId, attributes: $attributes) {
+        ...PullRequestFragment
+    }
+}
+
 fragment AgentRuntimeFragment on AgentRuntime {
     id
     name

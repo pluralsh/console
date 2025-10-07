@@ -4530,9 +4530,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.25.1":
-  version: 5.25.1
-  resolution: "@pluralsh/design-system@npm:5.25.1"
+"@pluralsh/design-system@npm:5.25.2":
+  version: 5.25.2
+  resolution: "@pluralsh/design-system@npm:5.25.2"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -4545,7 +4545,7 @@ __metadata:
     "@radix-ui/react-focus-scope": 1.1.0
     "@react-aria/utils": 3.23.0
     "@react-hooks-library/core": 0.6.0
-    "@react-spring/web": 10.0.1
+    "@react-spring/web": 10.0.3
     "@react-stately/utils": 3.9.0
     "@tanstack/match-sorter-utils": 8.8.4
     "@tanstack/react-table": 8.20.5
@@ -4577,7 +4577,7 @@ __metadata:
     react-dom: ">=19.1.1"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 051021645b568e513ef1c8ca35c2f556de01b014cd2e205e92c9946ba45a93c6396636e35a05731daf9691c297d16f39bffdd4b4c25f717baa37a701c6c887f2
+  checksum: c9da7a31d12a63cc32e0d7a14d7de04d00e2fac8b1675a59d7821ad47495d7793982f34dddda1744a88c9b2eecdd091be45bb54bf2a0c59d299a1f95ab01b008
   languageName: node
   linkType: hard
 
@@ -6084,7 +6084,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/animated@npm:~10.0.1, @react-spring/animated@npm:~10.0.2":
+"@react-spring/animated@npm:~10.0.2":
   version: 10.0.2
   resolution: "@react-spring/animated@npm:10.0.2"
   dependencies:
@@ -6096,7 +6096,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:9.4.5 || ^9.7.2 || ^10.0, @react-spring/core@npm:~10.0.1, @react-spring/core@npm:~10.0.2":
+"@react-spring/animated@npm:~10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/animated@npm:10.0.3"
+  dependencies:
+    "@react-spring/shared": ~10.0.3
+    "@react-spring/types": ~10.0.3
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 3af0efd4874d8c3b43e99b68e08e9645bc75bcbd04d032fa87f9f45f40010ff2b348e3566893c157ff38ee41fb41eceaeaeba205fca8a9dc263aacfc80a16fa5
+  languageName: node
+  linkType: hard
+
+"@react-spring/core@npm:9.4.5 || ^9.7.2 || ^10.0, @react-spring/core@npm:~10.0.2":
   version: 10.0.2
   resolution: "@react-spring/core@npm:10.0.2"
   dependencies:
@@ -6109,6 +6121,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-spring/core@npm:~10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/core@npm:10.0.3"
+  dependencies:
+    "@react-spring/animated": ~10.0.3
+    "@react-spring/shared": ~10.0.3
+    "@react-spring/types": ~10.0.3
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 9744ec276c24d12d39ec2140f389188a2b166ee8b76f9da5ad40adb4a911e0e8072b00aeb65d0a81a7f65ee5f9740938ea7560ebe6ba7307b5db9c94a3ccdb66
+  languageName: node
+  linkType: hard
+
 "@react-spring/rafz@npm:~10.0.2":
   version: 10.0.2
   resolution: "@react-spring/rafz@npm:10.0.2"
@@ -6116,7 +6141,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/shared@npm:~10.0.1, @react-spring/shared@npm:~10.0.2":
+"@react-spring/rafz@npm:~10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/rafz@npm:10.0.3"
+  checksum: 40ce0aa72fb06c77631499919ad147fa69bba6454715b2e87828d7fab1830d67855476579d6124545a69aefdca3b5ca169f9cf054bd3ee7f0405e591e17a4e10
+  languageName: node
+  linkType: hard
+
+"@react-spring/shared@npm:~10.0.2":
   version: 10.0.2
   resolution: "@react-spring/shared@npm:10.0.2"
   dependencies:
@@ -6128,25 +6160,44 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/types@npm:~10.0.1, @react-spring/types@npm:~10.0.2":
+"@react-spring/shared@npm:~10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/shared@npm:10.0.3"
+  dependencies:
+    "@react-spring/rafz": ~10.0.3
+    "@react-spring/types": ~10.0.3
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 8dff57ba42bbd124c32a2fb833cf1a7459a0da64b40a794bb65817ada7969eddae83444e2c76978256f1faff8253f26528e6e1f75397c966727b1fa5acab8ed6
+  languageName: node
+  linkType: hard
+
+"@react-spring/types@npm:~10.0.2":
   version: 10.0.2
   resolution: "@react-spring/types@npm:10.0.2"
   checksum: 9229d5cd0aaefd41e5c18d90b46525d87297e2a4adc4b97db6735108df96a5b9701b7784fb00ad3a9d05779247dc1dc71f8f77e293f517f883c9db4765d13d03
   languageName: node
   linkType: hard
 
-"@react-spring/web@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@react-spring/web@npm:10.0.1"
+"@react-spring/types@npm:~10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/types@npm:10.0.3"
+  checksum: 68108ac3f125bf3715c3f2e0001a159af7298c92e490b1ae0796d2763b23257884fdaf2a497f957d71266f3a7c8ed7bcd797d89214c26f2535b16f6d8c75f129
+  languageName: node
+  linkType: hard
+
+"@react-spring/web@npm:10.0.3":
+  version: 10.0.3
+  resolution: "@react-spring/web@npm:10.0.3"
   dependencies:
-    "@react-spring/animated": ~10.0.1
-    "@react-spring/core": ~10.0.1
-    "@react-spring/shared": ~10.0.1
-    "@react-spring/types": ~10.0.1
+    "@react-spring/animated": ~10.0.3
+    "@react-spring/core": ~10.0.3
+    "@react-spring/shared": ~10.0.3
+    "@react-spring/types": ~10.0.3
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 0d45fffa6e3cc451fa13f8596ed3eec58fc1a8b6f5b774b3e2ad7a3a552795e7795790aaadd25008be72a68524f90cd8da74eff2555b8f0c3bd50d2be00b5111
+  checksum: 0ddcf9487c12b48658dfa3cf49245e98f9a1ff0a24507a56112d6ae4c6b2de7e78777c877ae2095ad2a96161f8928dbbbe08143b95e99a83fe689836f2761339
   languageName: node
   linkType: hard
 
@@ -10460,11 +10511,11 @@ __metadata:
     "@nivo/radial-bar": 0.99.0
     "@nivo/tooltip": 0.99.0
     "@nivo/treemap": 0.99.0
-    "@pluralsh/design-system": 5.25.1
+    "@pluralsh/design-system": 5.25.2
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
-    "@react-spring/web": 10.0.1
+    "@react-spring/web": 10.0.3
     "@react-types/shared": 3.25.0
     "@replit/graphql-codegen-persisted-queries": 0.1.2
     "@saas-ui/use-hotkeys": 1.1.3

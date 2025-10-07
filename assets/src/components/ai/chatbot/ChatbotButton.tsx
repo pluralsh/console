@@ -136,7 +136,7 @@ const MainChatbotButtonSC = styled(Button)<{ $showAnimation: boolean }>(
       '--border-angle-2': '180deg',
       border: $showAnimation ? '1px solid transparent' : undefined,
       backgroundImage: `
-        linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}),
+        linear-gradient(${theme.colors['fill-accent']}, ${theme.colors['fill-accent']}),
         conic-gradient(
           from var(--border-angle-1) at 25% 30%,
           transparent,
@@ -171,10 +171,12 @@ function usePeriodicPulse(onMs: number, periodMs: number) {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
     const trigger = () => {
+      if (timeoutId) clearTimeout(timeoutId)
       setOn(true)
       timeoutId = setTimeout(() => setOn(false), onMs)
     }
-    const intervalId = setInterval(trigger, periodMs)
+    // summed so the timing starts at the end of the animation
+    const intervalId = setInterval(trigger, periodMs + onMs)
     return () => {
       clearInterval(intervalId)
       clearTimeout(timeoutId)
