@@ -3037,6 +3037,12 @@ enum PolicyEngineType {
   TRIVY
 }
 
+enum ApprovalResult {
+  APPROVED
+  REJECTED
+  INDETERMINATE
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -3128,6 +3134,9 @@ input StackConfigurationAttributes {
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
+
+  "the ai approval configuration for this stack"
+  aiApproval: AiApprovalAttributes
 }
 
 input StackOverridesAttributes {
@@ -3163,6 +3172,13 @@ input AnsibleConfigurationAttributes {
 
   "additional args for the playbook"
   additionalArgs: [String]
+}
+
+input AiApprovalAttributes {
+  enabled: Boolean!
+  ignoreCancel: Boolean!
+  git: GitRefAttributes!
+  file: String!
 }
 
 input StackCronAttributes {
@@ -3570,6 +3586,9 @@ type StackRun {
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
 
+  "the result of the approval decision by the ai"
+  approvalResult: StackRunApprovalResult
+
   "Arbitrary variables to add to a stack run"
   variables: Map
 
@@ -3734,6 +3753,14 @@ type StackDefinition {
   steps: [CustomRunStep]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type StackRunApprovalResult {
+  "the reason for the approval decision by the ai"
+  reason: String
+
+  "the result of the approval decision by the ai"
+  result: ApprovalResult
 }
 
 type CustomRunStep {

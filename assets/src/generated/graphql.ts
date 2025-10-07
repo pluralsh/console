@@ -658,6 +658,13 @@ export type AiAnalysisRates = {
   slow?: Maybe<Scalars['Int']['output']>;
 };
 
+export type AiApprovalAttributes = {
+  enabled: Scalars['Boolean']['input'];
+  file: Scalars['String']['input'];
+  git: GitRefAttributes;
+  ignoreCancel: Scalars['Boolean']['input'];
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -946,6 +953,12 @@ export type AppNotificationEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AppNotification>;
 };
+
+export enum ApprovalResult {
+  Approved = 'APPROVED',
+  Indeterminate = 'INDETERMINATE',
+  Rejected = 'REJECTED'
+}
 
 export type ArgoAnalysis = {
   __typename?: 'ArgoAnalysis';
@@ -11249,6 +11262,8 @@ export type StackConfiguration = {
 };
 
 export type StackConfigurationAttributes = {
+  /** the ai approval configuration for this stack */
+  aiApproval?: InputMaybe<AiApprovalAttributes>;
   /** the ansible configuration for this stack */
   ansible?: InputMaybe<AnsibleConfigurationAttributes>;
   /** the hooks to customize execution for this stack */
@@ -11413,6 +11428,8 @@ export type StackRun = {
   actor?: Maybe<User>;
   /** whether to require approval */
   approval?: Maybe<Scalars['Boolean']['output']>;
+  /** the result of the approval decision by the ai */
+  approvalResult?: Maybe<StackRunApprovalResult>;
   /** when this run was approved */
   approvedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the approver of this job */
@@ -11474,6 +11491,14 @@ export type StackRun = {
   violations?: Maybe<Array<Maybe<StackPolicyViolation>>>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
+};
+
+export type StackRunApprovalResult = {
+  __typename?: 'StackRunApprovalResult';
+  /** the reason for the approval decision by the ai */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** the result of the approval decision by the ai */
+  result?: Maybe<ApprovalResult>;
 };
 
 export type StackRunAttributes = {

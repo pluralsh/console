@@ -101,7 +101,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
   alias Console.AI.PubSub.Vector.Indexable
 
   def resource(%@for{item: %Service{} = service}) do
-    case Console.Repo.preload(service, [:repository, :cluster, components: [:content, :children]]) do
+    case Console.Repo.preload(service, [:repository, :cluster, :components]) do
       %Service{components: [_ | _] = components} = service ->
         minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
                 |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})

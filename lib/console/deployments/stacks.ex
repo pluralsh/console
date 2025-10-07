@@ -4,9 +4,11 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability}
+  alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
   alias Console.Deployments.Pr.Dispatcher
+  alias Console.Services.Users
+  alias Console.AI.{Provider, Tools.ApproveStack}
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
@@ -439,6 +441,64 @@ defmodule Console.Deployments.Stacks do
     |> when_ok(:update)
     |> notify(:update)
   end
+
+  @doc """
+  Determines if a stack run should be approved based on a specified rules file.  Only available for terraform stacks and leverages
+  the approve_stack tool call.
+  """
+  @spec ai_stack_run_approval(StackRun.t) :: run_resp | :ok
+  def ai_stack_run_approval(%StackRun{
+    type: :terraform,
+    status: :pending_approval,
+    approver_id: nil,
+    configuration: %Stack.Configuration{
+      ai_approval: %Stack.Configuration.AiApproval{
+        enabled: true, git: git, file: file
+      }
+    }
+  } = run) do
+    with %{repository: %GitRepository{} = repo, state: %StackState{plan: p}} = run = Repo.preload(run, [:repository, :state]),
+         {:ok, f} <- Discovery.fetch(repo, git),
+         {:ok, files} <- Tar.tar_stream(f),
+         {_, rules} <- Enum.find(files, fn {k, _} -> k == file end) do
+      [
+        {:user, "I've been given the following terraform plan, determine if its safe to merge given the various rules provided"},
+        {:user, "here is the terraform plan:"},
+        {:user, "```terraform\n#{p}\n```"},
+        {:user, "Here are the rules for approval:\n\n#{rules}"}
+      ]
+      |> Provider.simple_tool_call(ApproveStack)
+      |> case do
+        {:ok, %ApproveStack{} = approval} -> handle_approval(run, approval)
+        err -> err
+      end
+    end
+  end
+  def ai_stack_run_approval(_), do: :ok
+
+  defp handle_approval(%StackRun{} = run, %ApproveStack{} = approval) do
+    StackRun.update_changeset(run, %{approval_result: Map.take(approval, ~w(reason result)a)})
+    |> approval_decision(run, approval)
+    |> Repo.update()
+    |> case do
+      {:ok, %StackRun{status: s, approver_id: id} = run} when s == :cancelled or is_binary(id) ->
+        handle_notify(PubSub.StackRunUpdated, run)
+      res -> res
+    end
+  end
+
+  defp approval_decision(
+    cs,
+    %StackRun{configuration: %{ai_approval: %{ignore_cancel: true}}},
+    %ApproveStack{result: :rejected}
+  ), do: cs
+  defp approval_decision(cs, _, %ApproveStack{result: :approved}) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    StackRun.approve_changeset(cs, %{approver_id: bot.id, approved_at: Timex.now()})
+  end
+  defp approval_decision(cs, _, %ApproveStack{result: :rejected}),
+    do: StackRun.update_changeset(cs, %{status: :cancelled})
+  defp approval_decision(cs, _, _), do: cs
 
   @doc """
   Updates run step attributes, only achievable by a cluster

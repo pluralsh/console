@@ -201,6 +201,10 @@ type StackConfiguration struct {
 	// Ansible configuration for this stack.
 	// +kubebuilder:validation:Optional
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
+
+	// AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git.
+	// +kubebuilder:validation:Optional
+	AiApproval *AiApprovalConfiguration `json:"aiApproval,omitempty"`
 }
 
 type TerraformConfiguration struct {
@@ -227,6 +231,42 @@ type AnsibleConfiguration struct {
 	// Additional args for the ansible playbook command.
 	// +kubebuilder:validation:Optional
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
+type AiApprovalConfiguration struct {
+	// Enabled indicates if AI approval is enabled for this stack.
+	// +kubebuilder:validation:Required
+	Enabled bool `json:"enabled,omitempty"`
+
+	// Git references the Git repository containing the rules file.
+	// +kubebuilder:validation:Required
+	Git GitRef `json:"git"`
+
+	// File is the name of the rules file within the Git repository.
+	// +kubebuilder:validation:Required
+	File string `json:"file"`
+
+	// IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI.
+	// +kubebuilder:validation:Optional
+	IgnoreCancel *bool `json:"ignoreCancel,omitempty"`
+}
+
+func (in *AiApprovalConfiguration) Attributes() *console.AiApprovalAttributes {
+	if in == nil {
+		return nil
+	}
+
+	cancel := false
+	if in.IgnoreCancel != nil {
+		cancel = *in.IgnoreCancel
+	}
+
+	return &console.AiApprovalAttributes{
+		Enabled:      in.Enabled,
+		IgnoreCancel: cancel,
+		Git:          *in.Git.Attributes(),
+		File:         in.File,
+	}
 }
 
 type StackCron struct {

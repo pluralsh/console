@@ -75,17 +75,27 @@ defmodule Console.AI.Provider do
       do: mod.proxy(client)
   end
 
-  def completion(history, opts \\ []) do
+  def completion([_ | _] = history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),
       do: mod.completion(client, add_preface(history, opts), opts)
   end
 
-  def tool_call(history, tools, opts \\ []) do
+  def tool_call([_ | _] = history, tools, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- tool_client(settings),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
       do: handle_tool_calls(result, tools)
+  end
+
+  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_atom(tool) do
+    name = tool.name()
+    case tool_call(history, [tool], opts) do
+      {:ok, [%{^name => %{result: result}} | _]} -> {:ok, result}
+      {:ok, [%{^name => %{error: error}} | _]} -> {:error, error}
+      {:ok, _} -> {:error, "unexpected tool call result for #{name}"}
+      error -> error
+    end
   end
 
   def embeddings(text) do

@@ -792,12 +792,23 @@ defmodule Console.Deployments.Services do
   end
   def stabilize_contexts(attrs, _), do: attrs
 
-  def stabilize(%{components: new_components} = attrs, %{components: components}) do
+  def stabilize(%{components: new_components} = attrs, %Service{components: components} = svc) do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
     new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
+    |> Map.put(:errors, stabilize_errors(attrs[:errors], svc.errors))
   end
   def stabilize(attrs, _), do: attrs
+
+  defp stabilize_errors(nil, _), do: []
+  defp stabilize_errors([], _), do: []
+  defp stabilize_errors(errors, old_errors) when is_list(errors) and is_list(old_errors),
+    do: _stabilize_errors(errors, old_errors, [])
+
+  defp _stabilize_errors([], _, acc), do: acc
+  defp _stabilize_errors(res, [], acc), do: acc ++ res
+  defp _stabilize_errors([l | lres], [r | rres], acc),
+    do: _stabilize_errors(lres, rres, [Map.put(l, :id, r.id) | acc])
 
   defp stabilize_component(new_component, components) do
     case components[component_key(new_component)] do
