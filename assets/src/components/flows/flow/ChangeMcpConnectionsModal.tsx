@@ -4,7 +4,7 @@ import {
   ColConfirm,
   ColInfo,
   McpTableAction,
-} from 'components/ai/McpServerTableCols'
+} from 'components/ai/mcp/McpServerTableCols'
 import { GqlError, GqlErrorType } from 'components/utils/Alert'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { McpServerFragment } from 'generated/graphql'

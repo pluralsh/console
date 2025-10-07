@@ -1,14 +1,16 @@
 import { Navigate, Route } from 'react-router-dom'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { AI } from 'components/ai/AI.tsx'
-import { McpServers } from 'components/ai/McpServers.tsx'
+import { McpServers } from 'components/ai/mcp/McpServers.tsx'
 import { AIAgent } from '../components/ai/AIAgent.tsx'
 import {
   AI_ABS_PATH,
   AI_THREADS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_AGENT_REL_PATH,
+  AI_SENTINELS_REL_PATH,
 } from './aiRoutesConsts'
+import { AISentinels } from 'components/ai/sentinel/AISentinels.tsx'
 
 export const aiRoutes = (
   <Route
@@ -35,6 +37,10 @@ export const aiRoutes = (
     <Route
       path={AI_MCP_SERVERS_REL_PATH}
       element={<McpServers />}
+    />
+    <Route
+      path={AI_SENTINELS_REL_PATH}
+      element={<AISentinels />}
     />
   </Route>
 )

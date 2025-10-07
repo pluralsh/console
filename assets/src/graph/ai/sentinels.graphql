@@ -1,0 +1,79 @@
+fragment Sentinel on Sentinel {
+  id
+  name
+  description
+  git {
+    ref
+    folder
+  }
+  repository {
+    ...GitRepository
+  }
+  checks {
+    ...SentinelCheck
+  }
+}
+
+fragment SentinelCheck on SentinelCheck {
+  id
+  name
+  type
+  ruleFile
+  configuration {
+    ...SentinelCheckConfiguration
+  }
+}
+
+fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
+  log {
+    namespaces
+    query
+    clusterId
+    facets {
+      ...LogFacet
+    }
+  }
+  kubernetes {
+    group
+    version
+    kind
+    name
+    namespace
+  }
+}
+
+fragment SentinelRun on SentinelRun {
+  id
+  status
+  results {
+    name
+    reason
+    status
+  }
+  updatedAt
+}
+
+query Sentinels($first: Int = 100, $after: String, $q: String) {
+  sentinels(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Sentinel
+      }
+    }
+  }
+}
+
+query Sentinel($id: ID, $name: String) {
+  sentinel(id: $id, name: $name) {
+    ...Sentinel
+  }
+}
+
+mutation RunSentinel($id: ID!) {
+  runSentinel(id: $id) {
+    ...SentinelRun
+  }
+}
