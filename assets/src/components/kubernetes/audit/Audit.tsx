@@ -1,17 +1,17 @@
-import { Table } from '@pluralsh/design-system'
+import { Flex, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { CellContext, createColumnHelper } from '@tanstack/react-table'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useTheme } from 'styled-components'
 import {
   ClusterAuditLog,
   useKubernetesClusterAuditLogsQuery,
 } from '../../../generated/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
-import { ScrollablePage } from '../../utils/layout/ScrollablePage.tsx'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import UserInfo from '../../utils/UserInfo.tsx'
 import { useCluster } from '../Cluster.tsx'
-import { useDataSelect } from '../common/DataSelect.tsx'
+import { getBaseBreadcrumbs } from '../common/utils.tsx'
 
 const columnHelper = createColumnHelper<ClusterAuditLog>()
 
@@ -48,8 +48,8 @@ const userColumn = columnHelper.accessor((log) => log?.actor, {
 const columns = [methodColumn, pathColumn, userColumn, insertedAtColumn]
 
 export default function Audit() {
+  const { spacing } = useTheme()
   const cluster = useCluster()
-  const { setEnabled } = useDataSelect()
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -59,25 +59,27 @@ export default function Audit() {
         keyPath: ['auditLogs'],
         pollInterval: 30_000,
       },
-      {
-        clusterId: cluster?.id,
-      }
+      { clusterId: cluster?.id }
     )
-
-  useEffect(() => {
-    // Disable data select on audit page
-    setEnabled(false)
-  })
 
   const auditLogs = useMemo(
     () => data?.cluster?.auditLogs?.edges?.map((edge) => edge?.node),
     [data]
   )
 
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...getBaseBreadcrumbs(cluster), { label: 'audit logs' }],
+      [cluster]
+    )
+  )
+
   return (
-    <ScrollablePage
-      fullWidth
-      scrollable={false}
+    <Flex
+      direction="column"
+      height="100%"
+      gap="medium"
+      paddingBottom={spacing.large}
     >
       {error && <GqlError error={error} />}
       <Table
@@ -90,6 +92,6 @@ export default function Audit() {
         virtualizeRows
         onVirtualSliceChange={setVirtualSlice}
       />
-    </ScrollablePage>
+    </Flex>
   )
 }

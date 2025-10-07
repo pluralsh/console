@@ -6,20 +6,15 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { ReactElement, useEffect, useMemo } from 'react'
-import {
-  Outlet,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   CustomResourceDefinitionQueryVariables,
+  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
+  Types_CustomResourceObjectList as CustomResourceListT,
   CustomResourcesDocument,
   CustomResourcesQuery,
   CustomResourcesQueryVariables,
-  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
   Types_CustomResourceObjectDetail as CustomResourceT,
-  Types_CustomResourceObjectList as CustomResourceListT,
   useCustomResourceDefinitionQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -35,7 +30,6 @@ import { ResourceList } from '../common/ResourceList'
 import { Kind } from '../common/types'
 
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
-import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -109,12 +103,11 @@ export default function CustomResourceDefinition(): ReactElement<any> {
 
 const columnHelper = createColumnHelper<CustomResourceT>()
 
-export function CustomResourceDefinitionObjects(): ReactElement<any> {
+export function CustomResourceDefinitionObjects() {
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd?.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
   const { name } = useParams()
-  const [params, setParams] = useSearchParams()
   const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
@@ -135,26 +128,11 @@ export function CustomResourceDefinitionObjects(): ReactElement<any> {
     ]
   )
 
-  useEffect(
-    () => {
-      dataSelect.setNamespaced(namespaced)
-      dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? '')
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
   useEffect(() => {
-    if (isEmpty(dataSelect.namespace)) params.delete(NAMESPACE_PARAM)
-    else params.set(NAMESPACE_PARAM, dataSelect.namespace)
+    dataSelect.setNamespaced(namespaced)
+  }, [namespaced, dataSelect])
 
-    setParams(params)
-  }, [dataSelect.namespace, params, setParams])
-
-  const headerContent = useMemo(
-    () => <DataSelectInputs dataSelect={dataSelect} />,
-    [dataSelect]
-  )
+  const headerContent = useMemo(() => <DataSelectInputs />, [])
 
   useSetPageHeaderContent(headerContent)
 
