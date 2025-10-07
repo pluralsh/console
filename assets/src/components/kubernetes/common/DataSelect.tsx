@@ -2,7 +2,6 @@ import {
   createContext,
   ReactNode,
   use,
-  useCallback,
   useLayoutEffect,
   useMemo,
   useState,
@@ -24,6 +23,7 @@ import { useNamespaces } from '../Cluster'
 import {
   SetURLSearchParams,
   useLocation,
+  useParams,
   useSearchParams,
 } from 'react-router-dom'
 import { FILTER_PARAM, NAMESPACE_PARAM } from '../Navigation'
@@ -33,9 +33,7 @@ type DataSelectContextT = {
   namespaced: boolean
   setNamespaced: (namespaced: boolean) => void
   namespace: string
-  setNamespace: (namespace: string) => void
   filter: string
-  setFilter: (filter: string) => void
   setParams: SetURLSearchParams
 }
 
@@ -47,27 +45,15 @@ export function DataSelectProvider({ children }: { children: ReactNode }) {
   const [params, setParams] = useSearchParams()
   const [namespaced, setNamespaced] = useState<boolean>(true)
 
-  const setParam = useCallback(
-    (key: string, value: string) => {
-      const newParams = new URLSearchParams(params)
-      if (value) newParams.set(key, value)
-      else newParams.delete(key)
-      setParams(newParams, { replace: true })
-    },
-    [params, setParams]
-  )
-
   const ctx = useMemo(
     () => ({
       namespaced,
       setNamespaced,
       namespace: params.get(NAMESPACE_PARAM) ?? '',
-      setNamespace: (namespace: string) => setParam(NAMESPACE_PARAM, namespace),
       filter: params.get(FILTER_PARAM) ?? '',
-      setFilter: (filter: string) => setParam(FILTER_PARAM, filter),
       setParams,
     }),
-    [namespaced, params, setParam, setParams]
+    [namespaced, params, setParams]
   )
   return <DataSelectContext value={ctx}>{children}</DataSelectContext>
 }
@@ -82,8 +68,8 @@ export function useDataSelect() {
 export function DataSelectInputs() {
   const namespaces = useNamespaces()
   const { pathname } = useLocation()
-  const { namespaced, namespace, setNamespace, filter, setFilter, setParams } =
-    useDataSelect()
+  const { clusterId } = useParams()
+  const { namespaced, namespace, filter, setParams } = useDataSelect()
 
   const [nsState, setNsState] = useState(namespace)
   const [filterState, setFilterState] = useState(filter)
@@ -91,28 +77,28 @@ export function DataSelectInputs() {
 
   // this kind of logic is generally brittle and bad practice, but likely necessary here
   // need internal filter state for debouncing and performance
-  // need internal namespace state so we can persist it across route changes that occur while the component still exists
+  // need internal namespace state so we can persist it across route changes that occur while the component still exists (except on cluster change)
   // the custom setParams is needed to avoid a race condition when simultaneously calling setFilter and setNamespace
-  const routeHasChanged = usePrevious(pathname) !== pathname
+  const routeHasChanged = (usePrevious(pathname) ?? pathname) !== pathname
+  const clusterHasChanged = (usePrevious(clusterId) ?? clusterId) !== clusterId
   useLayoutEffect(() => {
-    if (routeHasChanged) setFilterState('')
-    else {
-      setParams(
-        new URLSearchParams({
-          ...(nsState && { [NAMESPACE_PARAM]: nsState }),
-          ...(debFilterState && { [FILTER_PARAM]: debFilterState }),
-        }),
-        { replace: true }
-      )
-    }
-  }, [
-    debFilterState,
-    nsState,
-    routeHasChanged,
-    setFilter,
-    setNamespace,
-    setParams,
-  ])
+    setParams((params) => {
+      if (routeHasChanged) {
+        setFilterState('')
+        params.delete(FILTER_PARAM)
+      } else {
+        if (nsState) params.set(NAMESPACE_PARAM, nsState)
+        else params.delete(NAMESPACE_PARAM)
+        if (debFilterState) params.set(FILTER_PARAM, debFilterState)
+        else params.delete(FILTER_PARAM)
+      }
+      if (clusterHasChanged) {
+        setNsState('')
+        params.delete(NAMESPACE_PARAM)
+      }
+      return params
+    })
+  }, [clusterHasChanged, debFilterState, nsState, routeHasChanged, setParams])
 
   return (
     <Flex gap="medium">
@@ -120,10 +106,7 @@ export function DataSelectInputs() {
         showIndicator
         icon={<SearchIcon />}
         active={!!filterState}
-        onClear={() => {
-          setFilterState('')
-          setFilter('')
-        }}
+        onClear={() => setFilterState('')}
       >
         <ExpandedInput
           inputValue={filterState}
@@ -135,10 +118,7 @@ export function DataSelectInputs() {
           showIndicator
           icon={<FiltersIcon />}
           active={!!nsState}
-          onClear={() => {
-            setNsState('')
-            setNamespace('')
-          }}
+          onClear={() => setNsState('')}
         >
           <NamespaceFilter
             namespaces={namespaces}

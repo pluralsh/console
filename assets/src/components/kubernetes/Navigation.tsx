@@ -21,7 +21,7 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 
 import { Flex } from '@pluralsh/design-system'
 import { useClusters } from './Cluster'
-import { DataSelectInputs, useDataSelect } from './common/DataSelect'
+import { DataSelectInputs } from './common/DataSelect'
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
@@ -41,14 +41,12 @@ const directory: Directory = [
 export default function Navigation() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { pathname, search } = useLocation()
+  const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
   const clusters = useClusters()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [headerAction, setHeaderAction] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
-
-  const dataSelect = useDataSelect()
 
   const pageHeaderContext = useMemo(
     () => ({ setHeaderContent, setHeaderAction }),
@@ -74,15 +72,14 @@ export default function Navigation() {
           <ClusterSelect
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={(id) => {
-              dataSelect.setNamespace('')
-              navigate(pathname.replace(clusterId, `${id}`) + search)
-            }}
+            onSelectionChange={(id) =>
+              navigate(pathname.replace(clusterId, `${id}`))
+            }
             withoutTitleContent
           />
           <SideNavEntries
             directory={directory}
-            pathname={`${pathname}?${search}`}
+            pathname={pathname}
             pathPrefix={pathPrefix}
           />
         </div>
