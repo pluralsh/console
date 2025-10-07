@@ -23,13 +23,6 @@ export default defineConfig({
         configFile: false,
       },
     }),
-    // TODO(floreks): Enable once fixed
-    // VitePWA({
-    //   injectRegister: null,
-    //   filename: 'service-worker.ts',
-    //   srcDir: 'src',
-    //   strategies: 'injectManifest',
-    // }),
     tsconfigPaths({ loose: true }),
     pluginRewriteAll(), // Fix 404 error for urls with dots in their path
     sentryVitePlugin({
