@@ -21,6 +21,7 @@ type ConsoleClient interface {
 	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
 	UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error)
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
+	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -19846,6 +19847,17 @@ func (t *UpdateAgentRunTodos) GetUpdateAgentRunTodos() *AgentRunFragment {
 	return t.UpdateAgentRunTodos
 }
 
+type CreateAgentPullRequest struct {
+	AgentPullRequest *PullRequestFragment "json:\"agentPullRequest,omitempty\" graphql:\"agentPullRequest\""
+}
+
+func (t *CreateAgentPullRequest) GetAgentPullRequest() *PullRequestFragment {
+	if t == nil {
+		t = &CreateAgentPullRequest{}
+	}
+	return t.AgentPullRequest
+}
+
 type AddClusterAuditLog struct {
 	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
 }
@@ -23776,6 +23788,38 @@ func (c *Client) UpdateAgentRunTodos(ctx context.Context, id string, todos []*Ag
 
 	var res UpdateAgentRunTodos
 	if err := c.Client.Post(ctx, "UpdateAgentRunTodos", UpdateAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentPullRequestDocument = `mutation CreateAgentPullRequest ($runId: ID!, $attributes: AgentPullRequestAttributes!) {
+	agentPullRequest(runId: $runId, attributes: $attributes) {
+		... PullRequestFragment
+	}
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error) {
+	vars := map[string]any{
+		"runId":      runID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentPullRequest
+	if err := c.Client.Post(ctx, "CreateAgentPullRequest", CreateAgentPullRequestDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -41655,6 +41699,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunDocument:                            "UpdateAgentRun",
 	UpdateAgentRunAnalysisDocument:                    "UpdateAgentRunAnalysis",
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
+	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",
