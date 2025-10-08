@@ -143,7 +143,7 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
   defp maybe_query(q) when is_binary(q) and byte_size(q) > 0,
-    do: %{bool: %{must: %{match: %{message: %{query: q, analyzer: "whitespace"}}}}}
+    do: %{bool: %{must: %{match: %{message: %{query: q, analyzer: "stop"}}}}}
   defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) do

@@ -12,7 +12,8 @@ defmodule Console.AI.Cron do
     DeploymentSettings,
     ChatThread,
     McpServerAudit,
-    AgentRun
+    AgentRun,
+    SentinelRun
   }
 
   require Logger
@@ -36,6 +37,11 @@ defmodule Console.AI.Cron do
 
   def trim_runs() do
     AgentRun.expired()
+    |> Repo.delete_all()
+  end
+
+  def trim_sentinel_runs() do
+    SentinelRun.expired()
     |> Repo.delete_all()
   end
 

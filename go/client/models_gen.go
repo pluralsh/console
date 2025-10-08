@@ -498,6 +498,13 @@ type AiAnalysisRates struct {
 	Slow *int64 `json:"slow,omitempty"`
 }
 
+type AiApprovalAttributes struct {
+	Enabled      bool             `json:"enabled"`
+	IgnoreCancel bool             `json:"ignoreCancel"`
+	Git          GitRefAttributes `json:"git"`
+	File         string           `json:"file"`
+}
+
 type AiDelta struct {
 	Seq     int64      `json:"seq"`
 	Content string     `json:"content"`
@@ -6247,6 +6254,8 @@ type Sentinel struct {
 	Name string `json:"name"`
 	// the description of the sentinel
 	Description *string `json:"description,omitempty"`
+	// the status of the sentinel's last run
+	Status *SentinelRunStatus `json:"status,omitempty"`
 	// the git location for rules files from the associated repository
 	Git *GitRef `json:"git,omitempty"`
 	// the git repository to use for fetching rules files for AI enabled analysis
@@ -6254,9 +6263,13 @@ type Sentinel struct {
 	// the project of this sentinel
 	Project *Project `json:"project,omitempty"`
 	// the checks to run for this sentinel
-	Checks     []*SentinelCheck `json:"checks,omitempty"`
-	InsertedAt *string          `json:"insertedAt,omitempty"`
-	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+	Checks []*SentinelCheck `json:"checks,omitempty"`
+	// the last time this sentinel was run
+	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// the runs of this sentinel, do not query w/in list fields
+	Runs       *SentinelRunConnection `json:"runs,omitempty"`
+	InsertedAt *string                `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                `json:"updatedAt,omitempty"`
 }
 
 type SentinelAttributes struct {
@@ -6389,6 +6402,16 @@ type SentinelRun struct {
 	UpdatedAt  *string              `json:"updatedAt,omitempty"`
 }
 
+type SentinelRunConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*SentinelRunEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunEdge struct {
+	Node   *SentinelRun `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
+}
+
 type SentinelRunResult struct {
 	// the name of the check
 	Name *string `json:"name,omitempty"`
@@ -6396,6 +6419,13 @@ type SentinelRunResult struct {
 	Status SentinelRunStatus `json:"status"`
 	// the reason for the result
 	Reason *string `json:"reason,omitempty"`
+}
+
+type SentinelStatistic struct {
+	// the status of the sentinel
+	Status SentinelRunStatus `json:"status"`
+	// the count of the sentinel
+	Count int64 `json:"count"`
 }
 
 type Service struct {
@@ -6971,6 +7001,8 @@ type StackConfigurationAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
+	// the ai approval configuration for this stack
+	AiApproval *AiApprovalAttributes `json:"aiApproval,omitempty"`
 }
 
 type StackCron struct {
@@ -7132,6 +7164,8 @@ type StackRun struct {
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
+	// the result of the approval decision by the ai
+	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
@@ -7173,6 +7207,13 @@ type StackRun struct {
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
 	InsertedAt *string                 `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type StackRunApprovalResult struct {
+	// the reason for the approval decision by the ai
+	Reason *string `json:"reason,omitempty"`
+	// the result of the approval decision by the ai
+	Result *ApprovalResult `json:"result,omitempty"`
 }
 
 type StackRunAttributes struct {
@@ -8292,6 +8333,49 @@ func (e *AlertState) UnmarshalGQL(v any) error {
 }
 
 func (e AlertState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ApprovalResult string
+
+const (
+	ApprovalResultApproved      ApprovalResult = "APPROVED"
+	ApprovalResultRejected      ApprovalResult = "REJECTED"
+	ApprovalResultIndeterminate ApprovalResult = "INDETERMINATE"
+)
+
+var AllApprovalResult = []ApprovalResult{
+	ApprovalResultApproved,
+	ApprovalResultRejected,
+	ApprovalResultIndeterminate,
+}
+
+func (e ApprovalResult) IsValid() bool {
+	switch e {
+	case ApprovalResultApproved, ApprovalResultRejected, ApprovalResultIndeterminate:
+		return true
+	}
+	return false
+}
+
+func (e ApprovalResult) String() string {
+	return string(e)
+}
+
+func (e *ApprovalResult) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApprovalResult(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApprovalResult", str)
+	}
+	return nil
+}
+
+func (e ApprovalResult) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

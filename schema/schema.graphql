@@ -431,7 +431,9 @@ type RootQueryType {
 
   sentinel(id: ID, name: String): Sentinel
 
-  sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
+  sentinels(after: String, first: Int, before: String, last: Int, q: String, status: SentinelRunStatus): SentinelConnection
+
+  sentinelStatistics(q: String): [SentinelStatistic]
 
   sharedAgentRun(id: ID!): AgentRun
 
@@ -1717,6 +1719,9 @@ type Sentinel {
   "the description of the sentinel"
   description: String
 
+  "the status of the sentinel's last run"
+  status: SentinelRunStatus
+
   "the git location for rules files from the associated repository"
   git: GitRef
 
@@ -1728,6 +1733,12 @@ type Sentinel {
 
   "the checks to run for this sentinel"
   checks: [SentinelCheck]
+
+  "the last time this sentinel was run"
+  lastRunAt: DateTime
+
+  "the runs of this sentinel, do not query w\/in list fields"
+  runs(after: String, first: Int, before: String, last: Int): SentinelRunConnection
 
   insertedAt: DateTime
 
@@ -1822,9 +1833,22 @@ type SentinelRunResult {
   reason: String
 }
 
+type SentinelStatistic {
+  "the status of the sentinel"
+  status: SentinelRunStatus!
+
+  "the count of the sentinel"
+  count: Int!
+}
+
 type SentinelConnection {
   pageInfo: PageInfo!
   edges: [SentinelEdge]
+}
+
+type SentinelRunConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelRunEdge]
 }
 
 input FlowAttributes {
@@ -3037,6 +3061,12 @@ enum PolicyEngineType {
   TRIVY
 }
 
+enum ApprovalResult {
+  APPROVED
+  REJECTED
+  INDETERMINATE
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -3128,6 +3158,9 @@ input StackConfigurationAttributes {
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
+
+  "the ai approval configuration for this stack"
+  aiApproval: AiApprovalAttributes
 }
 
 input StackOverridesAttributes {
@@ -3163,6 +3196,13 @@ input AnsibleConfigurationAttributes {
 
   "additional args for the playbook"
   additionalArgs: [String]
+}
+
+input AiApprovalAttributes {
+  enabled: Boolean!
+  ignoreCancel: Boolean!
+  git: GitRefAttributes!
+  file: String!
 }
 
 input StackCronAttributes {
@@ -3570,6 +3610,9 @@ type StackRun {
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
 
+  "the result of the approval decision by the ai"
+  approvalResult: StackRunApprovalResult
+
   "Arbitrary variables to add to a stack run"
   variables: Map
 
@@ -3734,6 +3777,14 @@ type StackDefinition {
   steps: [CustomRunStep]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type StackRunApprovalResult {
+  "the reason for the approval decision by the ai"
+  reason: String
+
+  "the result of the approval decision by the ai"
+  result: ApprovalResult
 }
 
 type CustomRunStep {
@@ -11259,6 +11310,11 @@ type McpServerEdge {
 
 type FlowEdge {
   node: Flow
+  cursor: String
+}
+
+type SentinelRunEdge {
+  node: SentinelRun
   cursor: String
 }
 

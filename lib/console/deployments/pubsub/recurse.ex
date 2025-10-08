@@ -123,7 +123,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
            _ <- sleep(stack.repository),
            _ <- Discovery.kick(stack.repository),
         do: Stacks.poll(Repo.get(PullRequest, pr.id))
-    end, ttl: :timer.minutes(2))
+    end, ttl: :timer.seconds(30))
   end
 
   def process(_), do: :ok
@@ -162,6 +162,9 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
       _ -> :ok
     end
   end
+
+  def process(%@for{item: %StackRun{status: :pending_approval} = run}),
+    do: Stacks.ai_stack_run_approval(run)
 
   def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
     when is_binary(id) and status != :queued do

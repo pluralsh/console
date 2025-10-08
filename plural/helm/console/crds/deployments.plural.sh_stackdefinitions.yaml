@@ -53,6 +53,49 @@ spec:
                   Configuration allows customization of the stack execution environment,
                   including Docker image settings, version specifications, and execution hooks.
                 properties:
+                  aiApproval:
+                    description: AiApproval configuration for this stack to be auto-approved
+                      by AI according to rules sourced from Git.
+                    properties:
+                      enabled:
+                        description: Enabled indicates if AI approval is enabled for
+                          this stack.
+                        type: boolean
+                      file:
+                        description: File is the name of the rules file within the
+                          Git repository.
+                        type: string
+                      git:
+                        description: Git references the Git repository containing
+                          the rules file.
+                        properties:
+                          files:
+                            description: Optional files to add to the manifests for
+                              this service
+                            items:
+                              type: string
+                            type: array
+                          folder:
+                            description: Folder is the folder in the Git repository
+                              where the manifests are located.
+                            type: string
+                          ref:
+                            description: Ref is the Git reference (branch, tag, or
+                              commit) to use.
+                            type: string
+                        required:
+                        - folder
+                        - ref
+                        type: object
+                      ignoreCancel:
+                        description: IgnoreCancel indicates if the cancellation of
+                          a stack run should be ignored by AI.
+                        type: boolean
+                    required:
+                    - enabled
+                    - file
+                    - git
+                    type: object
                   ansible:
                     description: Ansible configuration for this stack.
                     properties:

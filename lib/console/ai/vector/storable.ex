@@ -156,14 +156,11 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.ServiceComponent.Mini do
   def content(%@for{} = mini) do
     base = base_content(mini)
 
-    with {:ok, svc_yaml} <- TU.yaml_encode(mini.service),
-         {:ok, children_yaml} <- TU.yaml_encode(mini.children) do
+    with {:ok, svc_yaml} <- TU.yaml_encode(mini.service) do
         """
         #{base}
         service:
         #{TU.indent(svc_yaml, 2)}
-        children:
-        #{TU.indent(children_yaml, 2)}
         """
     else
       _ -> base

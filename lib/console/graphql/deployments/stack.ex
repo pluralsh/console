@@ -1,14 +1,15 @@
 defmodule Console.GraphQl.Deployments.Stack do
   use Console.GraphQl.Schema.Base
-  alias Console.Schema.{Stack, RunStep}
+  alias Console.Schema.{Stack, RunStep, StackRun}
   alias Console.Deployments.Stacks
   alias Console.GraphQl.Resolvers.{Deployments, User}
 
-  ecto_enum :stack_status, Stack.Status
-  ecto_enum :stack_type, Stack.Type
-  ecto_enum :step_status, RunStep.Status
-  ecto_enum :step_stage, RunStep.Stage
+  ecto_enum :stack_status,       Stack.Status
+  ecto_enum :stack_type,         Stack.Type
+  ecto_enum :step_status,        RunStep.Status
+  ecto_enum :step_stage,         RunStep.Stage
   ecto_enum :policy_engine_type, Stack.PolicyEngine.Type
+  ecto_enum :approval_result,    StackRun.ApprovalResult
 
   input_object :stack_attributes do
     field :name,           non_null(:string), description: "the name of the stack"
@@ -42,12 +43,13 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :stack_configuration_attributes do
-    field :image,     :string, description: "optional custom image you might want to use"
-    field :version,   :string, description: "the semver of the tool you wish to use"
-    field :tag,       :string, description: "the docker image tag you wish to use if you're customizing the version"
-    field :hooks,     list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
-    field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
-    field :ansible,   :ansible_configuration_attributes, description: "the ansible configuration for this stack"
+    field :image,       :string, description: "optional custom image you might want to use"
+    field :version,     :string, description: "the semver of the tool you wish to use"
+    field :tag,         :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,       list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
+    field :terraform,   :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+    field :ansible,     :ansible_configuration_attributes, description: "the ansible configuration for this stack"
+    field :ai_approval, :ai_approval_attributes, description: "the ai approval configuration for this stack"
   end
 
   input_object :stack_overrides_attributes do
@@ -69,6 +71,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :playbook, :string, description: "the playbook to run"
     field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
     field :additional_args, list_of(:string), description: "additional args for the playbook"
+  end
+
+  input_object :ai_approval_attributes do
+    field :enabled,       non_null(:boolean)
+    field :ignore_cancel, non_null(:boolean)
+    field :git,           non_null(:git_ref_attributes)
+    field :file,          non_null(:string)
   end
 
   input_object :stack_cron_attributes do
@@ -316,6 +325,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :additional_args, list_of(:string), description: "Additional args for the playbook"
   end
 
+  object :ai_approval_configuration do
+    field :enabled,       :boolean
+    field :ignore_cancel, :boolean
+    field :git,           :git_ref
+    field :file,          :string
+  end
+
   object :stack_run do
     field :id,                  non_null(:id)
     field :status,              non_null(:stack_status), description: "The status of this run"
@@ -338,6 +354,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approved_at,         :datetime, description: "when this run was approved"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
+    field :approval_result,     :stack_run_approval_result, description: "the result of the approval decision by the ai"
     field :variables,           :map, description: "Arbitrary variables to add to a stack run", resolve: fn
       parent, _, context -> Deployments.safe_field(parent, :variables, context)
     end
@@ -471,6 +488,11 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :steps, list_of(:custom_run_step)
 
     timestamps()
+  end
+
+  object :stack_run_approval_result do
+    field :reason, :string, description: "the reason for the approval decision by the ai"
+    field :result, :approval_result, description: "the result of the approval decision by the ai"
   end
 
   object :custom_run_step do

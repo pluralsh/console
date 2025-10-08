@@ -62,7 +62,9 @@ defmodule Console.Deployments.Sentinels do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
       get_sentinel!(id)
+      |> Sentinel.changeset(%{last_run_at: DateTime.utc_now()})
       |> allow(user, :read)
+      |> when_ok(:update)
     end)
     |> add_operation(:run, fn %{fetch: sentinel} ->
       %SentinelRun{sentinel_id: sentinel.id, status: :pending}

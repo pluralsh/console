@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Sentinel.Runner do
   use GenServer
+  use Console.Services.Base
   alias Console.Repo
   alias Console.Schema.{Sentinel, SentinelRun, GitRepository}
   alias Console.Deployments.{Git.Discovery, Tar}
@@ -77,8 +78,16 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   defp do_update(attrs, %SentinelRun{} = run) do
-    SentinelRun.changeset(run, attrs)
-    |> Repo.update()
+    start_transaction()
+    |> add_operation(:sentinel, fn _ ->
+      Sentinel.changeset(run.sentinel, Map.take(attrs, [:status]))
+      |> Repo.update()
+    end)
+    |> add_operation(:run, fn _ ->
+      SentinelRun.changeset(run, attrs)
+      |> Repo.update()
+    end)
+    |> execute(extract: :run)
   end
 
   defp rule_files(%SentinelRun{sentinel: %Sentinel{repository: %GitRepository{} = repo, git: git}}) do

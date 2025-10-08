@@ -658,6 +658,13 @@ export type AiAnalysisRates = {
   slow?: Maybe<Scalars['Int']['output']>;
 };
 
+export type AiApprovalAttributes = {
+  enabled: Scalars['Boolean']['input'];
+  file: Scalars['String']['input'];
+  git: GitRefAttributes;
+  ignoreCancel: Scalars['Boolean']['input'];
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -946,6 +953,12 @@ export type AppNotificationEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AppNotification>;
 };
+
+export enum ApprovalResult {
+  Approved = 'APPROVED',
+  Indeterminate = 'INDETERMINATE',
+  Rejected = 'REJECTED'
+}
 
 export type ArgoAnalysis = {
   __typename?: 'ArgoAnalysis';
@@ -8887,6 +8900,7 @@ export type RootQueryType = {
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
+  sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
   sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
@@ -9945,12 +9959,18 @@ export type RootQueryTypeSentinelArgs = {
 };
 
 
+export type RootQueryTypeSentinelStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeSentinelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<SentinelRunStatus>;
 };
 
 
@@ -10406,13 +10426,27 @@ export type Sentinel = {
   /** the id of the sentinel */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this sentinel was run */
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the sentinel */
   name: Scalars['String']['output'];
   /** the project of this sentinel */
   project?: Maybe<Project>;
   /** the git repository to use for fetching rules files for AI enabled analysis */
   repository?: Maybe<GitRepository>;
+  /** the runs of this sentinel, do not query w/in list fields */
+  runs?: Maybe<SentinelRunConnection>;
+  /** the status of the sentinel's last run */
+  status?: Maybe<SentinelRunStatus>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SentinelRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SentinelAttributes = {
@@ -10557,6 +10591,18 @@ export type SentinelRun = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type SentinelRunConnection = {
+  __typename?: 'SentinelRunConnection';
+  edges?: Maybe<Array<Maybe<SentinelRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelRunEdge = {
+  __typename?: 'SentinelRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<SentinelRun>;
+};
+
 export type SentinelRunResult = {
   __typename?: 'SentinelRunResult';
   /** the name of the check */
@@ -10572,6 +10618,14 @@ export enum SentinelRunStatus {
   Pending = 'PENDING',
   Success = 'SUCCESS'
 }
+
+export type SentinelStatistic = {
+  __typename?: 'SentinelStatistic';
+  /** the count of the sentinel */
+  count: Scalars['Int']['output'];
+  /** the status of the sentinel */
+  status: SentinelRunStatus;
+};
 
 export type Service = {
   __typename?: 'Service';
@@ -11249,6 +11303,8 @@ export type StackConfiguration = {
 };
 
 export type StackConfigurationAttributes = {
+  /** the ai approval configuration for this stack */
+  aiApproval?: InputMaybe<AiApprovalAttributes>;
   /** the ansible configuration for this stack */
   ansible?: InputMaybe<AnsibleConfigurationAttributes>;
   /** the hooks to customize execution for this stack */
@@ -11413,6 +11469,8 @@ export type StackRun = {
   actor?: Maybe<User>;
   /** whether to require approval */
   approval?: Maybe<Scalars['Boolean']['output']>;
+  /** the result of the approval decision by the ai */
+  approvalResult?: Maybe<StackRunApprovalResult>;
   /** when this run was approved */
   approvedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the approver of this job */
@@ -11474,6 +11532,14 @@ export type StackRun = {
   violations?: Maybe<Array<Maybe<StackPolicyViolation>>>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
+};
+
+export type StackRunApprovalResult = {
+  __typename?: 'StackRunApprovalResult';
+  /** the reason for the approval decision by the ai */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** the result of the approval decision by the ai */
+  result?: Maybe<ApprovalResult>;
 };
 
 export type StackRunAttributes = {

@@ -121,6 +121,25 @@ _Appears in:_
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: \{\} <br /> |
 
 
+#### AiApprovalConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled indicates if AI approval is enabled for this stack. |  | Required: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git references the Git repository containing the rules file. |  | Required: \{\} <br /> |
+| `file` _string_ | File is the name of the rules file within the Git repository. |  | Required: \{\} <br /> |
+| `ignoreCancel` _boolean_ | IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI. |  | Optional: \{\} <br /> |
+
+
 #### AnalysisRates
 
 
@@ -1523,6 +1542,7 @@ GitRef represents a reference to a Git repository.
 
 
 _Appears in:_
+- [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
 - [ServiceHelm](#servicehelm)
@@ -4272,6 +4292,7 @@ _Appears in:_
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
+| `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
 
 #### StackCron
