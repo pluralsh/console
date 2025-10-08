@@ -1,19 +1,15 @@
-import {
-  Flex,
-  LightDarkSwitch,
-  setThemeColorMode,
-} from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
-import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './HeaderProjectSelect'
+import { ProfileMenu } from './ProfileMenu'
 
 const APP_ICON_LIGHT = '/plural-logo.png'
 const APP_ICON_DARK = '/plural-logo-white.png'
@@ -26,7 +22,7 @@ const HeaderSC = styled.div(({ theme }) => ({
 const HeaderContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.small,
   padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
 }))
 
@@ -54,15 +50,9 @@ export default function Header() {
         <ProjectSelect />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
-        <BillingSubscriptionChip />
         <NotificationsLauncher />
-        <LightDarkSwitch
-          checked={theme.mode === 'dark'}
-          onChange={(val) => {
-            setThemeColorMode(val ? 'dark' : 'light')
-          }}
-        />
         <ChatbotLauncher />
+        <ProfileMenu />
       </HeaderContentSC>
     </HeaderSC>
   )
