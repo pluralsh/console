@@ -74,6 +74,7 @@
     import_fields :sentinel_queries
     import_fields :agent_queries
     import_fields :public_agent_queries
+    import_fields :public_sentinel_queries
   end
 
   object :deployment_mutations do
@@ -98,6 +99,7 @@
     import_fields :sentinel_mutations
     import_fields :agent_mutations
     import_fields :public_agent_mutations
+    import_fields :public_sentinel_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

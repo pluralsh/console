@@ -56,4 +56,25 @@ defmodule Console.GraphQl.Deployments.SentinelMutationsTest do
       refute refetch(sentinel)
     end
   end
+
+  describe "updateSentinelRunJob" do
+    test "it can update a sentinel run job" do
+      sentinel_run_job = insert(:sentinel_run_job)
+
+      {:ok, %{data: %{"updateSentinelRunJob" => updated}}} = run_query("""
+        mutation SentinelRunJobUpdate($id: ID!, $attributes: SentinelRunJobUpdateAttributes!) {
+          updateSentinelRunJob(id: $id, attributes: $attributes) {
+            id
+            status
+          }
+        }
+      """, %{
+        "id" => sentinel_run_job.id,
+        "attributes" => %{"status" => "SUCCESS"}
+      }, %{cluster: sentinel_run_job.cluster})
+
+      assert updated["id"] == sentinel_run_job.id
+      assert updated["status"] == "SUCCESS"
+    end
+  end
 end

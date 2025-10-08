@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Sentinels
-  alias Console.Schema.{Sentinel, SentinelRun}
+  alias Console.Schema.{Sentinel, SentinelRun, SentinelRunJob}
 
   def sentinel(%{id: id}, ctx) when is_binary(id) do
     Sentinels.get_sentinel!(id)
@@ -36,6 +36,24 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
     |> paginate(args)
   end
 
+  def sentinel_run(%{id: id}, ctx) do
+    Sentinels.get_sentinel_run!(id)
+    |> allow(actor(ctx), :read)
+  end
+
+  def sentinel_run_jobs(%{id: id}, args, _) do
+    SentinelRunJob.for_sentinel_run(id)
+    |> SentinelRunJob.ordered()
+    |> paginate(args)
+  end
+
+  def cluster_sentinel_run_jobs(args, %{context: %{cluster: cluster}}) do
+    SentinelRunJob.for_cluster(cluster.id)
+    |> SentinelRunJob.pending()
+    |> SentinelRunJob.ordered()
+    |> paginate(args)
+  end
+
   def create_sentinel(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Sentinels.create_sentinel(attrs, user)
 
@@ -47,6 +65,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
 
   def run_sentinel(%{id: id}, %{context: %{current_user: user}}),
     do: Sentinels.run_sentinel(id, user)
+
+  def update_sentinel_run_job(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
+    do: Sentinels.update_sentinel_job(attrs, id, cluster)
 
   def sentinel_filters(query, args) do
     Enum.reduce(args, query, fn

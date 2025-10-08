@@ -1051,6 +1051,15 @@ defmodule Console.Factory do
     }
   end
 
+  def sentinel_run_job_factory do
+    %Schema.SentinelRunJob{
+      check: "test",
+      sentinel_run: build(:sentinel_run),
+      cluster: build(:cluster),
+      job: %{namespace: "test"}
+    }
+  end
+
   def agent_runtime_factory do
     %Schema.AgentRuntime{
       name: sequence(:agent_runtime, & "agent-runtime-#{&1}"),

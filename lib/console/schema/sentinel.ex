@@ -1,9 +1,19 @@
 defmodule Console.Schema.Sentinel do
   use Console.Schema.Base
-  alias Console.Schema.{SentinelRun, GitRepository, Service, Project, PolicyBinding, User}
+  alias Console.Schema.{
+    SentinelRun,
+    SentinelRunJob,
+    GitRepository,
+    Service,
+    Cluster,
+    Project,
+    PolicyBinding,
+    User,
+    Gates.JobSpec
+  }
   alias Console.Deployments.Policies.Rbac
 
-  defenum CheckType, log: 0, kubernetes: 1
+  defenum CheckType, log: 0, kubernetes: 1, integration_test: 2
 
   schema "sentinels" do
     field :name,        :string
@@ -41,6 +51,14 @@ defmodule Console.Schema.Sentinel do
           field :name,       :string
           field :namespace,  :string
           field :cluster_id, :binary_id
+        end
+
+        embeds_one :integration_test, IntegrationTestConfiguration, on_replace: :update do
+          embeds_one :job, JobSpec, on_replace: :update
+
+          field :format, SentinelRunJob.Format
+          field :tags,   :map
+          field :distro, Cluster.Distro
         end
       end
     end
@@ -99,6 +117,7 @@ defmodule Console.Schema.Sentinel do
     |> cast(attrs, [])
     |> cast_embed(:log, with: &log_changeset/2)
     |> cast_embed(:kubernetes, with: &kubernetes_changeset/2)
+    |> cast_embed(:integration_test, with: &integration_test_changeset/2)
   end
 
   defp log_changeset(model, attrs) do
@@ -117,5 +136,12 @@ defmodule Console.Schema.Sentinel do
     model
     |> cast(attrs, ~w(group version kind name namespace cluster_id)a)
     |> validate_required(~w(version kind name cluster_id)a)
+  end
+
+  defp integration_test_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(tags distro)a)
+    |> cast_embed(:job)
+    |> validate_required(~w(tags distro)a)
   end
 end
