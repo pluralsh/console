@@ -21,6 +21,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
     |> paginate(args)
   end
 
+  def sentinel_statistics(args, %{context: %{current_user: user}}) do
+    Sentinel.for_user(user)
+    |> sentinel_filters(args)
+    |> maybe_search(Sentinel, args)
+    |> Sentinel.statuses()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def sentinel_runs(%{id: id}, args, _) do
     SentinelRun.for_sentinel(id)
     |> SentinelRun.ordered()

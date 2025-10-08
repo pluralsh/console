@@ -6421,6 +6421,13 @@ type SentinelRunResult struct {
 	Reason *string `json:"reason,omitempty"`
 }
 
+type SentinelStatistic struct {
+	// the status of the sentinel
+	Status SentinelRunStatus `json:"status"`
+	// the count of the sentinel
+	Count int64 `json:"count"`
+}
+
 type Service struct {
 	Metadata Metadata      `json:"metadata"`
 	Status   ServiceStatus `json:"status"`

@@ -8900,6 +8900,7 @@ export type RootQueryType = {
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
+  sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
   sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
@@ -9958,6 +9959,11 @@ export type RootQueryTypeSentinelArgs = {
 };
 
 
+export type RootQueryTypeSentinelStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeSentinelsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -10612,6 +10618,14 @@ export enum SentinelRunStatus {
   Pending = 'PENDING',
   Success = 'SUCCESS'
 }
+
+export type SentinelStatistic = {
+  __typename?: 'SentinelStatistic';
+  /** the count of the sentinel */
+  count: Scalars['Int']['output'];
+  /** the status of the sentinel */
+  status: SentinelRunStatus;
+};
 
 export type Service = {
   __typename?: 'Service';

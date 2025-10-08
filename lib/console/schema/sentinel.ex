@@ -68,6 +68,10 @@ defmodule Console.Schema.Sentinel do
     from(s in query, where: ilike(s.name, ^"%#{search}%"))
   end
 
+  def statuses(query \\ __MODULE__) do
+    from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(s in query, order_by: ^order)
   end

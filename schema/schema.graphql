@@ -433,6 +433,8 @@ type RootQueryType {
 
   sentinels(after: String, first: Int, before: String, last: Int, q: String, status: SentinelRunStatus): SentinelConnection
 
+  sentinelStatistics(q: String): [SentinelStatistic]
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
@@ -1829,6 +1831,14 @@ type SentinelRunResult {
 
   "the reason for the result"
   reason: String
+}
+
+type SentinelStatistic {
+  "the status of the sentinel"
+  status: SentinelRunStatus!
+
+  "the count of the sentinel"
+  count: Int!
 }
 
 type SentinelConnection {

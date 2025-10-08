@@ -106,6 +106,11 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :reason,    :string, description: "the reason for the result"
   end
 
+  object :sentinel_statistic do
+    field :status, non_null(:sentinel_run_status), description: "the status of the sentinel"
+    field :count,  non_null(:integer), description: "the count of the sentinel"
+  end
+
   connection node_type: :sentinel
   connection node_type: :sentinel_run
 
@@ -124,6 +129,13 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       arg :status, :sentinel_run_status
 
       resolve &Deployments.sentinels/2
+    end
+
+    field :sentinel_statistics, list_of(:sentinel_statistic) do
+      middleware Authenticated
+      arg :q, :string
+
+      resolve &Deployments.sentinel_statistics/2
     end
   end
 

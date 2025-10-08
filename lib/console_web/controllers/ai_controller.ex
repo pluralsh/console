@@ -75,5 +75,7 @@ defmodule ConsoleWeb.AIController do
   defp add_nginx_headers(conn) do
     conn
     |> put_resp_header("x-accel-buffering", "no")
+    |> put_resp_header("cache-control", "no-cache")
+    |> put_resp_header("connection", "keep-alive")
   end
 end
