@@ -66,5 +66,49 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
 
       assert refetch(sentinel).status == :success
     end
+
+    test "it can handle integration test sentinels appropriately" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      sentinel = insert(:sentinel,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        checks: [
+          %{
+            type: :integration_test,
+            name: "integration_test",
+            rule_file: "values.yaml",
+            tags: %{"tier" => "dev"},
+            configuration: %{
+              integration_test: %{
+                namespace: "kube-system",
+                command: "echo 'hello'",
+              }
+            }
+          }
+        ]
+      )
+
+      insert_list(2, :cluster, tags: [%{name: "tier", value: "dev"}])
+      run = insert(:sentinel_run, sentinel: sentinel)
+
+      {:ok, pid} = Runner.start(refetch(run))
+
+      :timer.sleep(:timer.seconds(10))
+      Console.Repo.update_all(Console.Schema.SentinelRunJob, set: [status: :success])
+
+      case Console.await(pid, :timer.seconds(60)) do
+        :ok -> :ok
+        :timeout -> flunk("timeout waiting for sentinel run to finish")
+      end
+
+      run = refetch(run)
+      assert run.status == :success
+      [status] = run.results
+
+      assert status.status == :success
+      assert status.job_count        == 2
+      assert status.successful_count == 2
+      assert status.failed_count     == 0
+    end
   end
 end

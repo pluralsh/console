@@ -431,6 +431,8 @@ type RootQueryType {
 
   sentinel(id: ID, name: String): Sentinel
 
+  sentinelRun(id: ID): SentinelRun
+
   sentinels(after: String, first: Int, before: String, last: Int, q: String, status: SentinelRunStatus): SentinelConnection
 
   sentinelStatistics(q: String): [SentinelStatistic]
@@ -444,6 +446,8 @@ type RootQueryType {
   agentRuntime(id: ID!): AgentRuntime
 
   agentRun(id: ID!): AgentRun
+
+  clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
   aiInsight(id: ID!): AiInsight
 
@@ -1035,6 +1039,8 @@ type RootMutationType {
 
   updateAgentRun(id: ID!, attributes: AgentRunStatusAttributes!): AgentRun
 
+  updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1622,12 +1628,25 @@ type AgentRunConnection {
 enum SentinelCheckType {
   LOG
   KUBERNETES
+  INTEGRATION_TEST
 }
 
 enum SentinelRunStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum SentinelRunJobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum SentinelRunJobFormat {
+  PLAINTEXT
+  JUNIT
 }
 
 input SentinelAttributes {
@@ -1670,6 +1689,9 @@ input SentinelCheckConfigurationAttributes {
 
   "the kubernetes configuration to use for this check"
   kubernetes: SentinelCheckKubernetesConfigurationAttributes
+
+  "the integration test configuration to use for this check"
+  integrationTest: SentinelCheckIntegrationTestConfigurationAttributes
 }
 
 input SentinelCheckLogConfigurationAttributes {
@@ -1707,6 +1729,28 @@ input SentinelCheckKubernetesConfigurationAttributes {
 
   "the cluster to run the query against"
   clusterId: ID!
+}
+
+input SentinelCheckIntegrationTestConfigurationAttributes {
+  "the job to run for this check"
+  job: GateJobAttributes
+
+  "the distro to run the check on"
+  distro: ClusterDistro
+
+  "the cluster tags to select where to run this job"
+  tags: Json
+}
+
+input SentinelRunJobUpdateAttributes {
+  "the status of the job"
+  status: SentinelRunJobStatus
+
+  "the reference to the job that was run"
+  reference: NamespacedName
+
+  "the output of the job"
+  output: String
 }
 
 type Sentinel {
@@ -1817,6 +1861,8 @@ type SentinelRun {
   "the results of the run"
   results: [SentinelRunResult]
 
+  jobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1831,6 +1877,15 @@ type SentinelRunResult {
 
   "the reason for the result"
   reason: String
+
+  "the number of jobs that were run"
+  jobCount: Int
+
+  "the number of jobs that were successful"
+  successfulCount: Int
+
+  "the number of jobs that failed"
+  failedCount: Int
 }
 
 type SentinelStatistic {
@@ -1841,6 +1896,39 @@ type SentinelStatistic {
   count: Int!
 }
 
+type SentinelRunJob {
+  "the id of the job"
+  id: String!
+
+  "the status of the job"
+  status: SentinelRunJobStatus!
+
+  "the format of the job"
+  format: SentinelRunJobFormat!
+
+  "the check that was run"
+  check: String
+
+  "the output of the job"
+  output: String
+
+  "the job that was run"
+  job: JobGateSpec
+
+  "the reference to the job that was run"
+  reference: JobReference
+
+  "the cluster that the job was run on"
+  cluster: Cluster
+
+  "the run that the job was run on"
+  sentinelRun: SentinelRun
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type SentinelConnection {
   pageInfo: PageInfo!
   edges: [SentinelEdge]
@@ -1849,6 +1937,11 @@ type SentinelConnection {
 type SentinelRunConnection {
   pageInfo: PageInfo!
   edges: [SentinelRunEdge]
+}
+
+type SentinelRunJobConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelRunJobEdge]
 }
 
 input FlowAttributes {
@@ -11310,6 +11403,11 @@ type McpServerEdge {
 
 type FlowEdge {
   node: Flow
+  cursor: String
+}
+
+type SentinelRunJobEdge {
+  node: SentinelRunJob
   cursor: String
 }
 

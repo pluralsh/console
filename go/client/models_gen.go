@@ -6323,6 +6323,17 @@ type SentinelCheckConfigurationAttributes struct {
 	Log *SentinelCheckLogConfigurationAttributes `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfigurationAttributes `json:"kubernetes,omitempty"`
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfigurationAttributes `json:"integrationTest,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfigurationAttributes struct {
+	// the job to run for this check
+	Job *GateJobAttributes `json:"job,omitempty"`
+	// the distro to run the check on
+	Distro *ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags *string `json:"tags,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {
@@ -6397,9 +6408,10 @@ type SentinelRun struct {
 	// the sentinel that was run
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
-	Results    []*SentinelRunResult `json:"results,omitempty"`
-	InsertedAt *string              `json:"insertedAt,omitempty"`
-	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+	Results    []*SentinelRunResult      `json:"results,omitempty"`
+	Jobs       *SentinelRunJobConnection `json:"jobs,omitempty"`
+	InsertedAt *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
 }
 
 type SentinelRunConnection struct {
@@ -6412,6 +6424,48 @@ type SentinelRunEdge struct {
 	Cursor *string      `json:"cursor,omitempty"`
 }
 
+type SentinelRunJob struct {
+	// the id of the job
+	ID string `json:"id"`
+	// the status of the job
+	Status SentinelRunJobStatus `json:"status"`
+	// the format of the job
+	Format SentinelRunJobFormat `json:"format"`
+	// the check that was run
+	Check *string `json:"check,omitempty"`
+	// the output of the job
+	Output *string `json:"output,omitempty"`
+	// the job that was run
+	Job *JobGateSpec `json:"job,omitempty"`
+	// the reference to the job that was run
+	Reference *JobReference `json:"reference,omitempty"`
+	// the cluster that the job was run on
+	Cluster *Cluster `json:"cluster,omitempty"`
+	// the run that the job was run on
+	SentinelRun *SentinelRun `json:"sentinelRun,omitempty"`
+	InsertedAt  *string      `json:"insertedAt,omitempty"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunJobConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*SentinelRunJobEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunJobEdge struct {
+	Node   *SentinelRunJob `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+type SentinelRunJobUpdateAttributes struct {
+	// the status of the job
+	Status *SentinelRunJobStatus `json:"status,omitempty"`
+	// the reference to the job that was run
+	Reference *NamespacedName `json:"reference,omitempty"`
+	// the output of the job
+	Output *string `json:"output,omitempty"`
+}
+
 type SentinelRunResult struct {
 	// the name of the check
 	Name *string `json:"name,omitempty"`
@@ -6419,6 +6473,12 @@ type SentinelRunResult struct {
 	Status SentinelRunStatus `json:"status"`
 	// the reason for the result
 	Reason *string `json:"reason,omitempty"`
+	// the number of jobs that were run
+	JobCount *int64 `json:"jobCount,omitempty"`
+	// the number of jobs that were successful
+	SuccessfulCount *int64 `json:"successfulCount,omitempty"`
+	// the number of jobs that failed
+	FailedCount *int64 `json:"failedCount,omitempty"`
 }
 
 type SentinelStatistic struct {
@@ -10618,18 +10678,20 @@ func (e ScmType) MarshalGQL(w io.Writer) {
 type SentinelCheckType string
 
 const (
-	SentinelCheckTypeLog        SentinelCheckType = "LOG"
-	SentinelCheckTypeKubernetes SentinelCheckType = "KUBERNETES"
+	SentinelCheckTypeLog             SentinelCheckType = "LOG"
+	SentinelCheckTypeKubernetes      SentinelCheckType = "KUBERNETES"
+	SentinelCheckTypeIntegrationTest SentinelCheckType = "INTEGRATION_TEST"
 )
 
 var AllSentinelCheckType = []SentinelCheckType{
 	SentinelCheckTypeLog,
 	SentinelCheckTypeKubernetes,
+	SentinelCheckTypeIntegrationTest,
 }
 
 func (e SentinelCheckType) IsValid() bool {
 	switch e {
-	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes:
+	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes, SentinelCheckTypeIntegrationTest:
 		return true
 	}
 	return false
@@ -10653,6 +10715,92 @@ func (e *SentinelCheckType) UnmarshalGQL(v any) error {
 }
 
 func (e SentinelCheckType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunJobFormat string
+
+const (
+	SentinelRunJobFormatPlaintext SentinelRunJobFormat = "PLAINTEXT"
+	SentinelRunJobFormatJunit     SentinelRunJobFormat = "JUNIT"
+)
+
+var AllSentinelRunJobFormat = []SentinelRunJobFormat{
+	SentinelRunJobFormatPlaintext,
+	SentinelRunJobFormatJunit,
+}
+
+func (e SentinelRunJobFormat) IsValid() bool {
+	switch e {
+	case SentinelRunJobFormatPlaintext, SentinelRunJobFormatJunit:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunJobFormat) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunJobFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunJobFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunJobFormat", str)
+	}
+	return nil
+}
+
+func (e SentinelRunJobFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunJobStatus string
+
+const (
+	SentinelRunJobStatusPending SentinelRunJobStatus = "PENDING"
+	SentinelRunJobStatusRunning SentinelRunJobStatus = "RUNNING"
+	SentinelRunJobStatusSuccess SentinelRunJobStatus = "SUCCESS"
+	SentinelRunJobStatusFailed  SentinelRunJobStatus = "FAILED"
+)
+
+var AllSentinelRunJobStatus = []SentinelRunJobStatus{
+	SentinelRunJobStatusPending,
+	SentinelRunJobStatusRunning,
+	SentinelRunJobStatusSuccess,
+	SentinelRunJobStatusFailed,
+}
+
+func (e SentinelRunJobStatus) IsValid() bool {
+	switch e {
+	case SentinelRunJobStatusPending, SentinelRunJobStatusRunning, SentinelRunJobStatusSuccess, SentinelRunJobStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunJobStatus) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunJobStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunJobStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunJobStatus", str)
+	}
+	return nil
+}
+
+func (e SentinelRunJobStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

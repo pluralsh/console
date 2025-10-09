@@ -4,6 +4,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
   ecto_enum :sentinel_check_type, Console.Schema.Sentinel.CheckType
   ecto_enum :sentinel_run_status, Console.Schema.SentinelRun.Status
+  ecto_enum :sentinel_run_job_status, Console.Schema.SentinelRunJob.Status
+  ecto_enum :sentinel_run_job_format, Console.Schema.SentinelRunJob.Format
 
   input_object :sentinel_attributes do
     field :name,          :string, description: "the name of the sentinel"
@@ -22,8 +24,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   input_object :sentinel_check_configuration_attributes do
-    field :log,        :sentinel_check_log_configuration_attributes, description: "the log configuration to use for this check"
-    field :kubernetes, :sentinel_check_kubernetes_configuration_attributes, description: "the kubernetes configuration to use for this check"
+    field :log,              :sentinel_check_log_configuration_attributes, description: "the log configuration to use for this check"
+    field :kubernetes,       :sentinel_check_kubernetes_configuration_attributes, description: "the kubernetes configuration to use for this check"
+    field :integration_test, :sentinel_check_integration_test_configuration_attributes, description: "the integration test configuration to use for this check"
   end
 
   input_object :sentinel_check_log_configuration_attributes do
@@ -41,6 +44,18 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :name,       non_null(:string), description: "the name to use when fetching this resource"
     field :namespace,  :string, description: "the namespace to use when fetching this resource"
     field :cluster_id, non_null(:id), description: "the cluster to run the query against"
+  end
+
+  input_object :sentinel_check_integration_test_configuration_attributes do
+    field :job,    :gate_job_attributes, description: "the job to run for this check"
+    field :distro, :cluster_distro, description: "the distro to run the check on"
+    field :tags,   :json, description: "the cluster tags to select where to run this job"
+  end
+
+  input_object :sentinel_run_job_update_attributes do
+    field :status,    :sentinel_run_job_status, description: "the status of the job"
+    field :reference, :namespaced_name, description: "the reference to the job that was run"
+    field :output,    :string, description: "the output of the job"
   end
 
   object :sentinel do
@@ -92,18 +107,25 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   object :sentinel_run do
-    field :id,            non_null(:string), description: "the id of the run"
-    field :status,        non_null(:sentinel_run_status), description: "the status of the run"
-    field :sentinel,      :sentinel, resolve: dataloader(Deployments), description: "the sentinel that was run"
-    field :results,       list_of(:sentinel_run_result), description: "the results of the run"
+    field :id,               non_null(:string), description: "the id of the run"
+    field :status,           non_null(:sentinel_run_status), description: "the status of the run"
+    field :sentinel,         :sentinel, resolve: dataloader(Deployments), description: "the sentinel that was run"
+    field :results,          list_of(:sentinel_run_result), description: "the results of the run"
+
+    connection field :jobs, node_type: :sentinel_run_job do
+      resolve &Deployments.sentinel_run_jobs/3
+    end
 
     timestamps()
   end
 
   object :sentinel_run_result do
-    field :name,      :string, description: "the name of the check"
-    field :status,    non_null(:sentinel_run_status), description: "the status of the result"
-    field :reason,    :string, description: "the reason for the result"
+    field :name,             :string, description: "the name of the check"
+    field :status,           non_null(:sentinel_run_status), description: "the status of the result"
+    field :reason,           :string, description: "the reason for the result"
+    field :job_count,        :integer, description: "the number of jobs that were run"
+    field :successful_count, :integer, description: "the number of jobs that were successful"
+    field :failed_count,     :integer, description: "the number of jobs that failed"
   end
 
   object :sentinel_statistic do
@@ -111,8 +133,43 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :count,  non_null(:integer), description: "the count of the sentinel"
   end
 
+  object :sentinel_run_job do
+    field :id,            non_null(:string), description: "the id of the job"
+    field :status,        non_null(:sentinel_run_job_status), description: "the status of the job"
+    field :format,        non_null(:sentinel_run_job_format), description: "the format of the job"
+    field :check,         :string, description: "the check that was run"
+    field :output,        :string, description: "the output of the job"
+
+    field :job,           :job_gate_spec, description: "the job that was run"
+    field :reference,     :job_reference, description: "the reference to the job that was run"
+
+    field :cluster,       :cluster, resolve: dataloader(Deployments), description: "the cluster that the job was run on"
+    field :sentinel_run,  :sentinel_run, resolve: dataloader(Deployments), description: "the run that the job was run on"
+
+    timestamps()
+  end
+
   connection node_type: :sentinel
   connection node_type: :sentinel_run
+  connection node_type: :sentinel_run_job
+
+  object :public_sentinel_queries do
+    connection field :cluster_sentinel_run_jobs, node_type: :sentinel_run_job do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.cluster_sentinel_run_jobs/2
+    end
+  end
+
+  object :public_sentinel_mutations do
+    field :update_sentinel_run_job, :sentinel_run_job do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :attributes, :sentinel_run_job_update_attributes
+
+      resolve &Deployments.update_sentinel_run_job/2
+    end
+  end
 
   object :sentinel_queries do
     field :sentinel, :sentinel do
@@ -121,6 +178,13 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       arg :name, :string
 
       resolve &Deployments.sentinel/2
+    end
+
+    field :sentinel_run, :sentinel_run do
+      middleware Authenticated
+      arg :id, :id
+
+      resolve &Deployments.sentinel_run/2
     end
 
     connection field :sentinels, node_type: :sentinel do
