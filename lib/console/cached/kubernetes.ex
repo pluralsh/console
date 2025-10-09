@@ -3,7 +3,7 @@ defmodule Console.Cached.Kubernetes do
   alias Kazan.Watcher
   require Logger
 
-  defmodule State, do: defstruct [:table, :model, :pid, :callback, :key, :monitor]
+  defmodule State, do: defstruct [:table, :model, :pid, :callback, :key, :monitor, :request, :timer]
 
   def start_link(name, request, model, callback \\ nil, key \\ & &1.metadata.name) do
     GenServer.start_link(__MODULE__, {request, name, model, callback, key}, name: name)
@@ -15,6 +15,7 @@ defmodule Console.Cached.Kubernetes do
 
   def init({request, name, model, callback, key}) do
     if Console.conf(:initialize) do
+      Logger.info "boostrapping watcher for #{model}"
       send self(), {:start, request}
     end
     table = :ets.new(name, [:ordered_set, :named_table, :protected, read_concurrency: true])
@@ -51,19 +52,18 @@ defmodule Console.Cached.Kubernetes do
   def handle_info({:start, request}, %State{table: table, model: model, key: key, pid: old} = state) do
     Logger.info "starting #{model} watcher"
 
-    with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
+    with _ <- maybe_kill(old),
+         {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
          {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
-      maybe_kill(old)
-      :timer.send_interval(:timer.seconds(5), :watcher_ping)
       Process.send_after(self(), {:start, request}, :timer.minutes(30) + jitter())
       :ets.delete_all_objects(table)
       :ets.insert(table, Enum.map(instances, &{key.(&1), &1}))
-      {:noreply, %{state | pid: pid, table: table}}
+      {:noreply, start_timer(%{state | pid: pid, table: table})}
     else
       _err ->
         Logger.warning "did not start #{model} watcher for cache"
         Process.send_after(self(), {:start, request}, :timer.seconds(120))
-        {:noreply, state}
+        {:noreply, stop_timer(state)}
     end
   end
 
@@ -86,6 +86,18 @@ defmodule Console.Cached.Kubernetes do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  defp start_timer(%State{timer: nil} = state) do
+    {:ok, ref} = :timer.send_interval(:timer.seconds(5), :watcher_ping)
+    %{state | timer: ref}
+  end
+  defp start_timer(state), do: state
+
+  defp stop_timer(%State{timer: ref} = state) when not is_nil(ref) do
+    :timer.cancel(ref)
+    %{state | timer: nil}
+  end
+  defp stop_timer(state), do: state
 
   defp callback(event, %State{callback: back}) when is_function(back), do: back.(event)
   defp callback(_, _), do: :ok

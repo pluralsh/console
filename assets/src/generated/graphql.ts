@@ -8907,6 +8907,7 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
   sentinelRun?: Maybe<SentinelRun>;
+  sentinelRunJob?: Maybe<SentinelRunJob>;
   sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
   sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
@@ -9976,6 +9977,11 @@ export type RootQueryTypeSentinelArgs = {
 
 export type RootQueryTypeSentinelRunArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeSentinelRunJobArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

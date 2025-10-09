@@ -41,6 +41,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
     |> allow(actor(ctx), :read)
   end
 
+  def sentinel_run_job(%{id: id}, %{context: %{cluster: cluster}}) do
+    Sentinels.get_sentinel_run_job!(id)
+    |> allow(cluster, :read)
+  end
+
   def sentinel_run_jobs(%{id: id}, args, _) do
     SentinelRunJob.for_sentinel_run(id)
     |> SentinelRunJob.ordered()

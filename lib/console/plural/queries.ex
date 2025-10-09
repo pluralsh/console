@@ -159,6 +159,14 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @ping_cluster """
+    mutation PingCluster($attributes: ClusterPingAttributes!) {
+      pingCluster(attributes: $attributes) {
+        id
+      }
+    }
+  """
+
   @search_repositories """
     query SearchRepos($query: String!, $first: Int, $cursor: String) {
       repositories(q: $query, first: $first, after: $cursor, installed: false) {
@@ -324,6 +332,8 @@ defmodule Console.Plural.Queries do
   def create_message_mutation(), do: @create_message
 
   def create_queue_mutation(), do: @create_queue
+
+  def ping_cluster_mutation(), do: @ping_cluster
 
   def me_query(), do: @me_query
 

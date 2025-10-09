@@ -6,7 +6,7 @@ metadata:
     app: console
 {{ include "console.labels" . | indent 4 }}
 spec:
-  type: NodePort
+  type: {{ .Values.service.type }}
   ports:
   - port: 4369
     targetPort: epmd
