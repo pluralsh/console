@@ -22,6 +22,9 @@ defmodule Console.Deployments.Sentinels do
   def get_sentinel_run!(id), do: Repo.get!(SentinelRun, id)
   def get_sentinel_run(id), do: Repo.get(SentinelRun, id)
 
+  def get_sentinel_run_job!(id), do: Repo.get!(SentinelRunJob, id)
+  def get_sentinel_run_job(id), do: Repo.get(SentinelRunJob, id)
+
   def get_sentinel_by_name(name), do: Repo.get_by(Sentinel, name: name)
   def get_sentinel_by_name!(name), do: Repo.get_by!(Sentinel, name: name)
 

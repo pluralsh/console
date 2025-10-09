@@ -148,7 +148,7 @@ fullnameOverride: ""
 
 # service is used to configure Kubernetes service type and port for console
 service:
-  type: ClusterIP
+  type: NodePort
   port: 4000
 
 # dbPasswordSecret is not used in any of the templates

@@ -449,6 +449,8 @@ type RootQueryType {
 
   clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
+  sentinelRunJob(id: ID!): SentinelRunJob
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1281,9 +1283,6 @@ input AgentPullRequestAttributes {
 
   "the body of the pull request"
   body: String!
-
-  "the repository the agent will be working in"
-  repository: String!
 
   "the base branch of the pull request"
   base: String!

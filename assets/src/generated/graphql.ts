@@ -372,8 +372,6 @@ export type AgentPullRequestAttributes = {
   body: Scalars['String']['input'];
   /** the head branch of the pull request */
   head: Scalars['String']['input'];
-  /** the repository the agent will be working in */
-  repository: Scalars['String']['input'];
   /** the title of the pull request */
   title: Scalars['String']['input'];
 };
@@ -8909,6 +8907,7 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
   sentinelRun?: Maybe<SentinelRun>;
+  sentinelRunJob?: Maybe<SentinelRunJob>;
   sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
   sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
@@ -9978,6 +9977,11 @@ export type RootQueryTypeSentinelArgs = {
 
 export type RootQueryTypeSentinelRunArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeSentinelRunJobArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
