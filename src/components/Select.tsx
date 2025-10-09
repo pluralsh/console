@@ -373,12 +373,22 @@ function Select({
         e.stopPropagation()
       }}
     >
-      <HiddenSelect
-        state={state}
-        triggerRef={ref}
-        label={label}
-        name={name}
-      />
+      <div
+        aria-hidden="true"
+        css={{
+          // CAN BREAK TABLE VIRTUALIZATION WITHOUT THIS
+          // react aria changed this to 'fixed' here https://github.com/adobe/react-spectrum/commit/a98c2a5ef8e0ad971cc98025faf30b81bd5fd42f
+          // but since our tables calculate the range of all children for row height, that change made every measurement start from the top of the page in some cases
+          '& > *': { position: 'absolute !important' },
+        }}
+      >
+        <HiddenSelect
+          state={state}
+          triggerRef={ref}
+          label={label}
+          name={name}
+        />
+      </div>
       <Trigger
         buttonRef={triggerRef as unknown as RefObject<HTMLElement | null>}
         buttonElt={triggerButton}

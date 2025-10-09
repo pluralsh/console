@@ -13,12 +13,9 @@ export const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
     '0%': { backgroundPosition: '-250px 0' },
     '100%': { backgroundPosition: '250px 0' },
   },
-  maxWidth: '400px',
   width: '100%',
   span: {
     borderRadius: theme.borderRadiuses.medium,
-    maxWidth: '400px',
-    width: 'unset',
     minWidth: '150px',
     display: 'block',
     height: '12px',

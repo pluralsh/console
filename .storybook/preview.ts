@@ -1,6 +1,6 @@
-import { type Preview } from '@storybook/react'
-import { fn } from '@storybook/test'
-import { themes } from '@storybook/theming'
+import { type Preview } from '@storybook/react-vite'
+import { fn } from 'storybook/test'
+import { themes } from 'storybook/theming'
 
 import { DEFAULT_COLOR_MODE } from '../src/theme'
 import themeDecorator from '../src/ThemeDecorator'

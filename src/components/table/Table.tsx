@@ -306,7 +306,7 @@ function Table({
                           key={j}
                           $fillLevel={fillLevel}
                           $firstRow={i === 0}
-                          $padCells={padCells}
+                          $padCells={true}
                           $loose={loose}
                           $stickyColumn={stickyColumn}
                           $truncateColumn={false}
@@ -365,7 +365,7 @@ function Table({
                               key={i}
                               $fillLevel={fillLevel}
                               $firstRow={i === 0}
-                              $padCells={padCells}
+                              $padCells={true}
                               $loose={loose}
                               $stickyColumn={stickyColumn}
                               $truncateColumn={false}

@@ -104,10 +104,10 @@ const FlexSC = styled.div<{
   }) => ({
     display: 'flex',
     flexDirection: $direction,
-    flexWrap: typeof $wrap === 'boolean' ? 'wrap' : $wrap,
+    flexWrap: $wrap,
     flexBasis: $basis,
-    flexGrow: typeof $grow === 'boolean' ? 1 : $grow,
-    flexShrink: typeof $shrink === 'boolean' ? 1 : $shrink,
+    flexGrow: $grow,
+    flexShrink: $shrink,
     alignItems: $align,
     justifyContent: $justify,
     gap: theme.spacing[$gap] || 0,

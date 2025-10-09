@@ -23,14 +23,20 @@ import { useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
 import { type Key, type Node } from '@react-types/shared'
 
-export type BimodalSelectState<T = object> = SelectState<T> & {
+// TODO: we should probably revisit the conflicting typings/state management
+// we might be able to simplify a lot of this now that react-aria natively supports multi-select
+// or maybe should build a new Select and migrate incrementally
+export type BimodalSelectState<T = object> = SelectState<
+  T,
+  'single' | 'multiple'
+> & {
   selectedKeys: Set<Key>
   setSelectedKeys: any
   selectedItems: Node<T>[]
 }
 
 export type BimodalSelectProps<T> = Omit<
-  AriaSelectProps<T>,
+  AriaSelectProps<T, 'single' | 'multiple'>,
   'onSelectionChange'
 > &
   Omit<ListProps<T>, 'onSelectionChange'>
@@ -41,7 +47,8 @@ export type BimodalSelectProps<T> = Omit<
  * multiple selection state.
  */
 function useBimodalSelectState<T extends object>(
-  p: BimodalSelectProps<T> & Pick<AriaSelectProps<T>, 'onSelectionChange'>
+  p: BimodalSelectProps<T> &
+    Pick<AriaSelectProps<T, 'single' | 'multiple'>, 'onSelectionChange'>
 ): BimodalSelectState<T>
 function useBimodalSelectState<T extends object>(
   p: BimodalSelectProps<T> & Pick<ListProps<T>, 'onSelectionChange'>
@@ -143,6 +150,25 @@ function useBimodalSelectState<T extends object>({
     },
     isFocused,
     setFocused,
+    // following properties were recently added as required by react-aria, ultimately replacing old API
+    defaultSelectedKey: props.defaultSelectedKey ?? null,
+    value:
+      selectionMode === 'single'
+        ? selectedKey
+        : Array.from(listState.selectionManager.selectedKeys),
+    defaultValue:
+      selectionMode === 'single'
+        ? props.defaultSelectedKey ?? null
+        : props.selectedKeys
+        ? Array.from(props.selectedKeys)
+        : [],
+    setValue: (newValue) => {
+      if (selectionMode === 'single') setSelectedKey(newValue as Key)
+      else
+        listState.selectionManager.setSelectedKeys(
+          Array.isArray(newValue) ? new Set(newValue) : new Set<Key>()
+        )
+    },
   }
 }
 
