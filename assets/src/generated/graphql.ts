@@ -12814,7 +12814,7 @@ export type DeleteMcpServerMutationVariables = Exact<{
 
 export type DeleteMcpServerMutation = { __typename?: 'RootMutationType', deleteMcpServer?: { __typename?: 'McpServer', id: string } | null };
 
-export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null };
+export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null };
 
 export type SentinelCheckFragment = { __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null };
 
@@ -12826,10 +12826,11 @@ export type SentinelsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<SentinelRunStatus>;
 }>;
 
 
-export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null } | null } | null> | null } | null };
+export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null } | null } | null> | null } | null };
 
 export type SentinelQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -12837,7 +12838,24 @@ export type SentinelQueryVariables = Exact<{
 }>;
 
 
-export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null } | null };
+export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, checks?: Array<{ __typename?: 'SentinelCheck', id: string, name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null } | null } | null> | null } | null };
+
+export type SentinelRunsQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SentinelRunsQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, runs?: { __typename?: 'SentinelRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunEdge', node?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, updatedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus } | null> | null } | null } | null> | null } | null } | null };
+
+export type SentinelStatisticsQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SentinelStatisticsQuery = { __typename?: 'RootQueryType', sentinelStatistics?: Array<{ __typename?: 'SentinelStatistic', status: SentinelRunStatus, count: number } | null> | null };
 
 export type RunSentinelMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16326,21 +16344,6 @@ export const McpServerConnectionFragmentDoc = gql`
 }
     ${PageInfoFragmentDoc}
 ${McpServerFragmentDoc}`;
-export const GitRepositoryFragmentDoc = gql`
-    fragment GitRepository on GitRepository {
-  id
-  url
-  health
-  authMethod
-  editable
-  error
-  insertedAt
-  pulledAt
-  updatedAt
-  urlFormat
-  httpsPath
-}
-    `;
 export const SentinelCheckConfigurationFragmentDoc = gql`
     fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
   log {
@@ -16376,19 +16379,21 @@ export const SentinelFragmentDoc = gql`
   id
   name
   description
+  status
+  lastRunAt
   git {
     ref
     folder
   }
   repository {
-    ...GitRepository
+    id
+    url
   }
   checks {
     ...SentinelCheck
   }
 }
-    ${GitRepositoryFragmentDoc}
-${SentinelCheckFragmentDoc}`;
+    ${SentinelCheckFragmentDoc}`;
 export const SentinelRunFragmentDoc = gql`
     fragment SentinelRun on SentinelRun {
   id
@@ -17064,6 +17069,21 @@ export const ServiceDeploymentsRowFragmentDoc = gql`
 }
     ${ClusterMinimalFragmentDoc}
 ${AiInsightSummaryFragmentDoc}`;
+export const GitRepositoryFragmentDoc = gql`
+    fragment GitRepository on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
+  urlFormat
+  httpsPath
+}
+    `;
 export const ServiceTemplateWithoutConfigurationFragmentDoc = gql`
     fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
   contexts
@@ -20982,8 +21002,8 @@ export type DeleteMcpServerMutationHookResult = ReturnType<typeof useDeleteMcpSe
 export type DeleteMcpServerMutationResult = Apollo.MutationResult<DeleteMcpServerMutation>;
 export type DeleteMcpServerMutationOptions = Apollo.BaseMutationOptions<DeleteMcpServerMutation, DeleteMcpServerMutationVariables>;
 export const SentinelsDocument = gql`
-    query Sentinels($first: Int = 100, $after: String, $q: String) {
-  sentinels(first: $first, after: $after, q: $q) {
+    query Sentinels($first: Int = 100, $after: String, $q: String, $status: SentinelRunStatus) {
+  sentinels(first: $first, after: $after, q: $q, status: $status) {
     pageInfo {
       ...PageInfo
     }
@@ -21012,6 +21032,7 @@ ${SentinelFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      q: // value for 'q'
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -21072,6 +21093,101 @@ export type SentinelQueryHookResult = ReturnType<typeof useSentinelQuery>;
 export type SentinelLazyQueryHookResult = ReturnType<typeof useSentinelLazyQuery>;
 export type SentinelSuspenseQueryHookResult = ReturnType<typeof useSentinelSuspenseQuery>;
 export type SentinelQueryResult = Apollo.QueryResult<SentinelQuery, SentinelQueryVariables>;
+export const SentinelRunsDocument = gql`
+    query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
+  sentinel(id: $id, name: $name) {
+    id
+    runs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...SentinelRun
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${SentinelRunFragmentDoc}`;
+
+/**
+ * __useSentinelRunsQuery__
+ *
+ * To run a query within a React component, call `useSentinelRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSentinelRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSentinelRunsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useSentinelRunsQuery(baseOptions?: Apollo.QueryHookOptions<SentinelRunsQuery, SentinelRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SentinelRunsQuery, SentinelRunsQueryVariables>(SentinelRunsDocument, options);
+      }
+export function useSentinelRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SentinelRunsQuery, SentinelRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SentinelRunsQuery, SentinelRunsQueryVariables>(SentinelRunsDocument, options);
+        }
+export function useSentinelRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SentinelRunsQuery, SentinelRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SentinelRunsQuery, SentinelRunsQueryVariables>(SentinelRunsDocument, options);
+        }
+export type SentinelRunsQueryHookResult = ReturnType<typeof useSentinelRunsQuery>;
+export type SentinelRunsLazyQueryHookResult = ReturnType<typeof useSentinelRunsLazyQuery>;
+export type SentinelRunsSuspenseQueryHookResult = ReturnType<typeof useSentinelRunsSuspenseQuery>;
+export type SentinelRunsQueryResult = Apollo.QueryResult<SentinelRunsQuery, SentinelRunsQueryVariables>;
+export const SentinelStatisticsDocument = gql`
+    query SentinelStatistics($q: String) {
+  sentinelStatistics(q: $q) {
+    status
+    count
+  }
+}
+    `;
+
+/**
+ * __useSentinelStatisticsQuery__
+ *
+ * To run a query within a React component, call `useSentinelStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSentinelStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSentinelStatisticsQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useSentinelStatisticsQuery(baseOptions?: Apollo.QueryHookOptions<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>(SentinelStatisticsDocument, options);
+      }
+export function useSentinelStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>(SentinelStatisticsDocument, options);
+        }
+export function useSentinelStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>(SentinelStatisticsDocument, options);
+        }
+export type SentinelStatisticsQueryHookResult = ReturnType<typeof useSentinelStatisticsQuery>;
+export type SentinelStatisticsLazyQueryHookResult = ReturnType<typeof useSentinelStatisticsLazyQuery>;
+export type SentinelStatisticsSuspenseQueryHookResult = ReturnType<typeof useSentinelStatisticsSuspenseQuery>;
+export type SentinelStatisticsQueryResult = Apollo.QueryResult<SentinelStatisticsQuery, SentinelStatisticsQueryVariables>;
 export const RunSentinelDocument = gql`
     mutation RunSentinel($id: ID!) {
   runSentinel(id: $id) {
@@ -33146,6 +33262,8 @@ export const namedOperations = {
     GenerateMcpToken: 'GenerateMcpToken',
     Sentinels: 'Sentinels',
     Sentinel: 'Sentinel',
+    SentinelRuns: 'SentinelRuns',
+    SentinelStatistics: 'SentinelStatistics',
     ClusterAlerts: 'ClusterAlerts',
     ServiceAlerts: 'ServiceAlerts',
     Audits: 'Audits',
