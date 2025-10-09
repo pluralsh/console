@@ -51,26 +51,21 @@ export function AIThreads() {
       />
     )
 
-  const tableLoading = !data && loading
   return (
     <Table
       rowBg="raised"
       hideHeader
       fullHeightWrap
       virtualizeRows
+      padCells={false}
       data={filteredThreads}
       columns={columns}
-      loading={tableLoading}
+      loading={!data && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No threads found.' }}
-      // hacky, should update logic in DS
-      {...(tableLoading && {
-        '& td div, & td span': { width: '100%', maxWidth: '100%' },
-      })}
-      padCells={tableLoading}
     />
   )
 }

@@ -2,12 +2,15 @@ fragment Sentinel on Sentinel {
   id
   name
   description
+  status
+  lastRunAt
   git {
     ref
     folder
   }
   repository {
-    ...GitRepository
+    id
+    url
   }
   checks {
     ...SentinelCheck
@@ -53,8 +56,13 @@ fragment SentinelRun on SentinelRun {
   updatedAt
 }
 
-query Sentinels($first: Int = 100, $after: String, $q: String) {
-  sentinels(first: $first, after: $after, q: $q) {
+query Sentinels(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $status: SentinelRunStatus
+) {
+  sentinels(first: $first, after: $after, q: $q, status: $status) {
     pageInfo {
       ...PageInfo
     }
@@ -69,6 +77,29 @@ query Sentinels($first: Int = 100, $after: String, $q: String) {
 query Sentinel($id: ID, $name: String) {
   sentinel(id: $id, name: $name) {
     ...Sentinel
+  }
+}
+
+query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
+  sentinel(id: $id, name: $name) {
+    id
+    runs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...SentinelRun
+        }
+      }
+    }
+  }
+}
+
+query SentinelStatistics($q: String) {
+  sentinelStatistics(q: $q) {
+    status
+    count
   }
 }
 
