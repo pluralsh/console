@@ -117,7 +117,12 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     test "a user can create a pull request" do
       user    = insert(:user)
       runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
-      run     = insert(:agent_run, runtime: runtime, flow: insert(:flow), user: user)
+      run     = insert(:agent_run,
+        runtime: runtime,
+        flow: insert(:flow),
+        user: user,
+        repository: "https://github.com/pluralsh/console.git"
+      )
       insert(:scm_connection, default: true)
 
       expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "plrl/ai/pr-test" ->
@@ -136,7 +141,6 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
         "attrs" => %{
           "title" => "a pr",
           "body" => "a body",
-          "repository" => "https://github.com/pluralsh/console.git",
           "base" => "main",
           "head" => "plrl/ai/pr-test"
         }

@@ -39,7 +39,6 @@ defmodule Console.GraphQl.Deployments.Agent do
   input_object :agent_pull_request_attributes do
     field :title,      non_null(:string), description: "the title of the pull request"
     field :body,       non_null(:string), description: "the body of the pull request"
-    field :repository, non_null(:string), description: "the repository the agent will be working in"
     field :base,       non_null(:string), description: "the base branch of the pull request"
     field :head,       non_null(:string), description: "the head branch of the pull request"
   end

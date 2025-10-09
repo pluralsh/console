@@ -1282,9 +1282,6 @@ input AgentPullRequestAttributes {
   "the body of the pull request"
   body: String!
 
-  "the repository the agent will be working in"
-  repository: String!
-
   "the base branch of the pull request"
   base: String!
 

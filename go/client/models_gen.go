@@ -300,8 +300,6 @@ type AgentPullRequestAttributes struct {
 	Title string `json:"title"`
 	// the body of the pull request
 	Body string `json:"body"`
-	// the repository the agent will be working in
-	Repository string `json:"repository"`
 	// the base branch of the pull request
 	Base string `json:"base"`
 	// the head branch of the pull request

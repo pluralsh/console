@@ -372,8 +372,6 @@ export type AgentPullRequestAttributes = {
   body: Scalars['String']['input'];
   /** the head branch of the pull request */
   head: Scalars['String']['input'];
-  /** the repository the agent will be working in */
-  repository: Scalars['String']['input'];
   /** the title of the pull request */
   title: Scalars['String']['input'];
 };
