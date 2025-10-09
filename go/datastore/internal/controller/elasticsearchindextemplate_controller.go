@@ -78,7 +78,7 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
 		utils.MarkCondition(index.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return jitterRequeue(requeueDefault), nil
 	}
 
 	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {
@@ -113,9 +113,14 @@ func (r *ElasticSearchIndexTemplateReconciler) Reconcile(ctx context.Context, re
 }
 
 func (r *ElasticSearchIndexTemplateReconciler) createTemplateIndex(ctx context.Context, index v1alpha1.ElasticsearchIndexTemplate) error {
+	priority := 0
+	if index.Spec.Definition.Priority != nil {
+		priority = *index.Spec.Definition.Priority
+	}
 	indexTemplate := map[string]interface{}{
 		"index_patterns": index.Spec.Definition.IndexPatterns,
 		"template":       index.Spec.Definition.Template,
+		"priority":       priority,
 	}
 
 	body, err := json.Marshal(indexTemplate)

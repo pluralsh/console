@@ -20,10 +20,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -35,7 +32,7 @@ export const PIPELINES_CRUMBS = [
 ]
 
 export default function PipelineList() {
-  const theme = useTheme()
+  const { spacing, colors } = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
@@ -67,24 +64,23 @@ export default function PipelineList() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.small,
+        gap: spacing.small,
         height: '100%',
       }}
     >
-      <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
+      <div css={{ display: 'flex', minWidth: 0, gap: spacing.medium }}>
         <Input2
-          placeholder="Search"
+          placeholder="Search pipelines"
           startIcon={<SearchIcon />}
           showClearButton
           value={searchString}
           onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexGrow: 1 }}
+          css={{ flexGrow: 1, background: colors['fill-one'] }}
         />
       </div>
       <Table
         fullHeightWrap
         columns={columns}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={data?.pipelines?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

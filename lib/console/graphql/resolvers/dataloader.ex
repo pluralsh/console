@@ -7,8 +7,13 @@ defmodule Console.GraphQl.Resolvers.HelmRepositoryLoader do
   end
 
   def query(_, services) do
-    repos = fetch_repos()
-    Map.new(services, & {&1, repos[key(&1)]})
+    with_keys = Enum.map(services, & {&1, key(&1)})
+    case Enum.any?(with_keys, fn {_, key} -> not is_nil(key) end) do
+      true ->
+        repos = fetch_repos()
+        Map.new(with_keys, fn {svc, key} -> {svc, repos[key]} end)
+      false -> Map.new(services, & {&1, nil})
+    end
   end
 
   def fetch_repos() do

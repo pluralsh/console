@@ -1,21 +1,19 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
-import { AiInsight } from '../../../generated/graphql.ts'
-import { AIPinButton } from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
-import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 export function StackInsights() {
-  const { stack, refetch, loading } = useOutletContext() as StackOutletContextT
+  const { stack } = useOutletContext() as StackOutletContextT
 
   useSetBreadcrumbs(
     useMemo(
@@ -47,11 +45,7 @@ export function StackInsights() {
           justify="flex-end"
           gap="small"
         >
-          <IconFrameRefreshButton
-            loading={loading}
-            refetch={refetch}
-          />
-          <AIPinButton insight={stack.insight as AiInsight} />
+          {stack?.insight && <InsightRefresh insight={stack?.insight} />}
           <ChatWithAIButton
             floating
             insightId={stack?.insight?.id}

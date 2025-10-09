@@ -663,6 +663,22 @@ defmodule Console.Deployments.GitTest do
     end
   end
 
+  describe "#kick_observer/2" do
+    test "it can kick an observer" do
+      obs = insert(:observer)
+      now = Timex.now()
+      {:ok, kicked} = Git.kick_observer(obs.id, admin_user())
+
+      assert kicked.id == obs.id
+      assert Timex.after?(kicked.next_run_at, now)
+    end
+
+    test "randos cannot kick" do
+      obs = insert(:observer)
+      {:error, _} = Git.kick_observer(obs.id, insert(:user))
+    end
+  end
+
   describe "#delete_observer/2" do
     test "writers can delete observers" do
       obs = insert(:observer)
@@ -804,6 +820,30 @@ defmodule Console.Deployments.GitTest do
 
     test "randos cannot create" do
       {:error, _} = Git.upsert_governance(%{name: "governance", connection_id: insert(:scm_connection).id}, insert(:user))
+    end
+  end
+
+  describe "#auto_merge/1" do
+    test "it can auto merge a pull request" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", status: :open, approver: "someone@example.com")
+      expect(Tentacat.Pulls, :merge, fn _, "pluralsh", "console", "1", _ -> {:ok, %{"merged" => true}, :ok} end)
+
+      :ok = Git.auto_merge(pr)
+    end
+
+    test "it errors if the pr is not approved" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, status: :open, approver: nil, merge_cron: "*/5 * * * *")
+      {:error, _} = Git.auto_merge(pr)
+
+      assert refetch(pr).merge_attempt_at
+    end
+
+    test "it errors if the pr is in a terminal state" do
+      insert(:scm_connection, default: true)
+      pr = insert(:pull_request, status: :merged)
+      {:error, _} = Git.auto_merge(pr)
     end
   end
 

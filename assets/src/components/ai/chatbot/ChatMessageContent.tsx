@@ -1,42 +1,46 @@
 import {
   Accordion,
   AccordionItem,
-  AppIcon,
   Button,
   Card,
   CaretRightIcon,
+  CheckIcon,
   Chip,
   Code,
   Divider,
   DocumentIcon,
   FileIcon,
   Flex,
+  IconFrame,
   Markdown,
   PrQueueIcon,
-  WrapWithIf,
 } from '@pluralsh/design-system'
-
-import isJson from 'is-json'
-
-import styled, { useTheme } from 'styled-components'
+import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentSessionFragment,
   AiRole,
   ChatType,
   ChatTypeAttributes,
   PrAutomationFragment,
+  PrCallAttributes,
   useConfirmChatMutation,
   useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
+
+import isJson from 'is-json'
+import { ReactElement, useState } from 'react'
+
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
+import styled, { useTheme } from 'styled-components'
+import { iconUrl as getIconUrl } from 'utils/icon'
 import { ChatMessageActions } from './ChatMessage'
-import { iconUrl } from 'utils/icon'
-import { StackedText } from 'components/utils/table/StackedText'
-import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -44,7 +48,6 @@ type ChatMessageContentProps = {
   role?: AiRole
   threadId?: string
   showActions?: boolean
-  side?: 'left' | 'right'
   content: string
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
@@ -53,6 +56,7 @@ type ChatMessageContentProps = {
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
   highlightToolContent?: boolean
+  session?: Nullable<AgentSessionFragment>
 }
 
 export function ChatMessageContent({
@@ -61,7 +65,6 @@ export function ChatMessageContent({
   role,
   threadId,
   showActions,
-  side,
   content,
   type = ChatType.Text,
   attributes,
@@ -70,8 +73,8 @@ export function ChatMessageContent({
   confirmedAt,
   serverName,
   highlightToolContent = true,
+  session,
 }: ChatMessageContentProps) {
-  const { spacing } = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -79,7 +82,7 @@ export function ChatMessageContent({
           id={id}
           seq={seq}
           showActions={showActions}
-          side={side}
+          role={role}
           content={content}
           attributes={attributes}
         />
@@ -101,6 +104,7 @@ export function ChatMessageContent({
         <ImplementationPlanMessageContent
           content={content}
           threadId={threadId}
+          session={session}
         />
       )
     case ChatType.PrCall:
@@ -108,22 +112,16 @@ export function ChatMessageContent({
         <PrCallContent
           prAutomation={prAutomation}
           threadId={threadId}
+          session={session}
+          attributes={attributes?.prCall}
         />
       )
     case ChatType.Text:
     default:
       return (
-        <WrapWithIf
-          condition={!(role === AiRole.Assistant || role === AiRole.System)}
-          wrapper={
-            <Card
-              css={{ padding: spacing.medium }}
-              fillLevel={2}
-            />
-          }
-        >
+        <DefaultWrapperSC $role={role ?? AiRole.User}>
           <Markdown text={content ?? ''} />
-        </WrapWithIf>
+        </DefaultWrapperSC>
       )
   }
 }
@@ -132,14 +130,17 @@ function FileMessageContent({
   id,
   seq,
   showActions,
-  side,
+  role,
   content,
   attributes,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
+  const theme = useTheme()
   const fileName = attributes?.file?.name ?? ''
   return (
-    <Accordion type="single">
+    <Accordion
+      type="single"
+      css={{ border: theme.borders.default }}
+    >
       <AccordionItem
         padding="compact"
         caret="right"
@@ -148,7 +149,7 @@ function FileMessageContent({
             gap="small"
             align="center"
             wordBreak="break-word"
-            marginRight={spacing.small}
+            marginRight={theme.spacing.small}
           >
             <FileIcon
               size={12}
@@ -160,14 +161,18 @@ function FileMessageContent({
               seq={seq}
               content={fileName}
               show={showActions}
-              side={side ?? 'right'}
+              side={role === AiRole.User ? 'right' : 'left'}
               iconFrameType="floating"
               css={{ position: 'absolute', right: 16, top: 4 }}
             />
           </Flex>
         }
+        css={{
+          background: theme.colors['fill-zero'],
+          borderRadius: theme.borderRadiuses.large,
+        }}
       >
-        <Code css={{ background: colors['fill-three'], maxWidth: '100%' }}>
+        <Code css={{ background: theme.colors['fill-one'], maxWidth: '100%' }}>
           {content}
         </Code>
       </AccordionItem>
@@ -178,9 +183,13 @@ function FileMessageContent({
 function ImplementationPlanMessageContent({
   content,
   threadId,
+  session,
 }: ChatMessageContentProps) {
-  const { spacing, colors } = useTheme()
-  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation()
+  const { spacing, colors, borders, partials } = useTheme()
+  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation({
+    awaitRefetchQueries: true,
+    refetchQueries: ['ChatThreadDetails'],
+  })
 
   return (
     <Flex
@@ -190,90 +199,93 @@ function ImplementationPlanMessageContent({
       <Accordion
         type="single"
         css={{
-          '&:has(:first-of-type button:hover)': {
-            background: colors['fill-two-hover'],
-          },
+          background: colors['fill-zero'],
+          border: borders.default,
         }}
       >
         <AccordionItem
-          padding="compact"
+          padding="relaxed"
           caret="right"
           trigger={
             <Flex
-              gap="small"
+              gap="xsmall"
               align="center"
               wordBreak="break-word"
             >
-              <DocumentIcon
-                size={12}
-                color="icon-light"
+              <IconFrame
+                icon={
+                  <DocumentIcon
+                    size={12}
+                    color="icon-light"
+                  />
+                }
+                size="small"
               />
-              <CaptionP $color="text-light">Implementation Plan</CaptionP>
+              <Body2BoldP $color="text">Implementation Plan</Body2BoldP>
             </Flex>
           }
         >
-          <div css={{ padding: spacing.xsmall }}>
-            <Markdown text={content} />
-          </div>
+          <Markdown text={content} />
         </AccordionItem>
         <Divider
-          css={{ margin: `0 ${spacing.small}px` }}
-          backgroundColor={colors['border-fill-three']}
+          css={{ margin: `0 ${spacing.medium}px` }}
+          backgroundColor={colors['border']}
         />
-        <Button
-          small
-          css={{ margin: spacing.small, alignSelf: 'flex-start' }}
-          loading={loading}
-          onClick={() =>
-            confirmPlan({ variables: { threadId: threadId ?? '' } })
-          }
-        >
-          Confirm plan
-        </Button>
+        {!session?.planConfirmed ? (
+          <Button
+            small
+            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
+            loading={loading}
+            onClick={() =>
+              confirmPlan({ variables: { threadId: threadId ?? '' } })
+            }
+          >
+            Approve
+          </Button>
+        ) : (
+          <Flex
+            gap="small"
+            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
+          >
+            <span
+              css={{
+                ...partials.text.buttonSmall,
+                color: colors['text-light'],
+              }}
+            >
+              Approved
+            </span>
+            <CheckIcon />
+          </Flex>
+        )}
       </Accordion>
       {error && <GqlError error={error} />}
     </Flex>
   )
 }
 
-function PrCallContent({
+export function ChatbotCreatePrButton({
   prAutomation,
   threadId,
-}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId'>) {
+  session,
+  attributes,
+}: {
+  prAutomation?: Nullable<PrAutomationFragment>
+  threadId?: string
+  session?: Nullable<AgentSessionFragment>
+  attributes?: Nullable<PrCallAttributes>
+}) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
+  const [created, setCreated] = useState<boolean>(!!session?.pullRequest)
 
-  if (!prAutomation) return <GqlError error="PR automation not found." />
+  if (!prAutomation) return null
 
-  const { icon, darkIcon, name, documentation } = prAutomation
-
-  return (
-    <Flex
-      direction="column"
-      gap="xsmall"
-      align="flex-start"
-      width="fit-content"
-    >
-      <CaptionP $color="text-xlight">PR automation:</CaptionP>
-      <Card css={{ padding: theme.spacing.xsmall, minWidth: 150 }}>
-        <Flex
-          alignItems="center"
-          gap="xsmall"
-        >
-          <AppIcon
-            size="xxsmall"
-            url={iconUrl(icon, darkIcon, theme.mode)}
-            icon={<PrQueueIcon />}
-          />
-          <StackedText
-            first={name}
-            second={documentation}
-          />
-        </Flex>
-      </Card>
+  return !created ? (
+    <>
       <Button
         small
-        css={{ alignSelf: 'flex-end' }}
+        alignSelf="flex-end"
         onClick={() => setOpen(true)}
       >
         Create PR
@@ -283,8 +295,91 @@ function PrCallContent({
         threadId={threadId}
         open={open}
         onClose={() => setOpen(false)}
+        onSuccess={() => setCreated(true)}
+        prCallAttributes={attributes}
       />
+    </>
+  ) : (
+    <Flex
+      gap="small"
+      justifySelf="flex-end"
+      margin={`${theme.spacing.xxsmall}px ${theme.spacing.medium}px`}
+    >
+      <span
+        css={{
+          ...theme.partials.text.buttonSmall,
+          color: theme.colors['text-light'],
+        }}
+      >
+        Created
+      </span>
+      <CheckIcon />
     </Flex>
+  )
+}
+
+function PrCallContent({
+  prAutomation,
+  threadId,
+  session,
+  attributes,
+}: Pick<ChatMessageContentProps, 'prAutomation' | 'threadId' | 'session'> & {
+  attributes?: Nullable<PrCallAttributes>
+}) {
+  const theme = useTheme()
+
+  if (!prAutomation) return <GqlError error="PR automation not found." />
+
+  const { icon, darkIcon, name } = prAutomation
+  const iconUrl = getIconUrl(icon, darkIcon, theme.mode)
+
+  return (
+    <Card
+      css={{
+        padding: theme.spacing.medium,
+        minWidth: 150,
+        maxWidth: '100%',
+        background: theme.colors['fill-zero'],
+        border: theme.borders.default,
+      }}
+    >
+      <StretchedFlex gap="xlarge">
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+          minWidth={0}
+        >
+          <IconFrame
+            icon={
+              iconUrl ? (
+                <img
+                  width={24}
+                  height={24}
+                  src={iconUrl}
+                />
+              ) : (
+                <PrQueueIcon />
+              )
+            }
+            size="xlarge"
+            css={{ width: 32, height: 32 }}
+          />
+          <StackedText
+            truncate
+            first={name}
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="PR automation"
+          />
+        </Flex>
+        <ChatbotCreatePrButton
+          prAutomation={prAutomation}
+          threadId={threadId}
+          session={session}
+          attributes={attributes}
+        />
+      </StretchedFlex>
+    </Card>
   )
 }
 
@@ -314,7 +409,7 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
-}: Omit<ChatMessageContentProps, 'side'>) {
+}: ChatMessageContentProps) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt
@@ -322,12 +417,12 @@ function ToolMessageContent({
   const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
     useDeleteChatMutation({
       awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
     })
   const [confirmMessage, { loading: confirmLoading, error: confirmError }] =
     useConfirmChatMutation({
       awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
     })
 
   return (
@@ -335,6 +430,7 @@ function ToolMessageContent({
       direction="column"
       gap="xsmall"
       align="flex-end"
+      width="100%"
     >
       <CaptionP $color="text-xlight">
         {pendingConfirmation
@@ -454,16 +550,21 @@ function ToolMessageContent({
           </Flex>
         )}
       </ToolMessageWrapperSC>
+      <ToolMessageDetails
+        content={content}
+        attributes={attributes}
+      />
     </Flex>
   )
 }
 const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   width: 480,
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  background: 'none',
-  border: theme.borders.input,
+  background: theme.colors['fill-one'],
+  border: theme.borders.default,
   padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
 }))
@@ -474,4 +575,37 @@ const ToolMessageContentSC = styled.div(({ theme }) => ({
   overflow: 'auto',
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
+}))
+
+enum ToolCall {
+  CloudQuery = '__plrl__cloud_query',
+}
+
+function ToolMessageDetails({ content, attributes }): ReactElement | null {
+  if (!content) {
+    return null
+  }
+
+  switch (attributes?.tool?.name) {
+    case ToolCall.CloudQuery:
+      return (
+        <CloudObjectsCard
+          content={content}
+          query={attributes?.tool?.arguments?.query}
+        />
+      )
+    default:
+      return null
+  }
+}
+
+const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
+  maxWidth: '100%',
+  overflow: 'auto',
+  ...(!($role === AiRole.Assistant || $role === AiRole.System) && {
+    backgroundColor: theme.colors['fill-zero'],
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.large,
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  }),
 }))

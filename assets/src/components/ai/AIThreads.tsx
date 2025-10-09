@@ -2,170 +2,76 @@ import {
   Button,
   Card,
   ChatOutlineIcon,
-  Flex,
   GearTrainIcon,
-  PushPinFilledIcon,
+  Table,
 } from '@pluralsh/design-system'
-import { StackedText } from 'components/utils/table/StackedText.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
-  FetchPaginatedDataResult,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData.tsx'
-import {
-  AiPinFragment,
-  AiPinsQuery,
   ChatThreadTinyFragment,
-  ChatThreadsQuery,
-  useAiPinsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
+import { createColumnHelper } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
 import { CSSProperties, useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql.ts'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
-import { AITable } from './AITable.tsx'
-import { sortThreadsOrPins } from './AITableEntry.tsx'
+import { AITableEntry, sortThreadsOrPins } from './AITableEntry.tsx'
+
+const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
 export function AIThreads() {
-  const threadsQuery = useFetchPaginatedData({
-    queryHook: useChatThreadsQuery,
-    keyPath: ['chatThreads'],
-  })
-
-  const pinsQuery = useFetchPaginatedData({
-    queryHook: useAiPinsQuery,
-    keyPath: ['aiPins'],
-  })
-
-  const filteredPins = useMemo(
-    () =>
-      pinsQuery.data?.aiPins?.edges
-        ?.map((edge) => edge?.node)
-        ?.sort(sortThreadsOrPins)
-        ?.filter((pin): pin is AiPinFragment => Boolean(pin)) ?? [],
-    [pinsQuery.data?.aiPins?.edges]
-  )
+  const { error, data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useChatThreadsQuery,
+      keyPath: ['chatThreads'],
+    })
 
   const filteredThreads = useMemo(
-    () =>
-      threadsQuery.data?.chatThreads?.edges
-        ?.map((edge) => edge?.node)
-        ?.sort(sortThreadsOrPins)
-        ?.filter(
-          (thread) => !filteredPins.some((pin) => pin.thread?.id === thread?.id)
-        )
-        ?.filter((thread): thread is ChatThreadTinyFragment =>
-          Boolean(thread)
-        ) ?? [],
-    [filteredPins, threadsQuery.data?.chatThreads?.edges]
+    () => mapExistingNodes(data?.chatThreads)?.sort(sortThreadsOrPins),
+    [data?.chatThreads]
   )
 
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-      overflow="hidden"
-    >
-      <Flex
-        direction="column"
-        gap="large"
-        height="100%"
-      >
-        <PinnedSection
-          filteredPins={filteredPins}
-          pinsQuery={pinsQuery}
-        />
-        <ThreadsSection
-          filteredThreads={filteredThreads}
-          threadsQuery={threadsQuery}
-        />
-      </Flex>
-    </Flex>
-  )
-}
-
-function PinnedSection({
-  filteredPins,
-  pinsQuery,
-}: {
-  filteredPins: AiPinFragment[]
-  pinsQuery: FetchPaginatedDataResult<AiPinsQuery>
-}) {
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-      maxHeight="40%"
-      css={{ overflow: 'hidden' }}
-    >
-      <StackedText
-        first="Pins"
-        firstPartialType="subtitle2"
+  if (error) return <GqlError error={error} />
+  if (data && isEmpty(filteredThreads))
+    return (
+      <EmptyStateCompact
+        icon={
+          <ChatOutlineIcon
+            color="icon-primary"
+            size={24}
+          />
+        }
+        message="No chat threads found."
+        description="Conversations with Plural AI will appear here."
       />
-      {isEmpty(filteredPins) && pinsQuery.data ? (
-        <EmptyStateCompact
-          icon={
-            <PushPinFilledIcon
-              color="icon-primary"
-              size={24}
-            />
-          }
-          message="No pinned threads or insights"
-          description="Click on the pin icon of any thread or insight to access it here."
-          cssProps={{ overflow: 'auto' }}
-        />
-      ) : (
-        <AITable
-          query={pinsQuery}
-          rowData={filteredPins}
-        />
-      )}
-    </Flex>
-  )
-}
+    )
 
-function ThreadsSection({
-  filteredThreads,
-  threadsQuery,
-}: {
-  filteredThreads: ChatThreadTinyFragment[]
-  threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
-}) {
+  const tableLoading = !data && loading
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      flex={1}
-      overflow="hidden"
-      paddingBottom={36} // this is a magic number to make the table fit
-    >
-      <StackedText
-        first="Other threads"
-        firstPartialType="subtitle2"
-      />
-      {isEmpty(filteredThreads) && threadsQuery.data ? (
-        <EmptyStateCompact
-          icon={
-            <ChatOutlineIcon
-              color="icon-primary"
-              size={24}
-            />
-          }
-          message="No threads or insights"
-          description="Insights will be automatically created and appear here when potential fixes are found."
-          cssProps={{ overflow: 'auto' }}
-        />
-      ) : (
-        <AITable
-          query={threadsQuery}
-          rowData={filteredThreads}
-        />
-      )}
-    </Flex>
+    <Table
+      rowBg="raised"
+      hideHeader
+      fullHeightWrap
+      virtualizeRows
+      data={filteredThreads}
+      columns={columns}
+      loading={tableLoading}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'No threads found.' }}
+      // hacky, should update logic in DS
+      {...(tableLoading && {
+        '& td div, & td span': { width: '100%', maxWidth: '100%' },
+      })}
+      padCells={tableLoading}
+    />
   )
 }
 
@@ -238,3 +144,13 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
     </EmptyStateCompact>
   )
 }
+
+// putting the whole row into a single column, easier to customize
+export const columns = [
+  columnHelper.accessor((thread) => thread, {
+    id: 'row',
+    cell: function Cell({ getValue }) {
+      return <AITableEntry thread={getValue()} />
+    },
+  }),
+]

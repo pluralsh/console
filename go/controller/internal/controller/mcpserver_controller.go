@@ -11,7 +11,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -125,21 +124,17 @@ func (r *MCPServerReconciler) ensure(server *v1alpha1.MCPServer) error {
 	if server.Spec.Bindings == nil {
 		return nil
 	}
-	bindings, req, err := ensureBindings(server.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(server.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	server.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(server.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(server.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	server.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

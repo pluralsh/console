@@ -50,7 +50,7 @@ spec:
         securityContext:
         {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
         {{ end }}
-        image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default (printf "v%s" .Chart.AppVersion) }}"
         imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
         args:
         - --token-file=/shared/token

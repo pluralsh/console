@@ -74,15 +74,24 @@ defmodule Console.AI.Memoizer do
     history = if Evidence.custom(model), do: history, else: append(history, @format)
     with {:ok, insight} <- Provider.completion(history),
          {:ok, summary} <- Provider.summary(insight) do
-      %{insight: Map.merge(attrs, %{id: id, text: insight, summary: summary, errors: [], sha: sha})}
+      %{
+        ai_poll_at: next_poll_at(),
+        insight: Map.merge(attrs, %{id: id, force: false, text: insight, summary: summary, errors: [], sha: sha})
+      }
     else
       {:error, error} ->
-        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}}
+        %{
+          insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha},
+          ai_poll_at: next_poll_at()
+        }
     end
   end
 
   defp gen_error(%schema{} = model, error) do
-    schema.changeset(model, %{insight: %{errors: [%{source: "evidence", message: error}]}})
+    schema.changeset(model, %{
+      ai_poll_at: next_poll_at(),
+      insight: %{errors: [%{source: "evidence", message: error}]}
+    })
     |> Repo.update()
   end
 
@@ -90,5 +99,12 @@ defmodule Console.AI.Memoizer do
     :erlang.phash2(history)
     |> Integer.to_string(16)
     |> String.downcase()
+  end
+
+  @poll_duration 10 * 60 # 10 minutes
+
+  defp next_poll_at() do
+    duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
+    DateTime.shift(DateTime.utc_now(), duration)
   end
 end

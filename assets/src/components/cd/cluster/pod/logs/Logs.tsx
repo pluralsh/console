@@ -1,10 +1,10 @@
-import { Key, ReactElement, useMemo, useState } from 'react'
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+import { Key, ReactElement, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { Pod } from '../../../../../generated/graphql'
 
 import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
-import { Pod } from '../../../../../generated/graphql'
 
 import ContainerLogs from './ContainerLogs'
 
@@ -14,29 +14,16 @@ export enum SinceSecondsOptions {
   HalfHour = SinceSecondsOptions.Minute * 30,
   Hour = SinceSecondsOptions.Minute * 60,
   Day = SinceSecondsOptions.Hour * 24,
+  Week = SinceSecondsOptions.Day * 7,
 }
 
 export const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
-  {
-    key: SinceSecondsOptions.Minute,
-    label: '1 minute',
-  },
-  {
-    key: SinceSecondsOptions.QuarterHour,
-    label: '15 minutes',
-  },
-  {
-    key: SinceSecondsOptions.HalfHour,
-    label: '30 minutes',
-  },
-  {
-    key: SinceSecondsOptions.Hour,
-    label: '1 hour',
-  },
-  {
-    key: SinceSecondsOptions.Day,
-    label: '1 day',
-  },
+  { key: SinceSecondsOptions.Minute, label: '1 minute' },
+  { key: SinceSecondsOptions.QuarterHour, label: '15 minutes' },
+  { key: SinceSecondsOptions.HalfHour, label: '30 minutes' },
+  { key: SinceSecondsOptions.Hour, label: '1 hour' },
+  { key: SinceSecondsOptions.Day, label: '1 day' },
+  { key: SinceSecondsOptions.Week, label: '7 days' },
 ]
 
 function Logs(): ReactElement<any> {
@@ -54,8 +41,10 @@ function Logs(): ReactElement<any> {
     ],
     [pod]
   )
-  const [selected, setSelected] = useState<Key>(containers.at(0) as Key)
-  const [sinceSeconds, setSinceSeconds] = useState<Key>(
+  const [selected, setSelected] = useState<Nullable<Key>>(
+    containers.at(0) as Key
+  )
+  const [sinceSeconds, setSinceSeconds] = useState<Nullable<Key>>(
     SinceSecondsOptions.HalfHour as Key
   )
 

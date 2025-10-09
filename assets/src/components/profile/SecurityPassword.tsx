@@ -1,14 +1,9 @@
-import {
-  Button,
-  ContentCard,
-  Flex,
-  ValidatedInput,
-} from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
-import { UPDATE_USER } from 'components/graphql/users'
-import { useMutation } from '@apollo/client'
+import { Button, Flex, ValidatedInput } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
+import { useUpdateUserMutation } from 'generated/graphql'
+import { useContext, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { ProfileCard } from './Profile'
 
 const validPassword = (pass) =>
   pass.length < 8
@@ -19,7 +14,7 @@ function UpdatePassword({ cancel }: any) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [second, setSecond] = useState('')
-  const [mutation, { loading }] = useMutation(UPDATE_USER, {
+  const [mutation, { loading }] = useUpdateUserMutation({
     variables: { attributes: { password } },
   })
 
@@ -93,7 +88,7 @@ export default function SecurityPassword() {
   if (configuration?.pluralLogin) return null
 
   return (
-    <ContentCard overflowY="auto">
+    <ProfileCard>
       <Flex
         flexDirection="column"
         gap="large"
@@ -119,6 +114,6 @@ export default function SecurityPassword() {
           {pass && <UpdatePassword cancel={() => setPass(false)} />}
         </div>
       </Flex>
-    </ContentCard>
+    </ProfileCard>
   )
 }

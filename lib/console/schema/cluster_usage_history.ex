@@ -30,8 +30,9 @@ defmodule Console.Schema.ClusterUsageHistory do
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do
+    clusters = Cluster.for_user(user)
     from(cu in query,
-      join: c in ^Cluster.for_user(user),
+      join: c in subquery(clusters),
         on: c.id == cu.cluster_id,
         as: :cluster
     )

@@ -47,6 +47,7 @@ Mimic.copy(Cloudquery.CloudQuery.Stub)
 Mimic.copy(Console.AI.Graph.Indexer.Sink)
 Mimic.copy(Req)
 Mimic.copy(Oidcc.Token)
+Mimic.copy(Kazan.Client.Imp)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

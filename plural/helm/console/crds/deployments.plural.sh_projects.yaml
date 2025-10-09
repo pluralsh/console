@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: projects.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -23,9 +23,11 @@ spec:
     schema:
       openAPIV3Schema:
         description: |-
-          Project is a unit of organization to control
-          permissions for a set of objects within your
-          Console instance.
+          Project provides organizational segmentation and multi-tenancy capabilities within Plural Console.
+          It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade
+          fleet management while maintaining security boundaries. Projects allow resource owners to manage their
+          domain without accessing resources outside their scope, supporting principles of least privilege
+          and preventing credential sprawl across the entire fleet.
         properties:
           apiVersion:
             description: |-
@@ -48,7 +50,9 @@ spec:
             description: Spec reflects a Console API project spec.
             properties:
               bindings:
-                description: Bindings contain read and write policies of this project.
+                description: |-
+                  Bindings contain read and write policies that control access to all resources
+                  within this project, enabling fine-grained permission management and multi-tenancy.
                 properties:
                   read:
                     description: Read bindings.
@@ -86,18 +90,20 @@ spec:
                     type: array
                 type: object
               description:
-                description: Description is a description of this project.
+                description: |-
+                  Description provides a human-readable explanation of this project's purpose
+                  and the resources it manages within the organizational hierarchy.
                 example: my project description
                 type: string
               name:
-                description: Name is a project name.
+                description: Name of the project.
                 example: myprojectname
                 type: string
             required:
             - name
             type: object
           status:
-            description: Status represent a status of this resource.
+            description: Status represents the status of this resource.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

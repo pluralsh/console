@@ -29,6 +29,8 @@ export function initialSettingsAttributes(
               azure: {
                 apiVersion: ai.azure.apiVersion,
                 endpoint: ai.azure.endpoint,
+                model: ai.azure.model,
+                embeddingModel: ai.azure.embeddingModel,
                 accessToken: '',
               },
             }
@@ -37,8 +39,9 @@ export function initialSettingsAttributes(
           ? {
               bedrock: {
                 modelId: ai.bedrock.modelId,
-                accessKeyId: ai.bedrock.accessKeyId,
-                secretAccessKey: '',
+                embeddingModel: ai.bedrock.embeddingModel,
+                accessToken: '',
+                region: ai.bedrock.region,
               },
             }
           : {}),
@@ -55,6 +58,7 @@ export function initialSettingsAttributes(
           ? {
               openai: {
                 model: ai.openai.model,
+                embeddingModel: ai.openai.embeddingModel,
                 baseUrl: ai.openai.baseUrl,
                 accessToken: '',
               },
@@ -64,6 +68,7 @@ export function initialSettingsAttributes(
           ? {
               vertex: {
                 model: ai.vertex.model,
+                embeddingModel: ai.vertex.embeddingModel,
                 serviceAccountJson: '',
                 project: ai.vertex.project,
                 location: ai.vertex.location,
@@ -101,8 +106,8 @@ export function validateAttributes(
     case AiProvider.Bedrock:
       return !!(
         settings.bedrock?.modelId &&
-        settings.bedrock?.accessKeyId &&
-        settings.bedrock?.secretAccessKey
+        settings.bedrock?.accessToken &&
+        settings.bedrock?.region
       )
     case AiProvider.Vertex:
       return !!(settings.vertex?.project && settings.vertex?.location)
@@ -136,6 +141,19 @@ export function OpenAISettings({
           value={settings?.model}
           onChange={(e) => {
             updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Embedding Model"
+        hint="Leave blank for Plural default."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.embeddingModel}
+          onChange={(e) => {
+            updateSettings({ embeddingModel: e.currentTarget.value })
           }}
         />
       </FormField>
@@ -293,6 +311,19 @@ export function AzureSettings({
   return (
     <>
       <FormField
+        label="Model"
+        hint="Leave blank for Plural default."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.model}
+          onChange={(e) => {
+            updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
         label="API version"
         hint="The API version you want to use."
         required={enabled}
@@ -303,6 +334,19 @@ export function AzureSettings({
           value={settings?.apiVersion}
           onChange={(e) => {
             updateSettings({ apiVersion: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Embedding Model"
+        hint="Leave blank for Plural default."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.embeddingModel}
+          onChange={(e) => {
+            updateSettings({ embeddingModel: e.currentTarget.value })
           }}
         />
       </FormField>
@@ -369,29 +413,42 @@ export function BedrockSettings({
         />
       </FormField>
       <FormField
-        label="Access key ID"
+        label="Embedding Model"
+        hint="Leave blank for Plural default."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.embeddingModel}
+          onChange={(e) => {
+            updateSettings({ embeddingModel: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Access token"
         required={enabled}
         flex={1}
       >
         <Input
           disabled={!enabled}
-          value={settings?.accessKeyId}
+          value={settings?.accessToken}
           onChange={(e) => {
-            updateSettings({ accessKeyId: e.currentTarget.value })
+            updateSettings({ accessToken: e.currentTarget.value })
           }}
         />
       </FormField>
       <FormField
-        label="Secret access key"
+        label="Region"
         required={enabled}
         flex={1}
       >
         <InputRevealer
           css={{ background: theme.colors['fill-two'] }}
           disabled={!enabled}
-          value={settings?.secretAccessKey ?? undefined}
+          value={settings?.region ?? undefined}
           onChange={(e) => {
-            updateSettings({ secretAccessKey: e.currentTarget.value })
+            updateSettings({ region: e.currentTarget.value })
           }}
         />
       </FormField>
@@ -462,6 +519,19 @@ export function VertexSettings({
           value={settings?.model}
           onChange={(e) => {
             updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Embedding Model"
+        hint="Leave blank for Plural default."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.embeddingModel}
+          onChange={(e) => {
+            updateSettings({ embeddingModel: e.currentTarget.value })
           }}
         />
       </FormField>

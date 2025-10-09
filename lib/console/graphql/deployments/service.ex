@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_namespace,   :boolean
     field :enforce_namespace,  :boolean
     field :delete_namespace,   :boolean
+    field :require_ownership,  :boolean
     field :namespace_metadata, :metadata_attributes
     field :diff_normalizers,   list_of(:diff_normalizer_attributes), description: "A list of diff normalizers to apply to the service which controls how drift detection works"
   end
@@ -66,6 +67,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :ignore_crds,   :boolean
     field :lua_script,    :string
     field :lua_file,      :string
+    field :lua_folder,    :string
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -173,6 +175,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :service_error_attributes do
     field :source,  non_null(:string)
     field :message, non_null(:string)
+    field :warning, :boolean
   end
 
   @desc "A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc"
@@ -195,6 +198,12 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :kustomize_attributes do
     field :path, non_null(:string), description: "the path to the kustomization file to use"
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
+  end
+
+  @desc "metadata about the deployed contents of a service"
+  input_object :service_metadata_attributes do
+    field :images, list_of(:string), description: "a list of images to deployed in this service"
+    field :fqdns,  list_of(:string), description: "a list of fqdns to discover"
   end
 
   @desc "a reference to a service deployed from a git repo into a cluster"
@@ -225,6 +234,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :dry_run,          :boolean, description: "whether this service should not actively reconcile state and instead simply report pending changes"
     field :sources,          list_of(:service_source), description: "the sources of this service"
     field :renderers,        list_of(:renderer), description: "the renderers of this service"
+    field :metadata,         :service_metadata, description: "metadata about the deployed contents of this service"
 
     @desc "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
     field :docs, list_of(:git_file), resolve: &Deployments.docs/3
@@ -358,6 +368,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values_files,  list_of(:string), description: "a list of relative paths to values files to use for helm applies"
     field :lua_script,    :string, description: "a lua script to use for helm applies"
     field :lua_file,      :string, description: "a lua file to use for helm applies"
+    field :lua_folder,    :string, description: "a folder of lua files to include in the final script used"
   end
 
   @desc "a configuration item k/v pair"
@@ -457,8 +468,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "an error sent from the deploy operator about sync progress"
   object :service_error do
-    field :source, non_null(:string)
+    field :source,  non_null(:string)
     field :message, non_null(:string)
+    field :warning, :boolean, description: "whether this is just a warning"
   end
 
   @desc "a file fetched from a git repository, eg a docs .md file"
@@ -478,6 +490,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_namespace,   :boolean, description: "whether the agent should auto-create the namespace for this service"
     field :delete_namespace,   :boolean, description: "whether the agent should delete the namespace for this service upon deletion"
     field :enforce_namespace,  :boolean, description: "Whether to require all resources are placed in the same namespace"
+    field :require_ownership,  :boolean, description: "Whether to require all resources are owned by this service and fail if they are owned by another"
     field :namespace_metadata, :namespace_metadata
     field :diff_normalizers,   list_of(:diff_normalizer), description: "A list of diff normalizers to apply to the service which controls how drift detection works"
   end
@@ -486,6 +499,12 @@ defmodule Console.GraphQl.Deployments.Service do
   object :namespace_metadata do
     field :labels,      :map
     field :annotations, :map
+  end
+
+  @desc "metadata about the deployed contents of a service"
+  object :service_metadata do
+    field :images, list_of(:string), description: "a list of images to deployed in this service"
+    field :fqdns,  list_of(:string), description: "a list of fqdns to discover"
   end
 
   @desc "Allows you to control whether a specific set of fields in a kubernetes object is drift detected"
@@ -591,6 +610,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :revision_id, :id
       arg :sha,         :string
       arg :errors,      list_of(:service_error_attributes)
+      arg :metadata,    :service_metadata_attributes
 
       resolve &Deployments.update_service_components/2
     end

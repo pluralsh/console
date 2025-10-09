@@ -62,7 +62,6 @@ export function IconExpander({
         width: 12,
         backgroundColor: theme.colors['border-primary'],
         borderRadius: '50%',
-        zIndex: 9999,
       }}
       style={styles}
     ></AnimatedDiv>

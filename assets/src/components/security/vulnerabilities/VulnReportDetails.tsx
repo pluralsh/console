@@ -1,6 +1,7 @@
 import {
   ClusterIcon,
   Flex,
+  FlowIcon,
   IconFrame,
   ReturnIcon,
   Table,
@@ -8,9 +9,13 @@ import {
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from 'components/utils/table/useFetchPaginatedData'
-import { useClusterQuery, useVulnerabilityReportQuery } from 'generated/graphql'
-import { useNavigate, useParams } from 'react-router-dom'
+
+import {
+  useClusterQuery,
+  useFlowQuery,
+  useVulnerabilityReportQuery,
+} from 'generated/graphql'
+import { Link, useParams } from 'react-router-dom'
 import { getVulnerabilityReportsPath } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import {
@@ -24,19 +29,30 @@ import {
 
 export function VulnerabilityReportDetails() {
   const theme = useTheme()
-  const navigate = useNavigate()
-  const { vulnerabilityReportId = '', clusterId = '' } = useParams()
+  const { vulnerabilityReportId, clusterId, flowId } = useParams()
 
-  const { data: clusterData } = useClusterQuery({
-    variables: { id: clusterId },
+  const { data: clusterData, loading: clusterLoading } = useClusterQuery({
+    variables: { id: clusterId ?? '' },
+    skip: !clusterId,
   })
+  const { data: flowData, loading: flowLoading } = useFlowQuery({
+    variables: { id: flowId ?? '' },
+    skip: !flowId,
+  })
+
   const cluster = clusterData?.cluster
 
-  const { data, loading, error } = useVulnerabilityReportQuery({
-    variables: { id: vulnerabilityReportId },
+  const {
+    data,
+    loading: reportLoading,
+    error,
+  } = useVulnerabilityReportQuery({
+    variables: { id: vulnerabilityReportId ?? '' },
     skip: !vulnerabilityReportId,
     fetchPolicy: 'cache-and-network',
   })
+
+  const loading = clusterLoading || flowLoading || reportLoading
 
   if (error) return <GqlError error={error} />
 
@@ -44,11 +60,12 @@ export function VulnerabilityReportDetails() {
     <WrapperSC>
       <HeaderWrapperSC>
         <IconFrame
+          as={Link}
           size="large"
           clickable
           type="secondary"
+          to={getVulnerabilityReportsPath({ clusterId, flowId })}
           icon={<ReturnIcon css={{ width: 16 }} />}
-          onClick={() => navigate(getVulnerabilityReportsPath({ clusterId }))}
         />
         <Flex
           gap="xsmall"
@@ -57,12 +74,23 @@ export function VulnerabilityReportDetails() {
           <IconFrame
             size="large"
             type="floating"
-            icon={<ClusterIcon color="icon-light" />}
+            icon={
+              flowData ? (
+                <FlowIcon color="icon-light" />
+              ) : (
+                <ClusterIcon color="icon-light" />
+              )
+            }
           />
           <StackedText
+            loading={loading && !data}
             first={data?.vulnerabilityReport?.artifactUrl}
             firstPartialType="body2Bold"
-            second={`cluster: ${cluster?.name} (${cluster?.handle})`}
+            second={
+              flowData
+                ? `flow: ${flowData.flow?.name ?? ''}`
+                : `cluster: ${cluster?.name} (${cluster?.handle})`
+            }
           />
         </Flex>
       </HeaderWrapperSC>
@@ -74,7 +102,6 @@ export function VulnerabilityReportDetails() {
         data={data?.vulnerabilityReport?.vulnerabilities ?? []}
         columns={columns}
         loading={loading && !data}
-        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         getRowCanExpand={() => true}
         renderExpanded={VulnerabilityExpansionPanel}
         onRowClick={(_, row) => row.getToggleExpandedHandler()()}

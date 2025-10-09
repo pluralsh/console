@@ -13,8 +13,9 @@ func init() {
 	SchemeBuilder.Register(&ServiceAccount{}, &ServiceAccountList{})
 }
 
-// ServiceAccountList is a list of service accounts.
 // +kubebuilder:object:root=true
+
+// ServiceAccountList contains a list of ServiceAccount resources.
 type ServiceAccountList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -22,20 +23,25 @@ type ServiceAccountList struct {
 	Items []ServiceAccount `json:"items"`
 }
 
-// ServiceAccount is a type of non-human account that provides distinct identity.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the service account in the Console API."
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the ServiceAccount in the Console API."
+
+// ServiceAccount provides a programmatic identity for automated processes and tools to interact
+// with the Plural Console API. Unlike user accounts, service accounts are designed for non-human
+// authentication and can be scoped to specific APIs and resources for secure, limited access.
+// This enables to authenticate and perform operations within defined permissions boundaries.
 type ServiceAccount struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec reflects a Console API service account spec.
+	// Spec defines the desired state of the ServiceAccount, including email identity
+	// and scope restrictions for API access control.
 	// +kubebuilder:validation:Required
 	Spec ServiceAccountSpec `json:"spec"`
 
-	// Status represent a status of this resource.
+	// Status represents the current state of this ServiceAccount resource.
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
 }
@@ -72,19 +78,26 @@ func (in *ServiceAccount) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+// ServiceAccountSpec defines the desired state of the ServiceAccount.
 type ServiceAccountSpec struct {
-	// Email address to that will be bound to this service account.
+	// Email address that will be bound to this service account for identification
+	// and authentication purposes. This email serves as the unique identifier
+	// for the service account within the Console API.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=some@email.com
 	Email string `json:"email"`
 
-	// Scopes defines the scope of this service account.
-	// It can be used to limit the access of this service account to specific Console APIs or identifiers.
+	// Scopes define the access boundaries for this service account, controlling
+	// which Console APIs and resources it can interact with. Each scope can restrict
+	// access to specific API endpoints and resource identifiers, enabling fine-grained
+	// permission control for automated processes.
 	// +kubebuilder:validation:Optional
 	Scopes []ServiceAccountScope `json:"scopes,omitempty"`
 
-	// TokenSecretRef is a secret reference that should contain token.
+	// TokenSecretRef references a Kubernetes secret that should contain the
+	// authentication token for this service account. This enables secure storage
+	// and management of credentials within the cluster.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
 }
@@ -97,22 +110,29 @@ func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttribut
 	return result
 }
 
+// ServiceAccountScope defines access restrictions for a service account, allowing
+// fine-grained control over which Console APIs and resources can be accessed.
+// This enables implementing least-privilege principles for automated systems.
 type ServiceAccountScope struct {
-	// API is a name of the Console API that this service account should be scoped to.
+	// API specifies a single Console API endpoint name that this service account
+	// should be scoped to, such as 'updateServiceDeployment' or 'createCluster'.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:example:=updateServiceDeployment
 	API *string `json:"api,omitempty"`
 
-	// Apis is a list of Console APIs that this service account should be scoped to.
+	// Apis is a list of Console API endpoint names that this service account
+	// should be scoped to.
 	// +kubebuilder:validation:Optional
 	Apis []string `json:"apis,omitempty"`
 
-	// Identifier is a resource ID in the Console API that this service account should be scoped to.
-	// Leave blank or use `*` to scope to all resources in the API.
+	// Identifier specifies a resource ID in the Console API that this service
+	// account should be scoped to. Leave blank or use '*' to scope to all resources
+	// within the specified API endpoints.
 	// +kubebuilder:validation:Optional
 	Identifier *string `json:"identifier,omitempty"`
 
-	// Ids is a list of Console API IDs that this service account should be scoped to.
+	// Ids is a list of Console API resource IDs that this service account should
+	// be scoped to.
 	// +kubebuilder:validation:Optional
 	Ids []string `json:"ids,omitempty"`
 }

@@ -32,6 +32,16 @@ defmodule Console.Schema.ServiceTemplate do
     timestamps()
   end
 
+  def dangling(query \\ __MODULE__) do
+    from(tpl in query,
+      where: fragment("NOT EXISTS(SELECT 1 FROM global_services WHERE template_id = ?)", tpl.id) and
+        fragment("NOT EXISTS(SELECT 1 FROM preview_environment_templates WHERE template_id = ?)", tpl.id)
+    )
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :id]) do
+    from(tpl in query, order_by: ^order)
+  end
 
   def attributes(%__MODULE__{} = tpl) do
     tpl = load_configuration(tpl)
@@ -39,7 +49,7 @@ defmodule Console.Schema.ServiceTemplate do
     Map.new([:configuration | __schema__(:fields)] -- [:id], & {&1, Map.get(tpl, &1) |> Console.mapify()})
     |> Console.remove_ids()
     |> Map.put(:context_bindings, Enum.map(tpl.inferred_contexts || [], & %{context_id: &1}))
-    |> Map.drop(~w(updated_at inserted_at revision_id id)a)
+    |> Map.drop(~w(updated_at inserted_at revision_id id dependencies)a)
   end
 
   def attributes(%__MODULE__{} = tpl, namespace, name) do

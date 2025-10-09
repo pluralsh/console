@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -122,7 +123,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	}
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.Provider) (reconcile.Result, error) {
@@ -142,7 +143,7 @@ func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provide
 		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running.")
 	}
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *ProviderReconciler) isAlreadyExists(ctx context.Context, provider *v1alpha1.Provider) (bool, error) {
@@ -181,7 +182,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 		// If object is already being deleted from Console API requeue
 		if r.ConsoleClient.IsProviderDeleting(ctx, provider.Status.GetID()) {
 			logger.Info("Waiting for provider to be deleted from Console API")
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
@@ -200,7 +201,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

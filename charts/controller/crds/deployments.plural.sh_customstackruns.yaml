@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: customstackruns.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,7 +22,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CustomStackRun is the Schema for the customstackruns API
+        description: |-
+          CustomStackRun represents a custom stack run resource.
+          It allows users to define custom commands that can be executed as part of a stack run.
         properties:
           apiVersion:
             description: |-
@@ -42,21 +44,22 @@ spec:
           metadata:
             type: object
           spec:
-            description: CustomStackRunSpec defines the desired state of CustomStackRun
+            description: CustomStackRunSpec defines the desired state of CustomStackRun.
             properties:
               commands:
-                description: Commands the commands for this custom run
+                description: Commands to execute as part of this custom run.
                 items:
                   properties:
                     args:
-                      description: optional arguments to pass to the command
+                      description: Args are the arguments to pass to the command.
                       items:
                         type: string
                       type: array
                     cmd:
-                      description: the command this hook will execute
+                      description: Cmd is the command to execute
                       type: string
                     dir:
+                      description: Dir is the working directory for the command.
                       type: string
                   required:
                   - cmd
@@ -66,10 +69,13 @@ spec:
                 description: Configuration self-service configuration which will be
                   presented in UI before triggering
                 items:
-                  description: PrAutomationConfiguration ...
+                  description: PrAutomationConfiguration defines a single input field
+                    in the self-service UI form.
                   properties:
                     condition:
-                      description: Condition ...
+                      description: |-
+                        Condition defines when this field should be displayed based on the values
+                        of other fields, enabling dynamic forms that adapt to user input.
                       properties:
                         field:
                           type: string
@@ -91,23 +97,44 @@ spec:
                       - operation
                       type: object
                     default:
+                      description: Default provides a default value for this field.
                       type: string
                     displayName:
-                      description: A custom display name for the input of this field.  Will
-                        default to name otherwise.
+                      description: |-
+                        DisplayName provides a human-readable label for this field in the UI.
+                        If not provided, the Name field is used as the display label.
                       type: string
                     documentation:
+                      description: Documentation provides help text or description
+                        for this field to guide users in providing the correct input.
                       type: string
                     longform:
-                      description: Extended documentation for the input of this field.
+                      description: Longform provides extended documentation or detailed
+                        explanation for complex configuration fields.
                       type: string
                     name:
+                      description: |-
+                        Name is the identifier for this configuration field, used as a template variable
+                        and as the form field name in the UI.
                       type: string
                     optional:
+                      description: |-
+                        Optional indicates whether this field is required (false) or optional (true) for PR generation.
+                        Required fields must be filled by the user.
                       type: boolean
+                    page:
+                      description: Page specifies the page to use for the pr configuration
+                        in the Plural web configuration wizard
+                      format: int64
+                      type: integer
                     placeholder:
+                      description: Placeholder text to show in the input field to
+                        guide users on the expected format or content.
                       type: string
                     type:
+                      description: |-
+                        Type specifies the input type for this field, determining how it's rendered
+                        in the UI and what validation is applied.
                       enum:
                       - STRING
                       - INT
@@ -121,8 +148,8 @@ spec:
                       - FLOW
                       type: string
                     validation:
-                      description: Any additional validations you want to apply to
-                        this configuration item before generating a pr
+                      description: Validation defines additional validation rules
+                        to apply to user input before allowing PR generation.
                       properties:
                         json:
                           description: Whether the string value is supposed to be
@@ -145,6 +172,8 @@ spec:
                           type: object
                       type: object
                     values:
+                      description: Values provides the list of allowed values for
+                        ENUM type fields, creating a dropdown selection in the UI.
                       items:
                         type: string
                       type: array
@@ -154,16 +183,15 @@ spec:
                   type: object
                 type: array
               documentation:
-                description: Documentation to explain what this will do
+                description: Documentation to explain what this custom run does.
                 type: string
               name:
                 description: Name of this CustomStackRun. If not provided CustomStackRun's
                   own name from CustomStackRun.ObjectMeta will be used.
                 type: string
               stackRef:
-                description: |-
-                  LocalObjectReference contains enough information to let you locate the
-                  referenced object inside the same namespace.
+                description: StackRef is a reference to the stack this custom run
+                  belongs to.
                 properties:
                   name:
                     default: ""

@@ -5,6 +5,10 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+
+import { useDebounce } from '@react-hooks-library/core'
+
+import { ServiceDeploymentStatus } from 'generated/graphql'
 import isNil from 'lodash/isNil'
 import {
   Dispatch,
@@ -17,16 +21,14 @@ import {
 } from 'react'
 import styled from 'styled-components'
 
-import { ServiceDeploymentStatus } from 'generated/graphql'
-
-import { useDebounce } from '@react-hooks-library/core'
-
 import ClusterSelector from '../utils/ClusterSelector'
 
 import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
 } from './ServiceStatusChip'
+import { useOutletContext } from 'react-router-dom'
+import { ServicesContextT } from './Services'
 
 export type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
@@ -61,27 +63,25 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 
 export function ServicesFilters({
   setQueryStatusFilter,
-  setQueryString,
-  clusterId,
-  setClusterId,
+  hideSearch = false,
   tabStateRef,
   statusCounts,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
-  setQueryString?: (string) => void
-  clusterId?: Nullable<string>
-  setClusterId?: (clusterId: string) => void
+  hideSearch?: boolean
   tabStateRef: RefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
 }) {
-  const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useDebounce(searchString, 400)
+  const { q, setQ, clusterId, setClusterId } =
+    useOutletContext<ServicesContextT>()
+  const [searchString, setSearchString] = useState(q || '')
+  const debouncedSearchString = useDebounce(searchString, 250)
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
   const deferredStatusFilter = useDeferredValue(statusFilter)
 
   useEffect(() => {
-    setQueryString?.(debouncedSearchString)
-  }, [searchString, debouncedSearchString, setQueryString])
+    setQ?.(debouncedSearchString)
+  }, [searchString, debouncedSearchString, setQ])
 
   useEffect(() => {
     setQueryStatusFilter(deferredStatusFilter)
@@ -97,7 +97,7 @@ export function ServicesFilters({
   return (
     <ServiceFiltersSC>
       {setClusterId && (
-        <div css={{ width: 360 }}>
+        <div css={{ minWidth: 260, width: 360 }}>
           <ClusterSelector
             clusterId={clusterId}
             allowDeselect
@@ -105,8 +105,8 @@ export function ServicesFilters({
           />
         </div>
       )}
-      <div css={{ flex: 1 }}>
-        {setQueryString && (
+      <div css={{ minWidth: 120, flex: 1 }}>
+        {!hideSearch && (
           <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
@@ -117,6 +117,7 @@ export function ServicesFilters({
         )}
       </div>
       <TabList
+        scrollable
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

@@ -1,12 +1,10 @@
-import { ApolloCache, ApolloError } from '@apollo/client'
+import { ApolloCache } from '@apollo/client'
 import { Toast } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import {
-  AiInsightFragment,
-  AiInsightSummaryFragment,
+  AgentSessionType,
   ChatThreadAttributes,
   ChatThreadDetailsDocument,
-  ChatThreadFragment,
+  ChatThreadDetailsFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
   useChatThreadDetailsQuery,
@@ -19,6 +17,7 @@ import {
   ReactNode,
   SetStateAction,
   use,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -26,6 +25,7 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
+import { SidebarContext } from 'components/layout/Sidebar.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -41,20 +41,56 @@ type ExplainWithAIContextT = {
   system: string
 }
 
+type QueuedChatMessage = { message: string; threadId: string }
+
+export const AUTO_AGENT_TYPES = [
+  AgentSessionType.Kubernetes,
+  AgentSessionType.Terraform,
+] as const
+
+export type AutoAgentSessionT = Nullable<(typeof AUTO_AGENT_TYPES)[number]>
+
+const isAutoAgentType = (
+  type: Nullable<AgentSessionType>
+): type is NonNullable<AutoAgentSessionT> => {
+  return AUTO_AGENT_TYPES.includes(type as any)
+}
+
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
-  fullscreen: boolean
-  setFullscreen: Dispatch<SetStateAction<boolean>>
-  currentThread: Nullable<ChatThreadFragment>
-  setCurrentThreadId: (threadId: Nullable<string>) => void
-  currentInsight: Nullable<AiInsightSummaryFragment>
-  setCurrentInsight: Dispatch<
-    SetStateAction<Nullable<AiInsightSummaryFragment>>
-  >
-  threadLoading: boolean
-  threadError: ApolloError | undefined
+
+  actionsPanelOpen: boolean
+  setActionsPanelOpen: (show: boolean) => void
+
+  mcpPanelOpen: boolean
+  setMcpPanelOpen: (show: boolean) => void
+
   setShowForkToast: (show: boolean) => void
+
+  currentThread: Nullable<ChatThreadDetailsFragment>
+  currentThreadLoading: boolean
+
+  // this is the selected thread ID, updating it triggers currentThread to populate with its details
+  currentThreadId: Nullable<string>
+  setCurrentThreadId: (threadId: Nullable<string>) => void
+
+  // The last non-agent thread ID, used to navigate back to the last non-agent thread when the agent is deselected.
+  lastNonAgentThreadId: Nullable<string>
+  setLastNonAgentThreadId: Dispatch<SetStateAction<Nullable<string>>>
+
+  // The agent session type that is currently selected in the UI.
+  // Coming from the current thread or the agent init mode.
+  selectedAgent: AutoAgentSessionT
+
+  // The agent session type that is currently selected in the UI but not yet applied to the current thread.
+  agentInitMode: AutoAgentSessionT
+  setAgentInitMode: Dispatch<SetStateAction<AutoAgentSessionT>>
+
+  // the thread with the given ID will send this message, and then clear the value, next time it opens
+  // particularly useful for cases where we want to create a new thread with an initial message (and want to guarantee the message isn't sent to the wrong place)
+  queuedChatMessage: Nullable<QueuedChatMessage>
+  setQueuedChatMessage: Dispatch<SetStateAction<Nullable<QueuedChatMessage>>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -73,38 +109,73 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
-  const [open, setOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
-  const [currentThreadId, setCurrentThreadId] = useState<Nullable<string>>()
-  const [currentInsight, setCurrentInsight] =
-    useState<Nullable<AiInsightSummaryFragment>>()
+  const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
+  const [open, setOpenState] = usePersistedState('plural-ai-chat-open', false)
+  const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
+  const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
+  const [currentThreadId, setCurrentThreadId] = usePersistedState<
+    Nullable<string>
+  >('plural-ai-current-thread-id', null)
+  const [lastNonAgentThreadId, setLastNonAgentThreadId] =
+    useState<Nullable<string>>()
+  const [agentInitMode, setAgentInitMode] =
+    usePersistedState<AutoAgentSessionT>('plural-ai-agent-init-mode', null)
   const [showForkToast, setShowForkToast] = useState(false)
+  const [queuedChatMessage, setQueuedChatMessage] =
+    useState<Nullable<QueuedChatMessage>>()
 
   const {
     data: threadData,
-    loading: threadLoading,
+    loading: currentThreadLoading,
     error: threadError,
   } = useChatThreadDetailsQuery({
-    variables: { id: currentThreadId ?? '' },
     skip: !currentThreadId,
+    variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 10_000,
   })
+  // should handle cases of stale thread id being persisted
+  useEffect(() => {
+    if (currentThreadId && threadError) setCurrentThreadId(null)
+  }, [currentThreadId, setCurrentThreadId, threadError])
+
+  const currentThread = threadData?.chatThread
+
+  const selectedAgent = useMemo(() => {
+    const curType = currentThread?.session?.type
+    return agentInitMode || (isAutoAgentType(curType) ? curType : null)
+  }, [agentInitMode, currentThread?.session?.type])
+
+  // keep track of the last non-agent thread ID
+  useEffect(() => {
+    if (!!currentThread?.id && !isAutoAgentType(currentThread.session?.type))
+      setLastNonAgentThreadId(currentThread.id)
+  }, [currentThread?.id, currentThread?.session?.type])
 
   return (
     <ChatbotContext
       value={{
         open,
-        setOpen,
-        currentThread: threadData?.chatThread,
+        setOpen: (open) => {
+          setOpenState(open)
+          if (open) setSidebarExpanded(false)
+        },
+        currentThread,
+        currentThreadLoading,
+        currentThreadId,
         setCurrentThreadId,
-        fullscreen,
-        setFullscreen,
-        currentInsight,
-        setCurrentInsight,
-        threadLoading,
-        threadError,
+        selectedAgent,
+        agentInitMode,
+        setAgentInitMode,
+        lastNonAgentThreadId,
+        setLastNonAgentThreadId,
         setShowForkToast,
+        actionsPanelOpen,
+        setActionsPanelOpen,
+        mcpPanelOpen,
+        setMcpPanelOpen,
+        queuedChatMessage,
+        setQueuedChatMessage,
       }}
     >
       {children}
@@ -153,16 +224,14 @@ export function useChatbotContext() {
 
 export function useChatbot() {
   const {
+    open,
     setOpen,
-    currentThread,
     setCurrentThreadId,
-    fullscreen,
-    setFullscreen,
-    currentInsight,
-    setCurrentInsight,
-    threadLoading,
-    threadError,
+    lastNonAgentThreadId,
+    setAgentInitMode,
     setShowForkToast,
+    setQueuedChatMessage,
+    ...restChatbotCtx
   } = useChatbotContext()
 
   const [createThread, { loading: createLoading, error: createError }] =
@@ -170,19 +239,32 @@ export function useChatbot() {
   const [forkThread, { loading: forkLoading, error: forkError }] =
     useCloneChatThreadMutation()
 
-  return {
-    createNewThread: (attributes: ChatThreadAttributes) => {
-      createThread({
-        variables: { attributes },
-        onCompleted: (data) => {
-          setCurrentThreadId(data.createThread?.id)
-          setCurrentInsight(null)
-          setOpen(true)
-        },
-        update: (cache, { data }) =>
-          addThreadToCache(cache, data?.createThread),
-      })
+  const goToThread = useCallback(
+    (threadId: Nullable<string>, queuedMessage?: Nullable<string>) => {
+      setCurrentThreadId(threadId)
+      setAgentInitMode(null)
+      setOpen(true)
+      if (queuedMessage && threadId)
+        setQueuedChatMessage({ message: queuedMessage, threadId })
     },
+    [setAgentInitMode, setCurrentThreadId, setOpen, setQueuedChatMessage]
+  )
+
+  const createNewThread = (
+    attributes: ChatThreadAttributes,
+    initialMessage?: Nullable<string>
+  ) => {
+    return createThread({
+      variables: { attributes: { session: { done: true }, ...attributes } },
+      onCompleted: ({ createThread }) => {
+        if (createThread?.id) goToThread(createThread.id, initialMessage)
+      },
+      update: (cache, { data }) => addThreadToCache(cache, data?.createThread),
+    })
+  }
+
+  return {
+    createNewThread,
     forkThread: ({
       id,
       seq,
@@ -194,7 +276,6 @@ export function useChatbot() {
         variables: { id, seq },
         onCompleted: (data) => {
           setCurrentThreadId(data.cloneThread?.id)
-          setCurrentInsight(null)
           setOpen(true)
           setShowForkToast(true)
           onCompleted?.(data)
@@ -202,36 +283,32 @@ export function useChatbot() {
         update: (cache, { data }) => addThreadToCache(cache, data?.cloneThread),
       })
     },
-    goToThread: (threadId: string) => {
-      setCurrentThreadId(threadId)
-      setCurrentInsight(null)
-      setOpen(true)
+    goToThread,
+    goToLastNonAgentThread: () => {
+      if (!lastNonAgentThreadId) {
+        createNewThread({ summary: 'New chat with Plural AI' })
+        return
+      }
+
+      goToThread(lastNonAgentThreadId)
     },
-    goToInsight: (insight: AiInsightFragment) => {
-      setCurrentThreadId(null)
-      setCurrentInsight(insight)
-      setOpen(true)
-    },
-    goToThreadList: () => {
-      setCurrentThreadId(null)
-      setCurrentInsight(null)
-      setOpen(true)
-    },
+    isChatbotOpen: open,
     closeChatbot: () => setOpen(false),
-    currentThread,
-    currentInsight,
-    fullscreen,
-    setFullscreen,
-    detailsLoading: threadLoading,
-    detailsError: threadError,
     mutationLoading: createLoading || forkLoading,
     mutationError: createError || forkError,
+    setOpen,
+    setCurrentThreadId,
+    lastNonAgentThreadId,
+    setAgentInitMode,
+    setShowForkToast,
+    setQueuedChatMessage,
+    ...restChatbotCtx,
   }
 }
 
 const addThreadToCache = (
   cache: ApolloCache<any>,
-  thread: Nullable<ChatThreadFragment>
+  thread: Nullable<ChatThreadDetailsFragment>
 ) => {
   if (!thread) return
   cache.writeQuery({

@@ -1,7 +1,7 @@
 defmodule Console.AI.Cron do
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.{Repo, PubSub}
-  alias Console.AI.{Worker, Chat}
+  alias Console.AI.{Worker, Chat, VectorStore}
   alias Console.Deployments.Settings
   alias Console.Schema.{
     Alert,
@@ -11,7 +11,9 @@ defmodule Console.AI.Cron do
     Cluster,
     DeploymentSettings,
     ChatThread,
-    McpServerAudit
+    McpServerAudit,
+    AgentRun,
+    SentinelRun
   }
 
   require Logger
@@ -30,6 +32,16 @@ defmodule Console.AI.Cron do
 
   def trim_mcp_logs() do
     McpServerAudit.expired()
+    |> Repo.delete_all()
+  end
+
+  def trim_runs() do
+    AgentRun.expired()
+    |> Repo.delete_all()
+  end
+
+  def trim_sentinel_runs() do
+    SentinelRun.expired()
     |> Repo.delete_all()
   end
 
@@ -103,6 +115,15 @@ defmodule Console.AI.Cron do
       |> Flow.map(&Chat.summarize/1)
       |> Flow.run()
     end)
+  end
+
+  def vector_expire() do
+    with true <- VectorStore.enabled?() do
+      VectorStore.expire(
+        filters: [datatype: {:raw, :service_component}],
+        expiry: Timex.now() |> Timex.shift(hours: -10)
+      )
+    end
   end
 
   defp batch_insight(event, chunk) do

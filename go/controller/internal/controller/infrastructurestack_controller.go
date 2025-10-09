@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 	"time"
 
@@ -43,7 +42,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -161,11 +159,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	if !exists {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) {
-				return requeue, nil
-			}
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -186,11 +180,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	} else {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) {
-				return requeue, nil
-			}
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -269,7 +259,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 			}
 			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return requeue, nil
+				return jitterRequeue(requeueDefault), nil
 			}
 			if existingNotificationSink != nil {
 				if stack.Spec.Detach {
@@ -283,7 +273,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return requeue, nil
+				return jitterRequeue(requeueDefault), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
@@ -315,6 +305,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		ObservableMetrics: lo.ToSlicePtr(attributes.observableMetrics),
 		ManageState:       stack.Spec.ManageState,
 		AgentID:           stack.Spec.AgentId,
+		Interval:          stack.Spec.Interval,
 		Workdir:           stack.Spec.Workdir,
 		Git: console.GitRefAttributes{
 			Ref:    stack.Spec.Git.Ref,
@@ -464,15 +455,24 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 	}
 
 	attrs := &console.StackConfigurationAttributes{
-		Version: conf.Version,
-		Image:   conf.Image,
-		Tag:     conf.Tag,
+		Version:    conf.Version,
+		Image:      conf.Image,
+		Tag:        conf.Tag,
+		AiApproval: conf.AiApproval.Attributes(),
 	}
 
 	if conf.Terraform != nil {
 		attrs.Terraform = &console.TerraformConfigurationAttributes{
 			Parallelism: conf.Terraform.Parallelism,
 			Refresh:     conf.Terraform.Refresh,
+		}
+	}
+
+	if conf.Ansible != nil {
+		attrs.Ansible = &console.AnsibleConfigurationAttributes{
+			Playbook:       conf.Ansible.Playbook,
+			Inventory:      conf.Ansible.Inventory,
+			AdditionalArgs: conf.Ansible.AdditionalArgs,
 		}
 	}
 
@@ -495,7 +495,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if !cluster.Status.HasID() {
-		return "", &waitForResources, fmt.Errorf("cluster is not ready")
+		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -511,11 +511,11 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	if !repository.Status.HasID() {
-		return "", &waitForResources, fmt.Errorf("repository is not ready")
+		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		return "", &waitForResources, fmt.Errorf("repository is not healthy")
+		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not healthy")
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -539,7 +539,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	}
 
 	if !stackDefinition.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("stack definition is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack definition is not ready")
 	}
 
 	return stackDefinition.Status.ID, nil, nil
@@ -574,7 +574,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, &requeue, nil
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{
@@ -593,21 +593,17 @@ func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureSta
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	stack.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	stack.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return operrors.ErrRetriable
-	}
 
 	return nil
 }

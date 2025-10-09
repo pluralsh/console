@@ -636,23 +636,28 @@ defmodule Console.Deployments.Clusters do
 
     cluster
     |> Cluster.ping_changeset(
-      stabilize_insight_components(attrs, cluster)
+      attrs
+      |> stabilize_insight_components(cluster)
+      |> stabilize_operational_layout(cluster)
       |> stabilize_node_statistics(cluster)
     )
     |> Repo.update()
     |> notify(:ping)
   end
 
-  defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing} = cluster) do
+  defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing}) do
     key = fn %{group: g, version: v, kind: k, name: n} = attrs -> {g, v, k, Map.get(attrs, :namespace), n} end
     by_key = Map.new(existing, & {key.(&1), &1.id})
     Map.put(attrs, :insight_components, Enum.map(new, &Map.put(&1, :id, by_key[key.(&1)])))
-    |> Console.put_path([:operational_layout, :id], case cluster do
+  end
+  defp stabilize_insight_components(attrs, _), do: Map.put(attrs, :insight_components, [])
+
+  defp stabilize_operational_layout(attrs, cluster) do
+    Console.put_path(attrs, [:operational_layout, :id], case cluster do
       %Cluster{operational_layout: %{id: id}} -> id
       _ -> nil
     end)
   end
-  defp stabilize_insight_components(attrs, _), do: attrs
 
   defp stabilize_node_statistics(%{node_statistics: [_ | _] = new} = attrs, %Cluster{node_statistics: existing}) do
     key = & &1.name
@@ -950,17 +955,29 @@ defmodule Console.Deployments.Clusters do
 
   def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    # can't make this a transaction because there's no true time boundary on it
     Service.agent()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
-    |> Stream.each(fn svc ->
+    |> Console.throttle(count: 100, pause: 100)
+    |> Task.async_stream(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
-      AgentMigration.updates(migration, svc)
-      |> Services.update_service(svc.id, bot)
+      updates = AgentMigration.updates(migration, svc)
+      case Service.changeset(svc, updates) do
+        %Ecto.Changeset{changes: %{} = changes} when map_size(changes) > 0 ->
+          Services.update_service(updates, svc.id, bot)
+        _ -> {:ok, svc}
+      end
+    end, max_concurrency: 30)
+    |> Enum.reduce_while(:ok, fn
+      {:ok, {:ok, _}}, acc -> {:cont, acc}
+      {:ok, err}, _ -> {:halt, err}
+      err, _ -> {:halt, err}
     end)
-    |> Stream.run()
-
-    complete_migration(migration)
+    |> case do
+      :ok -> complete_migration(migration)
+      err -> err
+    end
   end
   def apply_migration(_), do: :ok
 

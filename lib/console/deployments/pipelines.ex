@@ -104,10 +104,10 @@ defmodule Console.Deployments.Pipelines do
   data-map for things like contextualizing pr automations
   """
   @spec create_pipeline_context(map, binary, User.t) :: context_resp
-  def create_pipeline_context(attrs, pipe_id, %User{} = user) do
+  def create_pipeline_context(attrs, %Pipeline{} = pipe, %User{} = user) do
     start_transaction()
     |> add_operation(:pipe, fn _ ->
-      get_pipeline!(pipe_id)
+      pipe
       |> Repo.preload([:edges, :stages, :write_bindings, :read_bindings])
       |> allow(user, :write)
     end)
@@ -129,6 +129,12 @@ defmodule Console.Deployments.Pipelines do
     |> flush_context_events(fn %{link: links} -> Map.values(links) end, :ctx)
     |> notify(:create, user)
   end
+  def create_pipeline_context(_, nil, _), do: {:error, "Pipeline not found"}
+  def create_pipeline_context(attrs, pipe_id, %User{} = user) when is_binary(pipe_id),
+    do: create_pipeline_context(attrs, get_pipeline!(pipe_id), user)
+
+  def create_pipeline_context_by_name(attrs, name, %User{} = user),
+    do: create_pipeline_context(attrs, get_pipeline_by_name(name), user)
 
   @spec create_context_binding(binary, PipelineStage.t) :: stage_resp
   def create_context_binding(ctx_id, %PipelineStage{} = stage) do
@@ -216,6 +222,11 @@ defmodule Console.Deployments.Pipelines do
     })
     |> Console.string_map()
   end
+
+  defp prs_merged?(_, %PipelinePromotion{context: %PipelineContext{pull_requests: [_ | _] = prs}}) do
+    Enum.all?(prs, & &1.status == :merged)
+  end
+  defp prs_merged?(_, _), do: true
 
   @doc """
   Whether all promotion gates for this edge are currently open
@@ -400,10 +411,11 @@ defmodule Console.Deployments.Pipelines do
   @spec apply_promotion(PipelinePromotion.t) :: promotion_resp
   def apply_promotion(%PipelinePromotion{} = promo) do
     start_transaction()
-    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, :context, services: [:service, :revision]])} end)
+    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, context: :pull_requests, services: [:service, :revision]])} end)
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
       Enum.filter(edges, &open?(&1, promotion))
+      |> Enum.filter(& prs_merged?(&1, promotion))
       |> Enum.filter(& !promoted?(&1, promotion.revised_at)) # don't drive promotion for edge if it's promoted_at is later than the revised_at of promotion
       |> Enum.filter(& !pr_promoted?(&1, promotion)) # don't drive promotion if contexts are equal
       |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))

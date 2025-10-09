@@ -63,7 +63,9 @@ config :console,
   kas_dns: "https://kas.example.com",
   qps: 1_000,
   nowatchers: false,
+  default_project_name: "default",
   prom_plugins: [Console.Prom.Plugin],
+  cloudquery: false,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,
@@ -174,5 +176,12 @@ config :console, Console.Services.OIDC.Hydra,
 config :phoenix, :filter_parameters, {:keep, ~w(id format)}
 
 config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.Req
+
+config :sentry,
+  environment_name: Mix.env(),
+  enable_source_code_context: true,
+  before_send: {Console.Sentry, :filter_non_500},
+  root_source_code_paths: [File.cwd!()],
+  tags: %{"plrl.flow": "console"}
 
 import_config "#{Mix.env()}.exs"

@@ -41,6 +41,7 @@ fragment ObserverTarget on ObserverTarget {
 fragment ServiceError on ServiceError {
   source
   message
+  warning
 }
 
 query Observers(
@@ -82,6 +83,12 @@ mutation UpsertObserver($attrs: ObserverAttributes) {
 
 mutation DeleteObserver($id: ID!) {
   deleteObserver(id: $id) {
+    ...Observer
+  }
+}
+
+mutation KickObserver($id: ID!) {
+  kickObserver(id: $id) {
     ...Observer
   }
 }

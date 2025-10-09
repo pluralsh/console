@@ -158,7 +158,11 @@ defmodule Console.AI.Tools.Agent.Coding.Pr do
   def file_update_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(file_name previous replacement)a)
-    |> validate_required(~w(file_name replacement)a)
+    |> validate_required(~w(file_name)a)
+    |> validate_change(:replacement, fn
+      :replacement, r when is_binary(r) -> []
+      _ , _ -> [replacement: "replacement must be a string"]
+    end)
   end
 
   def file_create_changeset(model, attrs) do

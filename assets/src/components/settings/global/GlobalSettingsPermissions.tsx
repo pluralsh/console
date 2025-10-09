@@ -1,6 +1,6 @@
 import { Card } from '@pluralsh/design-system'
 import { useGlobalSettingsContext } from 'components/settings/global/GlobalSettings'
-import { splitBindings } from 'components/settings/usermanagement/roles/RoleFormBindings'
+import { splitBindings } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
 import { BindingInput } from 'components/utils/BindingInput'
 import {

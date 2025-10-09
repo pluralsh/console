@@ -168,18 +168,18 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 	if errors.IsNotFound(err) {
 		globalService.Status.ID = nil
-		return requeue, r.handleCreate(sha, globalService, service, attr)
+		return jitterRequeue(requeueDefault), r.handleCreate(sha, globalService, service, attr)
 	}
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return jitterRequeue(requeueDefault), err
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
 		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
 		if err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue, err
+			return jitterRequeue(requeueDefault), err
 		}
 	}
 
@@ -193,7 +193,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {
@@ -212,11 +212,11 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		if err := r.Delete(ctx, globalService); err != nil {
 			return nil, nil, err
 		}
-		return nil, &waitForResources, nil
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
 	}
 
 	if !service.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("service is not ready")
 	}
 
 	return service, nil, nil
@@ -229,7 +229,7 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 			return nil, nil, err
 		}
 		if !provider.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("provider is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("provider is not ready")
 		}
 	}
 

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: clustersyncs.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,7 +22,21 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ClusterSync is the Schema for the clustersyncs API
+        description: "ClusterSync enables automatic synchronization of clusters from
+          the Plural Console\ninto Kubernetes cluster CRDs. It polls the Console clusters
+          API endpoint and creates\nor updates cluster resources based on the discovered
+          infrastructure, making it ideal\nfor scenarios where clusters are provisioned
+          externally (e.g., via Terraform) without\ndirect CRD creation capability.\n\nThe
+          resource supports optional filtering by project and tags, and uses templatable\nspecifications
+          that are populated with data from the discovered clusters.\n\nExample usage:\n\n\tapiVersion:
+          deployments.plural.sh/v1alpha1\n\tkind: ClusterSync\n\tmetadata:\n\t  name:
+          my-cluster-sync\n\t  namespace: default\n\tspec:\n\t  projectRef:\n\t    name:
+          my-project  # optional: only sync clusters from this project\n\t  tags:\n\t
+          \   environment: production  # optional: filter clusters by tags\n\t  clusterSpec:\n\t
+          \   metadata:\n\t      name: \"{{ .cluster.name }}\"  # templated from discovered
+          cluster\n\t      namespace: clusters\n\t    spec:\n\t      handle: \"{{
+          .cluster.handle }}\"\n\t      version: \"{{ .cluster.version }}\"\n\t      cloud:
+          \"{{ .cluster.cloud }}\""
         properties:
           apiVersion:
             description: |-
@@ -45,10 +59,14 @@ spec:
             description: ClusterSyncSpec defines the desired state of ClusterSync
             properties:
               clusterSpec:
+                description: ClusterSpec contains specifications of the cluster.
                 properties:
                   metadata:
+                    description: Metadata for the cluster.
                     properties:
                       name:
+                        description: Name is a short, unique human-readable name used
+                          to identify this cluster.
                         type: string
                       namespace:
                         description: |-
@@ -59,6 +77,7 @@ spec:
                     - name
                     type: object
                   spec:
+                    description: Spec for the cluster.
                     properties:
                       bindings:
                         description: Bindings contain read and write policies of this
@@ -94,6 +113,8 @@ spec:
                           If not provided, it will use the default project.
                         properties:
                           name:
+                            description: Name is a short, unique human-readable name
+                              used to identify this cluster.
                             type: string
                           namespace:
                             description: |-
@@ -101,6 +122,7 @@ spec:
                               If empty then the ClusterSync's namespace will be used.
                             type: string
                         required:
+                        - ""
                         - name
                         type: object
                       protect:
@@ -111,6 +133,8 @@ spec:
                           cluster. Can be skipped only for BYOK.
                         properties:
                           name:
+                            description: Name is a short, unique human-readable name
+                              used to identify this cluster.
                             type: string
                           namespace:
                             description: |-
@@ -118,6 +142,7 @@ spec:
                               If empty then the ClusterSync's namespace will be used.
                             type: string
                         required:
+                        - ""
                         - name
                         type: object
                       tags:
@@ -131,10 +156,10 @@ spec:
                     type: object
                 required:
                 - metadata
+                - spec
                 type: object
               projectRef:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
+                description: ProjectRef references project to sync clusters from.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -179,6 +204,7 @@ spec:
               tags:
                 additionalProperties:
                   type: string
+                description: Tags used to filter clusters.
                 type: object
             required:
             - clusterSpec

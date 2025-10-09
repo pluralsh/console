@@ -47,6 +47,8 @@ defmodule Console.AI.Anthropic do
     }
   end
 
+  def proxy(_), do: {:error, "anthropic proxy not implemented"}
+
   @doc """
   Generate a anthropic completion from
   """
@@ -114,9 +116,12 @@ defmodule Console.AI.Anthropic do
   defp split(hist), do: {nil, fmt_msgs(hist)}
 
   defp fmt_msgs(msgs) do
-    Enum.map(msgs, fn
-      {:tool, msg, id} -> %{role: :user, content: msg, tool_use_id: id}
-      {role, msg} -> %{role: anth_role(role), content: msg}
+    Enum.flat_map(msgs, fn
+      {:tool, msg, %{call_id: id, name: n, arguments: args}} when is_binary(id) -> [
+        %{role: :assistant, content: [%{type: :tool_use, id: id, name: n, input: args}]},
+        %{role: :user, content: [%{type: :tool_result, tool_use_id: id, content: msg}]}
+      ]
+      {role, msg} -> [%{role: anth_role(role), content: msg}]
     end)
   end
 

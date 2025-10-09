@@ -54,9 +54,10 @@ defmodule Console.Deployments.Observer.Poller do
     end
   end
 
-  def poll_git(%{git: %{repository_id: id}} = target, last) do
+  def poll_git(%{git: %{repository_id: id} = git_target} = target, last) do
     with %Console.Schema.GitRepository{} = git <- Git.get_repository(id),
          {:tags, [_ | _] = tags} <- {:tags, Git.Discovery.tags(git)},
+         tags <- maybe_filter_tags(tags, git_target),
          [vsn | _] <- sorted(tags, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn}
@@ -110,7 +111,7 @@ defmodule Console.Deployments.Observer.Poller do
          [_, semver | _] <- Regex.run(r, val) do # grab the first capture group which is assumed to be the substring
       semver
     else
-      _ -> val
+      _ -> nil
     end
   end
   defp formatted(val, _), do: val
@@ -122,6 +123,14 @@ defmodule Console.Deployments.Observer.Poller do
     |> Enum.map(&elem(&1, 0))
   end
   defp sorted(vsns, _), do: vsns
+
+  defp maybe_filter_tags(tags, %Observer.Target.GitTarget{filter: %{regex: regex}}) when is_binary(regex) do
+    case Regex.compile(regex) do
+      {:ok, r} -> Enum.filter(tags, &Regex.match?(r, &1))
+      {:error, _} -> tags
+    end
+  end
+  defp maybe_filter_tags(tags, _), do: tags
 
   defp sorted(vsns) do
     Enum.filter(vsns, &is_semver?/1)

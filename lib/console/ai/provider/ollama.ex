@@ -41,6 +41,8 @@ defmodule Console.AI.Ollama do
     }
   end
 
+  def proxy(_), do: {:error, "anthropic proxy not implemented"}
+
   @doc """
   Generate a anthropic completion from
   """

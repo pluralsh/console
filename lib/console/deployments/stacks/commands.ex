@@ -51,21 +51,32 @@ defmodule Console.Deployments.Stacks.Commands do
     end
   end
 
-  defp ansible_commands(%Stack{}, true) do
+  defp ansible_commands(%Stack{} = s, true) do
     indexed([
-      cmd("plan", "ansible-playbook", ["main.yaml", "--diff", "--check"], :plan)
+      cmd("plan", "ansible-playbook", ansible_args(s) ++ ["--diff", "--check"], :plan)
     ])
   end
 
   defp ansible_commands(%Stack{deleted_at: d} = s, _) when not is_nil(d),
     do: ansible_commands(s, true)
 
-  defp ansible_commands(%Stack{}, _) do
+  defp ansible_commands(%Stack{} = s, _) do
+    args = ansible_args(s)
     indexed([
-      cmd("plan", "ansible-playbook", ["main.yaml", "--diff", "--check"], :plan),
-      cmd("apply", "ansible-playbook", ["main.yaml"], :apply)
+      cmd("plan", "ansible-playbook", args ++ ["--diff", "--check"], :plan),
+      cmd("apply", "ansible-playbook", args, :apply)
     ])
   end
+
+  defp ansible_args(%Stack{configuration: %{ansible: %Stack.Configuration.Ansible{} = ansible}}) do
+    Enum.filter(
+      [ansible.playbook] ++
+      (if ansible.inventory, do: ["-i", ansible.inventory], else: []) ++
+      (ansible.additional_args || []),
+      & &1
+    )
+  end
+  defp ansible_args(_), do: ["main.yaml"]
 
   defp terraform_commands(%Stack{}, true) do
     indexed([

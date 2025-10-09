@@ -51,6 +51,7 @@ fragment PrConfiguration on PrConfiguration {
   optional
   placeholder
   type
+  page
 }
 
 fragment PrConfirmation on PrConfirmation {
@@ -65,12 +66,14 @@ query PrAutomations(
   $after: String
   $catalogId: ID
   $role: PrRole
+  $q: String
 ) {
   prAutomations(
     first: $first
     after: $after
     catalogId: $catalogId
     role: $role
+    q: $q
   ) {
     pageInfo {
       ...PageInfo
@@ -110,6 +113,11 @@ fragment ScmConnection on ScmConnection {
   username
   baseUrl
   apiUrl
+  azure {
+    username
+    organization
+    project
+  }
 }
 
 query ScmConnections($first: Int = 100, $after: String) {

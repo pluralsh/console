@@ -53,7 +53,7 @@ export default function ConsumeSecret() {
           <Overline>Share secret</Overline>
           <p>
             A user of this Console has shared a secret with you. After you
-            display this secret a single time it expires.
+            display this secret a single time it will expire.
           </p>
         </div>
         {error ? (

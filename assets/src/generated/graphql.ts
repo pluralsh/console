@@ -157,6 +157,179 @@ export type AddonVersionReleaseUrlArgs = {
   version: Scalars['String']['input'];
 };
 
+export type AgentAnalysis = {
+  __typename?: 'AgentAnalysis';
+  /** the analysis of the agent run */
+  analysis: Scalars['String']['output'];
+  /** quick bullet points to summarize the analysis */
+  bullets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the summary of the analysis */
+  summary: Scalars['String']['output'];
+};
+
+export type AgentAnalysisAttributes = {
+  /** the analysis of the agent run */
+  analysis: Scalars['String']['input'];
+  /** the bullets of the analysis */
+  bullets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the summary of the analysis */
+  summary: Scalars['String']['input'];
+};
+
+export type AgentBindingAttributes = {
+  /** the name of the group this binding is for */
+  groupName?: InputMaybe<Scalars['String']['input']>;
+  /** the email of the user this binding is for */
+  userEmail?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessage = {
+  __typename?: 'AgentMessage';
+  /** the cost of the message */
+  cost?: Maybe<AgentMessageCost>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the message to send to the agent */
+  message: Scalars['String']['output'];
+  /** the metadata of the message */
+  metadata?: Maybe<AgentMessageMetadata>;
+  /** the role of the message (system, assistant, user) */
+  role: AiRole;
+  /** the sequence number of the message */
+  seq: Scalars['Int']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentMessageAttributes = {
+  cost?: InputMaybe<AgentMessageCostAttributes>;
+  /** the message to send to the agent */
+  message: Scalars['String']['input'];
+  metadata?: InputMaybe<AgentMessageMetadataAttributes>;
+  /** the role of the message */
+  role: AiRole;
+};
+
+export type AgentMessageCost = {
+  __typename?: 'AgentMessageCost';
+  /** the tokens of the message */
+  tokens?: Maybe<AgentMessageTokens>;
+  /** the total cost of the message */
+  total: Scalars['Float']['output'];
+};
+
+export type AgentMessageCostAttributes = {
+  /** the tokens of the message */
+  tokens?: InputMaybe<AgentMessageTokensAttributes>;
+  /** the total cost of the message */
+  total: Scalars['Float']['input'];
+};
+
+export type AgentMessageFile = {
+  __typename?: 'AgentMessageFile';
+  /** the end of the file */
+  end?: Maybe<Scalars['Int']['output']>;
+  /** the name of the file */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the start of the file */
+  start?: Maybe<Scalars['Int']['output']>;
+  /** the text of the file */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentMessageFileAttributes = {
+  /** the end of the file */
+  end?: InputMaybe<Scalars['Int']['input']>;
+  /** the name of the file */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the start of the file */
+  start?: InputMaybe<Scalars['Int']['input']>;
+  /** the text of the file */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessageMetadata = {
+  __typename?: 'AgentMessageMetadata';
+  /** the file of the message */
+  file?: Maybe<AgentMessageFile>;
+  /** the reasoning of the message */
+  reasoning?: Maybe<AgentMessageReasoning>;
+  /** the tool of the message */
+  tool?: Maybe<AgentMessageTool>;
+};
+
+export type AgentMessageMetadataAttributes = {
+  /** the file of the message */
+  file?: InputMaybe<AgentMessageFileAttributes>;
+  /** the reasoning of the message */
+  reasoning?: InputMaybe<AgentMessageReasoningAttributes>;
+  /** the tool of the message */
+  tool?: InputMaybe<AgentMessageToolAttributes>;
+};
+
+export type AgentMessageReasoning = {
+  __typename?: 'AgentMessageReasoning';
+  /** the end of the reasoning */
+  end?: Maybe<Scalars['Int']['output']>;
+  /** the start of the reasoning */
+  start?: Maybe<Scalars['Int']['output']>;
+  /** the text of the reasoning */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentMessageReasoningAttributes = {
+  /** the end of the reasoning */
+  end?: InputMaybe<Scalars['Int']['input']>;
+  /** the start of the reasoning */
+  start?: InputMaybe<Scalars['Int']['input']>;
+  /** the text of the reasoning */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessageTokens = {
+  __typename?: 'AgentMessageTokens';
+  /** the input tokens of the message */
+  input?: Maybe<Scalars['Float']['output']>;
+  /** the output tokens of the message */
+  output?: Maybe<Scalars['Float']['output']>;
+  /** the reasoning tokens of the message */
+  reasoning?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AgentMessageTokensAttributes = {
+  /** the input tokens of the message */
+  input?: InputMaybe<Scalars['Float']['input']>;
+  /** the output tokens of the message */
+  output?: InputMaybe<Scalars['Float']['input']>;
+  /** the reasoning tokens of the message */
+  reasoning?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type AgentMessageTool = {
+  __typename?: 'AgentMessageTool';
+  /** the name of the tool */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the output of the tool */
+  output?: Maybe<Scalars['String']['output']>;
+  /** the state of the tool */
+  state?: Maybe<AgentMessageToolState>;
+};
+
+export type AgentMessageToolAttributes = {
+  /** the name of the tool */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the output of the tool */
+  output?: InputMaybe<Scalars['String']['input']>;
+  /** the state of the tool */
+  state?: InputMaybe<AgentMessageToolState>;
+};
+
+export enum AgentMessageToolState {
+  Completed = 'COMPLETED',
+  Error = 'ERROR',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
 /** a representation of a bulk operation to be performed on all agent services */
 export type AgentMigration = {
   __typename?: 'AgentMigration';
@@ -175,6 +348,182 @@ export type AgentMigrationAttributes = {
   ref?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AgentPodReference = {
+  __typename?: 'AgentPodReference';
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+};
+
+export type AgentPrompt = {
+  __typename?: 'AgentPrompt';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt to give this agent run */
+  prompt: Scalars['String']['output'];
+  /** the sequence number of the prompt */
+  seq: Scalars['Int']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentPullRequestAttributes = {
+  /** the base branch of the pull request */
+  base: Scalars['String']['input'];
+  /** the body of the pull request */
+  body: Scalars['String']['input'];
+  /** the head branch of the pull request */
+  head: Scalars['String']['input'];
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['input'];
+  /** the title of the pull request */
+  title: Scalars['String']['input'];
+};
+
+export type AgentRun = {
+  __typename?: 'AgentRun';
+  /** the analysis of the agent run */
+  analysis?: Maybe<AgentAnalysis>;
+  /** the branch this agent run is operating on (if not set, use default branch on clone) */
+  branch?: Maybe<Scalars['String']['output']>;
+  /** the error reason of the agent run */
+  error?: Maybe<Scalars['String']['output']>;
+  /** the flow this agent is associated with */
+  flow?: Maybe<Flow>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the messages this agent run has generated during its run */
+  messages?: Maybe<Array<Maybe<AgentMessage>>>;
+  /** the mode of the agent run */
+  mode: AgentRunMode;
+  pluralCreds?: Maybe<PluralCreds>;
+  /** the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation) */
+  pod?: Maybe<Pod>;
+  /** the kubernetes pod this agent is running on */
+  podReference?: Maybe<AgentPodReference>;
+  /** the prompt this agent was given */
+  prompt: Scalars['String']['output'];
+  /** the prompts this agent run has received */
+  prompts?: Maybe<Array<Maybe<AgentPrompt>>>;
+  /** the pull requests this agent run has created */
+  pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['output'];
+  /** the runtime this agent is using */
+  runtime?: Maybe<AgentRuntime>;
+  scmCreds?: Maybe<ScmCreds>;
+  /** whether this agent run is shared */
+  shared?: Maybe<Scalars['Boolean']['output']>;
+  /** the status of this agent run */
+  status: AgentRunStatus;
+  /** the todos of the agent run */
+  todos?: Maybe<Array<Maybe<AgentTodo>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who initiated this agent run */
+  user?: Maybe<User>;
+};
+
+export type AgentRunAttributes = {
+  /** the flow this agent run is associated with */
+  flowId?: InputMaybe<Scalars['ID']['input']>;
+  /** the mode of the agent run */
+  mode: AgentRunMode;
+  /** the prompt to give to the agent */
+  prompt: Scalars['String']['input'];
+  /** the repository the agent will be working in */
+  repository: Scalars['String']['input'];
+};
+
+export type AgentRunConnection = {
+  __typename?: 'AgentRunConnection';
+  edges?: Maybe<Array<Maybe<AgentRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRunEdge = {
+  __typename?: 'AgentRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRun>;
+};
+
+export enum AgentRunMode {
+  Analyze = 'ANALYZE',
+  Write = 'WRITE'
+}
+
+export enum AgentRunStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export type AgentRunStatusAttributes = {
+  /** the error reason of the agent run */
+  error?: InputMaybe<Scalars['String']['input']>;
+  /** the messages this agent run has generated during its run */
+  messages?: InputMaybe<Array<InputMaybe<AgentMessageAttributes>>>;
+  /** the kubernetes pod this agent is running on */
+  podReference?: InputMaybe<NamespacedName>;
+  /** the status of this agent run */
+  status: AgentRunStatus;
+};
+
+export type AgentRuntime = {
+  __typename?: 'AgentRuntime';
+  /** whether this runtime uses the built-in Plural AI proxy */
+  aiProxy?: Maybe<Scalars['Boolean']['output']>;
+  /** the cluster this runtime is running on */
+  cluster?: Maybe<Cluster>;
+  /** the policy for creating runs on this runtime */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this runtime */
+  name: Scalars['String']['output'];
+  pendingRuns?: Maybe<AgentRunConnection>;
+  /** the type of this runtime */
+  type: AgentRuntimeType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AgentRuntimePendingRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AgentRuntimeAttributes = {
+  /** whether this runtime uses the built-in Plural AI proxy */
+  aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the policy for creating runs on this runtime */
+  createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
+  /** the name of this runtime */
+  name: Scalars['String']['input'];
+  /** the type of this runtime */
+  type: AgentRuntimeType;
+};
+
+export type AgentRuntimeConnection = {
+  __typename?: 'AgentRuntimeConnection';
+  edges?: Maybe<Array<Maybe<AgentRuntimeEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRuntimeEdge = {
+  __typename?: 'AgentRuntimeEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRuntime>;
+};
+
+export enum AgentRuntimeType {
+  Claude = 'CLAUDE',
+  Custom = 'CUSTOM',
+  Gemini = 'GEMINI',
+  Opencode = 'OPENCODE'
+}
+
 /** A session for an AI agent to use when acting in a chat thread */
 export type AgentSession = {
   __typename?: 'AgentSession';
@@ -191,6 +540,7 @@ export type AgentSession = {
   pullRequest?: Maybe<PullRequest>;
   /** the pull requests associated with this chat, usually from an agentic workflow */
   pullRequests?: Maybe<PullRequestConnection>;
+  runs?: Maybe<AgentRunConnection>;
   service?: Maybe<ServiceDeployment>;
   /** the services associated with this chat, usually from an agentic workflow */
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -212,6 +562,15 @@ export type AgentSessionPullRequestsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   open?: InputMaybe<Scalars['Boolean']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** A session for an AI agent to use when acting in a chat thread */
+export type AgentSessionRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -264,12 +623,47 @@ export type AgentSessionEdge = {
 };
 
 export enum AgentSessionType {
+  Chat = 'CHAT',
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
+
+export type AgentTodo = {
+  __typename?: 'AgentTodo';
+  /** the description of the todo */
+  description: Scalars['String']['output'];
+  /** whether the todo is done */
+  done?: Maybe<Scalars['Boolean']['output']>;
+  /** the title of the todo */
+  title: Scalars['String']['output'];
+};
+
+export type AgentTodoAttributes = {
+  /** the description of the todo */
+  description: Scalars['String']['input'];
+  /** whether the todo is done */
+  done: Scalars['Boolean']['input'];
+  /** the title of the todo */
+  title: Scalars['String']['input'];
+};
+
+export type AiAnalysisRates = {
+  __typename?: 'AiAnalysisRates';
+  /** the rate in seconds for fast analysis, eg when the prompt has seen a material change */
+  fast?: Maybe<Scalars['Int']['output']>;
+  /** the rate in seconds for slow analysis, eg when the prompt has not seen a material change */
+  slow?: Maybe<Scalars['Int']['output']>;
+};
+
+export type AiApprovalAttributes = {
+  enabled: Scalars['Boolean']['input'];
+  file: Scalars['String']['input'];
+  git: GitRefAttributes;
+  ignoreCancel: Scalars['Boolean']['input'];
+};
 
 export type AiDelta = {
   __typename?: 'AiDelta';
@@ -367,6 +761,7 @@ export enum AiRole {
 /** Settings for configuring access to common LLM providers */
 export type AiSettings = {
   __typename?: 'AiSettings';
+  analysisRates?: Maybe<AiAnalysisRates>;
   anthropic?: Maybe<AnthropicSettings>;
   azure?: Maybe<AzureOpenaiSettings>;
   bedrock?: Maybe<BedrockAiSettings>;
@@ -381,6 +776,7 @@ export type AiSettings = {
 };
 
 export type AiSettingsAttributes = {
+  analysisRates?: InputMaybe<AnalysisRatesAttributes>;
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
   bedrock?: InputMaybe<BedrockAiAttributes>;
@@ -404,6 +800,8 @@ export type Alert = {
   /** the cluster this alert was associated with */
   cluster?: Maybe<Cluster>;
   fingerprint?: Maybe<Scalars['String']['output']>;
+  /** the flow this alert was associated with */
+  flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this alert */
@@ -473,6 +871,32 @@ export enum AlertState {
   Resolved = 'RESOLVED'
 }
 
+export type AnalysisRatesAttributes = {
+  /** the rate in seconds for fast analysis, eg when the prompt has seen a material change */
+  fast?: InputMaybe<Scalars['Int']['input']>;
+  /** the rate in seconds for slow analysis, eg when the prompt has not seen a material change */
+  slow?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AnsibleConfiguration = {
+  __typename?: 'AnsibleConfiguration';
+  /** Additional args for the playbook */
+  additionalArgs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
+  inventory?: Maybe<Scalars['String']['output']>;
+  /** The playbook to run */
+  playbook?: Maybe<Scalars['String']['output']>;
+};
+
+export type AnsibleConfigurationAttributes = {
+  /** additional args for the playbook */
+  additionalArgs?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
+  inventory?: InputMaybe<Scalars['String']['input']>;
+  /** the playbook to run */
+  playbook?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Anthropic connection information */
 export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
@@ -529,6 +953,12 @@ export type AppNotificationEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AppNotification>;
 };
+
+export enum ApprovalResult {
+  Approved = 'APPROVED',
+  Indeterminate = 'INDETERMINATE',
+  Rejected = 'REJECTED'
+}
 
 export type ArgoAnalysis = {
   __typename?: 'ArgoAnalysis';
@@ -698,7 +1128,8 @@ export type AwsCloudAttributes = {
 
 export type AwsCloudConnectionAttributes = {
   accessKeyId: Scalars['String']['input'];
-  region: Scalars['String']['input'];
+  region?: InputMaybe<Scalars['String']['input']>;
+  regions?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   secretAccessKey: Scalars['String']['input'];
 };
 
@@ -714,7 +1145,9 @@ export type AwsConnectionAttributes = {
   /** the access key id for aws */
   accessKeyId: Scalars['String']['output'];
   /** the region for aws */
-  region: Scalars['String']['output'];
+  region?: Maybe<Scalars['String']['output']>;
+  /** the regions for aws */
+  regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the secret access key for aws */
   secretAccessKey: Scalars['String']['output'];
 };
@@ -764,6 +1197,26 @@ export type AzureConnectionAttributes = {
   tenantId: Scalars['String']['output'];
 };
 
+/** Requirements to perform Azure DevOps authentication */
+export type AzureDevopsAttributes = {
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['input'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['input'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['input'];
+};
+
+export type AzureDevopsConfiguration = {
+  __typename?: 'AzureDevopsConfiguration';
+  /** the organization to use for azure devops */
+  organization: Scalars['String']['output'];
+  /** the project to use for azure devops */
+  project: Scalars['String']['output'];
+  /** the username asociated with your Azure DevOps PAT */
+  username: Scalars['String']['output'];
+};
+
 export type AzureOpenaiAttributes = {
   /** the azure openai access token to use */
   accessToken: Scalars['String']['input'];
@@ -784,6 +1237,8 @@ export type AzureOpenaiSettings = {
   __typename?: 'AzureOpenaiSettings';
   /** the api version you want to use */
   apiVersion?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
@@ -828,14 +1283,18 @@ export type BackupAttributes = {
 };
 
 export type BedrockAiAttributes = {
-  /** aws access key id to use, you can also use IRSA for self-hosted consoles */
-  accessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the openai bedrock access token to use */
+  accessToken?: InputMaybe<Scalars['String']['input']>;
+  /** the aws access key id to use (DEPRECATED) */
+  awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the aws secret access key to use (DEPRECATED) */
+  awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
   modelId: Scalars['String']['input'];
-  /** aws secret access key to use, you can also use IRSA for self-hosted consoles */
-  secretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** the aws region the model is hosted in */
+  region?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModelId?: InputMaybe<Scalars['String']['input']>;
 };
@@ -843,10 +1302,14 @@ export type BedrockAiAttributes = {
 /** Settings for usage of AWS Bedrock for LLMs */
 export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
-  /** the aws access key to use, can also use IRSA when console is self-hosted */
+  /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the bedrock model to use */
   modelId: Scalars['String']['output'];
+  /** the aws region the model is hosted in */
+  region?: Maybe<Scalars['String']['output']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModelId?: Maybe<Scalars['String']['output']>;
 };
@@ -1089,6 +1552,7 @@ export type ChatThreadChatsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** basic user-supplied input for creating an AI chat thread */
@@ -1280,6 +1744,8 @@ export type Cluster = {
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   auditLogs?: Maybe<ClusterAuditLogConnection>;
+  /** The availability zones this cluster is running in */
+  availabilityZones?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** any upgrade insights provided by your cloud provider that have been discovered by our agent */
   cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
@@ -1358,6 +1824,8 @@ export type Cluster = {
   operationalLayout?: Maybe<OperationalLayout>;
   /** the parent of this virtual cluster */
   parentCluster?: Maybe<Cluster>;
+  /** the interval in seconds between pings to the cluster */
+  pingInterval?: Maybe<Scalars['Int']['output']>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** custom resources with dedicated views for this cluster */
@@ -1785,6 +2253,7 @@ export type ClusterNodeMetrics = {
 };
 
 export type ClusterPing = {
+  availabilityZones?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cpuTotal?: InputMaybe<Scalars['Float']['input']>;
   cpuUtil?: InputMaybe<Scalars['Float']['input']>;
   currentVersion: Scalars['String']['input'];
@@ -1799,6 +2268,8 @@ export type ClusterPing = {
   nodeCount?: InputMaybe<Scalars['Int']['input']>;
   nodeStatistics?: InputMaybe<Array<InputMaybe<NodeStatisticAttributes>>>;
   openshiftVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the interval in seconds between pings to the cluster */
+  pingInterval?: InputMaybe<Scalars['Int']['input']>;
   podCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -2406,6 +2877,7 @@ export type ConsoleConfiguration = {
   manifest?: Maybe<PluralManifest>;
   oidcName?: Maybe<Scalars['String']['output']>;
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;
+  sentryEnabled?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -3041,10 +3513,13 @@ export type Flow = {
   pullRequests?: Maybe<PullRequestConnection>;
   /** read policy for this flow */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git https urls of the application code repositories used in this flow */
+  repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** servers that are bound to this flow */
   servers?: Maybe<Array<Maybe<McpServer>>>;
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   /** write policy for this flow */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -3097,12 +3572,21 @@ export type FlowServicesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
+export type FlowVulnerabilityReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type FlowAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   icon?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   serverAssociations?: InputMaybe<Array<InputMaybe<McpServerAssociationAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -3136,11 +3620,13 @@ export type GateJobAttributes = {
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
   labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
+  nodeSelector?: InputMaybe<Scalars['Json']['input']>;
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
   /** request overrides if you don't want to manually configure individual containers */
   resources?: InputMaybe<ContainerResourcesAttributes>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
+  tolerations?: InputMaybe<Array<InputMaybe<PodTolerationAttributes>>>;
 };
 
 /** detailed gate specifications */
@@ -3348,6 +3834,8 @@ export type GlobalService = {
   distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
   id: Scalars['ID']['output'];
+  /** the id of the clusters to ignore */
+  ignoreClusters?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether to include management clusters in the target set */
   mgmt?: Maybe<Scalars['Boolean']['output']>;
@@ -3389,6 +3877,10 @@ export type GlobalServiceAttributes = {
   context?: InputMaybe<TemplateContextAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
+  /** the id of the clusters to ignore */
+  ignoreClusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  /** the interval at which the global service will be reconciled, default is 10m */
+  interval?: InputMaybe<Scalars['String']['input']>;
   /** whether to include management clusters in the target set */
   mgmt?: InputMaybe<Scalars['Boolean']['input']>;
   /** name for this global service */
@@ -3564,6 +4056,7 @@ export type HelmConfigAttributes = {
   ignoreCrds?: InputMaybe<Scalars['Boolean']['input']>;
   ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
   luaFile?: InputMaybe<Scalars['String']['input']>;
+  luaFolder?: InputMaybe<Scalars['String']['input']>;
   luaScript?: InputMaybe<Scalars['String']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
@@ -3654,6 +4147,8 @@ export type HelmSpec = {
   ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
   /** a lua file to use for helm applies */
   luaFile?: Maybe<Scalars['String']['output']>;
+  /** a folder of lua files to include in the final script used */
+  luaFolder?: Maybe<Scalars['String']['output']>;
   /** a lua script to use for helm applies */
   luaScript?: Maybe<Scalars['String']['output']>;
   release?: Maybe<Scalars['String']['output']>;
@@ -3708,6 +4203,17 @@ export type HttpIngressRule = {
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
 
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyAttributes = {
+  url: Scalars['String']['input'];
+};
+
+/** Configuration for http proxy usage in connections to Git or SCM providers */
+export type HttpProxyConfiguration = {
+  __typename?: 'HttpProxyConfiguration';
+  url: Scalars['String']['output'];
+};
+
 export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
   /** the actor of this stack (defaults to root console user) */
@@ -3741,12 +4247,16 @@ export type InfrastructureStack = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this stack */
   insight?: Maybe<AiInsight>;
+  /** the interval at which the stack will be reconciled, default is 5m */
+  interval?: Maybe<Scalars['String']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
   /** whether you want Plural to manage the state of this stack */
   manageState?: Maybe<Scalars['Boolean']['output']>;
   /** the name of the stack */
   name: Scalars['String']['output'];
+  /** the next time the stack will be reconciled */
+  nextPollAt?: Maybe<Scalars['DateTime']['output']>;
   /** a list of metrics to poll to determine if a stack run should be cancelled */
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
@@ -3928,6 +4438,8 @@ export type JobGateSpec = {
   labels?: Maybe<Scalars['Map']['output']>;
   /** the namespace the job will run in */
   namespace: Scalars['String']['output'];
+  /** any pod node selector to apply */
+  nodeSelector?: Maybe<Scalars['Map']['output']>;
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
   /** equivalent to resources, present for backwards compatibility */
@@ -3936,6 +4448,8 @@ export type JobGateSpec = {
   resources?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
+  /** any pod tolerations to apply */
+  tolerations?: Maybe<Array<Maybe<PodToleration>>>;
 };
 
 export type JobReference = {
@@ -3981,6 +4495,17 @@ export type KubernetesUnstructured = {
   version: Scalars['String']['output'];
 };
 
+/** information about the kubernetes version for a given cluster */
+export type KubernetesVersionInfo = {
+  __typename?: 'KubernetesVersionInfo';
+  /** the distribution of kubernetes this info pertains to */
+  distro?: Maybe<ClusterDistro>;
+  /** whether this version is on extended support */
+  extended?: Maybe<Scalars['Boolean']['output']>;
+  /** the kubernetes version */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
 /** metadata needed for configuring kustomize */
 export type Kustomize = {
   __typename?: 'Kustomize';
@@ -4022,6 +4547,16 @@ export type LoadBalancerIngressStatus = {
 export type LoadBalancerStatus = {
   __typename?: 'LoadBalancerStatus';
   ingress?: Maybe<Array<Maybe<LoadBalancerIngressStatus>>>;
+};
+
+export type LogAggregationBucket = {
+  __typename?: 'LogAggregationBucket';
+  count?: Maybe<Scalars['Int']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type LogAggregationInput = {
+  bucketSize?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum LogDriver {
@@ -4136,6 +4671,8 @@ export type ManagedNamespace = {
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the interval at which the global service will be reconciled, default is 10m */
+  interval?: Maybe<Scalars['String']['output']>;
   /** labels for this namespace */
   labels?: Maybe<Scalars['Map']['output']>;
   /** the name of this namespace once its placed on a cluster */
@@ -4798,7 +5335,8 @@ export enum ObservabilityWebhookType {
   Datadog = 'DATADOG',
   Grafana = 'GRAFANA',
   Newrelic = 'NEWRELIC',
-  Pagerduty = 'PAGERDUTY'
+  Pagerduty = 'PAGERDUTY',
+  Sentry = 'SENTRY'
 }
 
 export type ObservableMetric = {
@@ -4894,13 +5432,28 @@ export type ObserverEdge = {
 };
 
 export type ObserverGitAttributes = {
+  filter?: InputMaybe<ObserverGitFilterAttributes>;
   repositoryId: Scalars['ID']['input'];
   type: ObserverGitTargetType;
+};
+
+/** a spec for filtering a git repository tags in an observer */
+export type ObserverGitFilter = {
+  __typename?: 'ObserverGitFilter';
+  /** a regex to filter the git repository tags for the observed value */
+  regex?: Maybe<Scalars['String']['output']>;
+};
+
+/** a spec for filtering a git repository tags in an observer */
+export type ObserverGitFilterAttributes = {
+  /** a regex to filter the git repository tags for the observed value */
+  regex?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** a spec for polling a git repository for recent updates */
 export type ObserverGitRepo = {
   __typename?: 'ObserverGitRepo';
+  filter?: Maybe<ObserverGitFilter>;
   repositoryId: Scalars['ID']['output'];
   /** the resource within the git repository you want to poll */
   type: ObserverGitTargetType;
@@ -5119,6 +5672,8 @@ export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
   /** the base url to use when querying an OpenAI compatible API, leave blank for OpenAI */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
@@ -5772,6 +6327,21 @@ export type PodStatus = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
+export type PodToleration = {
+  __typename?: 'PodToleration';
+  effect?: Maybe<Scalars['String']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  operator?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export type PodTolerationAttributes = {
+  effect?: InputMaybe<Scalars['String']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  operator?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
 export enum PolicyAggregate {
   Cluster = 'CLUSTER',
   Enforcement = 'ENFORCEMENT',
@@ -5906,6 +6476,8 @@ export type PrAutomation = {
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
   role?: Maybe<PrRole>;
+  /** the secrets to create as part of this pr */
+  secrets?: Maybe<PrSecrets>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -5950,6 +6522,7 @@ export type PrAutomationAttributes = {
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
+  secrets?: InputMaybe<PrSecretsAttributes>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -6008,6 +6581,7 @@ export type PrAutomationUpdateSpecAttributes = {
 /** Additional attributes for describing a pr call tool call that derived this chat message */
 export type PrCallAttributes = {
   __typename?: 'PrCallAttributes';
+  branch?: Maybe<Scalars['String']['output']>;
   context?: Maybe<Scalars['Map']['output']>;
 };
 
@@ -6034,6 +6608,8 @@ export type PrConfiguration = {
   longform?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   optional?: Maybe<Scalars['Boolean']['output']>;
+  /** the page to use for the pr configuration */
+  page?: Maybe<Scalars['Int']['output']>;
   placeholder?: Maybe<Scalars['String']['output']>;
   type: ConfigurationType;
   values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -6048,6 +6624,8 @@ export type PrConfigurationAttributes = {
   longform?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   optional?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the page to use for the pr automation */
+  page?: InputMaybe<Scalars['Int']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
   validation?: InputMaybe<ConfigurationValidationAttributes>;
@@ -6135,6 +6713,46 @@ export enum PrRole {
   Update = 'UPDATE',
   Upgrade = 'UPGRADE'
 }
+
+export type PrSecretEntry = {
+  __typename?: 'PrSecretEntry';
+  /** whether to autogenerate the secret */
+  autogenerate?: Maybe<Scalars['Boolean']['output']>;
+  /** the documentation for the secret entry */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** the name of the secret entry */
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type PrSecretEntryAttributes = {
+  /** whether to autogenerate the secret entry */
+  autogenerate?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the documentation for the secret entry */
+  documentation?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the secret entry */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PrSecrets = {
+  __typename?: 'PrSecrets';
+  /** the cluster handle that will hold this secret */
+  cluster?: Maybe<Scalars['String']['output']>;
+  entries?: Maybe<Array<Maybe<PrSecretEntry>>>;
+  /** the name of the secret */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the k8s namespace to place the secret in */
+  namespace?: Maybe<Scalars['String']['output']>;
+};
+
+export type PrSecretsAttributes = {
+  /** the cluster handle that will hold this secret */
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  entries?: InputMaybe<Array<InputMaybe<PrSecretEntryAttributes>>>;
+  /** the name of the secret */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the k8s namespace to place the secret in */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
 
 export enum PrStatus {
   Closed = 'CLOSED',
@@ -6674,11 +7292,13 @@ export type RootMutationType = {
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
   addRunLogs?: Maybe<RunLogs>;
+  agentPullRequest?: Maybe<PullRequest>;
   aiFixPr?: Maybe<PullRequest>;
   applyScalingRecommendation?: Maybe<PullRequest>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
+  cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
   /** saves a set of messages and generates a new one transactionally */
@@ -6698,6 +7318,7 @@ export type RootMutationType = {
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
+  createAgentRun?: Maybe<AgentRun>;
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
   createAlertResolution?: Maybe<AlertResolution>;
@@ -6735,6 +7356,7 @@ export type RootMutationType = {
   createScmWebhook?: Maybe<ScmWebhook>;
   /** creates a webhook reference in our system but doesn't attempt to create it in your upstream provider */
   createScmWebhookPointer?: Maybe<ScmWebhook>;
+  createSentinel?: Maybe<Sentinel>;
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
@@ -6743,6 +7365,7 @@ export type RootMutationType = {
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   deleteAccessToken?: Maybe<AccessToken>;
+  deleteAgentRuntime?: Maybe<AgentRuntime>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
@@ -6785,6 +7408,7 @@ export type RootMutationType = {
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteScmWebhook?: Maybe<ScmWebhook>;
+  deleteSentinel?: Maybe<Sentinel>;
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
@@ -6829,6 +7453,8 @@ export type RootMutationType = {
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
+  /** Refreshes an insight, which will trigger a new AI insight generation in the background */
+  refreshInsight?: Maybe<AiInsight>;
   registerGithubApp?: Maybe<ScmConnection>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
@@ -6838,6 +7464,7 @@ export type RootMutationType = {
   restoreStack?: Maybe<InfrastructureStack>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
+  runSentinel?: Maybe<SentinelRun>;
   /** saves a list of chat messages to your current chat history, can be used at any time */
   saveChats?: Maybe<Array<Maybe<Chat>>>;
   /** save the manifests in cache to be retrieved by the requesting user */
@@ -6850,6 +7477,7 @@ export type RootMutationType = {
   selfManage?: Maybe<ServiceDeployment>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
+  shareAgentRun?: Maybe<AgentRun>;
   /** Shares a one-time-viewable secret to a list of eligible users */
   shareSecret?: Maybe<SharedSecret>;
   signIn?: Maybe<User>;
@@ -6860,6 +7488,9 @@ export type RootMutationType = {
   threadPr?: Maybe<Chat>;
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
+  updateAgentRun?: Maybe<AgentRun>;
+  updateAgentRunAnalysis?: Maybe<AgentRun>;
+  updateAgentRunTodos?: Maybe<AgentRun>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
   updateClusterProvider?: Maybe<ClusterProvider>;
@@ -6884,6 +7515,7 @@ export type RootMutationType = {
   updateRole?: Maybe<Role>;
   updateRunStep?: Maybe<RunStep>;
   updateScmConnection?: Maybe<ScmConnection>;
+  updateSentinel?: Maybe<Sentinel>;
   updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
@@ -6893,6 +7525,7 @@ export type RootMutationType = {
   updateStackRun?: Maybe<StackRun>;
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
+  upsertAgentRuntime?: Maybe<AgentRuntime>;
   upsertCatalog?: Maybe<Catalog>;
   upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
@@ -6937,6 +7570,12 @@ export type RootMutationTypeAddRunLogsArgs = {
 };
 
 
+export type RootMutationTypeAgentPullRequestArgs = {
+  attributes: AgentPullRequestAttributes;
+  runId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeAiFixPrArgs = {
   insightId: Scalars['ID']['input'];
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
@@ -6954,6 +7593,11 @@ export type RootMutationTypeApproveGateArgs = {
 
 
 export type RootMutationTypeApproveStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelAgentRunArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -7024,6 +7668,12 @@ export type RootMutationTypeCreateAccessTokenArgs = {
 
 export type RootMutationTypeCreateAgentMigrationArgs = {
   attributes: AgentMigrationAttributes;
+};
+
+
+export type RootMutationTypeCreateAgentRunArgs = {
+  attributes: AgentRunAttributes;
+  runtimeId: Scalars['ID']['input'];
 };
 
 
@@ -7145,7 +7795,8 @@ export type RootMutationTypeCreatePinnedCustomResourceArgs = {
 
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
-  pipelineId: Scalars['ID']['input'];
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  pipelineName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -7168,8 +7819,10 @@ export type RootMutationTypeCreateProviderCredentialArgs = {
 export type RootMutationTypeCreatePullRequestArgs = {
   branch?: InputMaybe<Scalars['String']['input']>;
   context?: InputMaybe<Scalars['Json']['input']>;
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
   identifier?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  secrets?: InputMaybe<Scalars['Json']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -7197,6 +7850,11 @@ export type RootMutationTypeCreateScmWebhookArgs = {
 
 export type RootMutationTypeCreateScmWebhookPointerArgs = {
   attributes: ScmWebhookAttributes;
+};
+
+
+export type RootMutationTypeCreateSentinelArgs = {
+  attributes?: InputMaybe<SentinelAttributes>;
 };
 
 
@@ -7241,6 +7899,11 @@ export type RootMutationTypeCreateUserArgs = {
 export type RootMutationTypeDeleteAccessTokenArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootMutationTypeDeleteAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -7450,6 +8113,11 @@ export type RootMutationTypeDeleteScmWebhookArgs = {
 };
 
 
+export type RootMutationTypeDeleteSentinelArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteServiceContextArgs = {
   id: Scalars['ID']['input'];
 };
@@ -7612,6 +8280,11 @@ export type RootMutationTypeReconfigureRenovateArgs = {
 };
 
 
+export type RootMutationTypeRefreshInsightArgs = {
+  insightId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeRegisterGithubAppArgs = {
   installationId: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -7647,6 +8320,11 @@ export type RootMutationTypeRollbackServiceArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   revisionId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRunSentinelArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -7693,6 +8371,11 @@ export type RootMutationTypeSetupRenovateArgs = {
 };
 
 
+export type RootMutationTypeShareAgentRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeShareSecretArgs = {
   attributes: SharedSecretAttributes;
 };
@@ -7727,6 +8410,24 @@ export type RootMutationTypeThreadPrArgs = {
 
 export type RootMutationTypeTriggerRunArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentRunArgs = {
+  attributes: AgentRunStatusAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentRunAnalysisArgs = {
+  attributes: AgentAnalysisAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentRunTodosArgs = {
+  id: Scalars['ID']['input'];
+  todos?: InputMaybe<Array<InputMaybe<AgentTodoAttributes>>>;
 };
 
 
@@ -7876,6 +8577,12 @@ export type RootMutationTypeUpdateScmConnectionArgs = {
 };
 
 
+export type RootMutationTypeUpdateSentinelArgs = {
+  attributes?: InputMaybe<SentinelAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateServiceAccountArgs = {
   attributes: ServiceAccountAttributes;
   id: Scalars['ID']['input'];
@@ -7886,6 +8593,7 @@ export type RootMutationTypeUpdateServiceComponentsArgs = {
   components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
   errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
   id: Scalars['ID']['input'];
+  metadata?: InputMaybe<ServiceMetadataAttributes>;
   revisionId?: InputMaybe<Scalars['ID']['input']>;
   sha?: InputMaybe<Scalars['String']['input']>;
 };
@@ -7926,6 +8634,11 @@ export type RootMutationTypeUpdateThreadArgs = {
 export type RootMutationTypeUpdateUserArgs = {
   attributes: UserAttributes;
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeUpsertAgentRuntimeArgs = {
+  attributes: AgentRuntimeAttributes;
 };
 
 
@@ -8020,6 +8733,10 @@ export type RootQueryType = {
   accessToken?: Maybe<AccessToken>;
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
+  agentRun?: Maybe<AgentRun>;
+  agentRuns?: Maybe<AgentRunConnection>;
+  agentRuntime?: Maybe<AgentRuntime>;
+  agentRuntimes?: Maybe<AgentRuntimeConnection>;
   agentSessions?: Maybe<AgentSessionConnection>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
@@ -8111,7 +8828,9 @@ export type RootQueryType = {
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
+  logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
@@ -8180,6 +8899,9 @@ export type RootQueryType = {
   scmWebhook?: Maybe<ScmWebhook>;
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
+  sentinel?: Maybe<Sentinel>;
+  sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
+  sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
   serviceContext?: Maybe<ServiceContext>;
@@ -8189,6 +8911,7 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   /** Renders a filtered list of services and all their descendents returned as a paginated connection */
   serviceTree?: Maybe<ServiceDeploymentConnection>;
+  sharedAgentRun?: Maybe<AgentRun>;
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
@@ -8224,6 +8947,34 @@ export type RootQueryTypeAccessTokensArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeAgentRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRuntimesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<AgentRuntimeType>;
 };
 
 
@@ -8345,6 +9096,7 @@ export type RootQueryTypeChatsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -8653,6 +9405,7 @@ export type RootQueryTypeGlobalServicesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8728,10 +9481,25 @@ export type RootQueryTypeJobArgs = {
 };
 
 
+export type RootQueryTypeKubernetesVersionInfoArgs = {
+  distro?: InputMaybe<ClusterDistro>;
+};
+
+
 export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+};
+
+
+export type RootQueryTypeLogAggregationBucketsArgs = {
+  aggregation?: InputMaybe<LogAggregationInput>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -9185,6 +9953,27 @@ export type RootQueryTypeSecretArgs = {
 };
 
 
+export type RootQueryTypeSentinelArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeSentinelStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeSentinelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<SentinelRunStatus>;
+};
+
+
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -9245,6 +10034,11 @@ export type RootQueryTypeServiceTreeArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
+};
+
+
+export type RootQueryTypeSharedAgentRunArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -9514,12 +10308,16 @@ export type ScmConnection = {
   __typename?: 'ScmConnection';
   /** base url for HTTP apis for self-hosted versions if different from base url */
   apiUrl?: Maybe<Scalars['String']['output']>;
+  /** the azure devops attributes for this connection */
+  azure?: Maybe<AzureDevopsConfiguration>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
   default?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   type: ScmType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   username?: Maybe<Scalars['String']['output']>;
@@ -9528,12 +10326,14 @@ export type ScmConnection = {
 /** an object representing a means to authenticate to a source control provider like Github */
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
+  azure?: InputMaybe<AzureDevopsAttributes>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
   owner?: InputMaybe<Scalars['String']['input']>;
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -9553,7 +10353,14 @@ export type ScmConnectionEdge = {
   node?: Maybe<ScmConnection>;
 };
 
+export type ScmCreds = {
+  __typename?: 'ScmCreds';
+  token: Scalars['String']['output'];
+  username: Scalars['String']['output'];
+};
+
 export enum ScmType {
+  AzureDevops = 'AZURE_DEVOPS',
   Bitbucket = 'BITBUCKET',
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
@@ -9606,6 +10413,218 @@ export type Secret = {
   data: Scalars['Map']['output'];
   metadata: Metadata;
   type?: Maybe<Scalars['String']['output']>;
+};
+
+export type Sentinel = {
+  __typename?: 'Sentinel';
+  /** the checks to run for this sentinel */
+  checks?: Maybe<Array<Maybe<SentinelCheck>>>;
+  /** the description of the sentinel */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the git location for rules files from the associated repository */
+  git?: Maybe<GitRef>;
+  /** the id of the sentinel */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this sentinel was run */
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the sentinel */
+  name: Scalars['String']['output'];
+  /** the project of this sentinel */
+  project?: Maybe<Project>;
+  /** the git repository to use for fetching rules files for AI enabled analysis */
+  repository?: Maybe<GitRepository>;
+  /** the runs of this sentinel, do not query w/in list fields */
+  runs?: Maybe<SentinelRunConnection>;
+  /** the status of the sentinel's last run */
+  status?: Maybe<SentinelRunStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SentinelRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type SentinelAttributes = {
+  /** the checks to run for this sentinel */
+  checks?: InputMaybe<Array<InputMaybe<SentinelCheckAttributes>>>;
+  /** the description of the sentinel */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the git repository to use for this sentinel */
+  git?: InputMaybe<GitAttributes>;
+  /** the name of the sentinel */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the project to use for this sentinel */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** the repository to use for this sentinel */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type SentinelCheck = {
+  __typename?: 'SentinelCheck';
+  /** the configuration to use for this check */
+  configuration?: Maybe<SentinelCheckConfiguration>;
+  /** the id of the check */
+  id: Scalars['String']['output'];
+  /** the name of the check */
+  name: Scalars['String']['output'];
+  /** the rule file to use for this check */
+  ruleFile?: Maybe<Scalars['String']['output']>;
+  /** the type of check to run */
+  type: SentinelCheckType;
+};
+
+export type SentinelCheckAttributes = {
+  /** the configuration to use for this check */
+  configuration?: InputMaybe<SentinelCheckConfigurationAttributes>;
+  /** the name of the check */
+  name: Scalars['String']['input'];
+  /** the rule file to use for this check */
+  ruleFile?: InputMaybe<Scalars['String']['input']>;
+  /** the type of check to run */
+  type: SentinelCheckType;
+};
+
+export type SentinelCheckConfiguration = {
+  __typename?: 'SentinelCheckConfiguration';
+  /** the kubernetes configuration to use for this check */
+  kubernetes?: Maybe<SentinelCheckKubernetesConfiguration>;
+  /** the log configuration to use for this check */
+  log?: Maybe<SentinelCheckLogConfiguration>;
+};
+
+export type SentinelCheckConfigurationAttributes = {
+  /** the kubernetes configuration to use for this check */
+  kubernetes?: InputMaybe<SentinelCheckKubernetesConfigurationAttributes>;
+  /** the log configuration to use for this check */
+  log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
+};
+
+export type SentinelCheckKubernetesConfiguration = {
+  __typename?: 'SentinelCheckKubernetesConfiguration';
+  /** the api group to use when fetching this resource */
+  group?: Maybe<Scalars['String']['output']>;
+  /** the kind to use when fetching this resource */
+  kind: Scalars['String']['output'];
+  /** the name to use when fetching this resource */
+  name: Scalars['String']['output'];
+  /** the namespace to use when fetching this resource */
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the api version to use when fetching this resource */
+  version: Scalars['String']['output'];
+};
+
+export type SentinelCheckKubernetesConfigurationAttributes = {
+  /** the cluster to run the query against */
+  clusterId: Scalars['ID']['input'];
+  /** the api group to use when fetching this resource */
+  group?: InputMaybe<Scalars['String']['input']>;
+  /** the kind to use when fetching this resource */
+  kind: Scalars['String']['input'];
+  /** the name to use when fetching this resource */
+  name: Scalars['String']['input'];
+  /** the namespace to use when fetching this resource */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the api version to use when fetching this resource */
+  version: Scalars['String']['input'];
+};
+
+export type SentinelCheckLogConfiguration = {
+  __typename?: 'SentinelCheckLogConfiguration';
+  /** the cluster to run the query against */
+  clusterId?: Maybe<Scalars['ID']['output']>;
+  /** The duration of the log analysis run */
+  duration: Scalars['String']['output'];
+  /** the log facets to run the query against */
+  facets?: Maybe<Array<Maybe<LogFacet>>>;
+  /** the namespaces to run the query against */
+  namespaces?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a search query this will run against the logs */
+  query: Scalars['String']['output'];
+};
+
+export type SentinelCheckLogConfigurationAttributes = {
+  /** the cluster to run the query against */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  /** The duration of the log analysis run */
+  duration: Scalars['String']['input'];
+  /** the log facets to run the query against */
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  /** the namespaces to run the query against */
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a search query this will run against the logs */
+  query: Scalars['String']['input'];
+};
+
+export enum SentinelCheckType {
+  Kubernetes = 'KUBERNETES',
+  Log = 'LOG'
+}
+
+export type SentinelConnection = {
+  __typename?: 'SentinelConnection';
+  edges?: Maybe<Array<Maybe<SentinelEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelEdge = {
+  __typename?: 'SentinelEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Sentinel>;
+};
+
+export type SentinelRun = {
+  __typename?: 'SentinelRun';
+  /** the id of the run */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the results of the run */
+  results?: Maybe<Array<Maybe<SentinelRunResult>>>;
+  /** the sentinel that was run */
+  sentinel?: Maybe<Sentinel>;
+  /** the status of the run */
+  status: SentinelRunStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SentinelRunConnection = {
+  __typename?: 'SentinelRunConnection';
+  edges?: Maybe<Array<Maybe<SentinelRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelRunEdge = {
+  __typename?: 'SentinelRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<SentinelRun>;
+};
+
+export type SentinelRunResult = {
+  __typename?: 'SentinelRunResult';
+  /** the name of the check */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the reason for the result */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** the status of the result */
+  status: SentinelRunStatus;
+};
+
+export enum SentinelRunStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Success = 'SUCCESS'
+}
+
+export type SentinelStatistic = {
+  __typename?: 'SentinelStatistic';
+  /** the count of the sentinel */
+  count: Scalars['Int']['output'];
+  /** the status of the sentinel */
+  status: SentinelRunStatus;
 };
 
 export type Service = {
@@ -9791,6 +10810,8 @@ export type ServiceDeployment = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** the commit message currently in use */
   message?: Maybe<Scalars['String']['output']>;
+  /** metadata about the deployed contents of this service */
+  metadata?: Maybe<ServiceMetadata>;
   /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */
@@ -9946,11 +10967,14 @@ export type ServiceError = {
   __typename?: 'ServiceError';
   message: Scalars['String']['output'];
   source: Scalars['String']['output'];
+  /** whether this is just a warning */
+  warning?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type ServiceErrorAttributes = {
   message: Scalars['String']['input'];
   source: Scalars['String']['input'];
+  warning?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Import of stack data into a service's context */
@@ -9975,6 +10999,23 @@ export enum ServiceMesh {
   Istio = 'ISTIO',
   Linkerd = 'LINKERD'
 }
+
+/** metadata about the deployed contents of a service */
+export type ServiceMetadata = {
+  __typename?: 'ServiceMetadata';
+  /** a list of fqdns to discover */
+  fqdns?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a list of images to deployed in this service */
+  images?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+/** metadata about the deployed contents of a service */
+export type ServiceMetadataAttributes = {
+  /** a list of fqdns to discover */
+  fqdns?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a list of images to deployed in this service */
+  images?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
 
 export type ServicePort = {
   __typename?: 'ServicePort';
@@ -10208,6 +11249,8 @@ export type StackAttributes = {
   files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
   /** reference w/in the repository where the IaC lives */
   git: GitRefAttributes;
+  /** the interval at which the stack will be reconciled, default is 5m */
+  interval?: InputMaybe<Scalars['String']['input']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: InputMaybe<GateJobAttributes>;
   /** whether you want Plural to manage your terraform state for this stack */
@@ -10245,6 +11288,8 @@ export type StackCommand = {
 
 export type StackConfiguration = {
   __typename?: 'StackConfiguration';
+  /** the ansible configuration for this stack */
+  ansible?: Maybe<AnsibleConfiguration>;
   /** the hooks to customize execution for this stack */
   hooks?: Maybe<Array<Maybe<StackHook>>>;
   /** optional custom image you might want to use */
@@ -10258,6 +11303,10 @@ export type StackConfiguration = {
 };
 
 export type StackConfigurationAttributes = {
+  /** the ai approval configuration for this stack */
+  aiApproval?: InputMaybe<AiApprovalAttributes>;
+  /** the ansible configuration for this stack */
+  ansible?: InputMaybe<AnsibleConfigurationAttributes>;
   /** the hooks to customize execution for this stack */
   hooks?: InputMaybe<Array<InputMaybe<StackHookAttributes>>>;
   /** optional custom image you might want to use */
@@ -10420,6 +11469,8 @@ export type StackRun = {
   actor?: Maybe<User>;
   /** whether to require approval */
   approval?: Maybe<Scalars['Boolean']['output']>;
+  /** the result of the approval decision by the ai */
+  approvalResult?: Maybe<StackRunApprovalResult>;
   /** when this run was approved */
   approvedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the approver of this job */
@@ -10481,6 +11532,14 @@ export type StackRun = {
   violations?: Maybe<Array<Maybe<StackPolicyViolation>>>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
+};
+
+export type StackRunApprovalResult = {
+  __typename?: 'StackRunApprovalResult';
+  /** the reason for the approval decision by the ai */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** the result of the approval decision by the ai */
+  result?: Maybe<ApprovalResult>;
 };
 
 export type StackRunAttributes = {
@@ -10703,6 +11762,8 @@ export type SyncConfig = {
   /** Whether to require all resources are placed in the same namespace */
   enforceNamespace?: Maybe<Scalars['Boolean']['output']>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
+  /** Whether to require all resources are owned by this service and fail if they are owned by another */
+  requireOwnership?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SyncConfigAttributes = {
@@ -10712,6 +11773,7 @@ export type SyncConfigAttributes = {
   diffNormalizers?: InputMaybe<Array<InputMaybe<DiffNormalizerAttributes>>>;
   enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   namespaceMetadata?: InputMaybe<MetadataAttributes>;
+  requireOwnership?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type Tag = {
@@ -11069,6 +12131,8 @@ export type VertexAiAttributes = {
 /** Settings for usage of GCP VertexAI for LLMs */
 export type VertexAiSettings = {
   __typename?: 'VertexAiSettings';
+  /** the model to use for vector embeddings */
+  embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the gcp region the model */
   location: Scalars['String']['output'];
   /** the vertex ai model to use */
@@ -11332,58 +12396,64 @@ export type YamlOverlayAttributes = {
   yaml: Scalars['String']['input'];
 };
 
-export type AiPinFragment = { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
 
-export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
+export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
 
-export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null };
+export type ChatThreadDetailsFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
 
-export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null };
+export type ChatThreadMessagesFragment = { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type ChatThreadSettingsFragment = { __typename?: 'ChatThreadSettings', memory?: boolean | null };
 
-export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: string, name: string };
+export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: string, name: string, provider: Provider };
 
-export type AgentSessionFragment = { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null };
+export type AgentSessionFragment = { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null };
+
+export type ServiceDeploymentChatFragment = { __typename?: 'ServiceDeployment', protect?: boolean | null, id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null };
+
+export type StackChatFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null };
 
 export type AiDeltaFragment = { __typename?: 'AiDelta', seq: number, message?: number | null, role?: AiRole | null, content: string, tool?: { __typename?: 'ToolDelta', id?: string | null, name?: string | null } | null };
-
-export type AiPinsQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AiPinsQuery = { __typename?: 'RootQueryType', aiPins?: { __typename?: 'AiPinConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AiPinEdge', node?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null } | null> | null } | null };
-
-export type AiPinQueryVariables = Exact<{
-  insightId?: InputMaybe<Scalars['ID']['input']>;
-  threadId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type AiPinQuery = { __typename?: 'RootQueryType', aiPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type ChatThreadsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null } | null };
+export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null } | null> | null } | null };
+
+export type ChatAgentSessionQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ChatAgentSessionQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, session?: { __typename?: 'AgentSession', id: string, done?: boolean | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', protect?: boolean | null, id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null } | null, pullRequests?: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null> | null } | null, serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null } | null, stacks?: { __typename?: 'InfrastructureStackConnection', edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null } | null };
 
 export type ChatThreadDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ChatThreadDetailsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type ChatThreadDetailsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
-export type CloudConnectionsQueryVariables = Exact<{
+export type ChatThreadMessagesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type ChatThreadMessagesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null } | null };
+
+export type AgentSessionsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -11391,29 +12461,18 @@ export type CloudConnectionsQueryVariables = Exact<{
 }>;
 
 
-export type CloudConnectionsQuery = { __typename?: 'RootQueryType', cloudConnections?: { __typename?: 'CloudConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CloudConnectionEdge', node?: { __typename?: 'CloudConnection', id: string, name: string } | null } | null> | null } | null };
+export type AgentSessionsQuery = { __typename?: 'RootQueryType', agentSessions?: { __typename?: 'AgentSessionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentSessionEdge', node?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null } | null };
 
-export type CreateAiPinMutationVariables = Exact<{
-  attributes: AiPinAttributes;
+export type CloudConnectionsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CreateAiPinMutation = { __typename?: 'RootMutationType', createPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
-
-export type DeleteAiPinMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeleteAiPinMutation = { __typename?: 'RootMutationType', deletePin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
-
-export type ChatMutationVariables = Exact<{
-  messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
-  threadId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type ChatMutation = { __typename?: 'RootMutationType', chat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
+export type CloudConnectionsQuery = { __typename?: 'RootQueryType', cloudConnections?: { __typename?: 'CloudConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CloudConnectionEdge', node?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null } | null };
 
 export type HybridChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -11421,50 +12480,35 @@ export type HybridChatMutationVariables = Exact<{
 }>;
 
 
-export type HybridChatMutation = { __typename?: 'RootMutationType', hybridChat?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type HybridChatMutation = { __typename?: 'RootMutationType', hybridChat?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type ConfirmChatMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ConfirmChatMutation = { __typename?: 'RootMutationType', confirmChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
+export type ConfirmChatMutation = { __typename?: 'RootMutationType', confirmChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
 
 export type ConfirmChatPlanMutationVariables = Exact<{
   threadId: Scalars['ID']['input'];
 }>;
 
 
-export type ConfirmChatPlanMutation = { __typename?: 'RootMutationType', confirmPlan?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
-
-export type ClearChatHistoryMutationVariables = Exact<{
-  before?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type ClearChatHistoryMutation = { __typename?: 'RootMutationType', clearChatHistory?: number | null };
+export type ConfirmChatPlanMutation = { __typename?: 'RootMutationType', confirmPlan?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type DeleteChatMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
-
-export type SaveChatsMutationVariables = Exact<{
-  messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
-  threadId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type SaveChatsMutation = { __typename?: 'RootMutationType', saveChats?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
 
 export type CreateChatThreadMutationVariables = Exact<{
   attributes: ChatThreadAttributes;
 }>;
 
 
-export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type UpdateChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11472,14 +12516,14 @@ export type UpdateChatThreadMutationVariables = Exact<{
 }>;
 
 
-export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type DeleteChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type CloneChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11487,7 +12531,7 @@ export type CloneChatThreadMutationVariables = Exact<{
 }>;
 
 
-export type CloneChatThreadMutation = { __typename?: 'RootMutationType', cloneThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type CloneChatThreadMutation = { __typename?: 'RootMutationType', cloneThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type AddChatContextMutationVariables = Exact<{
   source: ContextSource;
@@ -11496,14 +12540,14 @@ export type AddChatContextMutationVariables = Exact<{
 }>;
 
 
-export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type CreateAgentSessionMutationVariables = Exact<{
   attributes: AgentSessionAttributes;
 }>;
 
 
-export type CreateAgentSessionMutation = { __typename?: 'RootMutationType', createAgentSession?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null, description?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null };
+export type CreateAgentSessionMutation = { __typename?: 'RootMutationType', createAgentSession?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null };
 
 export type AiChatStreamSubscriptionVariables = Exact<{
   threadId?: InputMaybe<Scalars['ID']['input']>;
@@ -11573,6 +12617,13 @@ export type AiFixPrMutationVariables = Exact<{
 
 
 export type AiFixPrMutation = { __typename?: 'RootMutationType', aiFixPr?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null };
+
+export type RefreshInsightMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RefreshInsightMutation = { __typename?: 'RootMutationType', refreshInsight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type McpServerFragment = { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null };
 
@@ -11679,9 +12730,9 @@ export type AuditMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AuditMetricsQuery = { __typename?: 'RootQueryType', auditMetrics?: Array<{ __typename?: 'AuditMetric', country?: string | null, count?: number | null } | null> | null };
 
-export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null };
+export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null };
 
-export type PrConfigurationFragment = { __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null };
+export type PrConfigurationFragment = { __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null };
 
 export type PrConfirmationFragment = { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null };
 
@@ -11690,17 +12741,18 @@ export type PrAutomationsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   catalogId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type PrAutomationsQuery = { __typename?: 'RootQueryType', prAutomations?: { __typename?: 'PrAutomationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PrAutomationEdge', node?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null } | null> | null } | null };
+export type PrAutomationsQuery = { __typename?: 'RootQueryType', prAutomations?: { __typename?: 'PrAutomationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PrAutomationEdge', node?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null } | null> | null } | null };
 
 export type CreatePrAutomationMutationVariables = Exact<{
   attributes: PrAutomationAttributes;
 }>;
 
 
-export type CreatePrAutomationMutation = { __typename?: 'RootMutationType', createPrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
+export type CreatePrAutomationMutation = { __typename?: 'RootMutationType', createPrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
 
 export type UpdatePrAutomationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11708,16 +12760,16 @@ export type UpdatePrAutomationMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePrAutomationMutation = { __typename?: 'RootMutationType', updatePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
+export type UpdatePrAutomationMutation = { __typename?: 'RootMutationType', updatePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
 
 export type DeletePrAutomationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeletePrAutomationMutation = { __typename?: 'RootMutationType', deletePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
+export type DeletePrAutomationMutation = { __typename?: 'RootMutationType', deletePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
 
-export type ScmConnectionFragment = { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null };
+export type ScmConnectionFragment = { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null };
 
 export type ScmConnectionsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -11725,7 +12777,7 @@ export type ScmConnectionsQueryVariables = Exact<{
 }>;
 
 
-export type ScmConnectionsQuery = { __typename?: 'RootQueryType', scmConnections?: { __typename?: 'ScmConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmConnectionEdge', node?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null } | null> | null } | null };
+export type ScmConnectionsQuery = { __typename?: 'RootQueryType', scmConnections?: { __typename?: 'ScmConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmConnectionEdge', node?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null } | null> | null } | null };
 
 export type ScmConnectionQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -11733,14 +12785,14 @@ export type ScmConnectionQueryVariables = Exact<{
 }>;
 
 
-export type ScmConnectionQuery = { __typename?: 'RootQueryType', scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+export type ScmConnectionQuery = { __typename?: 'RootQueryType', scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null };
 
 export type CreateScmConnectionMutationVariables = Exact<{
   attributes: ScmConnectionAttributes;
 }>;
 
 
-export type CreateScmConnectionMutation = { __typename?: 'RootMutationType', createScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+export type CreateScmConnectionMutation = { __typename?: 'RootMutationType', createScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null };
 
 export type UpdateScmConnectionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11748,14 +12800,14 @@ export type UpdateScmConnectionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateScmConnectionMutation = { __typename?: 'RootMutationType', updateScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+export type UpdateScmConnectionMutation = { __typename?: 'RootMutationType', updateScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null };
 
 export type DeleteScmConnectionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', deleteScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', deleteScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null };
 
 export type SetupRenovateMutationVariables = Exact<{
   connectionId: Scalars['ID']['input'];
@@ -11974,13 +13026,13 @@ export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: stri
 
 export type AddonVersionBlockingFragment = { __typename?: 'AddonVersion', blocking?: boolean | null };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type ClusterUpgradePlanFragment = { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null };
 
 export type ClusterNodeMetricsFragment = { __typename?: 'Cluster', id: string, clusterNodeMetrics?: { __typename?: 'ClusterNodeMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
-export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
+export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type ClusterInsightFragment = { __typename?: 'Cluster', id: string, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null };
 
@@ -12001,7 +13053,7 @@ export type ClustersQueryVariables = Exact<{
 }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null, upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null } | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null, upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null } | null };
 
 export type ClusterMinimalFragment = { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null };
 
@@ -12033,7 +13085,7 @@ export type VClustersQueryVariables = Exact<{
 }>;
 
 
-export type VClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null };
+export type VClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null };
 
 export type ClusterSelectorQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12052,7 +13104,7 @@ export type ClusterQueryVariables = Exact<{
 }>;
 
 
-export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type ClusterBasicQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12138,28 +13190,28 @@ export type UpdateClusterMutationVariables = Exact<{
 }>;
 
 
-export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type CreateClusterMutationVariables = Exact<{
   attributes: ClusterAttributes;
 }>;
 
 
-export type CreateClusterMutation = { __typename?: 'RootMutationType', createCluster?: { __typename?: 'Cluster', deployToken?: string | null, currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type CreateClusterMutation = { __typename?: 'RootMutationType', createCluster?: { __typename?: 'Cluster', deployToken?: string | null, currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type DeleteClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type DetachClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DetachClusterMutation = { __typename?: 'RootMutationType', detachCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type DetachClusterMutation = { __typename?: 'RootMutationType', detachCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, metadata?: Record<string, unknown> | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, deletedAt?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, parentCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type ClusterStatusInfoFragment = { __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null };
 
@@ -12301,7 +13353,7 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
-export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, mgmt?: boolean | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
 
 export type ServiceTemplateWithoutConfigurationFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
 
@@ -12313,7 +13365,7 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, mgmt?: boolean | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type UpdateGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12334,17 +13386,18 @@ export type GlobalServicesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null } | null> | null } | null };
+export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, mgmt?: boolean | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type GetGlobalServiceQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
 }>;
 
 
-export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, mgmt?: boolean | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type GetGlobalServiceServicesQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -12353,22 +13406,22 @@ export type GetGlobalServiceServicesQueryVariables = Exact<{
 }>;
 
 
-export type GetGlobalServiceServicesQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type GetGlobalServiceServicesQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type SyncGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, mgmt?: boolean | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null };
 
 export type SmtpSettingsFragment = { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean };
 
-export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null };
+export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -12377,7 +13430,7 @@ export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook'
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12400,7 +13453,7 @@ export type UpdateDeploymentSettingsMutationVariables = Exact<{
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null, embeddingModel?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', region?: string | null, modelId: string, embeddingModel?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type UpsertObservabilityProviderMutationVariables = Exact<{
   attributes: ObservabilityProviderAttributes;
@@ -12469,13 +13522,13 @@ export type GetManagedNamespaceServicesQueryVariables = Exact<{
 }>;
 
 
-export type GetManagedNamespaceServicesQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type GetManagedNamespaceServicesQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
-export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
+export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null };
 
 export type ObserverTargetFragment = { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null };
 
-export type ServiceErrorFragment = { __typename?: 'ServiceError', source: string, message: string };
+export type ServiceErrorFragment = { __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null };
 
 export type ObserversQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12486,7 +13539,7 @@ export type ObserversQueryVariables = Exact<{
 }>;
 
 
-export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null } | null> | null } | null };
+export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null } | null> | null } | null };
 
 export type ObserverQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -12494,21 +13547,28 @@ export type ObserverQueryVariables = Exact<{
 }>;
 
 
-export type ObserverQuery = { __typename?: 'RootQueryType', observer?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+export type ObserverQuery = { __typename?: 'RootQueryType', observer?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type UpsertObserverMutationVariables = Exact<{
   attrs?: InputMaybe<ObserverAttributes>;
 }>;
 
 
-export type UpsertObserverMutation = { __typename?: 'RootMutationType', upsertObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+export type UpsertObserverMutation = { __typename?: 'RootMutationType', upsertObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type DeleteObserverMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+
+export type KickObserverMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type KickObserverMutation = { __typename?: 'RootMutationType', kickObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, revision?: { __typename?: 'Revision', id: string } | null };
 
@@ -12709,9 +13769,9 @@ export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: {
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
-export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
+export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
-export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null };
+export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null };
 
 export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
@@ -12725,7 +13785,7 @@ export type ServiceDeploymentTinyFragment = { __typename?: 'ServiceDeployment', 
 
 export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, updatedAt?: string | null, status: ServiceDeploymentStatus, componentStatus?: string | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
 
-export type ServiceDeploymentsConnectionFragment = { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null };
+export type ServiceDeploymentsConnectionFragment = { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null };
 
 export type ServiceContextFragment = { __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null };
 
@@ -12742,7 +13802,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
 export type ServiceDeploymentsTinyQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -12767,7 +13827,7 @@ export type ServiceDeploymentQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
 
 export type ServiceDeploymentTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12811,7 +13871,7 @@ export type CreateServiceDeploymentMutationVariables = Exact<{
 }>;
 
 
-export type CreateServiceDeploymentMutation = { __typename?: 'RootMutationType', createServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type CreateServiceDeploymentMutation = { __typename?: 'RootMutationType', createServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type UpdateServiceDeploymentMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12819,7 +13879,7 @@ export type UpdateServiceDeploymentMutationVariables = Exact<{
 }>;
 
 
-export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
 
 export type MergeServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12849,7 +13909,7 @@ export type RollbackServiceMutationVariables = Exact<{
 }>;
 
 
-export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type ProceedServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12857,21 +13917,21 @@ export type ProceedServiceMutationVariables = Exact<{
 }>;
 
 
-export type ProceedServiceMutation = { __typename?: 'RootMutationType', proceed?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+export type ProceedServiceMutation = { __typename?: 'RootMutationType', proceed?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
 
 export type SelfManageMutationVariables = Exact<{
   values: Scalars['String']['input'];
 }>;
 
 
-export type SelfManageMutation = { __typename?: 'RootMutationType', selfManage?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type SelfManageMutation = { __typename?: 'RootMutationType', selfManage?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type KickServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type KickServiceMutation = { __typename?: 'RootMutationType', kickService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+export type KickServiceMutation = { __typename?: 'RootMutationType', kickService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type ServiceDeploymentBindingsFragment = { __typename?: 'ServiceDeployment', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -13091,7 +14151,7 @@ export type FlowServicesQueryVariables = Exact<{
 }>;
 
 
-export type FlowServicesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type FlowServicesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type FlowPipelinesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13144,6 +14204,15 @@ export type FlowMcpServersQueryVariables = Exact<{
 
 
 export type FlowMcpServersQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, servers?: Array<{ __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null> | null } | null };
+
+export type FlowVulnerabilityReportsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type FlowVulnerabilityReportsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null } | null };
 
 export type UpsertFlowMutationVariables = Exact<{
   attributes: FlowAttributes;
@@ -13227,7 +14296,7 @@ export type ClusterUpgradeDeprecatedCustomResourceFragment = { __typename?: 'Dep
 
 export type ClusterUpgradeFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
 
-export type ClusterOverviewDetailsFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, text?: string | null, sha?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
+export type ClusterOverviewDetailsFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, text?: string | null, sha?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
 
 export type ClusterHealthScoreFragment = { __typename?: 'Cluster', id: string, name: string, healthScore?: number | null };
 
@@ -13238,7 +14307,7 @@ export type ClusterOverviewDetailsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterOverviewDetailsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, metricsSummary?: { __typename?: 'ClusterMetricsSummary', cpuUsed?: number | null, cpuAvailable?: number | null, cpuTotal?: number | null, memoryUsed?: number | null, memoryAvailable?: number | null, memoryTotal?: number | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, text?: string | null, sha?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null } | null };
+export type ClusterOverviewDetailsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, text?: string | null, sha?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string } | null> | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null } | null };
 
 export type UpgradeStatisticsQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -13445,7 +14514,7 @@ export type NodeMetricQuery = { __typename?: 'RootQueryType', nodeMetric?: { __t
 
 export type PluralObjectStatusFragment = { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
-export type PluralServiceDeploymentFragment = { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } };
+export type PluralServiceDeploymentFragment = { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } };
 
 export type PluralServiceDeploymentQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -13454,7 +14523,7 @@ export type PluralServiceDeploymentQueryVariables = Exact<{
 }>;
 
 
-export type PluralServiceDeploymentQuery = { __typename?: 'RootQueryType', pluralServiceDeployment?: { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } } | null };
+export type PluralServiceDeploymentQuery = { __typename?: 'RootQueryType', pluralServiceDeployment?: { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } } | null };
 
 export type PodWithEventsFragment = { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
 
@@ -13524,6 +14593,88 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
+
+export type RefreshTokenFragment = { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null };
+
+export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null };
+
+export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
+
+export type MeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', id: string, groups?: Array<{ __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
+
+export type LoginInfoQueryVariables = Exact<{
+  redirect?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type LoginInfoQuery = { __typename?: 'RootQueryType', loginInfo?: { __typename?: 'LoginInfo', oidcUri?: string | null, external?: boolean | null, oidcName?: string | null } | null };
+
+export type InviteQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type InviteQuery = { __typename?: 'RootQueryType', invite?: { __typename?: 'Invite', email?: string | null } | null };
+
+export type RefreshQueryVariables = Exact<{
+  token: Scalars['String']['input'];
+}>;
+
+
+export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type TemporaryTokenQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TemporaryTokenQuery = { __typename?: 'RootQueryType', temporaryToken?: string | null };
+
+export type SignInMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+}>;
+
+
+export type SignInMutation = { __typename?: 'RootMutationType', signIn?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type OauthCallbackMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+  redirect?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type OauthCallbackMutation = { __typename?: 'RootMutationType', oauthCallback?: { __typename?: 'User', jwt?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'RootMutationType', logout?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type SignUpMutationVariables = Exact<{
+  inviteId: Scalars['String']['input'];
+  attributes: UserAttributes;
+}>;
+
+
+export type SignUpMutation = { __typename?: 'RootMutationType', signup?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
+export type LoginLinkMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type LoginLinkMutation = { __typename?: 'RootMutationType', loginLink?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
 
 export type LogLineFragment = { __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null };
 
@@ -13947,9 +15098,9 @@ export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt
 
 export type ObservableMetricFragment = { __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null };
 
-export type StackRunDetailsFragment = { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null };
+export type StackRunDetailsFragment = { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null };
 
-export type CustomStackRunFragment = { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
+export type CustomStackRunFragment = { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
 
 export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null };
 
@@ -13961,7 +15112,7 @@ export type StackOutputFragment = { __typename?: 'StackOutput', name: string, va
 
 export type StackEnvironmentFragment = { __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null };
 
-export type ServiceErrorsFragment = { __typename?: 'ServiceError', source: string, message: string };
+export type ServiceErrorsFragment = { __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null };
 
 export type StackFileFragment = { __typename?: 'StackFile', path: string, content: string };
 
@@ -14050,7 +15201,7 @@ export type StackRunQueryVariables = Exact<{
 }>;
 
 
-export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
 
 export type StackRunJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -14077,7 +15228,7 @@ export type CustomStackRunsQueryVariables = Exact<{
 }>;
 
 
-export type CustomStackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, customStackRuns?: { __typename?: 'CustomStackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CustomStackRunEdge', node?: { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null } | null> | null } | null } | null };
+export type CustomStackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, customStackRuns?: { __typename?: 'CustomStackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CustomStackRunEdge', node?: { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null } | null> | null } | null } | null };
 
 export type CreateStackMutationVariables = Exact<{
   attributes: StackAttributes;
@@ -14236,18 +15387,6 @@ export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audi
 
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
 
-export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null };
-
-export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
-
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
-
 export type UsersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -14272,35 +15411,19 @@ export type UpdateUserMutationVariables = Exact<{
 
 export type UpdateUserMutation = { __typename?: 'RootMutationType', updateUser?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
 
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteUserMutation = { __typename?: 'RootMutationType', deleteUser?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
+
 export type CreateInviteMutationVariables = Exact<{
   attributes: InviteAttributes;
 }>;
 
 
 export type CreateInviteMutation = { __typename?: 'RootMutationType', createInvite?: { __typename?: 'Invite', secureId: string } | null };
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = { __typename?: 'RootMutationType', logout?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
-
-export type RefreshTokenFragment = { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null };
-
-export type RefreshQueryVariables = Exact<{
-  token: Scalars['String']['input'];
-}>;
-
-
-export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
-
-export type OauthCallbackMutationVariables = Exact<{
-  code: Scalars['String']['input'];
-  redirect?: InputMaybe<Scalars['String']['input']>;
-  state?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type OauthCallbackMutation = { __typename?: 'RootMutationType', oauthCallback?: { __typename?: 'User', jwt?: string | null, refreshToken?: { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
@@ -14313,6 +15436,8 @@ export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatis
 export type ClusterVulnAggregateFragment = { __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null };
 
 export type CvssBundleFragment = { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
+
+export type VulnerabilityReportConnectionFragment = { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null };
 
 export type VulnerabilityReportsQueryVariables = Exact<{
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
@@ -14349,6 +15474,11 @@ export type ClusterVulnerabilityAggregateQueryVariables = Exact<{
 
 export type ClusterVulnerabilityAggregateQuery = { __typename?: 'RootQueryType', clusterVulnerabilityAggregate?: Array<{ __typename?: 'ClusterVulnAggregate', count: number, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null };
 
+export const ChatThreadSettingsFragmentDoc = gql`
+    fragment ChatThreadSettings on ChatThreadSettings {
+  memory
+}
+    `;
 export const LogLineFragmentDoc = gql`
     fragment LogLine on LogLine {
   facets {
@@ -14486,27 +15616,6 @@ export const AiInsightContextFragmentDoc = gql`
 }
     ${AiInsightEvidenceFragmentDoc}
 ${ClusterMinimalFragmentDoc}`;
-export const AiInsightFragmentDoc = gql`
-    fragment AiInsight on AiInsight {
-  id
-  text
-  summary
-  sha
-  freshness
-  updatedAt
-  insertedAt
-  error {
-    message
-    source
-  }
-  ...AiInsightContext
-}
-    ${AiInsightContextFragmentDoc}`;
-export const ChatThreadSettingsFragmentDoc = gql`
-    fragment ChatThreadSettings on ChatThreadSettings {
-  memory
-}
-    `;
 export const AiInsightSummaryFragmentDoc = gql`
     fragment AiInsightSummary on AiInsight {
   id
@@ -14523,8 +15632,34 @@ export const AgentSessionFragmentDoc = gql`
   type
   done
   planConfirmed
+  thread {
+    id
+    summary
+    insertedAt
+    lastMessageAt
+  }
+  connection {
+    id
+    name
+    provider
+  }
   cluster {
     id
+  }
+  pullRequest {
+    id
+    url
+  }
+  stack {
+    id
+    name
+  }
+  service {
+    id
+    name
+    cluster {
+      id
+    }
   }
 }
     `;
@@ -14554,22 +15689,96 @@ export const ChatThreadTinyFragmentDoc = gql`
     ${ChatThreadSettingsFragmentDoc}
 ${AiInsightSummaryFragmentDoc}
 ${AgentSessionFragmentDoc}`;
-export const AiPinFragmentDoc = gql`
-    fragment AiPin on AiPin {
+export const AiInsightFragmentDoc = gql`
+    fragment AiInsight on AiInsight {
+  id
+  text
+  summary
+  sha
+  freshness
+  updatedAt
+  insertedAt
+  error {
+    message
+    source
+  }
+  ...AiInsightContext
+}
+    ${AiInsightContextFragmentDoc}`;
+export const McpToolFragmentDoc = gql`
+    fragment McpTool on McpTool {
+  name
+  description
+  inputSchema
+}
+    `;
+export const PolicyBindingFragmentDoc = gql`
+    fragment PolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+    `;
+export const McpServerFragmentDoc = gql`
+    fragment McpServer on McpServer {
   id
   name
+  url
+  confirm
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  authentication {
+    headers {
+      name
+      value
+    }
+    plural
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
+export const McpServerToolFragmentDoc = gql`
+    fragment McpServerTool on McpServerTool {
+  tool {
+    ...McpTool
+  }
+  server {
+    ...McpServer
+  }
+}
+    ${McpToolFragmentDoc}
+${McpServerFragmentDoc}`;
+export const ChatThreadDetailsFragmentDoc = gql`
+    fragment ChatThreadDetails on ChatThread {
+  ...ChatThreadTiny
   insight {
-    id
     ...AiInsight
   }
-  thread {
-    ...ChatThreadTiny
+  tools {
+    ...McpServerTool
   }
-  insertedAt
-  updatedAt
 }
-    ${AiInsightFragmentDoc}
-${ChatThreadTinyFragmentDoc}`;
+    ${ChatThreadTinyFragmentDoc}
+${AiInsightFragmentDoc}
+${McpServerToolFragmentDoc}`;
+export const PageInfoFragmentDoc = gql`
+    fragment PageInfo on PageInfo {
+  hasNextPage
+  endCursor
+  hasPreviousPage
+  startCursor
+}
+    `;
 export const ClusterTinyFragmentDoc = gql`
     fragment ClusterTiny on Cluster {
   ...ClusterMinimal
@@ -14623,19 +15832,10 @@ export const ScmConnectionFragmentDoc = gql`
   username
   baseUrl
   apiUrl
-}
-    `;
-export const PolicyBindingFragmentDoc = gql`
-    fragment PolicyBinding on PolicyBinding {
-  id
-  user {
-    id
-    name
-    email
-  }
-  group {
-    id
-    name
+  azure {
+    username
+    organization
+    project
   }
 }
     `;
@@ -14655,6 +15855,7 @@ export const PrConfigurationFragmentDoc = gql`
   optional
   placeholder
   type
+  page
 }
     `;
 export const PrConfirmationFragmentDoc = gql`
@@ -14727,6 +15928,7 @@ export const ChatFragmentDoc = gql`
     }
     prCall {
       context
+      branch
     }
   }
   pullRequest {
@@ -14744,91 +15946,88 @@ export const ChatFragmentDoc = gql`
 }
     ${PullRequestFragmentDoc}
 ${PrAutomationFragmentDoc}`;
-export const FlowBasicFragmentDoc = gql`
-    fragment FlowBasic on Flow {
+export const ChatThreadMessagesFragmentDoc = gql`
+    fragment ChatThreadMessages on ChatThread {
   id
-  name
-  description
-  icon
-  alerts(first: 500) {
-    edges {
-      node {
-        id
-      }
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    reverse: $reverse
+  ) {
+    pageInfo {
+      ...PageInfo
     }
-  }
-}
-    `;
-export const McpToolFragmentDoc = gql`
-    fragment McpTool on McpTool {
-  name
-  description
-  inputSchema
-}
-    `;
-export const McpServerFragmentDoc = gql`
-    fragment McpServer on McpServer {
-  id
-  name
-  url
-  confirm
-  readBindings {
-    ...PolicyBinding
-  }
-  writeBindings {
-    ...PolicyBinding
-  }
-  authentication {
-    headers {
-      name
-      value
-    }
-    plural
-  }
-}
-    ${PolicyBindingFragmentDoc}`;
-export const McpServerToolFragmentDoc = gql`
-    fragment McpServerTool on McpServerTool {
-  tool {
-    ...McpTool
-  }
-  server {
-    ...McpServer
-  }
-}
-    ${McpToolFragmentDoc}
-${McpServerFragmentDoc}`;
-export const ChatThreadFragmentDoc = gql`
-    fragment ChatThread on ChatThread {
-  ...ChatThreadTiny
-  chats(first: 100) {
     edges {
       node {
         ...Chat
       }
     }
   }
-  insight {
-    ...AiInsight
-  }
-  flow {
-    ...FlowBasic
-  }
-  tools {
-    ...McpServerTool
-  }
 }
-    ${ChatThreadTinyFragmentDoc}
-${ChatFragmentDoc}
-${AiInsightFragmentDoc}
-${FlowBasicFragmentDoc}
-${McpServerToolFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${ChatFragmentDoc}`;
 export const CloudConnectionTinyFragmentDoc = gql`
     fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
     `;
+export const ServiceDeploymentTinyFragmentDoc = gql`
+    fragment ServiceDeploymentTiny on ServiceDeployment {
+  id
+  name
+  cluster {
+    ...ClusterMinimal
+  }
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+}
+    ${ClusterMinimalFragmentDoc}`;
+export const ServiceDeploymentChatFragmentDoc = gql`
+    fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+    ${ServiceDeploymentTinyFragmentDoc}
+${AiInsightSummaryFragmentDoc}`;
+export const StackTinyFragmentDoc = gql`
+    fragment StackTiny on InfrastructureStack {
+  id
+  insertedAt
+  updatedAt
+  deletedAt
+  name
+  type
+  repository {
+    url
+    pulledAt
+  }
+  paused
+  status
+  insight {
+    ...AiInsightSummary
+  }
+}
+    ${AiInsightSummaryFragmentDoc}`;
+export const StackChatFragmentDoc = gql`
+    fragment StackChat on InfrastructureStack {
+  ...StackTiny
+  insight {
+    ...AiInsightSummary
+  }
+}
+    ${StackTinyFragmentDoc}
+${AiInsightSummaryFragmentDoc}`;
 export const AiDeltaFragmentDoc = gql`
     fragment AiDelta on AiDelta {
   seq
@@ -14941,14 +16140,6 @@ export const McpServerAuditFragmentDoc = gql`
   updatedAt
 }
     ${UserFragmentDoc}`;
-export const PageInfoFragmentDoc = gql`
-    fragment PageInfo on PageInfo {
-  hasNextPage
-  endCursor
-  hasPreviousPage
-  startCursor
-}
-    `;
 export const McpServerConnectionFragmentDoc = gql`
     fragment McpServerConnection on McpServerConnection {
   pageInfo {
@@ -15207,14 +16398,14 @@ export const ClustersRowFragmentDoc = gql`
   name
   handle
   distro
-  metricsSummary {
-    cpuUsed
-    cpuAvailable
-    cpuTotal
-    memoryUsed
-    memoryAvailable
-    memoryTotal
-  }
+  cpuTotal
+  memoryTotal
+  cpuUtil
+  nodeCount
+  namespaceCount
+  availabilityZones
+  podCount
+  memoryUtil
   installed
   pingedAt
   deletedAt
@@ -15608,11 +16799,7 @@ export const ServiceDeploymentsRowFragmentDoc = gql`
   errors {
     message
     source
-  }
-  components {
-    apiDeprecations {
-      blocking
-    }
+    warning
   }
   globalService {
     id
@@ -15730,6 +16917,7 @@ export const GlobalServiceFragmentDoc = gql`
   }
   insertedAt
   updatedAt
+  mgmt
 }
     ${ProjectTinyFragmentDoc}
 ${ServiceDeploymentsRowFragmentDoc}
@@ -15756,21 +16944,26 @@ export const AiSettingsFragmentDoc = gql`
   }
   openai {
     model
+    embeddingModel
   }
   azure {
     apiVersion
     endpoint
+    model
+    embeddingModel
   }
   ollama {
     model
     url
   }
   bedrock {
+    region
     modelId
-    accessKeyId
+    embeddingModel
   }
   vertex {
     model
+    embeddingModel
     project
     location
   }
@@ -15943,6 +17136,7 @@ export const ServiceErrorFragmentDoc = gql`
     fragment ServiceError on ServiceError {
   source
   message
+  warning
 }
     `;
 export const ObserverFragmentDoc = gql`
@@ -16731,6 +17925,21 @@ export const IsoImageFragmentDoc = gql`
   }
 }
     `;
+export const FlowBasicFragmentDoc = gql`
+    fragment FlowBasic on Flow {
+  id
+  name
+  description
+  icon
+  alerts(first: 500) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}
+    `;
 export const FlowBasicWithBindingsFragmentDoc = gql`
     fragment FlowBasicWithBindings on Flow {
   ...FlowBasic
@@ -16743,21 +17952,6 @@ export const FlowBasicWithBindingsFragmentDoc = gql`
 }
     ${FlowBasicFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
-export const ServiceDeploymentTinyFragmentDoc = gql`
-    fragment ServiceDeploymentTiny on ServiceDeployment {
-  id
-  name
-  cluster {
-    ...ClusterMinimal
-  }
-  componentStatus
-  status
-  errors {
-    message
-    source
-  }
-}
-    ${ClusterMinimalFragmentDoc}`;
 export const PreviewEnvironmentInstanceFragmentDoc = gql`
     fragment PreviewEnvironmentInstance on PreviewEnvironmentInstance {
   id
@@ -17697,6 +18891,33 @@ export const UnstructuredResourceFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${EventFragmentDoc}`;
+export const RefreshTokenFragmentDoc = gql`
+    fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
+}
+    `;
+export const AccountFragmentDoc = gql`
+    fragment Account on Account {
+  grandfatheredUntil
+  delinquentAt
+  availableFeatures {
+    audits
+    userManagement
+    databaseManagement
+  }
+  subscription {
+    id
+    plan {
+      id
+      name
+      period
+    }
+  }
+}
+    `;
 export const MetricPointResponseFragmentDoc = gql`
     fragment MetricPointResponse on MetricPointResponse {
   metric
@@ -17861,25 +19082,6 @@ export const ProjectBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
-export const StackTinyFragmentDoc = gql`
-    fragment StackTiny on InfrastructureStack {
-  id
-  insertedAt
-  updatedAt
-  deletedAt
-  name
-  type
-  repository {
-    url
-    pulledAt
-  }
-  paused
-  status
-  insight {
-    ...AiInsightSummary
-  }
-}
-    ${AiInsightSummaryFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
     fragment StackRun on StackRun {
   id
@@ -18028,6 +19230,7 @@ export const ServiceErrorsFragmentDoc = gql`
     fragment ServiceErrors on ServiceError {
   source
   message
+  warning
 }
     `;
 export const StackFileFragmentDoc = gql`
@@ -18264,33 +19467,6 @@ export const ManifestFragmentDoc = gql`
   bucketPrefix
 }
     `;
-export const AccountFragmentDoc = gql`
-    fragment Account on Account {
-  grandfatheredUntil
-  delinquentAt
-  availableFeatures {
-    audits
-    userManagement
-    databaseManagement
-  }
-  subscription {
-    id
-    plan {
-      id
-      name
-      period
-    }
-  }
-}
-    `;
-export const RefreshTokenFragmentDoc = gql`
-    fragment RefreshToken on RefreshToken {
-  id
-  token
-  insertedAt
-  updatedAt
-}
-    `;
 export const VulnerabilityReportTinyFragmentDoc = gql`
     fragment VulnerabilityReportTiny on VulnerabilityReport {
   id
@@ -18394,101 +19570,22 @@ export const ClusterVulnAggregateFragmentDoc = gql`
   count
 }
     `;
-export const AiPinsDocument = gql`
-    query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
-  aiPins(first: $first, last: $last, after: $after, before: $before) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...AiPin
-      }
+export const VulnerabilityReportConnectionFragmentDoc = gql`
+    fragment VulnerabilityReportConnection on VulnerabilityReportConnection {
+  pageInfo {
+    ...PageInfo
+  }
+  edges {
+    node {
+      ...VulnerabilityReportTiny
     }
   }
 }
     ${PageInfoFragmentDoc}
-${AiPinFragmentDoc}`;
-
-/**
- * __useAiPinsQuery__
- *
- * To run a query within a React component, call `useAiPinsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAiPinsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAiPinsQuery({
- *   variables: {
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *   },
- * });
- */
-export function useAiPinsQuery(baseOptions?: Apollo.QueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
-      }
-export function useAiPinsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
-        }
-export function useAiPinsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
-        }
-export type AiPinsQueryHookResult = ReturnType<typeof useAiPinsQuery>;
-export type AiPinsLazyQueryHookResult = ReturnType<typeof useAiPinsLazyQuery>;
-export type AiPinsSuspenseQueryHookResult = ReturnType<typeof useAiPinsSuspenseQuery>;
-export type AiPinsQueryResult = Apollo.QueryResult<AiPinsQuery, AiPinsQueryVariables>;
-export const AiPinDocument = gql`
-    query AIPin($insightId: ID, $threadId: ID) {
-  aiPin(insightId: $insightId, threadId: $threadId) {
-    ...AiPin
-  }
-}
-    ${AiPinFragmentDoc}`;
-
-/**
- * __useAiPinQuery__
- *
- * To run a query within a React component, call `useAiPinQuery` and pass it any options that fit your needs.
- * When your component renders, `useAiPinQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAiPinQuery({
- *   variables: {
- *      insightId: // value for 'insightId'
- *      threadId: // value for 'threadId'
- *   },
- * });
- */
-export function useAiPinQuery(baseOptions?: Apollo.QueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
-      }
-export function useAiPinLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
-        }
-export function useAiPinSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
-        }
-export type AiPinQueryHookResult = ReturnType<typeof useAiPinQuery>;
-export type AiPinLazyQueryHookResult = ReturnType<typeof useAiPinLazyQuery>;
-export type AiPinSuspenseQueryHookResult = ReturnType<typeof useAiPinSuspenseQuery>;
-export type AiPinQueryResult = Apollo.QueryResult<AiPinQuery, AiPinQueryVariables>;
+${VulnerabilityReportTinyFragmentDoc}`;
 export const ChatThreadsDocument = gql`
-    query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String) {
-  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+    query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
+  chatThreads(first: $first, last: $last, after: $after, before: $before, q: $q) {
     pageInfo {
       ...PageInfo
     }
@@ -18518,6 +19615,7 @@ ${ChatThreadTinyFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      q: // value for 'q'
  *   },
  * });
  */
@@ -18537,13 +19635,91 @@ export type ChatThreadsQueryHookResult = ReturnType<typeof useChatThreadsQuery>;
 export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLazyQuery>;
 export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
 export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
+export const ChatAgentSessionDocument = gql`
+    query ChatAgentSession($id: ID!) {
+  chatThread(id: $id) {
+    id
+    session {
+      id
+      done
+      pullRequest {
+        ...PullRequest
+      }
+      service {
+        ...ServiceDeploymentChat
+      }
+      stack {
+        ...StackChat
+      }
+      pullRequests(first: 100) {
+        edges {
+          node {
+            ...PullRequest
+          }
+        }
+      }
+      serviceDeployments(first: 100) {
+        edges {
+          node {
+            ...ServiceDeploymentTiny
+          }
+        }
+      }
+      stacks(first: 100) {
+        edges {
+          node {
+            ...StackTiny
+          }
+        }
+      }
+    }
+  }
+}
+    ${PullRequestFragmentDoc}
+${ServiceDeploymentChatFragmentDoc}
+${StackChatFragmentDoc}
+${ServiceDeploymentTinyFragmentDoc}
+${StackTinyFragmentDoc}`;
+
+/**
+ * __useChatAgentSessionQuery__
+ *
+ * To run a query within a React component, call `useChatAgentSessionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatAgentSessionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatAgentSessionQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useChatAgentSessionQuery(baseOptions: Apollo.QueryHookOptions<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>(ChatAgentSessionDocument, options);
+      }
+export function useChatAgentSessionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>(ChatAgentSessionDocument, options);
+        }
+export function useChatAgentSessionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>(ChatAgentSessionDocument, options);
+        }
+export type ChatAgentSessionQueryHookResult = ReturnType<typeof useChatAgentSessionQuery>;
+export type ChatAgentSessionLazyQueryHookResult = ReturnType<typeof useChatAgentSessionLazyQuery>;
+export type ChatAgentSessionSuspenseQueryHookResult = ReturnType<typeof useChatAgentSessionSuspenseQuery>;
+export type ChatAgentSessionQueryResult = Apollo.QueryResult<ChatAgentSessionQuery, ChatAgentSessionQueryVariables>;
 export const ChatThreadDetailsDocument = gql`
     query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
-    ${ChatThreadFragmentDoc}`;
+    ${ChatThreadDetailsFragmentDoc}`;
 
 /**
  * __useChatThreadDetailsQuery__
@@ -18577,9 +19753,111 @@ export type ChatThreadDetailsQueryHookResult = ReturnType<typeof useChatThreadDe
 export type ChatThreadDetailsLazyQueryHookResult = ReturnType<typeof useChatThreadDetailsLazyQuery>;
 export type ChatThreadDetailsSuspenseQueryHookResult = ReturnType<typeof useChatThreadDetailsSuspenseQuery>;
 export type ChatThreadDetailsQueryResult = Apollo.QueryResult<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>;
+export const ChatThreadMessagesDocument = gql`
+    query ChatThreadMessages($id: ID!, $first: Int = 25, $last: Int, $after: String, $before: String, $reverse: Boolean = true) {
+  chatThread(id: $id) {
+    ...ChatThreadMessages
+  }
+}
+    ${ChatThreadMessagesFragmentDoc}`;
+
+/**
+ * __useChatThreadMessagesQuery__
+ *
+ * To run a query within a React component, call `useChatThreadMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatThreadMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatThreadMessagesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      reverse: // value for 'reverse'
+ *   },
+ * });
+ */
+export function useChatThreadMessagesQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
+      }
+export function useChatThreadMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
+        }
+export function useChatThreadMessagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
+        }
+export type ChatThreadMessagesQueryHookResult = ReturnType<typeof useChatThreadMessagesQuery>;
+export type ChatThreadMessagesLazyQueryHookResult = ReturnType<typeof useChatThreadMessagesLazyQuery>;
+export type ChatThreadMessagesSuspenseQueryHookResult = ReturnType<typeof useChatThreadMessagesSuspenseQuery>;
+export type ChatThreadMessagesQueryResult = Apollo.QueryResult<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>;
+export const AgentSessionsDocument = gql`
+    query AgentSessions($first: Int = 100, $last: Int, $after: String, $before: String) {
+  agentSessions(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentSession
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AgentSessionFragmentDoc}`;
+
+/**
+ * __useAgentSessionsQuery__
+ *
+ * To run a query within a React component, call `useAgentSessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentSessionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useAgentSessionsQuery(baseOptions?: Apollo.QueryHookOptions<AgentSessionsQuery, AgentSessionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentSessionsQuery, AgentSessionsQueryVariables>(AgentSessionsDocument, options);
+      }
+export function useAgentSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentSessionsQuery, AgentSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentSessionsQuery, AgentSessionsQueryVariables>(AgentSessionsDocument, options);
+        }
+export function useAgentSessionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentSessionsQuery, AgentSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentSessionsQuery, AgentSessionsQueryVariables>(AgentSessionsDocument, options);
+        }
+export type AgentSessionsQueryHookResult = ReturnType<typeof useAgentSessionsQuery>;
+export type AgentSessionsLazyQueryHookResult = ReturnType<typeof useAgentSessionsLazyQuery>;
+export type AgentSessionsSuspenseQueryHookResult = ReturnType<typeof useAgentSessionsSuspenseQuery>;
+export type AgentSessionsQueryResult = Apollo.QueryResult<AgentSessionsQuery, AgentSessionsQueryVariables>;
 export const CloudConnectionsDocument = gql`
-    query CloudConnections($first: Int = 100, $last: Int, $after: String, $before: String) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+    query CloudConnections($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -18609,6 +19887,7 @@ ${CloudConnectionTinyFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      q: // value for 'q'
  *   },
  * });
  */
@@ -18628,106 +19907,6 @@ export type CloudConnectionsQueryHookResult = ReturnType<typeof useCloudConnecti
 export type CloudConnectionsLazyQueryHookResult = ReturnType<typeof useCloudConnectionsLazyQuery>;
 export type CloudConnectionsSuspenseQueryHookResult = ReturnType<typeof useCloudConnectionsSuspenseQuery>;
 export type CloudConnectionsQueryResult = Apollo.QueryResult<CloudConnectionsQuery, CloudConnectionsQueryVariables>;
-export const CreateAiPinDocument = gql`
-    mutation CreateAIPin($attributes: AiPinAttributes!) {
-  createPin(attributes: $attributes) {
-    ...AiPin
-  }
-}
-    ${AiPinFragmentDoc}`;
-export type CreateAiPinMutationFn = Apollo.MutationFunction<CreateAiPinMutation, CreateAiPinMutationVariables>;
-
-/**
- * __useCreateAiPinMutation__
- *
- * To run a mutation, you first call `useCreateAiPinMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateAiPinMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createAiPinMutation, { data, loading, error }] = useCreateAiPinMutation({
- *   variables: {
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useCreateAiPinMutation(baseOptions?: Apollo.MutationHookOptions<CreateAiPinMutation, CreateAiPinMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateAiPinMutation, CreateAiPinMutationVariables>(CreateAiPinDocument, options);
-      }
-export type CreateAiPinMutationHookResult = ReturnType<typeof useCreateAiPinMutation>;
-export type CreateAiPinMutationResult = Apollo.MutationResult<CreateAiPinMutation>;
-export type CreateAiPinMutationOptions = Apollo.BaseMutationOptions<CreateAiPinMutation, CreateAiPinMutationVariables>;
-export const DeleteAiPinDocument = gql`
-    mutation DeleteAIPin($id: ID!) {
-  deletePin(id: $id) {
-    ...AiPin
-  }
-}
-    ${AiPinFragmentDoc}`;
-export type DeleteAiPinMutationFn = Apollo.MutationFunction<DeleteAiPinMutation, DeleteAiPinMutationVariables>;
-
-/**
- * __useDeleteAiPinMutation__
- *
- * To run a mutation, you first call `useDeleteAiPinMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteAiPinMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteAiPinMutation, { data, loading, error }] = useDeleteAiPinMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeleteAiPinMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAiPinMutation, DeleteAiPinMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteAiPinMutation, DeleteAiPinMutationVariables>(DeleteAiPinDocument, options);
-      }
-export type DeleteAiPinMutationHookResult = ReturnType<typeof useDeleteAiPinMutation>;
-export type DeleteAiPinMutationResult = Apollo.MutationResult<DeleteAiPinMutation>;
-export type DeleteAiPinMutationOptions = Apollo.BaseMutationOptions<DeleteAiPinMutation, DeleteAiPinMutationVariables>;
-export const ChatDocument = gql`
-    mutation Chat($messages: [ChatMessage], $threadId: ID) {
-  chat(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-    ${ChatFragmentDoc}`;
-export type ChatMutationFn = Apollo.MutationFunction<ChatMutation, ChatMutationVariables>;
-
-/**
- * __useChatMutation__
- *
- * To run a mutation, you first call `useChatMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChatMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [chatMutation, { data, loading, error }] = useChatMutation({
- *   variables: {
- *      messages: // value for 'messages'
- *      threadId: // value for 'threadId'
- *   },
- * });
- */
-export function useChatMutation(baseOptions?: Apollo.MutationHookOptions<ChatMutation, ChatMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ChatMutation, ChatMutationVariables>(ChatDocument, options);
-      }
-export type ChatMutationHookResult = ReturnType<typeof useChatMutation>;
-export type ChatMutationResult = Apollo.MutationResult<ChatMutation>;
-export type ChatMutationOptions = Apollo.BaseMutationOptions<ChatMutation, ChatMutationVariables>;
 export const HybridChatDocument = gql`
     mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
   hybridChat(messages: $messages, threadId: $threadId) {
@@ -18828,37 +20007,6 @@ export function useConfirmChatPlanMutation(baseOptions?: Apollo.MutationHookOpti
 export type ConfirmChatPlanMutationHookResult = ReturnType<typeof useConfirmChatPlanMutation>;
 export type ConfirmChatPlanMutationResult = Apollo.MutationResult<ConfirmChatPlanMutation>;
 export type ConfirmChatPlanMutationOptions = Apollo.BaseMutationOptions<ConfirmChatPlanMutation, ConfirmChatPlanMutationVariables>;
-export const ClearChatHistoryDocument = gql`
-    mutation ClearChatHistory($before: Int) {
-  clearChatHistory(before: $before)
-}
-    `;
-export type ClearChatHistoryMutationFn = Apollo.MutationFunction<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
-
-/**
- * __useClearChatHistoryMutation__
- *
- * To run a mutation, you first call `useClearChatHistoryMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useClearChatHistoryMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [clearChatHistoryMutation, { data, loading, error }] = useClearChatHistoryMutation({
- *   variables: {
- *      before: // value for 'before'
- *   },
- * });
- */
-export function useClearChatHistoryMutation(baseOptions?: Apollo.MutationHookOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>(ClearChatHistoryDocument, options);
-      }
-export type ClearChatHistoryMutationHookResult = ReturnType<typeof useClearChatHistoryMutation>;
-export type ClearChatHistoryMutationResult = Apollo.MutationResult<ClearChatHistoryMutation>;
-export type ClearChatHistoryMutationOptions = Apollo.BaseMutationOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
 export const DeleteChatDocument = gql`
     mutation DeleteChat($id: ID!) {
   deleteChat(id: $id) {
@@ -18892,47 +20040,13 @@ export function useDeleteChatMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteChatMutationHookResult = ReturnType<typeof useDeleteChatMutation>;
 export type DeleteChatMutationResult = Apollo.MutationResult<DeleteChatMutation>;
 export type DeleteChatMutationOptions = Apollo.BaseMutationOptions<DeleteChatMutation, DeleteChatMutationVariables>;
-export const SaveChatsDocument = gql`
-    mutation SaveChats($messages: [ChatMessage], $threadId: ID) {
-  saveChats(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-    ${ChatFragmentDoc}`;
-export type SaveChatsMutationFn = Apollo.MutationFunction<SaveChatsMutation, SaveChatsMutationVariables>;
-
-/**
- * __useSaveChatsMutation__
- *
- * To run a mutation, you first call `useSaveChatsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSaveChatsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [saveChatsMutation, { data, loading, error }] = useSaveChatsMutation({
- *   variables: {
- *      messages: // value for 'messages'
- *      threadId: // value for 'threadId'
- *   },
- * });
- */
-export function useSaveChatsMutation(baseOptions?: Apollo.MutationHookOptions<SaveChatsMutation, SaveChatsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SaveChatsMutation, SaveChatsMutationVariables>(SaveChatsDocument, options);
-      }
-export type SaveChatsMutationHookResult = ReturnType<typeof useSaveChatsMutation>;
-export type SaveChatsMutationResult = Apollo.MutationResult<SaveChatsMutation>;
-export type SaveChatsMutationOptions = Apollo.BaseMutationOptions<SaveChatsMutation, SaveChatsMutationVariables>;
 export const CreateChatThreadDocument = gql`
     mutation CreateChatThread($attributes: ChatThreadAttributes!) {
   createThread(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
-    ${ChatThreadFragmentDoc}`;
+    ${ChatThreadDetailsFragmentDoc}`;
 export type CreateChatThreadMutationFn = Apollo.MutationFunction<CreateChatThreadMutation, CreateChatThreadMutationVariables>;
 
 /**
@@ -18962,10 +20076,10 @@ export type CreateChatThreadMutationOptions = Apollo.BaseMutationOptions<CreateC
 export const UpdateChatThreadDocument = gql`
     mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
   updateThread(id: $id, attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
-    ${ChatThreadFragmentDoc}`;
+    ${ChatThreadDetailsFragmentDoc}`;
 export type UpdateChatThreadMutationFn = Apollo.MutationFunction<UpdateChatThreadMutation, UpdateChatThreadMutationVariables>;
 
 /**
@@ -19029,10 +20143,10 @@ export type DeleteChatThreadMutationOptions = Apollo.BaseMutationOptions<DeleteC
 export const CloneChatThreadDocument = gql`
     mutation CloneChatThread($id: ID!, $seq: Int) {
   cloneThread(id: $id, seq: $seq) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
-    ${ChatThreadFragmentDoc}`;
+    ${ChatThreadDetailsFragmentDoc}`;
 export type CloneChatThreadMutationFn = Apollo.MutationFunction<CloneChatThreadMutation, CloneChatThreadMutationVariables>;
 
 /**
@@ -19098,10 +20212,10 @@ export type AddChatContextMutationOptions = Apollo.BaseMutationOptions<AddChatCo
 export const CreateAgentSessionDocument = gql`
     mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
   createAgentSession(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadTiny
   }
 }
-    ${ChatThreadFragmentDoc}`;
+    ${ChatThreadTinyFragmentDoc}`;
 export type CreateAgentSessionMutationFn = Apollo.MutationFunction<CreateAgentSessionMutation, CreateAgentSessionMutationVariables>;
 
 /**
@@ -19359,6 +20473,39 @@ export function useAiFixPrMutation(baseOptions?: Apollo.MutationHookOptions<AiFi
 export type AiFixPrMutationHookResult = ReturnType<typeof useAiFixPrMutation>;
 export type AiFixPrMutationResult = Apollo.MutationResult<AiFixPrMutation>;
 export type AiFixPrMutationOptions = Apollo.BaseMutationOptions<AiFixPrMutation, AiFixPrMutationVariables>;
+export const RefreshInsightDocument = gql`
+    mutation RefreshInsight($id: ID!) {
+  refreshInsight(insightId: $id) {
+    ...AiInsight
+  }
+}
+    ${AiInsightFragmentDoc}`;
+export type RefreshInsightMutationFn = Apollo.MutationFunction<RefreshInsightMutation, RefreshInsightMutationVariables>;
+
+/**
+ * __useRefreshInsightMutation__
+ *
+ * To run a mutation, you first call `useRefreshInsightMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRefreshInsightMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [refreshInsightMutation, { data, loading, error }] = useRefreshInsightMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRefreshInsightMutation(baseOptions?: Apollo.MutationHookOptions<RefreshInsightMutation, RefreshInsightMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RefreshInsightMutation, RefreshInsightMutationVariables>(RefreshInsightDocument, options);
+      }
+export type RefreshInsightMutationHookResult = ReturnType<typeof useRefreshInsightMutation>;
+export type RefreshInsightMutationResult = Apollo.MutationResult<RefreshInsightMutation>;
+export type RefreshInsightMutationOptions = Apollo.BaseMutationOptions<RefreshInsightMutation, RefreshInsightMutationVariables>;
 export const McpServersDocument = gql`
     query McpServers($first: Int = 100, $after: String, $q: String) {
   mcpServers(first: $first, after: $after, q: $q) {
@@ -19815,8 +20962,14 @@ export type AuditMetricsLazyQueryHookResult = ReturnType<typeof useAuditMetricsL
 export type AuditMetricsSuspenseQueryHookResult = ReturnType<typeof useAuditMetricsSuspenseQuery>;
 export type AuditMetricsQueryResult = Apollo.QueryResult<AuditMetricsQuery, AuditMetricsQueryVariables>;
 export const PrAutomationsDocument = gql`
-    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID, $role: PrRole) {
-  prAutomations(first: $first, after: $after, catalogId: $catalogId, role: $role) {
+    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID, $role: PrRole, $q: String) {
+  prAutomations(
+    first: $first
+    after: $after
+    catalogId: $catalogId
+    role: $role
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -19846,6 +20999,7 @@ ${PrAutomationFragmentDoc}`;
  *      after: // value for 'after'
  *      catalogId: // value for 'catalogId'
  *      role: // value for 'role'
+ *      q: // value for 'q'
  *   },
  * });
  */
@@ -22562,8 +23716,8 @@ export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteG
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
 export const GlobalServicesDocument = gql`
-    query GlobalServices($first: Int, $after: String, $projectId: ID) {
-  globalServices(first: $first, after: $after, projectId: $projectId) {
+    query GlobalServices($first: Int, $after: String, $projectId: ID, $q: String) {
+  globalServices(first: $first, after: $after, projectId: $projectId, q: $q) {
     pageInfo {
       ...PageInfo
     }
@@ -22592,6 +23746,7 @@ ${GlobalServiceFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      projectId: // value for 'projectId'
+ *      q: // value for 'q'
  *   },
  * });
  */
@@ -23417,6 +24572,39 @@ export function useDeleteObserverMutation(baseOptions?: Apollo.MutationHookOptio
 export type DeleteObserverMutationHookResult = ReturnType<typeof useDeleteObserverMutation>;
 export type DeleteObserverMutationResult = Apollo.MutationResult<DeleteObserverMutation>;
 export type DeleteObserverMutationOptions = Apollo.BaseMutationOptions<DeleteObserverMutation, DeleteObserverMutationVariables>;
+export const KickObserverDocument = gql`
+    mutation KickObserver($id: ID!) {
+  kickObserver(id: $id) {
+    ...Observer
+  }
+}
+    ${ObserverFragmentDoc}`;
+export type KickObserverMutationFn = Apollo.MutationFunction<KickObserverMutation, KickObserverMutationVariables>;
+
+/**
+ * __useKickObserverMutation__
+ *
+ * To run a mutation, you first call `useKickObserverMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickObserverMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickObserverMutation, { data, loading, error }] = useKickObserverMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKickObserverMutation(baseOptions?: Apollo.MutationHookOptions<KickObserverMutation, KickObserverMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickObserverMutation, KickObserverMutationVariables>(KickObserverDocument, options);
+      }
+export type KickObserverMutationHookResult = ReturnType<typeof useKickObserverMutation>;
+export type KickObserverMutationResult = Apollo.MutationResult<KickObserverMutation>;
+export type KickObserverMutationOptions = Apollo.BaseMutationOptions<KickObserverMutation, KickObserverMutationVariables>;
 export const PipelinesDocument = gql`
     query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
   pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
@@ -26122,6 +27310,51 @@ export type FlowMcpServersQueryHookResult = ReturnType<typeof useFlowMcpServersQ
 export type FlowMcpServersLazyQueryHookResult = ReturnType<typeof useFlowMcpServersLazyQuery>;
 export type FlowMcpServersSuspenseQueryHookResult = ReturnType<typeof useFlowMcpServersSuspenseQuery>;
 export type FlowMcpServersQueryResult = Apollo.QueryResult<FlowMcpServersQuery, FlowMcpServersQueryVariables>;
+export const FlowVulnerabilityReportsDocument = gql`
+    query FlowVulnerabilityReports($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    vulnerabilityReports(first: $first, after: $after) {
+      ...VulnerabilityReportConnection
+    }
+  }
+}
+    ${VulnerabilityReportConnectionFragmentDoc}`;
+
+/**
+ * __useFlowVulnerabilityReportsQuery__
+ *
+ * To run a query within a React component, call `useFlowVulnerabilityReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlowVulnerabilityReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlowVulnerabilityReportsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useFlowVulnerabilityReportsQuery(baseOptions: Apollo.QueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+      }
+export function useFlowVulnerabilityReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+        }
+export function useFlowVulnerabilityReportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>(FlowVulnerabilityReportsDocument, options);
+        }
+export type FlowVulnerabilityReportsQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsQuery>;
+export type FlowVulnerabilityReportsLazyQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsLazyQuery>;
+export type FlowVulnerabilityReportsSuspenseQueryHookResult = ReturnType<typeof useFlowVulnerabilityReportsSuspenseQuery>;
+export type FlowVulnerabilityReportsQueryResult = Apollo.QueryResult<FlowVulnerabilityReportsQuery, FlowVulnerabilityReportsQueryVariables>;
 export const UpsertFlowDocument = gql`
     mutation UpsertFlow($attributes: FlowAttributes!) {
   upsertFlow(attributes: $attributes) {
@@ -27535,6 +28768,506 @@ export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructu
 export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
 export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
 export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export const SubscriptionDocument = gql`
+    query Subscription {
+  account {
+    ...Account
+  }
+}
+    ${AccountFragmentDoc}`;
+
+/**
+ * __useSubscriptionQuery__
+ *
+ * To run a query within a React component, call `useSubscriptionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSubscriptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscriptionQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscriptionQuery(baseOptions?: Apollo.QueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+      }
+export function useSubscriptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export function useSubscriptionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery>;
+export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
+export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
+export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
+export const MeGroupsDocument = gql`
+    query MeGroups {
+  me {
+    id
+    groups {
+      ...Group
+    }
+  }
+}
+    ${GroupFragmentDoc}`;
+
+/**
+ * __useMeGroupsQuery__
+ *
+ * To run a query within a React component, call `useMeGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeGroupsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeGroupsQuery(baseOptions?: Apollo.QueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+      }
+export function useMeGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export function useMeGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeGroupsQuery, MeGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeGroupsQuery, MeGroupsQueryVariables>(MeGroupsDocument, options);
+        }
+export type MeGroupsQueryHookResult = ReturnType<typeof useMeGroupsQuery>;
+export type MeGroupsLazyQueryHookResult = ReturnType<typeof useMeGroupsLazyQuery>;
+export type MeGroupsSuspenseQueryHookResult = ReturnType<typeof useMeGroupsSuspenseQuery>;
+export type MeGroupsQueryResult = Apollo.QueryResult<MeGroupsQuery, MeGroupsQueryVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...User
+    boundRoles {
+      ...Role
+    }
+    unreadNotifications
+  }
+  clusterInfo {
+    version
+    platform
+    gitCommit
+  }
+  configuration {
+    gitCommit
+    isDemoProject
+    isSandbox
+    pluralLogin
+    byok
+    externalOidc
+    cloud
+    installed
+    consoleVersion
+    sentryEnabled
+    manifest {
+      ...Manifest
+    }
+    gitStatus {
+      cloned
+      output
+    }
+    features {
+      ...AvailableFeatures
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RoleFragmentDoc}
+${ManifestFragmentDoc}
+${AvailableFeaturesFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+      }
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const LoginInfoDocument = gql`
+    query LoginInfo($redirect: String) {
+  loginInfo(redirect: $redirect) {
+    oidcUri
+    external
+    oidcName
+  }
+}
+    `;
+
+/**
+ * __useLoginInfoQuery__
+ *
+ * To run a query within a React component, call `useLoginInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoginInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoginInfoQuery({
+ *   variables: {
+ *      redirect: // value for 'redirect'
+ *   },
+ * });
+ */
+export function useLoginInfoQuery(baseOptions?: Apollo.QueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+      }
+export function useLoginInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+        }
+export function useLoginInfoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LoginInfoQuery, LoginInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LoginInfoQuery, LoginInfoQueryVariables>(LoginInfoDocument, options);
+        }
+export type LoginInfoQueryHookResult = ReturnType<typeof useLoginInfoQuery>;
+export type LoginInfoLazyQueryHookResult = ReturnType<typeof useLoginInfoLazyQuery>;
+export type LoginInfoSuspenseQueryHookResult = ReturnType<typeof useLoginInfoSuspenseQuery>;
+export type LoginInfoQueryResult = Apollo.QueryResult<LoginInfoQuery, LoginInfoQueryVariables>;
+export const InviteDocument = gql`
+    query Invite($id: String!) {
+  invite(id: $id) {
+    email
+  }
+}
+    `;
+
+/**
+ * __useInviteQuery__
+ *
+ * To run a query within a React component, call `useInviteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInviteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInviteQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useInviteQuery(baseOptions: Apollo.QueryHookOptions<InviteQuery, InviteQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+      }
+export function useInviteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InviteQuery, InviteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+        }
+export function useInviteSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InviteQuery, InviteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+        }
+export type InviteQueryHookResult = ReturnType<typeof useInviteQuery>;
+export type InviteLazyQueryHookResult = ReturnType<typeof useInviteLazyQuery>;
+export type InviteSuspenseQueryHookResult = ReturnType<typeof useInviteSuspenseQuery>;
+export type InviteQueryResult = Apollo.QueryResult<InviteQuery, InviteQueryVariables>;
+export const RefreshDocument = gql`
+    query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useRefreshQuery__
+ *
+ * To run a query within a React component, call `useRefreshQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRefreshQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRefreshQuery({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useRefreshQuery(baseOptions: Apollo.QueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+      }
+export function useRefreshLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export function useRefreshSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
+export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
+export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
+export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
+export const TemporaryTokenDocument = gql`
+    query TemporaryToken {
+  temporaryToken
+}
+    `;
+
+/**
+ * __useTemporaryTokenQuery__
+ *
+ * To run a query within a React component, call `useTemporaryTokenQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTemporaryTokenQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTemporaryTokenQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useTemporaryTokenQuery(baseOptions?: Apollo.QueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+      }
+export function useTemporaryTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+        }
+export function useTemporaryTokenSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TemporaryTokenQuery, TemporaryTokenQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TemporaryTokenQuery, TemporaryTokenQueryVariables>(TemporaryTokenDocument, options);
+        }
+export type TemporaryTokenQueryHookResult = ReturnType<typeof useTemporaryTokenQuery>;
+export type TemporaryTokenLazyQueryHookResult = ReturnType<typeof useTemporaryTokenLazyQuery>;
+export type TemporaryTokenSuspenseQueryHookResult = ReturnType<typeof useTemporaryTokenSuspenseQuery>;
+export type TemporaryTokenQueryResult = Apollo.QueryResult<TemporaryTokenQuery, TemporaryTokenQueryVariables>;
+export const SignInDocument = gql`
+    mutation signIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type SignInMutationFn = Apollo.MutationFunction<SignInMutation, SignInMutationVariables>;
+
+/**
+ * __useSignInMutation__
+ *
+ * To run a mutation, you first call `useSignInMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignInMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signInMutation, { data, loading, error }] = useSignInMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *      password: // value for 'password'
+ *   },
+ * });
+ */
+export function useSignInMutation(baseOptions?: Apollo.MutationHookOptions<SignInMutation, SignInMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument, options);
+      }
+export type SignInMutationHookResult = ReturnType<typeof useSignInMutation>;
+export type SignInMutationResult = Apollo.MutationResult<SignInMutation>;
+export type SignInMutationOptions = Apollo.BaseMutationOptions<SignInMutation, SignInMutationVariables>;
+export const OauthCallbackDocument = gql`
+    mutation OauthCallback($code: String!, $redirect: String, $state: String) {
+  oauthCallback(code: $code, redirect: $redirect, state: $state) {
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${RefreshTokenFragmentDoc}`;
+export type OauthCallbackMutationFn = Apollo.MutationFunction<OauthCallbackMutation, OauthCallbackMutationVariables>;
+
+/**
+ * __useOauthCallbackMutation__
+ *
+ * To run a mutation, you first call `useOauthCallbackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOauthCallbackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [oauthCallbackMutation, { data, loading, error }] = useOauthCallbackMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *      redirect: // value for 'redirect'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useOauthCallbackMutation(baseOptions?: Apollo.MutationHookOptions<OauthCallbackMutation, OauthCallbackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OauthCallbackMutation, OauthCallbackMutationVariables>(OauthCallbackDocument, options);
+      }
+export type OauthCallbackMutationHookResult = ReturnType<typeof useOauthCallbackMutation>;
+export type OauthCallbackMutationResult = Apollo.MutationResult<OauthCallbackMutation>;
+export type OauthCallbackMutationOptions = Apollo.BaseMutationOptions<OauthCallbackMutation, OauthCallbackMutationVariables>;
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+
+/**
+ * __useLogoutMutation__
+ *
+ * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLogoutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
+      }
+export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
+export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const SignUpDocument = gql`
+    mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
+  signup(inviteId: $inviteId, attributes: $attributes) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMutationVariables>;
+
+/**
+ * __useSignUpMutation__
+ *
+ * To run a mutation, you first call `useSignUpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignUpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signUpMutation, { data, loading, error }] = useSignUpMutation({
+ *   variables: {
+ *      inviteId: // value for 'inviteId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignUpMutation, SignUpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
+      }
+export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
+export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
+export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
+export const LoginLinkDocument = gql`
+    mutation LoginLink($key: String!) {
+  loginLink(key: $key) {
+    ...User
+    jwt
+    refreshToken {
+      ...RefreshToken
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RefreshTokenFragmentDoc}`;
+export type LoginLinkMutationFn = Apollo.MutationFunction<LoginLinkMutation, LoginLinkMutationVariables>;
+
+/**
+ * __useLoginLinkMutation__
+ *
+ * To run a mutation, you first call `useLoginLinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLoginLinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [loginLinkMutation, { data, loading, error }] = useLoginLinkMutation({
+ *   variables: {
+ *      key: // value for 'key'
+ *   },
+ * });
+ */
+export function useLoginLinkMutation(baseOptions?: Apollo.MutationHookOptions<LoginLinkMutation, LoginLinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginLinkMutation, LoginLinkMutationVariables>(LoginLinkDocument, options);
+      }
+export type LoginLinkMutationHookResult = ReturnType<typeof useLoginLinkMutation>;
+export type LoginLinkMutationResult = Apollo.MutationResult<LoginLinkMutation>;
+export type LoginLinkMutationOptions = Apollo.BaseMutationOptions<LoginLinkMutation, LoginLinkMutationVariables>;
 export const LogAggregationDocument = gql`
     query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {
   logAggregation(
@@ -30662,117 +32395,6 @@ export function useConsumeSecretMutation(baseOptions?: Apollo.MutationHookOption
 export type ConsumeSecretMutationHookResult = ReturnType<typeof useConsumeSecretMutation>;
 export type ConsumeSecretMutationResult = Apollo.MutationResult<ConsumeSecretMutation>;
 export type ConsumeSecretMutationOptions = Apollo.BaseMutationOptions<ConsumeSecretMutation, ConsumeSecretMutationVariables>;
-export const SubscriptionDocument = gql`
-    query Subscription {
-  account {
-    ...Account
-  }
-}
-    ${AccountFragmentDoc}`;
-
-/**
- * __useSubscriptionQuery__
- *
- * To run a query within a React component, call `useSubscriptionQuery` and pass it any options that fit your needs.
- * When your component renders, `useSubscriptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSubscriptionQuery({
- *   variables: {
- *   },
- * });
- */
-export function useSubscriptionQuery(baseOptions?: Apollo.QueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-      }
-export function useSubscriptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-        }
-export function useSubscriptionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
-        }
-export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery>;
-export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
-export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
-export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    ...User
-    boundRoles {
-      ...Role
-    }
-    unreadNotifications
-  }
-  clusterInfo {
-    version
-    platform
-    gitCommit
-  }
-  configuration {
-    gitCommit
-    isDemoProject
-    isSandbox
-    pluralLogin
-    byok
-    externalOidc
-    cloud
-    installed
-    consoleVersion
-    manifest {
-      ...Manifest
-    }
-    gitStatus {
-      cloned
-      output
-    }
-    features {
-      ...AvailableFeatures
-    }
-  }
-}
-    ${UserFragmentDoc}
-${RoleFragmentDoc}
-${ManifestFragmentDoc}
-${AvailableFeaturesFragmentDoc}`;
-
-/**
- * __useMeQuery__
- *
- * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
-export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
-export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
-export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
-export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const UsersDocument = gql`
     query Users($q: String, $after: String) {
   users(q: $q, first: 20, after: $after) {
@@ -30905,6 +32527,39 @@ export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
 export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
 export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
+export const DeleteUserDocument = gql`
+    mutation DeleteUser($id: ID!) {
+  deleteUser(id: $id) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type DeleteUserMutationFn = Apollo.MutationFunction<DeleteUserMutation, DeleteUserMutationVariables>;
+
+/**
+ * __useDeleteUserMutation__
+ *
+ * To run a mutation, you first call `useDeleteUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteUserMutation, { data, loading, error }] = useDeleteUserMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<DeleteUserMutation, DeleteUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteUserMutation, DeleteUserMutationVariables>(DeleteUserDocument, options);
+      }
+export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
+export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
+export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
 export const CreateInviteDocument = gql`
     mutation CreateInvite($attributes: InviteAttributes!) {
   createInvite(attributes: $attributes) {
@@ -30938,117 +32593,6 @@ export function useCreateInviteMutation(baseOptions?: Apollo.MutationHookOptions
 export type CreateInviteMutationHookResult = ReturnType<typeof useCreateInviteMutation>;
 export type CreateInviteMutationResult = Apollo.MutationResult<CreateInviteMutation>;
 export type CreateInviteMutationOptions = Apollo.BaseMutationOptions<CreateInviteMutation, CreateInviteMutationVariables>;
-export const LogoutDocument = gql`
-    mutation Logout {
-  logout {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
-
-/**
- * __useLogoutMutation__
- *
- * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLogoutMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
- *   variables: {
- *   },
- * });
- */
-export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
-      }
-export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
-export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
-export const RefreshDocument = gql`
-    query Refresh($token: String!) {
-  refresh(token: $token) {
-    ...User
-    jwt
-  }
-}
-    ${UserFragmentDoc}`;
-
-/**
- * __useRefreshQuery__
- *
- * To run a query within a React component, call `useRefreshQuery` and pass it any options that fit your needs.
- * When your component renders, `useRefreshQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRefreshQuery({
- *   variables: {
- *      token: // value for 'token'
- *   },
- * });
- */
-export function useRefreshQuery(baseOptions: Apollo.QueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-      }
-export function useRefreshLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-        }
-export function useRefreshSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
-        }
-export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
-export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
-export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
-export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
-export const OauthCallbackDocument = gql`
-    mutation OauthCallback($code: String!, $redirect: String, $state: String) {
-  oauthCallback(code: $code, redirect: $redirect, state: $state) {
-    jwt
-    refreshToken {
-      ...RefreshToken
-    }
-  }
-}
-    ${RefreshTokenFragmentDoc}`;
-export type OauthCallbackMutationFn = Apollo.MutationFunction<OauthCallbackMutation, OauthCallbackMutationVariables>;
-
-/**
- * __useOauthCallbackMutation__
- *
- * To run a mutation, you first call `useOauthCallbackMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useOauthCallbackMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [oauthCallbackMutation, { data, loading, error }] = useOauthCallbackMutation({
- *   variables: {
- *      code: // value for 'code'
- *      redirect: // value for 'redirect'
- *      state: // value for 'state'
- *   },
- * });
- */
-export function useOauthCallbackMutation(baseOptions?: Apollo.MutationHookOptions<OauthCallbackMutation, OauthCallbackMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<OauthCallbackMutation, OauthCallbackMutationVariables>(OauthCallbackDocument, options);
-      }
-export type OauthCallbackMutationHookResult = ReturnType<typeof useOauthCallbackMutation>;
-export type OauthCallbackMutationResult = Apollo.MutationResult<OauthCallbackMutation>;
-export type OauthCallbackMutationOptions = Apollo.BaseMutationOptions<OauthCallbackMutation, OauthCallbackMutationVariables>;
 export const VulnerabilityReportsDocument = gql`
     query VulnerabilityReports($clusters: [ID], $namespaces: [String], $q: String, $grade: VulnReportGrade, $first: Int, $after: String) {
   vulnerabilityReports(
@@ -31059,18 +32603,10 @@ export const VulnerabilityReportsDocument = gql`
     first: $first
     after: $after
   ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...VulnerabilityReportTiny
-      }
-    }
+    ...VulnerabilityReportConnection
   }
 }
-    ${PageInfoFragmentDoc}
-${VulnerabilityReportTinyFragmentDoc}`;
+    ${VulnerabilityReportConnectionFragmentDoc}`;
 
 /**
  * __useVulnerabilityReportsQuery__
@@ -31233,10 +32769,11 @@ export type ClusterVulnerabilityAggregateSuspenseQueryHookResult = ReturnType<ty
 export type ClusterVulnerabilityAggregateQueryResult = Apollo.QueryResult<ClusterVulnerabilityAggregateQuery, ClusterVulnerabilityAggregateQueryVariables>;
 export const namedOperations = {
   Query: {
-    AIPins: 'AIPins',
-    AIPin: 'AIPin',
     ChatThreads: 'ChatThreads',
+    ChatAgentSession: 'ChatAgentSession',
     ChatThreadDetails: 'ChatThreadDetails',
+    ChatThreadMessages: 'ChatThreadMessages',
+    AgentSessions: 'AgentSessions',
     CloudConnections: 'CloudConnections',
     AiInsight: 'AiInsight',
     AICompletion: 'AICompletion',
@@ -31338,6 +32875,7 @@ export const namedOperations = {
     FlowPreviewEnvironmentInstances: 'FlowPreviewEnvironmentInstances',
     FlowPreviewEnvironmentTemplates: 'FlowPreviewEnvironmentTemplates',
     FlowMcpServers: 'FlowMcpServers',
+    FlowVulnerabilityReports: 'FlowVulnerabilityReports',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -31362,6 +32900,13 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    Subscription: 'Subscription',
+    MeGroups: 'MeGroups',
+    Me: 'Me',
+    LoginInfo: 'LoginInfo',
+    Invite: 'Invite',
+    Refresh: 'Refresh',
+    TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
@@ -31400,26 +32945,18 @@ export const namedOperations = {
     CustomStackRuns: 'CustomStackRuns',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
-    Subscription: 'Subscription',
-    Me: 'Me',
     Users: 'Users',
     SearchUsers: 'SearchUsers',
-    Refresh: 'Refresh',
     VulnerabilityReports: 'VulnerabilityReports',
     VulnerabilityReport: 'VulnerabilityReport',
     VulnerabilityStatistics: 'VulnerabilityStatistics',
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate'
   },
   Mutation: {
-    CreateAIPin: 'CreateAIPin',
-    DeleteAIPin: 'DeleteAIPin',
-    Chat: 'Chat',
     HybridChat: 'HybridChat',
     ConfirmChat: 'ConfirmChat',
     ConfirmChatPlan: 'ConfirmChatPlan',
-    ClearChatHistory: 'ClearChatHistory',
     DeleteChat: 'DeleteChat',
-    SaveChats: 'SaveChats',
     CreateChatThread: 'CreateChatThread',
     UpdateChatThread: 'UpdateChatThread',
     DeleteChatThread: 'DeleteChatThread',
@@ -31427,6 +32964,7 @@ export const namedOperations = {
     AddChatContext: 'AddChatContext',
     CreateAgentSession: 'CreateAgentSession',
     AiFixPr: 'AiFixPr',
+    RefreshInsight: 'RefreshInsight',
     UpsertMcpServer: 'UpsertMcpServer',
     DeleteMcpServer: 'DeleteMcpServer',
     UpsertAlertResolution: 'UpsertAlertResolution',
@@ -31469,6 +33007,7 @@ export const namedOperations = {
     DissmissOnboarding: 'DissmissOnboarding',
     UpsertObserver: 'UpsertObserver',
     DeleteObserver: 'DeleteObserver',
+    KickObserver: 'KickObserver',
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
@@ -31503,6 +33042,11 @@ export const namedOperations = {
     UnpinCustomResource: 'UnpinCustomResource',
     DeleteJob: 'DeleteJob',
     DeletePod: 'DeletePod',
+    signIn: 'signIn',
+    OauthCallback: 'OauthCallback',
+    Logout: 'Logout',
+    SignUp: 'SignUp',
+    LoginLink: 'LoginLink',
     UpsertNotificationRouter: 'UpsertNotificationRouter',
     DeleteNotificationRouter: 'DeleteNotificationRouter',
     UpsertNotificationSink: 'UpsertNotificationSink',
@@ -31541,22 +33085,23 @@ export const namedOperations = {
     ShareSecret: 'ShareSecret',
     ConsumeSecret: 'ConsumeSecret',
     UpdateUser: 'UpdateUser',
-    CreateInvite: 'CreateInvite',
-    Logout: 'Logout',
-    OauthCallback: 'OauthCallback'
+    DeleteUser: 'DeleteUser',
+    CreateInvite: 'CreateInvite'
   },
   Subscription: {
     AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta'
   },
   Fragment: {
-    AiPin: 'AiPin',
     Chat: 'Chat',
     ChatThreadTiny: 'ChatThreadTiny',
-    ChatThread: 'ChatThread',
+    ChatThreadDetails: 'ChatThreadDetails',
+    ChatThreadMessages: 'ChatThreadMessages',
     ChatThreadSettings: 'ChatThreadSettings',
     CloudConnectionTiny: 'CloudConnectionTiny',
     AgentSession: 'AgentSession',
+    ServiceDeploymentChat: 'ServiceDeploymentChat',
+    StackChat: 'StackChat',
     AiDelta: 'AiDelta',
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
@@ -31732,6 +33277,8 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    RefreshToken: 'RefreshToken',
+    Account: 'Account',
     LogLine: 'LogLine',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
@@ -31777,13 +33324,12 @@ export const namedOperations = {
     Role: 'Role',
     AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest',
-    Account: 'Account',
-    RefreshToken: 'RefreshToken',
     VulnerabilityReportTiny: 'VulnerabilityReportTiny',
     VulnerabilityReport: 'VulnerabilityReport',
     Vulnerability: 'Vulnerability',
     VulnerabilityStatistic: 'VulnerabilityStatistic',
     ClusterVulnAggregate: 'ClusterVulnAggregate',
-    CvssBundle: 'CvssBundle'
+    CvssBundle: 'CvssBundle',
+    VulnerabilityReportConnection: 'VulnerabilityReportConnection'
   }
 }

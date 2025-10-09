@@ -4,7 +4,7 @@ defmodule Console.Deployments.Observability.Webhook do
   to handle provider-specific logic.
   """
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Newrelic, Raw}
+  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Newrelic, Raw, Sentry}
   alias Console.Schema.ObservabilityWebhook
 
   @callback associations(atom, map, map) :: map
@@ -54,6 +54,24 @@ defmodule Console.Deployments.Observability.Webhook do
     |> ok()
   end
 
+  def payload(%ObservabilityWebhook{type: :sentry}, %{"data" => payload}) do
+    tags = (get_in(payload, ["event", "tags"]) || [])
+           |> Map.new(fn [k, v] -> {k, v} end)
+
+    Map.merge(%{
+      type: :sentry,
+      fingerprint: Sentry.fingerprint(payload),
+      state: Sentry.state(payload),
+      severity: :high,
+      url: get_in(payload, ["event", "issue_url"]),
+      title: get_in(payload, ["event", "title"]),
+      message: Sentry.summary(payload),
+      annotations: tags,
+    }, add_associations(Sentry, tags))
+    |> listify()
+    |> ok()
+  end
+
   def payload(%ObservabilityWebhook{type: :datadog}, payload) do
     Map.merge(%{
       type: :datadog,
@@ -95,7 +113,7 @@ defmodule Console.Deployments.Observability.Webhook do
   def payload(_, _), do: {:error, "invalid payload"}
 
   defp add_associations(impl, data) do
-    Enum.reduce(~w(project cluster service)a, %{}, &impl.associations(&1, data, &2))
+    Enum.reduce(~w(project cluster service flow)a, %{}, &impl.associations(&1, data, &2))
   end
 
   defp backfill_raw(%{title: title, message: msg} = attrs) do

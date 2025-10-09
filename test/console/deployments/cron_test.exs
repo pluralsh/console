@@ -188,50 +188,6 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
-  describe "#cache_warm/0" do
-    test "it can warm the cache for all healthy registered clusters" do
-      insert_list(3, :cluster, pinged_at: Timex.now())
-      insert_list(2, :cluster)
-      expect(Clusters, :warm, 3, fn :cluster_metrics, _ -> :ok end)
-
-      :ok = Cron.cache_warm()
-    end
-  end
-
-  describe "#poll_stacks/0" do
-    test "it can generate new stack runs" do
-      stack = insert(:stack,
-        environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}],
-        git: %{ref: "main", folder: "terraform"}
-      )
-      expect(Console.Deployments.Git.Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Console.Deployments.Git.Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
-
-      Cron.poll_stacks()
-
-      [run] = Console.Schema.StackRun.for_stack(stack.id)
-              |> Console.Repo.all()
-
-      assert run.status == :queued
-      assert run.stack_id == stack.id
-    end
-  end
-
-  describe "#dequeue_stacks/0" do
-    test "it can mark stack runs as pending" do
-      stack = insert(:stack)
-      insert(:stack_run, stack: stack, status: :successful)
-      :timer.sleep(1)
-      run = insert(:stack_run, stack: stack, status: :queued)
-
-      Cron.dequeue_stacks()
-
-      dequeued = refetch(run)
-      assert dequeued.id == run.id
-      assert dequeued.status == :pending
-    end
-  end
-
   describe "#prune_run_logs/0" do
     test "it can remove unnnecessary run logs" do
       rm = insert_list(3, :run_log, inserted_at: Timex.now() |> Timex.shift(days: -35))
@@ -335,6 +291,25 @@ defmodule Console.Deployments.CronTest do
       Cron.pr_governance()
 
       assert refetch(pr).approved
+    end
+  end
+
+  describe "#prune_dangling_templates/0" do
+    test "it will prune dangling templates" do
+      tpl = insert(:service_template)
+      insert(:global_service, template: tpl)
+
+      tpl2 = insert(:service_template)
+      insert(:preview_environment_template, template: tpl2)
+
+      del = insert_list(3, :service_template)
+
+      :ok = Cron.prune_dangling_templates()
+
+      assert refetch(tpl)
+      assert refetch(tpl2)
+
+      for t <- del, do: refute refetch(t)
     end
   end
 end

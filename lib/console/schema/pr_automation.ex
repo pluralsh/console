@@ -77,6 +77,18 @@ defmodule Console.Schema.PrAutomation do
       end
     end
 
+    embeds_one :secrets, Secrets, on_replace: :update do
+      field :cluster, :string
+      field :namespace, :string
+      field :name, :string
+
+      embeds_many :entries, SecretEntry, on_replace: :delete do
+        field :name,          :string
+        field :documentation, :string
+        field :autogenerate,  :boolean, default: false
+      end
+    end
+
     embeds_many :configuration, Configuration, on_replace: :delete
 
     belongs_to :cluster,    Cluster
@@ -132,10 +144,12 @@ defmodule Console.Schema.PrAutomation do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_embed(:creates, with: &create_changeset/2)
     |> cast_embed(:deletes, with: &delete_changeset/2)
     |> cast_embed(:confirmation, with: &confirmation_changeset/2)
+    |> cast_embed(:secrets, with: &secret_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
@@ -198,5 +212,18 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, [:label])
     |> validate_required([:label])
+  end
+
+  defp secret_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:cluster, :namespace, :name])
+    |> cast_embed(:entries, with: &secret_entry_changeset/2)
+    |> validate_required([:cluster, :namespace, :name])
+  end
+
+  defp secret_entry_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:name, :documentation, :autogenerate])
+    |> validate_required([:name, :documentation])
   end
 end

@@ -33,15 +33,18 @@ defmodule Console.AI.Evidence.Base do
 
   def interpolate(str, first, last), do: "#{first}#{str}#{last}"
 
-  def json_blob(json), do: "```json\n#{json}\n```"
+  def json_blob(json) when is_binary(json), do: "```json\n#{json}\n```"
+  def json_blob(json), do: "```json\n#{Jason.encode!(json)}\n```"
 
   def prepend(list, l) when is_list(l), do: l ++ list
+  def prepend(list, msg) when is_binary(msg), do: prepend(list, {:user, msg})
   def prepend(list, msg), do: [msg | list]
 
   def maybe_prepend(nil, l), do: l
   def maybe_prepend(v, l), do: prepend(l, v)
 
   def append(list, l) when is_list(l), do: list ++ l
+  def append(list, msg) when is_binary(msg), do: list ++ [{:user, msg}]
   def append(list, msg), do: list ++ [msg]
 
   def distro(:byok), do: "vanilla"

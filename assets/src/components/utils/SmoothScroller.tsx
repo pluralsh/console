@@ -1,3 +1,4 @@
+// TODO: deprecate this, we should instead base this component off our DS Table
 import memoize from 'memoize-one'
 import {
   Component,
@@ -8,10 +9,7 @@ import {
   useState,
 } from 'react'
 import Autosizer from 'react-virtualized-auto-sizer'
-import {
-  FixedSizeList as FixedList,
-  VariableSizeList as List,
-} from 'react-window'
+import { VariableSizeList as List } from 'react-window'
 import * as rwr from 'react-window-reversed'
 
 import { CellMeasurer } from './CellMeasurer.js'
@@ -198,24 +196,6 @@ const ItemWrapper = memo(
   areEqual
 )
 
-const FixedItemWrapper = memo(
-  ({
-    data: { items, isItemLoaded, placeholder, mapper },
-    style,
-    index,
-  }: any) => (
-    <div style={style}>
-      <Item
-        index={index}
-        items={items}
-        isItemLoaded={isItemLoaded}
-        placeholder={placeholder}
-        mapper={mapper}
-      />
-    </div>
-  )
-)
-
 const buildItemData = memoize(
   (
     setSize,
@@ -338,6 +318,8 @@ export function StandardScroller({
   handleScroll,
   refreshKey,
   setLoader,
+  customHeight = 0,
+  customWidth = 0,
   ...props
 }) {
   const sizeMap = useRef({})
@@ -371,98 +353,44 @@ export function StandardScroller({
     >
       {({ onItemsRendered, ref }) => (
         <Autosizer>
-          {({ height, width }) => (
-            <List
-              height={height}
-              width={width}
-              itemCount={itemCount}
-              itemSize={getSize}
-              itemKey={(index) => `${refreshKey}:${index}`}
-              itemData={buildItemData(
-                setSize,
-                mapper,
-                isItemLoaded,
-                items,
-                listRef,
-                width,
-                placeholder,
-                refreshKey,
-                props
-              )}
-              onScroll={({ scrollOffset }) =>
-                handleScroll && handleScroll(scrollOffset > height / 2)
-              }
-              onItemsRendered={(ctx) => {
-                if (props.onRendered) props.onRendered(ctx)
-                onItemsRendered(ctx)
-              }}
-              ref={(listRef) => {
-                if (setListRef) setListRef(listRef)
-                ref(listRef)
-              }}
-              {...props}
-            >
-              {ItemWrapper}
-            </List>
-          )}
-        </Autosizer>
-      )}
-    </SmartLoader>
-  )
-}
-
-export function FixedScroller({
-  hasNextPage,
-  loading,
-  items,
-  loadNextPage,
-  mapper,
-  itemSize,
-  placeholder,
-  setLoader,
-}) {
-  const count = items.length
-  const itemCount = hasNextPage ? count + 7 : count
-  const loadMoreItems = loading ? () => {} : loadNextPage
-  const isItemLoaded = useCallback(
-    (index) => !hasNextPage || index < count,
-    [hasNextPage, count]
-  )
-
-  return (
-    <SmartLoader
-      ref={setLoader}
-      isItemLoaded={isItemLoaded}
-      itemCount={itemCount}
-      loadMoreItems={loadMoreItems}
-      minimumBatchSize={50}
-      threshold={75}
-    >
-      {({ onItemsRendered, ref }) => (
-        <Autosizer>
-          {({ height, width }) => (
-            <FixedList
-              height={height}
-              width={width}
-              itemSize={itemSize}
-              itemCount={itemCount}
-              itemData={buildItemData(
-                null,
-                mapper,
-                isItemLoaded,
-                items,
-                null,
-                width,
-                placeholder,
-                null,
-                null
-              )}
-              onItemsRendered={onItemsRendered}
-              ref={ref}
-            >
-              {FixedItemWrapper}
-            </FixedList>
-          )}
+          {({ height: autoHeight, width: autoWidth }) => {
+            const height = customHeight || autoHeight
+            const width = customWidth || autoWidth
+            return (
+              <List
+                height={height}
+                width={width}
+                itemCount={itemCount}
+                itemSize={getSize}
+                itemKey={(index) => `${refreshKey}:${index}`}
+                itemData={buildItemData(
+                  setSize,
+                  mapper,
+                  isItemLoaded,
+                  items,
+                  listRef,
+                  width,
+                  placeholder,
+                  refreshKey,
+                  props
+                )}
+                onScroll={({ scrollOffset }) =>
+                  handleScroll && handleScroll(scrollOffset > height / 2)
+                }
+                onItemsRendered={(ctx) => {
+                  if (props.onRendered) props.onRendered(ctx)
+                  onItemsRendered(ctx)
+                }}
+                ref={(listRef) => {
+                  if (setListRef) setListRef(listRef)
+                  ref(listRef)
+                }}
+                {...props}
+              >
+                {ItemWrapper}
+              </List>
+            )
+          }}
         </Autosizer>
       )}
     </SmartLoader>

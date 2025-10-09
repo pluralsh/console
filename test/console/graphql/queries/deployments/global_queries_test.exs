@@ -1,6 +1,130 @@
 defmodule Console.GraphQl.Deployments.GlobalQueriesTest do
   use Console.DataCase, async: true
 
+  describe "globalServices" do
+    test "admins can list all global services" do
+      gs = insert_list(3, :global_service)
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query {
+          globalServices(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(gs)
+    end
+
+    test "it can search global services" do
+      gs = insert(:global_service, name: "test")
+      insert(:global_service, name: "other")
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query Search($q: String!) {
+          globalServices(first: 5, q: $q) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "test"}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal([gs])
+    end
+
+    test "it properly sql escapes search" do
+      gs = insert(:global_service, name: "test")
+      insert(:global_service, name: "other")
+
+      {:ok, %{data: %{"globalServices" => _}}} = run_query("""
+        query Search($q: String!) {
+          globalServices(first: 5, q: $q) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "drop tables \"global_services\""}, %{current_user: admin_user()})
+
+      assert refetch(gs)
+    end
+
+    test "project readers can list project global services" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      gs = insert_list(3, :global_service, project: project)
+      insert_list(3, :global_service)
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query {
+          globalServices(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(gs)
+    end
+
+    test "non project readers cannot list global services" do
+      user = insert(:user)
+      project = insert(:project)
+      insert_list(3, :global_service, project: project)
+      insert_list(3, :global_service)
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query {
+          globalServices(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> Enum.empty?()
+    end
+  end
+
+  describe "globalService" do
+    test "it can fetch a global service" do
+      gs = insert(:global_service)
+
+      {:ok, %{data: %{"globalService" => found}}} = run_query("""
+        query Get($id: ID!) {
+          globalService(id: $id) { id }
+        }
+      """, %{"id" => gs.id}, %{current_user: admin_user()})
+
+      assert found["id"] == gs.id
+    end
+
+    test "project readers can fetch a global service" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      gs = insert(:global_service, project: project)
+
+      {:ok, %{data: %{"globalService" => found}}} = run_query("""
+        query Get($id: ID!) {
+          globalService(id: $id) { id }
+        }
+      """, %{"id" => gs.id}, %{current_user: user})
+
+      assert found["id"] == gs.id
+    end
+
+    test "non project readers cannot fetch a global service" do
+      user = insert(:user)
+      project = insert(:project)
+      gs = insert(:global_service, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Get($id: ID!) {
+          globalService(id: $id) { id }
+        }
+      """, %{"id" => gs.id}, %{current_user: user})
+    end
+  end
+
   describe "managedNamespaces" do
     test "it can list managed namespaces" do
       ns = insert_list(3, :managed_namespace)

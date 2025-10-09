@@ -51,7 +51,7 @@ const DynamicObservabilityProviderTypeIconSC = styled.div((_) => ({
 
 export const observabilityproviderTypeToLabel = {
   [ObservabilityProviderType.Datadog]: 'Datadog',
-  [ObservabilityProviderType.Newrelic]: 'Newrelic',
+  [ObservabilityProviderType.Newrelic]: 'New Relic',
   '': 'Unknown',
 } as const satisfies Record<ObservabilityProviderType | '', string>
 

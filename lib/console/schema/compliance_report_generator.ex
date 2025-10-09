@@ -35,6 +35,7 @@ defmodule Console.Schema.ComplianceReportGenerator do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [:name, :format])
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:read_bindings)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> unique_constraint(:name)

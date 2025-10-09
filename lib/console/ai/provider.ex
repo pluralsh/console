@@ -7,7 +7,8 @@ defmodule Console.AI.Provider do
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
-  @type message :: {sender, binary} | {:tool, binary, binary}
+  @type tool :: %{call_id: binary, name: binary, arguments: map}
+  @type message :: {sender, binary} | {:tool, binary, tool}
   @type history :: [message]
   @type tool_result :: [Tool.t]
   @type completion_result :: {:ok, binary} | {:ok, binary, [Tool.t]} | Console.error
@@ -19,11 +20,23 @@ defmodule Console.AI.Provider do
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
   give a concise but clear explanation of issues in your companies kubernetes infrastructure.  The user is not necessarily
   an expert in the domain, so assume they're not familiar with the terminology and provide a clear explanation of the issue.
+
+  In addition, here are some guidelines for Plural-specific apis and toolchains that might be worth knowing:
+
+  1. Almost all kubernetes resources in the group deployments.plural.sh are meant to be deployeed on a management cluster, not workload clusters.
+  2. Terraform should be managed via Plural stacks, and they are usually instantiated via an InfrastructureStack crd.  This guarantees a gitops flow.
+  3. All Plural resources should also be managed via gitops, leveraging ServiceDeployment or GlobalService crds to provision resources in kubernetes.
+
+  - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+  - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """}
 
   @summary """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure as Code.  The following is a detailed explanation of how to debug an issue in a user's kubernetes or cloud infrastructure.
   Please provide a brief, easily digestable summary. The whole summary should be two sentences. Summarize the problem in a single sentence, then explain the solution at a high level in a single sentence.
+
+  - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
+  - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """
 
   @callback completion(struct, history, keyword) :: completion_result
@@ -35,6 +48,8 @@ defmodule Console.AI.Provider do
   @callback tools?() :: boolean
 
   @callback context_window(struct) :: integer
+
+  @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
 
   def tools?() do
     Console.Deployments.Settings.cached()
@@ -54,17 +69,33 @@ defmodule Console.AI.Provider do
     end
   end
 
-  def completion(history, opts \\ []) do
+  def proxy() do
+    settings = Console.Deployments.Settings.cached()
+    with {:ok, %mod{} = client} <- client(settings),
+      do: mod.proxy(client)
+  end
+
+  def completion([_ | _] = history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),
       do: mod.completion(client, add_preface(history, opts), opts)
   end
 
-  def tool_call(history, tools, opts \\ []) do
+  def tool_call([_ | _] = history, tools, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- tool_client(settings),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
       do: handle_tool_calls(result, tools)
+  end
+
+  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_atom(tool) do
+    name = tool.name()
+    case tool_call(history, [tool], opts) do
+      {:ok, [%{^name => %{result: result}} | _]} -> {:ok, result}
+      {:ok, [%{^name => %{error: error}} | _]} -> {:error, error}
+      {:ok, _} -> {:error, "unexpected tool call result for #{name}"}
+      error -> error
+    end
   end
 
   def embeddings(text) do

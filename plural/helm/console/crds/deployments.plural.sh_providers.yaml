@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: providers.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,22 +15,17 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: ID of the provider in the Console API.
+    - description: ID of the Provider in the Console API
       jsonPath: .status.id
       name: ID
-      type: string
-    - description: Human-readable name of the Provider.
-      jsonPath: .spec.name
-      name: Name
-      type: string
-    - description: Name of the Provider cloud service.
-      jsonPath: .spec.cloud
-      name: Cloud
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Provider ...
+        description: |-
+          Provider configures cloud provider integration for Kubernetes cluster provisioning using Cluster API (CAPI).
+          It defines cloud-specific settings, credentials, and configuration needed to provision and manage
+          Kubernetes clusters on cloud platforms like AWS, Azure, or Google Cloud Platform.
         properties:
           apiVersion:
             description: |-
@@ -50,12 +45,17 @@ spec:
           metadata:
             type: object
           spec:
-            description: ProviderSpec ...
+            description: |-
+              Spec defines the desired state of the Provider, including cloud provider type,
+              credentials configuration, and namespace settings for CAPI resource deployment.
             properties:
               cloud:
                 description: |-
-                  Cloud is the name of the cloud service for the Provider.
-                  One of (CloudProvider): [gcp, aws, azure]
+                  Cloud specifies the name of the cloud service for this Provider.
+                  This determines which cloud platform will be used for cluster provisioning
+                  and must match one of the supported cloud providers: aws, gcp, or azure.
+                  The cloud provider selection affects available features, instance types, and
+                  networking options for clusters created with this provider.
                 enum:
                 - gcp
                 - aws
@@ -67,13 +67,18 @@ spec:
                   rule: self == oldSelf
               cloudSettings:
                 description: |-
-                  CloudSettings reference cloud provider credentials secrets used for provisioning the Cluster.
-                  Not required when Cloud is set to CloudProvider(BYOK).
+                  CloudSettings references cloud provider credential secrets used for provisioning clusters.
+                  These credentials provide the necessary access to create, modify, and delete cloud resources
+                  such as virtual machines, networks, and storage volumes. The specific credential format
+                  depends on the cloud provider - AWS requires access keys, Azure uses service principals,
+                  and GCP requires service account keys. Not required for bring-your-own-cluster (BYOK) scenarios.
                 properties:
                   aws:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                      AWS specifies a reference to a Kubernetes Secret containing AWS credentials.
+                      The secret should contain the necessary access keys and configuration for
+                      provisioning resources in Amazon Web Services, typically including
+                      access key ID and secret access key pairs.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -87,8 +92,10 @@ spec:
                     x-kubernetes-map-type: atomic
                   azure:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                      Azure specifies a reference to a Kubernetes Secret containing Azure credentials.
+                      The secret should contain service principal credentials for Microsoft Azure,
+                      including client ID, client secret, tenant ID, and subscription ID needed
+                      for provisioning resources in Azure.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -102,8 +109,9 @@ spec:
                     x-kubernetes-map-type: atomic
                   gcp:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                      GCP specifies a reference to a Kubernetes Secret containing Google Cloud Platform credentials.
+                      The secret should contain a service account key in JSON format with the necessary
+                      permissions for provisioning resources in Google Cloud Platform.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -118,15 +126,22 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               name:
-                description: Name is a human-readable name of the Provider.
+                description: |-
+                  Name is a human-readable identifier for this Provider.
+                  This name should be descriptive and help distinguish between multiple providers
+                  for the same cloud platform, such as "aws-production" or "gcp-development".
+                  The name is immutable once set to ensure consistency across references.
                 example: gcp-provider
                 type: string
                 x-kubernetes-validations:
                 - message: Name is immutable
                   rule: self == oldSelf
               namespace:
-                description: Namespace is the namespace ClusterAPI resources are deployed
-                  into.
+                description: |-
+                  Namespace specifies the Kubernetes namespace where Cluster API resources are deployed.
+                  This namespace will contain the provider-specific controllers, custom resources,
+                  and other CAPI components needed for cluster lifecycle management. Different
+                  providers can use separate namespaces for better organization and isolation.
                 example: capi-gcp
                 type: string
                 x-kubernetes-validations:
@@ -134,8 +149,12 @@ spec:
                   rule: self == oldSelf
             required:
             - cloud
+            - name
             type: object
           status:
+            description: |-
+              Status represents the current state of this Provider resource, including
+              synchronization status with the Console API and cloud provider connectivity.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

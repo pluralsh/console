@@ -10,8 +10,9 @@ func init() {
 	SchemeBuilder.Register(&Project{}, &ProjectList{})
 }
 
-// ProjectList is a list of [Project].
 // +kubebuilder:object:root=true
+
+// ProjectList contains a list of Project resources.
 type ProjectList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -19,13 +20,16 @@ type ProjectList struct {
 	Items []Project `json:"items"`
 }
 
-// Project is a unit of organization to control
-// permissions for a set of objects within your
-// Console instance.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Project in the Console API."
+
+// Project provides organizational segmentation and multi-tenancy capabilities within Plural Console.
+// It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade
+// fleet management while maintaining security boundaries. Projects allow resource owners to manage their
+// domain without accessing resources outside their scope, supporting principles of least privilege
+// and preventing credential sprawl across the entire fleet.
 type Project struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -34,7 +38,7 @@ type Project struct {
 	// +kubebuilder:validation:Required
 	Spec ProjectSpec `json:"spec"`
 
-	// Status represent a status of this resource.
+	// Status represents the status of this resource.
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
 }
@@ -76,20 +80,23 @@ func (in *Project) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+// ProjectSpec defines the desired state of a Project.
 type ProjectSpec struct {
-	// Name is a project name.
+	// Name of the project.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=myprojectname
 	Name string `json:"name"`
 
-	// Description is a description of this project.
+	// Description provides a human-readable explanation of this project's purpose
+	// and the resources it manages within the organizational hierarchy.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=my project description
 	Description *string `json:"description,omitempty"`
 
-	// Bindings contain read and write policies of this project.
+	// Bindings contain read and write policies that control access to all resources
+	// within this project, enabling fine-grained permission management and multi-tenancy.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 }

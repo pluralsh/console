@@ -2,10 +2,12 @@ import { Navigate, Route } from 'react-router-dom'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { McpServers } from 'components/ai/McpServers.tsx'
+import { AIAgent } from '../components/ai/AIAgent.tsx'
 import {
   AI_ABS_PATH,
   AI_THREADS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
+  AI_AGENT_REL_PATH,
 } from './aiRoutesConsts'
 
 export const aiRoutes = (
@@ -18,9 +20,13 @@ export const aiRoutes = (
       element={
         <Navigate
           replace
-          to={AI_THREADS_REL_PATH}
+          to={AI_AGENT_REL_PATH}
         />
       }
+    />
+    <Route
+      path={AI_AGENT_REL_PATH}
+      element={<AIAgent />}
     />
     <Route
       path={AI_THREADS_REL_PATH}

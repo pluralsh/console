@@ -1,6 +1,5 @@
 import { Modal, Button } from '@pluralsh/design-system'
 import { StepBody } from 'components/cd/ModalAlt'
-import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
@@ -14,6 +13,7 @@ import { useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Permissions } from 'components/cd/utils/PermissionsModal.tsx'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 
 export function CatalogPermissions({
   catalog,

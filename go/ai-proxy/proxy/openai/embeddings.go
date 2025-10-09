@@ -8,11 +8,19 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/console/go/ai-proxy/api/openai"
+	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 )
 
-func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
+const (
+	embeddingsEndpoint = "/v1/embeddings"
+)
+
+func NewOpenAIEmbeddingsProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+	if len(tokenRotator.Tokens) == 0 {
+		return nil, fmt.Errorf("at least one token is required")
+	}
+
 	parsedURL, err := url.Parse(host)
 	if err != nil {
 		return nil, err
@@ -20,11 +28,11 @@ func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
 
 	reverse := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
-			r.Out.Header.Set("Authorization", "Bearer "+token)
+			r.Out.Header.Set("Authorization", "Bearer "+tokenRotator.GetNextToken())
 
 			r.SetXForwarded()
 
-			targetURL, err := url.Parse(openai.EndpointEmbeddings)
+			targetURL, err := url.Parse(embeddingsEndpoint)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse target url")
 				return
@@ -44,7 +52,7 @@ func NewOpenAIEmbeddingsProxy(host, token string) (api.OpenAIProxy, error) {
 	}
 
 	return &OpenAIProxy{
-		proxy: reverse,
-		token: token,
+		proxy:        reverse,
+		tokenRotator: tokenRotator,
 	}, nil
 }

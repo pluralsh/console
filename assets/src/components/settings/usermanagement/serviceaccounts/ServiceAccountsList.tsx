@@ -6,10 +6,7 @@ import { useServiceAccountsQuery } from 'generated/graphql'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -20,6 +17,8 @@ import { useDebounce } from '@react-hooks-library/core'
 import { ListWrapperSC } from '../users/UsersList'
 
 import { serviceAccountsCols } from './ServiceAccountCols'
+import { useLogin } from 'components/contexts'
+import { mapExistingNodes } from 'utils/graphql'
 
 export const SERVICE_ACCOUNTS_QUERY_PAGE_SIZE = 100
 export default function ServiceAccountsList({
@@ -30,6 +29,8 @@ export default function ServiceAccountsList({
   setQ: (q: string) => void
 }) {
   const debouncedQ = useDebounce(q, 100)
+  const { me } = useLogin()
+  const isAdmin = !!me?.roles?.admin
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -42,15 +43,15 @@ export default function ServiceAccountsList({
     )
 
   const serviceAccounts = useMemo(
-    () => data?.serviceAccounts?.edges?.map((edge) => edge?.node),
-    [data?.serviceAccounts?.edges]
+    () => mapExistingNodes(data?.serviceAccounts),
+    [data?.serviceAccounts]
   )
 
   if (error) return <GqlError error={error} />
   if (!serviceAccounts) return <LoadingIndicator />
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
-    meta: { q, gridTemplateColumns: '1fr auto' },
+    meta: { isAdmin },
   }
 
   return (
@@ -74,11 +75,8 @@ export default function ServiceAccountsList({
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             reactTableOptions={reactTableOptions}
-            css={{
-              height: '100%',
-            }}
+            css={{ height: '100%' }}
           />
         </GridTableWrapper>
       ) : (

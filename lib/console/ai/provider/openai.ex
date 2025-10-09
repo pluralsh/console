@@ -13,6 +13,8 @@ defmodule Console.AI.OpenAI do
   @model "gpt-4.1-mini"
   @embedding_model "text-embedding-3-large"
 
+  @mkdwn_prompt [%{role: :user, content: "Also please use markdown formatting in your responses as described in the original instructions."}]
+
   def default_model(), do: @model
   def default_embedding_model(), do: @embedding_model
 
@@ -25,7 +27,7 @@ defmodule Console.AI.OpenAI do
   defmodule ToolCall do
     @type t :: %__MODULE__{}
 
-    defstruct [:id, :type, :function, :call_id]
+    defstruct [:id, :type, :function]
   end
 
   defmodule Message do
@@ -87,6 +89,15 @@ defmodule Console.AI.OpenAI do
     }
   end
 
+  def proxy(%__MODULE__{} = openai) do
+    {:ok, %Console.AI.Proxy{
+      backend: :openai,
+      url: openai.base_url || "https://api.openai.com/v1",
+      token: openai.access_key,
+      params: %{}
+    }}
+  end
+
   @doc """
   Generate a openai completion
   """
@@ -138,21 +149,34 @@ defmodule Console.AI.OpenAI do
   def tools?(), do: true
 
   defp msg_history(model, messages) do
-    Enum.map(messages, fn
-      {:tool, msg, id} -> %{role: :tool, content: msg, tool_call_id: id}
-      {role, msg} -> %{role: tool_role(role, model), content: msg}
+    Enum.flat_map(messages, fn
+      {:tool, msg, %{call_id: id, name: n, arguments: args}} when is_binary(id) ->
+        [
+          %{role: :assistant, tool_calls: [
+            %{type: "function", id: id, function: %{name: n, arguments: Jason.encode!(args)}}
+          ]},
+          %{role: :tool, content: msg, tool_call_id: id}
+        ]
+      {role, msg} -> [%{role: tool_role(role, model), content: msg}]
     end)
+    |> maybe_append_mkdwn(model)
   end
+
+  defp maybe_append_mkdwn(messages, "gpt-5" <> _), do: messages ++ @mkdwn_prompt
+  defp maybe_append_mkdwn(messages, _), do: messages
 
   defp chat(%__MODULE__{stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
-      all = tools(opts)
+      all   = tools(opts)
+      model = model(openai)
+
       body = Map.merge(%{
-        model: model(openai),
+        model: model,
         messages: history,
         stream: true,
         tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
       }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      |> Map.merge(reasoning_details(model))
       |> Console.drop_nils()
       |> Jason.encode!()
 
@@ -162,13 +186,16 @@ defmodule Console.AI.OpenAI do
   end
 
   defp chat(%__MODULE__{} = openai, history, opts) do
-    all = tools(opts)
+    all   = tools(opts)
+    model = model(openai)
+
     body = Console.drop_nils(%{
-      model: model(openai),
+      model: model,
       messages: history,
       tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
     })
     |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge(reasoning_details(model))
     |> Jason.encode!()
 
     url(openai, "/chat/completions")
@@ -214,7 +241,7 @@ defmodule Console.AI.OpenAI do
 
   defp gen_tools(calls) do
     Enum.map(calls, fn
-      %ToolCall{call_id: id, function: %{"name" => n, "arguments" => args}} ->
+      %ToolCall{id: id, function: %{"name" => n, "arguments" => args}} ->
         %Console.AI.Tool{id: id, name: n, arguments: Jason.decode!(args)}
       _ -> nil
     end)
@@ -224,12 +251,23 @@ defmodule Console.AI.OpenAI do
   defp model(%__MODULE__{model: m}) when is_binary(m), do: m
   defp model(_), do: @model
 
+  defp window("gpt-5" <> _), do: 400_000 * 4
   defp window("gpt-4.1" <> _), do: 1_000_000 * 4
   defp window("o" <> _), do: 1_000_000 * 4
   defp window(_), do: 128_000 * 4
 
-  defp tool_role(:system, "gpt-4.1" <> _), do: :developer
-  defp tool_role(:system, "o" <> _), do: :developer
+  defp reasoning_details("gpt-5" <> _), do: %{reasoning_effort: :minimal}
+  defp reasoning_details("o" <> _), do: %{reasoning_effort: :minimal}
+  defp reasoning_details(_), do: %{}
+
+  defp tool_role(:system, model) do
+    case model do
+      "gpt-4.1" <> _ -> :developer
+      "gpt-4" <> _ -> :system
+      "gpt-3" <> _ -> :system
+      _ -> :developer
+    end
+  end
   defp tool_role(r, _), do: r
 
   defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || @model

@@ -9,7 +9,7 @@ defmodule ConsoleWeb.WebhookController do
     with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
          ["plrl", id, auth] <- String.split(token, ":"),
          {:ok, _, _} <- Console.Guardian.resource_from_token(auth),
-         %Cluster{id: id} = Clusters.get_cluster(id) do
+         %Cluster{id: id} <- Clusters.get_cluster(id) do
       send_resp(conn, 200, id)
     else
       _ -> send_resp(conn, 400, "invalid token")
@@ -64,6 +64,17 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(conn, %ObservabilityWebhook{type: :grafana, secret: secret}) do
     with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
          true <- Plug.Crypto.secure_compare(secret, password) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %ObservabilityWebhook{type: :sentry, secret: secret}) do
+    with [signature] <- get_req_header(conn, "sentry-hook-signature"),
+         ["event_alert"] <- get_req_header(conn, "sentry-hook-resource"),
+         computed = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         true <- Plug.Crypto.secure_compare(signature, Base.encode16(computed, case: :lower)) do
       :ok
     else
       _ -> :reject

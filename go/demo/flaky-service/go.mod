@@ -1,10 +1,8 @@
 module github.com/pluralsh/console/go/demo/flaky-service
 
-go 1.23.4
+go 1.25.1
 
-require (
-	github.com/prometheus/client_golang v1.20.5
-)
+require github.com/prometheus/client_golang v1.20.5
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

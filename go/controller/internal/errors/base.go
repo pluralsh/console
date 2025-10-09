@@ -19,7 +19,6 @@ func (k KnownError) Error() string {
 const (
 	ErrorNotFound             KnownError = "could not find resource"
 	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
-	ErrRetriable              KnownError = "still waiting on read/write bindings, requeueing until they're available"
 	ErrDeleteRepository                  = "could not delete repository"
 )
 

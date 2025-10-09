@@ -1,5 +1,5 @@
 defmodule Console.Schema.Alert do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Project,
     Cluster,
@@ -7,7 +7,8 @@ defmodule Console.Schema.Alert do
     Tag,
     ObservabilityWebhook,
     AiInsight,
-    AlertResolution
+    AlertResolution,
+    Flow
   }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
@@ -26,17 +27,42 @@ defmodule Console.Schema.Alert do
     field :annotations, :map
     field :url,         :string
 
+    field :ai_poll_at, :utc_datetime_usec
+
+    embeds_one :stacktrace, Stacktrace, on_replace: :update do
+      field :type,  :string
+      field :value, :string
+
+      embeds_many :frames, Frame, on_replace: :delete do
+        field :file,         :string
+        field :line,         :integer
+        field :column,       :integer
+        field :function,     :string
+        field :context_line, :string
+        field :vars,         :map
+      end
+    end
+
     belongs_to :insight, AiInsight, on_replace: :update
 
     belongs_to :project, Project
     belongs_to :cluster, Cluster
     belongs_to :service, Service
+    belongs_to :flow,    Flow
 
     has_one :resolution, AlertResolution
 
     has_many :tags, Tag, on_replace: :delete
 
     timestamps()
+  end
+
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
   end
 
   def firing(query \\ __MODULE__) do
@@ -89,18 +115,30 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.severity in ^severities)
   end
 
-  @valid ~w(type severity state title message fingerprint annotations url project_id cluster_id insight_id service_id)a
+  @valid ~w(type severity state title message fingerprint annotations url project_id flow_id cluster_id insight_id service_id ai_poll_at)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:tags)
     |> cast_assoc(:insight)
+    |> cast_embed(:stacktrace, with: &stacktrace_changeset/2)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(type title state severity message fingerprint)a)
-    |> validate_one_present(~w(project_id cluster_id service_id)a)
+    |> validate_one_present(~w(project_id cluster_id service_id flow_id)a)
+  end
+
+  def stacktrace_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(type value)a)
+    |> cast_embed(:frames, with: &frame_changeset/2)
+  end
+
+  def frame_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(file line column function context_line vars)a)
   end
 end

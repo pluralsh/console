@@ -3,16 +3,15 @@ package controller
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -115,7 +114,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 
 	if !cluster.Status.HasID() {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
@@ -129,20 +128,20 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 
 		if !repository.Status.HasID() {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return waitForResources, nil
+			return jitterRequeue(requeueWaitForResources), nil
 		}
 	}
 
-	if err = r.ensureService(service); err != nil {
+	if err = r.ensure(service); err != nil {
 		return handleRequeue(nil, err, service.SetCondition)
 	}
 
@@ -214,11 +213,11 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -283,7 +282,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
@@ -297,17 +296,17 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		}
 		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
-			return nil, &requeue, fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
 
 	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
 	if err != nil {
-		return nil, &requeue, err
+		return nil, lo.ToPtr(jitterRequeue(requeueDefault)), err
 	}
 
 	// we only want to explicitly set the configuration field in attr if the user specified it via
@@ -340,8 +339,10 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
 			LuaScript:   service.Spec.Helm.LuaScript,
 			LuaFile:     service.Spec.Helm.LuaFile,
+			LuaFolder:   service.Spec.Helm.LuaFolder,
 			Git:         service.Spec.Helm.Git.Attributes(),
 		}
+
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
 				Name:      service.Spec.Helm.Repository.Name,
@@ -353,11 +354,11 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			ref := service.Spec.Helm.RepositoryRef
 			var repo v1alpha1.GitRepository
 			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting repository: %s", err.Error())
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
 			if !repo.Status.HasID() {
-				return nil, &waitForResources, fmt.Errorf("repository is not ready")
+				return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -366,7 +367,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
-				return nil, &requeue, fmt.Errorf("error while getting values config map: %s", err.Error())
+				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting values config map: %s", err.Error())
 			}
 			attr.Helm.Values = &val
 		}
@@ -472,6 +473,9 @@ func (r *ServiceDeploymentReconciler) svcConfiguration(ctx context.Context, serv
 			configuration = append(configuration, &console.ConfigAttributes{Name: k, Value: lo.ToPtr(v)})
 		}
 	}
+	slices.SortFunc(configuration, func(a, b *console.ConfigAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 	return configuration, hasConfig, nil
 }
 
@@ -603,12 +607,12 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove service from Console API if it exists and is not read-only.
@@ -622,7 +626,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return &waitForResources
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
 		}
 
 		// If our finalizer is present, remove it.
@@ -642,28 +646,24 @@ func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) erro
 	return r.ConsoleClient.DeleteService(id)
 }
 
-// ensureService makes sure that user-friendly input such as userEmail/groupName in
+// ensure makes sure that user-friendly input such as userEmail/groupName in
 // bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceDeploymentReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
+func (r *ServiceDeploymentReconciler) ensure(service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.Bindings == nil {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return apierrors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

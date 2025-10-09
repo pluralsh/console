@@ -6,21 +6,22 @@ import {
   Stepper,
   StepperSteps,
 } from '@pluralsh/design-system'
-import { ComponentProps, useState } from 'react'
-
-import { PrAutomationFragment } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import {
+  PrAutomationFragment,
+  PrCallAttributes,
+  PullRequestFragment,
+} from 'generated/graphql'
+
 import { isEmpty } from 'lodash'
+import { ComponentProps, Dispatch, useState } from 'react'
+import { PrConfigurationFields } from './PrConfigurationFields'
 import { usePrAutomationForm } from './prConfigurationUtils'
 import { CreatePrActions } from './wizard/CreatePrActions'
-import {
-  ConfigPrStep,
-  CreateSuccessPrStep,
-  ReviewPrStep,
-} from './wizard/CreatePrSteps'
+import { CreateSuccessPrStep, ReviewPrStep } from './wizard/CreatePrSteps'
 
 export type PrStepKey =
   | 'selectType'
@@ -40,11 +41,15 @@ function CreatePrModalBase({
   open,
   threadId,
   onClose,
+  onSuccess,
+  prCallAttributes,
 }: {
   prAutomation: PrAutomationFragment
   open: boolean
   threadId?: string
   onClose: Nullable<() => void>
+  onSuccess?: Nullable<Dispatch<PullRequestFragment>>
+  prCallAttributes?: Nullable<PrCallAttributes>
 }) {
   const { configuration, confirmation } = prAutomation
   const hasConfiguration = !isEmpty(configuration)
@@ -57,6 +62,7 @@ function CreatePrModalBase({
     curConfigVals,
     setCurConfigVals,
     configIsValid,
+    pageData,
     filteredConfig,
     reviewFormState,
     setReviewFormState,
@@ -68,6 +74,7 @@ function CreatePrModalBase({
   } = usePrAutomationForm({
     prAutomation,
     threadId,
+    prCallAttributes,
     onSuccess: () => setCurrentStep('success'),
   })
 
@@ -87,7 +94,13 @@ function CreatePrModalBase({
       }}
       size="large"
       open={open}
-      onClose={onClose || undefined}
+      onClose={() => {
+        if (!!successPr) {
+          onSuccess?.(successPr)
+        }
+
+        onClose?.()
+      }}
       header={
         currentStep === 'success'
           ? `Successfully created PR`
@@ -104,6 +117,7 @@ function CreatePrModalBase({
             onClose,
             hasConfiguration,
             configIsValid,
+            pageData,
           }}
         />
       }
@@ -111,6 +125,7 @@ function CreatePrModalBase({
       <Flex
         direction="column"
         gap="large"
+        minHeight={0}
       >
         {currentStep !== 'success' && hasConfiguration && (
           <Flex>
@@ -122,10 +137,11 @@ function CreatePrModalBase({
           </Flex>
         )}
         {currentStep === 'config' && (
-          <ConfigPrStep
+          <PrConfigurationFields
             configuration={configuration}
             configVals={curConfigVals}
             setConfigVals={setCurConfigVals}
+            pageData={pageData}
           />
         )}
         {currentStep === 'review' && (

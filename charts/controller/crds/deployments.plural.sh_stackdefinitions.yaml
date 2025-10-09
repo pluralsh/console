@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: stackdefinitions.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,7 +22,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: StackDefinition is the Schema for the StackDefinitions API
+        description: |-
+          StackDefinition provides reusable templates for Infrastructure Stack configurations and execution steps.
+          It allows you to define standardized stack configurations, custom execution steps, and runtime environments
+          that can be referenced by multiple Infrastructure Stacks. This enables consistent deployment patterns
+          and reduces duplication when managing similar infrastructure components across different environments.
         properties:
           apiVersion:
             description: |-
@@ -42,15 +46,75 @@ spec:
           metadata:
             type: object
           spec:
-            description: StackDefinitionSpec defines the desired state of StackDefinition
+            description: StackDefinitionSpec defines the desired state of the StackDefinition.
             properties:
               configuration:
                 description: |-
-                  Configuration allows modifying the StackDefinition environment
-                  and execution.
+                  Configuration allows customization of the stack execution environment,
+                  including Docker image settings, version specifications, and execution hooks.
                 properties:
+                  aiApproval:
+                    description: AiApproval configuration for this stack to be auto-approved
+                      by AI according to rules sourced from Git.
+                    properties:
+                      enabled:
+                        description: Enabled indicates if AI approval is enabled for
+                          this stack.
+                        type: boolean
+                      file:
+                        description: File is the name of the rules file within the
+                          Git repository.
+                        type: string
+                      git:
+                        description: Git references the Git repository containing
+                          the rules file.
+                        properties:
+                          files:
+                            description: Optional files to add to the manifests for
+                              this service
+                            items:
+                              type: string
+                            type: array
+                          folder:
+                            description: Folder is the folder in the Git repository
+                              where the manifests are located.
+                            type: string
+                          ref:
+                            description: Ref is the Git reference (branch, tag, or
+                              commit) to use.
+                            type: string
+                        required:
+                        - folder
+                        - ref
+                        type: object
+                      ignoreCancel:
+                        description: IgnoreCancel indicates if the cancellation of
+                          a stack run should be ignored by AI.
+                        type: boolean
+                    required:
+                    - enabled
+                    - file
+                    - git
+                    type: object
+                  ansible:
+                    description: Ansible configuration for this stack.
+                    properties:
+                      additionalArgs:
+                        description: Additional args for the ansible playbook command.
+                        items:
+                          type: string
+                        type: array
+                      inventory:
+                        description: Inventory is the ansible inventory file to use.  We
+                          recommend checking this into git alongside your playbook
+                          files, and referencing it with a relative path.
+                        type: string
+                      playbook:
+                        description: Playbook is the ansible playbook to run.
+                        type: string
+                    type: object
                   hooks:
-                    description: Hooks to run at various stages of the stack run
+                    description: Hooks to run at various stages of the stack run.
                     items:
                       properties:
                         afterStage:
@@ -62,12 +126,13 @@ spec:
                           - DESTROY
                           type: string
                         args:
-                          description: optional arguments to pass to the command
+                          description: Args contain optional arguments to pass to
+                            the command.
                           items:
                             type: string
                           type: array
                         cmd:
-                          description: the command this hook will execute
+                          description: Cmd is the command to execute.
                           type: string
                       required:
                       - afterStage
@@ -75,67 +140,76 @@ spec:
                       type: object
                     type: array
                   image:
-                    description: Image optional custom image you might want to use
+                    description: |-
+                      Image contains the optional Docker image to use for the IaC tool.
+                      If not provided, the default image for the tool will be used.
                     type: string
                   tag:
-                    description: |-
-                      Tag is the docker image tag you wish to use
-                      if you're customizing the version
+                    description: Tag of the IaC tool Docker image to use.
                     type: string
                   terraform:
-                    description: Terraform is the terraform configuration for this
-                      stack
+                    description: Terraform configuration for this stack.
                     properties:
                       parallelism:
-                        description: Parallelism is the number of concurrent operations
-                          to run, equivalent to the -parallelism flag in terraform
+                        description: |-
+                          Parallelism is the number of concurrent operations to run,
+                          equivalent to the -parallelism flag in Terraform.
                         format: int64
                         type: integer
                       refresh:
-                        description: Refresh is whether to refresh the state of the
-                          stack, equivalent to the -refresh flag in terraform
+                        description: |-
+                          Refresh is whether to refresh the state of the stack,
+                          equivalent to the -refresh flag in Terraform.
                         type: boolean
                     type: object
                   version:
-                    description: Version the semver of the tool you wish to use
+                    description: Version of the IaC tool to use.
                     type: string
                 type: object
               description:
-                description: Description can be used to describe this StackDefinition.
+                description: |-
+                  Description provides a human-readable explanation of what this StackDefinition
+                  template is intended for and how it should be used.
                 type: string
               name:
                 description: |-
-                  Name of this StackDefinition. If not provided StackDefinition's own name
-                  from StackDefinition.ObjectMeta will be used.
+                  Name of this StackDefinition.
+                  If not provided, the name from StackDefinition.ObjectMeta will be used.
                 type: string
               steps:
                 description: |-
-                  Steps is a list of custom run steps that will be executed as
-                  part of the stack run.
+                  Steps defines a list of custom run steps that will be executed as part of
+                  any stack run using this definition. Each step specifies a command, arguments,
+                  execution stage, and approval requirements.
                 items:
+                  description: |-
+                    CustomRunStep defines a custom execution step within a StackDefinition template.
+                    Each step represents a discrete action that will be performed during stack execution,
+                    with control over when it runs and whether it requires manual approval.
                   properties:
                     args:
                       description: |-
-                        Args allow you to provide any additional
-                        args that should be passed to the custom
-                        run step.
+                        Args provides additional command-line arguments that should be passed
+                        to the command specified in Cmd during execution.
                       items:
                         type: string
                       type: array
                     cmd:
                       description: |-
-                        Cmd defines what command should be executed
-                        as part of your custom run step.
+                        Cmd specifies the executable command that should be run as part of this
+                        custom step. This can be any command available in the execution environment.
                       type: string
                     requireApproval:
                       description: |-
-                        RequireApproval controls whether this custom run step
-                        will require an approval to proceed.
+                        RequireApproval determines whether this step requires manual approval
+                        before it can proceed. When true, the stack run will pause at this step
+                        until an authorized user approves its execution.
                       type: boolean
                     stage:
                       description: |-
-                        Stage controls at which stage should this custom run
-                        step be executed.
+                        Stage controls at which phase of the stack lifecycle this step should be executed.
+                        Valid stages include PLAN, VERIFY, APPLY, INIT, and DESTROY, allowing fine-grained
+                        control over when custom logic runs in relation to the main IaC operations.
                       enum:
                       - PLAN
                       - VERIFY

@@ -94,6 +94,19 @@ defmodule Console.Deployments.Helm.AgentTest do
 
       Process.exit(pid, :kill)
     end
+
+    test "it can handle legacy bitnami charts" do
+      repo = "oci://registry-1.docker.io/bitnamicharts"
+      {:ok, pid} = Agent.start(repo) |> handle()
+
+      {:ok, f, _, _} = Agent.fetch(pid, "wordpress", "26.0.0")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+      {:ok, _} = YamlElixir.read_from_string(files["Chart.yaml"])
+
+      Process.exit(pid, :kill)
+    end
   end
 
   defp stream_and_untar(f) do

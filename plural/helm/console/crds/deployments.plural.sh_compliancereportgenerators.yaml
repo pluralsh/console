@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: compliancereportgenerators.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,6 +22,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: ComplianceReportGenerator represents a resource that generates
+          compliance reports.
         properties:
           apiVersion:
             description: |-

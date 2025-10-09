@@ -2,25 +2,26 @@ import {
   Accordion,
   AccordionItem,
   Chip,
+  CloseIcon,
   EyeIcon,
   Flex,
   GearTrainIcon,
-  HamburgerMenuCollapsedIcon,
   IconFrame,
   ToolIcon,
 } from '@pluralsh/design-system'
 import { useChatbot } from 'components/ai/AIContext'
-import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
+import { SimpleFlyover } from 'components/utils/SimpleFlyover'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
-import { McpServerToolFragment, McpToolFragment } from 'generated/graphql'
+import { McpToolFragment } from 'generated/graphql'
 import { groupBy } from 'lodash'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
 import { ToolDetailsModal } from './ToolDetailsModal'
 
 type ServerWithTools = {
@@ -30,20 +31,15 @@ type ServerWithTools = {
   tools: McpToolFragment[]
 }
 
-export function McpServerShelf({
-  isOpen,
-  setIsOpen,
-  fullscreen,
-  tools,
-}: {
-  isOpen: boolean
-  setIsOpen: (isOpen: boolean) => void
-  fullscreen: boolean
-  tools: McpServerToolFragment[]
-}) {
-  const { borders, spacing } = useTheme()
-  const { closeChatbot } = useChatbot()
-  const value = isOpen ? ARBITRARY_VALUE_NAME : ''
+export function McpServerShelf({ zIndex }: { zIndex?: number }) {
+  const theme = useTheme()
+  const { mcpPanelOpen, setMcpPanelOpen, currentThread } = useChatbot()
+
+  const tools = useMemo(
+    () => currentThread?.tools?.filter(isNonNullable) ?? [],
+    [currentThread?.tools]
+  )
+
   const [selectedToolDetails, setSelectedToolDetails] = useState<{
     serverName: string
     tool: McpToolFragment
@@ -59,171 +55,122 @@ export function McpServerShelf({
   }))
 
   return (
-    <WrapperAccordionSC
-      type="single"
-      value={value}
-      orientation="horizontal"
+    <SimpleFlyover
+      isOpen={mcpPanelOpen}
+      zIndex={zIndex}
     >
-      <AccordionItem
-        value={ARBITRARY_VALUE_NAME}
-        caret="none"
-        padding="none"
-        trigger={null}
-        css={{ height: '100%' }}
-      >
-        <WrapperSC $fullscreen={fullscreen}>
-          <HeaderSC $fullscreen={fullscreen}>
-            <Body2BoldP>MCP servers</Body2BoldP>
-            <Flex gap="xsmall">
-              <IconFrame
-                clickable
-                as={Link}
-                type="secondary"
-                to={AI_MCP_SERVERS_ABS_PATH}
-                onClick={() => closeChatbot()}
-                tooltip="Go to MCP server settings"
-                icon={<GearTrainIcon />}
-              />
-              <IconFrame
-                clickable
-                type="secondary"
-                icon={<HamburgerMenuCollapsedIcon />}
-                onClick={() => setIsOpen(!isOpen)}
-                tooltip="Close panel"
-              />
-            </Flex>
-          </HeaderSC>
-          <ContentAccordionSC
-            type="multiple"
-            $fullscreen={fullscreen}
-          >
-            {serversWithTools.map((server) => (
-              <AccordionItem
-                key={server.name}
-                paddingArea="trigger-only"
-                css={{ borderBottom: borders.input }}
-                trigger={
-                  <Flex
-                    direction="column"
-                    gap="small"
-                  >
-                    {server.confirm && (
-                      <Chip
-                        size="small"
-                        css={{ width: 'fit-content' }}
-                      >
-                        Confirmation required
-                      </Chip>
-                    )}
-                    <StackedText
-                      first={server.name ?? 'Unknown MCP server'}
-                      firstPartialType="body2Bold"
-                      firstColor="text"
-                      second={server.url}
-                    />
-                  </Flex>
-                }
+      <HeaderSC>
+        <Body2BoldP>MCP servers</Body2BoldP>
+        <Flex gap="xsmall">
+          <IconFrame
+            clickable
+            as={Link}
+            type="tertiary"
+            to={AI_MCP_SERVERS_ABS_PATH}
+            onClick={() => setMcpPanelOpen(false)}
+            tooltip="Go to MCP server settings"
+            icon={<GearTrainIcon />}
+          />
+          <IconFrame
+            clickable
+            type="tertiary"
+            icon={<CloseIcon />}
+            onClick={() => setMcpPanelOpen(false)}
+            tooltip="Close"
+          />
+        </Flex>
+      </HeaderSC>
+      <ContentAccordionSC type="multiple">
+        {serversWithTools.map((server) => (
+          <AccordionItem
+            key={server.name}
+            paddingArea="trigger-only"
+            css={{ borderBottom: theme.borders.input }}
+            trigger={
+              <Flex
+                direction="column"
+                gap="small"
               >
-                {server.tools.length === 0 && (
-                  <Body1P
-                    $color="text-light"
-                    css={{ textAlign: 'center', paddingBottom: spacing.medium }}
+                {server.confirm && (
+                  <Chip
+                    size="small"
+                    css={{ width: 'fit-content' }}
                   >
-                    No tools found.
-                  </Body1P>
+                    Confirmation required
+                  </Chip>
                 )}
-                {server.tools.map((tool) => (
-                  <ToolRowSC key={tool.name}>
-                    <Flex
-                      paddingLeft={40}
-                      alignItems="center"
-                      gap="xsmall"
-                      minWidth={0}
-                    >
-                      <ToolIcon />
-                      <Body2P css={TRUNCATE}>{tool.name}</Body2P>
-                    </Flex>
-                    <IconFrame
-                      clickable
-                      tooltip="View tool"
-                      icon={<EyeIcon />}
-                      onClick={() =>
-                        setSelectedToolDetails({
-                          serverName: server.name ?? '',
-                          tool,
-                        })
-                      }
-                    />
-                  </ToolRowSC>
-                ))}
-              </AccordionItem>
+                <StackedText
+                  first={server.name ?? 'Unknown MCP server'}
+                  firstPartialType="body2Bold"
+                  firstColor="text"
+                  second={server.url}
+                />
+              </Flex>
+            }
+          >
+            {server.tools.length === 0 && (
+              <Body1P
+                $color="text-light"
+                css={{
+                  textAlign: 'center',
+                  paddingBottom: theme.spacing.medium,
+                }}
+              >
+                No tools found.
+              </Body1P>
+            )}
+            {server.tools.map((tool) => (
+              <ToolRowSC key={tool.name}>
+                <Flex
+                  paddingLeft={40}
+                  alignItems="center"
+                  gap="xsmall"
+                  minWidth={0}
+                >
+                  <ToolIcon />
+                  <Body2P css={TRUNCATE}>{tool.name}</Body2P>
+                </Flex>
+                <IconFrame
+                  clickable
+                  tooltip="View tool"
+                  icon={<EyeIcon />}
+                  onClick={() =>
+                    setSelectedToolDetails({
+                      serverName: server.name ?? '',
+                      tool,
+                    })
+                  }
+                />
+              </ToolRowSC>
             ))}
-          </ContentAccordionSC>
-        </WrapperSC>
-      </AccordionItem>
+          </AccordionItem>
+        ))}
+      </ContentAccordionSC>
       <ToolDetailsModal
         open={selectedToolDetails !== null}
         onClose={() => setSelectedToolDetails(null)}
         serverName={selectedToolDetails?.serverName ?? ''}
         tool={selectedToolDetails?.tool}
       />
-    </WrapperAccordionSC>
+    </SimpleFlyover>
   )
 }
 
-const WrapperSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    width: 320,
-    ...($fullscreen && {
-      gap: theme.spacing.medium,
-    }),
-  })
-)
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottom: theme.borders.default,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  height: CHATBOT_HEADER_HEIGHT,
+}))
 
-const HeaderSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: theme.borders['fill-two'],
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    ...($fullscreen
-      ? {
-          minHeight: 75,
-          border: theme.borders.input,
-          borderRadius: theme.borderRadiuses.large,
-          background: theme.colors['fill-one'],
-        }
-      : {
-          minHeight: 69,
-          background: theme.colors['fill-two'],
-          borderBottom: theme.borders['fill-two'],
-        }),
-  })
-)
-
-const WrapperAccordionSC = styled(Accordion)({
+const ContentAccordionSC = styled(Accordion)(({ theme }) => ({
   border: 'none',
-  background: 'none',
-  maxWidth: '50%',
-})
-
-const ContentAccordionSC = styled(Accordion)<{ $fullscreen: boolean }>(
-  ({ $fullscreen, theme }) => ({
-    border: 'none',
-    background: theme.colors['fill-one'],
-    height: '100%',
-    overflow: 'auto',
-    ...($fullscreen && {
-      border: theme.borders.input,
-      borderRadius: theme.borderRadiuses.large,
-      background: theme.colors['fill-one'],
-    }),
-  })
-)
+  background: theme.colors['fill-accent'],
+  height: '100%',
+  overflow: 'auto',
+}))
 
 const ToolRowSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -232,5 +179,5 @@ const ToolRowSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   padding: theme.spacing.small,
   borderTop: theme.borders.input,
-  background: theme.colors['fill-one-selected'],
+  background: theme.colors['fill-zero-selected'],
 }))

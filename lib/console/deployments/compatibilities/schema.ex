@@ -37,14 +37,15 @@ defmodule Console.Deployments.Compatibilities.AddOn do
   end
 
   def find_version(%__MODULE__{versions: [_ | _] = vsns}, version) do
-    case Version.parse(version) do
-      {:ok, v} -> find_version(Enum.reverse(vsns), v)
+    cleaned = clean_version(version)
+    case Version.parse(cleaned) do
+      {:ok, v} -> find_version(Enum.reverse(vsns), v, cleaned)
       _ -> nil
     end
   end
 
-  def find_version([%{version: version} = found | _], version), do: found
-  def find_version([%{version: version} = found], tgt) do
+  def find_version([%{version: version} = found | _], _, version), do: found
+  def find_version([%{version: version} = found], tgt, _) do
     with {:ok, vsn} <- Version.parse(version),
          :gt <- Version.compare(tgt, vsn) do
       found
@@ -53,7 +54,8 @@ defmodule Console.Deployments.Compatibilities.AddOn do
     end
   end
 
-  def find_version([%{version: first} = v1, %{version: second} = v2 | rest], version) when is_binary(first) and is_binary(second) do
+  def find_version([%{version: first} = v1, %{version: second} = v2 | rest], version, cleaned)
+      when is_binary(first) and is_binary(second) do
     first  = clean_version(first)
     second = clean_version(second)
 
@@ -65,10 +67,11 @@ defmodule Console.Deployments.Compatibilities.AddOn do
     else
       {:v2, :eq} -> v2
       {:v1, :eq} -> v1
-      _ -> find_version([v2 | rest], version)
+      _ -> find_version([v2 | rest], version, cleaned)
     end
   end
-  def find_version(_, _), do: nil
+  def find_version([_ | rest], version, cleaned), do: find_version(rest, version, cleaned)
+  def find_version(_, _, _), do: nil
 end
 
 defmodule Console.Deployments.Compatibilities.CloudAddOn do

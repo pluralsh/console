@@ -10,7 +10,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Stacks,
     Settings,
     Git,
-    Flows
+    Flows,
   }
   alias Console.Schema.{
     Cluster,
@@ -93,7 +93,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PreviewEnvironmentInstance,
     PreviewEnvironmentTemplate,
     TemplateContext,
-    NodeStatistic
+    NodeStatistic,
+    CloudConnection,
+    Sentinel,
+    AgentRuntime,
+    AgentRun,
+    AgentPromptHistory,
+    AgentPrompt,
+    AgentMessage
   }
 
   def query(Project, _), do: Project
@@ -176,6 +183,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(PreviewEnvironmentTemplate, _), do: PreviewEnvironmentTemplate
   def query(TemplateContext, _), do: TemplateContext
   def query(NodeStatistic, _), do: NodeStatistic
+  def query(CloudConnection, _), do: CloudConnection
+  def query(Sentinel, _), do: Sentinel
+  def query(AgentRuntime, _), do: AgentRuntime
+  def query(AgentRun, _), do: AgentRun
+  def query(AgentPromptHistory, _), do: AgentPromptHistory
+  def query(AgentPrompt, _), do: AgentPrompt.ordered()
+  def query(AgentMessage, _), do: AgentMessage.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -191,6 +205,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Settings
   delegates Console.GraphQl.Resolvers.Deployments.OAuth
   delegates Console.GraphQl.Resolvers.Deployments.Flow
+  delegates Console.GraphQl.Resolvers.Deployments.Sentinel
+  delegates Console.GraphQl.Resolvers.Deployments.Agent
 
   def list_addons(_, _), do: AddOns.addons()
 

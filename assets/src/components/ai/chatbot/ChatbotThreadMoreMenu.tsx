@@ -1,58 +1,66 @@
 import {
   ArrowRightIcon,
+  DiffColumnIcon,
   EditIcon,
   GitForkIcon,
   IconFrame,
   ListBoxItem,
   Modal,
   MoreIcon,
-  PushPinFilledIcon,
-  PushPinOutlineIcon,
   Spinner,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from 'components/commandpalette/CommandPaletteContext.tsx'
 import { MoreMenu } from 'components/utils/MoreMenu'
-import { useState } from 'react'
+import { use, useRef, useState } from 'react'
 import { useChatbot } from '../AIContext'
-import { useAiPin } from '../AIPinButton'
+
 import { DeleteAiThreadModal, RenameAiThread } from '../AITableActions'
 
 enum MenuItemKey {
-  Pin = 'pin',
   Rename = 'rename',
   Fork = 'fork',
   Delete = 'delete',
+  History = 'history',
 }
 
-export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
-  const { forkThread, mutationLoading, currentThread } = useChatbot()
+export function ChatbotThreadMoreMenu() {
+  const {
+    forkThread,
+    mutationLoading: forkLoading,
+    currentThread,
+  } = useChatbot()
+  const { setCmdkOpen } = use(CommandPaletteContext)
   const [menuKey, setMenuKey] = useState<MenuItemKey | ''>('')
   const [isOpen, setIsOpen] = useState(false)
-  const [pinHovered, setPinHovered] = useState(false)
-  const [forkHovered, setForkHovered] = useState(false)
 
-  const { isPinned, pinCreating, pinDeleting, handlePin } = useAiPin({
-    thread: currentThread,
-  })
-  const pinLoading = pinCreating || pinDeleting
+  // need a ref instead of state because state doesn't update before onOpenChange fires
+  const blockClose = useRef(false)
 
   const closeMenu = () => {
     setIsOpen(false)
+    blockClose.current = false
     setMenuKey('')
   }
 
   const handleSelectionChange = (selectedKey: MenuItemKey) => {
+    blockClose.current = true
     switch (selectedKey) {
-      case MenuItemKey.Pin:
-        handlePin()
-        break
       case MenuItemKey.Fork:
         forkThread({
           id: currentThread?.id ?? '',
           onCompleted: () => closeMenu(),
         })
         break
+      case MenuItemKey.History:
+        closeMenu()
+        setCmdkOpen(true, CommandPaletteTab.History)
+        break
       default:
+        blockClose.current = false
         setMenuKey(selectedKey)
         break
     }
@@ -64,52 +72,38 @@ export function ChatbotThreadMoreMenu({ fullscreen }: { fullscreen: boolean }) {
     <>
       <MoreMenu
         isOpen={isOpen}
-        // a bit hacky but basically just blocks closing menu if pin or fork options are hovered, so we can see their loading states
-        onOpenChange={(newOpen) =>
-          (newOpen || !(pinHovered || forkHovered)) && setIsOpen(newOpen)
-        }
+        // a bit hacky but basically just blocks closing menu if mutations are running, so we can see their loading states
+        onOpenChange={(newOpen) => {
+          if (!newOpen && blockClose.current)
+            blockClose.current = false // unblock it so user can still manually close menu
+          else setIsOpen(newOpen)
+        }}
         onSelectionChange={handleSelectionChange}
-        size={fullscreen ? 'large' : 'medium'}
         triggerButton={
           <IconFrame
             clickable
-            type="secondary"
-            size={fullscreen ? 'large' : 'medium'}
+            type="tertiary"
             icon={<MoreIcon css={{ width: 16 }} />}
           />
         }
         width={256}
       >
         <ListBoxItem
-          onMouseEnter={() => setPinHovered(true)}
-          onMouseLeave={() => setPinHovered(false)}
-          key={MenuItemKey.Pin}
-          leftContent={
-            pinLoading ? (
-              <Spinner />
-            ) : isPinned ? (
-              <PushPinFilledIcon
-                color="icon-info"
-                css={{ width: 16 }}
-              />
-            ) : (
-              <PushPinOutlineIcon />
-            )
-          }
-          label={isPinned ? 'Unpin thread' : 'Pin thread'}
-        />
-        <ListBoxItem
           key={MenuItemKey.Rename}
           leftContent={<EditIcon />}
           label="Rename thread"
         />
         <ListBoxItem
-          onMouseEnter={() => setForkHovered(true)}
-          onMouseLeave={() => setForkHovered(false)}
           key={MenuItemKey.Fork}
-          leftContent={mutationLoading ? <Spinner /> : <GitForkIcon />}
+          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
           rightContent={<ArrowRightIcon color="icon-default" />}
           label="Fork thread"
+        />
+        <ListBoxItem
+          key={MenuItemKey.History}
+          leftContent={<DiffColumnIcon />}
+          rightContent={<ArrowRightIcon color="icon-default" />}
+          label="View history"
         />
         <ListBoxItem
           destructive

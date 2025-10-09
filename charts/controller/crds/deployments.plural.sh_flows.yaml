@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: flows.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,7 +22,10 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Flow is the Schema for the flows API
+        description: |-
+          Flow provides an abstraction layer over complex Kubernetes deployments to simplify application
+          management for developers. It groups related services, pipelines, and infrastructure components
+          into a single logical unit, making it easier to understand and manage application state.
         properties:
           apiVersion:
             description: |-
@@ -45,7 +48,7 @@ spec:
             description: FlowSpec defines the desired state of Flow
             properties:
               bindings:
-                description: Bindings contain read and write policies of this Flow
+                description: Bindings contain read and write policies of this Flow.
                 properties:
                   read:
                     description: Read bindings.
@@ -83,19 +86,21 @@ spec:
                     type: array
                 type: object
               description:
-                description: Longform description of the service managed by this flow
+                description: |-
+                  Description provides a longform description of the service managed by this flow.
+                  This field is used for documentation and UI display purposes.
                 type: string
               icon:
-                description: Optional image icon for the flow to apply branding or
-                  improve identification
+                description: Icon specifies an optional image icon for the flow to
+                  apply branding or improve identification.
                 type: string
               name:
                 description: Name of this Flow. If not provided Flow's own name from
                   Flow.ObjectMeta will be used.
                 type: string
               projectRef:
-                description: ProjectRef allows a global service to span a specific
-                  project only
+                description: ProjectRef allows a global service to be scoped to a
+                  specific project only.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -137,15 +142,22 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              repositories:
+                description: Repositories contains a list of git https urls of the
+                  application code repositories used in this flow.
+                items:
+                  type: string
+                type: array
               serverAssociations:
-                description: ServerAssociations contains a list of MCP services you
-                  wish to associate with this flow. Can also be managed within the
-                  Plural Console UI securely.
+                description: |-
+                  ServerAssociations contains a list of MCP services you wish to associate with this flow.
+                  Can also be managed within the Plural Console UI securely.
                 items:
                   properties:
                     mcpServerRef:
-                      description: ObjectReference contains enough information to
-                        let you inspect or modify the referred object.
+                      description: |-
+                        MCPServerRef is a required reference to an MCP server resource.
+                        This establishes the connection between the flow and the server.
                       properties:
                         apiVersion:
                           description: API version of the referent.

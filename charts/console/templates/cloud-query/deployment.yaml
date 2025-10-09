@@ -56,6 +56,15 @@ spec:
                   name: {{ include "console.cloudquery.db.secret" . }}
                   key: password
                 {{- end }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U postgres
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
         - name: cloud-query
           {{- with .Values.cloudQuery.securityContext }}
           securityContext:
@@ -90,9 +99,9 @@ spec:
             httpGet:
               path: /healthz
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 15
             periodSeconds: 30
-            failureThreshold: 1
+            failureThreshold: 3
           {{- with .Values.cloudQuery.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

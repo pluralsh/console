@@ -31,6 +31,7 @@ const (
 	ComplianceReportGeneratorReconciler  Reconciler = "compliancereportgenerator"
 	CustomStackRunReconciler             Reconciler = "customstackrun"
 	DeploymentSettingsReconciler         Reconciler = "deploymentsettings"
+	FederatedCredentialReconciler        Reconciler = "federatedcredential"
 	FlowReconciler                       Reconciler = "flow"
 	GeneratedSecretReconciler            Reconciler = "generatedsecret"
 	GitRepositoryReconciler              Reconciler = "gitrepository"
@@ -59,6 +60,7 @@ const (
 	StackDefinitionReconciler            Reconciler = "stackdefinition"
 	InfrastructureStackReconciler        Reconciler = "infrastructurestack"
 	PrGovernanceReconciler               Reconciler = "prgovernance"
+	SentinelReconciler                   Reconciler = "sentinel"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

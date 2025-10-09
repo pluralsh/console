@@ -773,6 +773,13 @@ defmodule Console.Factory do
     }
   end
 
+  def service_vuln_factory do
+    %Schema.ServiceVuln{
+      service: build(:service),
+      report: build(:vulnerability_report)
+    }
+  end
+
   def vulnerability_factory do
     %Schema.Vulnerability{
       report: build(:vulnerability_report)
@@ -1028,6 +1035,39 @@ defmodule Console.Factory do
       claims_like: %{"sub" => ".*@example.com"},
       scopes: ["createPullRequest"],
       user: build(:user)
+    }
+  end
+
+  def sentinel_factory do
+    %Schema.Sentinel{
+      name: sequence(:sentinel, & "sentinel-#{&1}"),
+      project: build(:project)
+    }
+  end
+
+  def sentinel_run_factory do
+    %Schema.SentinelRun{
+      sentinel: build(:sentinel)
+    }
+  end
+
+  def agent_runtime_factory do
+    %Schema.AgentRuntime{
+      name: sequence(:agent_runtime, & "agent-runtime-#{&1}"),
+      create_policy_id: Ecto.UUID.generate(),
+      cluster: build(:cluster),
+      type: :claude
+    }
+  end
+
+  def agent_run_factory do
+    %Schema.AgentRun{
+      runtime: build(:agent_runtime),
+      user: build(:user),
+      status: :running,
+      mode: :write,
+      prompt: "hello world",
+      repository: "https://github.com/pluralsh/console.git"
     }
   end
 

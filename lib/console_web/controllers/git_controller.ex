@@ -66,7 +66,7 @@ defmodule ConsoleWeb.GitController do
   def tarball(conn, %{"id" => service_id} = params) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
-         svc <- Console.Repo.preload(svc, [:revision]),
+         svc <- Console.Repo.preload(svc, [:revision, :dependencies]),
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, sha}, _} <- {get_digest(params, svc), svc},
          {{:ok, path, sha}, _} <- {FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end), svc} do
@@ -76,6 +76,9 @@ defmodule ConsoleWeb.GitController do
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
         send_resp(conn, 429, "Rate limited")
+      {{:error, {:dependencies, err}}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: stringify(err), warning: true}])
+        send_resp(conn, 402, stringify(err))
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
         send_resp(conn, 402, stringify(err))

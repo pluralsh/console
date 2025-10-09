@@ -4,16 +4,14 @@ import {
   CloudWelcomeStep,
 } from 'components/cloud-setup/CloudConsoleWelcomeModal'
 import { useUpdateState } from 'components/hooks/useUpdateState'
-import {
-  DEFAULT_SCM_ATTRIBUTES,
-  sanitizeScmAttributes,
-} from 'components/self-service/pr/scm/CreateScmConnection'
+import { sanitizeScmAttributes } from 'components/self-service/pr/scm/CreateScmConnection'
 import { ScmConnectionForm } from 'components/self-service/pr/scm/EditScmConnection'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body1P } from 'components/utils/typography/Text'
 import {
   ScmConnectionAttributes,
   ScmConnectionDocument,
+  ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
 import { use } from 'react'
@@ -23,9 +21,11 @@ export function ManualSetup() {
   const { spacing } = useTheme()
   const { setStep } = use(CloudWelcomeCtx)
 
-  const { state: formState, update: updateFormState } = useUpdateState<
-    Partial<ScmConnectionAttributes>
-  >({ ...DEFAULT_SCM_ATTRIBUTES, name: 'plural' })
+  const { state: formState, update: updateFormState } =
+    useUpdateState<ScmConnectionAttributes>({
+      type: ScmType.Github,
+      name: 'plural',
+    })
 
   const [createScmConnection, { loading, error }] =
     useCreateScmConnectionMutation({
@@ -36,10 +36,11 @@ export function ManualSetup() {
       ],
     })
 
-  const { token, github, type } = formState
-  const allowSubmit =
-    type &&
-    (token || (github?.appId && github?.privateKey && github?.installationId))
+  const { token, github } = formState
+  const allowSubmit = !!(
+    token ||
+    (github?.appId && github?.privateKey && github?.installationId)
+  )
 
   return (
     <Flex

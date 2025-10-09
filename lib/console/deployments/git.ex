@@ -8,7 +8,6 @@ defmodule Console.Deployments.Git do
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
   alias Console.Deployments.Pr.Governance.Provider, as: GovernanceProvider
-  alias Console.Deployments.Observer.Runner
   alias Console.Schema.{
     GitRepository,
     User,
@@ -152,11 +151,13 @@ defmodule Console.Deployments.Git do
       get_repository!(id)
       |> GitRepository.changeset()
       |> allow(user, :git)
-      |> when_ok(:delete)
+      |> when_ok(&Repo.delete(&1, timeout: 60_000))
       |> notify(:delete, user)
     rescue
       # foreign key constraint violated
-      _ -> {:error, "could not delete repository"}
+      e ->
+        Logger.error "Could not delete git repository: #{Exception.format(:error, e, __STACKTRACE__)}}"
+        {:error, "could not delete repository"}
     end
   end
 
@@ -338,25 +339,51 @@ defmodule Console.Deployments.Git do
   Creates a pull request given a pr automation instance
   """
   @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
-  def create_pull_request(attrs \\ %{}, ctx, id, branch, identifier \\ nil, %User{} = user) do
-    pr = get_pr_automation!(id)
-         |> Repo.preload([:write_bindings, :create_bindings, :connection])
+  def create_pull_request(attrs \\ %{}, ctx, pra, branch, identifier \\ nil, user)
+
+  def create_pull_request(attrs, ctx, id, branch, identifier, user) when is_binary(id) do
+    pra = get_pr_automation!(id)
+    create_pull_request(attrs, ctx, pra, branch, identifier, user)
+  end
+
+  def create_pull_request(attrs, ctx, %PrAutomation{} = pr, branch, identifier, %User{} = user) do
+    pr = Repo.preload(pr, [:write_bindings, :create_bindings, :connection])
+    {secrets, ctx} = Map.pop(ctx, :secrets)
     with :ok <- Validation.validate(pr, ctx),
          {:ok, pr} <- allow(pr, user, :create),
          {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do
       Logger.info "creating pr #{pr_attrs[:url]}"
-
-      %PullRequest{}
-      |> PullRequest.changeset(
-        Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
-        |> Map.merge(attrs)
-        |> Map.put(:governance_id, pr.governance_id)
-        |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
-      )
-      |> Repo.insert()
+      start_transaction()
+      |> add_operation(:pr, fn _ ->
+        %PullRequest{}
+        |> PullRequest.changeset(
+          Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
+          |> Map.merge(attrs)
+          |> Map.put(:governance_id, pr.governance_id)
+          |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
+        )
+        |> Repo.insert()
+      end)
+      |> add_operation(:secrets, fn _ -> create_secrets(pr, user, secrets) end)
+      |> execute(extract: :pr)
       |> notify(:create, user)
     end
   end
+
+  defp create_secrets(
+    %PrAutomation{secrets: %PrAutomation.Secrets{cluster: cluster} = conf},
+    %{} = secrets,
+    %User{} = user
+  ) when is_binary(cluster) do
+    cluster = Clusters.get_cluster_by_handle!(cluster)
+    Kube.Utils.save_kubeconfig(Clusters.control_plane(cluster, user))
+    Kube.Utils.upsert_secret(
+      conf.namespace,
+      conf.name,
+      secrets
+    )
+  end
+  defp create_secrets(_, _, _), do: {:ok, %{}}
 
   defp prep(pr, %User{} = user, identifier) when is_binary(identifier) do
     prep(pr, user, nil)
@@ -544,6 +571,17 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Forcibly retriggers an observer to run immediately
+  """
+  @spec kick_observer(binary, User.t) :: observer_resp
+  def kick_observer(id, %User{} = user) do
+    get_observer!(id)
+    |> Ecto.Changeset.change(%{next_run_at: Timex.now()})
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
   Deletes an observer record
   """
   @spec delete_observer(binary, User.t) :: observer_resp
@@ -562,16 +600,6 @@ defmodule Console.Deployments.Git do
     |> Observer.reset_changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
-  end
-
-  @doc """
-  Forcibly retriggers an observer to run
-  """
-  @spec kick_observer(binary, User.t) :: observer_resp
-  def kick_observer(id, %User{} = user) do
-    get_observer!(id)
-    |> allow(user, :write)
-    |> when_ok(&Runner.run/1)
   end
 
   @doc """
@@ -597,6 +625,22 @@ defmodule Console.Deployments.Git do
     |> allow(user, :write)
     |> when_ok(:delete)
   end
+
+  @doc """
+  Attempts to automatically merge a pr if its already been approved
+  """
+  @spec auto_merge(PullRequest.t) :: :ok | Console.error
+  def auto_merge(%PullRequest{status: s, approver: a} = pr) when is_binary(a) and s not in [:merged, :closed] do
+    with %ScmConnection{} = conn <- default_scm_connection(),
+      do: Dispatcher.merge(conn, pr)
+  end
+  def auto_merge(%PullRequest{approver: nil, status: :open} = pr) do
+    PullRequest.changeset(pr)
+    |> PullRequest.next_merge_attempt(pr.merge_cron)
+    |> Repo.update()
+    |> then(fn _ -> {:error, "pr is still pending approval"} end)
+  end
+  def auto_merge(_), do: {:error, "pr is already in a terminal state"}
 
   @doc """
   Sets up a service to run the renovate cron given an scm connection and target repositories

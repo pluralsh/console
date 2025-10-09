@@ -105,6 +105,21 @@ defmodule Kube.Utils do
     |> Kazan.run()
   end
 
+  def upsert_secret(ns, name, data) do
+    secret = %CoreV1.Secret{
+      metadata: %MetaV1.ObjectMeta{namespace: ns, name: name},
+      data: Map.new(data, fn {k, v} -> {k, Base.encode64(v)} end)
+    }
+
+    CoreV1.read_namespaced_secret!(ns, name)
+    |> run()
+    |> case do
+      {:ok, %CoreV1.Secret{}} -> CoreV1.replace_namespaced_secret!(secret, ns, name)
+      _ -> CoreV1.create_namespaced_secret!(secret, ns)
+    end
+    |> run()
+  end
+
   @spec create_secret(binary, binary, %{binary => binary}) :: secret_resp
   def create_secret(ns, name, data) do
     %CoreV1.Secret{

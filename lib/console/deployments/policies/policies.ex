@@ -18,7 +18,9 @@ defmodule Console.Deployments.Policies do
     TerraformState,
     AiInsight,
     ServiceImport,
-    BootstrapToken
+    BootstrapToken,
+    AgentRuntime,
+    AgentRun
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
@@ -45,6 +47,17 @@ defmodule Console.Deployments.Policies do
 
   def can?(user, %{read_bindings: r, write_bindings: w} = resource, :create) when r != [] and w != [],
       do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
+
+  def can?(%Cluster{id: id}, %AgentRuntime{cluster_id: id}, _), do: :pass
+
+  def can?(%Cluster{id: id}, %AgentRun{} = run, _) do
+    case Repo.preload(run, [:runtime]) do
+      %AgentRun{runtime: %AgentRuntime{cluster_id: ^id}} -> :pass
+      _ -> {:error, "forbidden"}
+    end
+  end
+
+  def can?(%User{id: id}, %AgentRun{user_id: id}, _), do: :pass
 
   def can?(%Cluster{id: id}, %ClusterRestore{} = restore, :read) do
     case Repo.preload(restore, [:backup]) do

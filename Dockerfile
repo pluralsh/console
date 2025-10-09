@@ -5,7 +5,7 @@ ARG OS_VERSION=3.21.3
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
 ARG RUNNER_IMAGE=${OS_VARIANT}:${OS_VERSION}
 
-FROM node:16.16-alpine3.15 as node
+FROM node:20-alpine as node
 
 WORKDIR /app
 
@@ -14,13 +14,19 @@ COPY assets/yarn.lock ./yarn.lock
 COPY assets/.yarn ./.yarn
 COPY assets/.yarnrc.yml ./.yarnrc.yml
 
-RUN npm config set unsafe-perm true
 RUN yarn install
 
 COPY assets/ ./
 
 ARG VITE_PROD_SECRET_KEY
-ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
+ARG VITE_SENTRY_DSN
+ARG SENTRY_AUTH_TOKEN
+ARG GIT_COMMIT
+
+ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY} \
+    VITE_GIT_COMMIT=${GIT_COMMIT} \
+    VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
+    SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 RUN yarn run build
 
@@ -63,12 +69,12 @@ RUN ls -al
 
 COPY --from=node /app/build ./priv/static
 
-RUN mix do db.certs, agent.chart, release
+RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.8
+ENV CLI_VERSION=v0.12.19
 
 COPY AGENT_VERSION AGENT_VERSION
 

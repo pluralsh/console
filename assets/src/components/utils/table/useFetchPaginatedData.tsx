@@ -1,23 +1,19 @@
 import {
   ErrorPolicy,
+  FetchPolicy,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
 } from '@apollo/client'
-import { Table } from '@pluralsh/design-system'
-import { VirtualItem } from '@tanstack/react-virtual'
+import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { Dispatch, useCallback, useMemo, useState } from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
-
-export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = { overscan: 10 }
 
 export const DEFAULT_PAGE_SIZE = 100
 
@@ -37,13 +33,14 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
+  fetchPolicy?: FetchPolicy
   skip?: boolean
 }
 
-export type VirtualSlice = {
-  start: VirtualItem | undefined
-  end: VirtualItem | undefined
-}
+// could also export this directly from DS
+export type VirtualSlice = Parameters<
+  NonNullable<TableProps['onVirtualSliceChange']>
+>[0]
 
 export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
@@ -51,7 +48,7 @@ export type FetchPaginatedDataResult<TQueryType> = {
   error: any
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
-  fetchNextPage: () => void
+  fetchNextPage: Dispatch<void>
   setVirtualSlice: (slice: VirtualSlice) => void
 }
 
@@ -76,7 +73,7 @@ export function useFetchPaginatedData<
     },
     skip: options.skip,
     errorPolicy: options.errorPolicy,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: options.fetchPolicy ?? 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
   })
@@ -102,14 +99,14 @@ export function useFetchPaginatedData<
   const { refetch } = useSlicePolling(reducedQueryResult, {
     virtualSlice,
     pageSize: options.pageSize ?? DEFAULT_PAGE_SIZE,
-    interval: options.pollInterval || POLL_INTERVAL,
+    interval: options.pollInterval ?? POLL_INTERVAL,
     keyPath: options.keyPath,
   })
 
   const fetchNextPage = useCallback(() => {
-    if (pageInfo?.endCursor) {
+    if (pageInfo?.hasNextPage) {
       fetchMore({
-        variables: { after: pageInfo.endCursor },
+        variables: { after: pageInfo?.endCursor },
         updateQuery: (prev, { fetchMoreResult }) => {
           const newConnection = extendConnection(
             reduceNestedData(options.keyPath, prev),
@@ -121,7 +118,13 @@ export function useFetchPaginatedData<
         },
       })
     }
-  }, [pageInfo, fetchMore, options.keyPath, queryKey])
+  }, [
+    pageInfo?.hasNextPage,
+    pageInfo?.endCursor,
+    fetchMore,
+    options.keyPath,
+    queryKey,
+  ])
 
   return {
     data,

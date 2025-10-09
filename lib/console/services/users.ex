@@ -48,7 +48,7 @@ defmodule Console.Services.Users do
   @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
 
-  @decorate cacheable(cache: Console.Cache, key: {:access, token}, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @cache_adapter, key: {:access, token}, opts: [ttl: @ttl])
   def get_by_token(token) do
     Repo.get_by(AccessToken, token: token)
     |> Repo.preload([:user])
@@ -71,6 +71,9 @@ defmodule Console.Services.Users do
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
   def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
+
+  @decorate cacheable(cache: @cache_adapter, key: {:user_by_email, email}, opts: [ttl: @ttl])
+  def cached_user_by_email!(email), do: get_user_by_email!(email)
 
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)
@@ -98,6 +101,16 @@ defmodule Console.Services.Users do
 
   @spec get_invite!(binary) :: Invite.t
   def get_invite!(secure_id), do: Repo.get_by!(Invite, secure_id: secure_id)
+
+  def user_by_emails(emails) do
+    User.with_emails(emails)
+    |> Repo.all()
+  end
+
+  def group_by_names(names) do
+    Group.with_names(names)
+    |> Repo.all()
+  end
 
   @spec unread_notifications(User.t) :: integer
   def unread_notifications(%User{} = user) do
@@ -165,7 +178,7 @@ defmodule Console.Services.Users do
     |> bootstrap_user_impl()
   end
 
-  def bootstrap_user_impl(%{"email" => email} = attrs) do
+  def bootstrap_user_impl(%{"email" => email} = attrs) when is_binary(email) do
     email = sanitize_email(email)
     attrs = token_attrs(attrs)
             |> Map.put("email", email)
@@ -189,7 +202,23 @@ defmodule Console.Services.Users do
     |> bootstrap_user()
   end
 
-  def bootstrap_user_impl(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
+  def bootstrap_user_impl(%{"sub" => sub} = attrs) do
+    case Console.conf(:service_account_domain) do
+      domain when is_binary(domain) and byte_size(domain) > 0 ->
+        Map.put(attrs, "email", "#{to_email(sub)}@#{domain}")
+        |> bootstrap_user_impl()
+      _ ->
+        {:error, "Failed to bootstrap user, missing email claim in OIDC id token"}
+    end
+  end
+
+  def bootstrap_user_impl(_), do: {:error, "Failed to bootstrap user, email and sub claims are required in OIDC id token"}
+
+  defp to_email(sub) do
+    sub
+    |> String.replace(~r/\s+/, "-")
+    |> String.downcase()
+  end
 
   defp sanitize_email(email) do
     case Console.conf(:org_email_suffix) do
@@ -339,7 +368,13 @@ defmodule Console.Services.Users do
   end
 
   defp hydrate_groups(transaction, [_ | _] = groups) do
-    Enum.uniq(groups)
+    Enum.map(groups, fn
+      group when is_binary(group) -> group
+      %{"name" => name} when is_binary(name) -> name
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+    |> Enum.uniq()
     |> Enum.reduce(transaction, fn group, xaction ->
       xaction
       |> add_operation({:group, group}, fn _ ->

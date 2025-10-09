@@ -1,6 +1,8 @@
 import {
+  ArrowTopRightIcon,
   Button,
   CloseIcon,
+  Divider,
   EmptyState,
   FiltersIcon,
   IconFrame,
@@ -9,7 +11,6 @@ import {
   LoopingLogo,
   MoreIcon,
   PeopleIcon,
-  PlusIcon,
   ReturnIcon,
   SearchIcon,
   SubTab,
@@ -28,7 +29,13 @@ import usePersistedState from 'components/hooks/usePersistedState'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { isEmpty } from 'lodash'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { keySetToTagArray } from 'utils/clusterTags'
@@ -68,7 +75,6 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
 import StackStatusChip from './common/StackStatusChip.tsx'
-import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
 import RestoreStackButton from './RestoreStackButton.tsx'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
@@ -232,7 +238,15 @@ export default function Stacks() {
   ) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
-        <CreateStack refetch={refetch} />
+        <Button
+          as={Link}
+          to="https://docs.plural.sh/plural-features/stacks-iac-management"
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Create a stack
+        </Button>
       </EmptyState>
     )
   }
@@ -289,11 +303,6 @@ export default function Stacks() {
               <FiltersIcon />
             </Button>
           )}
-          <CreateStack
-            buttonContent={<PlusIcon />}
-            buttonProps={{ floating: true, height: 40, width: 40 }}
-            refetch={refetch}
-          />
         </div>
         {filterExpanded && (
           <TagsFilter
@@ -362,6 +371,7 @@ export default function Stacks() {
             display: 'flex',
             flexDirection: 'column',
             flex: 1,
+            gap: theme.spacing.medium,
             overflow: 'hidden',
           }}
         >
@@ -370,9 +380,6 @@ export default function Stacks() {
               alignItems: 'start',
               display: 'flex',
               gap: theme.spacing.medium,
-              borderBottom: theme.borders.default,
-              marginBottom: theme.spacing.medium,
-              paddingBottom: theme.spacing.medium,
             }}
           >
             <div css={{ flexGrow: 1 }}>
@@ -486,40 +493,49 @@ export default function Stacks() {
               </>
             )}
           </div>
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-            marginRight="medium"
-            paddingBottom="medium"
-            minHeight={56}
-          >
-            {directory
-              .filter(({ enabled }) => enabled)
-              .map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  to={`${getStacksAbsPath(stackId)}/${path}`}
-                >
-                  <SubTab key={path}>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-          </TabList>
+          <Divider backgroundColor={theme.colors.border} />
+          <div>
+            <TabList
+              scrollable
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {directory
+                .filter(({ enabled }) => enabled)
+                .map(({ label, path }) => (
+                  <LinkTabWrap
+                    subTab
+                    key={path}
+                    to={`${getStacksAbsPath(stackId)}/${path}`}
+                  >
+                    <SubTab key={path}>{label}</SubTab>
+                  </LinkTabWrap>
+                ))}
+            </TabList>
+          </div>
           {!fullStack ? (
             <LoopingLogo css={{ flex: 1 }} />
           ) : (
-            <Outlet
-              context={
-                {
-                  stack: fullStack,
-                  refetch,
-                  loading,
-                } satisfies StackOutletContextT
-              }
-            />
+            <div
+              css={{
+                width: '100%',
+                height: '100%',
+                overflowX: 'auto',
+              }}
+            >
+              <Outlet
+                context={
+                  {
+                    stack: fullStack,
+                    refetch,
+                    loading,
+                  } satisfies StackOutletContextT
+                }
+              />
+            </div>
           )}
         </div>
       )}

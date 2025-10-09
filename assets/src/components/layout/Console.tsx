@@ -1,5 +1,5 @@
-import { Flex, MarkdocContextProvider, Toast } from '@pluralsh/design-system'
-import { Suspense } from 'react'
+import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
+import { Suspense, useRef } from 'react'
 
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -20,15 +20,18 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
-import { AIContextProvider } from 'components/ai/AIContext'
+import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgent'
+import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
+import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
+import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
-import { useTheme } from 'styled-components'
+import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
-import { ContentOverlay } from './Overlay'
-import Sidebar from './Sidebar'
+import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
-import WithApplicationUpdate from './WithApplicationUpdate'
+import { SentryInitializer } from '../SentryInitializer'
 
 export default function Console() {
   return (
@@ -36,23 +39,29 @@ export default function Console() {
       <MarkdocContextProvider value={{ variant: 'console' }}>
         <ConsoleNavContextProvider>
           <EnsureLogin>
-            <ProjectsProvider>
-              <BillingSubscriptionProvider>
-                <BreadcrumbsProvider>
-                  <TerminalThemeProvider>
-                    <ShareSecretProvider>
-                      <DeploymentSettingsProvider>
-                        <AIContextProvider>
-                          <FeatureFlagProvider>
-                            <ConsoleContent />
-                          </FeatureFlagProvider>
-                        </AIContextProvider>
-                      </DeploymentSettingsProvider>
-                    </ShareSecretProvider>
-                  </TerminalThemeProvider>
-                </BreadcrumbsProvider>
-              </BillingSubscriptionProvider>
-            </ProjectsProvider>
+            <SentryInitializer>
+              <ProjectsProvider>
+                <BillingSubscriptionProvider>
+                  <BreadcrumbsProvider>
+                    <TerminalThemeProvider>
+                      <ShareSecretProvider>
+                        <DeploymentSettingsProvider>
+                          <SidebarProvider>
+                            <AIContextProvider>
+                              <FeatureFlagProvider>
+                                <CommandPaletteProvider>
+                                  <ConsoleContent />
+                                </CommandPaletteProvider>
+                              </FeatureFlagProvider>
+                            </AIContextProvider>
+                          </SidebarProvider>
+                        </DeploymentSettingsProvider>
+                      </ShareSecretProvider>
+                    </TerminalThemeProvider>
+                  </BreadcrumbsProvider>
+                </BillingSubscriptionProvider>
+              </ProjectsProvider>
+            </SentryInitializer>
           </EnsureLogin>
         </ConsoleNavContextProvider>
       </MarkdocContextProvider>
@@ -62,67 +71,57 @@ export default function Console() {
 
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
-  const theme = useTheme()
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
+  const { setActionsPanelOpen } = useChatbot()
+
+  // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, () => {
+    setActionsPanelOpen(false)
+  })
 
   return (
     <Flex
-      position="relative"
-      height="100%"
-      minHeight="0"
-      maxHeight="100vh"
-      overflow="hidden"
-      flexDirection="column"
+      height="100vh"
       flexGrow={1}
+      minHeight={0}
+      alignItems="stretch"
     >
-      {isProduction && (
-        <WithApplicationUpdate>
-          {({ reloadApplication }) => (
-            <Toast
-              severity="info"
-              marginBottom="medium"
-              marginRight="xxxxlarge"
-            >
-              <span css={{ marginRight: theme.spacing.small }}>
-                Time for a new update!
-              </span>
-              <a
-                onClick={() => reloadApplication()}
-                style={{
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  color: theme.colors['action-link-inline'],
-                }}
-              >
-                Update now
-              </a>
-            </Toast>
-          )}
-        </WithApplicationUpdate>
-      )}
-      {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
-      <Header />
       <Flex
-        width="100%"
-        minWidth={0}
-        minHeight={0}
+        ref={wrapperRef}
+        position="relative"
+        height="100%"
+        overflow="hidden"
+        flexDirection="column"
         flexGrow={1}
-        alignItems="stretch"
+        zIndex={0} // needed so chatbot flyovers render over main console content
       >
-        <Sidebar />
+        {isProduction && <ApplicationUpdateToast />}
+        {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
+        <Header />
         <Flex
-          direction="column"
+          width="100%"
+          minWidth={0}
+          minHeight={0}
           flexGrow={1}
-          overflowX="hidden"
-          position="relative"
+          alignItems="stretch"
         >
-          <ContentOverlay />
-          <Subheader />
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
+          <Sidebar />
+          <Flex
+            direction="column"
+            flexGrow={1}
+            overflowX="hidden"
+            position="relative"
+            container="console / inline-size"
+          >
+            <Subheader />
+            <Suspense fallback={<LoadingIndicator />}>
+              <Outlet />
+            </Suspense>
+          </Flex>
         </Flex>
       </Flex>
+      <ChatbotPanel />
     </Flex>
   )
 }

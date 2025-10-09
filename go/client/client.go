@@ -9,6 +9,19 @@ import (
 )
 
 type ConsoleClient interface {
+	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
+	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
+	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
+	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
+	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
+	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
+	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
+	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
+	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
+	UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error)
+	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
+	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -98,6 +111,10 @@ type ConsoleClient interface {
 	UpdateClusterIsoImage(ctx context.Context, id string, attributes ClusterIsoImageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterIsoImage, error)
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
+	GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error)
+	CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error)
+	DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error)
 	GetFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFlow, error)
 	UpsertFlow(ctx context.Context, attributes FlowAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertFlow, error)
 	DeleteFlow(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFlow, error)
@@ -194,6 +211,10 @@ type ConsoleClient interface {
 	DeleteProviderCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteProviderCredential, error)
 	ListProviders(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListProviders, error)
 	UpdateRbac(ctx context.Context, rbac RbacAttributes, serviceID *string, clusterID *string, providerID *string, interceptors ...clientv2.RequestInterceptor) (*UpdateRbac, error)
+	CreateSentinel(ctx context.Context, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateSentinel, error)
+	UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error)
+	DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error)
+	GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error)
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
@@ -251,6 +272,265 @@ type Client struct {
 
 func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+}
+
+type AgentRuntimeFragment struct {
+	ID             string                   "json:\"id\" graphql:\"id\""
+	Name           string                   "json:\"name\" graphql:\"name\""
+	Type           AgentRuntimeType         "json:\"type\" graphql:\"type\""
+	AiProxy        *bool                    "json:\"aiProxy,omitempty\" graphql:\"aiProxy\""
+	Cluster        *TinyClusterFragment     "json:\"cluster,omitempty\" graphql:\"cluster\""
+	CreateBindings []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
+}
+
+func (t *AgentRuntimeFragment) GetID() string {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRuntimeFragment) GetName() string {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.Name
+}
+func (t *AgentRuntimeFragment) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return &t.Type
+}
+func (t *AgentRuntimeFragment) GetAiProxy() *bool {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.AiProxy
+}
+func (t *AgentRuntimeFragment) GetCluster() *TinyClusterFragment {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.Cluster
+}
+func (t *AgentRuntimeFragment) GetCreateBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.CreateBindings
+}
+
+type AgentPodReferenceFragment struct {
+	Name      string "json:\"name\" graphql:\"name\""
+	Namespace string "json:\"namespace\" graphql:\"namespace\""
+}
+
+func (t *AgentPodReferenceFragment) GetName() string {
+	if t == nil {
+		t = &AgentPodReferenceFragment{}
+	}
+	return t.Name
+}
+func (t *AgentPodReferenceFragment) GetNamespace() string {
+	if t == nil {
+		t = &AgentPodReferenceFragment{}
+	}
+	return t.Namespace
+}
+
+type AgentAnalysisFragment struct {
+	Summary  string    "json:\"summary\" graphql:\"summary\""
+	Analysis string    "json:\"analysis\" graphql:\"analysis\""
+	Bullets  []*string "json:\"bullets,omitempty\" graphql:\"bullets\""
+}
+
+func (t *AgentAnalysisFragment) GetSummary() string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Summary
+}
+func (t *AgentAnalysisFragment) GetAnalysis() string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Analysis
+}
+func (t *AgentAnalysisFragment) GetBullets() []*string {
+	if t == nil {
+		t = &AgentAnalysisFragment{}
+	}
+	return t.Bullets
+}
+
+type AgentTodoFragment struct {
+	Description string "json:\"description\" graphql:\"description\""
+	Done        *bool  "json:\"done,omitempty\" graphql:\"done\""
+	Title       string "json:\"title\" graphql:\"title\""
+}
+
+func (t *AgentTodoFragment) GetDescription() string {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Description
+}
+func (t *AgentTodoFragment) GetDone() *bool {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Done
+}
+func (t *AgentTodoFragment) GetTitle() string {
+	if t == nil {
+		t = &AgentTodoFragment{}
+	}
+	return t.Title
+}
+
+type ScmCredentialFragment struct {
+	Token    string "json:\"token\" graphql:\"token\""
+	Username string "json:\"username\" graphql:\"username\""
+}
+
+func (t *ScmCredentialFragment) GetToken() string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.Token
+}
+func (t *ScmCredentialFragment) GetUsername() string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.Username
+}
+
+type PluralCredsFragment struct {
+	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *PluralCredsFragment) GetToken() *string {
+	if t == nil {
+		t = &PluralCredsFragment{}
+	}
+	return t.Token
+}
+func (t *PluralCredsFragment) GetURL() *string {
+	if t == nil {
+		t = &PluralCredsFragment{}
+	}
+	return t.URL
+}
+
+type AgentRunFragment struct {
+	ID           string                     "json:\"id\" graphql:\"id\""
+	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
+	Repository   string                     "json:\"repository\" graphql:\"repository\""
+	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
+	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User         *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow         *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+}
+
+func (t *AgentRunFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return &t.Status
+}
+func (t *AgentRunFragment) GetMode() *AgentRunMode {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return &t.Mode
+}
+func (t *AgentRunFragment) GetPodReference() *AgentPodReferenceFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PodReference
+}
+func (t *AgentRunFragment) GetError() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Error
+}
+func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Analysis
+}
+func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Todos
+}
+func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ScmCreds
+}
+func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PluralCreds
+}
+func (t *AgentRunFragment) GetRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunFragment) GetUser() *AgentRunFragment_User {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.User
+}
+func (t *AgentRunFragment) GetFlow() *AgentRunFragment_Flow {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Flow
+}
+func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.PullRequests
 }
 
 type ScmWebhookFragment struct {
@@ -546,6 +826,7 @@ type ClusterFragment struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -626,6 +907,12 @@ func (t *ClusterFragment) GetMetadata() map[string]any {
 		t = &ClusterFragment{}
 	}
 	return t.Metadata
+}
+func (t *ClusterFragment) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ClusterFragment{}
+	}
+	return t.Distro
 }
 func (t *ClusterFragment) GetTags() []*ClusterTags {
 	if t == nil {
@@ -1200,6 +1487,59 @@ func (t *ClusterIsoImageFragment) GetRegistry() string {
 func (t *ClusterIsoImageFragment) GetUser() *string {
 	if t == nil {
 		t = &ClusterIsoImageFragment{}
+	}
+	return t.User
+}
+
+type FederatedCredentialFragment struct {
+	ID         string                            "json:\"id\" graphql:\"id\""
+	ClaimsLike map[string]any                    "json:\"claimsLike,omitempty\" graphql:\"claimsLike\""
+	Issuer     string                            "json:\"issuer\" graphql:\"issuer\""
+	Scopes     []*string                         "json:\"scopes,omitempty\" graphql:\"scopes\""
+	InsertedAt *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	User       *FederatedCredentialFragment_User "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *FederatedCredentialFragment) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment) GetClaimsLike() map[string]any {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.ClaimsLike
+}
+func (t *FederatedCredentialFragment) GetIssuer() string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Issuer
+}
+func (t *FederatedCredentialFragment) GetScopes() []*string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Scopes
+}
+func (t *FederatedCredentialFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *FederatedCredentialFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *FederatedCredentialFragment) GetUser() *FederatedCredentialFragment_User {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
 	}
 	return t.User
 }
@@ -4132,6 +4472,194 @@ func (t *ProviderCredentialFragment) GetKind() string {
 	return t.Kind
 }
 
+type SentinelFragment struct {
+	ID          string                   "json:\"id\" graphql:\"id\""
+	Name        string                   "json:\"name\" graphql:\"name\""
+	Description *string                  "json:\"description,omitempty\" graphql:\"description\""
+	Git         *GitRefFragment          "json:\"git,omitempty\" graphql:\"git\""
+	Repository  *GitRepositoryFragment   "json:\"repository,omitempty\" graphql:\"repository\""
+	Project     *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	Checks      []*SentinelCheckFragment "json:\"checks,omitempty\" graphql:\"checks\""
+}
+
+func (t *SentinelFragment) GetID() string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.ID
+}
+func (t *SentinelFragment) GetName() string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelFragment) GetDescription() *string {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Description
+}
+func (t *SentinelFragment) GetGit() *GitRefFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Git
+}
+func (t *SentinelFragment) GetRepository() *GitRepositoryFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Repository
+}
+func (t *SentinelFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Project
+}
+func (t *SentinelFragment) GetChecks() []*SentinelCheckFragment {
+	if t == nil {
+		t = &SentinelFragment{}
+	}
+	return t.Checks
+}
+
+type SentinelCheckFragment struct {
+	ID            string                              "json:\"id\" graphql:\"id\""
+	Name          string                              "json:\"name\" graphql:\"name\""
+	Type          SentinelCheckType                   "json:\"type\" graphql:\"type\""
+	RuleFile      *string                             "json:\"ruleFile,omitempty\" graphql:\"ruleFile\""
+	Configuration *SentinelCheckConfigurationFragment "json:\"configuration,omitempty\" graphql:\"configuration\""
+}
+
+func (t *SentinelCheckFragment) GetID() string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.ID
+}
+func (t *SentinelCheckFragment) GetName() string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelCheckFragment) GetType() *SentinelCheckType {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return &t.Type
+}
+func (t *SentinelCheckFragment) GetRuleFile() *string {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.RuleFile
+}
+func (t *SentinelCheckFragment) GetConfiguration() *SentinelCheckConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckFragment{}
+	}
+	return t.Configuration
+}
+
+type SentinelCheckConfigurationFragment struct {
+	Log        *SentinelCheckLogConfigurationFragment        "json:\"log,omitempty\" graphql:\"log\""
+	Kubernetes *SentinelCheckKubernetesConfigurationFragment "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+}
+
+func (t *SentinelCheckConfigurationFragment) GetLog() *SentinelCheckLogConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment{}
+	}
+	return t.Log
+}
+func (t *SentinelCheckConfigurationFragment) GetKubernetes() *SentinelCheckKubernetesConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment{}
+	}
+	return t.Kubernetes
+}
+
+type SentinelCheckLogConfigurationFragment struct {
+	Namespaces []*string                                       "json:\"namespaces,omitempty\" graphql:\"namespaces\""
+	Query      string                                          "json:\"query\" graphql:\"query\""
+	ClusterID  *string                                         "json:\"clusterId,omitempty\" graphql:\"clusterId\""
+	Facets     []*SentinelCheckLogConfigurationFragment_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Duration   string                                          "json:\"duration\" graphql:\"duration\""
+}
+
+func (t *SentinelCheckLogConfigurationFragment) GetNamespaces() []*string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Namespaces
+}
+func (t *SentinelCheckLogConfigurationFragment) GetQuery() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Query
+}
+func (t *SentinelCheckLogConfigurationFragment) GetClusterID() *string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.ClusterID
+}
+func (t *SentinelCheckLogConfigurationFragment) GetFacets() []*SentinelCheckLogConfigurationFragment_Facets {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Facets
+}
+func (t *SentinelCheckLogConfigurationFragment) GetDuration() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment{}
+	}
+	return t.Duration
+}
+
+type SentinelCheckKubernetesConfigurationFragment struct {
+	Group     *string "json:\"group,omitempty\" graphql:\"group\""
+	Version   string  "json:\"version\" graphql:\"version\""
+	Kind      string  "json:\"kind\" graphql:\"kind\""
+	Name      string  "json:\"name\" graphql:\"name\""
+	Namespace *string "json:\"namespace,omitempty\" graphql:\"namespace\""
+}
+
+func (t *SentinelCheckKubernetesConfigurationFragment) GetGroup() *string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Group
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetVersion() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Version
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetKind() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Kind
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetName() string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Name
+}
+func (t *SentinelCheckKubernetesConfigurationFragment) GetNamespace() *string {
+	if t == nil {
+		t = &SentinelCheckKubernetesConfigurationFragment{}
+	}
+	return t.Namespace
+}
+
 type InfrastructureStackEdgeFragment struct {
 	Node *InfrastructureStackFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -5470,6 +5998,49 @@ func (t *AccessTokenFragment) GetToken() *string {
 	return t.Token
 }
 
+type AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
 type ClusterBackupFragment_Cluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -5880,6 +6451,7 @@ type ServiceDeploymentForAgent_Helm struct {
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -5923,6 +6495,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -5982,6 +6560,7 @@ func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations(
 type ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                   "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -5997,6 +6576,12 @@ func (t *ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
 		t = &ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -6088,6 +6673,31 @@ func (t *ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentFor
 		t = &ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
+}
+
+type FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Email
 }
 
 type PipelineGateIDsEdgeFragment_Node_ struct {
@@ -6938,6 +7548,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -6981,6 +7592,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -7040,6 +7657,7 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                              "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                              "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                          "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -7055,6 +7673,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -7767,6 +8391,78 @@ func (t *PreviewEnvironmentTemplateFragment_Template) GetName() *string {
 		t = &PreviewEnvironmentTemplateFragment_Template{}
 	}
 	return t.Name
+}
+
+type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -8589,6 +9285,427 @@ func (t *StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	return t.RequireApproval
 }
 
+type DeleteAgentRuntime_DeleteAgentRuntime struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteAgentRuntime_DeleteAgentRuntime) GetID() string {
+	if t == nil {
+		t = &DeleteAgentRuntime_DeleteAgentRuntime{}
+	}
+	return t.ID
+}
+
+type ListAgentRuntimes_AgentRuntimes_Edges struct {
+	Node *AgentRuntimeFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimes_AgentRuntimes_Edges) GetNode() *AgentRuntimeFragment {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRuntimes_AgentRuntimes struct {
+	Edges    []*ListAgentRuntimes_AgentRuntimes_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuntimes_AgentRuntimes) GetEdges() []*ListAgentRuntimes_AgentRuntimes_Edges {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuntimes_AgentRuntimes) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuntimes_AgentRuntimes{}
+	}
+	return &t.PageInfo
+}
+
+type GetAgentRun_AgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type GetAgentRun_AgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges struct {
+	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges) GetNode() *AgentRunFragment {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRuns_AgentRuns struct {
+	Edges    []*ListAgentRuns_AgentRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                 "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuns_AgentRuns) GetEdges() []*ListAgentRuns_AgentRuns_Edges {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns{}
+	}
+	return &t.PageInfo
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
+	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunFragment {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns struct {
+	Edges    []*ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                              "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns) GetEdges() []*ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns{}
+	}
+	return &t.PageInfo
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime struct {
+	PendingRuns *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns "json:\"pendingRuns,omitempty\" graphql:\"pendingRuns\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime) GetPendingRuns() *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime{}
+	}
+	return t.PendingRuns
+}
+
+type CancelAgentRun_CancelAgentRun struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CancelAgentRun_CancelAgentRun) GetID() string {
+	if t == nil {
+		t = &CancelAgentRun_CancelAgentRun{}
+	}
+	return t.ID
+}
+
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
+	}
+	return t.Email
+}
+
+type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
 type ListScmWebhooks_ScmWebhooks_Edges struct {
 	Node *ScmWebhookFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -8880,6 +9997,7 @@ type CreateCluster_CreateCluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -8966,6 +10084,12 @@ func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
 		t = &CreateCluster_CreateCluster{}
 	}
 	return t.Metadata
+}
+func (t *CreateCluster_CreateCluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Distro
 }
 func (t *CreateCluster_CreateCluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -10327,6 +11451,7 @@ type GetClusterWithToken_Cluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -10408,6 +11533,12 @@ func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
 		t = &GetClusterWithToken_Cluster{}
 	}
 	return t.Metadata
+}
+func (t *GetClusterWithToken_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Distro
 }
 func (t *GetClusterWithToken_Cluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -11302,6 +12433,7 @@ type UpsertVirtualCluster_UpsertVirtualCluster struct {
 	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
 	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
 	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -11388,6 +12520,12 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.Metadata
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Distro
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetTags() []*ClusterTags {
 	if t == nil {
@@ -13630,6 +14768,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -13673,6 +14812,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -13732,6 +14877,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                  "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                                  "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                              "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -13747,6 +14893,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -14122,6 +15274,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
 	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
@@ -14165,6 +15318,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFile
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaFolder
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -14224,6 +15383,7 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
 	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	DeleteNamespace   *bool                                                                                                                                                      "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
 	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
@@ -14239,6 +15399,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.EnforceNamespace
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.DeleteNamespace
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
 	if t == nil {
@@ -14814,6 +15980,92 @@ func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterR
 		t = &GetClusterRegistrations_ClusterRegistrations{}
 	}
 	return t.Edges
+}
+
+type GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
+
+type DeleteFederatedCredential_DeleteFederatedCredential struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteFederatedCredential_DeleteFederatedCredential) GetID() string {
+	if t == nil {
+		t = &DeleteFederatedCredential_DeleteFederatedCredential{}
+	}
+	return t.ID
+}
+
+type UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.ID
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetName() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Name
+}
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
 }
 
 type DeleteFlow_DeleteFlow struct {
@@ -16225,6 +17477,71 @@ func (t *ListProviders_ClusterProviders) GetEdges() []*ListProviders_ClusterProv
 		t = &ListProviders_ClusterProviders{}
 	}
 	return t.Edges
+}
+
+type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type DeleteSentinel_DeleteSentinel struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteSentinel_DeleteSentinel) GetID() string {
+	if t == nil {
+		t = &DeleteSentinel_DeleteSentinel{}
+	}
+	return t.ID
+}
+
+type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
 }
 
 type ServiceAccounts_ServiceAccounts_Edges struct {
@@ -18398,6 +19715,149 @@ func (t *DeleteGroupMember_DeleteGroupMember_GroupMemberFragment_Group) GetID() 
 	return t.ID
 }
 
+type GetAgentRuntime struct {
+	AgentRuntime *AgentRuntimeFragment "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *GetAgentRuntime) GetAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &GetAgentRuntime{}
+	}
+	return t.AgentRuntime
+}
+
+type UpsertAgentRuntime struct {
+	UpsertAgentRuntime *AgentRuntimeFragment "json:\"upsertAgentRuntime,omitempty\" graphql:\"upsertAgentRuntime\""
+}
+
+func (t *UpsertAgentRuntime) GetUpsertAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &UpsertAgentRuntime{}
+	}
+	return t.UpsertAgentRuntime
+}
+
+type DeleteAgentRuntime struct {
+	DeleteAgentRuntime *DeleteAgentRuntime_DeleteAgentRuntime "json:\"deleteAgentRuntime,omitempty\" graphql:\"deleteAgentRuntime\""
+}
+
+func (t *DeleteAgentRuntime) GetDeleteAgentRuntime() *DeleteAgentRuntime_DeleteAgentRuntime {
+	if t == nil {
+		t = &DeleteAgentRuntime{}
+	}
+	return t.DeleteAgentRuntime
+}
+
+type ListAgentRuntimes struct {
+	AgentRuntimes *ListAgentRuntimes_AgentRuntimes "json:\"agentRuntimes,omitempty\" graphql:\"agentRuntimes\""
+}
+
+func (t *ListAgentRuntimes) GetAgentRuntimes() *ListAgentRuntimes_AgentRuntimes {
+	if t == nil {
+		t = &ListAgentRuntimes{}
+	}
+	return t.AgentRuntimes
+}
+
+type GetAgentRun struct {
+	AgentRun *AgentRunFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &GetAgentRun{}
+	}
+	return t.AgentRun
+}
+
+type ListAgentRuns struct {
+	AgentRuns *ListAgentRuns_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
+}
+
+func (t *ListAgentRuns) GetAgentRuns() *ListAgentRuns_AgentRuns {
+	if t == nil {
+		t = &ListAgentRuns{}
+	}
+	return t.AgentRuns
+}
+
+type ListAgentRuntimePendingRuns struct {
+	AgentRuntime *ListAgentRuntimePendingRuns_AgentRuntime "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *ListAgentRuntimePendingRuns) GetAgentRuntime() *ListAgentRuntimePendingRuns_AgentRuntime {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns{}
+	}
+	return t.AgentRuntime
+}
+
+type CancelAgentRun struct {
+	CancelAgentRun *CancelAgentRun_CancelAgentRun "json:\"cancelAgentRun,omitempty\" graphql:\"cancelAgentRun\""
+}
+
+func (t *CancelAgentRun) GetCancelAgentRun() *CancelAgentRun_CancelAgentRun {
+	if t == nil {
+		t = &CancelAgentRun{}
+	}
+	return t.CancelAgentRun
+}
+
+type CreateAgentRun struct {
+	CreateAgentRun *AgentRunFragment "json:\"createAgentRun,omitempty\" graphql:\"createAgentRun\""
+}
+
+func (t *CreateAgentRun) GetCreateAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &CreateAgentRun{}
+	}
+	return t.CreateAgentRun
+}
+
+type UpdateAgentRun struct {
+	UpdateAgentRun *AgentRunFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
+}
+
+func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRun{}
+	}
+	return t.UpdateAgentRun
+}
+
+type UpdateAgentRunAnalysis struct {
+	UpdateAgentRunAnalysis *AgentRunFragment "json:\"updateAgentRunAnalysis,omitempty\" graphql:\"updateAgentRunAnalysis\""
+}
+
+func (t *UpdateAgentRunAnalysis) GetUpdateAgentRunAnalysis() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRunAnalysis{}
+	}
+	return t.UpdateAgentRunAnalysis
+}
+
+type UpdateAgentRunTodos struct {
+	UpdateAgentRunTodos *AgentRunFragment "json:\"updateAgentRunTodos,omitempty\" graphql:\"updateAgentRunTodos\""
+}
+
+func (t *UpdateAgentRunTodos) GetUpdateAgentRunTodos() *AgentRunFragment {
+	if t == nil {
+		t = &UpdateAgentRunTodos{}
+	}
+	return t.UpdateAgentRunTodos
+}
+
+type CreateAgentPullRequest struct {
+	AgentPullRequest *PullRequestFragment "json:\"agentPullRequest,omitempty\" graphql:\"agentPullRequest\""
+}
+
+func (t *CreateAgentPullRequest) GetAgentPullRequest() *PullRequestFragment {
+	if t == nil {
+		t = &CreateAgentPullRequest{}
+	}
+	return t.AgentPullRequest
+}
+
 type AddClusterAuditLog struct {
 	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
 }
@@ -19375,6 +20835,50 @@ func (t *GetClusterIsoImage) GetClusterIsoImage() *ClusterIsoImageFragment {
 		t = &GetClusterIsoImage{}
 	}
 	return t.ClusterIsoImage
+}
+
+type GetFederatedCredential struct {
+	FederatedCredential *FederatedCredentialFragment "json:\"federatedCredential,omitempty\" graphql:\"federatedCredential\""
+}
+
+func (t *GetFederatedCredential) GetFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &GetFederatedCredential{}
+	}
+	return t.FederatedCredential
+}
+
+type CreateFederatedCredential struct {
+	CreateFederatedCredential *FederatedCredentialFragment "json:\"createFederatedCredential,omitempty\" graphql:\"createFederatedCredential\""
+}
+
+func (t *CreateFederatedCredential) GetCreateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &CreateFederatedCredential{}
+	}
+	return t.CreateFederatedCredential
+}
+
+type DeleteFederatedCredential struct {
+	DeleteFederatedCredential *DeleteFederatedCredential_DeleteFederatedCredential "json:\"deleteFederatedCredential,omitempty\" graphql:\"deleteFederatedCredential\""
+}
+
+func (t *DeleteFederatedCredential) GetDeleteFederatedCredential() *DeleteFederatedCredential_DeleteFederatedCredential {
+	if t == nil {
+		t = &DeleteFederatedCredential{}
+	}
+	return t.DeleteFederatedCredential
+}
+
+type UpdateFederatedCredential struct {
+	UpdateFederatedCredential *FederatedCredentialFragment "json:\"updateFederatedCredential,omitempty\" graphql:\"updateFederatedCredential\""
+}
+
+func (t *UpdateFederatedCredential) GetUpdateFederatedCredential() *FederatedCredentialFragment {
+	if t == nil {
+		t = &UpdateFederatedCredential{}
+	}
+	return t.UpdateFederatedCredential
 }
 
 type GetFlow struct {
@@ -20433,6 +21937,50 @@ func (t *UpdateRbac) GetUpdateRbac() *bool {
 	return t.UpdateRbac
 }
 
+type CreateSentinel struct {
+	CreateSentinel *SentinelFragment "json:\"createSentinel,omitempty\" graphql:\"createSentinel\""
+}
+
+func (t *CreateSentinel) GetCreateSentinel() *SentinelFragment {
+	if t == nil {
+		t = &CreateSentinel{}
+	}
+	return t.CreateSentinel
+}
+
+type UpdateSentinel struct {
+	UpdateSentinel *SentinelFragment "json:\"updateSentinel,omitempty\" graphql:\"updateSentinel\""
+}
+
+func (t *UpdateSentinel) GetUpdateSentinel() *SentinelFragment {
+	if t == nil {
+		t = &UpdateSentinel{}
+	}
+	return t.UpdateSentinel
+}
+
+type DeleteSentinel struct {
+	DeleteSentinel *DeleteSentinel_DeleteSentinel "json:\"deleteSentinel,omitempty\" graphql:\"deleteSentinel\""
+}
+
+func (t *DeleteSentinel) GetDeleteSentinel() *DeleteSentinel_DeleteSentinel {
+	if t == nil {
+		t = &DeleteSentinel{}
+	}
+	return t.DeleteSentinel
+}
+
+type GetSentinel struct {
+	Sentinel *SentinelFragment "json:\"sentinel,omitempty\" graphql:\"sentinel\""
+}
+
+func (t *GetSentinel) GetSentinel() *SentinelFragment {
+	if t == nil {
+		t = &GetSentinel{}
+	}
+	return t.Sentinel
+}
+
 type ServiceAccounts struct {
 	ServiceAccounts *ServiceAccounts_ServiceAccounts "json:\"serviceAccounts,omitempty\" graphql:\"serviceAccounts\""
 }
@@ -20970,6 +22518,1316 @@ func (t *UpsertVulnerabilities) GetUpsertVulnerabilities() *int64 {
 		t = &UpsertVulnerabilities{}
 	}
 	return t.UpsertVulnerabilities
+}
+
+const GetAgentRuntimeDocument = `query GetAgentRuntime ($id: ID!) {
+	agentRuntime(id: $id) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRuntime
+	if err := c.Client.Post(ctx, "GetAgentRuntime", GetAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertAgentRuntimeDocument = `mutation UpsertAgentRuntime ($attributes: AgentRuntimeAttributes!) {
+	upsertAgentRuntime(attributes: $attributes) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertAgentRuntime
+	if err := c.Client.Post(ctx, "UpsertAgentRuntime", UpsertAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteAgentRuntimeDocument = `mutation DeleteAgentRuntime ($id: ID!) {
+	deleteAgentRuntime(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteAgentRuntime
+	if err := c.Client.Post(ctx, "DeleteAgentRuntime", DeleteAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRuntimesDocument = `query ListAgentRuntimes ($after: String, $first: Int, $before: String, $last: Int, $q: String, $type: AgentRuntimeType) {
+	agentRuntimes(after: $after, first: $first, before: $before, last: $last, q: $q, type: $type) {
+		edges {
+			node {
+				... AgentRuntimeFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+		"q":      q,
+		"type":   typeArg,
+	}
+
+	var res ListAgentRuntimes
+	if err := c.Client.Post(ctx, "ListAgentRuntimes", ListAgentRuntimesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunDocument = `query GetAgentRun ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRun
+	if err := c.Client.Post(ctx, "GetAgentRun", GetAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRunsDocument = `query ListAgentRuns ($after: String, $first: Int, $before: String, $last: Int) {
+	agentRuns(after: $after, first: $first, before: $before, last: $last) {
+		edges {
+			node {
+				... AgentRunFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRuns
+	if err := c.Client.Post(ctx, "ListAgentRuns", ListAgentRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns ($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+	agentRuntime(id: $id) {
+		pendingRuns(after: $after, first: $first, before: $before, last: $last) {
+			edges {
+				node {
+					... AgentRunFragment
+				}
+			}
+			pageInfo {
+				... PageInfoFragment
+			}
+		}
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error) {
+	vars := map[string]any{
+		"id":     id,
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRuntimePendingRuns
+	if err := c.Client.Post(ctx, "ListAgentRuntimePendingRuns", ListAgentRuntimePendingRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CancelAgentRunDocument = `mutation CancelAgentRun ($id: ID!) {
+	cancelAgentRun(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CancelAgentRun
+	if err := c.Client.Post(ctx, "CancelAgentRun", CancelAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentRunDocument = `mutation CreateAgentRun ($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+	createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error) {
+	vars := map[string]any{
+		"runtimeId":  runtimeID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentRun
+	if err := c.Client.Post(ctx, "CreateAgentRun", CreateAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunDocument = `mutation UpdateAgentRun ($id: ID!, $attributes: AgentRunStatusAttributes!) {
+	updateAgentRun(id: $id, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateAgentRun
+	if err := c.Client.Post(ctx, "UpdateAgentRun", UpdateAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunAnalysisDocument = `mutation UpdateAgentRunAnalysis ($id: ID!, $attributes: AgentAnalysisAttributes!) {
+	updateAgentRunAnalysis(id: $id, attributes: $attributes) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateAgentRunAnalysis
+	if err := c.Client.Post(ctx, "UpdateAgentRunAnalysis", UpdateAgentRunAnalysisDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentRunTodosDocument = `mutation UpdateAgentRunTodos ($id: ID!, $todos: [AgentTodoAttributes]) {
+	updateAgentRunTodos(id: $id, todos: $todos) {
+		... AgentRunFragment
+	}
+}
+fragment AgentRunFragment on AgentRun {
+	id
+	prompt
+	repository
+	status
+	mode
+	podReference {
+		... AgentPodReferenceFragment
+	}
+	error
+	analysis {
+		... AgentAnalysisFragment
+	}
+	todos {
+		... AgentTodoFragment
+	}
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+	runtime {
+		... AgentRuntimeFragment
+	}
+	user {
+		id
+		name
+		email
+	}
+	flow {
+		id
+		name
+	}
+	pullRequests {
+		... PullRequestFragment
+	}
+}
+fragment AgentPodReferenceFragment on AgentPodReference {
+	name
+	namespace
+}
+fragment AgentAnalysisFragment on AgentAnalysis {
+	summary
+	analysis
+	bullets
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error) {
+	vars := map[string]any{
+		"id":    id,
+		"todos": todos,
+	}
+
+	var res UpdateAgentRunTodos
+	if err := c.Client.Post(ctx, "UpdateAgentRunTodos", UpdateAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentPullRequestDocument = `mutation CreateAgentPullRequest ($runId: ID!, $attributes: AgentPullRequestAttributes!) {
+	agentPullRequest(runId: $runId, attributes: $attributes) {
+		... PullRequestFragment
+	}
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+}
+`
+
+func (c *Client) CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error) {
+	vars := map[string]any{
+		"runId":      runID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentPullRequest
+	if err := c.Client.Post(ctx, "CreateAgentPullRequest", CreateAgentPullRequestDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($attributes: ClusterAuditAttributes!) {
@@ -21960,6 +24818,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -22189,6 +25048,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -22939,6 +25799,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23184,6 +26045,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23418,6 +26280,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23711,6 +26574,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -23941,6 +26805,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -24672,6 +27537,7 @@ fragment ClusterFragment on Cluster {
 	kasUrl
 	deletedAt
 	metadata
+	distro
 	tags {
 		... ClusterTags
 	}
@@ -27228,6 +30094,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
@@ -27240,6 +30107,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	syncConfig {
 		createNamespace
 		enforceNamespace
+		deleteNamespace
 		namespaceMetadata {
 			labels
 			annotations
@@ -27720,6 +30588,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		ignoreCrds
 		luaScript
 		luaFile
+		luaFolder
 	}
 	configuration {
 		name
@@ -27732,6 +30601,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	syncConfig {
 		createNamespace
 		enforceNamespace
+		deleteNamespace
 		namespaceMetadata {
 			labels
 			annotations
@@ -29014,6 +31884,142 @@ func (c *Client) GetClusterIsoImage(ctx context.Context, id *string, image *stri
 
 	var res GetClusterIsoImage
 	if err := c.Client.Post(ctx, "GetClusterIsoImage", GetClusterIsoImageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetFederatedCredentialDocument = `query GetFederatedCredential ($id: ID!) {
+	federatedCredential(id: $id) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetFederatedCredential
+	if err := c.Client.Post(ctx, "GetFederatedCredential", GetFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateFederatedCredentialDocument = `mutation CreateFederatedCredential ($attributes: FederatedCredentialAttributes!) {
+	createFederatedCredential(attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateFederatedCredential
+	if err := c.Client.Post(ctx, "CreateFederatedCredential", CreateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteFederatedCredentialDocument = `mutation DeleteFederatedCredential ($id: ID!) {
+	deleteFederatedCredential(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteFederatedCredential
+	if err := c.Client.Post(ctx, "DeleteFederatedCredential", DeleteFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateFederatedCredentialDocument = `mutation UpdateFederatedCredential ($id: ID!, $attributes: FederatedCredentialAttributes!) {
+	updateFederatedCredential(id: $id, attributes: $attributes) {
+		... FederatedCredentialFragment
+	}
+}
+fragment FederatedCredentialFragment on FederatedCredential {
+	id
+	claimsLike
+	issuer
+	scopes
+	insertedAt
+	updatedAt
+	user {
+		id
+		name
+		email
+	}
+}
+`
+
+func (c *Client) UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateFederatedCredential
+	if err := c.Client.Post(ctx, "UpdateFederatedCredential", UpdateFederatedCredentialDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -34064,6 +37070,307 @@ func (c *Client) UpdateRbac(ctx context.Context, rbac RbacAttributes, serviceID 
 	return &res, nil
 }
 
+const CreateSentinelDocument = `mutation CreateSentinel ($attributes: SentinelAttributes) {
+	createSentinel(attributes: $attributes) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) CreateSentinel(ctx context.Context, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateSentinel, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateSentinel
+	if err := c.Client.Post(ctx, "CreateSentinel", CreateSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateSentinelDocument = `mutation UpdateSentinel ($id: ID!, $attributes: SentinelAttributes) {
+	updateSentinel(id: $id, attributes: $attributes) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateSentinel
+	if err := c.Client.Post(ctx, "UpdateSentinel", UpdateSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteSentinelDocument = `mutation DeleteSentinel ($id: ID!) {
+	deleteSentinel(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteSentinel
+	if err := c.Client.Post(ctx, "DeleteSentinel", DeleteSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetSentinelDocument = `query GetSentinel ($id: ID!) {
+	sentinel(id: $id) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+`
+
+func (c *Client) GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetSentinel
+	if err := c.Client.Post(ctx, "GetSentinel", GetSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ServiceAccountsDocument = `query ServiceAccounts ($after: String, $first: Int, $before: String, $last: Int, $q: String) {
 	serviceAccounts(after: $after, first: $first, before: $before, last: $last, q: $q) {
 		pageInfo {
@@ -38380,6 +41687,19 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 }
 
 var DocumentOperationNames = map[string]string{
+	GetAgentRuntimeDocument:                           "GetAgentRuntime",
+	UpsertAgentRuntimeDocument:                        "UpsertAgentRuntime",
+	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
+	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
+	GetAgentRunDocument:                               "GetAgentRun",
+	ListAgentRunsDocument:                             "ListAgentRuns",
+	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
+	CancelAgentRunDocument:                            "CancelAgentRun",
+	CreateAgentRunDocument:                            "CreateAgentRun",
+	UpdateAgentRunDocument:                            "UpdateAgentRun",
+	UpdateAgentRunAnalysisDocument:                    "UpdateAgentRunAnalysis",
+	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
+	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",
@@ -38469,6 +41789,10 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterIsoImageDocument:                     "UpdateClusterIsoImage",
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
+	GetFederatedCredentialDocument:                    "GetFederatedCredential",
+	CreateFederatedCredentialDocument:                 "CreateFederatedCredential",
+	DeleteFederatedCredentialDocument:                 "DeleteFederatedCredential",
+	UpdateFederatedCredentialDocument:                 "UpdateFederatedCredential",
 	GetFlowDocument:                                   "GetFlow",
 	UpsertFlowDocument:                                "UpsertFlow",
 	DeleteFlowDocument:                                "DeleteFlow",
@@ -38565,6 +41889,10 @@ var DocumentOperationNames = map[string]string{
 	DeleteProviderCredentialDocument:                  "DeleteProviderCredential",
 	ListProvidersDocument:                             "ListProviders",
 	UpdateRbacDocument:                                "UpdateRbac",
+	CreateSentinelDocument:                            "CreateSentinel",
+	UpdateSentinelDocument:                            "UpdateSentinel",
+	DeleteSentinelDocument:                            "DeleteSentinel",
+	GetSentinelDocument:                               "GetSentinel",
 	ServiceAccountsDocument:                           "ServiceAccounts",
 	CreateServiceAccountDocument:                      "CreateServiceAccount",
 	UpdateServiceAccountDocument:                      "UpdateServiceAccount",

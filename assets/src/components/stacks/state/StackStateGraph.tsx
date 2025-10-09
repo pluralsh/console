@@ -7,24 +7,27 @@ import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { EdgeType } from '../../utils/reactflow/edges'
 import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
+import {
+  Card,
+  EmptyState,
+  Flex,
+  Input,
+  SearchIcon,
+} from '@pluralsh/design-system'
 import { LayoutOptions } from 'elkjs'
-import { StackStateGraphNode } from './StackStateGraphNode'
-import { Flex, Input, SearchIcon } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
+import { useTheme } from 'styled-components'
+import { useDebounce } from 'usehooks-ts'
+import { StackStateGraphNode } from './StackStateGraphNode'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
 }
 
 const searchOptions = {
-  keys: [
-    'name',
-    {
-      name: 'configuration',
-      getFn: (r) => JSON.stringify(r?.configuration ?? {}),
-    },
-  ],
+  keys: [{ name: 'all', getFn: (r) => JSON.stringify(r ?? {}) }],
+  ignoreLocation: true,
   threshold: 0.25,
 }
 
@@ -79,11 +82,13 @@ function getNodesAndEdges(state: StackState, query: string) {
 }
 
 export function StackStateGraph({ state }: { state: StackState }) {
+  const { colors } = useTheme()
   const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 250)
 
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
-    () => getNodesAndEdges(state, query),
-    [state, query]
+    () => getNodesAndEdges(state, debouncedQuery),
+    [state, debouncedQuery]
   )
 
   return (
@@ -98,16 +103,22 @@ export function StackStateGraph({ state }: { state: StackState }) {
         placeholder="Search resources"
         startIcon={<SearchIcon color="icon-light" />}
       />
-      <div css={{ height: '100%' }}>
-        <ReactFlowGraph
-          allowFullscreen
-          baseNodes={baseNodes}
-          baseEdges={baseEdges}
-          elkOptions={options}
-          nodeTypes={nodeTypes}
-          minZoom={0.05}
-        />
-      </div>
+      {isEmpty(baseNodes) ? (
+        <Card css={{ height: '100%', background: colors['fill-accent'] }}>
+          <EmptyState message="No resources found, try a different search query." />
+        </Card>
+      ) : (
+        <div css={{ height: '100%' }}>
+          <ReactFlowGraph
+            allowFullscreen
+            baseNodes={baseNodes}
+            baseEdges={baseEdges}
+            elkOptions={options}
+            nodeTypes={nodeTypes}
+            minZoom={0.05}
+          />
+        </div>
+      )}
     </Flex>
   )
 }

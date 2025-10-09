@@ -105,6 +105,164 @@ type AddonVersion struct {
 	Blocking *bool `json:"blocking,omitempty"`
 }
 
+type AgentAnalysis struct {
+	// the summary of the analysis
+	Summary string `json:"summary"`
+	// the analysis of the agent run
+	Analysis string `json:"analysis"`
+	// quick bullet points to summarize the analysis
+	Bullets []*string `json:"bullets,omitempty"`
+}
+
+type AgentAnalysisAttributes struct {
+	// the summary of the analysis
+	Summary string `json:"summary"`
+	// the analysis of the agent run
+	Analysis string `json:"analysis"`
+	// the bullets of the analysis
+	Bullets []*string `json:"bullets,omitempty"`
+}
+
+type AgentBindingAttributes struct {
+	// the email of the user this binding is for
+	UserEmail *string `json:"userEmail,omitempty"`
+	// the name of the group this binding is for
+	GroupName *string `json:"groupName,omitempty"`
+}
+
+type AgentMessage struct {
+	ID string `json:"id"`
+	// the role of the message (system, assistant, user)
+	Role AiRole `json:"role"`
+	// the message to send to the agent
+	Message string `json:"message"`
+	// the sequence number of the message
+	Seq int64 `json:"seq"`
+	// the cost of the message
+	Cost *AgentMessageCost `json:"cost,omitempty"`
+	// the metadata of the message
+	Metadata   *AgentMessageMetadata `json:"metadata,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type AgentMessageAttributes struct {
+	// the message to send to the agent
+	Message string `json:"message"`
+	// the role of the message
+	Role     AiRole                          `json:"role"`
+	Cost     *AgentMessageCostAttributes     `json:"cost,omitempty"`
+	Metadata *AgentMessageMetadataAttributes `json:"metadata,omitempty"`
+}
+
+type AgentMessageCost struct {
+	// the total cost of the message
+	Total float64 `json:"total"`
+	// the tokens of the message
+	Tokens *AgentMessageTokens `json:"tokens,omitempty"`
+}
+
+type AgentMessageCostAttributes struct {
+	// the total cost of the message
+	Total float64 `json:"total"`
+	// the tokens of the message
+	Tokens *AgentMessageTokensAttributes `json:"tokens,omitempty"`
+}
+
+type AgentMessageFile struct {
+	// the name of the file
+	Name *string `json:"name,omitempty"`
+	// the text of the file
+	Text *string `json:"text,omitempty"`
+	// the start of the file
+	Start *int64 `json:"start,omitempty"`
+	// the end of the file
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageFileAttributes struct {
+	// the name of the file
+	Name *string `json:"name,omitempty"`
+	// the text of the file
+	Text *string `json:"text,omitempty"`
+	// the start of the file
+	Start *int64 `json:"start,omitempty"`
+	// the end of the file
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageMetadata struct {
+	// the reasoning of the message
+	Reasoning *AgentMessageReasoning `json:"reasoning,omitempty"`
+	// the file of the message
+	File *AgentMessageFile `json:"file,omitempty"`
+	// the tool of the message
+	Tool *AgentMessageTool `json:"tool,omitempty"`
+}
+
+type AgentMessageMetadataAttributes struct {
+	// the reasoning of the message
+	Reasoning *AgentMessageReasoningAttributes `json:"reasoning,omitempty"`
+	// the file of the message
+	File *AgentMessageFileAttributes `json:"file,omitempty"`
+	// the tool of the message
+	Tool *AgentMessageToolAttributes `json:"tool,omitempty"`
+}
+
+type AgentMessageReasoning struct {
+	// the text of the reasoning
+	Text *string `json:"text,omitempty"`
+	// the start of the reasoning
+	Start *int64 `json:"start,omitempty"`
+	// the end of the reasoning
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageReasoningAttributes struct {
+	// the text of the reasoning
+	Text *string `json:"text,omitempty"`
+	// the start of the reasoning
+	Start *int64 `json:"start,omitempty"`
+	// the end of the reasoning
+	End *int64 `json:"end,omitempty"`
+}
+
+type AgentMessageTokens struct {
+	// the input tokens of the message
+	Input *float64 `json:"input,omitempty"`
+	// the output tokens of the message
+	Output *float64 `json:"output,omitempty"`
+	// the reasoning tokens of the message
+	Reasoning *float64 `json:"reasoning,omitempty"`
+}
+
+type AgentMessageTokensAttributes struct {
+	// the input tokens of the message
+	Input *float64 `json:"input,omitempty"`
+	// the output tokens of the message
+	Output *float64 `json:"output,omitempty"`
+	// the reasoning tokens of the message
+	Reasoning *float64 `json:"reasoning,omitempty"`
+}
+
+type AgentMessageTool struct {
+	// the name of the tool
+	Name *string `json:"name,omitempty"`
+	// the state of the tool
+	State *AgentMessageToolState `json:"state,omitempty"`
+	// the output of the tool
+	Output *string `json:"output,omitempty"`
+}
+
+type AgentMessageToolAttributes struct {
+	// the name of the tool
+	Name *string `json:"name,omitempty"`
+	// the state of the tool
+	State *AgentMessageToolState `json:"state,omitempty"`
+	// the output of the tool
+	Output *string `json:"output,omitempty"`
+}
+
 // a representation of a bulk operation to be performed on all agent services
 type AgentMigration struct {
 	ID            string         `json:"id"`
@@ -120,6 +278,146 @@ type AgentMigrationAttributes struct {
 	Name          *string `json:"name,omitempty"`
 	Ref           *string `json:"ref,omitempty"`
 	Configuration *string `json:"configuration,omitempty"`
+}
+
+type AgentPodReference struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type AgentPrompt struct {
+	ID string `json:"id"`
+	// the prompt to give this agent run
+	Prompt string `json:"prompt"`
+	// the sequence number of the prompt
+	Seq        int64   `json:"seq"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type AgentPullRequestAttributes struct {
+	// the title of the pull request
+	Title string `json:"title"`
+	// the body of the pull request
+	Body string `json:"body"`
+	// the repository the agent will be working in
+	Repository string `json:"repository"`
+	// the base branch of the pull request
+	Base string `json:"base"`
+	// the head branch of the pull request
+	Head string `json:"head"`
+}
+
+type AgentRun struct {
+	ID string `json:"id"`
+	// the prompt this agent was given
+	Prompt string `json:"prompt"`
+	// the repository the agent will be working in
+	Repository string `json:"repository"`
+	// the branch this agent run is operating on (if not set, use default branch on clone)
+	Branch *string `json:"branch,omitempty"`
+	// the status of this agent run
+	Status AgentRunStatus `json:"status"`
+	// the mode of the agent run
+	Mode AgentRunMode `json:"mode"`
+	// the kubernetes pod this agent is running on
+	PodReference *AgentPodReference `json:"podReference,omitempty"`
+	// the error reason of the agent run
+	Error *string `json:"error,omitempty"`
+	// whether this agent run is shared
+	Shared *bool `json:"shared,omitempty"`
+	// the analysis of the agent run
+	Analysis *AgentAnalysis `json:"analysis,omitempty"`
+	// the todos of the agent run
+	Todos       []*AgentTodo `json:"todos,omitempty"`
+	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
+	PluralCreds *PluralCreds `json:"pluralCreds,omitempty"`
+	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
+	Pod *Pod `json:"pod,omitempty"`
+	// the prompts this agent run has received
+	Prompts []*AgentPrompt `json:"prompts,omitempty"`
+	// the messages this agent run has generated during its run
+	Messages []*AgentMessage `json:"messages,omitempty"`
+	// the runtime this agent is using
+	Runtime *AgentRuntime `json:"runtime,omitempty"`
+	// the user who initiated this agent run
+	User *User `json:"user,omitempty"`
+	// the flow this agent is associated with
+	Flow *Flow `json:"flow,omitempty"`
+	// the pull requests this agent run has created
+	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
+	InsertedAt   *string        `json:"insertedAt,omitempty"`
+	UpdatedAt    *string        `json:"updatedAt,omitempty"`
+}
+
+type AgentRunAttributes struct {
+	// the prompt to give to the agent
+	Prompt string `json:"prompt"`
+	// the repository the agent will be working in
+	Repository string `json:"repository"`
+	// the mode of the agent run
+	Mode AgentRunMode `json:"mode"`
+	// the flow this agent run is associated with
+	FlowID *string `json:"flowId,omitempty"`
+}
+
+type AgentRunConnection struct {
+	PageInfo PageInfo        `json:"pageInfo"`
+	Edges    []*AgentRunEdge `json:"edges,omitempty"`
+}
+
+type AgentRunEdge struct {
+	Node   *AgentRun `json:"node,omitempty"`
+	Cursor *string   `json:"cursor,omitempty"`
+}
+
+type AgentRunStatusAttributes struct {
+	// the status of this agent run
+	Status AgentRunStatus `json:"status"`
+	// the messages this agent run has generated during its run
+	Messages []*AgentMessageAttributes `json:"messages,omitempty"`
+	// the error reason of the agent run
+	Error *string `json:"error,omitempty"`
+	// the kubernetes pod this agent is running on
+	PodReference *NamespacedName `json:"podReference,omitempty"`
+}
+
+type AgentRuntime struct {
+	ID string `json:"id"`
+	// the name of this runtime
+	Name string `json:"name"`
+	// the type of this runtime
+	Type AgentRuntimeType `json:"type"`
+	// whether this runtime uses the built-in Plural AI proxy
+	AiProxy *bool `json:"aiProxy,omitempty"`
+	// the cluster this runtime is running on
+	Cluster *Cluster `json:"cluster,omitempty"`
+	// the policy for creating runs on this runtime
+	CreateBindings []*PolicyBinding    `json:"createBindings,omitempty"`
+	PendingRuns    *AgentRunConnection `json:"pendingRuns,omitempty"`
+	InsertedAt     *string             `json:"insertedAt,omitempty"`
+	UpdatedAt      *string             `json:"updatedAt,omitempty"`
+}
+
+type AgentRuntimeAttributes struct {
+	// the name of this runtime
+	Name string `json:"name"`
+	// the type of this runtime
+	Type AgentRuntimeType `json:"type"`
+	// the policy for creating runs on this runtime
+	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
+	// whether this runtime uses the built-in Plural AI proxy
+	AiProxy *bool `json:"aiProxy,omitempty"`
+}
+
+type AgentRuntimeConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*AgentRuntimeEdge `json:"edges,omitempty"`
+}
+
+type AgentRuntimeEdge struct {
+	Node   *AgentRuntime `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 // A session for an AI agent to use when acting in a chat thread
@@ -145,6 +443,7 @@ type AgentSession struct {
 	Stacks *InfrastructureStackConnection `json:"stacks,omitempty"`
 	// the pull requests associated with this chat, usually from an agentic workflow
 	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
+	Runs         *AgentRunConnection    `json:"runs,omitempty"`
 	InsertedAt   *string                `json:"insertedAt,omitempty"`
 	UpdatedAt    *string                `json:"updatedAt,omitempty"`
 }
@@ -172,6 +471,38 @@ type AgentSessionConnection struct {
 type AgentSessionEdge struct {
 	Node   *AgentSession `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type AgentTodo struct {
+	// the title of the todo
+	Title string `json:"title"`
+	// the description of the todo
+	Description string `json:"description"`
+	// whether the todo is done
+	Done *bool `json:"done,omitempty"`
+}
+
+type AgentTodoAttributes struct {
+	// the title of the todo
+	Title string `json:"title"`
+	// the description of the todo
+	Description string `json:"description"`
+	// whether the todo is done
+	Done bool `json:"done"`
+}
+
+type AiAnalysisRates struct {
+	// the rate in seconds for fast analysis, eg when the prompt has seen a material change
+	Fast *int64 `json:"fast,omitempty"`
+	// the rate in seconds for slow analysis, eg when the prompt has not seen a material change
+	Slow *int64 `json:"slow,omitempty"`
+}
+
+type AiApprovalAttributes struct {
+	Enabled      bool             `json:"enabled"`
+	IgnoreCancel bool             `json:"ignoreCancel"`
+	Git          GitRefAttributes `json:"git"`
+	File         string           `json:"file"`
 }
 
 type AiDelta struct {
@@ -247,9 +578,10 @@ type AiPinEdge struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled      *bool       `json:"enabled,omitempty"`
-	ToolsEnabled *bool       `json:"toolsEnabled,omitempty"`
-	Provider     *AiProvider `json:"provider,omitempty"`
+	Enabled       *bool            `json:"enabled,omitempty"`
+	AnalysisRates *AiAnalysisRates `json:"analysisRates,omitempty"`
+	ToolsEnabled  *bool            `json:"toolsEnabled,omitempty"`
+	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider          `json:"toolProvider,omitempty"`
 	Openai       *OpenaiSettings      `json:"openai,omitempty"`
@@ -261,9 +593,10 @@ type AiSettings struct {
 }
 
 type AiSettingsAttributes struct {
-	Enabled  *bool                 `json:"enabled,omitempty"`
-	Tools    *ToolConfigAttributes `json:"tools,omitempty"`
-	Provider *AiProvider           `json:"provider,omitempty"`
+	Enabled       *bool                    `json:"enabled,omitempty"`
+	Tools         *ToolConfigAttributes    `json:"tools,omitempty"`
+	AnalysisRates *AnalysisRatesAttributes `json:"analysisRates,omitempty"`
+	Provider      *AiProvider              `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
@@ -299,9 +632,11 @@ type Alert struct {
 	// the service this alert was associated with
 	Service *Service `json:"service,omitempty"`
 	// the project this alert was associated with
-	Project    *Project `json:"project,omitempty"`
-	InsertedAt *string  `json:"insertedAt,omitempty"`
-	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+	Project *Project `json:"project,omitempty"`
+	// the flow this alert was associated with
+	Flow       *Flow   `json:"flow,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type AlertConnection struct {
@@ -333,6 +668,31 @@ type AlertResolution struct {
 
 type AlertResolutionAttributes struct {
 	Resolution string `json:"resolution"`
+}
+
+type AnalysisRatesAttributes struct {
+	// the rate in seconds for fast analysis, eg when the prompt has seen a material change
+	Fast *int64 `json:"fast,omitempty"`
+	// the rate in seconds for slow analysis, eg when the prompt has not seen a material change
+	Slow *int64 `json:"slow,omitempty"`
+}
+
+type AnsibleConfiguration struct {
+	// The playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// Additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+}
+
+type AnsibleConfigurationAttributes struct {
+	// the playbook to run
+	Playbook *string `json:"playbook,omitempty"`
+	// The ansible inventory file to use. we recommend checking this into git alongside your playbook files
+	Inventory *string `json:"inventory,omitempty"`
+	// additional args for the playbook
+	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
 }
 
 // Anthropic connection information
@@ -497,9 +857,10 @@ type AWSCloudAttributes struct {
 }
 
 type AWSCloudConnectionAttributes struct {
-	AccessKeyID     string `json:"accessKeyId"`
-	SecretAccessKey string `json:"secretAccessKey"`
-	Region          string `json:"region"`
+	AccessKeyID     string    `json:"accessKeyId"`
+	SecretAccessKey string    `json:"secretAccessKey"`
+	Region          *string   `json:"region,omitempty"`
+	Regions         []*string `json:"regions,omitempty"`
 }
 
 // aws specific cloud configuration
@@ -514,7 +875,9 @@ type AWSConnectionAttributes struct {
 	// the secret access key for aws
 	SecretAccessKey string `json:"secretAccessKey"`
 	// the region for aws
-	Region string `json:"region"`
+	Region *string `json:"region,omitempty"`
+	// the regions for aws
+	Regions []*string `json:"regions,omitempty"`
 }
 
 type AWSNodeCloudAttributes struct {
@@ -560,6 +923,25 @@ type AzureConnectionAttributes struct {
 	ClientSecret string `json:"clientSecret"`
 }
 
+// Requirements to perform Azure DevOps authentication
+type AzureDevopsAttributes struct {
+	// the username asociated with your Azure DevOps PAT
+	Username string `json:"username"`
+	// the organization to use for azure devops
+	Organization string `json:"organization"`
+	// the project to use for azure devops
+	Project string `json:"project"`
+}
+
+type AzureDevopsConfiguration struct {
+	// the username asociated with your Azure DevOps PAT
+	Username string `json:"username"`
+	// the organization to use for azure devops
+	Organization string `json:"organization"`
+	// the project to use for azure devops
+	Project string `json:"project"`
+}
+
 type AzureOpenaiAttributes struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments
 	Endpoint string `json:"endpoint"`
@@ -580,6 +962,8 @@ type AzureOpenaiSettings struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
 	Endpoint string  `json:"endpoint"`
 	Model    *string `json:"model,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
@@ -626,10 +1010,14 @@ type BedrockAiAttributes struct {
 	ModelID string `json:"modelId"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
-	// aws access key id to use, you can also use IRSA for self-hosted consoles
-	AccessKeyID *string `json:"accessKeyId,omitempty"`
-	// aws secret access key to use, you can also use IRSA for self-hosted consoles
-	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	// the openai bedrock access token to use
+	AccessToken *string `json:"accessToken,omitempty"`
+	// the aws region the model is hosted in
+	Region *string `json:"region,omitempty"`
+	// the aws access key id to use (DEPRECATED)
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// the aws secret access key to use (DEPRECATED)
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
@@ -640,8 +1028,12 @@ type BedrockAiSettings struct {
 	ModelID string `json:"modelId"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
-	// the aws access key to use, can also use IRSA when console is self-hosted
+	// the openai bedrock aws access key id to use (DEPRECATED)
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
+	// the aws region the model is hosted in
+	Region *string `json:"region,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type BindingAttributes struct {
@@ -1039,6 +1431,8 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// the interval in seconds between pings to the cluster
+	PingInterval *int64 `json:"pingInterval,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -1055,6 +1449,8 @@ type Cluster struct {
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// The memory utilization of the cluster
 	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
+	// The availability zones this cluster is running in
+	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -1418,6 +1814,9 @@ type ClusterPing struct {
 	MemoryTotal      *float64       `json:"memoryTotal,omitempty"`
 	CPUUtil          *float64       `json:"cpuUtil,omitempty"`
 	MemoryUtil       *float64       `json:"memoryUtil,omitempty"`
+	// the interval in seconds between pings to the cluster
+	PingInterval      *int64    `json:"pingInterval,omitempty"`
+	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
 	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
 	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 	NodeStatistics    []*NodeStatisticAttributes           `json:"nodeStatistics,omitempty"`
@@ -1907,6 +2306,7 @@ type ConsoleConfiguration struct {
 	IsSandbox      *bool   `json:"isSandbox,omitempty"`
 	PluralLogin    *bool   `json:"pluralLogin,omitempty"`
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
+	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
 	Installed    *bool              `json:"installed,omitempty"`
 	Cloud        *bool              `json:"cloud,omitempty"`
@@ -2467,6 +2867,8 @@ type Flow struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Icon        *string `json:"icon,omitempty"`
+	// the git https urls of the application code repositories used in this flow
+	Repositories []*string `json:"repositories,omitempty"`
 	// servers that are bound to this flow
 	Servers []*McpServer `json:"servers,omitempty"`
 	// read policy for this flow
@@ -2481,6 +2883,7 @@ type Flow struct {
 	Alerts                      *AlertConnection                      `json:"alerts,omitempty"`
 	PreviewEnvironmentTemplates *PreviewEnvironmentTemplateConnection `json:"previewEnvironmentTemplates,omitempty"`
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
+	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
@@ -2490,6 +2893,7 @@ type FlowAttributes struct {
 	Description        *string                           `json:"description,omitempty"`
 	Icon               *string                           `json:"icon,omitempty"`
 	ProjectID          *string                           `json:"projectId,omitempty"`
+	Repositories       []*string                         `json:"repositories,omitempty"`
 	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
 	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
 	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
@@ -2519,11 +2923,13 @@ type FluxHelmRepository struct {
 type GateJobAttributes struct {
 	Namespace string `json:"namespace"`
 	// if you'd rather define the job spec via straight k8s yaml
-	Raw            *string                `json:"raw,omitempty"`
-	Containers     []*ContainerAttributes `json:"containers,omitempty"`
-	Labels         *string                `json:"labels,omitempty"`
-	Annotations    *string                `json:"annotations,omitempty"`
-	ServiceAccount *string                `json:"serviceAccount,omitempty"`
+	Raw            *string                    `json:"raw,omitempty"`
+	Containers     []*ContainerAttributes     `json:"containers,omitempty"`
+	Labels         *string                    `json:"labels,omitempty"`
+	Annotations    *string                    `json:"annotations,omitempty"`
+	NodeSelector   *string                    `json:"nodeSelector,omitempty"`
+	Tolerations    []*PodTolerationAttributes `json:"tolerations,omitempty"`
+	ServiceAccount *string                    `json:"serviceAccount,omitempty"`
 	// request overrides if you don't want to manually configure individual containers
 	Resources *ContainerResourcesAttributes `json:"resources,omitempty"`
 }
@@ -2709,6 +3115,8 @@ type GlobalService struct {
 	Reparent *bool `json:"reparent,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *Cascade `json:"cascade,omitempty"`
+	// the id of the clusters to ignore
+	IgnoreClusters []*string `json:"ignoreClusters,omitempty"`
 	// the service which created this global service
 	Parent *ServiceDeployment `json:"parent,omitempty"`
 	// a project this global service is bound to
@@ -2745,10 +3153,14 @@ type GlobalServiceAttributes struct {
 	// whether you want the global service to take ownership of existing plural services
 	Reparent *bool                      `json:"reparent,omitempty"`
 	Template *ServiceTemplateAttributes `json:"template,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *CascadeAttributes `json:"cascade,omitempty"`
 	// additional context used to template service metadata during global service reconciliation
 	Context *TemplateContextAttributes `json:"context,omitempty"`
+	// the id of the clusters to ignore
+	IgnoreClusters []*string `json:"ignoreClusters,omitempty"`
 }
 
 type GlobalServiceConnection struct {
@@ -2889,6 +3301,7 @@ type HelmConfigAttributes struct {
 	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
 	LuaScript   *string              `json:"luaScript,omitempty"`
 	LuaFile     *string              `json:"luaFile,omitempty"`
+	LuaFolder   *string              `json:"luaFolder,omitempty"`
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
@@ -2984,6 +3397,8 @@ type HelmSpec struct {
 	LuaScript *string `json:"luaScript,omitempty"`
 	// a lua file to use for helm applies
 	LuaFile *string `json:"luaFile,omitempty"`
+	// a folder of lua files to include in the final script used
+	LuaFolder *string `json:"luaFolder,omitempty"`
 }
 
 // a (possibly nested) helm value pair
@@ -3018,6 +3433,16 @@ type HTTPIngressRule struct {
 	Paths []*IngressPath `json:"paths,omitempty"`
 }
 
+// Configuration for http proxy usage in connections to Git or SCM providers
+type HTTPProxyAttributes struct {
+	URL string `json:"url"`
+}
+
+// Configuration for http proxy usage in connections to Git or SCM providers
+type HTTPProxyConfiguration struct {
+	URL string `json:"url"`
+}
+
 type InfrastructureStack struct {
 	ID *string `json:"id,omitempty"`
 	// the name of the stack
@@ -3035,6 +3460,10 @@ type InfrastructureStack struct {
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
 	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval *string `json:"interval,omitempty"`
+	// the next time the stack will be reconciled
+	NextPollAt *string `json:"nextPollAt,omitempty"`
 	// version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 	// whether to require approval
@@ -3181,6 +3610,10 @@ type JobGateSpec struct {
 	Labels map[string]any `json:"labels,omitempty"`
 	// any pod annotations to apply
 	Annotations map[string]any `json:"annotations,omitempty"`
+	// any pod node selector to apply
+	NodeSelector map[string]any `json:"nodeSelector,omitempty"`
+	// any pod tolerations to apply
+	Tolerations []*PodToleration `json:"tolerations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
 	// equivalent to resources, present for backwards compatibility
@@ -3227,6 +3660,16 @@ type KubernetesUnstructured struct {
 	Events   []*Event       `json:"events,omitempty"`
 }
 
+// information about the kubernetes version for a given cluster
+type KubernetesVersionInfo struct {
+	// the distribution of kubernetes this info pertains to
+	Distro *ClusterDistro `json:"distro,omitempty"`
+	// the kubernetes version
+	Version *string `json:"version,omitempty"`
+	// whether this version is on extended support
+	Extended *bool `json:"extended,omitempty"`
+}
+
 // metadata needed for configuring kustomize
 type Kustomize struct {
 	// the path to the kustomization file to use
@@ -3259,6 +3702,15 @@ type LoadBalancerIngressStatus struct {
 
 type LoadBalancerStatus struct {
 	Ingress []*LoadBalancerIngressStatus `json:"ingress,omitempty"`
+}
+
+type LogAggregationBucket struct {
+	Timestamp *string `json:"timestamp,omitempty"`
+	Count     *int64  `json:"count,omitempty"`
+}
+
+type LogAggregationInput struct {
+	BucketSize *string `json:"bucketSize,omitempty"`
 }
 
 type LogFacet struct {
@@ -3368,6 +3820,8 @@ type ManagedNamespace struct {
 	DeletedAt *string `json:"deletedAt,omitempty"`
 	// behavior for all owned resources when this global service is deleted
 	Cascade *Cascade `json:"cascade,omitempty"`
+	// the interval at which the global service will be reconciled, default is 10m
+	Interval *string `json:"interval,omitempty"`
 	// the service which created this managed namespace
 	Parent *ServiceDeployment `json:"parent,omitempty"`
 	// a project this global service is bound to
@@ -3997,15 +4451,29 @@ type ObserverEdge struct {
 }
 
 type ObserverGitAttributes struct {
-	RepositoryID string                `json:"repositoryId"`
-	Type         ObserverGitTargetType `json:"type"`
+	RepositoryID string                       `json:"repositoryId"`
+	Type         ObserverGitTargetType        `json:"type"`
+	Filter       *ObserverGitFilterAttributes `json:"filter,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilter struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
+}
+
+// a spec for filtering a git repository tags in an observer
+type ObserverGitFilterAttributes struct {
+	// a regex to filter the git repository tags for the observed value
+	Regex *string `json:"regex,omitempty"`
 }
 
 // a spec for polling a git repository for recent updates
 type ObserverGitRepo struct {
 	RepositoryID string `json:"repositoryId"`
 	// the resource within the git repository you want to poll
-	Type ObserverGitTargetType `json:"type"`
+	Type   ObserverGitTargetType `json:"type"`
+	Filter *ObserverGitFilter    `json:"filter,omitempty"`
 }
 
 // a spec for querying a helm repository in an observer
@@ -4178,6 +4646,8 @@ type OpenaiSettings struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -4730,6 +5200,20 @@ type PodStatus struct {
 	InitContainerStatuses []*ContainerStatus `json:"initContainerStatuses,omitempty"`
 }
 
+type PodToleration struct {
+	Key      *string `json:"key,omitempty"`
+	Operator *string `json:"operator,omitempty"`
+	Value    *string `json:"value,omitempty"`
+	Effect   *string `json:"effect,omitempty"`
+}
+
+type PodTolerationAttributes struct {
+	Key      *string `json:"key,omitempty"`
+	Operator *string `json:"operator,omitempty"`
+	Value    *string `json:"value,omitempty"`
+	Effect   *string `json:"effect,omitempty"`
+}
+
 type PolicyBinding struct {
 	ID    *string `json:"id,omitempty"`
 	User  *User   `json:"user,omitempty"`
@@ -4831,6 +5315,8 @@ type PrAutomation struct {
 	// a darkmode icon url to use for this catalog
 	DarkIcon      *string            `json:"darkIcon,omitempty"`
 	Configuration []*PrConfiguration `json:"configuration,omitempty"`
+	// the secrets to create as part of this pr
+	Secrets *PrSecrets `json:"secrets,omitempty"`
 	// optional confirmation block to express prerequisites for this PR
 	Confirmation *PrConfirmation `json:"confirmation,omitempty"`
 	// write policy for this pr automation, also propagates to the notifications list for any created PRs
@@ -4891,6 +5377,7 @@ type PrAutomationAttributes struct {
 	// the governance controller to use for this pr
 	GovernanceID  *string                      `json:"governanceId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
+	Secrets       *PrSecretsAttributes         `json:"secrets,omitempty"`
 	Confirmation  *PrConfirmationAttributes    `json:"confirmation,omitempty"`
 	// users who can update this automation
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -4946,6 +5433,7 @@ type PrAutomationUpdateSpecAttributes struct {
 // Additional attributes for describing a pr call tool call that derived this chat message
 type PrCallAttributes struct {
 	Context map[string]any `json:"context,omitempty"`
+	Branch  *string        `json:"branch,omitempty"`
 }
 
 // a checkbox item to render before creating a pr
@@ -4962,31 +5450,35 @@ type PrChecklistAttributes struct {
 
 // the a configuration item for creating a new pr, used for templating the ultimate code changes made
 type PrConfiguration struct {
-	Type          ConfigurationType         `json:"type"`
-	Name          string                    `json:"name"`
-	Default       *string                   `json:"default,omitempty"`
-	Documentation *string                   `json:"documentation,omitempty"`
-	Longform      *string                   `json:"longform,omitempty"`
-	Placeholder   *string                   `json:"placeholder,omitempty"`
-	DisplayName   *string                   `json:"displayName,omitempty"`
-	Optional      *bool                     `json:"optional,omitempty"`
-	Values        []*string                 `json:"values,omitempty"`
-	Condition     *PrConfigurationCondition `json:"condition,omitempty"`
+	Type          ConfigurationType `json:"type"`
+	Name          string            `json:"name"`
+	Default       *string           `json:"default,omitempty"`
+	Documentation *string           `json:"documentation,omitempty"`
+	Longform      *string           `json:"longform,omitempty"`
+	Placeholder   *string           `json:"placeholder,omitempty"`
+	DisplayName   *string           `json:"displayName,omitempty"`
+	// the page to use for the pr configuration
+	Page      *int64                    `json:"page,omitempty"`
+	Optional  *bool                     `json:"optional,omitempty"`
+	Values    []*string                 `json:"values,omitempty"`
+	Condition *PrConfigurationCondition `json:"condition,omitempty"`
 }
 
 // the a configuration item for creating a new pr
 type PrConfigurationAttributes struct {
-	Type          ConfigurationType                  `json:"type"`
-	Name          string                             `json:"name"`
-	Default       *string                            `json:"default,omitempty"`
-	Documentation *string                            `json:"documentation,omitempty"`
-	Longform      *string                            `json:"longform,omitempty"`
-	DisplayName   *string                            `json:"displayName,omitempty"`
-	Placeholder   *string                            `json:"placeholder,omitempty"`
-	Optional      *bool                              `json:"optional,omitempty"`
-	Condition     *ConditionAttributes               `json:"condition,omitempty"`
-	Validation    *ConfigurationValidationAttributes `json:"validation,omitempty"`
-	Values        []*string                          `json:"values,omitempty"`
+	Type          ConfigurationType `json:"type"`
+	Name          string            `json:"name"`
+	Default       *string           `json:"default,omitempty"`
+	Documentation *string           `json:"documentation,omitempty"`
+	Longform      *string           `json:"longform,omitempty"`
+	DisplayName   *string           `json:"displayName,omitempty"`
+	Placeholder   *string           `json:"placeholder,omitempty"`
+	// the page to use for the pr automation
+	Page       *int64                             `json:"page,omitempty"`
+	Optional   *bool                              `json:"optional,omitempty"`
+	Condition  *ConditionAttributes               `json:"condition,omitempty"`
+	Validation *ConfigurationValidationAttributes `json:"validation,omitempty"`
+	Values     []*string                          `json:"values,omitempty"`
 }
 
 // declaritive spec for whether a config item is relevant given prior config
@@ -5054,6 +5546,44 @@ type PrGovernanceConfiguration struct {
 // The settings for configuring a pr governance controller
 type PrGovernanceConfigurationAttributes struct {
 	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
+}
+
+type PrSecretEntry struct {
+	// the name of the secret entry
+	Name *string `json:"name,omitempty"`
+	// the documentation for the secret entry
+	Documentation *string `json:"documentation,omitempty"`
+	// whether to autogenerate the secret
+	Autogenerate *bool `json:"autogenerate,omitempty"`
+}
+
+type PrSecretEntryAttributes struct {
+	// the name of the secret entry
+	Name *string `json:"name,omitempty"`
+	// the documentation for the secret entry
+	Documentation *string `json:"documentation,omitempty"`
+	// whether to autogenerate the secret entry
+	Autogenerate *bool `json:"autogenerate,omitempty"`
+}
+
+type PrSecrets struct {
+	// the cluster handle that will hold this secret
+	Cluster *string `json:"cluster,omitempty"`
+	// the k8s namespace to place the secret in
+	Namespace *string `json:"namespace,omitempty"`
+	// the name of the secret
+	Name    *string          `json:"name,omitempty"`
+	Entries []*PrSecretEntry `json:"entries,omitempty"`
+}
+
+type PrSecretsAttributes struct {
+	// the cluster handle that will hold this secret
+	Cluster *string `json:"cluster,omitempty"`
+	// the k8s namespace to place the secret in
+	Namespace *string `json:"namespace,omitempty"`
+	// the name of the secret
+	Name    *string                    `json:"name,omitempty"`
+	Entries []*PrSecretEntryAttributes `json:"entries,omitempty"`
 }
 
 // the details of where to find and place a templated file
@@ -5627,6 +6157,10 @@ type ScmConnection struct {
 	Type     ScmType `json:"type"`
 	Default  *bool   `json:"default,omitempty"`
 	Username *string `json:"username,omitempty"`
+	// a proxy to use for git requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
+	// the azure devops attributes for this connection
+	Azure *AzureDevopsConfiguration `json:"azure,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// base url for HTTP apis for self-hosted versions if different from base url
@@ -5640,13 +6174,15 @@ type ScmConnectionAttributes struct {
 	Name string  `json:"name"`
 	Type ScmType `json:"type"`
 	// the owning entity in this scm provider, eg a github organization
-	Owner    *string              `json:"owner,omitempty"`
-	Username *string              `json:"username,omitempty"`
-	Token    *string              `json:"token,omitempty"`
-	BaseURL  *string              `json:"baseUrl,omitempty"`
-	APIURL   *string              `json:"apiUrl,omitempty"`
-	Github   *GithubAppAttributes `json:"github,omitempty"`
-	Default  *bool                `json:"default,omitempty"`
+	Owner    *string                `json:"owner,omitempty"`
+	Username *string                `json:"username,omitempty"`
+	Token    *string                `json:"token,omitempty"`
+	BaseURL  *string                `json:"baseUrl,omitempty"`
+	APIURL   *string                `json:"apiUrl,omitempty"`
+	Github   *GithubAppAttributes   `json:"github,omitempty"`
+	Azure    *AzureDevopsAttributes `json:"azure,omitempty"`
+	Default  *bool                  `json:"default,omitempty"`
+	Proxy    *HTTPProxyAttributes   `json:"proxy,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -5659,6 +6195,11 @@ type ScmConnectionConnection struct {
 type ScmConnectionEdge struct {
 	Node   *ScmConnection `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type ScmCreds struct {
+	Username string `json:"username"`
+	Token    string `json:"token"`
 }
 
 type ScmWebhook struct {
@@ -5704,6 +6245,187 @@ type Secret struct {
 	Metadata Metadata       `json:"metadata"`
 	Type     *string        `json:"type,omitempty"`
 	Data     map[string]any `json:"data"`
+}
+
+type Sentinel struct {
+	// the id of the sentinel
+	ID string `json:"id"`
+	// the name of the sentinel
+	Name string `json:"name"`
+	// the description of the sentinel
+	Description *string `json:"description,omitempty"`
+	// the status of the sentinel's last run
+	Status *SentinelRunStatus `json:"status,omitempty"`
+	// the git location for rules files from the associated repository
+	Git *GitRef `json:"git,omitempty"`
+	// the git repository to use for fetching rules files for AI enabled analysis
+	Repository *GitRepository `json:"repository,omitempty"`
+	// the project of this sentinel
+	Project *Project `json:"project,omitempty"`
+	// the checks to run for this sentinel
+	Checks []*SentinelCheck `json:"checks,omitempty"`
+	// the last time this sentinel was run
+	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// the runs of this sentinel, do not query w/in list fields
+	Runs       *SentinelRunConnection `json:"runs,omitempty"`
+	InsertedAt *string                `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                `json:"updatedAt,omitempty"`
+}
+
+type SentinelAttributes struct {
+	// the name of the sentinel
+	Name *string `json:"name,omitempty"`
+	// the description of the sentinel
+	Description *string `json:"description,omitempty"`
+	// the repository to use for this sentinel
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the project to use for this sentinel
+	ProjectID *string `json:"projectId,omitempty"`
+	// the git repository to use for this sentinel
+	Git *GitAttributes `json:"git,omitempty"`
+	// the checks to run for this sentinel
+	Checks []*SentinelCheckAttributes `json:"checks,omitempty"`
+}
+
+type SentinelCheck struct {
+	// the id of the check
+	ID string `json:"id"`
+	// the name of the check
+	Name string `json:"name"`
+	// the type of check to run
+	Type SentinelCheckType `json:"type"`
+	// the rule file to use for this check
+	RuleFile *string `json:"ruleFile,omitempty"`
+	// the configuration to use for this check
+	Configuration *SentinelCheckConfiguration `json:"configuration,omitempty"`
+}
+
+type SentinelCheckAttributes struct {
+	// the type of check to run
+	Type SentinelCheckType `json:"type"`
+	// the name of the check
+	Name string `json:"name"`
+	// the rule file to use for this check
+	RuleFile *string `json:"ruleFile,omitempty"`
+	// the configuration to use for this check
+	Configuration *SentinelCheckConfigurationAttributes `json:"configuration,omitempty"`
+}
+
+type SentinelCheckConfiguration struct {
+	// the log configuration to use for this check
+	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
+	// the kubernetes configuration to use for this check
+	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+}
+
+type SentinelCheckConfigurationAttributes struct {
+	// the log configuration to use for this check
+	Log *SentinelCheckLogConfigurationAttributes `json:"log,omitempty"`
+	// the kubernetes configuration to use for this check
+	Kubernetes *SentinelCheckKubernetesConfigurationAttributes `json:"kubernetes,omitempty"`
+}
+
+type SentinelCheckKubernetesConfiguration struct {
+	// the api group to use when fetching this resource
+	Group *string `json:"group,omitempty"`
+	// the api version to use when fetching this resource
+	Version string `json:"version"`
+	// the kind to use when fetching this resource
+	Kind string `json:"kind"`
+	// the name to use when fetching this resource
+	Name string `json:"name"`
+	// the namespace to use when fetching this resource
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+type SentinelCheckKubernetesConfigurationAttributes struct {
+	// the api group to use when fetching this resource
+	Group *string `json:"group,omitempty"`
+	// the api version to use when fetching this resource
+	Version string `json:"version"`
+	// the kind to use when fetching this resource
+	Kind string `json:"kind"`
+	// the name to use when fetching this resource
+	Name string `json:"name"`
+	// the namespace to use when fetching this resource
+	Namespace *string `json:"namespace,omitempty"`
+	// the cluster to run the query against
+	ClusterID string `json:"clusterId"`
+}
+
+type SentinelCheckLogConfiguration struct {
+	// the namespaces to run the query against
+	Namespaces []*string `json:"namespaces,omitempty"`
+	// a search query this will run against the logs
+	Query string `json:"query"`
+	// the cluster to run the query against
+	ClusterID *string `json:"clusterId,omitempty"`
+	// the log facets to run the query against
+	Facets []*LogFacet `json:"facets,omitempty"`
+	// The duration of the log analysis run
+	Duration string `json:"duration"`
+}
+
+type SentinelCheckLogConfigurationAttributes struct {
+	// the namespaces to run the query against
+	Namespaces []*string `json:"namespaces,omitempty"`
+	// a search query this will run against the logs
+	Query string `json:"query"`
+	// the cluster to run the query against
+	ClusterID *string `json:"clusterId,omitempty"`
+	// The duration of the log analysis run
+	Duration string `json:"duration"`
+	// the log facets to run the query against
+	Facets []*LogFacetInput `json:"facets,omitempty"`
+}
+
+type SentinelConnection struct {
+	PageInfo PageInfo        `json:"pageInfo"`
+	Edges    []*SentinelEdge `json:"edges,omitempty"`
+}
+
+type SentinelEdge struct {
+	Node   *Sentinel `json:"node,omitempty"`
+	Cursor *string   `json:"cursor,omitempty"`
+}
+
+type SentinelRun struct {
+	// the id of the run
+	ID string `json:"id"`
+	// the status of the run
+	Status SentinelRunStatus `json:"status"`
+	// the sentinel that was run
+	Sentinel *Sentinel `json:"sentinel,omitempty"`
+	// the results of the run
+	Results    []*SentinelRunResult `json:"results,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*SentinelRunEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunEdge struct {
+	Node   *SentinelRun `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
+}
+
+type SentinelRunResult struct {
+	// the name of the check
+	Name *string `json:"name,omitempty"`
+	// the status of the result
+	Status SentinelRunStatus `json:"status"`
+	// the reason for the result
+	Reason *string `json:"reason,omitempty"`
+}
+
+type SentinelStatistic struct {
+	// the status of the sentinel
+	Status SentinelRunStatus `json:"status"`
+	// the count of the sentinel
+	Count int64 `json:"count"`
 }
 
 type Service struct {
@@ -5872,6 +6594,8 @@ type ServiceDeployment struct {
 	Sources []*ServiceSource `json:"sources,omitempty"`
 	// the renderers of this service
 	Renderers []*Renderer `json:"renderers,omitempty"`
+	// metadata about the deployed contents of this service
+	Metadata *ServiceMetadata `json:"metadata,omitempty"`
 	// fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries
 	Docs []*GitFile `json:"docs,omitempty"`
 	// the git repo of this service
@@ -5970,11 +6694,14 @@ type ServiceDeploymentEdge struct {
 type ServiceError struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
+	// whether this is just a warning
+	Warning *bool `json:"warning,omitempty"`
 }
 
 type ServiceErrorAttributes struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
+	Warning *bool  `json:"warning,omitempty"`
 }
 
 // Import of stack data into a service's context
@@ -5990,6 +6717,22 @@ type ServiceImport struct {
 
 type ServiceImportAttributes struct {
 	StackID string `json:"stackId"`
+}
+
+// metadata about the deployed contents of a service
+type ServiceMetadata struct {
+	// a list of images to deployed in this service
+	Images []*string `json:"images,omitempty"`
+	// a list of fqdns to discover
+	Fqdns []*string `json:"fqdns,omitempty"`
+}
+
+// metadata about the deployed contents of a service
+type ServiceMetadataAttributes struct {
+	// a list of images to deployed in this service
+	Images []*string `json:"images,omitempty"`
+	// a list of fqdns to discover
+	Fqdns []*string `json:"fqdns,omitempty"`
 }
 
 type ServicePort struct {
@@ -6210,7 +6953,9 @@ type StackAttributes struct {
 	Variables    *string                 `json:"variables,omitempty"`
 	PolicyEngine *PolicyEngineAttributes `json:"policyEngine,omitempty"`
 	// the agent id this stack is associated with
-	AgentID           *string                       `json:"agentId,omitempty"`
+	AgentID *string `json:"agentId,omitempty"`
+	// the interval at which the stack will be reconciled, default is 5m
+	Interval          *string                       `json:"interval,omitempty"`
 	ReadBindings      []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
 	WriteBindings     []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 	Tags              []*TagAttributes              `json:"tags,omitempty"`
@@ -6239,6 +6984,8 @@ type StackConfiguration struct {
 	Hooks []*StackHook `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 }
 
 type StackConfigurationAttributes struct {
@@ -6252,6 +6999,10 @@ type StackConfigurationAttributes struct {
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the ansible configuration for this stack
+	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
+	// the ai approval configuration for this stack
+	AiApproval *AiApprovalAttributes `json:"aiApproval,omitempty"`
 }
 
 type StackCron struct {
@@ -6413,6 +7164,8 @@ type StackRun struct {
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
+	// the result of the approval decision by the ai
+	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
@@ -6454,6 +7207,13 @@ type StackRun struct {
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
 	InsertedAt *string                 `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type StackRunApprovalResult struct {
+	// the reason for the approval decision by the ai
+	Reason *string `json:"reason,omitempty"`
+	// the result of the approval decision by the ai
+	Result *ApprovalResult `json:"result,omitempty"`
 }
 
 type StackRunAttributes struct {
@@ -6627,7 +7387,9 @@ type SyncConfig struct {
 	// whether the agent should delete the namespace for this service upon deletion
 	DeleteNamespace *bool `json:"deleteNamespace,omitempty"`
 	// Whether to require all resources are placed in the same namespace
-	EnforceNamespace  *bool              `json:"enforceNamespace,omitempty"`
+	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
+	// Whether to require all resources are owned by this service and fail if they are owned by another
+	RequireOwnership  *bool              `json:"requireOwnership,omitempty"`
 	NamespaceMetadata *NamespaceMetadata `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizer `json:"diffNormalizers,omitempty"`
@@ -6637,6 +7399,7 @@ type SyncConfigAttributes struct {
 	CreateNamespace   *bool               `json:"createNamespace,omitempty"`
 	EnforceNamespace  *bool               `json:"enforceNamespace,omitempty"`
 	DeleteNamespace   *bool               `json:"deleteNamespace,omitempty"`
+	RequireOwnership  *bool               `json:"requireOwnership,omitempty"`
 	NamespaceMetadata *MetadataAttributes `json:"namespaceMetadata,omitempty"`
 	// A list of diff normalizers to apply to the service which controls how drift detection works
 	DiffNormalizers []*DiffNormalizerAttributes `json:"diffNormalizers,omitempty"`
@@ -6947,6 +7710,8 @@ type VertexAiAttributes struct {
 type VertexAiSettings struct {
 	// the vertex ai model to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the gcp project id to use
@@ -7163,6 +7928,184 @@ type YamlOverlayAttributes struct {
 	Templated *bool `json:"templated,omitempty"`
 }
 
+type AgentMessageToolState string
+
+const (
+	AgentMessageToolStatePending   AgentMessageToolState = "PENDING"
+	AgentMessageToolStateRunning   AgentMessageToolState = "RUNNING"
+	AgentMessageToolStateCompleted AgentMessageToolState = "COMPLETED"
+	AgentMessageToolStateError     AgentMessageToolState = "ERROR"
+)
+
+var AllAgentMessageToolState = []AgentMessageToolState{
+	AgentMessageToolStatePending,
+	AgentMessageToolStateRunning,
+	AgentMessageToolStateCompleted,
+	AgentMessageToolStateError,
+}
+
+func (e AgentMessageToolState) IsValid() bool {
+	switch e {
+	case AgentMessageToolStatePending, AgentMessageToolStateRunning, AgentMessageToolStateCompleted, AgentMessageToolStateError:
+		return true
+	}
+	return false
+}
+
+func (e AgentMessageToolState) String() string {
+	return string(e)
+}
+
+func (e *AgentMessageToolState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentMessageToolState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentMessageToolState", str)
+	}
+	return nil
+}
+
+func (e AgentMessageToolState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AgentRunMode string
+
+const (
+	AgentRunModeAnalyze AgentRunMode = "ANALYZE"
+	AgentRunModeWrite   AgentRunMode = "WRITE"
+)
+
+var AllAgentRunMode = []AgentRunMode{
+	AgentRunModeAnalyze,
+	AgentRunModeWrite,
+}
+
+func (e AgentRunMode) IsValid() bool {
+	switch e {
+	case AgentRunModeAnalyze, AgentRunModeWrite:
+		return true
+	}
+	return false
+}
+
+func (e AgentRunMode) String() string {
+	return string(e)
+}
+
+func (e *AgentRunMode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentRunMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentRunMode", str)
+	}
+	return nil
+}
+
+func (e AgentRunMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AgentRunStatus string
+
+const (
+	AgentRunStatusPending    AgentRunStatus = "PENDING"
+	AgentRunStatusRunning    AgentRunStatus = "RUNNING"
+	AgentRunStatusSuccessful AgentRunStatus = "SUCCESSFUL"
+	AgentRunStatusFailed     AgentRunStatus = "FAILED"
+	AgentRunStatusCancelled  AgentRunStatus = "CANCELLED"
+)
+
+var AllAgentRunStatus = []AgentRunStatus{
+	AgentRunStatusPending,
+	AgentRunStatusRunning,
+	AgentRunStatusSuccessful,
+	AgentRunStatusFailed,
+	AgentRunStatusCancelled,
+}
+
+func (e AgentRunStatus) IsValid() bool {
+	switch e {
+	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled:
+		return true
+	}
+	return false
+}
+
+func (e AgentRunStatus) String() string {
+	return string(e)
+}
+
+func (e *AgentRunStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentRunStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentRunStatus", str)
+	}
+	return nil
+}
+
+func (e AgentRunStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AgentRuntimeType string
+
+const (
+	AgentRuntimeTypeClaude   AgentRuntimeType = "CLAUDE"
+	AgentRuntimeTypeOpencode AgentRuntimeType = "OPENCODE"
+	AgentRuntimeTypeGemini   AgentRuntimeType = "GEMINI"
+	AgentRuntimeTypeCustom   AgentRuntimeType = "CUSTOM"
+)
+
+var AllAgentRuntimeType = []AgentRuntimeType{
+	AgentRuntimeTypeClaude,
+	AgentRuntimeTypeOpencode,
+	AgentRuntimeTypeGemini,
+	AgentRuntimeTypeCustom,
+}
+
+func (e AgentRuntimeType) IsValid() bool {
+	switch e {
+	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom:
+		return true
+	}
+	return false
+}
+
+func (e AgentRuntimeType) String() string {
+	return string(e)
+}
+
+func (e *AgentRuntimeType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentRuntimeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentRuntimeType", str)
+	}
+	return nil
+}
+
+func (e AgentRuntimeType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type AgentSessionType string
 
 const (
@@ -7171,6 +8114,7 @@ const (
 	AgentSessionTypeProvisioning AgentSessionType = "PROVISIONING"
 	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
+	AgentSessionTypeChat         AgentSessionType = "CHAT"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -7179,11 +8123,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeProvisioning,
 	AgentSessionTypeSearch,
 	AgentSessionTypeManifests,
+	AgentSessionTypeChat,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat:
 		return true
 	}
 	return false
@@ -7388,6 +8333,49 @@ func (e *AlertState) UnmarshalGQL(v any) error {
 }
 
 func (e AlertState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ApprovalResult string
+
+const (
+	ApprovalResultApproved      ApprovalResult = "APPROVED"
+	ApprovalResultRejected      ApprovalResult = "REJECTED"
+	ApprovalResultIndeterminate ApprovalResult = "INDETERMINATE"
+)
+
+var AllApprovalResult = []ApprovalResult{
+	ApprovalResultApproved,
+	ApprovalResultRejected,
+	ApprovalResultIndeterminate,
+}
+
+func (e ApprovalResult) IsValid() bool {
+	switch e {
+	case ApprovalResultApproved, ApprovalResultRejected, ApprovalResultIndeterminate:
+		return true
+	}
+	return false
+}
+
+func (e ApprovalResult) String() string {
+	return string(e)
+}
+
+func (e *ApprovalResult) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApprovalResult(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApprovalResult", str)
+	}
+	return nil
+}
+
+func (e ApprovalResult) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -8711,6 +9699,7 @@ const (
 	ObservabilityWebhookTypeDatadog   ObservabilityWebhookType = "DATADOG"
 	ObservabilityWebhookTypePagerduty ObservabilityWebhookType = "PAGERDUTY"
 	ObservabilityWebhookTypeNewrelic  ObservabilityWebhookType = "NEWRELIC"
+	ObservabilityWebhookTypeSentry    ObservabilityWebhookType = "SENTRY"
 )
 
 var AllObservabilityWebhookType = []ObservabilityWebhookType{
@@ -8718,11 +9707,12 @@ var AllObservabilityWebhookType = []ObservabilityWebhookType{
 	ObservabilityWebhookTypeDatadog,
 	ObservabilityWebhookTypePagerduty,
 	ObservabilityWebhookTypeNewrelic,
+	ObservabilityWebhookTypeSentry,
 }
 
 func (e ObservabilityWebhookType) IsValid() bool {
 	switch e {
-	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic:
+	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic, ObservabilityWebhookTypeSentry:
 		return true
 	}
 	return false
@@ -9583,20 +10573,22 @@ func (e ScalingRecommendationType) MarshalGQL(w io.Writer) {
 type ScmType string
 
 const (
-	ScmTypeGithub    ScmType = "GITHUB"
-	ScmTypeGitlab    ScmType = "GITLAB"
-	ScmTypeBitbucket ScmType = "BITBUCKET"
+	ScmTypeGithub      ScmType = "GITHUB"
+	ScmTypeGitlab      ScmType = "GITLAB"
+	ScmTypeBitbucket   ScmType = "BITBUCKET"
+	ScmTypeAzureDevops ScmType = "AZURE_DEVOPS"
 )
 
 var AllScmType = []ScmType{
 	ScmTypeGithub,
 	ScmTypeGitlab,
 	ScmTypeBitbucket,
+	ScmTypeAzureDevops,
 }
 
 func (e ScmType) IsValid() bool {
 	switch e {
-	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket:
+	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket, ScmTypeAzureDevops:
 		return true
 	}
 	return false
@@ -9620,6 +10612,90 @@ func (e *ScmType) UnmarshalGQL(v any) error {
 }
 
 func (e ScmType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelCheckType string
+
+const (
+	SentinelCheckTypeLog        SentinelCheckType = "LOG"
+	SentinelCheckTypeKubernetes SentinelCheckType = "KUBERNETES"
+)
+
+var AllSentinelCheckType = []SentinelCheckType{
+	SentinelCheckTypeLog,
+	SentinelCheckTypeKubernetes,
+}
+
+func (e SentinelCheckType) IsValid() bool {
+	switch e {
+	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes:
+		return true
+	}
+	return false
+}
+
+func (e SentinelCheckType) String() string {
+	return string(e)
+}
+
+func (e *SentinelCheckType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelCheckType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelCheckType", str)
+	}
+	return nil
+}
+
+func (e SentinelCheckType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunStatus string
+
+const (
+	SentinelRunStatusPending SentinelRunStatus = "PENDING"
+	SentinelRunStatusSuccess SentinelRunStatus = "SUCCESS"
+	SentinelRunStatusFailed  SentinelRunStatus = "FAILED"
+)
+
+var AllSentinelRunStatus = []SentinelRunStatus{
+	SentinelRunStatusPending,
+	SentinelRunStatusSuccess,
+	SentinelRunStatusFailed,
+}
+
+func (e SentinelRunStatus) IsValid() bool {
+	switch e {
+	case SentinelRunStatusPending, SentinelRunStatusSuccess, SentinelRunStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunStatus) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunStatus", str)
+	}
+	return nil
+}
+
+func (e SentinelRunStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

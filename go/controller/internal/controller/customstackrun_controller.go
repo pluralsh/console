@@ -138,7 +138,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -196,7 +196,7 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		}
 
 		if !stack.Status.HasID() {
-			return nil, &waitForResources, fmt.Errorf("stack is not ready")
+			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack is not ready")
 		}
 
 		attr.StackID = stack.Status.ID

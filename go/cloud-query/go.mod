@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/cloud-query
 
-go 1.24.2
+go 1.25.1
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible

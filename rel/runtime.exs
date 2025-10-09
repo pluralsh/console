@@ -132,7 +132,7 @@ pool_size =
        {val, _} <- Integer.parse(size) do
     val
   else
-    _ -> 20
+    _ -> 50
   end
 
 ssl_opts = case {get_env("PGROOTSSLCERT"), get_env("DB_CLOUD_PROVIDER")} do
@@ -197,6 +197,7 @@ config :console,
   vmetrics_url: get_env("CONSOLE_VMETRICS_URL"),
   es_url: get_env("CONSOLE_CLOUD_ES_URL"),
   byok: get_env("CONSOLE_BYOK") == "true",
+  cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")
@@ -267,4 +268,24 @@ if is_set("CONSOLE_GITHUB_APP_ID") and is_set("CONSOLE_GITHUB_APP_PEM") do
   config :console,
     github_app_id: get_env("CONSOLE_GITHUB_APP_ID"),
     github_app_pem: get_env("CONSOLE_GITHUB_APP_PEM")
+end
+
+if is_set("CONSOLE_DEFAULT_PROJECT_NAME") do
+  config :console,
+    default_project_name: get_env("CONSOLE_DEFAULT_PROJECT_NAME")
+end
+
+if is_set("CONSOLE_SERVICE_ACCOUNT_DOMAIN") do
+  config :console,
+    service_account_domain: get_env("CONSOLE_SERVICE_ACCOUNT_DOMAIN")
+end
+
+if is_set("CONSOLE_GITHUB_HTTP_PROXY") do
+  config :tentacat,
+    request_options: [proxy: to_charlist(get_env("CONSOLE_GITHUB_HTTP_PROXY"))]
+end
+
+if is_set("CONSOLE_SENTRY_DSN") do
+  config :sentry,
+    dsn: get_env("CONSOLE_SENTRY_DSN")
 end

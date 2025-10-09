@@ -16,6 +16,7 @@ import {
   ColActions,
   ColDistribution,
   ColLastActivity,
+  ColMgmt,
   ColProject,
   ColServiceName,
   ColTags,
@@ -27,6 +28,7 @@ export const columns = [
   ColDistribution,
   ColTags,
   ColProject,
+  ColMgmt,
   ColLastActivity,
   ColActions,
 ]

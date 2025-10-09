@@ -9,7 +9,11 @@ defmodule Console.Logs.Query do
   @type t :: %__MODULE__{time: Time.t}
   @type direction :: :gte | :lte | :gt | :lt
 
-  defstruct [:project_id, :cluster_id, :service_id, :query, :limit, :resource, :time, :facets, :namespaces]
+  defstruct [
+    :project_id, :cluster_id, :service_id, :query, :limit,
+    :resource, :time, :facets, :namespaces,
+    :bucket_size, :group_by_fields
+  ]
 
   def new(args) do
     %__MODULE__{
@@ -20,7 +24,9 @@ defmodule Console.Logs.Query do
       limit: args[:limit],
       time: Time.new(args[:time]),
       facets: args[:facets],
-      namespaces: args[:namespaces]
+      namespaces: args[:namespaces],
+      bucket_size: args[:bucket_size],
+      group_by_fields: args[:group_by_fields]
     }
   end
 

@@ -16,6 +16,7 @@ defmodule ConsoleWeb.Router do
   scope "/v1", ConsoleWeb do
     pipe_through [:api]
 
+    post "/token/exchange", JWTController, :exchange
     get "/dashboard/cluster", WebhookController, :cluster
   end
 
@@ -29,6 +30,13 @@ defmodule ConsoleWeb.Router do
       pipe_through [:api]
 
       scope "/v1", ConsoleWeb do
+        scope "/ai" do
+          scope "/openai" do
+            post "/v1/chat/completions", AIController, :openai_chat_completions
+            post "/v1/embeddings", AIController, :openai_embeddings
+          end
+        end
+
         get "/agent/chart", GitController, :agent_chart
         post "/webhooks/observability/:type/:id", WebhookController, :observability
         post "/webhooks/:type/:id", WebhookController, :scm
@@ -50,7 +58,7 @@ defmodule ConsoleWeb.Router do
 
       forward "/gql", Console.ExternalGraphQl.Plug,
         schema: Console.ExternalGraphQl,
-        document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
+        document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
         analyze_complexity: true,
         max_complexity: 650,
         token_limit: 5_000
@@ -79,7 +87,6 @@ defmodule ConsoleWeb.Router do
     pipe_through [:auth]
 
     scope "/v1", ConsoleWeb do
-      post "/token/exchange", JWTController, :exchange
       get "/digests", GitController, :digest
       get "/compliance/report", ComplianceController, :report
       get "/compliance/report/:name", ComplianceController, :report
@@ -89,7 +96,7 @@ defmodule ConsoleWeb.Router do
 
     forward "/gql", Absinthe.Plug,
       schema: Console.GraphQl,
-      document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
+      document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
       analyze_complexity: true,
       max_complexity: 650,
       token_limit: 5_000

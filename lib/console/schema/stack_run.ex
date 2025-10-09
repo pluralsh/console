@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackRun do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Service,
     Cluster,
@@ -18,6 +18,8 @@ defmodule Console.Schema.StackRun do
     StackPolicyViolation
   }
 
+  defenum ApprovalResult, approved: 0, rejected: 1, indeterminate: 2
+
   schema "stack_runs" do
     field :type,         Stack.Type
     field :status,       Stack.Status
@@ -28,6 +30,7 @@ defmodule Console.Schema.StackRun do
     field :workdir,      :string
     field :manage_state, :boolean, default: false
     field :variables,    :map
+    field :check_id,     :string
 
     field :cancellation_reason, :string
 
@@ -39,6 +42,11 @@ defmodule Console.Schema.StackRun do
     embeds_one :job_ref, JobRef, on_replace: :update do
       field :name,      :string
       field :namespace, :string
+    end
+
+    embeds_one :approval_result, RunApprovalResult, on_replace: :update do
+      field :reason, :string
+      field :result, ApprovalResult
     end
 
     has_one :state, StackState,
@@ -122,7 +130,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status workdir actor_id variables manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
+  @valid ~w(type status workdir actor_id variables manage_state message approval check_id dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -152,6 +160,7 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:state)
     |> cast_assoc(:errors)
     |> cast_assoc(:violations)
+    |> cast_embed(:approval_result, with: &approval_result_changeset/2)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> validate_required(~w(status)a)
   end
@@ -178,5 +187,11 @@ defmodule Console.Schema.StackRun do
     model
     |> cast(attrs, ~w(name namespace)a)
     |> validate_required(~w(name namespace)a)
+  end
+
+  defp approval_result_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(reason result)a)
+    |> validate_required(~w(reason result)a)
   end
 end

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: servicecontexts.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,14 +15,16 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Console ID
+    - description: ID in the Console API.
       jsonPath: .status.id
-      name: Id
+      name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ServiceContext is the Schema for the servicecontexts API
+        description: |-
+          ServiceContext provides a reusable bundle of configuration. It enables sharing configuration data across multiple services.
+          This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.
         properties:
           apiVersion:
             description: |-
@@ -42,20 +44,22 @@ spec:
           metadata:
             type: object
           spec:
-            description: ServiceContextSpec defines the desired state of ServiceContext
+            description: ServiceContextSpec defines the desired state of the ServiceContext.
             properties:
               configuration:
-                description: A reusable configuration context, useful for plumbing
-                  data from external tools like terraform, pulumi, etc.
+                description: |-
+                  Configuration is a reusable configuration context that can include any JSON-compatible configuration data
+                  that needs to be shared across multiple services.
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               name:
-                description: the name of this service, if not provided ServiceContext's
-                  own name from ServiceContext.ObjectMeta will be used.
+                description: |-
+                  Name of this service context.
+                  If not provided, the name from ServiceContext.ObjectMeta will be used.
                 type: string
               projectRef:
                 description: |-
-                  ProjectRef references project this service context belongs to.
+                  ProjectRef references the project this service context belongs to.
                   If not provided, it will use the default project.
                 properties:
                   apiVersion:

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: observabilityproviders.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,7 +15,7 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: ID of the ObservabilityProvider in the Console API.
+    - description: ID of the ObservabilityProvider in the Console API
       jsonPath: .status.id
       name: ID
       type: string
@@ -23,9 +23,11 @@ spec:
     schema:
       openAPIV3Schema:
         description: |-
-          ObservabilityProvider defines metrics provider used
-          by i.e. InfrastructureStack to determine if a stack run
-          should be cancelled.
+          ObservabilityProvider configures external monitoring and observability platforms for use with Plural Console.
+          It enables integration with services like Datadog and New Relic to provide enhanced monitoring capabilities
+          for infrastructure stacks and service deployments. The provider can be used by InfrastructureStack resources
+          to monitor metrics and determine if operations should be cancelled based on system health indicators.
+          Common use cases include monitoring deployment health or tracking infrastructure performance metrics.
         properties:
           apiVersion:
             description: |-
@@ -45,16 +47,23 @@ spec:
           metadata:
             type: object
           spec:
+            description: |-
+              Spec defines the desired state of the ObservabilityProvider, including the provider type
+              and authentication credentials needed to connect to the external monitoring service.
             properties:
               credentials:
-                description: Credentials to access the configured provider Type.
+                description: |-
+                  Credentials contains the authentication information needed to connect to the observability provider.
+                  The specific credential format depends on the provider type. Each provider requires different
+                  API keys and authentication methods as specified in their respective credential specifications.
                 properties:
                   datadog:
                     description: |-
-                      Datadog is a reference to the secret with credentials used to access datadog.
-                      It requires 2 keys to be provided in a secret:
-                      - 'apiKey'
-                      - 'appKey'
+                      Datadog specifies a reference to a Kubernetes Secret containing Datadog API credentials.
+                      The referenced secret must contain two keys:
+                      - 'apiKey': Your Datadog API key for authentication
+                      - 'appKey': Your Datadog application key for extended API access
+                      These keys are obtained from your Datadog account's API settings.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -68,9 +77,10 @@ spec:
                     x-kubernetes-map-type: atomic
                   newrelic:
                     description: |-
-                      Newrelic is a reference to the secret with credentials used to access newrelic.
-                      It requires 1 key to be provided in a secret:
-                      - 'apiKey'
+                      Newrelic specifies a reference to a Kubernetes Secret containing New Relic API credentials.
+                      The referenced secret must contain one key:
+                      - 'apiKey': Your New Relic API key for authentication and data access
+                      This key is obtained from your New Relic account's API settings.
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -84,10 +94,15 @@ spec:
                     x-kubernetes-map-type: atomic
                 type: object
               name:
-                description: Name of the ObservabilityProvider in the Console API.
+                description: |-
+                  Name specifies the name for this observability provider.
+                  If not provided, the name from the resource metadata will be used.
                 type: string
               type:
-                description: Type of the ObservabilityProvider.
+                description: |-
+                  Type specifies the observability platform this provider connects to.
+                  Currently supported providers include Datadog for comprehensive monitoring and alerting,
+                  and New Relic for application performance monitoring and infrastructure insights.
                 enum:
                 - DATADOG
                 - NEWRELIC
@@ -96,6 +111,9 @@ spec:
             - type
             type: object
           status:
+            description: |-
+              Status represents the current state of this ObservabilityProvider resource, including
+              synchronization status with the Console API and connection health information.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

@@ -30,6 +30,8 @@ export default function StackDeleteModal({
         stack.name
       } stack?`}
       close={onClose}
+      confirmationEnabled
+      confirmationText={stack.name}
       submit={() => mutation()}
       label={deleting ? 'Retry delete' : 'Delete'}
       loading={loading}

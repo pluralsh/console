@@ -5,6 +5,8 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ttl :timer.hours(1)
 
+  @adapter Console.conf(:cache_adapter)
+
   @ansi_code ~r/\x1b\[[0-9;]*m/
 
   @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural [sS]tacks?:\s+([[:alnum:]_\-]+)/]
@@ -12,14 +14,16 @@ defmodule Console.Deployments.Pr.Utils do
   @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural [cC]lusters?:\s+([[:alnum:]_\-]+)/]
   @flow_regex [~r/plrl\/flow\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(flow:([[:alnum:]_\-]*)\)/, ~r/Plural [fF]low:\s+([[:alnum:]_\-]+)/]
   @preview_regex [~r/plrl\/preview\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(preview:([[:alnum:]_\-]*)\)/, ~r/Plural [pP]review:\s+([[:alnum:]_\-]+)/]
+  @merge_cron_regex [~r/[Pp]lural [Mm]erge [Cc]ron:\s+([0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+)/]
 
   @solid_opts [strict_variables: true, strict_filters: true]
 
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
-  def pr_associations(content, scopes \\ ~w(stack service cluster flow)a) do
+  def pr_associations(content, scopes \\ ~w(stack cluster service flow)a) do
     Enum.reduce(scopes, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
     |> Map.put(:preview, scrape(:preview, content))
+    |> Map.put(:merge_cron, scrape(:merge_cron, content))
   end
 
   defp maybe_add(attrs, field, %{id: id}), do: Map.put(attrs, field, id)
@@ -43,8 +47,9 @@ defmodule Console.Deployments.Pr.Utils do
   defp regexes(:cluster), do: @cluster_regex
   defp regexes(:flow), do: @flow_regex
   defp regexes(:preview), do: @preview_regex
+  defp regexes(:merge_cron), do: @merge_cron_regex
 
-  @decorate cacheable(cache: Console.Cache, key: {:pr_fetch, scope, id}, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @adapter, key: {:pr_fetch, scope, id}, opts: [ttl: @ttl])
   def fetch(scope, id), do: do_fetch(scope, id)
 
   defp do_fetch(:stack, name), do: Stacks.get_stack_by_name(name)
@@ -57,6 +62,7 @@ defmodule Console.Deployments.Pr.Utils do
     end
   end
   defp do_fetch(:preview, name), do: name
+  defp do_fetch(:merge_cron, cron), do: cron
 
   def description(%PrAutomation{message: msg, title: title}, ctx) do
     with {:ok, body} <- render_solid(msg, ctx),

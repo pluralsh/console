@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: personas.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,14 +15,21 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Persona ID
+    - description: ID of the Persona in the Console API
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Persona is the Schema for the personas API
+        description: |-
+          Persona defines role-based UI configurations for different types of users in Plural Console.
+          It allows customizing the user interface based on user roles such as platform engineers, developers,
+          security teams, or management. Each persona controls which features and sections of the Console
+          are visible and accessible to users assigned to it. This enables organizations to provide
+          tailored experiences that match different user responsibilities and reduce interface complexity
+          for specific roles. Common use cases include hiding infrastructure details from developers
+          or providing simplified dashboards for management oversight.
         properties:
           apiVersion:
             description: |-
@@ -42,10 +49,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: PersonaSpec defines the desired state of Persona
+            description: |-
+              Spec defines the desired state of the Persona, including role configuration,
+              UI customizations, and group bindings for role-based access control.
             properties:
               bindings:
-                description: Bindings contains the group bindings for this Persona.
+                description: |-
+                  Bindings define which users and groups are assigned to this persona.
+                  Users can be assigned to multiple personas, with permissions being additive.
+                  This enables flexible role combinations while maintaining clear base configurations.
                 items:
                   description: Binding represents a policy binding.
                   properties:
@@ -62,90 +74,193 @@ spec:
                   type: object
                 type: array
               configuration:
-                description: Configuration contains the UI configuration for this
-                  Persona (additive across personas)".
+                description: |-
+                  Configuration contains detailed UI customization settings for this persona.
+                  These settings are additive across multiple personas assigned to a user,
+                  allowing for flexible permission combinations while maintaining role-based defaults.
                 properties:
                   ai:
-                    description: AI enables individual parts of the ai views.
+                    description: |-
+                      AI configures access to AI-powered features and capabilities within the Console.
+                      This includes AI-assisted operations, automated suggestions, and other intelligent features.
                     properties:
                       pr:
-                        description: Enables whether users bound to this persona can
-                          use AI to generate PRs.
+                        description: |-
+                          PR enables AI-powered pull request generation and management features.
+                          When enabled, users can use AI assistance to create pull requests, generate code changes,
+                          and automate various development workflows through AI-powered tools.
                         type: boolean
                     type: object
                   all:
-                    description: All enables full UI for this Persona.
+                    description: |-
+                      All enables the complete UI interface for this persona when set to true.
+                      This overrides individual feature settings and provides full access to all Console features.
+                      Useful for administrative personas that need unrestricted access to all functionality.
                     type: boolean
                   deployments:
-                    description: Deployments enable individual parts of the deployments
-                      views.
+                    description: |-
+                      Deployments controls access to deployment-related features and sections.
+                      This includes clusters, services, pipelines, and other deployment management tools.
+                      Useful for controlling which teams can view or manage different aspects of deployments.
                     properties:
                       addOns:
+                        description: |-
+                          AddOns enables access to Kubernetes add-on management features when set to true.
+                          This includes installing, configuring, and managing cluster add-ons.
                         type: boolean
                       clusters:
+                        description: |-
+                          Clusters enables access to cluster management features when set to true.
+                          This includes viewing cluster status, managing cluster resources, and performing
+                          cluster-level operations. Typically enabled for platform and infrastructure teams.
                         type: boolean
                       deployments:
+                        description: |-
+                          Deployments enables access to deployment management features when set to true.
+                          This includes viewing and managing application deployments, deployment history,
+                          and deployment-related operations across the platform.
                         type: boolean
                       pipelines:
+                        description: |-
+                          Pipelines enables access to CI/CD pipeline features when set to true.
+                          This includes viewing pipeline status, managing pipeline configurations,
+                          and triggering pipeline executions for automated deployments.
                         type: boolean
                       providers:
+                        description: |-
+                          Providers enables access to cloud provider management features when set to true.
+                          This includes managing cloud provider credentials, configuring provider settings,
+                          and other provider-related operations for infrastructure management.
                         type: boolean
                       repositories:
+                        description: |-
+                          Repositories enables access to Git repository management features when set to true.
+                          This includes configuring source repositories, managing Git credentials,
+                          and other repository-related operations for deployments.
                         type: boolean
                       services:
+                        description: |-
+                          Services enables access to service management features when set to true.
+                          This includes viewing service status, managing service configurations,
+                          and performing service-level operations and troubleshooting.
                         type: boolean
                     type: object
                   home:
-                    description: Home contains configuration for the homepage for
-                      this Persona.
+                    description: |-
+                      Home configures the homepage layout and content for this persona.
+                      Different personas can have customized homepages that highlight the most relevant
+                      information and workflows for their specific role and responsibilities.
                     properties:
                       manager:
+                        description: |-
+                          Manager enables management-focused homepage content when set to true.
+                          This typically includes high-level dashboards, cost summaries, compliance status,
+                          and other information relevant to engineering managers and leadership roles.
                         type: boolean
                       security:
+                        description: |-
+                          Security enables security-focused homepage content when set to true.
+                          This includes security alerts, compliance reports, vulnerability summaries,
+                          and other security-related metrics and dashboards.
                         type: boolean
                     type: object
                   services:
-                    description: Services enable individual parts of the services
-                      views.
+                    description: |-
+                      Services controls access to service-specific features and configuration options.
+                      This includes service configuration, secrets management, and other service-level operations.
                     properties:
                       configuration:
+                        description: |-
+                          Configuration enables access to service configuration management when set to true.
+                          This includes modifying service deployment settings, environment variables,
+                          and other configuration parameters that affect service behavior.
                         type: boolean
                       secrets:
+                        description: |-
+                          Secrets enables access to service secrets management when set to true.
+                          This includes viewing, creating, and modifying secrets associated with services.
+                          Typically restricted to platform engineers and senior developers who need
+                          to manage service authentication and configuration secrets.
                         type: boolean
                     type: object
                   sidebar:
-                    description: Sidebar enables individual aspects of the sidebar.
+                    description: |-
+                      Sidebar configures which navigation items and sections are visible in the main sidebar.
+                      This allows personas to have streamlined navigation focused on their primary workflows
+                      while hiding irrelevant or restricted functionality.
                     properties:
                       audits:
+                        description: |-
+                          Audits enables access to audit logs and compliance reporting features when set to true.
+                          This includes viewing system audit trails, user activity logs, and compliance reports.
+                          Typically enabled for security teams and compliance officers.
                         type: boolean
                       backups:
+                        description: |-
+                          Backups enables access to backup and restore management features when set to true.
+                          This includes configuring backup policies, managing backup storage,
+                          and performing restore operations for disaster recovery.
                         type: boolean
                       cost:
+                        description: |-
+                          Cost enables access to cost management and optimization features when set to true.
+                          This includes cost tracking or resource optimization recommendations.
                         type: boolean
                       kubernetes:
+                        description: |-
+                          Kubernetes enables access to direct Kubernetes management features when set to true.
+                          This includes raw Kubernetes resource management, kubectl-like operations,
+                          and low-level cluster administration tasks.
                         type: boolean
                       pullRequests:
+                        description: |-
+                          PullRequests enables access to pull request management features when set to true.
+                          This includes viewing and managing pull requests and Git-based deployment automation features.
                         type: boolean
                       security:
+                        description: |-
+                          Security enables access to security management features when set to true.
+                          This includes security scanning results, vulnerability management,
+                          policy enforcement, and other security-related tools and dashboards.
                         type: boolean
                       settings:
+                        description: |-
+                          Settings enables access to system configuration and administrative settings when set to true.
+                          This includes user management, system configuration, integration settings,
+                          and other administrative functions. Typically restricted to administrators.
                         type: boolean
                       stacks:
+                        description: |-
+                          Stacks enables access to Infrastructure as Code (IaC) stack management when set to true.
+                          This includes managing Terraform stacks and other IaC
+                          automation tools for infrastructure provisioning and management.
                         type: boolean
                     type: object
                 type: object
               description:
-                description: Longform description of this Persona.
+                description: |-
+                  Description provides a detailed explanation of this persona's purpose and intended users.
+                  This helps administrators understand which teams or roles should be assigned to this persona
+                  and what kind of experience it provides. Examples might describe responsibilities like
+                  "Platform engineers managing infrastructure" or "Developers deploying applications".
                 type: string
               name:
-                description: Name of this Persona. If not provided Persona's own name
-                  from Persona.ObjectMeta will be used.
+                description: |-
+                  Name specifies the name for this persona.
+                  If not provided, the name from the resource metadata will be used.
                 type: string
               role:
-                description: Role of this Persona controls the behavior of the homepage.
+                description: |-
+                  Role defines the primary responsibility area for users assigned to this persona.
+                  This controls the default homepage layout and highlights relevant features.
+                  Different roles provide different perspectives on the same underlying data,
+                  optimized for specific workflows and responsibilities.
                 type: string
             type: object
           status:
+            description: |-
+              Status represents the current state of this Persona resource, including
+              synchronization status with the Console API.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

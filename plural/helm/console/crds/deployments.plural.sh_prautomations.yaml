@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: prautomations.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,14 +15,19 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: ID of the pr automation in the Console API.
+    - description: ID of the PrAutomation in the Console API.
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PrAutomation ...
+        description: |-
+          PrAutomation provides a self-service mechanism for generating pull requests against IaC repositories.
+          It enables teams to create standardized, templated PRs for common operations like cluster
+          upgrades, service deployments, and configuration changes. Each automation defines the files to modify,
+          the changes to make (via regex replacement, YAML overlays, or file creation), and provides a UI wizard
+          for users to configure parameters before generating the PR.
         properties:
           apiVersion:
             description: |-
@@ -42,13 +47,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: Spec ...
+            description: |-
+              Spec defines the desired state of the PrAutomation, including the operations
+              to perform, target repository, and user interface configuration.
             properties:
               addon:
-                description: Addon is a link to an addon name
+                description: Addon links this automation to a specific add-on name.
                 type: string
               bindings:
-                description: Bindings contain read and write policies of pr automation
+                description: Bindings containing read and write policies of PR automation.
                 properties:
                   create:
                     description: Create bindings.
@@ -86,11 +93,14 @@ spec:
                     type: array
                 type: object
               branch:
-                description: The base branch this pr will be based on (defaults to
-                  the repo's main branch)
+                description: |-
+                  Branch specifies the base branch this PR will be created from. If not provided,
+                  defaults to the repository's main branch (usually 'main' or 'master').
                 type: string
               catalogRef:
-                description: CatalogRef the catalog this automation will belong to
+                description: |-
+                  CatalogRef references the catalog this automation belongs to for
+                  organizational purposes and discoverability in the service catalog.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -133,7 +143,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               clusterRef:
-                description: ClusterRef a cluster this pr works on
+                description: ClusterRef references a specific cluster that this PR
+                  operates on.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -176,13 +187,17 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               configuration:
-                description: Configuration self-service configuration for the UI wizard
-                  generating this PR
+                description: |-
+                  Configuration defines the self-service UI form fields that users fill out
+                  to customize the generated PR. Each field can be templated into the PR content.
                 items:
-                  description: PrAutomationConfiguration ...
+                  description: PrAutomationConfiguration defines a single input field
+                    in the self-service UI form.
                   properties:
                     condition:
-                      description: Condition ...
+                      description: |-
+                        Condition defines when this field should be displayed based on the values
+                        of other fields, enabling dynamic forms that adapt to user input.
                       properties:
                         field:
                           type: string
@@ -204,23 +219,44 @@ spec:
                       - operation
                       type: object
                     default:
+                      description: Default provides a default value for this field.
                       type: string
                     displayName:
-                      description: A custom display name for the input of this field.  Will
-                        default to name otherwise.
+                      description: |-
+                        DisplayName provides a human-readable label for this field in the UI.
+                        If not provided, the Name field is used as the display label.
                       type: string
                     documentation:
+                      description: Documentation provides help text or description
+                        for this field to guide users in providing the correct input.
                       type: string
                     longform:
-                      description: Extended documentation for the input of this field.
+                      description: Longform provides extended documentation or detailed
+                        explanation for complex configuration fields.
                       type: string
                     name:
+                      description: |-
+                        Name is the identifier for this configuration field, used as a template variable
+                        and as the form field name in the UI.
                       type: string
                     optional:
+                      description: |-
+                        Optional indicates whether this field is required (false) or optional (true) for PR generation.
+                        Required fields must be filled by the user.
                       type: boolean
+                    page:
+                      description: Page specifies the page to use for the pr configuration
+                        in the Plural web configuration wizard
+                      format: int64
+                      type: integer
                     placeholder:
+                      description: Placeholder text to show in the input field to
+                        guide users on the expected format or content.
                       type: string
                     type:
+                      description: |-
+                        Type specifies the input type for this field, determining how it's rendered
+                        in the UI and what validation is applied.
                       enum:
                       - STRING
                       - INT
@@ -234,8 +270,8 @@ spec:
                       - FLOW
                       type: string
                     validation:
-                      description: Any additional validations you want to apply to
-                        this configuration item before generating a pr
+                      description: Validation defines additional validation rules
+                        to apply to user input before allowing PR generation.
                       properties:
                         json:
                           description: Whether the string value is supposed to be
@@ -258,6 +294,8 @@ spec:
                           type: object
                       type: object
                     values:
+                      description: Values provides the list of allowed values for
+                        ENUM type fields, creating a dropdown selection in the UI.
                       items:
                         type: string
                       type: array
@@ -267,12 +305,13 @@ spec:
                   type: object
                 type: array
               confirmation:
-                description: Additional details to verify all prerequisites are satisfied
-                  before generating this pr
+                description: |-
+                  Confirmation specifies additional verification steps or information to present
+                  to users before they can generate the PR, ensuring prerequisites are met.
                 properties:
                   checklist:
-                    description: An itemized checklist to present to confirm each
-                      prerequisite is satisfied
+                    description: Checklist to present to confirm each prerequisite
+                      is satisfied.
                     items:
                       description: A checkbox to render to confirm a PR prerequisite
                         is satisfied
@@ -285,14 +324,16 @@ spec:
                       type: object
                     type: array
                   text:
-                    description: Markdown text to explain this pr
+                    description: Text in Markdown to explain this PR.
                     type: string
                 type: object
               creates:
-                description: Specs for files to be templated and created
+                description: |-
+                  Creates defines specifications for generating new files from templates,
+                  allowing the automation to add new configuration files to the repository.
                 properties:
                   git:
-                    description: Git Location to source external files from
+                    description: Git location to source external files from.
                     properties:
                       files:
                         description: Optional files to add to the manifests for this
@@ -315,7 +356,8 @@ spec:
                   templates:
                     description: Template files to use to generate file content
                     items:
-                      description: PrAutomationTemplate ...
+                      description: PrAutomationTemplate defines a single file template
+                        for creating new files in the target repository.
                       properties:
                         condition:
                           description: Condition string that will be evaluated to
@@ -344,45 +386,60 @@ spec:
                     type: array
                 type: object
               darkIcon:
-                description: An darkmode icon url to annotate this pr automation
+                description: |-
+                  DarkIcon provides a URL to a dark-mode variant of the icon for improved
+                  visibility in dark-themed user interfaces.
                 type: string
               deletes:
-                description: Spec for files and folders to be deleted
+                description: |-
+                  Deletes specifies files and folders to remove from the repository as part
+                  of the PR, useful for cleanup or migration scenarios.
                 properties:
                   files:
-                    description: Individual files to delete
+                    description: Individual files to delete.
                     items:
                       type: string
                     type: array
                   folders:
-                    description: Entire folders to delete
+                    description: Entire folders to delete.
                     items:
                       type: string
                     type: array
                 type: object
               documentation:
-                description: Documentation ...
+                description: |-
+                  Documentation provides detailed explanation of what this automation does,
+                  when to use it, and any prerequisites or considerations.
                 type: string
               icon:
-                description: An icon url to annotate this pr automation
+                description: |-
+                  Icon provides a URL to an icon image to visually represent this automation
+                  in the user interface and catalogs.
                 type: string
               identifier:
-                description: Identifier is a string referencing the repository, i.e.
-                  for GitHub it would be "organization/repositoryName"
+                description: |-
+                  Identifier specifies the target repository in the format "organization/repository-name"
+                  for GitHub, or equivalent formats for other SCM providers.
                 type: string
               message:
-                description: Message the commit message this pr will incorporate
+                description: |-
+                  Message defines the commit message template that will be used in the generated PR.
+                  Can include templated variables from user input.
                 type: string
               name:
-                description: Name name of the automation in the console api (defaults
-                  to metadata.name)
+                description: |-
+                  Name specifies the display name for this automation in the Console API.
+                  If not provided, defaults to the Kubernetes resource name.
                 type: string
               patch:
-                description: Patch whether to generate a patch for this pr instead
-                  of a full pr
+                description: |-
+                  Patch determines whether to generate a patch for this PR instead of
+                  creating a full pull request.
                 type: boolean
               projectRef:
-                description: ProjectRef the project this automation belongs to.
+                description: |-
+                  ProjectRef references the project this automation belongs to, enabling
+                  project-scoped organization and access control.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -425,7 +482,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               repositoryRef:
-                description: RepositoryRef the repository this automation uses.
+                description: RepositoryRef references a Git repository resource this
+                  automation uses.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -477,8 +535,8 @@ spec:
                 - COST
                 type: string
               scmConnectionRef:
-                description: ScmConnectionRef the SCM connection to use for generating
-                  this PR
+                description: ScmConnectionRef references the SCM connection to use
+                  for authentication when creating pull requests.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -520,8 +578,47 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              secrets:
+                description: |-
+                  Configuration for setting a secret as part of this pr.  This will usually be used by k8s manifests defined and is
+                  securely handled by our api with RBAC validation.
+                properties:
+                  cluster:
+                    description: The cluster handle that will hold this secret
+                    type: string
+                  entries:
+                    description: The entries of the secret
+                    items:
+                      properties:
+                        autogenerate:
+                          description: Whether to autogenerate the secret entry
+                          type: boolean
+                        documentation:
+                          description: The documentation of the secret entry
+                          type: string
+                        name:
+                          description: The name of the secret entry
+                          type: string
+                      required:
+                      - documentation
+                      - name
+                      type: object
+                    type: array
+                  name:
+                    description: The name of the secret
+                    type: string
+                  namespace:
+                    description: The k8s namespace to place the secret in
+                    type: string
+                required:
+                - cluster
+                - entries
+                - name
+                - namespace
+                type: object
               serviceRef:
-                description: ServiceRef the service this PR acts on.
+                description: ServiceRef references a specific service that this PR
+                  automation acts upon.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -564,38 +661,43 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               title:
-                description: Title the title of the generated pr
+                description: |-
+                  Title defines the template for the pull request title. Can include variables
+                  that will be replaced with user-provided configuration values.
                 type: string
               updates:
-                description: Spec for files to be updated, using regex replacement
+                description: |-
+                  Updates specifies how to modify existing files using regex replacements
+                  or YAML overlays, enabling precise changes to infrastructure code.
                 properties:
                   files:
-                    description: Files to update
+                    description: Files to update.
                     items:
                       type: string
                     type: array
                   matchStrategy:
-                    description: MatchStrategy, see enum for behavior
+                    description: MatchStrategy, see enum for behavior.
                     type: string
                   regexReplacements:
                     description: Full regex + replacement structs in case there is
                       different behavior per regex
                     items:
-                      description: RegexReplacement ...
+                      description: RegexReplacement defines a specific find-and-replace
+                        operation using regular expressions.
                       properties:
                         file:
-                          description: The file this replacement will work on
+                          description: File this replacement will work on.
                           type: string
                         regex:
-                          description: The regex to match a substring on
+                          description: Regex to match a substring on.
                           type: string
                         replacement:
                           description: Replacement to be substituted for the match
-                            in the regex
+                            in the regex.
                           type: string
                         templated:
-                          description: Whether you want to apply templating to the
-                            regex before compiling
+                          description: Templated indicates whether you want to apply
+                            templating to the regex before compiling.
                           type: boolean
                       required:
                       - file
@@ -604,36 +706,38 @@ spec:
                       type: object
                     type: array
                   regexes:
-                    description: The regexes to apply on each file
+                    description: Regexes to apply on each file.
                     items:
                       type: string
                     type: array
                   replaceTemplate:
-                    description: The template to use when replacing a regex
+                    description: ReplaceTemplate is a template to use when replacing
+                      a regex.
                     type: string
                   yamlOverlays:
                     description: Replacement via overlaying a yaml structure on an
                       existing yaml file
                     items:
-                      description: YamlOverlay ...
+                      description: YamlOverlay defines a YAML merge operation to modify
+                        existing YAML files.
                       properties:
                         file:
-                          description: the file to execute the overlay on
+                          description: File to execute the overlay on.
                           type: string
                         listMerge:
-                          description: How you want list merge to be performed, defaults
-                            to OVERWRITE
+                          description: ListMerge defines how you want list merge to
+                            be performed, defaults to OVERWRITE.
                           enum:
                           - OVERWRITE
                           - APPEND
                           type: string
                         templated:
-                          description: Whether you want to apply templating to the
-                            yaml blob before overlaying
+                          description: Templated indicates whether you want to apply
+                            templating to the YAML blob before overlaying.
                           type: boolean
                         yaml:
-                          description: the (possibly templated) yaml to use as the
-                            overlayed yaml blob written to the file
+                          description: Yaml (possibly templated) to use as the overlayed
+                            YAML blob written to the file.
                           type: string
                       required:
                       - file
@@ -641,14 +745,15 @@ spec:
                       type: object
                     type: array
                   yq:
-                    description: (Unused so far)
+                    description: Yq (unused so far)
                     type: string
                 type: object
             required:
             - scmConnectionRef
             type: object
           status:
-            description: Status ...
+            description: Status represents the current state of this PrAutomation
+              resource.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

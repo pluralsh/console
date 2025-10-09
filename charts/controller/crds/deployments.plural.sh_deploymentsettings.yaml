@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: deploymentsettings.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -17,7 +17,23 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: DeploymentSettings is the Schema for the deploymentsettings API
+        description: "DeploymentSettings provides global configuration settings for\nContinuous
+          Deployment (CD) operations. This resource defines\ncluster-wide settings
+          that control how the Plural deployment\nsystem operates, including access
+          policies, repository configuration,\nmonitoring integrations, and AI-powered
+          features.\n\nExample usage:\n\n\tapiVersion: deployments.plural.sh/v1alpha1\n\tkind:
+          DeploymentSettings\n\tmetadata:\n\t  name: global-deployment-settings\n\t
+          \ namespace: plrl-deploy-operator\n\tspec:\n\t  agentHelmValues:\n\t    annotations:\n\t
+          \     company.com/team: \"platform\"\n\t  managementRepo: \"https://github.com/company/infrastructure\"\n\t
+          \ bindings:\n\t    read:\n\t      - user:\n\t          email: \"dev-team@company.com\"\n\t
+          \   write:\n\t      - group:\n\t          name: \"platform-engineers\"\n\t
+          \ deploymentRepositoryRef:\n\t    name: \"main-deployment-repo\"\n\t    namespace:
+          \"plrl-deploy-operator\"\n\t  prometheusConnection:\n\t    host: \"https://prometheus.company.com\"\n\t
+          \   user: \"monitoring\"\n\t    passwordSecretRef:\n\t      name: \"prometheus-creds\"\n\t
+          \     key: \"password\"\n\t  ai:\n\t    enabled: true\n\t    provider: OPENAI\n\t
+          \   openAI:\n\t      model: \"gpt-4\"\n\t      tokenSecretRef:\n\t        name:
+          \"openai-secret\"\n\t        key: \"token\"\n\t  cost:\n\t    recommendationCushion:
+          20\n\t    recommendationThreshold: 100"
         properties:
           apiVersion:
             description: |-
@@ -40,24 +56,41 @@ spec:
             description: DeploymentSettingsSpec defines the desired state of DeploymentSettings
             properties:
               agentHelmValues:
-                description: AgentHelmValues custom helm values to apply to all agents
-                  (useful for things like adding customary annotations/labels)
+                description: |-
+                  AgentHelmValues custom helm values to apply
+                  to all agents (useful for things like adding
+                  customary annotations/labels)
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               ai:
                 description: AI settings specifies a configuration for LLM provider
                   clients
                 properties:
+                  analysisRates:
+                    description: Configure the pace at which AI insight analysis should
+                      run. Useful if you want to minimize impacts on inference costs.
+                    properties:
+                      fast:
+                        description: Fast is the rate in seconds for fast analysis,
+                          eg when the prompt used has seen a material change. Example
+                          1h
+                        type: string
+                      slow:
+                        description: Slow is the rate in seconds for slow analysis,
+                          eg when the prompt used has not seen a material change.
+                          Example 2h
+                        type: string
+                    type: object
                   anthropic:
                     description: Anthropic holds the Anthropic provider configuration.
                     properties:
                       baseUrl:
-                        description: A custom base url to use, for reimplementations
-                          of the same API scheme (for instance Together.ai uses the
-                          OpenAI API spec)
+                        description: |-
+                          BaseUrl is a custom base url to use, for reimplementations
+                          of the same API scheme (for instance Together.ai uses the OpenAI API spec)
                         type: string
                       embeddingModel:
-                        description: Model to use for generating embeddings
+                        description: EmbeddingModel to use for generating embeddings
                         type: string
                       model:
                         description: Model is the LLM model name to use.
@@ -89,7 +122,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: Model to use for tool calling, which is less
+                        description: ToolModel to use for tool calling, which is less
                           frequent and often requires more advanced reasoning
                         type: string
                     required:
@@ -100,19 +133,21 @@ spec:
                       generate LLM insights
                     properties:
                       apiVersion:
-                        description: The azure openai Data plane - inference api version
-                          to use, defaults to 2024-10-01-preview or the latest available
+                        description: |-
+                          The azure openai Data plane - inference api version to use,
+                          defaults to 2024-10-01-preview or the latest available
                         type: string
                       embeddingModel:
-                        description: Model to use for generating embeddings
+                        description: EmbeddingModel to use for generating embeddings.
                         type: string
                       endpoint:
-                        description: 'Your Azure OpenAI endpoint, should be formatted
-                          like: https://{endpoint}/openai/deployments/{deployment-id}"'
+                        description: |-
+                          Endpoint is your Azure OpenAI endpoint,
+                          should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
                         type: string
                       model:
-                        description: The OpenAi Model you wish to use.  If not specified,
-                          Plural will provide a default
+                        description: Model - the OpenAi model you wish to use. If
+                          not specified, Plural will provide a default.
                         type: string
                       tokenSecretRef:
                         description: |-
@@ -141,8 +176,8 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: Model to use for tool calling, which is less
-                          frequent and often requires more advanced reasoning
+                        description: ToolModel to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning.
                         type: string
                     required:
                     - endpoint
@@ -152,16 +187,20 @@ spec:
                     description: Bedrock holds configuration for using AWS Bedrock
                       to generate LLM insights
                     properties:
-                      accessKeyId:
-                        description: An AWS Access Key ID to use, can also use IRSA
-                          to acquire credentials
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
                         type: string
                       modelId:
-                        description: The AWS Bedrock Model ID to use
+                        description: ModelID is the AWS Bedrock Model ID to use.
                         type: string
-                      secretAccessKeyRef:
-                        description: An AWS Secret Access Key to use, can also use
-                          IRSA to acquire credentials
+                      region:
+                        description: Region is the AWS region the model is hosted
+                          in
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -185,16 +224,18 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModelId:
-                        description: Model to use for tool calling, which is less
-                          frequent and often requires more advanced reasoning
+                        description: ToolModelId to use for tool calling, which is
+                          less frequent and often requires more advanced reasoning
                         type: string
                     required:
                     - modelId
+                    - region
+                    - tokenSecretRef
                     type: object
                   embeddingProvider:
-                    description: Provider to use for generating embeddings. Oftentimes
-                      foundational model providers do not have embeddings models,
-                      and it's better to simply use OpenAI.
+                    description: |-
+                      EmbeddingProvider to use for generating embeddings. Oftentimes foundational
+                      model providers do not have embeddings models, and it's better to simply use OpenAI.
                     enum:
                     - OPENAI
                     - ANTHROPIC
@@ -210,17 +251,20 @@ spec:
                     type: boolean
                   graph:
                     description: Configuration for the cloud graph store, which uses
-                      similar datastores to the vector store
+                      similar datastores to the vector store.
                     properties:
                       elastic:
-                        description: elastic configuration for the graph store
+                        description: Elastic configuration for the graph store.
                         properties:
                           host:
+                            description: Host is the host of the elasticsearch cluster.
                             type: string
                           index:
+                            description: Index is the index of the elasticsearch cluster.
                             type: string
                           passwordSecretRef:
-                            description: SecretKeySelector selects a key of a Secret.
+                            description: PasswordSecretRef is a reference to the local
+                              secret holding the password to authenticate with.
                             properties:
                               key:
                                 description: The key of the secret to select from.  Must
@@ -244,6 +288,7 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                           user:
+                            description: User is the user to authenticate with.
                             type: string
                         required:
                         - host
@@ -251,15 +296,19 @@ spec:
                         type: object
                       enabled:
                         default: false
+                        description: Enabled controls whether the graph store is enabled
+                          or not.
                         type: boolean
                       store:
+                        description: Store is the type of the graph store to use.
                         enum:
                         - ELASTIC
                         type: string
                     type: object
                   ollama:
-                    description: Ollama holds configuration for a self-hosted Ollama
-                      deployment, more details available at https://github.com/ollama/ollama
+                    description: |-
+                      Ollama holds configuration for a self-hosted Ollama deployment,
+                      more details available at https://github.com/ollama/ollama
                     properties:
                       model:
                         description: Model is the Ollama model to use when querying
@@ -267,7 +316,7 @@ spec:
                         type: string
                       tokenSecretRef:
                         description: |-
-                          TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
+                          AuthorizationSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
                           to send to your ollama api in case authorization is required (eg for an instance hosted on a public network)
                         properties:
                           key:
@@ -292,7 +341,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: Model to use for tool calling, which is less
+                        description: ToolModel to use for tool calling, which is less
                           frequent and often requires more advanced reasoning
                         type: string
                       url:
@@ -306,12 +355,12 @@ spec:
                     description: OpenAI holds the OpenAI provider configuration.
                     properties:
                       baseUrl:
-                        description: A custom base url to use, for reimplementations
-                          of the same API scheme (for instance Together.ai uses the
-                          OpenAI API spec)
+                        description: |-
+                          BaseUrl is a custom base url to use, for reimplementations
+                          of the same API scheme (for instance Together.ai uses the OpenAI API spec)
                         type: string
                       embeddingModel:
-                        description: Model to use for generating embeddings
+                        description: EmbeddingModel to use for generating embeddings
                         type: string
                       model:
                         description: Model is the LLM model name to use.
@@ -343,7 +392,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: Model to use for tool calling, which is less
+                        description: ToolModel to use for tool calling, which is less
                           frequent and often requires more advanced reasoning
                         type: string
                     required:
@@ -362,8 +411,8 @@ spec:
                     - VERTEX
                     type: string
                   toolProvider:
-                    description: Provider to use for tool calling, in case you want
-                      to use a different LLM more optimized to those tasks
+                    description: ToolProvider to use for tool calling, in case you
+                      want to use a different LLM more optimized to those tasks
                     enum:
                     - OPENAI
                     - ANTHROPIC
@@ -373,8 +422,12 @@ spec:
                     - VERTEX
                     type: string
                   tools:
+                    description: Tools holds the configuration for the tools that
+                      can be used with the AI integration.
                     properties:
                       createPr:
+                        description: CreatePr holds the configuration for the pr automation
+                          tool.
                         properties:
                           scmConnectionRef:
                             description: ScmConnectionRef the SCM connection to use
@@ -423,15 +476,21 @@ spec:
                         type: object
                     type: object
                   vectorStore:
+                    description: VectorStore holds configuration for using a vector
+                      store to store embeddings.
                     properties:
                       elastic:
+                        description: Elastic configuration for the vector store.
                         properties:
                           host:
+                            description: Host is the host of the elasticsearch cluster.
                             type: string
                           index:
+                            description: Index is the index of the elasticsearch cluster.
                             type: string
                           passwordSecretRef:
-                            description: SecretKeySelector selects a key of a Secret.
+                            description: PasswordSecretRef is a reference to the local
+                              secret holding the password to authenticate with.
                             properties:
                               key:
                                 description: The key of the secret to select from.  Must
@@ -455,6 +514,7 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                           user:
+                            description: User is the user to authenticate with.
                             type: string
                         required:
                         - host
@@ -462,15 +522,24 @@ spec:
                         type: object
                       enabled:
                         default: false
+                        description: Enabled controls whether the vector store is
+                          enabled or not..
                         type: boolean
                       opensearch:
+                        description: Opensearch configuration for the vector store.
                         properties:
                           awsAccessKeyId:
+                            description: AWSAccessKeyID is the AWS Access Key ID to
+                              use, can also use IRSA to acquire credentials.
                             type: string
                           awsRegion:
+                            description: AwsRegion is the AWS region to use, defaults
+                              to us-east-1
                             type: string
                           awsSecretAccessKeyRef:
-                            description: SecretKeySelector selects a key of a Secret.
+                            description: |-
+                              AWSSecretAccessKeyRef is a reference to the local secret holding the AWS Secret Access Key to use,
+                              can also use IRSA to acquire credentials.
                             properties:
                               key:
                                 description: The key of the secret to select from.  Must
@@ -494,14 +563,18 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                           host:
+                            description: Host is the host of the opensearch cluster.
                             type: string
                           index:
+                            description: Index is the index of the opensearch cluster.
                             type: string
                         required:
                         - host
                         - index
                         type: object
                       vectorStore:
+                        description: VectorStore is the type of the vector store to
+                          use.
                         enum:
                         - ELASTIC
                         - OPENSEARCH
@@ -511,21 +584,27 @@ spec:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights
                     properties:
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
+                        type: string
                       endpoint:
-                        description: A custom endpoint for self-deployed models
+                        description: Endpoint is a custom endpoint for self-deployed
+                          models
                         type: string
                       location:
-                        description: The GCP region Vertex is queried from
+                        description: Location is the GCP region Vertex is queried
+                          from
                         type: string
                       model:
-                        description: The Vertex AI model to use
+                        description: Model is the Vertex AI model to use
                         type: string
                       project:
-                        description: The GCP project you'll be using
+                        description: Project is the GCP project you'll be using
                         type: string
                       serviceAccountJsonSecretRef:
-                        description: An Service Account json file stored w/in a kubernetes
-                          secret to use for authentication to GCP
+                        description: ServiceAccountJsonSecretRef is a Service Account
+                          json file stored w/in a kubernetes secret to use for authentication
+                          to GCP
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -549,7 +628,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: Model to use for tool calling, which is less
+                        description: ToolModel to use for tool calling, which is less
                           frequent and often requires more advanced reasoning
                         type: string
                     required:
@@ -558,7 +637,7 @@ spec:
                     type: object
                 type: object
               bindings:
-                description: Bindings
+                description: Bindings global configuration for access control.
                 properties:
                   create:
                     description: Create bindings.
@@ -630,22 +709,25 @@ spec:
                     type: array
                 type: object
               cost:
-                description: Settings for managing Plural's cost management features
+                description: Cost settings for managing Plural's cost management features
                 properties:
                   recommendationCushion:
                     description: |-
-                      A percentage amount of cushion to give over the average discovered utilization to generate a scaling recommendation,
-                      should be between 1-99.
+                      RecommendationCushion is a percentage amount of cushion
+                      to give over the average discovered utilization to generate
+                      a scaling recommendation, should be between 1-99.
                     format: int64
                     type: integer
                   recommendationThreshold:
-                    description: The minimal monthly cost for a recommendation to
-                      be covered by a controller
+                    description: |-
+                      RecommendationThreshold is the minimal monthly cost for
+                      a recommendation to be covered by a controller.
                     format: int64
                     type: integer
                 type: object
               deploymentRepositoryRef:
-                description: pointer to the deployment GIT repository to use
+                description: DeploymentRepositoryRef is a pointer to the deployment
+                  GIT repository to use
                 properties:
                   name:
                     description: Name is a resource name.
@@ -658,29 +740,29 @@ spec:
                 - namespace
                 type: object
               logging:
-                description: Settings for connections to log aggregation datastores
+                description: Logging settings for connections to log aggregation datastores
                 properties:
                   driver:
                     default: VICTORIA
-                    description: The type of log aggregation solution you wish to
-                      use
+                    description: Driver is the type of log aggregation solution you
+                      wish to use.
                     enum:
                     - VICTORIA
                     - ELASTIC
                     - OPENSEARCH
                     type: string
                   elastic:
-                    description: Configures a connection to elasticsearch
+                    description: Elastic configures a connection to elasticsearch
                     properties:
                       host:
-                        description: Host ...
+                        description: Host is the elasticsearch host to connect to.
                         type: string
                       index:
-                        description: Index to query in elasticsearch
+                        description: Index to query in elasticsearch.
                         type: string
                       passwordSecretRef:
-                        description: PasswordSecretRef selects a key of a password
-                          Secret
+                        description: PasswordSecretRef is a reference to a secret
+                          containing the password to connect with basic auth.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -704,26 +786,28 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       user:
-                        description: User to connect with basic auth
+                        description: User to connect with basic auth.
                         type: string
                     required:
                     - host
                     type: object
                   enabled:
+                    description: Enabled defines whether to enable the logging integration
+                      or not.
                     type: boolean
                   opensearch:
-                    description: Configures a connection to opensearch
+                    description: Opensearch configures a connection to opensearch
                     properties:
                       awsAccessKeyId:
                         description: AWS Access Key ID to use, can also use IRSA to
-                          acquire credentials
+                          acquire credentials.
                         type: string
                       awsRegion:
-                        description: AWS Region to use
+                        description: AWS Region to use.
                         type: string
                       awsSecretAccessKeySecretRef:
                         description: AWS Secret Access Key to use, can also use IRSA
-                          to acquire credentials
+                          to acquire credentials.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -747,26 +831,26 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       host:
-                        description: Host ...
+                        description: Host is the opensearch host to connect to.
                         type: string
                       index:
-                        description: Index to query in opensearch
+                        description: Index to query in opensearch.
                         type: string
                     required:
                     - host
                     type: object
                   victoria:
-                    description: Configures a connection to victoria metrics
+                    description: Victoria configures a connection to VictoriaMetrics
                     properties:
                       host:
-                        description: Host ...
+                        description: Host is the host to connect to.
                         type: string
                       password:
-                        description: Password to connect w/ for basic auth
+                        description: Password to connect w/ for basic auth.
                         type: string
                       passwordSecretRef:
-                        description: PasswordSecretRef selects a key of a password
-                          Secret
+                        description: PasswordSecretRef is a reference to a secret
+                          containing the password to connect with basic auth.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -790,7 +874,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       user:
-                        description: User to connect with basic auth
+                        description: User to connect with basic auth.
                         type: string
                     required:
                     - host
@@ -801,13 +885,14 @@ spec:
                   to use
                 properties:
                   host:
-                    description: Host ...
+                    description: Host is the host to connect to.
                     type: string
                   password:
-                    description: Password to connect w/ for basic auth
+                    description: Password to connect w/ for basic auth.
                     type: string
                   passwordSecretRef:
-                    description: PasswordSecretRef selects a key of a password Secret
+                    description: PasswordSecretRef is a reference to a secret containing
+                      the password to connect with basic auth.
                     properties:
                       key:
                         description: The key of the secret to select from.  Must be
@@ -831,27 +916,30 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   user:
-                    description: User to connect with basic auth
+                    description: User to connect with basic auth.
                     type: string
                 required:
                 - host
                 type: object
               managementRepo:
-                description: The root repo for setting up your infrastructure with
-                  Plural.  Usually this will be your `plural up repo`
+                description: |-
+                  ManagementRepo is the root repo for setting up
+                  your infrastructure with Plural. Usually this
+                  will be your `plural up repo`
                 type: string
               prometheusConnection:
                 description: PrometheusConnection connection details for a prometheus
                   instance to use
                 properties:
                   host:
-                    description: Host ...
+                    description: Host is the host to connect to.
                     type: string
                   password:
-                    description: Password to connect w/ for basic auth
+                    description: Password to connect w/ for basic auth.
                     type: string
                   passwordSecretRef:
-                    description: PasswordSecretRef selects a key of a password Secret
+                    description: PasswordSecretRef is a reference to a secret containing
+                      the password to connect with basic auth.
                     properties:
                       key:
                         description: The key of the secret to select from.  Must be
@@ -875,13 +963,14 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   user:
-                    description: User to connect with basic auth
+                    description: User to connect with basic auth.
                     type: string
                 required:
                 - host
                 type: object
               scaffoldsRepositoryRef:
-                description: pointer to the Scaffolds GIT repository to use
+                description: ScaffoldsRepositoryRef is a pointer to the Scaffolds
+                  GIT repository to use
                 properties:
                   name:
                     description: Name is a resource name.
@@ -894,10 +983,10 @@ spec:
                 - namespace
                 type: object
               stacks:
-                description: Stacks global configuration for stack execution
+                description: Stacks global configuration for stack execution.
                 properties:
                   connectionRef:
-                    description: ConnectionRef reference to ScmConnection
+                    description: ConnectionRef reference to ScmConnection.
                     properties:
                       apiVersion:
                         description: API version of the referent.
@@ -941,13 +1030,17 @@ spec:
                     x-kubernetes-map-type: atomic
                   jobSpec:
                     description: JobSpec optional k8s job configuration for the job
-                      that will apply this stack
+                      that will apply this stack.
                     properties:
                       annotations:
                         additionalProperties:
                           type: string
+                        description: Annotations to apply to the job for additional
+                          metadata.
                         type: object
                       containers:
+                        description: Containers to run as part of the job, such as
+                          test runners or validation scripts.
                         items:
                           properties:
                             args:
@@ -958,8 +1051,12 @@ spec:
                               items:
                                 properties:
                                   name:
+                                    description: Name of the environment variable
+                                      to set.
                                     type: string
                                   value:
+                                    description: Value of the environment variable
+                                      to set.
                                     type: string
                                 required:
                                 - name
@@ -970,8 +1067,12 @@ spec:
                               items:
                                 properties:
                                   configMap:
+                                    description: ConfigMap to source environment variables
+                                      from.
                                     type: string
                                   secret:
+                                    description: Secret to source environment variables
+                                      from.
                                     type: string
                                 required:
                                 - configMap
@@ -1004,12 +1105,21 @@ spec:
                       labels:
                         additionalProperties:
                           type: string
+                        description: Labels to apply to the job for organization and
+                          selection.
                         type: object
                       namespace:
+                        description: Namespace where the job will be executed.
                         type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: NodeSelector to apply to the job for scheduling.
+                        type: object
                       raw:
-                        description: Raw can be used if you'd rather define the job
-                          spec via straight Kubernetes manifest file.
+                        description: |-
+                          Raw allows defining the job using a full Kubernetes JobSpec manifest
+                          instead of the simplified container-based approach.
                         properties:
                           activeDeadlineSeconds:
                             description: |-
@@ -1023,7 +1133,8 @@ spec:
                           backoffLimit:
                             description: |-
                               Specifies the number of retries before marking this job failed.
-                              Defaults to 6
+                              Defaults to 6, unless backoffLimitPerIndex (only Indexed Job) is specified.
+                              When backoffLimitPerIndex is specified, backoffLimit defaults to 2147483647.
                             format: int32
                             type: integer
                           backoffLimitPerIndex:
@@ -1246,8 +1357,6 @@ spec:
 
                               When using podFailurePolicy, Failed is the the only allowed value.
                               TerminatingOrFailed and Failed are allowed values when podFailurePolicy is not in use.
-                              This is an beta field. To use this, enable the JobPodReplacementPolicy feature toggle.
-                              This is on by default.
                             type: string
                           selector:
                             description: |-
@@ -1310,7 +1419,7 @@ spec:
                                 description: |-
                                   rules represents the list of alternative rules for the declaring the Jobs
                                   as successful before `.status.succeeded >= .spec.completions`. Once any of the rules are met,
-                                  the "SucceededCriteriaMet" condition is added, and the lingering pods are removed.
+                                  the "SuccessCriteriaMet" condition is added, and the lingering pods are removed.
                                   The terminal state for such a Job has the "Complete" condition.
                                   Additionally, these rules are evaluated in order; Once the Job meets one of the rules,
                                   other rules are ignored. At most 20 elements are allowed.
@@ -1999,8 +2108,8 @@ spec:
                                               most preferred is the one with the greatest sum of weights, i.e.
                                               for each node that meets all of the scheduling requirements (resource
                                               request, requiredDuringScheduling anti-affinity expressions, etc.),
-                                              compute a sum by iterating through the elements of this field and adding
-                                              "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
+                                              compute a sum by iterating through the elements of this field and subtracting
+                                              "weight" from the sum if the node has pods which matches the corresponding podAffinityTerm; the
                                               node(s) with the highest sum are the most preferred.
                                             items:
                                               description: The weights of all of the
@@ -2409,8 +2518,9 @@ spec:
                                               variable present in a Container.
                                             properties:
                                               name:
-                                                description: Name of the environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Name of the environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               value:
                                                 description: |-
@@ -2472,6 +2582,44 @@ spec:
                                                         type: string
                                                     required:
                                                     - fieldPath
+                                                    type: object
+                                                    x-kubernetes-map-type: atomic
+                                                  fileKeyRef:
+                                                    description: |-
+                                                      FileKeyRef selects a key of the env file.
+                                                      Requires the EnvFiles feature gate to be enabled.
+                                                    properties:
+                                                      key:
+                                                        description: |-
+                                                          The key within the env file. An invalid key will prevent the pod from starting.
+                                                          The keys defined within a source may consist of any printable ASCII characters except '='.
+                                                          During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.
+                                                        type: string
+                                                      optional:
+                                                        default: false
+                                                        description: |-
+                                                          Specify whether the file or its key must be defined. If the file or key
+                                                          does not exist, then the env var is not published.
+                                                          If optional is set to true and the specified key does not exist,
+                                                          the environment variable will not be set in the Pod's containers.
+
+                                                          If optional is set to false and the specified key does not exist,
+                                                          an error will be returned during Pod creation.
+                                                        type: boolean
+                                                      path:
+                                                        description: |-
+                                                          The path within the volume from which to select the file.
+                                                          Must be relative and may not contain the '..' path or start with '..'.
+                                                        type: string
+                                                      volumeName:
+                                                        description: The name of the
+                                                          volume mount containing
+                                                          the env file.
+                                                        type: string
+                                                    required:
+                                                    - key
+                                                    - path
+                                                    - volumeName
                                                     type: object
                                                     x-kubernetes-map-type: atomic
                                                   resourceFieldRef:
@@ -2539,8 +2687,8 @@ spec:
                                         envFrom:
                                           description: |-
                                             List of sources to populate environment variables in the container.
-                                            The keys defined within a source must be a C_IDENTIFIER. All invalid keys
-                                            will be reported as an event when the container is starting. When a key exists in multiple
+                                            The keys defined within a source may consist of any printable ASCII characters except '='.
+                                            When a key exists in multiple
                                             sources, the value associated with the last source will take precedence.
                                             Values defined by an Env with a duplicate key will take precedence.
                                             Cannot be updated.
@@ -2569,9 +2717,9 @@ spec:
                                                 type: object
                                                 x-kubernetes-map-type: atomic
                                               prefix:
-                                                description: Optional text to prepend
-                                                  to the name of each environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Optional text to prepend to the name of each environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               secretRef:
                                                 description: The Secret to select
@@ -3274,7 +3422,7 @@ spec:
                                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                                 that are used by this container.
 
-                                                This is an alpha field and requires enabling the
+                                                This field depends on the
                                                 DynamicResourceAllocation feature gate.
 
                                                 This field is immutable. It can only be set for containers.
@@ -3329,10 +3477,10 @@ spec:
                                         restartPolicy:
                                           description: |-
                                             RestartPolicy defines the restart behavior of individual containers in a pod.
-                                            This field may only be set for init containers, and the only allowed value is "Always".
-                                            For non-init containers or when this field is not specified,
+                                            This overrides the pod-level restart policy. When this field is not specified,
                                             the restart behavior is defined by the Pod's restart policy and the container type.
-                                            Setting the RestartPolicy as "Always" for the init container will have the following effect:
+                                            Additionally, setting the RestartPolicy as "Always" for the init container will
+                                            have the following effect:
                                             this init container will be continually restarted on
                                             exit until all regular containers have terminated. Once all regular
                                             containers have completed, all init containers with restartPolicy "Always"
@@ -3344,6 +3492,59 @@ spec:
                                             init container is started, or after any startupProbe has successfully
                                             completed.
                                           type: string
+                                        restartPolicyRules:
+                                          description: |-
+                                            Represents a list of rules to be checked to determine if the
+                                            container should be restarted on exit. The rules are evaluated in
+                                            order. Once a rule matches a container exit condition, the remaining
+                                            rules are ignored. If no rule matches the container exit condition,
+                                            the Container-level restart policy determines the whether the container
+                                            is restarted or not. Constraints on the rules:
+                                            - At most 20 rules are allowed.
+                                            - Rules can have the same action.
+                                            - Identical rules are not forbidden in validations.
+                                            When rules are specified, container MUST set RestartPolicy explicitly
+                                            even it if matches the Pod's RestartPolicy.
+                                          items:
+                                            description: ContainerRestartRule describes
+                                              how a container exit is handled.
+                                            properties:
+                                              action:
+                                                description: |-
+                                                  Specifies the action taken on a container exit if the requirements
+                                                  are satisfied. The only possible value is "Restart" to restart the
+                                                  container.
+                                                type: string
+                                              exitCodes:
+                                                description: Represents the exit codes
+                                                  to check on container exits.
+                                                properties:
+                                                  operator:
+                                                    description: |-
+                                                      Represents the relationship between the container exit code(s) and the
+                                                      specified values. Possible values are:
+                                                      - In: the requirement is satisfied if the container exit code is in the
+                                                        set of specified values.
+                                                      - NotIn: the requirement is satisfied if the container exit code is
+                                                        not in the set of specified values.
+                                                    type: string
+                                                  values:
+                                                    description: |-
+                                                      Specifies the set of values to check for container exit codes.
+                                                      At most 255 elements are allowed.
+                                                    items:
+                                                      format: int32
+                                                      type: integer
+                                                    type: array
+                                                    x-kubernetes-list-type: set
+                                                required:
+                                                - operator
+                                                type: object
+                                            required:
+                                            - action
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         securityContext:
                                           description: |-
                                             SecurityContext defines the security options the container should be run with.
@@ -3974,8 +4175,9 @@ spec:
                                               variable present in a Container.
                                             properties:
                                               name:
-                                                description: Name of the environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Name of the environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               value:
                                                 description: |-
@@ -4037,6 +4239,44 @@ spec:
                                                         type: string
                                                     required:
                                                     - fieldPath
+                                                    type: object
+                                                    x-kubernetes-map-type: atomic
+                                                  fileKeyRef:
+                                                    description: |-
+                                                      FileKeyRef selects a key of the env file.
+                                                      Requires the EnvFiles feature gate to be enabled.
+                                                    properties:
+                                                      key:
+                                                        description: |-
+                                                          The key within the env file. An invalid key will prevent the pod from starting.
+                                                          The keys defined within a source may consist of any printable ASCII characters except '='.
+                                                          During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.
+                                                        type: string
+                                                      optional:
+                                                        default: false
+                                                        description: |-
+                                                          Specify whether the file or its key must be defined. If the file or key
+                                                          does not exist, then the env var is not published.
+                                                          If optional is set to true and the specified key does not exist,
+                                                          the environment variable will not be set in the Pod's containers.
+
+                                                          If optional is set to false and the specified key does not exist,
+                                                          an error will be returned during Pod creation.
+                                                        type: boolean
+                                                      path:
+                                                        description: |-
+                                                          The path within the volume from which to select the file.
+                                                          Must be relative and may not contain the '..' path or start with '..'.
+                                                        type: string
+                                                      volumeName:
+                                                        description: The name of the
+                                                          volume mount containing
+                                                          the env file.
+                                                        type: string
+                                                    required:
+                                                    - key
+                                                    - path
+                                                    - volumeName
                                                     type: object
                                                     x-kubernetes-map-type: atomic
                                                   resourceFieldRef:
@@ -4104,8 +4344,8 @@ spec:
                                         envFrom:
                                           description: |-
                                             List of sources to populate environment variables in the container.
-                                            The keys defined within a source must be a C_IDENTIFIER. All invalid keys
-                                            will be reported as an event when the container is starting. When a key exists in multiple
+                                            The keys defined within a source may consist of any printable ASCII characters except '='.
+                                            When a key exists in multiple
                                             sources, the value associated with the last source will take precedence.
                                             Values defined by an Env with a duplicate key will take precedence.
                                             Cannot be updated.
@@ -4134,9 +4374,9 @@ spec:
                                                 type: object
                                                 x-kubernetes-map-type: atomic
                                               prefix:
-                                                description: Optional text to prepend
-                                                  to the name of each environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Optional text to prepend to the name of each environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               secretRef:
                                                 description: The Secret to select
@@ -4822,7 +5062,7 @@ spec:
                                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                                 that are used by this container.
 
-                                                This is an alpha field and requires enabling the
+                                                This field depends on the
                                                 DynamicResourceAllocation feature gate.
 
                                                 This field is immutable. It can only be set for containers.
@@ -4878,9 +5118,53 @@ spec:
                                           description: |-
                                             Restart policy for the container to manage the restart behavior of each
                                             container within a pod.
-                                            This may only be set for init containers. You cannot set this field on
-                                            ephemeral containers.
+                                            You cannot set this field on ephemeral containers.
                                           type: string
+                                        restartPolicyRules:
+                                          description: |-
+                                            Represents a list of rules to be checked to determine if the
+                                            container should be restarted on exit. You cannot set this field on
+                                            ephemeral containers.
+                                          items:
+                                            description: ContainerRestartRule describes
+                                              how a container exit is handled.
+                                            properties:
+                                              action:
+                                                description: |-
+                                                  Specifies the action taken on a container exit if the requirements
+                                                  are satisfied. The only possible value is "Restart" to restart the
+                                                  container.
+                                                type: string
+                                              exitCodes:
+                                                description: Represents the exit codes
+                                                  to check on container exits.
+                                                properties:
+                                                  operator:
+                                                    description: |-
+                                                      Represents the relationship between the container exit code(s) and the
+                                                      specified values. Possible values are:
+                                                      - In: the requirement is satisfied if the container exit code is in the
+                                                        set of specified values.
+                                                      - NotIn: the requirement is satisfied if the container exit code is
+                                                        not in the set of specified values.
+                                                    type: string
+                                                  values:
+                                                    description: |-
+                                                      Specifies the set of values to check for container exit codes.
+                                                      At most 255 elements are allowed.
+                                                    items:
+                                                      format: int32
+                                                      type: integer
+                                                    type: array
+                                                    x-kubernetes-list-type: set
+                                                required:
+                                                - operator
+                                                type: object
+                                            required:
+                                            - action
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         securityContext:
                                           description: |-
                                             Optional: SecurityContext defines the security options the ephemeral container should be run with.
@@ -5432,7 +5716,9 @@ spec:
                                   hostNetwork:
                                     description: |-
                                       Host networking requested for this pod. Use the host's network namespace.
-                                      If this option is set, the ports that will be used must be specified.
+                                      When using HostNetwork you should specify ports so the scheduler is aware.
+                                      When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`,
+                                      and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`.
                                       Default to false.
                                     type: boolean
                                   hostPID:
@@ -5456,6 +5742,19 @@ spec:
                                     description: |-
                                       Specifies the hostname of the Pod
                                       If not specified, the pod's hostname will be set to a system-defined value.
+                                    type: string
+                                  hostnameOverride:
+                                    description: |-
+                                      HostnameOverride specifies an explicit override for the pod's hostname as perceived by the pod.
+                                      This field only specifies the pod's hostname and does not affect its DNS records.
+                                      When this field is set to a non-empty string:
+                                      - It takes precedence over the values set in `hostname` and `subdomain`.
+                                      - The Pod's hostname will be set to this value.
+                                      - `setHostnameAsFQDN` must be nil or set to false.
+                                      - `hostNetwork` must be set to false.
+
+                                      This field must be a valid DNS subdomain as defined in RFC 1123 and contain at most 64 characters.
+                                      Requires the HostnameOverride feature gate to be enabled.
                                     type: string
                                   imagePullSecrets:
                                     description: |-
@@ -5538,8 +5837,9 @@ spec:
                                               variable present in a Container.
                                             properties:
                                               name:
-                                                description: Name of the environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Name of the environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               value:
                                                 description: |-
@@ -5601,6 +5901,44 @@ spec:
                                                         type: string
                                                     required:
                                                     - fieldPath
+                                                    type: object
+                                                    x-kubernetes-map-type: atomic
+                                                  fileKeyRef:
+                                                    description: |-
+                                                      FileKeyRef selects a key of the env file.
+                                                      Requires the EnvFiles feature gate to be enabled.
+                                                    properties:
+                                                      key:
+                                                        description: |-
+                                                          The key within the env file. An invalid key will prevent the pod from starting.
+                                                          The keys defined within a source may consist of any printable ASCII characters except '='.
+                                                          During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.
+                                                        type: string
+                                                      optional:
+                                                        default: false
+                                                        description: |-
+                                                          Specify whether the file or its key must be defined. If the file or key
+                                                          does not exist, then the env var is not published.
+                                                          If optional is set to true and the specified key does not exist,
+                                                          the environment variable will not be set in the Pod's containers.
+
+                                                          If optional is set to false and the specified key does not exist,
+                                                          an error will be returned during Pod creation.
+                                                        type: boolean
+                                                      path:
+                                                        description: |-
+                                                          The path within the volume from which to select the file.
+                                                          Must be relative and may not contain the '..' path or start with '..'.
+                                                        type: string
+                                                      volumeName:
+                                                        description: The name of the
+                                                          volume mount containing
+                                                          the env file.
+                                                        type: string
+                                                    required:
+                                                    - key
+                                                    - path
+                                                    - volumeName
                                                     type: object
                                                     x-kubernetes-map-type: atomic
                                                   resourceFieldRef:
@@ -5668,8 +6006,8 @@ spec:
                                         envFrom:
                                           description: |-
                                             List of sources to populate environment variables in the container.
-                                            The keys defined within a source must be a C_IDENTIFIER. All invalid keys
-                                            will be reported as an event when the container is starting. When a key exists in multiple
+                                            The keys defined within a source may consist of any printable ASCII characters except '='.
+                                            When a key exists in multiple
                                             sources, the value associated with the last source will take precedence.
                                             Values defined by an Env with a duplicate key will take precedence.
                                             Cannot be updated.
@@ -5698,9 +6036,9 @@ spec:
                                                 type: object
                                                 x-kubernetes-map-type: atomic
                                               prefix:
-                                                description: Optional text to prepend
-                                                  to the name of each environment
-                                                  variable. Must be a C_IDENTIFIER.
+                                                description: |-
+                                                  Optional text to prepend to the name of each environment variable.
+                                                  May consist of any printable ASCII characters except '='.
                                                 type: string
                                               secretRef:
                                                 description: The Secret to select
@@ -6403,7 +6741,7 @@ spec:
                                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                                 that are used by this container.
 
-                                                This is an alpha field and requires enabling the
+                                                This field depends on the
                                                 DynamicResourceAllocation feature gate.
 
                                                 This field is immutable. It can only be set for containers.
@@ -6458,10 +6796,10 @@ spec:
                                         restartPolicy:
                                           description: |-
                                             RestartPolicy defines the restart behavior of individual containers in a pod.
-                                            This field may only be set for init containers, and the only allowed value is "Always".
-                                            For non-init containers or when this field is not specified,
+                                            This overrides the pod-level restart policy. When this field is not specified,
                                             the restart behavior is defined by the Pod's restart policy and the container type.
-                                            Setting the RestartPolicy as "Always" for the init container will have the following effect:
+                                            Additionally, setting the RestartPolicy as "Always" for the init container will
+                                            have the following effect:
                                             this init container will be continually restarted on
                                             exit until all regular containers have terminated. Once all regular
                                             containers have completed, all init containers with restartPolicy "Always"
@@ -6473,6 +6811,59 @@ spec:
                                             init container is started, or after any startupProbe has successfully
                                             completed.
                                           type: string
+                                        restartPolicyRules:
+                                          description: |-
+                                            Represents a list of rules to be checked to determine if the
+                                            container should be restarted on exit. The rules are evaluated in
+                                            order. Once a rule matches a container exit condition, the remaining
+                                            rules are ignored. If no rule matches the container exit condition,
+                                            the Container-level restart policy determines the whether the container
+                                            is restarted or not. Constraints on the rules:
+                                            - At most 20 rules are allowed.
+                                            - Rules can have the same action.
+                                            - Identical rules are not forbidden in validations.
+                                            When rules are specified, container MUST set RestartPolicy explicitly
+                                            even it if matches the Pod's RestartPolicy.
+                                          items:
+                                            description: ContainerRestartRule describes
+                                              how a container exit is handled.
+                                            properties:
+                                              action:
+                                                description: |-
+                                                  Specifies the action taken on a container exit if the requirements
+                                                  are satisfied. The only possible value is "Restart" to restart the
+                                                  container.
+                                                type: string
+                                              exitCodes:
+                                                description: Represents the exit codes
+                                                  to check on container exits.
+                                                properties:
+                                                  operator:
+                                                    description: |-
+                                                      Represents the relationship between the container exit code(s) and the
+                                                      specified values. Possible values are:
+                                                      - In: the requirement is satisfied if the container exit code is in the
+                                                        set of specified values.
+                                                      - NotIn: the requirement is satisfied if the container exit code is
+                                                        not in the set of specified values.
+                                                    type: string
+                                                  values:
+                                                    description: |-
+                                                      Specifies the set of values to check for container exit codes.
+                                                      At most 255 elements are allowed.
+                                                    items:
+                                                      format: int32
+                                                      type: integer
+                                                    type: array
+                                                    x-kubernetes-list-type: set
+                                                required:
+                                                - operator
+                                                type: object
+                                            required:
+                                            - action
+                                            type: object
+                                          type: array
+                                          x-kubernetes-list-type: atomic
                                         securityContext:
                                           description: |-
                                             SecurityContext defines the security options the container should be run with.
@@ -7016,6 +7407,7 @@ spec:
                                       - spec.hostPID
                                       - spec.hostIPC
                                       - spec.hostUsers
+                                      - spec.resources
                                       - spec.securityContext.appArmorProfile
                                       - spec.securityContext.seLinuxOptions
                                       - spec.securityContext.seccompProfile
@@ -7170,7 +7562,7 @@ spec:
                                     description: |-
                                       Resources is the total amount of CPU and Memory resources required by all
                                       containers in the pod. It supports specifying Requests and Limits for
-                                      "cpu" and "memory" resource names only. ResourceClaims are not supported.
+                                      "cpu", "memory" and "hugepages-" resource names only. ResourceClaims are not supported.
 
                                       This field enables fine-grained control over resource allocation for the
                                       entire pod, allowing resource sharing among containers in a pod.
@@ -7183,7 +7575,7 @@ spec:
                                           Claims lists the names of resources, defined in spec.resourceClaims,
                                           that are used by this container.
 
-                                          This is an alpha field and requires enabling the
+                                          This field depends on the
                                           DynamicResourceAllocation feature gate.
 
                                           This field is immutable. It can only be set for containers.
@@ -8505,15 +8897,13 @@ spec:
                                                         volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim.
                                                         If specified, the CSI driver will create or update the volume with the attributes defined
                                                         in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName,
-                                                        it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass
-                                                        will be applied to the claim but it's not allowed to reset this field to empty string once it is set.
-                                                        If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass
-                                                        will be set by the persistentvolume controller if it exists.
+                                                        it can be changed after the claim is created. An empty string or nil value indicates that no
+                                                        VolumeAttributesClass will be applied to the claim. If the claim enters an Infeasible error state,
+                                                        this field can be reset to its previous value (including nil) to cancel the modification.
                                                         If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be
                                                         set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                                                         exists.
                                                         More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                                                        (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                                                       type: string
                                                     volumeMode:
                                                       description: |-
@@ -8699,12 +9089,10 @@ spec:
                                           description: |-
                                             glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.
                                             Deprecated: Glusterfs is deprecated and the in-tree glusterfs type is no longer supported.
-                                            More info: https://examples.k8s.io/volumes/glusterfs/README.md
                                           properties:
                                             endpoints:
-                                              description: |-
-                                                endpoints is the endpoint name that details Glusterfs topology.
-                                                More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod
+                                              description: endpoints is the endpoint
+                                                name that details Glusterfs topology.
                                               type: string
                                             path:
                                               description: |-
@@ -8783,7 +9171,7 @@ spec:
                                           description: |-
                                             iscsi represents an ISCSI Disk resource that is attached to a
                                             kubelet's host machine and then exposed to the pod.
-                                            More info: https://examples.k8s.io/volumes/iscsi/README.md
+                                            More info: https://kubernetes.io/docs/concepts/storage/volumes/#iscsi
                                           properties:
                                             chapAuthDiscovery:
                                               description: chapAuthDiscovery defines
@@ -9236,6 +9624,112 @@ spec:
                                                         type: array
                                                         x-kubernetes-list-type: atomic
                                                     type: object
+                                                  podCertificate:
+                                                    description: |-
+                                                      Projects an auto-rotating credential bundle (private key and certificate
+                                                      chain) that the pod can use either as a TLS client or server.
+
+                                                      Kubelet generates a private key and uses it to send a
+                                                      PodCertificateRequest to the named signer.  Once the signer approves the
+                                                      request and issues a certificate chain, Kubelet writes the key and
+                                                      certificate chain to the pod filesystem.  The pod does not start until
+                                                      certificates have been issued for each podCertificate projected volume
+                                                      source in its spec.
+
+                                                      Kubelet will begin trying to rotate the certificate at the time indicated
+                                                      by the signer using the PodCertificateRequest.Status.BeginRefreshAt
+                                                      timestamp.
+
+                                                      Kubelet can write a single file, indicated by the credentialBundlePath
+                                                      field, or separate files, indicated by the keyPath and
+                                                      certificateChainPath fields.
+
+                                                      The credential bundle is a single file in PEM format.  The first PEM
+                                                      entry is the private key (in PKCS#8 format), and the remaining PEM
+                                                      entries are the certificate chain issued by the signer (typically,
+                                                      signers will return their certificate chain in leaf-to-root order).
+
+                                                      Prefer using the credential bundle format, since your application code
+                                                      can read it atomically.  If you use keyPath and certificateChainPath,
+                                                      your application must make two separate file reads. If these coincide
+                                                      with a certificate rotation, it is possible that the private key and leaf
+                                                      certificate you read may not correspond to each other.  Your application
+                                                      will need to check for this condition, and re-read until they are
+                                                      consistent.
+
+                                                      The named signer controls chooses the format of the certificate it
+                                                      issues; consult the signer implementation's documentation to learn how to
+                                                      use the certificates it issues.
+                                                    properties:
+                                                      certificateChainPath:
+                                                        description: |-
+                                                          Write the certificate chain at this path in the projected volume.
+
+                                                          Most applications should use credentialBundlePath.  When using keyPath
+                                                          and certificateChainPath, your application needs to check that the key
+                                                          and leaf certificate are consistent, because it is possible to read the
+                                                          files mid-rotation.
+                                                        type: string
+                                                      credentialBundlePath:
+                                                        description: |-
+                                                          Write the credential bundle at this path in the projected volume.
+
+                                                          The credential bundle is a single file that contains multiple PEM blocks.
+                                                          The first PEM block is a PRIVATE KEY block, containing a PKCS#8 private
+                                                          key.
+
+                                                          The remaining blocks are CERTIFICATE blocks, containing the issued
+                                                          certificate chain from the signer (leaf and any intermediates).
+
+                                                          Using credentialBundlePath lets your Pod's application code make a single
+                                                          atomic read that retrieves a consistent key and certificate chain.  If you
+                                                          project them to separate files, your application code will need to
+                                                          additionally check that the leaf certificate was issued to the key.
+                                                        type: string
+                                                      keyPath:
+                                                        description: |-
+                                                          Write the key at this path in the projected volume.
+
+                                                          Most applications should use credentialBundlePath.  When using keyPath
+                                                          and certificateChainPath, your application needs to check that the key
+                                                          and leaf certificate are consistent, because it is possible to read the
+                                                          files mid-rotation.
+                                                        type: string
+                                                      keyType:
+                                                        description: |-
+                                                          The type of keypair Kubelet will generate for the pod.
+
+                                                          Valid values are "RSA3072", "RSA4096", "ECDSAP256", "ECDSAP384",
+                                                          "ECDSAP521", and "ED25519".
+                                                        type: string
+                                                      maxExpirationSeconds:
+                                                        description: |-
+                                                          maxExpirationSeconds is the maximum lifetime permitted for the
+                                                          certificate.
+
+                                                          Kubelet copies this value verbatim into the PodCertificateRequests it
+                                                          generates for this projection.
+
+                                                          If omitted, kube-apiserver will set it to 86400(24 hours). kube-apiserver
+                                                          will reject values shorter than 3600 (1 hour).  The maximum allowable
+                                                          value is 7862400 (91 days).
+
+                                                          The signer implementation is then free to issue a certificate with any
+                                                          lifetime *shorter* than MaxExpirationSeconds, but no shorter than 3600
+                                                          seconds (1 hour).  This constraint is enforced by kube-apiserver.
+                                                          `kubernetes.io` signers will never issue certificates with a lifetime
+                                                          longer than 24 hours.
+                                                        format: int32
+                                                        type: integer
+                                                      signerName:
+                                                        description: Kubelet's generated
+                                                          CSRs will be addressed to
+                                                          this signer.
+                                                        type: string
+                                                    required:
+                                                    - keyType
+                                                    - signerName
+                                                    type: object
                                                   secret:
                                                     description: secret information
                                                       about the secret data to project
@@ -9375,7 +9869,6 @@ spec:
                                           description: |-
                                             rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.
                                             Deprecated: RBD is deprecated and the in-tree rbd type is no longer supported.
-                                            More info: https://examples.k8s.io/volumes/rbd/README.md
                                           properties:
                                             fsType:
                                               description: |-
@@ -9688,8 +10181,9 @@ spec:
                         - template
                         type: object
                       resources:
-                        description: Resource specification that overrides implicit
-                          container resources when containers are not directly configured.
+                        description: |-
+                          Resources specification that overrides implicit container resources
+                          when containers are not directly configured.
                         properties:
                           limits:
                             properties:
@@ -9707,7 +10201,47 @@ spec:
                             type: object
                         type: object
                       serviceAccount:
+                        description: ServiceAccount to use for the job execution.
                         type: string
+                      tolerations:
+                        description: Tolerations to apply to the job for scheduling.
+                        items:
+                          description: |-
+                            The pod this Toleration is attached to tolerates any taint that matches
+                            the triple <key,value,effect> using the matching operator <operator>.
+                          properties:
+                            effect:
+                              description: |-
+                                Effect indicates the taint effect to match. Empty means match all taint effects.
+                                When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                              type: string
+                            key:
+                              description: |-
+                                Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                                If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                              type: string
+                            operator:
+                              description: |-
+                                Operator represents a key's relationship to the value.
+                                Valid operators are Exists and Equal. Defaults to Equal.
+                                Exists is equivalent to wildcard for value, so that a pod can
+                                tolerate all taints of a particular category.
+                              type: string
+                            tolerationSeconds:
+                              description: |-
+                                TolerationSeconds represents the period of time the toleration (which must be
+                                of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                                it is not set, which means tolerate the taint forever (do not evict). Zero and
+                                negative values will be treated as 0 (evict immediately) by the system.
+                              format: int64
+                              type: integer
+                            value:
+                              description: |-
+                                Value is the taint value the toleration matches to.
+                                If the operator is Exists, the value should be empty, otherwise just a regular string.
+                              type: string
+                          type: object
+                        type: array
                     required:
                     - namespace
                     type: object

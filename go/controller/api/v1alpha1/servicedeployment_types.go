@@ -18,17 +18,14 @@ func init() {
 
 type ComponentState string
 
-const (
-	ComponentStateRunning ComponentState = "RUNNING"
-	ComponentStatePending ComponentState = "PENDING"
-	ComponentStateFailed  ComponentState = "FAILED"
-)
+const ComponentStateRunning ComponentState = "RUNNING"
 
 type ServiceKustomize struct {
-	// The path to the kustomization file to use
+	// Path to the kustomization file to use.
 	Path string `json:"path"`
 
-	// whether to enable helm for this kustomize deployment, used for inflating helm charts
+	// EnableHelm indicates whether to enable Helm for this Kustomize deployment.
+	// Used for inflating Helm charts.
 	// +kubebuilder:validation:Optional
 	EnableHelm *bool `json:"enableHelm,omitempty"`
 }
@@ -44,54 +41,73 @@ func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
 type ServiceHelm struct {
 	// +kubebuilder:validation:Optional
 	URL *string `json:"url,omitempty"`
-	// Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively
+
+	// ValuesFrom is a reference to a Kubernetes Secret containing Helm values.
+	// It will consider any key with YAML data as a values file and merge them iteratively.
+	// This allows you to store Helm values in a secret and reference them here.
 	// +kubebuilder:validation:Optional
 	ValuesFrom *corev1.SecretReference `json:"valuesFrom,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
-	// name of the helm release to use when applying
+
+	// Release contains the name of the Helm release to use when applying this service.
 	// +kubebuilder:validation:Optional
 	Release *string `json:"release,omitempty"`
-	// reference to a GitRepository to source the helm chart from (useful if you're using a multi-source configuration for values files)
+
+	// RepositoryRef contains a reference to a GitRepository to source the Helm chart from.
+	// This is useful for using a multi-source configuration for values files.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
-	// arbitrary yaml values to overlay
+
+	// Values contains arbitrary YAML values to overlay.
 	// +kubebuilder:validation:Optional
 	Values *runtime.RawExtension `json:"values,omitempty"`
-	// individual values files to overlay
+
+	//  ValuesFiles contains individual values files to overlay.
 	// +kubebuilder:validation:Optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
-	// chart to use
+
+	// Chart is the name of the Helm chart to use.
 	// +kubebuilder:validation:Optional
 	Chart *string `json:"chart,omitempty"`
-	// chart version to use
+
+	// Version of the Helm chart to use.
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
-	// pointer to the FluxCD helm repository to use
+
+	// Repository is a pointer to the FluxCD Helm repository to use.
 	// +kubebuilder:validation:Optional
 	Repository *NamespacedName `json:"repository,omitempty"`
 
-	// A reference to a git folder/ref
+	// Git contains a reference to a Git folder and ref where the Helm chart is located.
 	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 
-	// whether you want to completely ignore any helm hooks when actualizing this service
+	// IgnoreHooks indicates whether to completely ignore Helm hooks when actualizing this service.
 	// +kubebuilder:validation:Optional
 	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 
-	// whether you want to not include the crds in the /crds folder of the chart (useful if reinstantiating the same chart on the same cluster)
+	// IgnoreCrds indicates whether to not include the CRDs in the /crds folder of the chart.
+	// It is useful if you want to avoid installing CRDs that are already present in the cluster.
 	// +kubebuilder:validation:Optional
 	IgnoreCrds *bool `json:"ignoreCrds,omitempty"`
 
-	// a lua script to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
-	// based on git state or other metadata
+	// LuaScript to use to generate Helm configuration.
+	// This can ultimately return a lua table with keys "values" and "valuesFiles"
+	// to supply overlays for either dynamically based on git state or other metadata.
 	// +kubebuilder:validation:Optional
 	LuaScript *string `json:"luaScript,omitempty"`
 
-	// a lua file to use to generate helm configuration.  This can ultimately return a lua table with keys "values" and "valuesFiles" to supply overlays for either dynamically
-	// based on git state or other metadata
+	// LuaFile to use to generate Helm configuration.
+	// This can ultimately return a Lua table with keys "values" and "valuesFiles"
+	// to supply overlays for either dynamically based on Git state or other metadata.
 	// +kubebuilder:validation:Optional
 	LuaFile *string `json:"luaFile,omitempty"`
+
+	// a folder of lua files to include in the final script used
+	// +kubebuilder:validation:Optional
+	LuaFolder *string `json:"luaFolder,omitempty"`
 }
 
 type ServiceDependency struct {
@@ -112,13 +128,17 @@ type SyncConfigAttributes struct {
 	// +kubebuilder:validation:Optional
 	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
 
+	// Whether to require all resources are owned by this service and fail if they are owned by another. Default is true.
+	// +kubebuilder:validation:Optional
+	RequireOwnership *bool `json:"requireOwnership,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 
-	// DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works
+	// DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works.
 	// +kubebuilder:validation:Optional
 	DiffNormalizers []DiffNormalizers `json:"diffNormalizers,omitempty"`
 }
@@ -130,11 +150,12 @@ type DiffNormalizers struct {
 	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty"`
 
-	// Whether to backfill the given pointers with the current live value, or otherwise ignore it entirely
+	// Backfill indicates whether to backfill the given pointers with the current live value
+	// or otherwise ignore it entirely.
 	// +kubebuilder:validation:Optional
 	Backfill *bool `json:"backfill,omitempty"`
 
-	// A list of json patches to apply to the service which controls how drift detection works
+	// JSONPointers contains a list of JSON patches to apply to the service, which controls how drift detection works.
 	JSONPointers []string `json:"jsonPointers,omitempty"`
 }
 
@@ -198,6 +219,7 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 		CreateNamespace:  &createNamespace,
 		EnforceNamespace: &enforceNamespace,
 		DeleteNamespace:  &deleteNamespace,
+		RequireOwnership: sca.RequireOwnership,
 		NamespaceMetadata: &console.MetadataAttributes{
 			Labels:      labels,
 			Annotations: annotations,
@@ -206,86 +228,118 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 	}, nil
 }
 
+// ServiceSpec defines the desired state of a ServiceDeployment.
 type ServiceSpec struct {
-	// the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
+	// Name of this service.
+	// If not provided, the name from ServiceDeployment.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
-	// the namespace this service will be deployed into, if not provided deploys to the ServiceDeployment's own namespace
+
+	// Namespace where this service will be deployed.
+	// If not provided, deploys to the ServiceDeployment namespace.
 	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty"`
+
+	// DocsPath specifies the path to documentation within the Git repository.
 	// +kubebuilder:validation:Optional
 	DocsPath *string `json:"docsPath,omitempty"`
+
+	// Version specifies the semantic version of this ServiceDeployment.
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version"`
+
+	// Protect when true, prevents deletion of this service to avoid accidental removal.
 	// +kubebuilder:validation:Optional
 	Protect bool `json:"protect,omitempty"`
+
+	// Kustomize configuration for applying Kustomize transformations to manifests.
 	// +kubebuilder:validation:Optional
 	Kustomize *ServiceKustomize `json:"kustomize,omitempty"`
+
+	// Git reference within the repository where the service manifests are located.
 	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
+
+	// Helm configuration for deploying Helm charts, including values and repository settings.
 	// +kubebuilder:validation:Optional
 	Helm *ServiceHelm `json:"helm,omitempty"`
+
+	// SyncConfig contains advanced configuration for how manifests are synchronized to the cluster.
 	// +kubebuilder:validation:Optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
+
+	// RepositoryRef references the GitRepository CRD containing the service source code.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
+
+	// ClusterRef references the target Cluster where this service will be deployed.
 	// +kubebuilder:validation:Required
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
-	// ConfigurationRef is a secret reference which should contain service configuration.
+
+	// ConfigurationRef is a secret reference containing service configuration for templating.
 	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 
-	// reference to a Flow this service belongs within
+	// FlowRef provides contextual linkage to a broader application Flow this service belongs within.
 	// +kubebuilder:validation:Optional
 	FlowRef *corev1.ObjectReference `json:"flowRef,omitempty"`
 
-	// Configuration is a set of non-secret configuration to apply for lightweight templating of manifests in this service
+	// Configuration contains non-secret key-value pairs for lightweight templating of manifests.
 	// +kubebuilder:validation:Optional
 	Configuration map[string]string `json:"configuration,omitempty"`
 
-	// Bindings contain read and write policies of this cluster
+	// Bindings contain read and write policies controlling access to this service.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
-	// Dependencies contain dependent services
+
+	// Dependencies specify services that must be healthy before this service can be deployed.
 	// +kubebuilder:validation:Optional
 	Dependencies []ServiceDependency `json:"dependencies,omitempty"`
-	// Contexts contain dependent service context names
+
+	// Contexts reference ServiceContext names to inject additional configuration.
 	// +kubebuilder:validation:Optional
 	Contexts []string `json:"contexts,omitempty"`
-	// Templated should apply liquid templating to raw yaml files, defaults to true
+
+	// Templated enables Liquid templating for raw YAML files, defaults to true.
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated,omitempty"`
+
+	// Imports enable importing outputs from InfrastructureStack resources for use in templating.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Imports are immutable"
 	Imports []ServiceImport `json:"imports"`
-	// Detach determined if user want to delete or detach service
+
+	// Detach when true, detaches the service on deletion instead of destroying it.
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
 
-	// Sources of this service
+	// Sources specify additional Git repositories to source manifests from for multi-source deployments.
 	// +kubebuilder:validation:Optional
 	Sources []Source `json:"sources,omitempty"`
 
-	// Renderers of this service
+	// Renderers define how to process and render manifests using different engines (Helm, Kustomize, etc.).
 	// +kubebuilder:validation:Optional
 	Renderers []Renderer `json:"renderers,omitempty"`
 
-	// The agent session id that created this service, used for ui linking and otherwise ignored
+	// AgentId represents agent session ID that created this service.
+	// It is used for UI linking and otherwise ignored.
 	// +kubebuilder:validation:Optional
 	AgentId *string `json:"agentId,omitempty"`
 }
 
 type Source struct {
-	//Path the subdirectory this source will live in the final tarball
+	// Path the subdirectory this source will live in the final tarball
 	Path *string `json:"path,omitempty"`
-	//RepositoryRef the reference of the git repository to source from
+
+	// RepositoryRef the reference of the Git repository to source from.
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
-	//Git the location in git to use
+
+	// Git contains a location in a Git repository to use.
 	Git *GitRef `json:"git,omitempty"`
 }
 
 type Renderer struct {
 	Path string `json:"path"`
+
 	// +kubebuilder:validation:Enum=AUTO;RAW;HELM;KUSTOMIZE
 	Type console.RendererType `json:"type"`
 
@@ -293,15 +347,18 @@ type Renderer struct {
 }
 
 type HelmMinimal struct {
-	//Values a helm values file to use when rendering this helm chart
+	// Values a Helm values file to use when rendering this Helm chart.
 	Values *string `json:"values,omitempty"`
-	//ValuesFiles a list of relative paths to values files to use for helm chart templating
+
+	// ValuesFiles a list of relative paths to values files to use for Helm chart templating.
 	ValuesFiles []string `json:"valuesFiles,omitempty"`
-	//Release the helm release name to use when rendering this helm chart
+
+	// Release is a Helm release name to use when rendering this Helm chart.
 	Release *string `json:"release,omitempty"`
 }
 
 type ServiceImport struct {
+	// StackRef is a reference to an InfrastructureStack resource that provides outputs to import.
 	// +kubebuilder:validation:Required
 	StackRef corev1.ObjectReference `json:"stackRef"`
 }
@@ -332,6 +389,7 @@ type ServiceStatus struct {
 
 	// +kubebuilder:validation:Optional
 	Errors []ServiceError `json:"errors,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Components []ServiceComponent `json:"components,omitempty"`
 }
@@ -342,26 +400,45 @@ type ServiceError struct {
 }
 
 type ServiceComponent struct {
-	ID   string `json:"id"`
+	ID string `json:"id"`
+
+	// Name is the name of the Kubernetes resource, e.g. "test-deployment" or "test-job".
 	Name string `json:"name"`
+
+	// Group is a Kubernetes resource group, e.g. "apps" or "batch".
 	// +kubebuilder:validation:Optional
 	Group *string `json:"group,omitempty"`
-	Kind  string  `json:"kind"`
-	// +kubebuilder:validation:Optional
-	Namespace *string `json:"namespace,omitempty"`
-	// State specifies the component state
-	// +kubebuilder:validation:Enum:=RUNNING;PENDING;FAILED
-	// +kubebuilder:validation:Optional
-	State  *ComponentState `json:"state,omitempty"`
-	Synced bool            `json:"synced"`
+
+	// Version is the Kubernetes resource version, e.g. "v1" or "v1beta1".
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
+
+	// Kind is the Kubernetes resource kind, e.g. "Deployment" or "Job".
+	Kind string `json:"kind"`
+
+	// Namespace is the Kubernetes namespace where this component is deployed.
+	// +kubebuilder:validation:Optional
+	Namespace *string `json:"namespace,omitempty"`
+
+	// State specifies the component state.
+	// One of RUNNING, PENDING, FAILED.
+	// +kubebuilder:validation:Enum:=RUNNING;PENDING;FAILED
+	// +kubebuilder:validation:Optional
+	State *ComponentState `json:"state,omitempty"`
+
+	// Synced indicates whether this component is in sync with the desired state.
+	Synced bool `json:"synced"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console repo Id"
+
+// ServiceDeployment provides a GitOps-driven approach to deploy and manage Kubernetes applications from Git repositories.
+// It represents a reference to a service deployed from a Git repo into a Cluster, enabling complete GitOps workflows
+// with full auditability and automated synchronization. The operator manages the deployment lifecycle by fetching
+// manifests from Git repositories and applying them to target clusters with support for Helm, Kustomize, and raw YAML.
 type ServiceDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -400,6 +477,7 @@ func (s *ServiceDeployment) SetCondition(condition metav1.Condition) {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// ServiceDeploymentList contains a list of ServiceDeployment resources.
 type ServiceDeploymentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

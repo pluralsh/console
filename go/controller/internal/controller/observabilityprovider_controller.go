@@ -157,7 +157,7 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 
 			// If deletion process started requeue so that we can make sure observability provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted
@@ -218,7 +218,7 @@ func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Co
 	if !exists {
 		provider.Status.ID = nil
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiProvider, err := in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))
@@ -231,7 +231,7 @@ func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Co
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (in *ObservabilityProviderReconciler) credentials(

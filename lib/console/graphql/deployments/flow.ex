@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :description,         :string
     field :icon,                :string
     field :project_id,          :id
+    field :repositories,        list_of(:string)
     field :read_bindings,       list_of(:policy_binding_attributes)
     field :write_bindings,      list_of(:policy_binding_attributes)
     field :server_associations, list_of(:mcp_server_association_attributes)
@@ -51,6 +52,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :name,        non_null(:string)
     field :description, :string
     field :icon,        :string
+    field :repositories, list_of(:string), description: "the git https urls of the application code repositories used in this flow"
 
     field :servers, list_of(:mcp_server), resolve: dataloader(Deployments),
       description: "servers that are bound to this flow"
@@ -81,6 +83,10 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     connection field :preview_environment_instances, node_type: :preview_environment_instance do
       resolve &Deployments.list_preview_environment_instances/3
+    end
+
+    connection field :vulnerability_reports, node_type: :vulnerability_report do
+      resolve &Deployments.list_vulnerability_reports_for_flow/3
     end
 
     timestamps()

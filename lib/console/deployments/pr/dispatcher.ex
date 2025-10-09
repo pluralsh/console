@@ -4,11 +4,13 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Repo
   alias Console.Deployments.{Pr.Config, Pr.File, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
-  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
+  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket, Azure}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
 
   @type pr_attrs :: %{title: binary, body: binary, branch: binary}
   @type pr_resp :: {:ok, pr_attrs} | Console.error
+  @type commit_status_attrs :: %{sha: binary, url: binary, name: binary, description: binary}
+  @type commit_status :: :queued | :pending | :running | :failed | :successful
 
   @doc """
   Create a pull request for the given SCM, and return the title + url of the pr if successful
@@ -34,7 +36,13 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
 
+  @callback commit_status(conn :: ScmConnection.t, pr :: PullRequest.t, id :: binary | nil, status :: commit_status, attrs :: commit_status_attrs) :: :ok | Console.error
+
+  @callback merge(conn :: ScmConnection.t, pr :: PullRequest.t) :: :ok | Console.error
+
   @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
+
+  @callback slug(url :: binary) :: {:ok, binary} | Console.error
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -43,7 +51,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def create(%PrAutomation{} = pr, branch, ctx) when is_binary(branch) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection, :repository])
     pr = put_in(pr.identifier, resolve_repo(pr.identifier))
-    with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
+    with {:ok, conn} <- setup(%{conn | branch: template_branch(pr.branch, ctx)}, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, ext} <- external_git(pr),
          {:ok, _} <- Plural.template(f, conn.dir, ext),
@@ -65,6 +73,20 @@ defmodule Console.Deployments.Pr.Dispatcher do
       do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
   end
 
+  def pr(%ScmConnection{} = conn, title, body, url, base, head) do
+    impl = dispatcher(conn)
+    with {:ok, slug} <- impl.slug(url) do
+      impl.create(%PrAutomation{
+        title: title,
+        connection_id: conn.id,
+        connection: conn,
+        message: body,
+        branch: base,
+        identifier: slug
+      }, head, %{})
+    end
+  end
+
   def webhook(%ScmConnection{} = conn, %ScmWebhook{} = hook) do
     impl = dispatcher(conn)
     impl.webhook(conn, hook)
@@ -83,6 +105,16 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def approve(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.approve(conn, pr, body)
+  end
+
+  def merge(%ScmConnection{} = conn, %PullRequest{} = pr) do
+    impl = dispatcher(conn)
+    impl.merge(conn, pr)
+  end
+
+  def commit_status(%ScmConnection{} = conn, %PullRequest{} = pr, sha, status, attrs) do
+    impl = dispatcher(conn)
+    impl.commit_status(conn, pr, sha, status, attrs)
   end
 
   def files(%ScmConnection{} = conn, url) do
@@ -112,7 +144,16 @@ defmodule Console.Deployments.Pr.Dispatcher do
   end
   defp resolve_repo(identifier), do: identifier
 
+  defp template_branch(branch, %{} = ctx) when is_binary(branch) do
+    case render_solid(branch, ctx) do
+      {:ok, branch} -> branch
+      _ -> branch
+    end
+  end
+  defp template_branch(branch, _), do: branch
+
   def dispatcher(%{type: :github}), do: Github
   def dispatcher(%{type: :gitlab}), do: Gitlab
   def dispatcher(%{type: :bitbucket}), do: BitBucket
+  def dispatcher(%{type: :azure_devops}), do: Azure
 end

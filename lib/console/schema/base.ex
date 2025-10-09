@@ -6,6 +6,14 @@ defmodule Console.Schema.Base do
     quote do
       use Piazza.Ecto.Schema
       import Console.Schema.Base
+
+      def with_lock(query \\ __MODULE__) do
+        from(q in query, lock: "FOR UPDATE")
+      end
+
+      def with_limit(query \\ __MODULE__, limit) do
+        from(q in query, limit: ^limit)
+      end
     end
   end
 
@@ -19,4 +27,31 @@ defmodule Console.Schema.Base do
       end
     end)
   end
+
+  def duration(cs, field) do
+    with val when is_binary(val) <- get_change(cs, field),
+         {:ok, _} <- parse_duration(val) do
+      cs
+    else
+      {:error, _} -> add_error(cs, field, "invalid duration")
+      _ -> cs
+    end
+  end
+
+  def helm_url(cs, field) do
+    validate_change(cs, field, fn
+      ^field, "http" <> _ -> []
+      ^field, "oci" <> _ -> []
+      _, _ -> [{field, "invalid helm url, must have a scheme of http://, https:// or oci://"}]
+    end)
+  end
+
+  def jitter(%Duration{} = duration) do
+    Console.jitter(floor(seconds(duration) / 2))
+  end
+
+  def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
+
+  def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
+  def parse_duration(duration), do: Duration.from_iso8601(String.upcase("PT#{duration}"))
 end

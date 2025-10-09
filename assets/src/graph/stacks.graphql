@@ -272,6 +272,7 @@ fragment StackEnvironment on StackEnvironment {
 fragment ServiceErrors on ServiceError {
   source
   message
+  warning
 }
 
 fragment StackFile on StackFile {

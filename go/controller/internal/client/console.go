@@ -224,11 +224,21 @@ type ConsoleClient interface {
 	UpsertPrGovernance(ctx context.Context, attributes console.PrGovernanceAttributes) (*console.PrGovernanceFragment, error)
 	DeletePrGovernance(ctx context.Context, id string) error
 	GetPrGovernance(ctx context.Context, id, name *string) (*console.PrGovernanceFragment, error)
+	CreateFederatedCredential(ctx context.Context, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error)
+	GetFederatedCredential(ctx context.Context, id string) (*console.FederatedCredentialFragment, error)
+	UpdateFederatedCredential(ctx context.Context, id string, attributes console.FederatedCredentialAttributes) (*console.FederatedCredentialFragment, error)
+	DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error)
+	IsFederatedCredentialExists(ctx context.Context, id string) (bool, error)
+	GetSentinel(ctx context.Context, id string) (*console.SentinelFragment, error)
+	IsSentinelExists(ctx context.Context, id string) (bool, error)
+	DeleteSentinel(ctx context.Context, id string) error
+	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
+	UpdateSentinel(ctx context.Context, id string, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
 	return &client{
-		consoleClient: console.NewClient(NewHttpClient(token), url, nil),
+		consoleClient: console.NewClient(NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
 		url:           url,
 		ctx:           context.Background(),
 	}

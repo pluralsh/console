@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: notificationsinks.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -14,10 +14,19 @@ spec:
     singular: notificationsink
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: ID of the NotificationSink in the Console API.
+      jsonPath: .status.id
+      name: ID
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: NotificationSink is the Schema for the notificationsinks API
+        description: |-
+          NotificationSink defines notification delivery destinations for events routed by NotificationRouter.
+          It represents the actual channels where notifications are sent, such as Slack webhooks,
+          Microsoft Teams channels, or in-app notifications. NotificationSinks are referenced by
+          NotificationRouter resources to determine where filtered events should be delivered.
         properties:
           apiVersion:
             description: |-
@@ -37,11 +46,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: NotificationSinkSpec defines the desired state of NotificationSink
+            description: |-
+              Spec defines the desired state of the NotificationSink, including the sink type,
+              destination configuration, and delivery settings.
             properties:
               bindings:
-                description: Bindings to determine users/groups to be notified for
-                  PLURAL sync types
+                description: |-
+                  Bindings define the users and groups who can receive notifications through this sink.
+                  This is only applicable for PLURAL type sinks that deliver in-app notifications.
+                  For external sinks like Slack or Teams, notifications are sent to the configured webhook.
                 items:
                   description: Binding represents a policy binding.
                   properties:
@@ -58,54 +71,84 @@ spec:
                   type: object
                 type: array
               configuration:
-                description: Configuration for the specific type
+                description: |-
+                  Configuration contains the type-specific settings for this notification sink.
+                  Only one configuration section should be populated based on the Type field.
+                  Each type has different requirements for delivery setup and authentication.
                 properties:
                   plural:
-                    description: Plural sink configuration knobs
+                    description: |-
+                      Plural configuration for delivering in-app notifications within the Plural Console.
+                      These notifications appear in the Console UI and can optionally trigger email delivery.
                     properties:
                       priority:
-                        description: The priority to label any delivered notification
-                          as
+                        description: |-
+                          Priority determines the importance level of notifications delivered through this sink.
+                          Higher priority notifications may be displayed more prominently in the Console UI
+                          and can influence notification filtering and display behavior.
                         enum:
                         - LOW
                         - MEDIUM
                         - HIGH
                         type: string
                       urgent:
-                        description: Whether to immediately deliver the notification
-                          via SMTP
+                        description: |-
+                          Urgent controls whether notifications should be immediately delivered via email.
+                          When true, notifications sent to this sink will trigger immediate SMTP delivery
+                          in addition to appearing in the Console UI, useful for critical alerts.
                         type: boolean
                     type: object
                   slack:
-                    description: Slack url
+                    description: |-
+                      Slack configuration for delivering notifications to Slack channels via webhook URLs.
+                      Requires a valid Slack incoming webhook URL configured in your Slack workspace.
                     properties:
                       url:
+                        description: |-
+                          URL is the webhook endpoint where notifications will be delivered.
+                          This should be a valid HTTP/HTTPS URL provided by your Slack or Teams workspace
+                          when configuring incoming webhooks for the target channel.
                         type: string
                     required:
                     - url
                     type: object
                   teams:
-                    description: Teams url
+                    description: |-
+                      Teams configuration for delivering notifications to Microsoft Teams channels.
+                      Requires a valid Teams incoming webhook URL configured in your Teams workspace.
                     properties:
                       url:
+                        description: |-
+                          URL is the webhook endpoint where notifications will be delivered.
+                          This should be a valid HTTP/HTTPS URL provided by your Slack or Teams workspace
+                          when configuring incoming webhooks for the target channel.
                         type: string
                     required:
                     - url
                     type: object
                 type: object
               name:
-                description: Name the name of this service, if not provided NotificationSink's
-                  own name from NotificationSink.ObjectMeta will be used.
+                description: |-
+                  Name specifies the name for this notification sink.
+                  If not provided, the name from the resource metadata will be used. // +kubebuilder:validation:Optional
                 type: string
               type:
-                description: Type the channel type of this sink.
+                description: |-
+                  Type specifies the channel type of this sink.
+                  Determines which configuration section will be used and how notifications are delivered.
+                  SLACK and TEAMS require webhook URLs, while PLURAL delivers in-app notifications.
                 enum:
                 - SLACK
                 - TEAMS
                 - PLURAL
                 type: string
+            required:
+            - type
             type: object
           status:
+            description: |-
+              Status represents the current state of this NotificationSink resource, including
+              synchronization status and operational health information.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

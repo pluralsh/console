@@ -59,7 +59,7 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.GlobalServiceCreated, Console.PubSub.GlobalServiceUpdated] do
   alias Console.Deployments.Global
 
-  def process(%{item: global}), do: Global.sync_clusters(global)
+  def process(%{item: global}), do: Global.enqueue(global)
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.ManagedNamespaceCreated, Console.PubSub.ManagedNamespaceUpdated] do
@@ -101,26 +101,42 @@ end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
-  alias Console.Schema.{PullRequest, Stack}
-  alias Console.Deployments.{Stacks, Git.Discovery}
+  alias Console.Schema.{PullRequest, Stack, Service, GitRepository}
+  alias Console.Deployments.{Stacks, Git.Discovery, Services}
 
   def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
     with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
+         _ <- sleep(stack.repository),
          _ <- Discovery.kick(stack.repository),
       do: Stacks.poll(stack)
   end
 
+  def process(%@for{item: %PullRequest{status: :merged, service_id: id} = pr}) when is_binary(id) do
+    with %PullRequest{service: %Service{} = service} <- Repo.preload(pr, [service: :repository]),
+         _ <- sleep(service.repository),
+      do: Services.kick(service)
+  end
+
   def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
     Console.debounce({:stack_pr, pr.id}, fn ->
-      Console.Retrier.retry(fn ->
-        with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
-              _ <- Discovery.kick(stack.repository),
-          do: Stacks.poll(pr)
-      end, max: 3, pause: :timer.seconds(30))
-    end, ttl: :timer.minutes(2))
+      with %PullRequest{stack: %Stack{} = stack} = pr <- Repo.preload(pr, [stack: :repository]),
+           _ <- sleep(stack.repository),
+           _ <- Discovery.kick(stack.repository),
+        do: Stacks.poll(Repo.get(PullRequest, pr.id))
+    end, ttl: :timer.seconds(30))
   end
 
   def process(_), do: :ok
+
+  defp sleep(%GitRepository{pulled_at: pulled}) when not is_nil(pulled) do
+    Timex.shift(pulled, seconds: 16)
+    |> Timex.diff(Timex.now(), :milliseconds)
+    |> case do
+      s when s <= 0 -> :ok
+      s when is_integer(s) -> :timer.sleep(s)
+    end
+  end
+  defp sleep(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do
@@ -145,6 +161,15 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
         Stacks.post_comment(run)
       _ -> :ok
     end
+  end
+
+  def process(%@for{item: %StackRun{status: :pending_approval} = run}),
+    do: Stacks.ai_stack_run_approval(run)
+
+  def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
+    when is_binary(id) and status != :queued do
+    run = Console.Repo.preload(run, [:pull_request])
+    Stacks.commit_status(run)
   end
 
   def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
@@ -172,13 +197,23 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
 
   def process(%{item: run}) do
     case Console.Repo.preload(run, [:stack, :pull_request]) do
-      %StackRun{pull_request: %PullRequest{} = pr} ->
+      %StackRun{pull_request: %PullRequest{} = pr} = run ->
         Stacks.dequeue(pr)
-      %StackRun{stack: %Stack{} = stack} ->
+        run
+      %StackRun{stack: %Stack{} = stack} = run ->
         Stacks.dequeue(stack)
-      _ -> :ok
+        run
+      _ -> run
     end
+    |> maybe_status()
   end
+
+  defp maybe_status(%StackRun{status: :queued}), do: :ok
+  defp maybe_status(%StackRun{pull_request_id: id} = run) when is_binary(id) do
+    run = Console.Repo.preload(run, [:pull_request])
+    Stacks.commit_status(run)
+  end
+  defp maybe_status(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
@@ -186,15 +221,23 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
   alias Console.Deployments.Stacks
 
   def process(%{item: %StackRun{id: id} = run}) do
-    case Console.Repo.preload(run, [:pull_request, :stack]) do
+    run = Console.Repo.preload(run, [:pull_request, :stack])
+    maybe_status(run)
+
+    case run do
       %StackRun{stack: %Stack{delete_run_id: ^id} = stack, status: :successful} ->
         Console.Repo.delete(stack)
       %StackRun{pull_request: %PullRequest{} = pr} = run ->
         Stacks.post_comment(run)
         Stacks.dequeue(pr)
-      %StackRun{stack: %Stack{} = stack} -> Stacks.dequeue(stack)
+      %StackRun{stack: %Stack{} = stack} ->
+        Stacks.dequeue(stack)
     end
   end
+
+  defp maybe_status(%StackRun{pull_request_id: id} = run) when is_binary(id),
+    do: Stacks.commit_status(run)
+  defp maybe_status(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.PreviewEnvironmentTemplateUpdated do

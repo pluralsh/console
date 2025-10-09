@@ -75,7 +75,7 @@ func (r *ElasticsearchILMPolicyReconciler) Reconcile(ctx context.Context, req ct
 		err := fmt.Errorf("unauthorized or unhealthy Elasticsearch")
 		logger.V(5).Info(err.Error())
 		utils.MarkCondition(policy.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return jitterRequeue(requeueDefault), nil
 	}
 
 	if err = r.ElasticsearchClient.Init(ctx, r.Client, credentials); err != nil {

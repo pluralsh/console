@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: mcpservers.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -15,13 +15,22 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: MCP Server ID
-      jsonPath: .status.id
-      name: ID
+    - description: MCP server URL
+      jsonPath: .spec.url
+      name: URL
       type: string
+    - description: Requires confirmation
+      jsonPath: .spec.confirm
+      name: Confirm
+      type: boolean
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: |-
+          MCPServer represents a Model Context Protocol server for AI tool
+          integration within the Plural Console environment. MCP servers enable
+          large language models to execute functions, access external APIs,
+          and interact with various systems.
         properties:
           apiVersion:
             description: |-
@@ -41,24 +50,36 @@ spec:
           metadata:
             type: object
           spec:
-            description: MCPServerSpec defines the desired state of the resource.
+            description: MCPServerSpec defines the desired state of an MCP (Model
+              Context Protocol) server.
             properties:
               authentication:
-                description: Authentication specs for this server.
+                description: |-
+                  Authentication specifies the authentication configuration for accessing this MCP server.
+                  Different authentication methods are supported including built-in Plural JWT
+                  and custom HTTP headers for integration with various authentication systems.
                 properties:
                   headers:
                     additionalProperties:
                       type: string
-                    description: Headers contain any custom HTTP headers needed for
-                      authentication.
+                    description: |-
+                      Headers specify custom HTTP headers required for authentication with this MCP server.
+                      This allows integration with servers that use API keys, bearer tokens, or other
+                      header-based authentication schemes. Common examples include "Authorization",
+                      "X-API-Key", or custom authentication headers.
                     type: object
                   plural:
-                    description: Plural turns on built-in Plural JWT authentication.
+                    description: |-
+                      Plural enables built-in Plural JWT authentication for this MCP server.
+                      When true, the server will receive a valid Plural JWT token in requests,
+                      allowing it to authenticate and authorize operations within the Plural ecosystem.
                     type: boolean
                 type: object
               bindings:
-                description: Bindings contain read and write policies of this MCP
-                  server
+                description: |-
+                  Bindings define the read and write access policies for this MCP server.
+                  These control which users and groups can view, modify, or execute tools
+                  provided by this server, enabling fine-grained access control.
                 properties:
                   read:
                     description: Read bindings.
@@ -96,14 +117,22 @@ spec:
                     type: array
                 type: object
               confirm:
-                description: Confirm whether a tool call against this server should
-                  require user confirmation.
+                description: |-
+                  Confirm determines whether tool calls against this server require explicit user confirmation.
+                  When true, users must approve each tool execution before it proceeds, providing
+                  an additional safety mechanism for sensitive operations. Defaults to false.
                 type: boolean
               name:
-                description: Name, if not provided name from object meta will be used.
+                description: |-
+                  Name specifies the name for this MCP server.
+                  If not provided, the name from the resource metadata will be used.
+                  This name is used for identification and referencing in AI workflows.
                 type: string
               url:
-                description: URL is the HTTP URL the server is hosted on.
+                description: |-
+                  URL is the HTTP endpoint where the MCP server is hosted.
+                  This must be a valid HTTP or HTTPS URL that the AI system can reach
+                  to execute tool calls and interact with the server's capabilities.
                 type: string
             required:
             - url

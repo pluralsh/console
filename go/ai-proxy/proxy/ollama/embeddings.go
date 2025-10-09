@@ -82,7 +82,11 @@ func (o *OllamaEmbeddingsProxy) handleEmbeddingOllama(
 		http.Error(w, "failed to send request to ollama service", http.StatusInternalServerError)
 		return
 	}
-	defer response.Body.Close()
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			klog.Errorf("error closing response body: %v", err)
+		}
+	}()
 
 	if response.StatusCode != http.StatusOK {
 		http.Error(w, "ollama service returned an error", response.StatusCode)

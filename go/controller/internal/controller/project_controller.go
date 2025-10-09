@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -115,7 +114,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
@@ -133,7 +132,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 
 		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Status.ID, nil)
 		if err != nil {
-			return &requeue
+			return lo.ToPtr(jitterRequeue(requeueDefault))
 		}
 
 		// Remove project from Console API if it exists.
@@ -142,7 +141,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &requeue
+				return lo.ToPtr(jitterRequeue(requeueDefault))
 			}
 		}
 
@@ -193,7 +192,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	if !exists {
 		project.Status.ID = nil
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources, nil
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
 	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
@@ -206,7 +205,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {
@@ -242,21 +241,17 @@ func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
+	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
+	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Write = bindings
-
-	if req || req2 {
-		return errors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }

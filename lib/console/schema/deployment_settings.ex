@@ -154,6 +154,11 @@ defmodule Console.Schema.DeploymentSettings do
       field :tool_provider,      AIProvider
       field :embedding_provider, AIProvider
 
+      embeds_one :analysis_rates, AnalysisRates, on_replace: :update do
+        field :fast, :integer
+        field :slow, :integer
+      end
+
       embeds_one :vector_store, VectorStore, on_replace: :update do
         field :enabled,     :boolean, default: false
         field :initialized, :boolean, default: false
@@ -212,8 +217,8 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :bedrock, Bedrock, on_replace: :update do
         field :model_id,          :string
         field :tool_model_id,     :string
-        field :access_key_id,     :string
-        field :secret_access_key, EncryptedString
+        field :access_token,      EncryptedString
+        field :region,            :string
         field :embedding_model,   :string
       end
 
@@ -299,6 +304,7 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(enabled provider tool_provider embedding_provider)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
+    |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
     |> cast_embed(:graph, with: &graph_store_changeset/2)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
@@ -308,6 +314,8 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:bedrock, with: &bedrock_changeset/2)
     |> cast_embed(:vertex, with: &vertex_changeset/2)
   end
+
+  defp analysis_rates_changeset(model, attrs), do: model |> cast(attrs, ~w(fast slow)a)
 
   defp ai_api_changeset(model, attrs) do
     model
@@ -337,8 +345,8 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_key_id secret_access_key)a)
-    |> validate_required(~w(model_id)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model)a)
+    |> validate_required(~w(model_id access_token region)a)
   end
 
   defp vertex_changeset(model, attrs) do

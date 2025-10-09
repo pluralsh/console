@@ -1,40 +1,41 @@
-import { Command } from 'cmdk'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-
 import { ModalWrapper } from '@pluralsh/design-system'
 
 import chroma from 'chroma-js'
+import { Command } from 'cmdk'
+import { use } from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
+import { CommandPaletteContext } from './CommandPaletteContext'
 
-export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
+export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
   position: 'relative',
-  top: '-96px',
   '[cmdk-root]': {
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.large,
-    boxShadow: theme.boxShadows.modal,
     display: 'flex',
     flexDirection: 'column',
-    width: 480,
-    maxHeight: 480,
+    width: 840,
+    maxHeight: '100%',
+    background: theme.colors['fill-zero'],
+    '&:focus': { outline: 'none' },
 
-    '[cmdk-input]': {
-      ...theme.partials.reset.input,
-      ...theme.partials.text.body2,
-      backgroundColor: theme.colors['fill-two'],
-      border: 'none',
+    '.plrl-chat-input-form': { padding: 0 },
+
+    '#cmdk-input-wrapper': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing.medium,
+      backgroundColor: theme.colors['fill-zero'],
       borderBottom: theme.borders.input,
       borderTopLeftRadius: theme.borderRadiuses.large,
       borderTopRightRadius: theme.borderRadiuses.large,
-      color: theme.colors.text,
-      padding: '14px 16px',
-      width: '100%',
+      padding: theme.spacing.medium,
+    },
 
-      '&::placeholder': {
-        color: theme.colors['text-xlight'],
-      },
+    '#cmdk-input-tabs': {
+      paddingTop: theme.spacing.small,
+      display: 'flex',
     },
 
     '[cmdk-empty]': {
@@ -52,9 +53,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
     },
 
     '[cmdk-list]': {
-      backgroundColor: theme.colors['fill-one'],
-      borderBottomLeftRadius: theme.borderRadiuses.large,
-      borderBottomRightRadius: theme.borderRadiuses.large,
+      backgroundColor: theme.colors['fill-zero'],
       height: `calc(var(--cmdk-list-height) + ${theme.spacing.small * 2}px)`,
       overflow: 'auto',
       padding: theme.spacing.small,
@@ -111,37 +110,42 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
         margin: `${theme.spacing.small}px -${theme.spacing.small}px`,
       },
     },
+
+    '#cmdk-footer': {
+      display: 'flex',
+      gap: theme.spacing.xsmall,
+      padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+      backgroundColor: theme.colors['fill-zero-selected'],
+      borderTop: theme.borders['input'],
+      borderBottomLeftRadius: theme.borderRadiuses.large,
+      borderBottomRightRadius: theme.borderRadiuses.large,
+
+      '> div': {
+        display: 'flex',
+        gap: theme.spacing.xsmall,
+        alignItems: 'center',
+        color: theme.colors['text-input-disabled'],
+      },
+    },
   },
 }))
 
-export default function CommandPaletteDialog({
-  open,
-  setOpen,
-}: {
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
-}) {
+export function CommandPaletteDialog() {
   const theme = useTheme()
-  const [value, setValue] = useState('')
-
-  useEffect(() => setValue(''), [open])
+  const { cmdkOpen, setCmdkOpen } = use(CommandPaletteContext)
 
   return (
-    <Wrapper
+    <WrapperModal
       overlayStyles={{
         background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
       }}
-      open={open}
-      onOpenChange={setOpen}
+      open={cmdkOpen}
+      onOpenChange={(open) => setCmdkOpen(open)}
       title="Command Palette"
     >
-      <Command>
-        <CommandPalette
-          value={value}
-          setValue={setValue}
-          close={() => setOpen(false)}
-        />
+      <Command shouldFilter={false}>
+        <CommandPalette />
       </Command>
-    </Wrapper>
+    </WrapperModal>
   )
 }

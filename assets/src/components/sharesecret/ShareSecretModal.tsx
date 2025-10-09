@@ -18,7 +18,6 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 
-import { splitBindings } from '../settings/usermanagement/roles/RoleFormBindings'
 import { BindingInput } from '../utils/BindingInput'
 
 import {
@@ -26,9 +25,12 @@ import {
   useShareSecretMutation,
 } from '../../generated/graphql'
 import { isNonNullable } from '../../utils/isNonNullable'
-import { bindingToBindingAttributes } from '../settings/usermanagement/roles/misc'
 
 import { SECRETS_PATH } from '../../routes/secretsRoutesConsts'
+import {
+  bindingToBindingAttributes,
+  splitBindings,
+} from 'components/utils/bindings'
 
 const getUrl = (handle?: string) =>
   `https://${window.location.host}/${SECRETS_PATH}/${handle}`

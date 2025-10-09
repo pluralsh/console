@@ -2,7 +2,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
   import Console.Services.Base, only: [ok: 1]
   alias Console.Deployments.Pr.File
-  alias Console.Schema.{PrAutomation, PullRequest}
+  alias Console.Schema.{PullRequest}
   require Logger
 
   @behaviour Console.Deployments.Pr.Dispatcher
@@ -19,7 +19,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def create(%PrAutomation{} = pr, branch, ctx) do
+  def create(pr, branch, ctx) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
       id = URI.encode(pr.identifier)
@@ -106,6 +106,19 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
       {:ok, %{workspace: workspace, repo: repo, number: number}}
     end
   end
+
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [owner, repo | _] <- String.split(path, "/") do
+      {:ok, "#{owner}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse bitbucket url"}
+    end
+  end
+
+  def commit_status(_, _, _, _, _), do: :ok
+
+  def merge(_, _), do: :ok
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))

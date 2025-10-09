@@ -7,10 +7,7 @@ import { useUsersQuery } from 'generated/graphql'
 import { LoginContext } from 'components/contexts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -64,7 +61,6 @@ export default function UsersList() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             reactTableOptions={reactTableOptions}
             height={'100%'}
           />

@@ -71,6 +71,8 @@ export function SelfService() {
         gap="medium"
         width="100%"
         justify="space-between"
+        minHeight="fit-content"
+        overflowX="auto"
       >
         <SubTabs directory={directory} />
         <div>{headerContent}</div>

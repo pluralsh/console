@@ -19,9 +19,10 @@ import {
   useDeleteChatThreadMutation,
   useUpdateChatThreadMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { useChatbot, useChatbotContext } from './AIContext'
 import { GqlError } from 'components/utils/Alert'
+import { CommandPaletteContext } from 'components/commandpalette/CommandPaletteContext'
 
 enum MenuItemKey {
   OpenChat = 'open-chat',
@@ -37,12 +38,15 @@ export function AITableActions({
 }) {
   const [menuKey, setMenuKey] = useState<Nullable<string>>('')
   const { goToThread, forkThread, mutationLoading } = useChatbot()
+  const { setCmdkOpen } = use(CommandPaletteContext)
 
   if (!thread) return null
 
   const onSelectionChange = (newKey: string) => {
-    if (newKey === MenuItemKey.OpenChat) goToThread(thread.id)
-    else if (newKey === MenuItemKey.Fork)
+    if (newKey === MenuItemKey.OpenChat) {
+      goToThread(thread.id)
+      setCmdkOpen(false)
+    } else if (newKey === MenuItemKey.Fork)
       forkThread({
         id: thread.id,
         onCompleted: (data) =>
@@ -166,13 +170,13 @@ export function DeleteAiThreadModal({
   open: boolean
   onClose: Nullable<() => void>
 }) {
-  const { setCurrentThreadId } = useChatbotContext()
+  const { currentThreadId, setCurrentThreadId } = useChatbotContext()
   const [mutation, { loading, error }] = useDeleteChatThreadMutation({
     variables: { id: thread.id },
     awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreads', 'AiPins'],
+    refetchQueries: ['ChatThreads'],
     onCompleted: () => {
-      setCurrentThreadId(null)
+      if (thread.id === currentThreadId) setCurrentThreadId(undefined)
       onClose?.()
     },
   })

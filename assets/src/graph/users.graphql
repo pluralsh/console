@@ -64,66 +64,6 @@ fragment Manifest on PluralManifest {
   bucketPrefix
 }
 
-fragment Account on Account {
-  grandfatheredUntil
-  delinquentAt
-  availableFeatures {
-    audits
-    userManagement
-    databaseManagement
-  }
-  subscription {
-    id
-    plan {
-      id
-      name
-      period
-    }
-  }
-}
-
-query Subscription {
-  account {
-    ...Account
-  }
-}
-
-query Me {
-  me {
-    ...User
-    boundRoles {
-      ...Role
-    }
-    unreadNotifications
-  }
-  clusterInfo {
-    version
-    platform
-    gitCommit
-  }
-  configuration {
-    gitCommit
-    isDemoProject
-    isSandbox
-    pluralLogin
-    byok
-    externalOidc
-    cloud
-    installed
-    consoleVersion
-    manifest {
-      ...Manifest
-    }
-    gitStatus {
-      cloned
-      output
-    }
-    features {
-      ...AvailableFeatures
-    }
-  }
-}
-
 query Users($q: String, $after: String) {
   users(q: $q, first: 20, after: $after) {
     pageInfo {
@@ -156,37 +96,14 @@ mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
   }
 }
 
+mutation DeleteUser($id: ID!) {
+  deleteUser(id: $id) {
+    ...User
+  }
+}
+
 mutation CreateInvite($attributes: InviteAttributes!) {
   createInvite(attributes: $attributes) {
     ...Invite
-  }
-}
-
-mutation Logout {
-  logout {
-    ...User
-  }
-}
-
-fragment RefreshToken on RefreshToken {
-  id
-  token
-  insertedAt
-  updatedAt
-}
-
-query Refresh($token: String!) {
-  refresh(token: $token) {
-    ...User
-    jwt
-  }
-}
-
-mutation OauthCallback($code: String!, $redirect: String, $state: String) {
-  oauthCallback(code: $code, redirect: $redirect, state: $state) {
-    jwt
-    refreshToken {
-      ...RefreshToken
-    }
   }
 }

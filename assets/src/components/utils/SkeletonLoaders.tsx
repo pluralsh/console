@@ -58,7 +58,7 @@ export function TableSkeleton({
       <svg
         width={width + theme.spacing.large * numColumns}
         height={height}
-        viewBox={`0 0 ${width + theme.spacing.large * numColumns} ${height}`}
+        viewBox={`0 0 ${width + theme.spacing.large * (numColumns - 1)} ${height}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -157,3 +157,25 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
     </svg>
   )
 }
+
+export const RectangleSkeleton = styled.div(({ theme }) => ({
+  '@keyframes moving-gradient': {
+    '0%': { backgroundPosition: '-250px 0' },
+    '100%': { backgroundPosition: '250px 0' },
+  },
+  maxWidth: '400px',
+  width: '100%',
+  position: 'relative',
+  '&::after': {
+    content: '""',
+    borderRadius: theme.borderRadiuses.medium,
+    maxWidth: '400px',
+    width: 'unset',
+    minWidth: '150px',
+    display: 'block',
+    height: '12px',
+    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
+    backgroundSize: '500px 100px',
+    animation: 'moving-gradient 2s infinite linear forwards',
+  },
+}))

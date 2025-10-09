@@ -92,8 +92,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> paginate(args)
   end
 
-  def list_catalogs(args, _) do
+  def list_catalogs(args, %{context: %{current_user: user}}) do
     Catalog.ordered()
+    |> Catalog.for_user(user)
     |> filter_proj(Catalog, args)
     |> paginate(args)
   end
@@ -135,10 +136,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_pr_automation(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_pr_automation(id, user)
 
-  def create_pull_request(%{id: id, branch: branch, context: ctx} = args, %{context: %{current_user: user}}) do
+  def create_pull_request(%{branch: branch, context: ctx} = args, %{context: %{current_user: user}}) do
     additional_context = Console.AI.Chat.pr_context(args[:thread_id])
     agent_id = Console.deep_get(additional_context, [:ai, :session, :agent_id])
-    Git.create_pull_request(%{agent_id: agent_id}, Map.merge(ctx, additional_context), id, branch, args[:identifier], user)
+    with {:ok, pra} <- resolve_pr_automation(args, user) do
+      Git.create_pull_request(
+        %{agent_id: agent_id},
+        Map.merge(ctx, additional_context) |> Map.put(:secrets, args[:secrets]),
+        pra,
+        branch,
+        args[:identifier],
+        user
+      )
+    end
   end
 
   def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
@@ -171,11 +181,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def upsert_observer(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.upsert_observer(attrs, user)
 
-  def reset_observer(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Git.reset_observer(attrs, id, user)
-
   def kick_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.kick_observer(id, user)
+
+  def reset_observer(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.reset_observer(attrs, id, user)
 
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)

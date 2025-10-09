@@ -6,7 +6,6 @@ import { useTheme } from 'styled-components'
 
 import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData.tsx'
 import { useClusterInsightsContext } from './ClusterInsights.tsx'
 import { ClusterInsightComponentFragment } from 'generated/graphql.ts'
 import { componentHasInsight } from '../clusters/info-flyover/health/ConfigurationIssuesSection.tsx'
@@ -25,10 +24,7 @@ export function ClusterInsightsComponents() {
       data={data}
       columns={[TableRow]}
       hideHeader
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-      css={{
-        height: '100%',
-      }}
+      css={{ height: '100%' }}
       border={theme.borders['fill-one']}
       overflowX={'hidden'}
       emptyStateProps={{ message: 'No entries found.' }}

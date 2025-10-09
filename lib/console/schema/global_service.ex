@@ -1,12 +1,25 @@
 defmodule Console.Schema.GlobalService do
-  use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, Cluster, Project, ClusterProvider, ServiceTemplate, TemplateContext}
+  use Console.Schema.Base
+  alias Console.Schema.{
+    User,
+    Service,
+    Cluster,
+    Project,
+    ClusterProvider,
+    ServiceTemplate,
+    TemplateContext,
+    PolicyBinding
+  }
+  alias Console.Deployments.Policies.Rbac
 
   schema "global_services" do
-    field :reparent, :boolean
-    field :name,     :string
-    field :distro,   Cluster.Distro
-    field :mgmt,     :boolean
+    field :reparent,        :boolean
+    field :name,            :string
+    field :distro,          Cluster.Distro
+    field :mgmt,            :boolean
+    field :interval,        :string
+    field :next_poll_at,    :utc_datetime_usec
+    field :ignore_clusters, {:array, :binary_id}
 
     embeds_one :cascade, Cascade, on_replace: :update do
       field :delete, :boolean
@@ -29,6 +42,22 @@ defmodule Console.Schema.GlobalService do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(g in query, where: ilike(g.name, ^"%#{search}%"))
+  end
+
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(f in query,
+        join: p in assoc(f, :project),
+        left_join: b in PolicyBinding,
+          on: b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
+  end
+
   def for_project(query \\ __MODULE__, id) do
     from(g in query, where: g.project_id == ^id)
   end
@@ -46,13 +75,21 @@ defmodule Console.Schema.GlobalService do
     from(g in query, order_by: ^order)
   end
 
+  def pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(g in query,
+      where: is_nil(g.next_poll_at) or g.next_poll_at < ^now,
+      order_by: [asc: :next_poll_at]
+    )
+  end
+
   def preloaded(query \\ __MODULE__, preloads \\ [:context, template: :dependencies, service: :dependencies]) do
     from(g in query, preload: ^preloads)
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name reparent mgmt service_id parent_id project_id distro provider_id)a
+  @valid ~w(name reparent mgmt service_id parent_id project_id distro provider_id interval ignore_clusters)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -62,6 +99,7 @@ defmodule Console.Schema.GlobalService do
     |> cast_embed(:tags, with: &tag_changeset/2)
     |> cast_embed(:cascade, with: &cascade_changeset/2)
     |> unique_constraint(:service_id)
+    |> duration(:interval)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:provider_id)
@@ -79,4 +117,19 @@ defmodule Console.Schema.GlobalService do
     model
     |> cast(attrs, ~w(delete detach)a)
   end
+
+  def next_poll_changeset(model, interval) do
+    duration = poll_duration(interval)
+    jittered = Duration.add(duration, Duration.new!(second: jitter(duration)))
+
+    Ecto.Changeset.change(model, %{next_poll_at: DateTime.shift(DateTime.utc_now(), jittered)})
+  end
+
+  def poll_duration(interval) when is_binary(interval) do
+    case parse_duration(interval) do
+      {:ok, duration} -> duration
+      {:error, _} -> poll_duration(nil)
+    end
+  end
+  def poll_duration(_), do: Duration.new!(minute: 10)
 end

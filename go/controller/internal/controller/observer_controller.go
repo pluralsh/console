@@ -156,7 +156,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, helm.Provider, helm.Auth)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, &waitForResources, err
+				return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), err
 			}
 
 			return target, actions, nil, err
@@ -172,17 +172,23 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		gitRepo := &v1alpha1.GitRepository{}
 		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, &waitForResources, err
+				return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), err
 			}
 
 			return target, actions, nil, err
 		}
 		if !gitRepo.Status.HasID() {
-			return target, actions, &waitForResources, fmt.Errorf("repository is not ready")
+			return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
 		}
+		var filter *console.ObserverGitFilterAttributes
+		if git.Filter != nil {
+			filter = &console.ObserverGitFilterAttributes{Regex: git.Filter.Regex}
+		}
+
 		target.Git = &console.ObserverGitAttributes{
 			RepositoryID: gitRepo.Status.GetID(),
 			Type:         git.Type,
+			Filter:       filter,
 		}
 	}
 
@@ -191,7 +197,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, oci.Provider, oci.Auth)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, &waitForResources, err
+				return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), err
 			}
 
 			return target, actions, nil, err
@@ -230,13 +236,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				prAutomation := &v1alpha1.PrAutomation{}
 				if err = r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
 					if errors.IsNotFound(err) {
-						return target, actions, &waitForResources, err
+						return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), err
 					}
 
 					return target, actions, nil, err
 				}
 				if !prAutomation.Status.HasID() {
-					return target, actions, &waitForResources, fmt.Errorf("pr automation is not ready")
+					return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("pr automation is not ready")
 				}
 
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
@@ -253,13 +259,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				pipeline := &v1alpha1.Pipeline{}
 				if err = r.Get(ctx, client.ObjectKey{Name: p.PipelineRef.Name, Namespace: p.PipelineRef.Namespace}, pipeline); err != nil {
 					if errors.IsNotFound(err) {
-						return target, actions, &waitForResources, err
+						return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), err
 					}
 
 					return target, actions, nil, err
 				}
 				if !pipeline.Status.HasID() {
-					return target, actions, &waitForResources, fmt.Errorf("pipeline is not ready")
+					return target, actions, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("pipeline is not ready")
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),
@@ -302,7 +308,7 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 
 			// If deletion process started requeue so that we can make sure observability observer
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

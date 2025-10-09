@@ -61,9 +61,9 @@ defmodule Console.AI.Chat.Engine do
   end
 
   def completion(messages, %ChatThread{id: thread_id} = thread, %User{} = user, completion, level) do
-    preface = prompt(thread)
-
     thread = current_thread(thread)
+
+    preface = prompt(thread)
     opts = include_tools([preface: preface], thread)
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)

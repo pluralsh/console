@@ -53,6 +53,10 @@ type RootQueryType {
 
   logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
+  logAggregationBuckets(
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
+  ): [LogAggregationBucket]
+
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
@@ -221,6 +225,8 @@ type RootQueryType {
 
   clusterIsoImages(after: String, first: Int, before: String, last: Int): ClusterIsoImageConnection
 
+  kubernetesVersionInfo(distro: ClusterDistro): [KubernetesVersionInfo]
+
   serviceDeployments(
     after: String
 
@@ -369,7 +375,7 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
-  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID): GlobalServiceConnection
+  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID, q: String): GlobalServiceConnection
 
   clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
 
@@ -423,6 +429,22 @@ type RootQueryType {
 
   oidcProviders(after: String, first: Int, before: String, last: Int, q: String): OidcProviderConnection
 
+  sentinel(id: ID, name: String): Sentinel
+
+  sentinels(after: String, first: Int, before: String, last: Int, q: String, status: SentinelRunStatus): SentinelConnection
+
+  sentinelStatistics(q: String): [SentinelStatistic]
+
+  sharedAgentRun(id: ID!): AgentRun
+
+  agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
+
+  agentRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
+
+  agentRuntime(id: ID!): AgentRuntime
+
+  agentRun(id: ID!): AgentRun
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -450,7 +472,20 @@ type RootQueryType {
   chatThread(id: ID!): ChatThread
 
   "gets the chat history from prior AI chat sessions"
-  chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    threadId: ID
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
@@ -597,13 +632,18 @@ type RootMutationType {
 
   createPullRequest(
     "the id of the PR automation instance to use"
-    id: ID!
+    id: ID
+
+    "the name of the PR automation instance to use"
+    name: String
 
     identifier: String
 
     branch: String
 
     context: Json
+
+    secrets: Json
 
     "a ai thread id this pr was spawned from, for associating with agentic workflows"
     threadId: ID
@@ -768,7 +808,7 @@ type RootMutationType {
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
   "creates a new pipeline context and binds it to the beginning stage"
-  createPipelineContext(pipelineId: ID!, attributes: PipelineContextAttributes!): PipelineContext
+  createPipelineContext(pipelineId: ID, pipelineName: String, attributes: PipelineContextAttributes!): PipelineContext
 
   deletePipeline(id: ID!): Pipeline
 
@@ -809,7 +849,7 @@ type RootMutationType {
 
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(
-    id: ID!, components: [ComponentAttributes], revisionId: ID, sha: String, errors: [ServiceErrorAttributes]
+    id: ID!, components: [ComponentAttributes], revisionId: ID, sha: String, errors: [ServiceErrorAttributes], metadata: ServiceMetadataAttributes
   ): ServiceDeployment
 
   "save the manifests in cache to be retrieved by the requesting user"
@@ -969,6 +1009,32 @@ type RootMutationType {
 
   deletePreviewEnvironmentTemplate(id: ID!): PreviewEnvironmentTemplate
 
+  createSentinel(attributes: SentinelAttributes): Sentinel
+
+  updateSentinel(id: ID!, attributes: SentinelAttributes): Sentinel
+
+  deleteSentinel(id: ID!): Sentinel
+
+  runSentinel(id: ID!): SentinelRun
+
+  cancelAgentRun(id: ID!): AgentRun
+
+  createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
+
+  shareAgentRun(id: ID!): AgentRun
+
+  agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
+
+  updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
+
+  updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
+
+  upsertAgentRuntime(attributes: AgentRuntimeAttributes!): AgentRuntime
+
+  deleteAgentRuntime(id: ID!): AgentRuntime
+
+  updateAgentRun(id: ID!, attributes: AgentRunStatusAttributes!): AgentRun
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1000,6 +1066,9 @@ type RootMutationType {
 
   "Creates a pull request given the thread message history"
   threadPr(threadId: ID!): Chat
+
+  "Refreshes an insight, which will trigger a new AI insight generation in the background"
+  refreshInsight(insightId: ID!): AiInsight
 
   "it will add additional context to the given chat from a source object"
   addChatContext(source: ContextSource!, sourceId: ID, threadId: ID!): [Chat]
@@ -1123,11 +1192,671 @@ input RbacAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+enum AgentRuntimeType {
+  CLAUDE
+  OPENCODE
+  GEMINI
+  CUSTOM
+}
+
+enum AgentRunStatus {
+  PENDING
+  RUNNING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+}
+
+enum AgentRunMode {
+  ANALYZE
+  WRITE
+}
+
+enum AgentMessageToolState {
+  PENDING
+  RUNNING
+  COMPLETED
+  ERROR
+}
+
+input AgentRuntimeAttributes {
+  "the name of this runtime"
+  name: String!
+
+  "the type of this runtime"
+  type: AgentRuntimeType!
+
+  "the policy for creating runs on this runtime"
+  createBindings: [AgentBindingAttributes]
+
+  "whether this runtime uses the built-in Plural AI proxy"
+  aiProxy: Boolean
+}
+
+input AgentBindingAttributes {
+  "the email of the user this binding is for"
+  userEmail: String
+
+  "the name of the group this binding is for"
+  groupName: String
+}
+
+input AgentRunAttributes {
+  "the prompt to give to the agent"
+  prompt: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the mode of the agent run"
+  mode: AgentRunMode!
+
+  "the flow this agent run is associated with"
+  flowId: ID
+}
+
+input AgentRunStatusAttributes {
+  "the status of this agent run"
+  status: AgentRunStatus!
+
+  "the messages this agent run has generated during its run"
+  messages: [AgentMessageAttributes]
+
+  "the error reason of the agent run"
+  error: String
+
+  "the kubernetes pod this agent is running on"
+  podReference: NamespacedName
+}
+
+input AgentPullRequestAttributes {
+  "the title of the pull request"
+  title: String!
+
+  "the body of the pull request"
+  body: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the base branch of the pull request"
+  base: String!
+
+  "the head branch of the pull request"
+  head: String!
+}
+
+input AgentTodoAttributes {
+  "the title of the todo"
+  title: String!
+
+  "the description of the todo"
+  description: String!
+
+  "whether the todo is done"
+  done: Boolean!
+}
+
+input AgentAnalysisAttributes {
+  "the summary of the analysis"
+  summary: String!
+
+  "the analysis of the agent run"
+  analysis: String!
+
+  "the bullets of the analysis"
+  bullets: [String]
+}
+
+input AgentMessageAttributes {
+  "the message to send to the agent"
+  message: String!
+
+  "the role of the message"
+  role: AiRole!
+
+  cost: AgentMessageCostAttributes
+
+  metadata: AgentMessageMetadataAttributes
+}
+
+input AgentMessageCostAttributes {
+  "the total cost of the message"
+  total: Float!
+
+  "the tokens of the message"
+  tokens: AgentMessageTokensAttributes
+}
+
+input AgentMessageTokensAttributes {
+  "the input tokens of the message"
+  input: Float
+
+  "the output tokens of the message"
+  output: Float
+
+  "the reasoning tokens of the message"
+  reasoning: Float
+}
+
+input AgentMessageMetadataAttributes {
+  "the reasoning of the message"
+  reasoning: AgentMessageReasoningAttributes
+
+  "the file of the message"
+  file: AgentMessageFileAttributes
+
+  "the tool of the message"
+  tool: AgentMessageToolAttributes
+}
+
+input AgentMessageReasoningAttributes {
+  "the text of the reasoning"
+  text: String
+
+  "the start of the reasoning"
+  start: Int
+
+  "the end of the reasoning"
+  end: Int
+}
+
+input AgentMessageFileAttributes {
+  "the name of the file"
+  name: String
+
+  "the text of the file"
+  text: String
+
+  "the start of the file"
+  start: Int
+
+  "the end of the file"
+  end: Int
+}
+
+input AgentMessageToolAttributes {
+  "the name of the tool"
+  name: String
+
+  "the state of the tool"
+  state: AgentMessageToolState
+
+  "the output of the tool"
+  output: String
+}
+
+type AgentRuntime {
+  id: ID!
+
+  "the name of this runtime"
+  name: String!
+
+  "the type of this runtime"
+  type: AgentRuntimeType!
+
+  "whether this runtime uses the built-in Plural AI proxy"
+  aiProxy: Boolean
+
+  "the cluster this runtime is running on"
+  cluster: Cluster
+
+  "the policy for creating runs on this runtime"
+  createBindings: [PolicyBinding]
+
+  pendingRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentRun {
+  id: ID!
+
+  "the prompt this agent was given"
+  prompt: String!
+
+  "the repository the agent will be working in"
+  repository: String!
+
+  "the branch this agent run is operating on (if not set, use default branch on clone)"
+  branch: String
+
+  "the status of this agent run"
+  status: AgentRunStatus!
+
+  "the mode of the agent run"
+  mode: AgentRunMode!
+
+  "the kubernetes pod this agent is running on"
+  podReference: AgentPodReference
+
+  "the error reason of the agent run"
+  error: String
+
+  "whether this agent run is shared"
+  shared: Boolean
+
+  "the analysis of the agent run"
+  analysis: AgentAnalysis
+
+  "the todos of the agent run"
+  todos: [AgentTodo]
+
+  scmCreds: ScmCreds
+
+  pluralCreds: PluralCreds
+
+  "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
+  pod: Pod
+
+  "the prompts this agent run has received"
+  prompts: [AgentPrompt]
+
+  "the messages this agent run has generated during its run"
+  messages: [AgentMessage]
+
+  "the runtime this agent is using"
+  runtime: AgentRuntime
+
+  "the user who initiated this agent run"
+  user: User
+
+  "the flow this agent is associated with"
+  flow: Flow
+
+  "the pull requests this agent run has created"
+  pullRequests: [PullRequest]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ScmCreds {
+  username: String!
+  token: String!
+}
+
+type AgentPodReference {
+  name: String!
+  namespace: String!
+}
+
+type AgentAnalysis {
+  "the summary of the analysis"
+  summary: String!
+
+  "the analysis of the agent run"
+  analysis: String!
+
+  "quick bullet points to summarize the analysis"
+  bullets: [String]
+}
+
+type AgentTodo {
+  "the title of the todo"
+  title: String!
+
+  "the description of the todo"
+  description: String!
+
+  "whether the todo is done"
+  done: Boolean
+}
+
+type AgentMessage {
+  id: ID!
+
+  "the role of the message (system, assistant, user)"
+  role: AiRole!
+
+  "the message to send to the agent"
+  message: String!
+
+  "the sequence number of the message"
+  seq: Int!
+
+  "the cost of the message"
+  cost: AgentMessageCost
+
+  "the metadata of the message"
+  metadata: AgentMessageMetadata
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentPrompt {
+  id: ID!
+
+  "the prompt to give this agent run"
+  prompt: String!
+
+  "the sequence number of the prompt"
+  seq: Int!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type AgentMessageCost {
+  "the total cost of the message"
+  total: Float!
+
+  "the tokens of the message"
+  tokens: AgentMessageTokens
+}
+
+type AgentMessageTokens {
+  "the input tokens of the message"
+  input: Float
+
+  "the output tokens of the message"
+  output: Float
+
+  "the reasoning tokens of the message"
+  reasoning: Float
+}
+
+type AgentMessageMetadata {
+  "the reasoning of the message"
+  reasoning: AgentMessageReasoning
+
+  "the file of the message"
+  file: AgentMessageFile
+
+  "the tool of the message"
+  tool: AgentMessageTool
+}
+
+type AgentMessageReasoning {
+  "the text of the reasoning"
+  text: String
+
+  "the start of the reasoning"
+  start: Int
+
+  "the end of the reasoning"
+  end: Int
+}
+
+type AgentMessageFile {
+  "the name of the file"
+  name: String
+
+  "the text of the file"
+  text: String
+
+  "the start of the file"
+  start: Int
+
+  "the end of the file"
+  end: Int
+}
+
+type AgentMessageTool {
+  "the name of the tool"
+  name: String
+
+  "the state of the tool"
+  state: AgentMessageToolState
+
+  "the output of the tool"
+  output: String
+}
+
+type AgentRuntimeConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRuntimeEdge]
+}
+
+type AgentRunConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRunEdge]
+}
+
+enum SentinelCheckType {
+  LOG
+  KUBERNETES
+}
+
+enum SentinelRunStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+input SentinelAttributes {
+  "the name of the sentinel"
+  name: String
+
+  "the description of the sentinel"
+  description: String
+
+  "the repository to use for this sentinel"
+  repositoryId: ID
+
+  "the project to use for this sentinel"
+  projectId: ID
+
+  "the git repository to use for this sentinel"
+  git: GitAttributes
+
+  "the checks to run for this sentinel"
+  checks: [SentinelCheckAttributes]
+}
+
+input SentinelCheckAttributes {
+  "the type of check to run"
+  type: SentinelCheckType!
+
+  "the name of the check"
+  name: String!
+
+  "the rule file to use for this check"
+  ruleFile: String
+
+  "the configuration to use for this check"
+  configuration: SentinelCheckConfigurationAttributes
+}
+
+input SentinelCheckConfigurationAttributes {
+  "the log configuration to use for this check"
+  log: SentinelCheckLogConfigurationAttributes
+
+  "the kubernetes configuration to use for this check"
+  kubernetes: SentinelCheckKubernetesConfigurationAttributes
+}
+
+input SentinelCheckLogConfigurationAttributes {
+  "the namespaces to run the query against"
+  namespaces: [String]
+
+  "a search query this will run against the logs"
+  query: String!
+
+  "the cluster to run the query against"
+  clusterId: ID
+
+  "The duration of the log analysis run"
+  duration: String!
+
+  "the log facets to run the query against"
+  facets: [LogFacetInput]
+}
+
+input SentinelCheckKubernetesConfigurationAttributes {
+  "the api group to use when fetching this resource"
+  group: String
+
+  "the api version to use when fetching this resource"
+  version: String!
+
+  "the kind to use when fetching this resource"
+  kind: String!
+
+  "the name to use when fetching this resource"
+  name: String!
+
+  "the namespace to use when fetching this resource"
+  namespace: String
+
+  "the cluster to run the query against"
+  clusterId: ID!
+}
+
+type Sentinel {
+  "the id of the sentinel"
+  id: String!
+
+  "the name of the sentinel"
+  name: String!
+
+  "the description of the sentinel"
+  description: String
+
+  "the status of the sentinel's last run"
+  status: SentinelRunStatus
+
+  "the git location for rules files from the associated repository"
+  git: GitRef
+
+  "the git repository to use for fetching rules files for AI enabled analysis"
+  repository: GitRepository
+
+  "the project of this sentinel"
+  project: Project
+
+  "the checks to run for this sentinel"
+  checks: [SentinelCheck]
+
+  "the last time this sentinel was run"
+  lastRunAt: DateTime
+
+  "the runs of this sentinel, do not query w\/in list fields"
+  runs(after: String, first: Int, before: String, last: Int): SentinelRunConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type SentinelCheck {
+  "the id of the check"
+  id: String!
+
+  "the name of the check"
+  name: String!
+
+  "the type of check to run"
+  type: SentinelCheckType!
+
+  "the rule file to use for this check"
+  ruleFile: String
+
+  "the configuration to use for this check"
+  configuration: SentinelCheckConfiguration
+}
+
+type SentinelCheckConfiguration {
+  "the log configuration to use for this check"
+  log: SentinelCheckLogConfiguration
+
+  "the kubernetes configuration to use for this check"
+  kubernetes: SentinelCheckKubernetesConfiguration
+}
+
+type SentinelCheckLogConfiguration {
+  "the namespaces to run the query against"
+  namespaces: [String]
+
+  "a search query this will run against the logs"
+  query: String!
+
+  "the cluster to run the query against"
+  clusterId: ID
+
+  "the log facets to run the query against"
+  facets: [LogFacet]
+
+  "The duration of the log analysis run"
+  duration: String!
+}
+
+type SentinelCheckKubernetesConfiguration {
+  "the api group to use when fetching this resource"
+  group: String
+
+  "the api version to use when fetching this resource"
+  version: String!
+
+  "the kind to use when fetching this resource"
+  kind: String!
+
+  "the name to use when fetching this resource"
+  name: String!
+
+  "the namespace to use when fetching this resource"
+  namespace: String
+}
+
+type SentinelRun {
+  "the id of the run"
+  id: String!
+
+  "the status of the run"
+  status: SentinelRunStatus!
+
+  "the sentinel that was run"
+  sentinel: Sentinel
+
+  "the results of the run"
+  results: [SentinelRunResult]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type SentinelRunResult {
+  "the name of the check"
+  name: String
+
+  "the status of the result"
+  status: SentinelRunStatus!
+
+  "the reason for the result"
+  reason: String
+}
+
+type SentinelStatistic {
+  "the status of the sentinel"
+  status: SentinelRunStatus!
+
+  "the count of the sentinel"
+  count: Int!
+}
+
+type SentinelConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelEdge]
+}
+
+type SentinelRunConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelRunEdge]
+}
+
 input FlowAttributes {
   name: String!
   description: String
   icon: String
   projectId: ID
+  repositories: [String]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
   serverAssociations: [McpServerAssociationAttributes]
@@ -1194,6 +1923,9 @@ type Flow {
 
   icon: String
 
+  "the git https urls of the application code repositories used in this flow"
+  repositories: [String]
+
   "servers that are bound to this flow"
   servers: [McpServer]
 
@@ -1217,6 +1949,8 @@ type Flow {
   previewEnvironmentTemplates(after: String, first: Int, before: String, last: Int): PreviewEnvironmentTemplateConnection
 
   previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
+
+  vulnerabilityReports(after: String, first: Int, before: String, last: Int): VulnerabilityReportConnection
 
   insertedAt: DateTime
 
@@ -1522,6 +2256,8 @@ input AiSettingsAttributes {
 
   tools: ToolConfigAttributes
 
+  analysisRates: AnalysisRatesAttributes
+
   provider: AiProvider
 
   "ai provider to use with tool calls"
@@ -1545,6 +2281,14 @@ input AiSettingsAttributes {
   vectorStore: VectorStoreAttributes
 
   graph: GraphStoreAttributes
+}
+
+input AnalysisRatesAttributes {
+  "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+  fast: Int
+
+  "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
+  slow: Int
 }
 
 input ToolConfigAttributes {
@@ -1624,11 +2368,17 @@ input BedrockAiAttributes {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
 
-  "aws access key id to use, you can also use IRSA for self-hosted consoles"
-  accessKeyId: String
+  "the openai bedrock access token to use"
+  accessToken: String
 
-  "aws secret access key to use, you can also use IRSA for self-hosted consoles"
-  secretAccessKey: String
+  "the aws region the model is hosted in"
+  region: String
+
+  "the aws access key id to use (DEPRECATED)"
+  awsAccessKeyId: String
+
+  "the aws secret access key to use (DEPRECATED)"
+  awsSecretAccessKey: String
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -1695,7 +2445,8 @@ input CloudConnectionConfigurationAttributes {
 input AwsCloudConnectionAttributes {
   accessKeyId: String!
   secretAccessKey: String!
-  region: String!
+  region: String
+  regions: [String]
 }
 
 input GcpCloudConnectionAttributes {
@@ -1853,6 +2604,8 @@ type CostSettings {
 type AiSettings {
   enabled: Boolean
 
+  analysisRates: AiAnalysisRates
+
   toolsEnabled: Boolean
 
   provider: AiProvider
@@ -1873,6 +2626,14 @@ type AiSettings {
   vertex: VertexAiSettings
 }
 
+type AiAnalysisRates {
+  "the rate in seconds for fast analysis, eg when the prompt has seen a material change"
+  fast: Int
+
+  "the rate in seconds for slow analysis, eg when the prompt has not seen a material change"
+  slow: Int
+}
+
 "OpenAI connection information"
 type OpenaiSettings {
   "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
@@ -1883,6 +2644,9 @@ type OpenaiSettings {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 "Anthropic connection information"
@@ -1912,6 +2676,9 @@ type AzureOpenaiSettings {
 
   model: String
 
+  "the model to use for vector embeddings"
+  embeddingModel: String
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -1927,14 +2694,23 @@ type BedrockAiSettings {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
 
-  "the aws access key to use, can also use IRSA when console is self-hosted"
+  "the openai bedrock aws access key id to use (DEPRECATED)"
   accessKeyId: String
+
+  "the aws region the model is hosted in"
+  region: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
 type VertexAiSettings {
   "the vertex ai model to use"
   model: String
+
+  "the model to use for vector embeddings"
+  embeddingModel: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -2025,7 +2801,10 @@ type AwsConnectionAttributes {
   secretAccessKey: String!
 
   "the region for aws"
-  region: String!
+  region: String
+
+  "the regions for aws"
+  regions: [String]
 }
 
 "The configuration for a cloud provider"
@@ -2083,6 +2862,7 @@ enum ObservabilityWebhookType {
   DATADOG
   PAGERDUTY
   NEWRELIC
+  SENTRY
 }
 
 enum AlertSeverity {
@@ -2203,6 +2983,9 @@ type Alert {
   "the project this alert was associated with"
   project: Project
 
+  "the flow this alert was associated with"
+  flow: Flow
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2278,6 +3061,12 @@ enum PolicyEngineType {
   TRIVY
 }
 
+enum ApprovalResult {
+  APPROVED
+  REJECTED
+  INDETERMINATE
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -2335,6 +3124,9 @@ input StackAttributes {
   "the agent id this stack is associated with"
   agentId: String
 
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2363,6 +3155,12 @@ input StackConfigurationAttributes {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
+
+  "the ansible configuration for this stack"
+  ansible: AnsibleConfigurationAttributes
+
+  "the ai approval configuration for this stack"
+  aiApproval: AiApprovalAttributes
 }
 
 input StackOverridesAttributes {
@@ -2387,6 +3185,24 @@ input TerraformConfigurationAttributes {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+}
+
+input AnsibleConfigurationAttributes {
+  "the playbook to run"
+  playbook: String
+
+  "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+  inventory: String
+
+  "additional args for the playbook"
+  additionalArgs: [String]
+}
+
+input AiApprovalAttributes {
+  enabled: Boolean!
+  ignoreCancel: Boolean!
+  git: GitRefAttributes!
+  file: String!
 }
 
 input StackCronAttributes {
@@ -2567,6 +3383,12 @@ type InfrastructureStack {
   "the agent id this stack is associated with"
   agentId: String
 
+  "the interval at which the stack will be reconciled, default is 5m"
+  interval: String
+
+  "the next time the stack will be reconciled"
+  nextPollAt: DateTime
+
   "version\/image config for the tool you're using"
   configuration: StackConfiguration!
 
@@ -2706,6 +3528,9 @@ type StackConfiguration {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the ansible configuration for this stack"
+  ansible: AnsibleConfiguration
 }
 
 "Configuration for applying policy enforcement to a stack"
@@ -2734,6 +3559,17 @@ type TerraformConfiguration {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+}
+
+type AnsibleConfiguration {
+  "The playbook to run"
+  playbook: String
+
+  "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+  inventory: String
+
+  "Additional args for the playbook"
+  additionalArgs: [String]
 }
 
 type StackRun {
@@ -2773,6 +3609,9 @@ type StackRun {
 
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
+
+  "the result of the approval decision by the ai"
+  approvalResult: StackRunApprovalResult
 
   "Arbitrary variables to add to a stack run"
   variables: Map
@@ -2940,6 +3779,14 @@ type StackDefinition {
   updatedAt: DateTime
 }
 
+type StackRunApprovalResult {
+  "the reason for the approval decision by the ai"
+  reason: String
+
+  "the result of the approval decision by the ai"
+  result: ApprovalResult
+}
+
 type CustomRunStep {
   cmd: String!
   args: [String]
@@ -3051,11 +3898,17 @@ input GlobalServiceAttributes {
 
   template: ServiceTemplateAttributes
 
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
+
   "behavior for all owned resources when this global service is deleted"
   cascade: CascadeAttributes
 
   "additional context used to template service metadata during global service reconciliation"
   context: TemplateContextAttributes
+
+  "the id of the clusters to ignore"
+  ignoreClusters: [ID]
 }
 
 "Attributes for configuring a managed namespace"
@@ -3179,6 +4032,9 @@ type GlobalService {
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
 
+  "the id of the clusters to ignore"
+  ignoreClusters: [ID]
+
   "the service which created this global service"
   parent: ServiceDeployment
 
@@ -3234,6 +4090,9 @@ type ManagedNamespace {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "the interval at which the global service will be reconciled, default is 10m"
+  interval: String
 
   "the service which created this managed namespace"
   parent: ServiceDeployment
@@ -4123,10 +4982,21 @@ input GateJobAttributes {
 
   annotations: Json
 
+  nodeSelector: Json
+
+  tolerations: [PodTolerationAttributes]
+
   serviceAccount: String
 
   "request overrides if you don't want to manually configure individual containers"
   resources: ContainerResourcesAttributes
+}
+
+input PodTolerationAttributes {
+  key: String
+  operator: String
+  value: String
+  effect: String
 }
 
 "the attributes for a container"
@@ -4358,6 +5228,12 @@ type JobGateSpec {
   "any pod annotations to apply"
   annotations: Map
 
+  "any pod node selector to apply"
+  nodeSelector: Map
+
+  "any pod tolerations to apply"
+  tolerations: [PodToleration]
+
   "the service account the pod will use"
   serviceAccount: String
 
@@ -4366,6 +5242,13 @@ type JobGateSpec {
 
   "requests overrides for cases where direct container configuration is unnecessary"
   resources: ContainerResources
+}
+
+type PodToleration {
+  key: String
+  operator: String
+  value: String
+  effect: String
 }
 
 "a shortform spec for job containers, designed for ease-of-use"
@@ -4606,6 +5489,8 @@ input SyncConfigAttributes {
 
   deleteNamespace: Boolean
 
+  requireOwnership: Boolean
+
   namespaceMetadata: MetadataAttributes
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -4646,6 +5531,8 @@ input HelmConfigAttributes {
   luaScript: String
 
   luaFile: String
+
+  luaFolder: String
 
   set: HelmValueAttributes
 
@@ -4798,6 +5685,7 @@ input ComponentContentAttributes {
 input ServiceErrorAttributes {
   source: String!
   message: String!
+  warning: Boolean
 }
 
 "A reusable configuration context, useful for plumbing data from external tools like terraform\/pulumi\/etc"
@@ -4826,6 +5714,15 @@ input KustomizeAttributes {
 
   "if the kustomization will need to inflate a helm chart"
   enableHelm: Boolean
+}
+
+"metadata about the deployed contents of a service"
+input ServiceMetadataAttributes {
+  "a list of images to deployed in this service"
+  images: [String]
+
+  "a list of fqdns to discover"
+  fqdns: [String]
 }
 
 "a reference to a service deployed from a git repo into a cluster"
@@ -4895,6 +5792,9 @@ type ServiceDeployment {
 
   "the renderers of this service"
   renderers: [Renderer]
+
+  "metadata about the deployed contents of this service"
+  metadata: ServiceMetadata
 
   "fetches the \/docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
   docs: [GitFile]
@@ -5069,6 +5969,9 @@ type HelmSpec {
 
   "a lua file to use for helm applies"
   luaFile: String
+
+  "a folder of lua files to include in the final script used"
+  luaFolder: String
 }
 
 "a configuration item k\/v pair"
@@ -5235,7 +6138,11 @@ type ApiDeprecation {
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
+
   message: String!
+
+  "whether this is just a warning"
+  warning: Boolean
 }
 
 "a file fetched from a git repository, eg a docs .md file"
@@ -5261,6 +6168,9 @@ type SyncConfig {
   "Whether to require all resources are placed in the same namespace"
   enforceNamespace: Boolean
 
+  "Whether to require all resources are owned by this service and fail if they are owned by another"
+  requireOwnership: Boolean
+
   namespaceMetadata: NamespaceMetadata
 
   "A list of diff normalizers to apply to the service which controls how drift detection works"
@@ -5271,6 +6181,15 @@ type SyncConfig {
 type NamespaceMetadata {
   labels: Map
   annotations: Map
+}
+
+"metadata about the deployed contents of a service"
+type ServiceMetadata {
+  "a list of images to deployed in this service"
+  images: [String]
+
+  "a list of fqdns to discover"
+  fqdns: [String]
 }
 
 "Allows you to control whether a specific set of fields in a kubernetes object is drift detected"
@@ -5502,6 +6421,11 @@ input ClusterPing {
   cpuUtil: Float
 
   memoryUtil: Float
+
+  "the interval in seconds between pings to the cluster"
+  pingInterval: Int
+
+  availabilityZones: [String]
 
   "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
   insightComponents: [ClusterInsightComponentAttributes]
@@ -6031,6 +6955,9 @@ type Cluster {
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
 
+  "the interval in seconds between pings to the cluster"
+  pingInterval: Int
+
   "The version of OpenShift this cluster is running"
   openshiftVersion: String
 
@@ -6054,6 +6981,9 @@ type Cluster {
 
   "The memory utilization of the cluster"
   memoryUtil: Float
+
+  "The availability zones this cluster is running in"
+  availabilityZones: [String]
 
   "The helm values for the agent installation"
   agentHelmValues: String
@@ -6913,6 +7843,18 @@ type NodeStatistic {
   updatedAt: DateTime
 }
 
+"information about the kubernetes version for a given cluster"
+type KubernetesVersionInfo {
+  "the distribution of kubernetes this info pertains to"
+  distro: ClusterDistro
+
+  "the kubernetes version"
+  version: String
+
+  "whether this version is on extended support"
+  extended: Boolean
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -6987,6 +7929,7 @@ enum ScmType {
   GITHUB
   GITLAB
   BITBUCKET
+  AZURE_DEVOPS
 }
 
 enum MatchStrategy {
@@ -7199,10 +8142,19 @@ input ScmConnectionAttributes {
 
   github: GithubAppAttributes
 
+  azure: AzureDevopsAttributes
+
   default: Boolean
+
+  proxy: HttpProxyAttributes
 
   "a ssh private key to be used for commit signing"
   signingPrivateKey: String
+}
+
+"Configuration for http proxy usage in connections to Git or SCM providers"
+input HttpProxyAttributes {
+  url: String!
 }
 
 "Requirements to perform Github App authentication"
@@ -7215,6 +8167,18 @@ input GithubAppAttributes {
 
   "PEM-encoded private key for this app"
   privateKey: String!
+}
+
+"Requirements to perform Azure DevOps authentication"
+input AzureDevopsAttributes {
+  "the username asociated with your Azure DevOps PAT"
+  username: String!
+
+  "the organization to use for azure devops"
+  organization: String!
+
+  "the project to use for azure devops"
+  project: String!
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"
@@ -7275,6 +8239,8 @@ input PrAutomationAttributes {
 
   configuration: [PrConfigurationAttributes]
 
+  secrets: PrSecretsAttributes
+
   confirmation: PrConfirmationAttributes
 
   "users who can update this automation"
@@ -7302,15 +8268,28 @@ input PrChecklistAttributes {
 "the a configuration item for creating a new pr"
 input PrConfigurationAttributes {
   type: ConfigurationType!
+
   name: String!
+
   default: String
+
   documentation: String
+
   longform: String
+
   displayName: String
+
   placeholder: String
+
+  "the page to use for the pr automation"
+  page: Int
+
   optional: Boolean
+
   condition: ConditionAttributes
+
   validation: ConfigurationValidationAttributes
+
   values: [String]
 }
 
@@ -7331,6 +8310,30 @@ input ConfigurationValidationAttributes {
 
   "configuration for name uniqueness"
   uniqBy: UniqByAttributes
+}
+
+input PrSecretsAttributes {
+  "the cluster handle that will hold this secret"
+  cluster: String
+
+  "the k8s namespace to place the secret in"
+  namespace: String
+
+  "the name of the secret"
+  name: String
+
+  entries: [PrSecretEntryAttributes]
+}
+
+input PrSecretEntryAttributes {
+  "the name of the secret entry"
+  name: String
+
+  "the documentation for the secret entry"
+  documentation: String
+
+  "whether to autogenerate the secret entry"
+  autogenerate: Boolean
 }
 
 "How to enforce uniqueness for a field"
@@ -7507,6 +8510,13 @@ input ObserverOciAttributes {
 input ObserverGitAttributes {
   repositoryId: ID!
   type: ObserverGitTargetType!
+  filter: ObserverGitFilterAttributes
+}
+
+"a spec for filtering a git repository tags in an observer"
+input ObserverGitFilterAttributes {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"
@@ -7680,6 +8690,12 @@ type ScmConnection {
 
   username: String
 
+  "a proxy to use for git requests"
+  proxy: HttpProxyConfiguration
+
+  "the azure devops attributes for this connection"
+  azure: AzureDevopsConfiguration
+
   "base url for git clones for self-hosted versions"
   baseUrl: String
 
@@ -7723,6 +8739,9 @@ type PrAutomation {
   darkIcon: String
 
   configuration: [PrConfiguration]
+
+  "the secrets to create as part of this pr"
+  secrets: PrSecrets
 
   "optional confirmation block to express prerequisites for this PR"
   confirmation: PrConfirmation
@@ -7824,14 +8843,26 @@ type RegexReplacement {
 "the a configuration item for creating a new pr, used for templating the ultimate code changes made"
 type PrConfiguration {
   type: ConfigurationType!
+
   name: String!
+
   default: String
+
   documentation: String
+
   longform: String
+
   placeholder: String
+
   displayName: String
+
+  "the page to use for the pr configuration"
+  page: Int
+
   optional: Boolean
+
   values: [String]
+
   condition: PrConfigurationCondition
 }
 
@@ -7847,6 +8878,30 @@ type PrConfigurationCondition {
   value: String
 }
 
+type PrSecrets {
+  "the cluster handle that will hold this secret"
+  cluster: String
+
+  "the k8s namespace to place the secret in"
+  namespace: String
+
+  "the name of the secret"
+  name: String
+
+  entries: [PrSecretEntry]
+}
+
+type PrSecretEntry {
+  "the name of the secret entry"
+  name: String
+
+  "the documentation for the secret entry"
+  documentation: String
+
+  "whether to autogenerate the secret"
+  autogenerate: Boolean
+}
+
 "Additional details to verify all prerequisites are satisfied before generating this pr"
 type PrConfirmation {
   "optional markdown text to present before pr create"
@@ -7860,6 +8915,17 @@ type PrConfirmation {
 type PrChecklist {
   "the label for the checkbox"
   label: String!
+}
+
+type AzureDevopsConfiguration {
+  "the username asociated with your Azure DevOps PAT"
+  username: String!
+
+  "the organization to use for azure devops"
+  organization: String!
+
+  "the project to use for azure devops"
+  project: String!
 }
 
 "A reference to a pull request for your kubernetes related IaC"
@@ -7985,6 +9051,14 @@ type ObserverGitRepo {
 
   "the resource within the git repository you want to poll"
   type: ObserverGitTargetType!
+
+  filter: ObserverGitFilter
+}
+
+"a spec for filtering a git repository tags in an observer"
+type ObserverGitFilter {
+  "a regex to filter the git repository tags for the observed value"
+  regex: String
 }
 
 "configuration for an observer action"
@@ -8012,6 +9086,11 @@ type ObserverPipelineAction {
 
   "the context to apply, use $value to interject the observed value"
   context: Map!
+}
+
+"Configuration for http proxy usage in connections to Git or SCM providers"
+type HttpProxyConfiguration {
+  url: String!
 }
 
 "A catalog is an organized collection of PR Automations used for permissioning and discovery"
@@ -8138,6 +9217,7 @@ enum AgentSessionType {
   PROVISIONING
   SEARCH
   MANIFESTS
+  CHAT
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -8275,6 +9355,7 @@ type ChatTool {
 "Additional attributes for describing a pr call tool call that derived this chat message"
 type PrCallAttributes {
   context: Map
+  branch: String
 }
 
 "A list of chat messages around a specific topic created on demand"
@@ -8300,7 +9381,18 @@ type ChatThread {
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
-  chats(after: String, first: Int, before: String, last: Int): ChatConnection
+  chats(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "reverse the order of the chats"
+    reverse: Boolean
+  ): ChatConnection
 
   insertedAt: DateTime
 
@@ -8351,6 +9443,8 @@ type AgentSession {
 
   "the pull requests associated with this chat, usually from an agentic workflow"
   pullRequests(after: String, first: Int, before: String, last: Int, open: Boolean, q: String): PullRequestConnection
+
+  runs(after: String, first: Int, before: String, last: Int): AgentRunConnection
 
   insertedAt: DateTime
 
@@ -8602,6 +9696,10 @@ input LogFacetInput {
   value: String!
 }
 
+input LogAggregationInput {
+  bucketSize: String
+}
+
 type Dashboard {
   id: String!
   spec: DashboardSpec!
@@ -8651,6 +9749,11 @@ type LogLine {
 type LogFacet {
   key: String!
   value: String
+}
+
+type LogAggregationBucket {
+  timestamp: DateTime
+  count: Int
 }
 
 type Metadata {
@@ -9801,6 +10904,8 @@ type ConsoleConfiguration {
 
   vpnEnabled: Boolean
 
+  sentryEnabled: Boolean
+
   "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean
 
@@ -10205,5 +11310,25 @@ type McpServerEdge {
 
 type FlowEdge {
   node: Flow
+  cursor: String
+}
+
+type SentinelRunEdge {
+  node: SentinelRun
+  cursor: String
+}
+
+type SentinelEdge {
+  node: Sentinel
+  cursor: String
+}
+
+type AgentRunEdge {
+  node: AgentRun
+  cursor: String
+}
+
+type AgentRuntimeEdge {
+  node: AgentRuntime
   cursor: String
 }

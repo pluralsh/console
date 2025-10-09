@@ -29,7 +29,7 @@ defmodule Console.Schema.ChatThread do
   end
 
   def search(query \\ __MODULE__, q) do
-    from(t in query, where: ilike(t.summary, ^"%#{q}%"))
+    from(t in query, where: fragment("encode(?, 'escape') ILIKE ?", t.summary, ^"%#{q}%"))
   end
 
   def settings(%__MODULE__{settings: %{memory: m}}, :memory) when is_boolean(m), do: m
@@ -65,6 +65,13 @@ defmodule Console.Schema.ChatThread do
         inserted_at: t.inserted_at,
         row_number: fragment("ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY inserted_at DESC)")
       }
+    )
+  end
+
+  def nonagent(query \\ __MODULE__) do
+    from(t in query,
+      left_join: s in assoc(t, :session),
+        where: is_nil(s.id) or s.type not in ^[:terraform, :kubernetes]
     )
   end
 

@@ -67,9 +67,15 @@ function ServiceAccountCreateModal({
       header="Create service account"
       open={open}
       onClose={() => onClose()}
+      asForm
+      onSubmit={(e) => {
+        e.preventDefault()
+        mutation()
+      }}
       actions={
         <>
           <Button
+            type="button"
             secondary
             onClick={() => onClose()}
           >

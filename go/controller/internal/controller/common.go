@@ -4,10 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"slices"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -21,22 +28,26 @@ import (
 	"sigs.k8s.io/yaml"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
-	requeueDefault          = 30 * time.Second
-	requeueWaitForResources = 5 * time.Second
+	requeueDefault          = 60 * time.Second
+	requeueWaitForResources = 15 * time.Second
+
+	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
+	// It is used instead of the standard owner reference to avoid garbage collection of resources
+	// but still be able to reconcile them.
+	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
 )
 
-var (
-	requeue          = ctrl.Result{RequeueAfter: requeueDefault}
-	waitForResources = ctrl.Result{RequeueAfter: requeueWaitForResources}
-)
+func jitterRequeue(t time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))}
+}
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
 // i.e., when a resource is not created yet, or when it is waiting for an ID.
@@ -50,7 +61,7 @@ var (
 // It is important that at least one from a result or an error have to be non-nil.
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
 	if err != nil && apierrors.IsNotFound(err) {
-		result = &waitForResources
+		result = lo.ToPtr(jitterRequeue(requeueWaitForResources))
 	}
 
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
@@ -67,48 +78,43 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	return defaultMessage
 }
 
-func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, bool, error) {
-	requeue := false
+func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, error) {
 	for i := range bindings {
-		binding, req, err := ensureBinding(bindings[i], userGroupCache)
+		binding, err := ensureBinding(bindings[i], userGroupCache)
 		if err != nil {
-			return bindings, req, err
+			return bindings, err
 		}
 
-		requeue = requeue || req
 		bindings[i] = binding
 	}
 
-	return bindings, requeue, nil
+	return bindings, nil
 }
 
-func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, bool, error) {
-	requeue := false
+func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, error) {
 	if binding.GroupName == nil && binding.UserEmail == nil {
-		return binding, requeue, nil
+		return binding, apierrors.NewNotFound(schema.GroupResource{Resource: "group/user"}, "nil")
 	}
 
 	if binding.GroupName != nil {
 		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
-		if err != nil && !errors.IsNotFound(err) {
-			return binding, requeue, err
+		if err != nil {
+			return binding, err
 		}
 
-		requeue = errors.IsNotFound(err)
 		binding.GroupID = lo.EmptyableToPtr(groupID)
 	}
 
 	if binding.UserEmail != nil {
 		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
-		if err != nil && !errors.IsNotFound(err) {
-			return binding, requeue, err
+		if err != nil {
+			return binding, err
 		}
 
-		requeue = errors.IsNotFound(err)
 		binding.UserID = lo.EmptyableToPtr(userID)
 	}
 
-	return binding, requeue, nil
+	return binding, nil
 }
 
 func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttributes {
@@ -145,15 +151,18 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		for _, dep := range srv.Dependencies {
 			serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
 		}
+
+		slices.SortFunc(serviceTemplate.Dependencies, func(a, b *console.ServiceDependencyAttributes) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 	}
 
 	if srv.Templated != nil {
 		serviceTemplate.Templated = srv.Templated
 	}
 	if srv.Contexts != nil {
-		serviceTemplate.Contexts = make([]*string, 0)
-		serviceTemplate.Contexts = algorithms.Map(srv.Contexts,
-			func(b string) *string { return &b })
+		slices.Sort(srv.Contexts)
+		serviceTemplate.Contexts = lo.ToSlicePtr(srv.Contexts)
 	}
 	if srv.Git != nil {
 		serviceTemplate.Git = &console.GitRefAttributes{
@@ -171,6 +180,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			IgnoreCrds:  srv.Helm.IgnoreCrds,
 			LuaScript:   srv.Helm.LuaScript,
 			LuaFile:     srv.Helm.LuaFile,
+			LuaFolder:   srv.Helm.LuaFolder,
 			Git:         srv.Helm.Git.Attributes(),
 		}
 		if srv.Helm.Repository != nil {
@@ -227,6 +237,10 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			})
 		}
 	}
+	slices.SortFunc(serviceTemplate.Configuration, func(a, b *console.ConfigAttributes) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
 	if err := getSources(ctx, c, serviceTemplate, srv.Sources); err != nil {
 		return nil, err
 	}
@@ -311,7 +325,7 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		return nil, nil
 	}
 
-	var annotations, labels, raw *string
+	var annotations, labels, nodeSelector, raw *string
 	if job.Annotations != nil {
 		result, err := json.Marshal(job.Annotations)
 		if err != nil {
@@ -326,12 +340,33 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		}
 		labels = lo.ToPtr(string(result))
 	}
+
+	if job.NodeSelector != nil {
+		result, err := json.Marshal(job.NodeSelector)
+		if err != nil {
+			return nil, err
+		}
+		nodeSelector = lo.ToPtr(string(result))
+	}
+
 	if job.Raw != nil {
 		rawData, err := json.Marshal(job.Raw)
 		if err != nil {
 			return nil, err
 		}
 		raw = lo.ToPtr(string(rawData))
+	}
+
+	var tolerations []*console.PodTolerationAttributes
+	if job.Tolerations != nil {
+		tolerations = algorithms.Map(job.Tolerations, func(t corev1.Toleration) *console.PodTolerationAttributes {
+			return &console.PodTolerationAttributes{
+				Key:      lo.ToPtr(t.Key),
+				Operator: lo.ToPtr(string(t.Operator)),
+				Value:    lo.ToPtr(t.Value),
+				Effect:   lo.ToPtr(string(t.Effect)),
+			}
+		})
 	}
 
 	return &console.GateJobAttributes{
@@ -360,6 +395,8 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 			}),
 		Labels:         labels,
 		Annotations:    annotations,
+		NodeSelector:   nodeSelector,
+		Tolerations:    tolerations,
 		ServiceAccount: job.ServiceAccount,
 	}, nil
 }
@@ -428,7 +465,7 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	}
 
 	if !project.Status.HasID() {
-		return nil, &waitForResources, fmt.Errorf("project is not ready")
+		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, objMeta, scheme); err != nil {
@@ -436,4 +473,94 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	}
 
 	return project, nil, nil
+}
+
+func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
+		if !HasAnnotation(obj, OwnedByAnnotationName) {
+			return nil
+		}
+
+		ownedBy := obj.GetAnnotations()[OwnedByAnnotationName]
+		annotationGk, namespacedName, err := fromAnnotation(ownedBy)
+		if err != nil {
+			klog.ErrorS(err, "failed to parse owned-by annotation", "annotation", ownedBy)
+			return nil
+		}
+
+		if ownerGk != nil && !strings.EqualFold(annotationGk.String(), ownerGk.String()) {
+			klog.V(log.LogLevelDebug).InfoS(
+				"owned-by annotation does not match expected group kind",
+				"ownerGk", ownerGk.String(),
+				"annotationGk", annotationGk.String(),
+			)
+			return nil
+		}
+
+		klog.V(log.LogLevelDebug).InfoS("enqueueing request for owned-by annotation",
+			"annotation", ownedBy,
+		)
+		return []reconcile.Request{{NamespacedName: namespacedName}}
+	})
+}
+
+func HasAnnotation(obj runtimeclient.Object, annotation string) bool {
+	if obj.GetAnnotations() == nil {
+		return false
+	}
+
+	value, exists := obj.GetAnnotations()[annotation]
+	_, _, err := fromAnnotation(value)
+	return exists && err == nil
+}
+
+func toAnnotation(gk metav1.GroupKind, namespacedName types.NamespacedName) string {
+	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", gk.Group, gk.Kind, namespacedName.Namespace, namespacedName.Name))
+}
+
+func fromAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
+	parts := strings.Split(annotation, "/")
+	if len(parts) != 4 {
+		return metav1.GroupKind{}, types.NamespacedName{}, fmt.Errorf("the annotation has wrong format %s", annotation)
+	}
+
+	gk := metav1.GroupKind{
+		Group: parts[0],
+		Kind:  parts[1],
+	}
+
+	return gk, types.NamespacedName{
+		Namespace: parts[2],
+		Name:      parts[3],
+	}, nil
+}
+
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object, child runtimeclient.Object) error {
+	if HasAnnotation(child, OwnedByAnnotationName) {
+		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists", "annotation", OwnedByAnnotationName, "owner", owner.GetName(), "child", child.GetName())
+		return nil
+	}
+
+	annotations := child.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	annotations[OwnedByAnnotationName] = toAnnotation(GroupKindFromObject(owner), types.NamespacedName{
+		Namespace: owner.GetNamespace(),
+		Name:      owner.GetName(),
+	})
+	child.SetAnnotations(annotations)
+
+	klog.V(log.LogLevelDebug).InfoS("adding owned-by annotation", "annotation", OwnedByAnnotationName, "owner", owner.GetName(), "child", child.GetName())
+	return utils.TryToUpdate(ctx, client, child)
+}
+
+func GroupKindFromObject(obj runtimeclient.Object) metav1.GroupKind {
+	gvk := obj.GetObjectKind().GroupVersionKind()
+
+	return metav1.GroupKind{
+		Group: gvk.Group,
+		Kind:  gvk.Kind,
+	}
 }

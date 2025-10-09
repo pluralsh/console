@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: helmrepositories.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -22,6 +22,11 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: |-
+          HelmRepository is a Kubernetes custom resource that represents a Helm chart repository
+          for use with the Plural Console deployment system. It enables integration with various
+          Helm repository providers including public repositories, private cloud-hosted repositories,
+          and on-premises solutions with comprehensive authentication support.
         properties:
           apiVersion:
             description: |-
@@ -41,20 +46,40 @@ spec:
           metadata:
             type: object
           spec:
-            description: Spec reflects a Console API Helm repository spec.
+            description: |-
+              Spec defines the desired state of the HelmRepository, including the repository URL
+              and authentication configuration. The URL is immutable once set to ensure consistency
+              across deployments and prevent accidental repository changes.
             properties:
               auth:
-                description: Auth contains authentication credentials for the Helm
-                  repository.
+                description: |-
+                  Auth contains the authentication configuration for accessing the Helm repository.
+                  The specific authentication method used depends on the Provider field.
+                  Only one authentication method should be configured per repository.
                 properties:
                   aws:
+                    description: |-
+                      Aws specifies AWS-specific authentication for Amazon ECR and other AWS-hosted repositories.
+                      Supports both static credentials and IAM role-based authentication for secure access
+                      to private repositories hosted in Amazon Web Services.
                     properties:
                       accessKey:
+                        description: |-
+                          AccessKey specifies the AWS access key ID for authentication.
+                          When using static credentials, this should be set along with the secret access key.
+                          For enhanced security, consider using IAM roles instead of static credentials.
                         type: string
                       assumeRoleArn:
+                        description: |-
+                          AssumeRoleArn specifies an AWS IAM role ARN to assume for repository access.
+                          This enables cross-account access and role-based authentication, providing
+                          enhanced security and flexibility in AWS environments.
                         type: string
                       secretAccessKeySecretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          SecretAccessKeySecretKeyRef references a specific key within a Kubernetes Secret containing the secret access key.
+                          This is the preferred method for storing AWS credentials as it allows multiple
+                          credential sets to be organized within a single secret.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -78,8 +103,10 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       secretAccessKeySecretRef:
-                        description: SecretAccessKeySecretRef is a secret reference
-                          that should contain secret access key.
+                        description: |-
+                          SecretAccessKeySecretRef references a Kubernetes Secret containing the AWS secret access key.
+                          The entire secret content will be used as the secret access key.
+                          This approach is deprecated in favor of SecretAccessKeySecretKeyRef for better secret management.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -93,11 +120,21 @@ spec:
                         x-kubernetes-map-type: atomic
                     type: object
                   azure:
+                    description: |-
+                      Azure specifies Azure-specific authentication for Azure Container Registry (ACR).
+                      Supports service principal authentication and managed identity for secure access
+                      to private repositories hosted in Microsoft Azure.
                     properties:
                       clientId:
+                        description: |-
+                          ClientID specifies the Azure service principal client ID.
+                          This is used in conjunction with the client secret to authenticate with Azure services.
                         type: string
                       clientSecretSecretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          ClientSecretSecretKeyRef references a specific key within a Kubernetes Secret containing the client secret.
+                          This is the preferred method for storing Azure credentials as it allows proper
+                          secret organization and key-based access control.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -121,8 +158,10 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       clientSecretSecretRef:
-                        description: ClientSecretSecretRef is a secret reference that
-                          should contain client secret.
+                        description: |-
+                          ClientSecretSecretRef references a Kubernetes Secret containing the Azure service principal client secret.
+                          The entire secret content will be used as the client secret.
+                          This approach is deprecated in favor of ClientSecretSecretKeyRef for better secret management.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -135,14 +174,29 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       subscriptionId:
+                        description: |-
+                          SubscriptionID specifies the Azure subscription ID.
+                          This identifies the Azure subscription containing the resources
+                          and may be required for certain repository access scenarios.
                         type: string
                       tenantId:
+                        description: |-
+                          TenantID specifies the Azure Active Directory tenant ID.
+                          This identifies the Azure AD instance that contains the service principal
+                          and is required for proper authentication scope.
                         type: string
                     type: object
                   basic:
+                    description: |-
+                      Basic specifies username/password authentication for repositories that support HTTP Basic Auth.
+                      Commonly used with private Helm repositories, Harbor registries, and other traditional
+                      repository managers that implement standard HTTP authentication.
                     properties:
                       passwordSecretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          PasswordSecretKeyRef references a specific key within a Kubernetes Secret that contains the password.
+                          This is the preferred method for password storage as it allows multiple credentials
+                          to be stored in a single secret with proper key-based access.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -167,8 +221,9 @@ spec:
                         x-kubernetes-map-type: atomic
                       passwordSecretRef:
                         description: |-
-                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                          in any namespace
+                          PasswordSecretRef references a Kubernetes Secret containing the password for Basic authentication.
+                          The entire secret content will be used as the password.
+                          This approach is deprecated in favor of PasswordSecretKeyRef for better secret management.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -181,14 +236,25 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       username:
+                        description: |-
+                          Username specifies the username for HTTP Basic authentication.
+                          This is typically a user account or service account name configured
+                          in the target repository system.
                         type: string
                     required:
                     - username
                     type: object
                   bearer:
+                    description: |-
+                      Bearer specifies token-based authentication for repositories that support Bearer tokens.
+                      Used with modern container registries and repositories that implement OAuth2 or similar
+                      token-based authentication schemes.
                     properties:
                       tokenSecretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          TokenSecretKeyRef references a specific key within a Kubernetes Secret that contains the bearer token.
+                          This is the preferred method for token storage as it allows multiple tokens
+                          to be stored in a single secret with proper key-based access.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -213,8 +279,9 @@ spec:
                         x-kubernetes-map-type: atomic
                       tokenSecretRef:
                         description: |-
-                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                          in any namespace
+                          TokenSecretRef references a Kubernetes Secret containing the bearer token.
+                          The entire secret content will be used as the authentication token.
+                          This approach is deprecated in favor of TokenSecretKeyRef for better secret management.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -228,9 +295,16 @@ spec:
                         x-kubernetes-map-type: atomic
                     type: object
                   gcp:
+                    description: |-
+                      Gcp specifies Google Cloud-specific authentication for Google Artifact Registry.
+                      Supports service account key authentication for secure access to private
+                      repositories hosted in Google Cloud Platform.
                     properties:
                       applicationCredentialsSecretKeyRef:
-                        description: SecretKeySelector selects a key of a Secret.
+                        description: |-
+                          ApplicationCredentialsSecretKeyRef references a specific key within a Kubernetes Secret containing the service account JSON.
+                          This is the preferred method for storing GCP credentials as it allows multiple
+                          service account keys to be organized within a single secret with proper access control.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -254,8 +328,10 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       applicationCredentialsSecretRef:
-                        description: ApplicationCredentialsSecretRef is a secret reference
-                          that should contain application credentials.
+                        description: |-
+                          ApplicationCredentialsSecretRef references a Kubernetes Secret containing the GCP service account key JSON.
+                          The entire secret content will be used as the service account credentials.
+                          This approach is deprecated in favor of ApplicationCredentialsSecretKeyRef for better secret management.
                         properties:
                           name:
                             description: name is unique within a namespace to reference
@@ -270,7 +346,10 @@ spec:
                     type: object
                 type: object
               provider:
-                description: Provider is the name of the Helm auth provider.
+                description: |-
+                  Provider specifies the authentication provider type for this Helm repository.
+                  This determines which authentication method will be used when accessing the repository.
+                  Different providers support different authentication mechanisms optimized for their platforms.
                 enum:
                 - BASIC
                 - BEARER
@@ -280,7 +359,11 @@ spec:
                 example: AWS
                 type: string
               url:
-                description: URL of the Helm repository.
+                description: |-
+                  URL specifies the HTTP/HTTPS URL of the Helm repository.
+                  This field is immutable once set to prevent accidental changes that could break
+                  existing service deployments that depend on this repository.
+                  Supported formats include standard Helm repository URLs and OCI registry URLs.
                 type: string
                 x-kubernetes-validations:
                 - message: URL is immutable
@@ -289,7 +372,9 @@ spec:
             - url
             type: object
           status:
-            description: Status represent a status of this resource.
+            description: |-
+              Status represents the current state of this HelmRepository resource, including
+              synchronization status with the Console API and any error conditions.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

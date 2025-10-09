@@ -1,12 +1,16 @@
 import {
   Button,
+  DatadogLogoIcon,
   Flex,
   FormField,
   GrafanaLogoIcon,
   Input2,
   ListBoxItem,
   Modal,
+  NewrelicLogoIcon,
+  PagerdutyLogoIcon,
   Select,
+  SentryLogoIcon,
   WebhooksIcon,
 } from '@pluralsh/design-system'
 import { ComponentPropsWithoutRef, useCallback } from 'react'
@@ -161,6 +165,14 @@ function getObservabilityWebhookTypeIcon(type: ObservabilityWebhookType) {
   switch (type) {
     case ObservabilityWebhookType.Grafana:
       return <GrafanaLogoIcon fullColor />
+    case ObservabilityWebhookType.Datadog:
+      return <DatadogLogoIcon fullColor />
+    case ObservabilityWebhookType.Newrelic:
+      return <NewrelicLogoIcon fullColor />
+    case ObservabilityWebhookType.Pagerduty:
+      return <PagerdutyLogoIcon fullColor />
+    case ObservabilityWebhookType.Sentry:
+      return <SentryLogoIcon />
     default:
       return <WebhooksIcon />
   }

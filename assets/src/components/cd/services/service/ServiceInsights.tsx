@@ -1,22 +1,20 @@
 import { Flex } from '@pluralsh/design-system'
 import { fromNow } from 'utils/datetime'
 
+import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import { useTheme } from 'styled-components'
-import { AiInsight } from '../../../../generated/graphql.ts'
-import { AIPinButton } from '../../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
-import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { useServiceContext } from './ServiceDetails'
 
 export function ServiceInsights() {
   const theme = useTheme()
-  const { service, refetch, isRefetching } = useServiceContext()
+  const { service } = useServiceContext()
 
   return (
     <Flex
@@ -42,11 +40,7 @@ export function ServiceInsights() {
           align="center"
           gap="small"
         >
-          <IconFrameRefreshButton
-            loading={isRefetching}
-            refetch={refetch}
-          />
-          <AIPinButton insight={service?.insight as AiInsight} />
+          {service?.insight && <InsightRefresh insight={service?.insight} />}
           <ChatWithAIButton
             floating
             insightId={service?.insight?.id}

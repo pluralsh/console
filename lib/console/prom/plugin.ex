@@ -12,6 +12,10 @@ defmodule Console.Prom.Plugin do
   def metric_scope(:file_count), do: ~w(console file count)a
   def metric_scope(:file_size), do: ~w(console file size)a
   def metric_scope(:erlang_nodes), do: ~w(console erlang nodes count)a
+  def metric_scope(:persisted_query_hit), do: ~w(console persisted query hit)a
+  def metric_scope(:persisted_query_miss), do: ~w(console persisted query miss)a
+
+  def plural_metric(name), do: [:plrl | name]
 
   @impl true
   def event_metrics(_opts) do
@@ -19,11 +23,23 @@ defmodule Console.Prom.Plugin do
       :console_prom_event_metrics,
       [
         sum(
-          [:git, :agent, :count],
+          plural_metric(~w(git agent count)a),
           event_name: metric_scope(:git_agent),
           measurement: :count,
           description: "The number of running git agents.",
           tags: [:url]
+        ),
+        sum(
+          plural_metric(~w(persisted query hit)a),
+          event_name: metric_scope(:persisted_query_hit),
+          measurement: :count,
+          description: "The number of persisted query hits."
+        ),
+        sum(
+          plural_metric(~w(persisted query miss)a),
+          event_name: metric_scope(:persisted_query_miss),
+          measurement: :count,
+          description: "The number of persisted query misses."
         )
       ]
     )
@@ -47,37 +63,37 @@ defmodule Console.Prom.Plugin do
       {Statistics, :compile, []},
       [
         last_value(
-          [:cluster, :count],
+          plural_metric(~w(cluster count)a),
           event_name: metric_scope(:cluster_count),
           description: "The total number of clusters managed by this instance.",
           measurement: :total
         ),
         last_value(
-          [:unhealthy, :cluster, :count],
+          plural_metric(~w(unhealthy cluster count)a),
           event_name: metric_scope(:unhealthy_cluster_count),
           description: "The total number of clusters managed by this instance.",
           measurement: :total
         ),
         last_value(
-          [:service, :count],
+          plural_metric(~w(service count)a),
           event_name: metric_scope(:service_count),
           description: "The total number of services managed by this instance.",
           measurement: :total
         ),
         last_value(
-          [:failed, :service, :count],
+          plural_metric(~w(failed service count)a),
           event_name: metric_scope(:failed_service_count),
           description: "The total number of services managed by this instance.",
           measurement: :total
         ),
         last_value(
-          [:stack, :count],
+          plural_metric(~w(stack count)a),
           event_name: metric_scope(:stack_count),
           description: "The total number of stacks managed by this instance.",
           measurement: :total
         ),
         last_value(
-          [:failed, :stack, :count],
+          plural_metric(~w(failed stack count)a),
           event_name: metric_scope(:failed_stack_count),
           description: "The total number of stacks managed by this instance.",
           measurement: :total
@@ -94,13 +110,13 @@ defmodule Console.Prom.Plugin do
       [
         # Capture the total number of files and disk utilization from console file caches
         last_value(
-          [:local, :cache, :file, :count],
+          plural_metric(~w(local cache file count)a),
           event_name: metric_scope(:file_count),
           description: "The total number of files w/in local caches.",
           measurement: :total
         ),
         last_value(
-          [:local, :cache, :filesize],
+          plural_metric(~w(local cache filesize)a),
           event_name: metric_scope(:file_size),
           description: "The total disk utilization from console file caches.",
           measurement: :total
@@ -117,7 +133,7 @@ defmodule Console.Prom.Plugin do
       [
         # Capture the total number of files and disk utilization from console file caches
         last_value(
-          [:erlang, :nodes, :count],
+          plural_metric(~w(erlang nodes count)a),
           event_name: metric_scope(:erlang_nodes),
           description: "The total number of erlang nodes.",
           measurement: :total

@@ -1,6 +1,6 @@
-go 1.24.2
+go 1.25.1
 
-toolchain go1.24.3
+toolchain go1.25.1
 
 use (
 	./ai-proxy
@@ -12,5 +12,6 @@ use (
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
+	./sign
 	./tools // github.com/pluralsh/console/go/tools
 )

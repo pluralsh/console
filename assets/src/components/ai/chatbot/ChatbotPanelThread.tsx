@@ -1,26 +1,9 @@
-import { EmptyState, usePrevious } from '@pluralsh/design-system'
-
-import {
-  Dispatch,
-  Fragment,
-  ReactNode,
-  RefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import styled, { useTheme } from 'styled-components'
-
-import { useCanScroll } from 'components/hooks/useCanScroll.ts'
-import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import { Flex, usePrevious } from '@pluralsh/design-system'
+import { GqlError, GqlErrorType } from 'components/utils/Alert.tsx'
 import {
   AiDeltaFragment,
   AiRole,
-  ChatThreadDetailsQueryResult,
-  ChatThreadFragment,
+  ChatFragment,
   ChatType,
   EvidenceType,
   useAiChatStreamSubscription,
@@ -28,57 +11,60 @@ import {
 } from 'generated/graphql'
 import { produce } from 'immer'
 import { isEmpty, uniq } from 'lodash'
-import { applyNodeToRefs } from 'utils/applyNodeToRefs.ts'
-import { mapExistingNodes } from 'utils/graphql.ts'
+
+import { TableSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { VirtualList } from 'components/utils/VirtualList.tsx'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { VListHandle } from 'virtua'
+import TypingIndicator from '../../utils/TypingIndicator.tsx'
+import { Body1P } from '../../utils/typography/Text.tsx'
+import { useChatbot } from '../AIContext.tsx'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
-import {
-  GeneratingResponseMessage,
-  SendMessageForm,
-} from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
-import { getChatOptimisticResponse, updateChatCache } from './utils.tsx'
+import { ChatInput } from './input/ChatInput.tsx'
 
 export function ChatbotPanelThread({
-  currentThread,
-  fullscreen,
-  threadDetailsQuery: { data, loading, error },
-  showMcpServers,
-  setShowMcpServers,
-  showExamplePrompts = false,
-  setShowExamplePrompts,
+  messages,
+  initLoading,
+  error,
+  fetchNextPage,
+  hasNextPage,
+  isLoadingNextPage,
 }: {
-  currentThread: ChatThreadFragment
-  fullscreen: boolean
-  threadDetailsQuery: ChatThreadDetailsQueryResult
-  showMcpServers: boolean
-  setShowMcpServers: Dispatch<SetStateAction<boolean>>
-  showExamplePrompts: boolean
-  setShowExamplePrompts: Dispatch<SetStateAction<boolean>>
+  messages: ChatFragment[]
+  initLoading: boolean
+  error: GqlErrorType
+  fetchNextPage: () => void
+  hasNextPage: boolean
+  isLoadingNextPage: boolean
 }) {
   const theme = useTheme()
-  const [streaming, setStreaming] = useState<boolean>(false)
-  const messageListRef = useRef<HTMLDivElement>(null)
-  const scrollToBottom = useCallback(() => {
-    messageListRef.current?.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: 'smooth',
-    })
-  }, [messageListRef])
-  const evidence = currentThread.insight?.evidence
-    ?.filter(isNonNullable)
-    .filter(({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr) // will change when we support alert evidence
+  const {
+    currentThread: curThreadDetails,
+    currentThreadLoading,
+    createNewThread,
+    queuedChatMessage,
+    setQueuedChatMessage,
+  } = useChatbot()
 
+  const threadId = curThreadDetails?.id
+  const messageListRef = useRef<VListHandle | null>(null)
+
+  const [showExamplePrompts, setShowExamplePrompts] = useState<boolean>(false)
+
+  const [streaming, setStreaming] = useState<boolean>(false)
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null)
   const [streamedMessages, setStreamedMessages] = useState<AiDeltaFragment[][]>(
     []
   )
   useAiChatStreamSubscription({
-    variables: { threadId: currentThread.id },
+    variables: { threadId },
     onData: ({ data: { data } }) => {
       setStreaming(true)
       const newDelta = data?.aiStream
-      if ((newDelta?.seq ?? 1) % 120 === 0) scrollToBottom()
       setStreamedMessages((streamedMessages) =>
         produce(streamedMessages, (draft) => {
           const msgNum = newDelta?.message ?? 0
@@ -94,196 +80,223 @@ export function ChatbotPanelThread({
     },
   })
 
-  const messages = mapExistingNodes(data?.chatThread?.chats)
-
-  const serverNames = uniq(
-    data?.chatThread?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
+  const { evidence, serverNames } = useMemo(
+    () => ({
+      evidence: curThreadDetails?.insight?.evidence
+        ?.filter(isNonNullable)
+        .filter(
+          ({ type }) => type === EvidenceType.Log || type === EvidenceType.Pr
+        ),
+      serverNames: uniq(
+        curThreadDetails?.tools?.map((tool) => tool?.server?.name ?? 'Unknown')
+      ),
+    }),
+    [curThreadDetails]
   )
 
-  // optimistic response adds the user's message right away, even though technically the mutation returns the AI response
-  // forcing the refetch before completion ensures both the user's sent message and AI response exist before overwriting the optimistic response in cache
+  const scrollToBottom = useCallback(
+    () => messageListRef.current?.scrollTo(messageListRef.current.scrollSize),
+    []
+  )
+
   const [
     mutateHybridChat,
     { loading: sendingMessage, error: messageError, reset },
   ] = useHybridChatMutation({
     awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreadDetails'],
-    onCompleted: () => streaming && scrollToBottom(),
-    optimisticResponse: ({ messages }) =>
-      getChatOptimisticResponse({
-        mutation: 'hybridChat',
-        content: messages?.[0]?.content,
-      }),
-    update: (cache, { data }) =>
-      updateChatCache(currentThread.id, cache, data?.hybridChat ?? []),
+    refetchQueries: ['ChatThreadMessages', 'ChatThreadDetails'],
+    onCompleted: () => scrollToBottom(),
   })
+
+  const sendMessage = useCallback(
+    (message: string) => {
+      if (!threadId) {
+        createNewThread({ summary: 'New chat with Plural AI' }, message)
+      } else {
+        scrollToBottom()
+        setPendingMessage(message)
+        mutateHybridChat({
+          variables: {
+            messages: [{ role: AiRole.User, content: message }],
+            threadId,
+          },
+        })
+      }
+    },
+    [threadId, createNewThread, scrollToBottom, mutateHybridChat]
+  )
+
+  // runs when new messages are added
+  const lastMessageId = messages[messages.length - 1]?.id
+  const prevLastMessageId = usePrevious(lastMessageId)
+  useEffect(() => {
+    if (!lastMessageId || lastMessageId === prevLastMessageId) return
+
+    setStreaming(false)
+    setStreamedMessages([])
+    setPendingMessage(null)
+  }, [lastMessageId, prevLastMessageId])
 
   // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
   useEffect(() => {
+    setStreaming(false)
+    setStreamedMessages([])
     reset()
-  }, [currentThread.id, reset])
+  }, [threadId, reset])
 
-  // scroll to the bottom when number of messages increases
-  const length = messages.length
-  const prevLength = usePrevious(length) ?? 0
+  // handles send and then clears the message queue if this is the right thread
   useEffect(() => {
-    if (length > prevLength) {
-      scrollToBottom()
-      setStreamedMessages([])
+    if (queuedChatMessage && queuedChatMessage.threadId === threadId) {
+      sendMessage(queuedChatMessage.message)
+      setQueuedChatMessage(null)
     }
-  }, [length, prevLength, scrollToBottom])
+  }, [queuedChatMessage, sendMessage, setQueuedChatMessage, threadId])
 
-  const sendMessage = useCallback(
-    (newMessage: string) => {
-      const variables = {
-        messages: [{ role: AiRole.User, content: newMessage }],
-        threadId: currentThread.id,
-      }
-      mutateHybridChat({ variables })
-    },
-    [currentThread.id, mutateHybridChat]
-  )
-
-  if (!data && loading)
-    return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
+  if (initLoading || currentThreadLoading)
+    return (
+      <TableSkeleton
+        centered
+        numColumns={1}
+        width={500}
+        styles={{ padding: theme.spacing.xlarge }}
+      />
+    )
 
   return (
-    <>
-      <ChatbotMessagesWrapper
-        messageListRef={messageListRef}
-        fullscreen={fullscreen}
-      >
+    <Flex
+      direction="column"
+      position="relative"
+      height="100%"
+      zIndex={3}
+    >
+      {messageError && (
+        <GqlError
+          css={{ margin: theme.spacing.small }}
+          error={messageError}
+        />
+      )}
+      <ChatbotMessagesWrapperSC>
         {isEmpty(messages) &&
-          !currentThread.session?.type &&
-          (error ? (
+        !sendingMessage &&
+        !curThreadDetails?.session?.type ? (
+          error ? (
             <GqlError error={error} />
           ) : (
-            <EmptyState message="No messages yet." />
-          ))}
-        {messages.map((msg) => (
-          <Fragment key={msg.id}>
-            <ChatMessage
-              {...msg}
-              threadId={currentThread.id}
-              serverName={msg.server?.name}
-            />
-            {!isEmpty(evidence) && // only attaches evidence to the initial insight
-              msg.seq === 0 &&
-              msg.role === AiRole.Assistant && (
-                <ChatbotPanelEvidence evidence={evidence ?? []} />
-              )}
-          </Fragment>
-        ))}
-        {!isEmpty(streamedMessages) ? (
-          streamedMessages.map((message, i) => {
-            const { tool, role } = message[0] ?? {}
-            return (
-              <ChatMessage
-                key={i}
-                disableActions
-                role={role ?? AiRole.Assistant}
-                type={!!tool ? ChatType.Tool : ChatType.Text}
-                attributes={tool ? { tool: { name: tool.name } } : undefined}
-                highlightToolContent={false}
-                content={message
-                  .toSorted((a, b) => a.seq - b.seq)
-                  .map((delta) => delta.content)
-                  .join('')}
-              />
-            )
-          })
-        ) : sendingMessage || currentThread.session?.done === false ? (
-          <GeneratingResponseMessage />
-        ) : null}
-        {messageError && <GqlError error={messageError} />}
+            <Body1P css={{ color: theme.colors['text-long-form'] }}>
+              How can I help you?
+            </Body1P>
+          )
+        ) : (
+          <VirtualList
+            isReversed
+            listRef={messageListRef}
+            data={messages}
+            loadNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isLoadingNextPage={isLoadingNextPage}
+            renderer={({ rowData }) => (
+              <div>
+                <ChatMessage
+                  {...rowData}
+                  threadId={threadId ?? ''}
+                  serverName={rowData.server?.name}
+                  session={curThreadDetails?.session}
+                />
+                {!isEmpty(evidence) && // only attaches evidence to the initial insight
+                  rowData.seq === 0 &&
+                  rowData.role === AiRole.Assistant && (
+                    <ChatbotPanelEvidence evidence={evidence ?? []} />
+                  )}
+              </div>
+            )}
+            bottomContent={
+              <>
+                {pendingMessage && (
+                  <ChatMessage
+                    role={AiRole.User}
+                    type={ChatType.Text}
+                    content={pendingMessage}
+                    disableActions
+                  />
+                )}
+                {streaming && !isEmpty(streamedMessages) ? (
+                  streamedMessages.map((message, i) => {
+                    const { tool, role } = message[0] ?? {}
+                    return (
+                      <ChatMessage
+                        key={i}
+                        disableActions
+                        role={role ?? AiRole.Assistant}
+                        type={!!tool ? ChatType.Tool : ChatType.Text}
+                        attributes={
+                          tool ? { tool: { name: tool.name } } : undefined
+                        }
+                        highlightToolContent={false}
+                        content={message
+                          .toSorted((a, b) => a.seq - b.seq)
+                          .map((delta) => delta.content)
+                          .join('')}
+                      />
+                    )
+                  })
+                ) : sendingMessage ||
+                  curThreadDetails?.session?.done === false ? (
+                  <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
+                ) : null}
+              </>
+            }
+          />
+        )}
         {showExamplePrompts && (
           <ChatbotPanelExamplePrompts
             setShowPrompts={setShowExamplePrompts}
             sendMessage={sendMessage}
           />
         )}
-      </ChatbotMessagesWrapper>
-      <SendMessageForm
-        currentThread={currentThread}
+      </ChatbotMessagesWrapperSC>
+      <ChatInput
+        currentThread={curThreadDetails}
         sendMessage={sendMessage}
-        fullscreen={fullscreen}
         serverNames={serverNames}
-        showMcpServers={showMcpServers}
-        setShowMcpServers={setShowMcpServers}
         showPrompts={showExamplePrompts}
         setShowPrompts={setShowExamplePrompts}
       />
-    </>
+    </Flex>
   )
 }
 
-export const ChatbotMessagesWrapper = ({
-  fullscreen,
-  messageListRef,
-  children,
-}: {
-  fullscreen: boolean
-  messageListRef?: RefObject<HTMLDivElement | null>
-  children: ReactNode
-}) => {
-  const internalRef = useRef<HTMLDivElement>(null)
-
-  const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
-
-  return (
-    <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
-      <ScrollGradientSC
-        $show={canScrollUp}
-        $position="top"
-      />
-      <ScrollGradientSC
-        $show={canScrollDown}
-        $position="bottom"
-      />
-      <ChatbotMessagesListSC
-        ref={(node) => applyNodeToRefs([messageListRef, internalRef], node)}
-      >
-        {children}
-      </ChatbotMessagesListSC>
-    </ChatbotMessagesWrapperSC>
-  )
-}
-
-export const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    position: 'relative',
-    ...($fullscreen && {
-      borderRadius: theme.borderRadiuses.large,
-      border: theme.borders.input,
-    }),
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.colors['fill-one'],
-    overflow: 'hidden',
-    padding: `0 ${theme.spacing.xsmall}px`,
-    flex: 1,
-  })
-)
-
-const ChatbotMessagesListSC = styled.div(({ theme }) => ({
-  ...theme.partials.reset.list,
+export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  flex: 1,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: theme.spacing.xsmall,
-}))
+  padding: `0 ${theme.spacing.medium}px 0 ${theme.spacing.medium}px`,
+  position: 'relative',
+  height: '100%',
 
-const ScrollGradientSC = styled.div<{
-  $show?: boolean
-  $position: 'top' | 'bottom'
-}>(({ theme, $show = true, $position }) => ({
-  position: 'absolute',
-  opacity: $show ? 1 : 0,
-  zIndex: 1,
-  [$position]: '0',
-  transition: 'opacity 0.16s ease-in-out',
-  left: 0,
-  right: 0,
-  height: theme.spacing.xxlarge,
-  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, rgba(42, 46, 55, 0.90) 0%, rgba(42, 46, 55, 0.20) 75%, transparent 100%)`,
-  pointerEvents: 'none',
+  // '&:after': {
+  //   content: '""',
+  //   pointerEvents: 'none',
+  //   position: 'absolute',
+  //   height: 32,
+  //   inset: 0,
+  //   zIndex: 1,
+  //   background: `linear-gradient(180deg, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%)`,
+  //   filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
+  // },
+
+  // '&:before': {
+  //   content: '""',
+  //   pointerEvents: 'none',
+  //   position: 'absolute',
+  //   height: 32,
+  //   bottom: 0,
+  //   left: 0,
+  //   right: 0,
+  //   zIndex: 1,
+  //   background: `linear-gradient(0deg, #0E1015 20.97%, rgba(14, 16, 21, 0) 67.74%)`,
+  //   filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
+  // },
 }))

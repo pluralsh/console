@@ -3,10 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { PullRequestEdge, useStackPrsQuery } from 'generated/graphql'
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -60,7 +57,6 @@ export function StackPrs() {
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       reactTableOptions={reactTableOptions}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       css={{ height: '100%' }}
       emptyStateProps={{
         message: 'No PRs found.',
@@ -70,26 +66,27 @@ export function StackPrs() {
 }
 
 const columnHelper = createColumnHelper<PullRequestEdge>()
-const ColAccordion = columnHelper.accessor((edge) => edge.node, {
-  id: 'accordion',
-  cell: function Cell({ getValue, table, row }) {
-    const pr = getValue()
-    const isOpen = table?.options?.meta?.openRowIdx === row.index
 
-    const toggleOpen = useCallback(
-      (open: boolean) =>
-        table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
-      [row.index, table?.options?.meta]
-    )
+const cols = [
+  columnHelper.accessor((edge) => edge.node, {
+    id: 'accordion',
+    cell: function Cell({ getValue, table, row }) {
+      const pr = getValue()
+      const isOpen = table?.options?.meta?.openRowIdx === row.index
 
-    return pr ? (
-      <PrStackRunsAccordion
-        isOpen={isOpen}
-        toggleOpen={toggleOpen}
-        pr={pr}
-      />
-    ) : null
-  },
-})
+      const toggleOpen = useCallback(
+        (open: boolean) =>
+          table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
+        [row.index, table?.options?.meta]
+      )
 
-const cols = [ColAccordion]
+      return pr ? (
+        <PrStackRunsAccordion
+          isOpen={isOpen}
+          toggleOpen={toggleOpen}
+          pr={pr}
+        />
+      ) : null
+    },
+  }),
+]

@@ -1,0 +1,57 @@
+defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
+  use Console.GraphQl.Resolvers.Deployments.Base
+  alias Console.Deployments.Sentinels
+  alias Console.Schema.{Sentinel, SentinelRun}
+
+  def sentinel(%{id: id}, ctx) when is_binary(id) do
+    Sentinels.get_sentinel!(id)
+    |> allow(actor(ctx), :read)
+  end
+  def sentinel(%{name: name}, ctx) when is_binary(name) do
+    Sentinels.get_sentinel_by_name!(name)
+    |> allow(actor(ctx), :read)
+  end
+  def sentinel(_, _), do: {:error, "Must specify either id or name"}
+
+  def sentinels(args, %{context: %{current_user: user}}) do
+    Sentinel.ordered()
+    |> Sentinel.for_user(user)
+    |> maybe_search(Sentinel, args)
+    |> sentinel_filters(args)
+    |> paginate(args)
+  end
+
+  def sentinel_statistics(args, %{context: %{current_user: user}}) do
+    Sentinel.for_user(user)
+    |> sentinel_filters(args)
+    |> maybe_search(Sentinel, args)
+    |> Sentinel.statuses()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def sentinel_runs(%{id: id}, args, _) do
+    SentinelRun.for_sentinel(id)
+    |> SentinelRun.ordered()
+    |> paginate(args)
+  end
+
+  def create_sentinel(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Sentinels.create_sentinel(attrs, user)
+
+  def update_sentinel(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Sentinels.update_sentinel(attrs, id, user)
+
+  def delete_sentinel(%{id: id}, %{context: %{current_user: user}}),
+    do: Sentinels.delete_sentinel(id, user)
+
+  def run_sentinel(%{id: id}, %{context: %{current_user: user}}),
+    do: Sentinels.run_sentinel(id, user)
+
+  def sentinel_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:status, status}, q -> Sentinel.for_status(q, status)
+      _, q -> q
+    end)
+  end
+end

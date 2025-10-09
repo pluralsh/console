@@ -73,8 +73,17 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :containers,      list_of(:container_attributes)
     field :labels,          :json
     field :annotations,     :json
+    field :node_selector,   :json
+    field :tolerations,     list_of(:pod_toleration_attributes)
     field :service_account, :string
     field :resources,       :container_resources_attributes, description: "request overrides if you don't want to manually configure individual containers"
+  end
+
+  input_object :pod_toleration_attributes do
+    field :key,       :string
+    field :operator,  :string
+    field :value,     :string
+    field :effect,    :string
   end
 
   @desc "the attributes for a container"
@@ -243,6 +252,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :containers,      list_of(:container_spec), description: "list of containers to run in this job"
     field :labels,          :map, description: "any pod labels to apply"
     field :annotations,     :map, description: "any pod annotations to apply"
+    field :node_selector,   :map, description: "any pod node selector to apply"
+    field :tolerations,     list_of(:pod_toleration), description: "any pod tolerations to apply"
     field :service_account, :string, description: "the service account the pod will use"
 
     @desc "equivalent to resources, present for backwards compatibility"
@@ -250,6 +261,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
     @desc "requests overrides for cases where direct container configuration is unnecessary"
     field :resources,       :container_resources
+  end
+
+  object :pod_toleration do
+    field :key,       :string
+    field :operator,  :string
+    field :value,     :string
+    field :effect,    :string
   end
 
   @desc "a shortform spec for job containers, designed for ease-of-use"
@@ -436,8 +454,10 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "creates a new pipeline context and binds it to the beginning stage"
     field :create_pipeline_context, :pipeline_context do
       middleware Authenticated
-      arg :pipeline_id, non_null(:id)
-      arg :attributes,  non_null(:pipeline_context_attributes)
+      middleware Scope, api: "createPipelineContext"
+      arg :pipeline_id,   :id
+      arg :pipeline_name, :string
+      arg :attributes,    non_null(:pipeline_context_attributes)
 
       resolve &Deployments.create_pipeline_context/2
     end

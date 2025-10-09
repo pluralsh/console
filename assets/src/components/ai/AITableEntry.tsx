@@ -1,6 +1,4 @@
 import {
-  AiSparkleFilledIcon,
-  AiSparkleOutlineIcon,
   AppIcon,
   ArrowTopRightIcon,
   ChatFilledIcon,
@@ -9,9 +7,6 @@ import {
   Flex,
   FlowIcon,
   IconFrame,
-  PushPinFilledIcon,
-  PushPinOutlineIcon,
-  Spinner,
 } from '@pluralsh/design-system'
 
 import { StackedText } from 'components/utils/table/StackedText'
@@ -20,7 +15,6 @@ import { CaptionP } from 'components/utils/typography/Text'
 
 import {
   AiInsightSummaryFragment,
-  AiPinFragment,
   ChatThreadTinyFragment,
 } from 'generated/graphql'
 import { ComponentProps, ComponentPropsWithRef, useCallback } from 'react'
@@ -38,7 +32,6 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts.tsx'
 import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
-import { MoreMenuTrigger } from '../utils/MoreMenu.tsx'
 import { ClusterProviderIcon } from '../utils/Provider.tsx'
 import { useChatbot } from './AIContext.tsx'
 import { AITableActions } from './AITableActions.tsx'
@@ -49,51 +42,32 @@ const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   gap: theme.spacing.xlarge,
   height: '100%',
   width: '100%',
-  background: theme.colors['fill-one'],
   padding: theme.spacing.medium,
   '&:not(:has(button:hover)):not(:has(a:hover))': {
     '&:hover': {
-      background: theme.colors['fill-two-selected'],
+      background: theme.colors['fill-zero-hover'],
       cursor: 'pointer',
     },
   },
 }))
 
 export function AITableEntry({
-  item,
-  onClickPin,
-  pinLoading,
-  modal,
-  hidePins,
+  thread,
   ...props
 }: {
-  item: ChatThreadTinyFragment | AiPinFragment
-  onClickPin?: () => void
-  pinLoading?: boolean
-  modal?: boolean | null
-  hidePins?: boolean | null
+  thread: ChatThreadTinyFragment
 } & ComponentPropsWithRef<typeof AIThreadsTableEntrySC>) {
-  const theme = useTheme()
-  const { pathname } = useLocation()
-  const { goToThread, goToInsight } = useChatbot()
+  const { goToThread } = useChatbot()
 
-  const isPin = item.__typename === 'AiPin'
-  const isInsight = isPin && !item.thread
-
-  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
-  const insight = item.insight
-  const insightPathUrl = getInsightPathInfo(insight)?.url
-
-  const timestamp = getThreadOrPinTimestamp(item)
+  const timestamp = getThreadTimestamp(thread)
 
   const isStale = isAfter(dayjs(), dayjs(timestamp).add(24, 'hours'))
 
   const onClick = useCallback(() => {
-    if (isInsight && insight) goToInsight(insight)
-    if (!isInsight && thread) goToThread(thread.id)
-  }, [isInsight, insight, goToInsight, thread, goToThread])
+    if (thread) goToThread(thread.id)
+  }, [thread, goToThread])
 
-  if ((isInsight && !insight) || (!isInsight && !thread)) return null
+  if (!thread) return null
 
   return (
     <AIThreadsTableEntrySC
@@ -101,77 +75,43 @@ export function AITableEntry({
         e.preventDefault()
         onClick()
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       {...props}
     >
       <AIEntryLabel
-        insight={insight}
-        isInsight={isInsight}
         isStale={isStale}
         thread={thread}
         opacity={isStale ? 0.6 : 1}
       />
-      {insightPathUrl && pathname?.includes(insightPathUrl) && (
-        <Chip
-          css={{ minWidth: 'fit-content' }}
-          severity="info"
-        >
-          Current page
-        </Chip>
-      )}
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
         {fromNow(timestamp)}
       </CaptionP>
-      {!modal && (
-        <>
-          <Chip severity={isStale ? 'neutral' : 'success'}>
-            {isStale ? 'Stale' : 'Active'}
-          </Chip>
-          {!hidePins && (
-            <IconFrame
-              clickable
-              onClick={(e) => {
-                e.stopPropagation()
-                if (pinLoading) return
-                onClickPin?.()
-              }}
-              icon={
-                pinLoading ? (
-                  <Spinner />
-                ) : isPin ? (
-                  <PushPinFilledIcon color={theme.colors['icon-info']} />
-                ) : (
-                  <PushPinOutlineIcon />
-                )
-              }
-            />
-          )}
-        </>
-      )}
-      {isInsight ? (
-        <MoreMenuTrigger
-          disabled
-          css={{ cursor: 'default' }}
-        />
-      ) : (
-        <AITableActions thread={thread} />
-      )}
+      <Chip
+        size="small"
+        severity={isStale ? 'neutral' : 'success'}
+      >
+        {isStale ? 'Stale' : 'Active'}
+      </Chip>
+      <AITableActions thread={thread} />
     </AIThreadsTableEntrySC>
   )
 }
 
 export function AIEntryLabel({
   thread,
-  insight,
-  isInsight,
   isStale,
   ...props
 }: {
   thread?: Nullable<ChatThreadTinyFragment>
-  insight?: Nullable<AiInsightSummaryFragment>
-  isInsight: boolean
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
-  const insightPathInfo = getInsightPathInfo(insight)
+  const { pathname } = useLocation()
+  const insightPathInfo = getInsightPathInfo(thread?.insight)
   const flowPath = thread?.flow && {
     path: [thread.flow.name],
     url: getFlowDetailsPath({ flowId: thread.flow.id }),
@@ -190,18 +130,25 @@ export function AIEntryLabel({
         css={{ flexShrink: 0 }}
         icon={
           <TableEntryIcon
-            isInsight={isInsight}
             isStale={isStale}
             thread={thread}
-            insight={insight}
           />
         }
       />
       <StackedText
-        first={
-          isInsight ? truncate(insight?.summary) : truncate(thread?.summary)
+        first={truncate(thread?.summary)}
+        second={
+          <Flex
+            gap="small"
+            align="center"
+          >
+            <TableEntryResourceLink {...(insightPathInfo || flowPath)} />{' '}
+            {insightPathInfo?.url &&
+              pathname?.includes(insightPathInfo.url) && (
+                <CaptionP $color="icon-info">Current page</CaptionP>
+              )}
+          </Flex>
         }
-        second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
         firstPartialType="body2"
         firstColor="text"
         secondPartialType="caption"
@@ -211,16 +158,13 @@ export function AIEntryLabel({
 }
 
 function TableEntryIcon({
-  isInsight,
   isStale,
-  insight,
   thread,
 }: {
-  isInsight: boolean
   isStale: boolean
-  insight: Nullable<AiInsightSummaryFragment>
   thread?: Nullable<ChatThreadTinyFragment>
 }) {
+  const insight = thread?.insight
   const theme = useTheme()
   const ICON_SIZE = 16
   if (!!insight?.cluster)
@@ -266,19 +210,6 @@ function TableEntryIcon({
     )
 
   // TODO: Add handler for insight?.clusterInsightComponent once we have a page for it
-
-  if (isInsight)
-    return isStale ? (
-      <AiSparkleOutlineIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-light']}
-      />
-    ) : (
-      <AiSparkleFilledIcon
-        size={ICON_SIZE}
-        color={theme.colors['icon-info']}
-      />
-    )
 
   if (thread?.flow)
     return (
@@ -365,7 +296,7 @@ export function getInsightPathInfo(
   return null
 }
 
-function TableEntryResourceLink({
+export function TableEntryResourceLink({
   path,
   url,
 }: {
@@ -374,7 +305,6 @@ function TableEntryResourceLink({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { closeChatbot } = useChatbot()
 
   if (!path) return null
 
@@ -382,10 +312,7 @@ function TableEntryResourceLink({
     <a
       onClick={(e) => {
         e.stopPropagation()
-        if (url) {
-          navigate(url)
-          closeChatbot()
-        }
+        if (url) navigate(url)
       }}
       css={{
         display: 'flex',
@@ -407,26 +334,13 @@ function TableEntryResourceLink({
   )
 }
 
-export const getThreadOrPinTimestamp = (
-  item: Nullable<ChatThreadTinyFragment | AiPinFragment>
-) => {
-  if (!item) return new Date()
-
-  const isPin = item.__typename === 'AiPin'
-  const isInsight = isPin && !item.thread
-
-  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
-  const insight = item.insight
-
-  return isInsight
-    ? (insight?.updatedAt ?? insight?.insertedAt ?? new Date())
-    : (thread?.lastMessageAt ?? thread?.insertedAt ?? new Date())
-}
+export const getThreadTimestamp = (thread: Nullable<ChatThreadTinyFragment>) =>
+  thread?.lastMessageAt ?? thread?.insertedAt ?? new Date()
 
 export const sortThreadsOrPins = (
-  a: Nullable<ChatThreadTinyFragment | AiPinFragment>,
-  b: Nullable<ChatThreadTinyFragment | AiPinFragment>
-) => dayjs(getThreadOrPinTimestamp(b)).diff(dayjs(getThreadOrPinTimestamp(a)))
+  a: Nullable<ChatThreadTinyFragment>,
+  b: Nullable<ChatThreadTinyFragment>
+) => dayjs(getThreadTimestamp(b)).diff(dayjs(getThreadTimestamp(a)))
 
 export const truncate = (text?: Nullable<string>, maxLength: number = 50) => {
   if (!text) return ''

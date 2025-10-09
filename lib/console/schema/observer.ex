@@ -1,5 +1,5 @@
 defmodule Console.Schema.Observer do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Project, OCIAuth, HelmRepository, ServiceError}
 
   defenum Action,        pipeline: 0, pr: 1
@@ -26,6 +26,10 @@ defmodule Console.Schema.Observer do
       embeds_one :git, GitTarget, on_replace: :update do
         field :type,          GitTargetType, default: :tags
         field :repository_id, :binary_id
+
+        embeds_one :filter, Filter, on_replace: :update do
+          field :regex, :string
+        end
       end
 
       embeds_one :oci, OCITarget, on_replace: :update do
@@ -152,7 +156,13 @@ defmodule Console.Schema.Observer do
   defp git_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(type repository_id)a)
+    |> cast_embed(:filter, with: &git_filter_changeset/2)
     |> validate_required(~w(type repository_id)a)
+  end
+
+  defp git_filter_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(regex)a)
   end
 
   defp addon_changeset(model, attrs) do

@@ -1,6 +1,7 @@
 defmodule Console.Schema.Catalog do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Project, PolicyBinding, Tag}
+  alias Console.Deployments.Policies.Rbac
 
   schema "catalogs" do
     field :name,        :string
@@ -35,6 +36,19 @@ defmodule Console.Schema.Catalog do
     timestamps()
   end
 
+  def for_user(query \\ __MODULE__, user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(c in query,
+        join: p in assoc(c, :project),
+        left_join: b in PolicyBinding,
+          on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
+  end
+
   def for_project(query \\ __MODULE__, pid) do
     from(c in query, where: c.project_id == ^pid)
   end
@@ -46,6 +60,7 @@ defmodule Console.Schema.Catalog do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name icon dark_icon author description category project_id)a)
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:tags)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)

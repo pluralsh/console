@@ -1,190 +1,109 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { useTransition } from '@react-spring/web'
-import styled from 'styled-components'
+import { use, useRef, useState } from 'react'
 
-import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
-
-import { AnimatedDiv } from '@pluralsh/design-system'
-
+import {
+  Button,
+  CaretRightIcon,
+  Divider,
+  DocumentIcon,
+  GitHubLogoIcon,
+  IconFrame,
+  LinkoutIcon,
+  SearchDocsIcon,
+} from '@pluralsh/design-system'
+import { CommandPaletteContext } from 'components/commandpalette/CommandPaletteContext'
+import CommandPaletteShortcuts from 'components/commandpalette/CommandPaletteShortcuts'
 import { DocSearch } from './DocSearch'
-import { HelpLauncherBtn } from './HelpLauncherBtn'
-import { HelpMenu } from './HelpMenu'
-import { useCustomEventListener } from './useCustomEventListener'
 
-export enum HelpMenuState {
-  menu = 'menu',
-  docSearch = 'docSearch',
-  // chatBot = 'chatBot',
-}
+import { useOutsideClick } from 'components/hooks/useOutsideClick'
+import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
+import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
-export enum HelpOpenState {
-  open = 'open',
-  closed = 'closed',
-}
-
-const HelpLauncherSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  width: '100%',
-  position: 'relative',
-  alignItems: 'end',
-  paddingLeft: theme.spacing.xxsmall,
-  pointerEvents: 'none',
-  '& > *': {
-    pointerEvents: 'auto',
-  },
-  zIndex: theme.zIndexes.modal,
-}))
-
-// @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
-const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => ({
-  display: 'flex',
-  position: 'absolute',
-  right: -240 - theme.spacing.large,
-  bottom: 0,
-  width: 240,
-  pointerEvents: 'none',
-  '& > *': { pointerEvents: 'auto' },
-}))
-
-const getTransitionProps = (isOpen: boolean) => ({
-  from: { opacity: 0, scale: `65%` },
-  enter: { opacity: 1, scale: '100%' },
-  leave: { opacity: 0, scale: `65%` },
-  config: isOpen
-    ? {
-        mass: 0.6,
-        tension: 280,
-        velocity: 0.02,
-      }
-    : {
-        mass: 0.6,
-        tension: 600,
-        velocity: 0.04,
-        restVelocity: 0.1,
-      },
-})
-
-const HELP_LAUNCH_EVENT_TYPE = 'pluralHelpLaunchEvent'
-
-type HelpLaunchEventProps = { menu: HelpMenuState }
-type HelpLaunchEvent = CustomEvent<HelpLaunchEventProps>
-
-function useLaunchEventListener(cb: (menu: HelpMenuState) => void) {
-  useCustomEventListener<HelpLaunchEvent>(
-    HELP_LAUNCH_EVENT_TYPE,
-    useCallback(
-      (e) => {
-        const { menu } = e.detail
-
-        if (Object.values(HelpMenuState).includes(menu)) {
-          cb(menu)
-        }
-      },
-      [cb]
-    )
-  )
-}
-
-function HelpLauncher() {
-  const [menuState, setMenuState] = useState<HelpMenuState>(HelpMenuState.menu)
-  const [openState, setOpenState] = useState<HelpOpenState>(
-    HelpOpenState.closed
-  )
-  const chatbotUnreadCount = 0
-
-  const changeState = useCallback(
-    (menuState?: HelpMenuState, openState?: HelpOpenState) => {
-      if (menuState !== undefined) {
-        setMenuState(menuState)
-      }
-      if (openState !== undefined) {
-        setOpenState(openState)
-        if (!openState) {
-          setMenuState(HelpMenuState.menu)
-        }
-      }
-    },
-    []
-  )
-
-  // const minHelp = useCallback(() => {
-  //   changeState(undefined, HelpOpenState.min)
-  // }, [changeState])
-
-  useLaunchEventListener((menu) => {
-    changeState(menu, HelpOpenState.open)
-  })
-
-  const helpMenu = <HelpMenu changeState={changeState} />
-  const contentOpts = {
-    // [HelpMenuState.chatBot]: (
-    //   <Chatbot
-    //     onClose={closeHelp}
-    //     onMin={minHelp}
-    //   />
-    // ),
-    [HelpMenuState.docSearch]: null,
-    [HelpMenuState.menu]: helpMenu,
-  }
-
-  const onLauncherClick = useCallback(
-    (event) => {
-      event.stopPropagation()
-      if (
-        openState === HelpOpenState.open &&
-        menuState === HelpMenuState.menu
-      ) {
-        changeState(undefined, HelpOpenState.closed)
-      } else {
-        changeState(HelpMenuState.menu, HelpOpenState.open)
-      }
-    },
-    [changeState, menuState, openState]
-  )
-
-  const isOpen = openState === HelpOpenState.open
-  const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
-  const transitions = useTransition(isOpen ? [menuState] : [], transitionProps)
-
-  const content = transitions((styles, menuState) => (
-    <HelpLauncherContentSC
-      style={{
-        transformOrigin: 'bottom left',
-        ...styles,
-      }}
-    >
-      {contentOpts[menuState]}
-    </HelpLauncherContentSC>
-  ))
-
-  // Close affordances
-  const ref = useRef<HTMLDivElement>(null)
-
-  useKeyDown(['Escape'], () => changeState(undefined, HelpOpenState.closed))
-  useClickOutside(ref, () => changeState(undefined, HelpOpenState.closed))
+export function HelpLauncher() {
+  const theme = useTheme()
+  const { docsSearchOpen, setDocsSearchOpen } = use(CommandPaletteContext)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuBtnRef = useRef<HTMLDivElement>(null)
+  useOutsideClick(menuBtnRef, () => setIsMenuOpen(false))
 
   return (
-    <HelpLauncherSC ref={ref}>
-      <HelpLauncherBtn
-        variant={
-          menuState === HelpMenuState.menu && openState === HelpOpenState.open
-            ? 'minimize'
-            : 'help'
-        }
-        onClick={onLauncherClick}
-        count={chatbotUnreadCount}
-      />
-      {content}
+    <>
+      <div css={{ position: 'relative' }}>
+        <IconFrame
+          clickable
+          ref={menuBtnRef}
+          type="secondary"
+          icon={isMenuOpen ? <CaretRightIcon /> : <span>?</span>}
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsMenuOpen((open) => !open)
+          }}
+          tooltip={isMenuOpen ? undefined : 'Open help menu'}
+          aria-haspopup="menu"
+          aria-expanded={isMenuOpen}
+          aria-label="Open help menu"
+        />
+        <SimplePopupMenu
+          isOpen={isMenuOpen}
+          setIsOpen={setIsMenuOpen}
+          type="sidebar"
+        >
+          <Button
+            small
+            tertiary
+            justifyContent="flex-start"
+            endIcon={<CommandPaletteShortcuts shortcuts={['shift D']} />}
+            onClick={() => {
+              setIsMenuOpen(false)
+              setDocsSearchOpen(true)
+            }}
+            innerFlexProps={{ gap: 'xsmall' }}
+          >
+            <SearchDocsIcon />
+            <span>Search docs</span>
+          </Button>
+          <Divider
+            backgroundColor="border-fill-two"
+            css={{
+              padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+            }}
+          />
+          <Button
+            small
+            tertiary
+            justifyContent="flex-start"
+            endIcon={<LinkoutIcon />}
+            as={Link}
+            target="_blank"
+            rel="noopener noreferrer"
+            to="https://docs.plural.sh"
+            onClick={() => setIsMenuOpen(false)}
+            innerFlexProps={{ gap: 'xsmall' }}
+          >
+            <DocumentIcon />
+            Docs
+          </Button>
+          <Button
+            small
+            tertiary
+            justifyContent="flex-start"
+            endIcon={<LinkoutIcon />}
+            as={Link}
+            target="_blank"
+            rel="noopener noreferrer"
+            to="https://github.com/pluralsh"
+            onClick={() => setIsMenuOpen(false)}
+            innerFlexProps={{ gap: 'xsmall' }}
+          >
+            <GitHubLogoIcon />
+            GitHub
+          </Button>
+        </SimplePopupMenu>
+      </div>
       <DocSearch
-        isOpen={menuState === HelpMenuState.docSearch}
-        onClose={() => {
-          if (menuState === HelpMenuState.docSearch) {
-            changeState(HelpMenuState.menu, HelpOpenState.closed)
-          }
-        }}
+        isOpen={docsSearchOpen}
+        onClose={() => setDocsSearchOpen(false)}
       />
-    </HelpLauncherSC>
+    </>
   )
 }
-
-export default HelpLauncher

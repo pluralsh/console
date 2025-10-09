@@ -9,7 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -143,15 +142,12 @@ func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection)
 	if connection.Spec.ReadBindings == nil {
 		return nil
 	}
-	bindings, req, err := ensureBindings(connection.Spec.ReadBindings, r.UserGroupCache)
+
+	bindings, err := ensureBindings(connection.Spec.ReadBindings, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	connection.Spec.ReadBindings = bindings
-
-	if req {
-		return errors.NewNotFound(schema.GroupResource{}, "bindings")
-	}
 
 	return nil
 }
@@ -183,7 +179,7 @@ func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context
 	utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connection *v1alpha1.CloudConnection) (bool, error) {
@@ -237,7 +233,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return &waitForResources, nil
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

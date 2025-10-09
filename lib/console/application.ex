@@ -5,6 +5,10 @@ defmodule Console.Application do
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
 
+    :logger.add_handler(:sentry_logger, Sentry.LoggerHandler, %{
+      config: %{metadata: [:file, :line]}
+    })
+
     children = [
       %{
         id: :pg,
@@ -23,7 +27,6 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Stacks.Worker.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Helm.Agent.registry()]},
-      {Registry, [keys: :unique, name: Console.Deployments.Observer.Worker.registry()]},
       {Registry, [keys: :unique, name: Console.AI.MCP.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.AI.Agents]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
@@ -32,7 +35,6 @@ defmodule Console.Application do
       Console.Deployments.Helm.Server,
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
-      Console.Deployments.Observer.Supervisor,
       ConsoleWeb.Endpoint,
       Console.Plural.Config,
       Console.Features,
@@ -45,6 +47,7 @@ defmodule Console.Application do
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
+      Console.Deployments.KubeVersions.Table,
       Console.Deployments.Compatibilities.CloudAddOns,
       Console.Buffers.Supervisor,
       Console.Bootstrapper,

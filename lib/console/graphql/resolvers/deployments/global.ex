@@ -18,9 +18,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
     |> allow(user, :read)
   end
 
-  def list_global_services(args, _) do
+  def list_global_services(args, %{context: %{current_user: user}}) do
     GlobalService.ordered()
+    |> GlobalService.for_user(user)
     |> apply_filters(GlobalService, args)
+    |> maybe_search(GlobalService, args)
     |> paginate(args)
   end
 

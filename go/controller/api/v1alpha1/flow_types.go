@@ -1,42 +1,25 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 )
 
-// FlowSpec defines the desired state of Flow
-type FlowSpec struct {
-	// Name of this Flow. If not provided Flow's own name from Flow.ObjectMeta will be used.
-	// +kubebuilder:validation:Optional
-	Name *string `json:"name,omitempty"`
-
-	// Longform description of the service managed by this flow
-	// +kubebuilder:validation:Optional
-	Description *string `json:"description,omitempty"`
-
-	// Optional image icon for the flow to apply branding or improve identification
-	// +kubebuilder:validation:Optional
-	Icon *string `json:"icon,omitempty"`
-
-	// ProjectRef allows a global service to span a specific project only
-	// +kubebuilder:validation:Optional
-	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
-
-	// Bindings contain read and write policies of this Flow
-	// +kubebuilder:validation:Optional
-	Bindings *Bindings `json:"bindings,omitempty"`
-
-	// ServerAssociations contains a list of MCP services you wish to associate with this flow. Can also be managed within the Plural Console UI securely.
-	// +kubebuilder:validation:Optional
-	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
+func init() {
+	SchemeBuilder.Register(&Flow{}, &FlowList{})
 }
 
-type FlowServerAssociation struct {
-	// +kubebuilder:validation:Required
-	MCPServerRef corev1.ObjectReference `json:"mcpServerRef,omitempty"`
+//+kubebuilder:object:root=true
+
+// FlowList contains a list of Flow resources.
+type FlowList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Flow `json:"items"`
 }
 
 //+kubebuilder:object:root=true
@@ -44,26 +27,15 @@ type FlowServerAssociation struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Flow Id"
 
-// Flow is the Schema for the flows API
+// Flow provides an abstraction layer over complex Kubernetes deployments to simplify application
+// management for developers. It groups related services, pipelines, and infrastructure components
+// into a single logical unit, making it easier to understand and manage application state.
 type Flow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   FlowSpec `json:"spec,omitempty"`
 	Status Status   `json:"status,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-
-// FlowList contains a list of Flow
-type FlowList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Flow `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&Flow{}, &FlowList{})
 }
 
 func (in *Flow) FlowName() string {
@@ -79,13 +51,13 @@ func (in *Flow) SetCondition(condition metav1.Condition) {
 }
 
 // ConsoleID implements PluralResource interface
-func (c *Flow) ConsoleID() *string {
-	return c.Status.ID
+func (in *Flow) ConsoleID() *string {
+	return in.Status.ID
 }
 
 // ConsoleName implements PluralResource interface
-func (c *Flow) ConsoleName() string {
-	return c.FlowName()
+func (in *Flow) ConsoleName() string {
+	return in.FlowName()
 }
 
 func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpServerAssociationAttributes) console.FlowAttributes {
@@ -95,6 +67,7 @@ func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpS
 		Icon:               in.Spec.Icon,
 		ProjectID:          projectID,
 		ServerAssociations: serverAssociations,
+		Repositories:       lo.ToSlicePtr(in.Spec.Repositories),
 	}
 
 	if in.Spec.Bindings != nil {
@@ -113,6 +86,46 @@ func (in *Flow) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
+// FlowSpec defines the desired state of Flow
+type FlowSpec struct {
+	// Name of this Flow. If not provided Flow's own name from Flow.ObjectMeta will be used.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
+
+	// Description provides a longform description of the service managed by this flow.
+	// This field is used for documentation and UI display purposes.
+	// +kubebuilder:validation:Optional
+	Description *string `json:"description,omitempty"`
+
+	// Icon specifies an optional image icon for the flow to apply branding or improve identification.
+	// +kubebuilder:validation:Optional
+	Icon *string `json:"icon,omitempty"`
+
+	// ProjectRef allows a global service to be scoped to a specific project only.
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Bindings contain read and write policies of this Flow.
+	// +kubebuilder:validation:Optional
+	Bindings *Bindings `json:"bindings,omitempty"`
+
+	// Repositories contains a list of git https urls of the application code repositories used in this flow.
+	// +kubebuilder:validation:Optional
+	Repositories []string `json:"repositories,omitempty"`
+
+	// ServerAssociations contains a list of MCP services you wish to associate with this flow.
+	// Can also be managed within the Plural Console UI securely.
+	// +kubebuilder:validation:Optional
+	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
+}
+
 func (in *FlowSpec) HasProjectRef() bool {
 	return in.ProjectRef != nil
+}
+
+type FlowServerAssociation struct {
+	// MCPServerRef is a required reference to an MCP server resource.
+	// This establishes the connection between the flow and the server.
+	// +kubebuilder:validation:Required
+	MCPServerRef corev1.ObjectReference `json:"mcpServerRef,omitempty"`
 }

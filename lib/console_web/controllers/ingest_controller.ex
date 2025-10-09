@@ -32,27 +32,29 @@ defmodule ConsoleWeb.IngestController do
     opts = ReverseProxyPlug.init(upstream: upstream, response_mode: :stream)
     {body, conn} = ReverseProxyPlug.read_body(conn)
     if meter do
-      Console.Prom.Meter.incr(meter, byte_size(body))
+      Console.Prom.Meter.incr(byte_size(body))
     end
 
-    Req.request_stream(%ReverseProxyPlug.HTTPClient.Request{
+    %ReverseProxyPlug.HTTPClient.Request{
       method: to_method(conn.method),
       url: upstream,
       headers: convert_headers(conn, upstream),
-      body: body
-    })
+      body: body,
+      options: [receive_timeout: :timer.seconds(30)]
+    }
+    |> Req.request_stream()
     |> ReverseProxyPlug.response(conn, opts)
     |> halt()
   end
 
-  defp to_method("GET"), do: :get
-  defp to_method("POST"), do: :post
-  defp to_method("PUT"), do: :put
-  defp to_method("DELETE"), do: :delete
-  defp to_method("PATCH"), do: :patch
-  defp to_method(_), do: :get
+  def to_method("GET"), do: :get
+  def to_method("POST"), do: :post
+  def to_method("PUT"), do: :put
+  def to_method("DELETE"), do: :delete
+  def to_method("PATCH"), do: :patch
+  def to_method(_), do: :get
 
-  defp convert_headers(conn, url) do
+  def convert_headers(conn, url) do
     headers =
       conn.req_headers
       |> remove_hop_by_hop_headers()

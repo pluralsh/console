@@ -73,6 +73,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_total,       :float
     field :cpu_util,           :float
     field :memory_util,        :float
+    field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
+    field :availability_zones, list_of(:string)
     field :insight_components, list_of(:cluster_insight_component_attributes),
       description: "scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval"
     field :node_statistics,    list_of(:node_statistic_attributes)
@@ -441,6 +443,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :installed,         :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+    field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"
@@ -450,6 +453,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_total,       :float, description: "The total memory capacity of the cluster"
     field :cpu_util,           :float, description: "The CPU utilization of the cluster"
     field :memory_util,        :float, description: "The memory utilization of the cluster"
+    field :availability_zones, list_of(:string), description: "The availability zones this cluster is running in"
 
     field :agent_helm_values, :string, description: "The helm values for the agent installation",
       resolve: &Deployments.agent_helm_values_for_cluster/3
@@ -1138,6 +1142,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  @desc "information about the kubernetes version for a given cluster"
+  object :kubernetes_version_info do
+    field :distro,   :cluster_distro, description: "the distribution of kubernetes this info pertains to"
+    field :version,  :string, description: "the kubernetes version"
+    field :extended, :boolean, description: "whether this version is on extended support"
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1367,6 +1378,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Authenticated
 
       resolve &Deployments.list_cluster_iso_images/2
+    end
+
+    field :kubernetes_version_info, list_of(:kubernetes_version_info) do
+      middleware Authenticated
+      arg :distro, :cluster_distro
+
+      resolve &Deployments.kubernetes_version_info/2
     end
   end
 

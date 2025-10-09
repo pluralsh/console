@@ -3,12 +3,9 @@ package controller_test
 import (
 	"context"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -194,9 +191,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, &clientv2.ErrorResponse{
-				GqlErrors: &gqlerror.List{gqlerror.Errorf("%s", "could not find resource")},
-			})
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
 
 			nr := &controller.CatalogReconciler{
 				Client:         k8sClient,

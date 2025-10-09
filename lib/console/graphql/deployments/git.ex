@@ -105,8 +105,15 @@ defmodule Console.GraphQl.Deployments.Git do
     field :base_url,            :string
     field :api_url,             :string
     field :github,              :github_app_attributes
+    field :azure,               :azure_devops_attributes
     field :default,             :boolean
+    field :proxy,               :http_proxy_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
+  end
+
+  @desc "Configuration for http proxy usage in connections to Git or SCM providers"
+  input_object :http_proxy_attributes do
+    field :url, non_null(:string)
   end
 
   @desc "Requirements to perform Github App authentication"
@@ -114,6 +121,13 @@ defmodule Console.GraphQl.Deployments.Git do
     field :app_id,          non_null(:string), description: "Github App ID"
     field :installation_id, non_null(:string), description: "ID of this github app installation"
     field :private_key,     non_null(:string), description: "PEM-encoded private key for this app"
+  end
+
+  @desc "Requirements to perform Azure DevOps authentication"
+  input_object :azure_devops_attributes do
+    field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
+    field :organization, non_null(:string), description: "the organization to use for azure devops"
+    field :project,      non_null(:string), description: "the project to use for azure devops"
   end
 
   @desc "A way to create a self-service means of generating PRs against an IaC repo"
@@ -145,6 +159,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :governance_id, :id, description: "the governance controller to use for this pr"
 
     field :configuration, list_of(:pr_configuration_attributes)
+    field :secrets,       :pr_secrets_attributes
 
     field :confirmation,  :pr_confirmation_attributes
 
@@ -172,6 +187,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :display_name,  :string
     field :placeholder,   :string
+    field :page,          :integer, description: "the page to use for the pr automation"
     field :optional,      :boolean
     field :condition,     :condition_attributes
     field :validation,    :configuration_validation_attributes
@@ -190,6 +206,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :regex,    :string, description: "regex a string value should match"
     field :json,     :boolean, description: "whether the string is json encoded"
     field :uniq_by,  :uniq_by_attributes, description: "configuration for name uniqueness"
+  end
+
+  input_object :pr_secrets_attributes do
+    field :cluster,       :string, description: "the cluster handle that will hold this secret"
+    field :namespace,     :string, description: "the k8s namespace to place the secret in"
+    field :name,          :string, description: "the name of the secret"
+    field :entries,       list_of(:pr_secret_entry_attributes)
+  end
+
+  input_object :pr_secret_entry_attributes do
+    field :name,          :string, description: "the name of the secret entry"
+    field :documentation, :string, description: "the documentation for the secret entry"
+    field :autogenerate,  :boolean, description: "whether to autogenerate the secret entry"
   end
 
   @desc "How to enforce uniqueness for a field"
@@ -332,6 +361,12 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_git_attributes do
     field :repository_id, non_null(:id)
     field :type,          non_null(:observer_git_target_type)
+    field :filter,        :observer_git_filter_attributes
+  end
+
+  @desc "a spec for filtering a git repository tags in an observer"
+  input_object :observer_git_filter_attributes do
+    field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
   end
 
   @desc "configuration for an observer action"
@@ -460,6 +495,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :type,     non_null(:scm_type)
     field :default,  :boolean
     field :username, :string
+    field :proxy,    :http_proxy_configuration, description: "a proxy to use for git requests"
+    field :azure,    :azure_devops_configuration, description: "the azure devops attributes for this connection"
+
     field :base_url, :string, description: "base url for git clones for self-hosted versions"
     field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"
 
@@ -483,6 +521,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
 
     field :configuration, list_of(:pr_configuration)
+    field :secrets,       :pr_secrets, description: "the secrets to create as part of this pr"
     field :confirmation,  :pr_confirmation, description: "optional confirmation block to express prerequisites for this PR"
 
     field :write_bindings, list_of(:policy_binding),
@@ -574,6 +613,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :placeholder,   :string
     field :display_name,  :string
+    field :page,          :integer, description: "the page to use for the pr configuration"
     field :optional,      :boolean
     field :values,        list_of(:string)
     field :condition,     :pr_configuration_condition
@@ -586,6 +626,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :value,     :string, description: "a fixed value to check against if its a binary operation"
   end
 
+  object :pr_secrets do
+    field :cluster,   :string, description: "the cluster handle that will hold this secret"
+    field :namespace, :string, description: "the k8s namespace to place the secret in"
+    field :name,      :string, description: "the name of the secret"
+    field :entries,   list_of(:pr_secret_entry)
+  end
+
+  object :pr_secret_entry do
+    field :name,          :string, description: "the name of the secret entry"
+    field :documentation, :string, description: "the documentation for the secret entry"
+    field :autogenerate,  :boolean, description: "whether to autogenerate the secret"
+  end
+
   @desc "Additional details to verify all prerequisites are satisfied before generating this pr"
   object :pr_confirmation do
     field :text,      :string, description: "optional markdown text to present before pr create"
@@ -595,6 +648,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a checkbox item to render before creating a pr"
   object :pr_checklist do
     field :label, non_null(:string), description: "the label for the checkbox"
+  end
+
+  object :azure_devops_configuration do
+    field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
+    field :organization, non_null(:string), description: "the organization to use for azure devops"
+    field :project,      non_null(:string), description: "the project to use for azure devops"
   end
 
   @desc "A reference to a pull request for your kubernetes related IaC"
@@ -703,6 +762,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :repository_id, non_null(:id)
     field :type,          non_null(:observer_git_target_type),
       description: "the resource within the git repository you want to poll"
+    field :filter,        :observer_git_filter
+  end
+
+  @desc "a spec for filtering a git repository tags in an observer"
+  object :observer_git_filter do
+    field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
   end
 
   @desc "configuration for an observer action"
@@ -723,6 +788,11 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_pipeline_action do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for http proxy usage in connections to Git or SCM providers"
+  object :http_proxy_configuration do
+    field :url, non_null(:string)
   end
 
 
@@ -1055,10 +1125,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :create_pull_request, :pull_request do
       middleware Authenticated
       middleware Scope, api: "createPullRequest"
-      arg :id,         non_null(:id), description: "the id of the PR automation instance to use"
+      arg :id,         :id, description: "the id of the PR automation instance to use"
+      arg :name,       :string, description: "the name of the PR automation instance to use"
       arg :identifier, :string
       arg :branch,     :string
       arg :context,    :json
+      arg :secrets,    :json
       arg :thread_id,  :id, description: "a ai thread id this pr was spawned from, for associating with agentic workflows"
 
       safe_resolve &Deployments.create_pull_request/2

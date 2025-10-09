@@ -48,6 +48,7 @@ defmodule Console.Schema.NotificationSink do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> cast_assoc(:notification_bindings)
     |> cast_embed(:configuration, with: &config_changeset/2)
     |> validate_required(@valid)

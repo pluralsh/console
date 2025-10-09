@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: cloudconnections.deployments.plural.sh
 spec:
   group: deployments.plural.sh
@@ -26,7 +26,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CloudConnection is the Schema for the cloudconnections API
+        description: |-
+          CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
+          queries against cloud configuration data.
         properties:
           apiVersion:
             description: |-
@@ -52,11 +54,20 @@ spec:
                 description: Configuration contains the cloud connection configuration.
                 properties:
                   aws:
+                    description: |-
+                      AWSCloudConnection contains AWS-specific authentication configuration.
+                      Enables cloud resource discovery and analysis across AWS resources and infrastructure.
                     properties:
                       accessKeyId:
                         type: string
                       region:
+                        description: The region this connection applies to
                         type: string
+                      regions:
+                        description: A list of regions this connection can query
+                        items:
+                          type: string
+                        type: array
                       secretAccessKey:
                         description: |-
                           ObjectKeyReference is a reference to an object in a specific namespace.
@@ -80,10 +91,12 @@ spec:
                         type: object
                     required:
                     - accessKeyId
-                    - region
                     - secretAccessKey
                     type: object
                   azure:
+                    description: |-
+                      AzureCloudConnection contains Microsoft Azure authentication configuration.
+                      Provides credentials for discovering and querying Azure resources.
                     properties:
                       clientId:
                         type: string
@@ -119,6 +132,9 @@ spec:
                     - tenantId
                     type: object
                   gcp:
+                    description: |-
+                      GCPCloudConnection contains Google Cloud Platform authentication configuration.
+                      Enables cloud resource discovery and analysis across GCP projects.
                     properties:
                       projectId:
                         type: string

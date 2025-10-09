@@ -8,7 +8,7 @@ defmodule Console do
 
   def version(), do: conf(:version)
 
-  def clamp(val, min \\ 5, max \\ 100) do
+  def clamp(val, min \\ 5, max \\ 50) do
     max(val, min)
     |> min(max)
   end
@@ -269,6 +269,15 @@ defmodule Console do
     case Console.Plural.Config.fetch_file() do
       %{"namespacePrefix" => pref} when byte_size(pref) > 0 -> String.trim_leading(namespace, pref)
       _ -> namespace
+    end
+  end
+
+  def await(pid, timeout \\ :timer.seconds(60)) when is_pid(pid) do
+    ref = Process.monitor(pid)
+    receive do
+      {:DOWN, ^ref, :process, ^pid, :normal} -> :ok
+    after
+      timeout -> :timeout
     end
   end
 

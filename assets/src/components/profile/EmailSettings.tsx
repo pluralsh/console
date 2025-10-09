@@ -1,6 +1,5 @@
 import {
   Button,
-  ContentCard,
   Flex,
   Switch,
   useSetBreadcrumbs,
@@ -11,6 +10,7 @@ import { Body2P } from 'components/utils/typography/Text'
 import { useUpdateUserMutation } from 'generated/graphql'
 import { useContext, useState } from 'react'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
+import { ProfileCard } from './Profile'
 
 export function EmailSettings() {
   useSetBreadcrumbs(PROFILE_BREADCRUMBS)
@@ -26,11 +26,11 @@ export function EmailSettings() {
   const changed = subscribed !== !!me?.emailSettings?.digest
 
   return (
-    <ScrollablePage heading="Profile">
-      <ContentCard
-        maxHeight="100%"
-        overflowY="auto"
-      >
+    <ScrollablePage
+      heading="Profile"
+      contentStyles={{ overflow: 'auto' }}
+    >
+      <ProfileCard css={{ minWidth: 300 }}>
         <Flex
           direction="column"
           gap="large"
@@ -60,7 +60,7 @@ export function EmailSettings() {
             </Button>
           </Flex>
         </Flex>
-      </ContentCard>
+      </ProfileCard>
     </ScrollablePage>
   )
 }

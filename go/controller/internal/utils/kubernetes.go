@@ -13,10 +13,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/klog/v2"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/log"
 )
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
@@ -201,6 +203,30 @@ func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1
 	return secret, nil
 }
 
+func GetSecretAndValue(ctx context.Context, c ctrlruntimeclient.Client, namespace string, selector *corev1.SecretKeySelector) (*corev1.Secret, string, error) {
+	if selector == nil {
+		return nil, "", nil
+	}
+
+	secret := &corev1.Secret{}
+	if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{
+		Namespace: namespace,
+		Name:      selector.Name,
+	}, secret); err != nil {
+		return nil, "", fmt.Errorf("failed to get secret %s/%s: %w", namespace, selector.Name, err)
+	}
+
+	val, ok := secret.Data[selector.Key]
+	if !ok {
+		if selector.Optional != nil && *selector.Optional {
+			return nil, "", nil
+		}
+		return nil, "", fmt.Errorf("key %q not found in secret %s/%s", selector.Key, namespace, selector.Name)
+	}
+
+	return secret, string(val), nil
+}
+
 func GetCluster(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.Cluster, error) {
 	cluster := &v1alpha1.Cluster{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, cluster); err != nil {
@@ -314,4 +340,35 @@ func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ct
 		return client.Patch(ctx, original, ctrlruntimeclient.MergeFrom(object))
 	})
 
+}
+
+func TryRemoveOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
+	if has, err := controllerutil.HasOwnerReference(controlled.GetOwnerReferences(), owner, scheme); !has || err != nil {
+		klog.V(log.LogLevelDebug).InfoS("owner reference not found, skipping removal", "owner", owner.GetName(), "controlled", controlled.GetName(), "has", has, "err", err)
+		return err
+	}
+
+	key := ctrlruntimeclient.ObjectKeyFromObject(controlled)
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := client.Get(ctx, key, controlled); err != nil {
+			return err
+		}
+
+		if owner.GetDeletionTimestamp() != nil || controlled.GetDeletionTimestamp() != nil {
+			return nil
+		}
+
+		original := controlled.DeepCopyObject().(ctrlruntimeclient.Object)
+
+		if err := controllerutil.RemoveOwnerReference(owner, controlled, scheme); err != nil {
+			return fmt.Errorf("failed to remove owner reference: %w", err)
+		}
+
+		if reflect.DeepEqual(original.GetOwnerReferences(), controlled.GetOwnerReferences()) {
+			return nil
+		}
+
+		klog.V(log.LogLevelDebug).InfoS("removing owner reference", "owner", owner.GetName(), "controlled", controlled.GetName())
+		return client.Patch(ctx, controlled, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
+	})
 }

@@ -10,6 +10,9 @@ import (
 type ElasticsearchIndexTemplateDefinition struct {
 	IndexPatterns []string             `json:"indexPatterns"`
 	Template      runtime.RawExtension `json:"template"`
+	// The priority of this index template in case multiple templates match the index pattern.  Highest priority wins.
+	// +kubebuilder:validation:Optional
+	Priority *int `json:"priority,omitempty"`
 }
 
 // ElasticsearchIndexTemplateSpec defines the desired state of ElasticsearchIndexTemplate

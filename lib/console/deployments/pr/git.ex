@@ -67,6 +67,16 @@ defmodule Console.Deployments.Pr.Git do
 
   def to_http(conn, url), do: "#{String.trim_trailing(_to_http(conn, url), ".git")}.git"
 
+  def backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
+    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk, request_options(conn)),
+      do: {:ok, %{conn | token: token}}
+  end
+  def backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
+
+  def request_options(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}}) when is_binary(url),
+    do: [proxy: url]
+  def request_options(_), do: []
+
   defp _to_http(conn, "ssh://" <> rest), do: _to_http(conn, rest)
   defp _to_http(%ScmConnection{} = conn, "git@" <> _ = url) do
     case String.split(url, ":") do
@@ -76,32 +86,30 @@ defmodule Console.Deployments.Pr.Git do
   end
   defp _to_http(_, "https://" <> _ = url), do: url
 
-  defp backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
-    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
-      do: {:ok, %{conn | token: token}}
-  end
-  defp backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
-
+  defp url(%ScmConnection{azure: %ScmConnection.Azure{organization: organization}, username: uname} = conn, id)
+    when uname != organization, do: url(%{conn | username: organization}, id)
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
-
   defp url(%ScmConnection{username: username}, "https://" <> _ = url) do
     uri = URI.parse(url)
     URI.to_string(%{uri | userinfo: username})
   end
-
   defp url(%ScmConnection{username: username} = conn, id) do
-    base = url(conn)
-    uri = URI.parse("#{base}/#{id}.git")
-    URI.to_string(%{uri | userinfo: username})
+    URI.parse("#{url(conn)}/#{id}#{if conn.type == :azure_devops, do: "", else: ".git"}")
+    |> Map.put(:userinfo, username)
+    |> URI.to_string()
   end
 
   defp url(%ScmConnection{base_url: base}) when is_binary(base), do: base
   defp url(%ScmConnection{type: :github}), do: "https://github.com"
   defp url(%ScmConnection{type: :gitlab}), do: "https://gitlab.com"
   defp url(%ScmConnection{type: :bitbucket}), do: "https://bitbucket.org"
+  defp url(%ScmConnection{type: :azure_devops, azure: %ScmConnection.Azure{organization: org, project: project}}),
+    do: "https://dev.azure.com/#{org}/#{project}/_git"
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 
+  defp env(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}} = conn) when is_binary(url),
+    do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{conn | proxy: nil})]
   defp env(%ScmConnection{token: password}) when is_binary(password),
     do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]
   defp env(_), do: []

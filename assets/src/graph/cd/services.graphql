@@ -58,11 +58,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   errors {
     message
     source
-  }
-  components {
-    apiDeprecations {
-      blocking
-    }
+    warning
   }
   globalService {
     id

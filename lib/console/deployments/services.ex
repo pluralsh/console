@@ -4,6 +4,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
   alias Console.PubSub
+  alias Console.Services.Users
   alias Console.Deployments.{
     Secrets.Store,
     Settings,
@@ -383,8 +384,8 @@ defmodule Console.Deployments.Services do
   @spec dependencies_ready(Service.t) :: service_resp
   def dependencies_ready(%Service{} = svc) do
     with %{dependencies: [_ | _] = deps} <- Repo.preload(svc, [:dependencies]),
-         dep when not is_nil(dep) <- Enum.find(deps, & &1.status != :healthy) do
-      {:error, "dependency #{dep.name} is not ready"}
+         %ServiceDependency{name: name} <- Enum.find(deps, & &1.status != :healthy) do
+      {:error, {:dependencies, "dependency #{name} is not ready"}}
     else
       _ -> {:ok, svc}
     end
@@ -397,7 +398,8 @@ defmodule Console.Deployments.Services do
     |> Repo.update()
   end
 
-  defp mark_failed(%{errors: [_ | _]} = attrs), do: Map.put(attrs, :status, :failed)
+  defp mark_failed(%{errors: [_ | _] = errors} = attrs),
+    do: Map.put(attrs, :status, status_from_errors(errors))
   defp mark_failed(attrs), do: attrs
 
   @doc """
@@ -518,6 +520,8 @@ defmodule Console.Deployments.Services do
     get_service!(service_id)
     |> kick(user)
   end
+
+  def kick(id), do: kick(id, %{Users.get_bot!("console") | roles: %{admin: true}})
 
   @doc """
   Updates the sha of a service if relevant
@@ -692,8 +696,13 @@ defmodule Console.Deployments.Services do
       ServiceDependency.for_cluster(id)
       |> ServiceDependency.for_name(name)
       |> ServiceDependency.pending()
+      |> ServiceDependency.selected()
       |> Repo.update_all(set: [status: :healthy])
-      |> ok()
+      |> case do
+        {_, [_ | _] = deps} ->
+          handle_notify(PubSub.ServiceDependenciesUpdated, deps)
+        _ -> {:ok, []}
+      end
     else
       {:ok, []}
     end
@@ -716,18 +725,15 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
-      running     = Enum.all?(components, & &1.state == :running || is_nil(&1.state)) && !Enum.empty?(components)
-      failed      = Enum.any?(components, & &1.state == :failed) || !Enum.empty?(service.errors)
-      paused      = Enum.any?(components, & &1.state == :paused)
-      unsynced    = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, paused, running, latest_vsn(service, attrs), unsynced} do
-        {true, _, _, _, _}       -> update_status(service, :failed, component_status)
-        {_, true, _, _, _}       -> update_status(service, :paused, component_status)
-        {_, _, _, _, true}       -> update_status(service, :stale, component_status)
-        {_, _, true, true, _}    -> update_status(service, :healthy, component_status)
-        _ -> update_status(service, :stale, component_status)
+      case {base_status(components), latest_vsn(service, attrs), status_from_errors(service)} do
+        {_, _, status} when not is_nil(status) ->
+          update_status(service, status, component_status)
+        {:healthy, latest, _} ->
+          update_status(service, (if latest, do: :healthy, else: :stale), component_status)
+        {status, _, _} ->
+          update_status(service, status, component_status)
       end
     end)
     |> add_operation(:dependencies, fn %{updated: svc} -> flush_dependencies(svc) end)
@@ -742,6 +748,27 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(attrs, svc)
   end
+
+  defp base_status([_ | _] = components) do
+    Enum.reduce_while(components, :healthy, fn
+      %ServiceComponent{state: :failed},  _ ->        {:halt, :failed}
+      %ServiceComponent{state: :paused},  _ ->        {:halt, :paused}
+      %ServiceComponent{state: :pending}, :healthy -> {:cont, :stale}
+      %ServiceComponent{synced: false},   :healthy -> {:cont, :stale}
+      _, v -> {:cont, v}
+    end)
+  end
+  defp base_status(_), do: :stale
+
+  defp status_from_errors(%Service{errors: errors}),
+    do: status_from_errors(errors)
+  defp status_from_errors([_ | _] = errors) do
+    case Enum.all?(errors, &Map.get(&1, :warning, false)) do
+      true ->  :stale
+      false -> :failed
+    end
+  end
+  defp status_from_errors(_), do: nil
 
   defp latest_vsn(%Service{sha: sha, revision_id: rid}, %{sha: sha, revision_id: rid})
     when is_binary(sha) and is_binary(rid), do: true
@@ -765,12 +792,23 @@ defmodule Console.Deployments.Services do
   end
   def stabilize_contexts(attrs, _), do: attrs
 
-  def stabilize(%{components: new_components} = attrs, %{components: components}) do
+  def stabilize(%{components: new_components} = attrs, %Service{components: components} = svc) do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
     new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
+    |> Map.put(:errors, stabilize_errors(attrs[:errors], svc.errors))
   end
   def stabilize(attrs, _), do: attrs
+
+  defp stabilize_errors(nil, _), do: []
+  defp stabilize_errors([], _), do: []
+  defp stabilize_errors(errors, old_errors) when is_list(errors) and is_list(old_errors),
+    do: _stabilize_errors(errors, old_errors, [])
+
+  defp _stabilize_errors([], _, acc), do: acc
+  defp _stabilize_errors(res, [], acc), do: acc ++ res
+  defp _stabilize_errors([l | lres], [r | rres], acc),
+    do: _stabilize_errors(lres, rres, [Map.put(l, :id, r.id) | acc])
 
   defp stabilize_component(new_component, components) do
     case components[component_key(new_component)] do
@@ -932,8 +970,21 @@ defmodule Console.Deployments.Services do
 
     Revision.ignore_ids(to_keep)
     |> Revision.for_service(id)
-    |> Repo.delete_all()
-    |> elem(0)
+    |> Revision.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 1000, pause: 100)
+    |> Stream.chunk_every(100)
+    |> Task.async_stream(fn revisions ->
+      Logger.info "pruning #{length(revisions)} stale revisions for service #{id}"
+      Enum.map(revisions, & &1.id)
+      |> Revision.for_ids()
+      |> Repo.delete_all(timeout: 5_000)
+      |> elem(0)
+    end, max_concurrency: 10)
+    |> Enum.reduce(0, fn
+      {:ok, count}, acc -> acc + count
+      _, acc -> acc
+    end)
     |> ok()
   end
 

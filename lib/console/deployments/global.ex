@@ -1,9 +1,9 @@
 defmodule Console.Deployments.Global do
   use Console.Services.Base
   import Console.Deployments.Policies
-  import Console, only: [clean: 1, clamp: 1]
+  import Console, only: [clean: 1]
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services}
   alias Console.Services.Users
   alias Console.Schema.{
     GlobalService,
@@ -39,6 +39,12 @@ defmodule Console.Deployments.Global do
     |> Repo.all()
   end
   def fetch_contexts(_), do: []
+
+  def enqueue(%GlobalService{} = global) do
+    global
+    |> Ecto.Changeset.change(%{next_poll_at: Timex.now()})
+    |> Repo.update()
+  end
 
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
@@ -240,7 +246,7 @@ defmodule Console.Deployments.Global do
         |> ServiceTemplate.load_contexts()
         |> ServiceTemplate.attributes()
         |> Map.put(:owner_id, gid)
-        |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
+        |> Map.put(:dependencies, svc_deps(tpl.dependencies, []))
         |> Services.create_service(cid, user)
       {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
         Services.clone_service(%{owner_id: gid}, sid, cid, user)
@@ -300,6 +306,12 @@ defmodule Console.Deployments.Global do
     end
   end
 
+  def next_poll(%GlobalService{} = global) do
+    global
+    |> GlobalService.next_poll_changeset(global.interval)
+    |> Repo.update()
+  end
+
   @doc """
   Adds the given global service to all target clusters
   """
@@ -317,7 +329,7 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: clamp(Clusters.count()))
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 10)
     |> Stream.map(fn
       {:ok, res} -> res
       _ -> nil
@@ -335,6 +347,7 @@ defmodule Console.Deployments.Global do
     |> (fn s -> MapSet.difference(service_ids, s) end).()
     |> MapSet.to_list()
     |> maybe_drain(global)
+    :ok
   end
 
   @doc """
@@ -524,8 +537,13 @@ defmodule Console.Deployments.Global do
   Fetches associated secure configuration of a service template
   """
   @spec configuration(ServiceTemplate.t) :: {:ok, map} | Console.error
+  def configuration(%ServiceTemplate{configuration: config}) when is_list(config) do
+    {:ok, Map.new(config, fn %{name: n, value: v} -> {n, v} end)}
+  end
+
   def configuration(%ServiceTemplate{revision_id: id}) when is_binary(id),
     do: secret_store().fetch(id)
+
   def configuration(_), do: {:ok, %{}}
 
   def load_configuration(%GlobalService{template: %ServiceTemplate{} = tpl} = global) do
@@ -570,14 +588,15 @@ defmodule Console.Deployments.Global do
   def diff?(_, _), do: false
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
-    missing_source?(source, dest) || !deps_equal?(s, d) || specs_different?(s, d) || fields_different?(s, d)
+    (missing_source?(source, dest) || !deps_equal?(s, d) ||
+      specs_different?(s, d) || fields_different?(s, d))
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do
     start_transaction()
     |> add_operation(:revision, fn _ ->
       case Repo.preload(template, [:revision]) do
-        %Revision{} = rev -> {:ok, rev}
+        %ServiceTemplate{revision: %Revision{} = rev} -> {:ok, rev}
         _ -> Repo.insert(%Revision{template_id: template.id, version: "0.1.0"})
       end
     end)
@@ -620,12 +639,13 @@ defmodule Console.Deployments.Global do
     Enum.any?(~w(repository_id namespace templated protect)a, & Map.get(svc1, &1) != Map.get(svc2, &1))
   end
 
-  @spec svc_deps([ServiceDependency.t], [ServiceDependency.t]) :: [ServiceDependency.t]
+  @spec svc_deps([ServiceDependency.t], [ServiceDependency.t]) :: [map]
   defp svc_deps(dependencies, existing) do
     existing_by_name = Map.new(existing, & {&1.name, &1})
     Enum.map(dependencies, fn dep ->
       case Map.get(existing_by_name, dep.name) do
-        %ServiceDependency{status: s} -> %{name: dep.name, status: s}
+        %ServiceDependency{id: id, name: n, status: s} ->
+          %{name: n, id: id, status: s}
         _ -> %{name: dep.name}
       end
     end)
@@ -639,8 +659,8 @@ defmodule Console.Deployments.Global do
     end)
   end
 
-  defp spec_fields(%{ignore_sync: true}), do: ~w(helm git kustomize)a
-  defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
+  defp spec_fields(%{ignore_sync: true}), do: ~w(helm sources renderers git kustomize)a
+  defp spec_fields(_), do: ~w(helm renderers sources git kustomize sync_config)a
 
   defp dynamic_template(attrs, %Cluster{} = cluster, %GlobalService{context: %TemplateContext{raw: %{} = ctx}}) do
     template_fields(attrs, [
@@ -670,7 +690,8 @@ defmodule Console.Deployments.Global do
     Enum.map(fields, fn keys -> Enum.map(keys, &Access.key/1) end)
     |> Enum.reduce(attrs, fn path, acc ->
       case get_in(attrs, path) do
-        str when is_binary(str) -> put_in(acc, path, render_solid_raw(str, cluster, ctx))
+        str when is_binary(str) ->
+          put_in(acc, path, render_solid_raw(str, cluster, ctx))
         [%{value: v} | _] = vals when is_binary(v) ->
           put_in(acc, path, Enum.map(vals, fn %{name: n, value: v} -> %{name: n, value: render_solid_raw(v, cluster, ctx)} end))
         [v | _] = vals when is_binary(v) ->

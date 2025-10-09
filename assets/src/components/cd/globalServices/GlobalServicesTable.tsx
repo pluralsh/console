@@ -1,34 +1,34 @@
-import { ComponentProps, memo, useEffect, useMemo } from 'react'
-import { Table } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
-import { useTheme } from 'styled-components'
+import { Flex, Input2, SearchIcon, Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert'
 import {
   type ServiceDeploymentsRowFragment,
   useGlobalServicesQuery,
 } from 'generated/graphql'
+import { ComponentProps, memo, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
 
 import { useProjectId } from 'components/contexts/ProjectsContext'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useThrottle } from 'components/hooks/useThrottle'
+
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { columns } from './GlobalServices'
+import { useTheme } from 'styled-components'
 
 function GlobalServicesTableComponent({
   setRefetch,
 }: {
   setRefetch?: (refetch: () => () => void) => void
 }) {
-  const theme = useTheme()
+  const { colors } = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString, 100)
 
   const {
     data,
@@ -39,11 +39,8 @@ function GlobalServicesTableComponent({
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useGlobalServicesQuery,
-      keyPath: ['globalServices'],
-    },
-    { projectId }
+    { queryHook: useGlobalServicesQuery, keyPath: ['globalServices'] },
+    { projectId, q: debouncedSearchString }
   )
 
   useEffect(() => {
@@ -51,61 +48,50 @@ function GlobalServicesTableComponent({
   }, [refetch, setRefetch])
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        meta: {
-          refetch,
-        },
-      }),
-      [refetch]
-    )
+    useMemo(() => ({ meta: { refetch } }), [refetch])
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (error) return <GqlError error={error} />
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="small"
+      height="100%"
     >
-      {!data ? (
-        <LoadingIndicator />
-      ) : (
-        <Table
-          fullHeightWrap
-          virtualizeRows
-          data={data?.globalServices?.edges || []}
-          columns={columns}
-          onRowClick={(
-            _e,
-            { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-          ) =>
-            navigate(
-              getGlobalServiceDetailsPath({
-                serviceId: original.node?.id,
-              })
-            )
-          }
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          reactTableOptions={reactTableOptions}
-          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          onVirtualSliceChange={setVirtualSlice}
-          emptyStateProps={{
-            message: "Looks like you don't have any service deployments yet.",
-          }}
-        />
-      )}
-    </div>
+      <Input2
+        showClearButton
+        placeholder="Search global services"
+        startIcon={<SearchIcon />}
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+        css={{ background: colors['fill-one'] }}
+      />
+      <Table
+        fullHeightWrap
+        virtualizeRows
+        data={data?.globalServices?.edges || []}
+        columns={columns}
+        loading={!data && loading}
+        onRowClick={(
+          _e,
+          { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+        ) =>
+          navigate(
+            getGlobalServiceDetailsPath({ serviceId: original.node?.id })
+          )
+        }
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        reactTableOptions={reactTableOptions}
+        onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{
+          message: debouncedSearchString
+            ? `No results found for "${debouncedSearchString}"`
+            : "Looks like you don't have any global services yet.",
+        }}
+      />
+    </Flex>
   )
 }
 

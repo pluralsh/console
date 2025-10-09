@@ -3,6 +3,7 @@ package pool
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -19,10 +20,12 @@ import (
 )
 
 type ConnectionPool struct {
-	admin connection.Connection
-	pool  cmap.ConcurrentMap[string, entry]
-	ttl   time.Duration
-	mux   sync.Mutex
+	admin         connection.Connection
+	pool          cmap.ConcurrentMap[string, entry]
+	ttl           time.Duration
+	mux           sync.Mutex
+	isCleaningUp  atomic.Bool
+	isBulkCleanup atomic.Bool
 }
 
 func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
@@ -47,6 +50,7 @@ func (c *ConnectionPool) cleanupRoutine() {
 	defer ticker.Stop()
 
 	for range ticker.C {
+		c.isBulkCleanup.Store(true)
 		for item := range c.pool.IterBuffered() {
 			if !item.Val.alive(c.ttl) {
 				err := c.Remove(item)
@@ -55,6 +59,7 @@ func (c *ConnectionPool) cleanupRoutine() {
 				}
 			}
 		}
+		c.isBulkCleanup.Store(false)
 	}
 }
 
@@ -63,13 +68,11 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		-- Create the schema
 		DROP SCHEMA IF EXISTS %[1]s CASCADE;
 		CREATE SCHEMA %[1]s;
-		COMMENT ON SCHEMA %[1]s IS 'steampipe aws fdw';
-		CREATE EXTENSION IF NOT EXISTS ltree SCHEMA %[1]s;
 
 		-- Create the user
 		CREATE USER %[1]s WITH PASSWORD %[2]s;
 		ALTER USER %[1]s WITH NOSUPERUSER;
-		ALTER USER %[1]s SET SEARCH_PATH = %[1]s;
+		ALTER USER %[1]s SET SEARCH_PATH = %[1]s, extensions;
 
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE %[4]s FROM PUBLIC;
@@ -82,6 +85,9 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		-- Allow accessing tables
 		REVOKE ALL ON ALL TABLES IN SCHEMA %[1]s FROM PUBLIC;
 		GRANT  ALL ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
+
+		-- Allow accessing to shared extensions
+		GRANT ALL ON SCHEMA extensions TO %[1]s; 
 
 		-- Grant usage on foreign data wrapper and servers
 		GRANT USAGE ON FOREIGN DATA WRAPPER %[3]s TO %[1]s;
@@ -107,10 +113,24 @@ func (c *ConnectionPool) cleanup(connection string) error {
 	)
 
 	_, err := c.admin.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to cleanup connection '%s': %w", connection, err)
+	}
+
+	klog.V(log.LogLevelExtended).InfoS("cleaned up connection", "connection", connection)
 	return err
 }
 
 func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connection, error) {
+	for c.isCleaningUp.Load() || c.isBulkCleanup.Load() {
+		klog.V(log.LogLevelVerbose).InfoS("waiting for cleanup to finish before connecting")
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	return c.connect(config)
+}
+
+func (c *ConnectionPool) connect(config config.Configuration) (connection.Connection, error) {
 	sha, err := config.SHA()
 	if err != nil {
 		return nil, err
@@ -131,6 +151,12 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 		}
 
 		connectionName := fmt.Sprintf("%x", id)
+		defer func() {
+			if err != nil {
+				_ = c.cleanup(connectionName)
+			}
+		}()
+
 		klog.V(log.LogLevelVerbose).InfoS("creating new connection", "connection", connectionName)
 		if err = c.setup(connectionName, string(config.Provider())); err != nil {
 			return nil, fmt.Errorf("setup failed: %w", err)
@@ -144,8 +170,7 @@ func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connec
 			return nil, err
 		}
 
-		if err := conn.Configure(config); err != nil {
-			_ = c.cleanup(connectionName)
+		if err = conn.Configure(config); err != nil {
 			_ = conn.Close()
 			return nil, err
 		}
@@ -168,13 +193,17 @@ func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
+	c.isCleaningUp.Store(true)
+	defer func() {
+		c.isCleaningUp.Store(false)
+	}()
+
 	if !c.pool.Has(t.Key) {
 		return nil
 	}
 
 	err := c.cleanup(t.Val.uuid)
 	if err != nil {
-		klog.ErrorS(err, "failed to cleanup connection", "connection", t.Val.uuid)
 		return err
 	}
 

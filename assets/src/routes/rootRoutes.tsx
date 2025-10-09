@@ -4,12 +4,13 @@ import { Outlet, RouteObject } from 'react-router-dom'
 import Console from 'components/layout/Console'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { PluralRouteErrorBoundary } from 'components/cd/PluralErrorBoundary.tsx'
 import Invite from 'components/login/Invite'
 import { LinkLogin } from 'components/login/LinkLogin'
 import Login from 'components/login/Login'
 import { OAuthCallback } from 'components/login/OauthCallback'
-import { consoleRoutes } from './consoleRoutes'
 import { OAuthConsent } from '../components/login/OAuthConsent.tsx'
+import { consoleRoutes } from './consoleRoutes'
 
 const Sandbox =
   import.meta.env.MODE === 'development'
@@ -28,6 +29,7 @@ export const rootRoutes = [
   {
     path: '/',
     element: <Root />,
+    errorElement: <PluralRouteErrorBoundary />,
     children: [
       {
         path: 'login',

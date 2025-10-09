@@ -39,7 +39,10 @@ defmodule Console.Deployments.Policies.Rbac do
     PreviewEnvironmentTemplate,
     ComplianceReportGenerator,
     ServiceContext,
-    CloudConnection
+    CloudConnection,
+    Sentinel,
+    AgentRuntime,
+    AgentRun
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -107,6 +110,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(gen, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ServiceContext{} = ctx, user, action),
     do: recurse(ctx, user, action, & &1.project)
+  def evaluate(%Sentinel{} = sentinel, user, action),
+    do: recurse(sentinel, user, action, & &1.project)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -145,6 +150,10 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%SharedSecret{} = share, %User{} = user, :consume), do: recurse(share, user, :notify)
   def evaluate(%CloudConnection{} = conn, %User{} = user, action),
     do: recurse(conn, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%AgentRuntime{} = runtime, %User{} = user, action),
+    do: recurse(runtime, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%AgentRun{} = run, %User{} = user, action),
+    do: recurse(run, user, action, & &1.runtime)
   def evaluate(l, user, action) when is_list(l), do: Enum.any?(l, &evaluate(&1, user, action))
   def evaluate(_, _, _), do: false
 
@@ -163,6 +172,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(project, @bindings)
   def preload(%OIDCProvider{} = oidc),
     do: Repo.preload(oidc, [:write_bindings])
+  def preload(%AgentRuntime{} = runtime),
+    do: Repo.preload(runtime, [:create_bindings])
+  def preload(%AgentRun{} = run),
+    do: Repo.preload(run, [runtime: [:create_bindings]])
   def preload(%RuntimeService{} = rs),
     do: Repo.preload(rs, [cluster: @top_preloads])
   def preload(%ClusterProvider{} = provider),
@@ -214,6 +227,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(ctx, [project: @bindings])
   def preload(%CloudConnection{} = conn),
     do: Repo.preload(conn, [:read_bindings])
+  def preload(%Sentinel{} = sentinel),
+    do: Repo.preload(sentinel, [project: @bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

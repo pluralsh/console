@@ -21,6 +21,10 @@ func (c *client) SavePipeline(name string, attrs console.PipelineAttributes) (*c
 }
 
 func (c *client) GetPipeline(id string) (*console.PipelineFragmentMinimal, error) {
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
+
 	response, err := c.consoleClient.GetPipeline(c.ctx, id)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)

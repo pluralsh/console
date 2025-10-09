@@ -12,7 +12,14 @@ import {
 import { useDebounce } from '@react-hooks-library/core'
 import { Row } from '@tanstack/react-table'
 import chroma from 'chroma-js'
-import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  Key,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -53,10 +60,7 @@ import {
 
 import { TagsFilter } from '../services/ClusterTagsFilter'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -70,6 +74,10 @@ import {
   ClusterInfoFlyoverTab,
 } from './info-flyover/ClusterInfoFlyover.tsx'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import {
+  dayjsExtended,
+  dayjsExtended as dayjs,
+} from '../../../utils/datetime.ts'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -81,6 +89,7 @@ type TableWrapperSCProps = {
 }
 
 export type ClustersTableMeta = {
+  now: dayjsExtended.Dayjs
   refetch: () => void
   setFlyoverTab: (tab: ClusterInfoFlyoverTab) => void
   setSelectedCluster: (cluster: ClustersRowFragment) => void
@@ -223,6 +232,7 @@ export default function Clusters() {
   const tableData: Edge<ClustersRowFragment>[] = isDemo
     ? DEMO_CLUSTERS
     : clusterEdges
+  const showGettingStarted = !onboarded && tableData && tableData?.length < 2
 
   useSetPageScrollable(isDemo)
 
@@ -253,7 +263,7 @@ export default function Clusters() {
         css={{ height: '100%', overflow: 'hidden' }}
       >
         <WrapWithIf
-          condition={!onboarded}
+          condition={showGettingStarted}
           wrapper={
             <div
               css={{
@@ -268,20 +278,17 @@ export default function Clusters() {
           }
         >
           <ClustersTable
-            flush={!onboarded}
-            fullHeightWrap={!!onboarded}
+            flush={showGettingStarted}
+            fullHeightWrap={!showGettingStarted}
             data={tableData || []}
             refetch={refetch}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
-          {!onboarded && tableData && tableData?.length < 2 && (
-            <GettingStartedBlock />
-          )}
+          {showGettingStarted && <GettingStartedBlock />}
         </WrapWithIf>
       </TabPanel>
     </Flex>
@@ -317,8 +324,15 @@ export function ClustersTable({
   const setSelectedCluster =
     setSelectedClusterProp ?? setSelectedClusterInternal
 
+  const [now, setNow] = useState(dayjs())
+
+  useEffect(() => {
+    const int = setInterval(() => setNow(dayjs()), 1000)
+    return () => clearInterval(int)
+  }, [])
+
   const reactTableOptions: { meta: ClustersTableMeta } = {
-    meta: { refetch, setFlyoverTab, setSelectedCluster },
+    meta: { now, refetch, setFlyoverTab, setSelectedCluster },
   }
 
   return (

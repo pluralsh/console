@@ -2,6 +2,11 @@ icon: https://avatars.githubusercontent.com/u/21054566?s=48&v=4
 release_url: https://github.com/cilium/cilium/releases/tag/{vsn}
 helm_repository_url: https://helm.cilium.io/
 versions:
+- version: 1.18.0
+  kube: ['1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.18.0
 - version: 1.17.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
@@ -43,7 +48,8 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 1.10.0
-- version: 1.9
+- version: 1.9.0
   kube: ['1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12']
   requirements: []
   incompatibilities: []
+  chart_version: 1.9.0

@@ -12,7 +12,13 @@ defmodule Console.Deployments.Secrets.Database do
 
   def store(revision, secrets) do
     secret_data = Enum.map(secrets, fn {k, v} -> timestamped(%{name: k, value: v, revision_id: revision}) end)
-    case Console.Repo.insert_all(ServiceConfiguration, secret_data) do
+    Console.Repo.insert_all(
+      ServiceConfiguration,
+      secret_data,
+      on_conflict: :replace_all,
+      conflict_target: [:revision_id, :name]
+    )
+    |> case do
       {count, _} when count >= map_size(secrets) -> {:ok, secrets}
       {count, _} -> {:error, "failed to create #{map_size(secrets) - count} secrets"}
     end

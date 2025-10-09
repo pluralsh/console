@@ -1,5 +1,5 @@
-defmodule Console.GraphQl.AiQueriesTest do
-  use Console.DataCase, async: false
+defmodule Console.GraphQl.AiQueriesAsyncTest do
+  use Console.DataCase, async: true
   use Mimic
 
   describe "aiInsight" do
@@ -28,6 +28,26 @@ defmodule Console.GraphQl.AiQueriesTest do
     end
   end
 
+  describe "chatThreads" do
+    test "you can search your own threads" do
+      user = insert(:user)
+      threads = insert_list(3, :chat_thread, user: user, summary: "test")
+      insert_list(3, :chat_thread, user: user, summary: "ignore")
+      insert_list(3, :chat_thread)
+
+      {:ok, %{data: %{"chatThreads" => found}}} = run_query("""
+        query {
+          chatThreads(first: 5, q: "test") {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(threads)
+    end
+  end
+
   describe "chatThread" do
     test "you can view your own threads" do
       user = insert(:user)
@@ -51,6 +71,36 @@ defmodule Console.GraphQl.AiQueriesTest do
              |> ids_equal(chats)
     end
 
+    test "it can fetch sideloads of an agent session" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      session = insert(:agent_session, connection: insert(:cloud_connection), thread: thread)
+      chats = insert_list(3, :chat, thread: thread)
+      insert_list(4, :chat)
+
+      {:ok, %{data: %{"chatThread" => found}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            session {
+              connection {
+                id
+              }
+            }
+            chats(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert found["id"] == thread.id
+      assert from_connection(found["chats"])
+             |> ids_equal(chats)
+
+      assert found["session"]["connection"]["id"] == session.connection_id
+    end
+
     test "you cannot view other users threads" do
       user = insert(:user)
       thread = insert(:chat_thread)
@@ -68,29 +118,6 @@ defmodule Console.GraphQl.AiQueriesTest do
         }
       """, %{"id" => thread.id}, %{current_user: user})
     end
-
-    test "it can fetch tools for a thread" do
-      user = insert(:user)
-      flow = insert(:flow)
-      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
-      insert(:mcp_server_association, server: server, flow: flow)
-      thread = insert(:chat_thread, user: user, flow: flow)
-
-      {:ok, %{data: %{"chatThread" => %{"tools" => tools}}}} = run_query("""
-        query Thread($id: ID!) {
-          chatThread(id: $id) {
-            id
-            tools {
-              server { name }
-              tool { name }
-            }
-          }
-        }
-      """, %{"id" => thread.id}, %{current_user: user})
-
-      assert Enum.any?(tools, & &1["server"]["name"] == "everything")
-      assert Enum.any?(tools, & &1["tool"]["name"] == "echo")
-    end
   end
 
   describe "aiCompletion" do
@@ -105,53 +132,6 @@ defmodule Console.GraphQl.AiQueriesTest do
       """, %{"input" => "blah", "system" => "blah"}, %{current_user: insert(:user)})
 
       assert summary == "openai completion"
-    end
-  end
-
-  describe "aiSuggestedFix" do
-    test "it can generate a suggestion for a fix given an existing insight" do
-      user = insert(:user)
-      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
-      parent = insert(:service,
-        repository: git,
-        git: %{ref: "main", folder: "charts/deployment-operator"}
-      )
-
-      svc = insert(:service,
-        repository: git,
-        git: %{ref: "main", folder: "charts/deployment-operator"},
-        write_bindings: [%{user_id: user.id}],
-        parent: parent
-      )
-      insight = insert(:ai_insight, service: svc)
-
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
-
-      {:ok, %{data: %{"aiSuggestedFix" => result}}} = run_query("""
-        query Suggestion($insightId: ID!) {
-          aiSuggestedFix(insightId: $insightId)
-        }
-      """, %{"insightId" => insight.id}, %{current_user: user})
-
-      assert result == "openai completion"
-    end
-
-    test "it will reject if a user shouldn't have access to this insight" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
-      svc = insert(:service,
-        repository: git,
-        git: %{ref: "main", folder: "charts/deployment-operator"}
-      )
-      insight = insert(:ai_insight, service: svc)
-
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Suggestion($insightId: ID!) {
-          aiSuggestedFix(insightId: $insightId)
-        }
-      """, %{"insightId" => insight.id}, %{current_user: insert(:user)})
     end
   end
 
@@ -331,6 +311,84 @@ defmodule Console.GraphQl.AiQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(sessions)
+    end
+  end
+end
+
+defmodule Console.GraphQl.AiQueriesSyccTest do
+  use Console.DataCase, async: false
+  use Mimic
+
+
+  describe "aiSuggestedFix" do
+    test "it can generate a suggestion for a fix given an existing insight" do
+      user = insert(:user)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
+      )
+      insight = insert(:ai_insight, service: svc)
+
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
+
+      {:ok, %{data: %{"aiSuggestedFix" => result}}} = run_query("""
+        query Suggestion($insightId: ID!) {
+          aiSuggestedFix(insightId: $insightId)
+        }
+      """, %{"insightId" => insight.id}, %{current_user: user})
+
+      assert result == "openai completion"
+    end
+
+    test "it will reject if a user shouldn't have access to this insight" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+      insight = insert(:ai_insight, service: svc)
+
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Suggestion($insightId: ID!) {
+          aiSuggestedFix(insightId: $insightId)
+        }
+      """, %{"insightId" => insight.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "chatThread" do
+    test "it can fetch tools for a thread" do
+      user = insert(:user)
+      flow = insert(:flow)
+      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
+      insert(:mcp_server_association, server: server, flow: flow)
+      thread = insert(:chat_thread, user: user, flow: flow)
+
+      {:ok, %{data: %{"chatThread" => %{"tools" => tools}}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            tools {
+              server { name }
+              tool { name }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert Enum.any?(tools, & &1["server"]["name"] == "everything")
+      assert Enum.any?(tools, & &1["tool"]["name"] == "echo")
     end
   end
 end

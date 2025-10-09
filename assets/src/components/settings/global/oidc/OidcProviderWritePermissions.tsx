@@ -1,7 +1,7 @@
 import { Button, Flex, Modal, PeopleIcon } from '@pluralsh/design-system'
 import { StepBody } from 'components/cd/ModalAlt'
 import { Permissions } from 'components/cd/utils/PermissionsModal'
-import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {

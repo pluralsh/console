@@ -78,4 +78,4 @@ brew install autoconf
 autoconf -V
 ```
 
-You can read more here: https://github.com/asdf-vm/asdf-erlang?tab=readme-ov-file#osx
+You can read more here: https://github.com/asdf-vm/asdf-erlang?tab=readme-ov-file#osx# Registry cache test - run 1

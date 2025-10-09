@@ -5,7 +5,6 @@ import (
 	"slices"
 	"strings"
 
-	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -13,33 +12,38 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
 	SchemeBuilder.Register(&Cluster{}, &ClusterList{})
 }
 
-// ClusterList ...
 // +kubebuilder:object:root=true
+
+// ClusterList contains a list of Cluster resources.
 type ClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Cluster `json:"items"`
 }
 
-// Cluster ...
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="CurrentVersion",type="string",JSONPath=".status.currentVersion",description="Current Kubernetes version"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
-type Cluster struct {
-	metav1.TypeMeta `json:",inline"`
 
+// Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment.
+// Clusters serve as deployment targets for services and can be either management clusters (hosting
+// the Plural Console and operators) or workload clusters (running application workloads). The Console
+// tracks cluster health, versions, and coordinates service deployments across the fleet.
+type Cluster struct {
+	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec ClusterSpec `json:"spec,omitempty"`
-
+	Spec   ClusterSpec   `json:"spec,omitempty"`
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
@@ -147,31 +151,38 @@ func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
 	}
 }
 
+// ClusterSpec defines the desired state of a Cluster.
+// Configures cluster properties including cloud provider settings, node pools, and access controls
+// for continuous deployment workflows across the Plural fleet management architecture.
 type ClusterSpec struct {
 	// Handle is a short, unique human-readable name used to identify this cluster.
 	// Does not necessarily map to the cloud resource name.
-	// This has to be specified in order to adopt existing cluster.
+	// This has to be specified to adopt the existing cluster.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=myclusterhandle
 	Handle *string `json:"handle,omitempty"`
 
-	// Version of Kubernetes to use for this cluster. Can be skipped only for BYOK.
+	// Version specifies the Kubernetes version to use for this cluster.
+	// Can be skipped only for BYOK (Bring Your Own Kubernetes) clusters where a version is externally managed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:="1.25.11"
 	Version *string `json:"version,omitempty"`
 
-	// ProviderRef references provider to use for this cluster. Can be skipped only for BYOK.
+	// ProviderRef references the cloud provider to use for this cluster.
+	// Can be skipped only for BYOK clusters where infrastructure is externally provisioned.
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
-	// ProjectRef references project this cluster belongs to.
-	// If not provided, it will use the default project.
+	// ProjectRef references the project this cluster belongs to for multi-tenancy and access control.
+	// If not provided, the cluster will be assigned to the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Cloud provider to use for this cluster.
+	// Cloud specifies the cloud provider to use for this cluster.
+	// Determines the infrastructure platform where the cluster will be provisioned and managed.
+	// For BYOK clusters, this field is set to "byok" and no cloud provider is required.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
@@ -179,29 +190,33 @@ type ClusterSpec struct {
 	// +kubebuilder:example:=azure
 	Cloud string `json:"cloud"`
 
-	// Protect cluster from being deleted.
+	// Protect prevents accidental deletion of this cluster.
+	// When enabled, the cluster cannot be deleted through the Console UI or API.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:example:=false
 	Protect *bool `json:"protect,omitempty"`
 
-	// Tags used to filter clusters.
+	// Tags are key-value pairs used to categorize and filter clusters in fleet management.
+	// Used for organizing clusters by environment, team, or other operational criteria.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
-	// Metadata for the cluster
+	// Metadata contains arbitrary JSON metadata for storing cluster-specific configuration.
+	// Used for custom cluster properties and integration with external systems.
 	// +kubebuilder:validation:Optional
 	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
 
-	// Bindings contain read and write policies of this cluster
+	// Bindings contain read and write access policies for this cluster.
+	// Controls which users and groups can view or manage this cluster through RBAC.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 
-	// CloudSettings contains cloud-specific settings for this cluster.
+	// CloudSettings contains cloud provider-specific configuration for this cluster.
 	// +kubebuilder:validation:Optional
 	// +structType=atomic
 	CloudSettings *ClusterCloudSettings `json:"cloudSettings,omitempty"`
 
-	// NodePools contains specs of node pools managed by this cluster.
+	// NodePools defines the worker node configurations managed by this cluster.
 	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
 }
@@ -222,16 +237,18 @@ func (cs *ClusterSpec) HasProjectRef() bool {
 	return cs.ProjectRef != nil
 }
 
+// ClusterCloudSettings contains cloud provider-specific configuration for cluster infrastructure.
+// Allows customization of networking, regions, and other cloud-specific cluster properties.
 type ClusterCloudSettings struct {
-	// AWS cluster customizations.
+	// AWS contains Amazon Web Services specific cluster configuration.
 	// +kubebuilder:validation:Optional
 	AWS *ClusterAWSCloudSettings `json:"aws,omitempty"`
 
-	// Azure cluster customizations.
+	// Azure contains Microsoft Azure specific cluster configuration.
 	// +kubebuilder:validation:Optional
 	Azure *ClusterAzureCloudSettings `json:"azure,omitempty"`
 
-	// GCP cluster customizations.
+	// GCP contains Google Cloud Platform specific cluster configuration.
 	// +kubebuilder:validation:Optional
 	GCP *ClusterGCPCloudSettings `json:"gcp,omitempty"`
 }
@@ -248,8 +265,10 @@ func (cs *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
 	}
 }
 
+// ClusterAWSCloudSettings contains AWS-specific configuration for cluster deployment.
 type ClusterAWSCloudSettings struct {
 	// Region in AWS to deploy this cluster to.
+	// Determines data residency, latency characteristics, and available AWS services.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
@@ -265,25 +284,26 @@ func (cs *ClusterAWSCloudSettings) Attributes() *console.AWSCloudAttributes {
 	}
 }
 
+// ClusterAzureCloudSettings contains Azure-specific configuration for cluster deployment.
 type ClusterAzureCloudSettings struct {
-	// ResourceGroup is a name for the Azure resource group for this cluster.
+	// ResourceGroup specifies the Azure resource group name for organizing cluster resources.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=myresourcegroup
 	ResourceGroup string `json:"resourceGroup"`
 
-	// Network is a name for the Azure virtual network for this cluster.
+	// Network specifies the Azure virtual network name for cluster networking.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=mynetwork
 	Network string `json:"network"`
 
-	// SubscriptionId is GUID of the Azure subscription to hold this cluster.
+	// SubscriptionId is the GUID of the Azure subscription that will contain this cluster.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	SubscriptionId string `json:"subscriptionId"`
 
-	// Location in Azure to deploy this cluster to.
+	// Location specifies the Azure region where this cluster will be deployed.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=eastus
@@ -303,18 +323,19 @@ func (cs *ClusterAzureCloudSettings) Attributes() *console.AzureCloudAttributes 
 	}
 }
 
+// ClusterGCPCloudSettings contains Google Cloud Platform specific configuration for cluster deployment.
 type ClusterGCPCloudSettings struct {
-	// Project in GCP to deploy cluster to.
+	// Project specifies the GCP project ID where this cluster will be deployed.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Project string `json:"project"`
 
-	// Network in GCP to use when creating the cluster.
+	// Network specifies the GCP VPC network name for cluster networking.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Network string `json:"network"`
 
-	// Region in GCP to deploy cluster to.
+	// Region specifies the GCP region where this cluster will be deployed.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
@@ -332,36 +353,37 @@ func (cs *ClusterGCPCloudSettings) Attributes() *console.GCPCloudAttributes {
 	}
 }
 
+// ClusterNodePool defines the configuration for a group of worker nodes in the cluster.
 type ClusterNodePool struct {
-	// Name of the node pool. Must be unique.
+	// Name is the unique identifier for this node pool within the cluster.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Name string `json:"name"`
 
-	// InstanceType contains the type of node to use. Usually cloud-specific.
+	// InstanceType specifies the cloud provider instance type for nodes in this pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	InstanceType string `json:"instanceType"`
 
-	// MinSize is minimum number of instances in this node pool.
+	// MinSize is the minimum number of nodes that must be running in this pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
 	MinSize int64 `json:"minSize"`
 
-	// MaxSize is maximum number of instances in this node pool.
+	// MaxSize is the maximum number of nodes that can be running in this pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
 	MaxSize int64 `json:"maxSize"`
 
-	// Labels to apply to the nodes in this pool. Useful for node selectors.
+	// Labels are key-value pairs applied to nodes for workload scheduling and organization.
 	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Taints you'd want to apply to a node, i.e. for preventing scheduling on spot instances.
+	// Taints are restrictions applied to nodes to control which pods can be scheduled.
 	// +kubebuilder:validation:Optional
 	Taints []Taint `json:"taints,omitempty"`
 
-	// CloudSettings contains cloud-specific settings for this node pool.
+	// CloudSettings contains cloud provider-specific configuration for this node pool.
 	// +kubebuilder:validation:Optional
 	// +structType=atomic
 	CloudSettings *ClusterNodePoolCloudSettings `json:"cloudSettings,omitempty"`
@@ -394,8 +416,9 @@ func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
 	return attrs
 }
 
+// ClusterNodePoolCloudSettings contains cloud provider-specific settings for node pools.
 type ClusterNodePoolCloudSettings struct {
-	// AWS node pool customizations.
+	// AWS contains Amazon Web Services specific node pool configuration.
 	// +kubebuilder:validation:Optional
 	AWS *ClusterNodePoolAWSCloudSettings `json:"aws,omitempty"`
 }
@@ -410,8 +433,9 @@ func (cs *ClusterNodePoolCloudSettings) Attributes() *console.NodePoolCloudAttri
 	}
 }
 
+// ClusterNodePoolAWSCloudSettings contains AWS-specific configuration for node pool deployment.
 type ClusterNodePoolAWSCloudSettings struct {
-	// LaunchTemplateId is an ID of custom launch template for your nodes. Useful for Golden AMI setups.
+	// LaunchTemplateId specifies a custom EC2 launch template ID for node provisioning.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	LaunchTemplateId *string `json:"launchTemplateId,omitempty"`
@@ -427,20 +451,22 @@ func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AWSNodeCloudAtt
 	}
 }
 
+// ClusterStatus represents the observed state of a Cluster.
 type ClusterStatus struct {
 	Status `json:",inline"`
 
-	// CurrentVersion contains current Kubernetes version this cluster is using.
+	// CurrentVersion contains the actual Kubernetes version currently running on this cluster.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 
-	// KasURL contains KAS URL.
+	// KasURL contains the Kubernetes API Server URL for accessing this cluster.
+	// Used by the Console and deployment operators for cluster communication.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	KasURL *string `json:"kasURL,omitempty"`
 
-	// PingedAt contains timestamp of last successful cluster ping.
+	// PingedAt contains the timestamp of the last successful cluster health check.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	PingedAt *string `json:"pingedAt,omitempty"`

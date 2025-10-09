@@ -1,5 +1,12 @@
-import { ArrowTopRightIcon, Button, Table } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import {
+  ArrowTopRightIcon,
+  Button,
+  Flex,
+  Input2,
+  SearchIcon,
+  Table,
+} from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 
@@ -7,17 +14,20 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
+import { useThrottle } from 'components/hooks/useThrottle'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
+  const { colors } = useTheme()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString, 300)
+
   const {
     data,
     loading,
@@ -26,10 +36,10 @@ export function PrAutomations() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: usePrAutomationsQuery,
-    keyPath: ['prAutomations'],
-  })
+  } = useFetchPaginatedData(
+    { queryHook: usePrAutomationsQuery, keyPath: ['prAutomations'] },
+    { q: debouncedSearchString }
+  )
 
   const prAutomations = useMemo(
     () => mapExistingNodes(data?.prAutomations),
@@ -46,6 +56,7 @@ export function PrAutomations() {
           target="_blank"
           rel="noopener noreferrer"
           endIcon={<ArrowTopRightIcon />}
+          style={{ width: 'max-content' }}
         >
           Create automation
         </Button>
@@ -57,18 +68,31 @@ export function PrAutomations() {
   if (error) return <GqlError error={error} />
 
   return (
-    <Table
-      fullHeightWrap
-      columns={columns}
-      loading={!data && loading}
-      reactTableOptions={{ meta: { refetch } }}
-      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-      data={prAutomations}
-      virtualizeRows
-      hasNextPage={pageInfo?.hasNextPage}
-      fetchNextPage={fetchNextPage}
-      isFetchingNextPage={loading}
-      onVirtualSliceChange={setVirtualSlice}
-    />
+    <Flex
+      overflow="hidden"
+      direction="column"
+      gap="small"
+    >
+      <Input2
+        showClearButton
+        placeholder="Search PR automations"
+        startIcon={<SearchIcon />}
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+        css={{ background: colors['fill-one'] }}
+      />
+      <Table
+        fullHeightWrap
+        columns={columns}
+        loading={!data && loading}
+        reactTableOptions={{ meta: { refetch } }}
+        data={prAutomations}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+      />
+    </Flex>
   )
 }

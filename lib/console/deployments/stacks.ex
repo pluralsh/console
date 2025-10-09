@@ -4,9 +4,11 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability}
+  alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
   alias Console.Deployments.Pr.Dispatcher
+  alias Console.Services.Users
+  alias Console.AI.{Provider, Tools.ApproveStack}
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
@@ -337,12 +339,46 @@ defmodule Console.Deployments.Stacks do
     end
   end
 
+  @doc """
+  Updates the commit status for a given stack run
+  """
+  @spec commit_status(StackRun.t) :: :ok | Console.error
+  def commit_status(%StackRun{git: %{ref: ref}, type: type} = run) do
+    start_transaction()
+    |> add_operation(:run, fn _ -> {:ok, Repo.locked(run)} end)
+    |> add_operation(:persist, fn %{run: run} ->
+      case {Repo.preload(run, [:pull_request]), scm_connection(run)} do
+        {%StackRun{pull_request: %PullRequest{} = pr, check_id: check_id}, %ScmConnection{} = conn} ->
+          status = _commit_status(run)
+          Dispatcher.commit_status(conn, pr, check_id, status, %{
+            url: Console.url("/stacks/#{run.stack_id}/runs/#{run.id}"),
+            sha: ref,
+            name: "Plural: #{type} plan",
+            description: "Plan Status: #{status}",
+            summary: "View full details here: #{Console.url("/stacks/#{run.stack_id}/runs/#{run.id}")}",
+          })
+          |> maybe_persist(run)
+        _ -> {:ok, %{}}
+      end
+    end)
+    |> execute(extract: :persist)
+  end
+
+  defp maybe_persist({:ok, id}, %StackRun{} = run) when is_binary(id) do
+    StackRun.changeset(run, %{check_id: id})
+    |> Repo.update()
+  end
+  defp maybe_persist(err, _), do: err
+
+  defp _commit_status(%StackRun{dry_run: true, status: :pending_approval}), do: :successful
+  defp _commit_status(%StackRun{status: status}), do: status
+
   defp scm_connection(%StackRun{} = run) do
     case {run, Settings.fetch()} do
       {%StackRun{stack: %{connection: %ScmConnection{} = conn}}, _} -> conn
       {_, %{stacks: %{connection_id: conn_id}}} when is_binary(conn_id) ->
         Git.get_scm_connection(conn_id)
-      _ -> nil
+      _ -> Git.default_scm_connection()
     end
   end
 
@@ -407,6 +443,64 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
+  Determines if a stack run should be approved based on a specified rules file.  Only available for terraform stacks and leverages
+  the approve_stack tool call.
+  """
+  @spec ai_stack_run_approval(StackRun.t) :: run_resp | :ok
+  def ai_stack_run_approval(%StackRun{
+    type: :terraform,
+    status: :pending_approval,
+    approver_id: nil,
+    configuration: %Stack.Configuration{
+      ai_approval: %Stack.Configuration.AiApproval{
+        enabled: true, git: git, file: file
+      }
+    }
+  } = run) do
+    with %{repository: %GitRepository{} = repo, state: %StackState{plan: p}} = run = Repo.preload(run, [:repository, :state]),
+         {:ok, f} <- Discovery.fetch(repo, git),
+         {:ok, files} <- Tar.tar_stream(f),
+         {_, rules} <- Enum.find(files, fn {k, _} -> k == file end) do
+      [
+        {:user, "I've been given the following terraform plan, determine if its safe to merge given the various rules provided"},
+        {:user, "here is the terraform plan:"},
+        {:user, "```terraform\n#{p}\n```"},
+        {:user, "Here are the rules for approval:\n\n#{rules}"}
+      ]
+      |> Provider.simple_tool_call(ApproveStack)
+      |> case do
+        {:ok, %ApproveStack{} = approval} -> handle_approval(run, approval)
+        err -> err
+      end
+    end
+  end
+  def ai_stack_run_approval(_), do: :ok
+
+  defp handle_approval(%StackRun{} = run, %ApproveStack{} = approval) do
+    StackRun.update_changeset(run, %{approval_result: Map.take(approval, ~w(reason result)a)})
+    |> approval_decision(run, approval)
+    |> Repo.update()
+    |> case do
+      {:ok, %StackRun{status: s, approver_id: id} = run} when s == :cancelled or is_binary(id) ->
+        handle_notify(PubSub.StackRunUpdated, run)
+      res -> res
+    end
+  end
+
+  defp approval_decision(
+    cs,
+    %StackRun{configuration: %{ai_approval: %{ignore_cancel: true}}},
+    %ApproveStack{result: :rejected}
+  ), do: cs
+  defp approval_decision(cs, _, %ApproveStack{result: :approved}) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    StackRun.approve_changeset(cs, %{approver_id: bot.id, approved_at: Timex.now()})
+  end
+  defp approval_decision(cs, _, %ApproveStack{result: :rejected}),
+    do: StackRun.update_changeset(cs, %{status: :cancelled})
+  defp approval_decision(cs, _, _), do: cs
+
+  @doc """
   Updates run step attributes, only achievable by a cluster
   """
   @spec update_run_step(map, binary, Cluster.t) :: step_resp
@@ -455,6 +549,7 @@ defmodule Console.Deployments.Stacks do
 
   defp unlock(%Stack{} = s) do
     Stack.lock_changeset(s, %{locked_at: nil})
+    |> Stack.next_poll_changeset(s.interval)
     |> Repo.update()
   end
 
@@ -499,11 +594,13 @@ defmodule Console.Deployments.Stacks do
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
+            |> PullRequest.next_poll_changeset(stack.interval)
             |> Repo.update()
           end)
           |> execute(extract: :run)
         err ->
-          add_polled_sha(pr, new_sha)
+          PullRequest.next_poll_changeset(pr, stack.interval)
+          |> add_polled_sha(new_sha)
           err
       end
     end)

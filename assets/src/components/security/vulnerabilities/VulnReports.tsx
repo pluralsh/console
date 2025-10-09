@@ -1,11 +1,9 @@
 import {
   Chip,
-  ChipProps,
   FillLevelProvider,
   Flex,
   Input,
   SearchIcon,
-  SemanticColorKey,
   SubTab,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -20,13 +18,14 @@ import {
 } from 'generated/graphql'
 import { ComponentProps, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
-import { VulneratbilityReportsTable } from './VulnReportsTable'
 import {
-  SECURITY_REL_PATH,
   SECURITY_ABS_PATH,
+  SECURITY_REL_PATH,
   VULNERABILITY_REPORTS_ABS_PATH,
 } from 'routes/securityRoutesConsts'
+import styled, { useTheme } from 'styled-components'
+import { VulneratbilityReportsTable } from './VulnReportsTable'
+import { gradeToSeverityMap } from './VulnReportsTableCols'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -35,26 +34,6 @@ const breadcrumbs = [
     url: VULNERABILITY_REPORTS_ABS_PATH,
   },
 ]
-
-export const gradeToSeverityMap: Record<
-  VulnReportGrade | 'All',
-  ChipProps['severity']
-> = {
-  [VulnReportGrade.A]: 'success',
-  [VulnReportGrade.B]: 'neutral',
-  [VulnReportGrade.C]: 'warning',
-  [VulnReportGrade.D]: 'danger',
-  [VulnReportGrade.F]: 'critical',
-  All: 'neutral',
-}
-
-export const gradeToTextColorMap: Record<VulnReportGrade, SemanticColorKey> = {
-  [VulnReportGrade.A]: 'text-success',
-  [VulnReportGrade.B]: 'text',
-  [VulnReportGrade.C]: 'text-warning',
-  [VulnReportGrade.D]: 'text-danger-light',
-  [VulnReportGrade.F]: 'text-danger',
-}
 
 export function VulnerabilityReports() {
   useSetBreadcrumbs(breadcrumbs)
@@ -95,7 +74,10 @@ export function VulnerabilityReports() {
 
   const header = useMemo(
     () => (
-      <Flex gap="medium">
+      <Flex
+        gap="medium"
+        minWidth="fit-content"
+      >
         <ClusterSelect
           clusters={clusters}
           selectedKey={clusterId}

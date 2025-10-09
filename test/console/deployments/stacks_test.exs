@@ -409,6 +409,7 @@ defmodule Console.Deployments.StacksTest do
 
       stack = refetch(stack)
       assert stack.sha == "new-sha"
+      assert stack.next_poll_at
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
@@ -566,7 +567,9 @@ defmodule Console.Deployments.StacksTest do
       %{pull_request: sideload} = Console.Repo.preload(run, [:pull_request])
       assert sideload.id == pr.id
 
-      assert refetch(pr).sha == "new-sha"
+      pr = refetch(pr)
+      assert pr.sha == "new-sha"
+      assert pr.next_poll_at
     end
 
     test "it can create a new run an ansible stack" do
@@ -598,6 +601,52 @@ defmodule Console.Deployments.StacksTest do
 
       assert second.cmd == "ansible-playbook"
       assert second.args == ["main.yaml"]
+      assert second.stage == :apply
+      assert second.index == 1
+
+      stack = refetch(stack)
+      assert stack.sha == "new-sha"
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
+
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
+    end
+
+    test "it can create a new run an ansible stack with custom configs" do
+      stack = insert(:stack,
+        type: :ansible,
+        configuration: %{
+          ansible: %{
+            playbook: "upgrade.yaml",
+            additional_args: ["--some-arg"],
+            inventory: "inventory.yaml"
+          },
+        },
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "ansible"},
+        sha: "old-sha"
+      )
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+
+      {:ok, run} = Stacks.poll(stack)
+
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.message == "a commit message"
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second] = run.steps
+
+      assert first.cmd == "ansible-playbook"
+      assert first.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg", "--diff", "--check"]
+      assert first.stage == :plan
+      assert first.index == 0
+
+      assert second.cmd == "ansible-playbook"
+      assert second.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg"]
       assert second.stage == :apply
       assert second.index == 1
 

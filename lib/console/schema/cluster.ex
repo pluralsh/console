@@ -1,7 +1,8 @@
 defmodule Console.Schema.Cluster do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.{Policies.Rbac, Settings}
+  alias Console.Deployments.KubeVersions
   alias Console.Schema.{
     Service,
     ClusterNodePool,
@@ -98,6 +99,7 @@ defmodule Console.Schema.Cluster do
     field :distro,          Distro, default: :generic
     field :metadata,        :map
     field :health_score,    :integer
+    field :ping_interval,   :integer
 
     field :version,         :string
     field :current_version, :string
@@ -108,14 +110,17 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
-    field :openshift_version, :string
-    field :node_count,        :integer
-    field :pod_count,         :integer
-    field :namespace_count,   :integer
-    field :cpu_total,         :float
-    field :memory_total,      :float
-    field :cpu_util,          :float
-    field :memory_util,       :float
+    field :openshift_version,  :string
+    field :node_count,         :integer
+    field :pod_count,          :integer
+    field :namespace_count,    :integer
+    field :cpu_total,          :float
+    field :memory_total,       :float
+    field :cpu_util,           :float
+    field :memory_util,        :float
+    field :availability_zones, {:array, :string}
+
+    field :ai_poll_at, :utc_datetime_usec
 
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
@@ -164,6 +169,13 @@ defmodule Console.Schema.Cluster do
   end
 
   def healthy?(%__MODULE__{pinged_at: nil}), do: false
+
+  def healthy?(%__MODULE__{ping_interval: interval, pinged_at: pinged}) when is_integer(interval) do
+    Timex.now()
+    |> Timex.shift(seconds: -interval * 3)
+    |> Timex.before?(pinged)
+  end
+
   def healthy?(%__MODULE__{pinged_at: pinged}) do
     Timex.now()
     |> Timex.shift(minutes: -20)
@@ -182,10 +194,6 @@ defmodule Console.Schema.Cluster do
       where: not is_nil(ic.id),
       distinct: true
     )
-  end
-
-  def with_limit(query \\ __MODULE__, limit) do
-    from(c in query, limit: ^limit)
   end
 
   def with_backups(query \\ __MODULE__, enabled)
@@ -222,13 +230,14 @@ defmodule Console.Schema.Cluster do
   end
 
   def target(query \\ __MODULE__, %{} = resource) do
-    Map.take(resource, ~w(provider_id project_id tags distro mgmt)a)
+    Map.take(resource, ~w(provider_id project_id tags distro mgmt ignore_clusters)a)
     |> Enum.reduce(query, fn
       {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:project_id, proj_id}, q when is_binary(proj_id) -> for_project(q, proj_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       {:tags, %{} = tags}, q -> for_tags(q, tags)
+      {:ignore_clusters, [_ | _] = ignore_clusters}, q -> ignore_ids(q, ignore_clusters)
       {:mgmt, mgmt}, q when is_boolean(mgmt) -> allow_mgmt(q, mgmt)
       _, q -> q
     end)
@@ -315,13 +324,24 @@ defmodule Console.Schema.Cluster do
   end
 
   def upgrade_statistics(query \\ __MODULE__) do
+    extended = KubeVersions.Table.extended_versions()
     from(c in query,
       select: %{
         count: count(c.id),
         upgradeable: sum(fragment("CASE WHEN ? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb THEN 1 ELSE 0 END",
           c.upgrade_plan["compatibilities"], c.upgrade_plan["kubelet_skew"], c.upgrade_plan["deprecations"])),
         latest: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.kube_vsn())),
-        compliant: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.compliant_vsn())),
+        compliant: sum(fragment("""
+          CASE WHEN ? = 3 and ? >= ? THEN 1
+               WHEN ? = 1 and ? >= ? THEN 1
+               WHEN ? = 2 and ? >= ? THEN 1
+               WHEN ? not in (1, 2, 3) and ? >= ? THEN 1
+               ELSE 0
+          END
+        """, c.distro, c.current_version, ^extended[:gke],
+             c.distro, c.current_version, ^extended[:eks],
+             c.distro, c.current_version, ^extended[:aks],
+             c.distro, c.current_version, ^extended[:gke])),
       }
     )
   end
@@ -332,11 +352,21 @@ defmodule Console.Schema.Cluster do
   end
 
   def with_version_compliance(query, :compliant) do
-    from(c in query, where: c.current_version >= ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version >= ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version >= ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version >= ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version >= ^extended[:gke]))
   end
 
   def with_version_compliance(query, :outdated) do
-    from(c in query, where: c.current_version < ^Settings.compliant_vsn())
+    extended = KubeVersions.Table.extended_versions()
+    from(c in query,
+      where: (c.distro == ^:gke and c.current_version < ^extended[:gke])
+        or (c.distro == ^:eks and c.current_version < ^extended[:eks])
+        or (c.distro == ^:aks and c.current_version < ^extended[:aks])
+        or (c.distro not in ^[:gke, :eks, :aks] and c.current_version < ^extended[:gke]))
   end
 
   def for_health_range(query \\ __MODULE__, min, max) do
@@ -415,15 +445,24 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.pinged_at) and not is_nil(c.current_version))
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id ai_poll_at distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255)
     |> kubernetes_name(:name)
     |> semver(:version)
     |> cast_embed(:kubeconfig)
@@ -469,7 +508,7 @@ defmodule Console.Schema.Cluster do
       attrs,
       ~w(pinged_at distro health_score kubelet_version current_version
          installed openshift_version node_count pod_count namespace_count
-         cpu_total memory_total cpu_util memory_util)a
+         cpu_total memory_total cpu_util memory_util availability_zones ping_interval)a
     )
     |> cast_assoc(:insight_components)
     |> cast_assoc(:node_statistics)

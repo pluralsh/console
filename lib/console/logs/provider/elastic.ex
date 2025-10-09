@@ -4,10 +4,12 @@ defmodule Console.Logs.Provider.Elastic do
   """
   @behaviour Console.Logs.Provider
   alias Console.Schema.{Cluster, Service, DeploymentSettings.Elastic}
-  alias Console.Logs.{Query, Line, Time}
+  alias Console.Logs.{Query, Line, Time, AggregationBucket}
 
   @type t :: %__MODULE__{}
   @headers [{"Content-Type", "application/json"}]
+
+  @opts [recv_timeout: 10_000]
 
   defstruct [:connection, :client]
 
@@ -23,9 +25,18 @@ defmodule Console.Logs.Provider.Elastic do
     end
   end
 
+  @spec aggregate(t(), Query.t) :: {:ok, [AggregationBucket.t()]} | Console.error
+  def aggregate(%__MODULE__{connection: connection}, %Query{} = q) do
+    case search(connection, build_aggregation_query(q)) do
+      {:ok, response} ->
+        {:ok, format_aggregation_response(response)}
+      {:error, err} -> {:error, "failed to query elasticsearch aggregations: #{inspect(err)}"}
+    end
+  end
+
   def search(%Elastic{index: index} = conn, query) do
     Elastic.url(conn, "#{index}/_search")
-    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(conn, @headers))
+    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(conn, @headers), @opts)
     |> search_response()
   end
 
@@ -47,6 +58,26 @@ defmodule Console.Logs.Provider.Elastic do
     |> Enum.filter(& &1.log)
   end
   defp format_hits(_), do: []
+
+  defp format_aggregation_response(%Snap.SearchResponse{aggregations: %{"logs_over_time" => %Snap.Aggregation{buckets: buckets}}}) do
+    Enum.map(buckets, fn bucket ->
+      %AggregationBucket{
+        timestamp: parse_bucket_timestamp(bucket["key_as_string"] || bucket["key"]),
+        count: bucket["doc_count"]
+      }
+    end)
+  end
+  defp format_aggregation_response(_), do: []
+
+  defp parse_bucket_timestamp(timestamp) when is_integer(timestamp) do
+    DateTime.from_unix!(timestamp, :millisecond)
+  end
+  defp parse_bucket_timestamp(timestamp) when is_binary(timestamp) do
+    case DateTime.from_iso8601(timestamp) do
+      {:ok, dt, _} -> dt
+      _ -> DateTime.utc_now()
+    end
+  end
 
   defp build_query(%Query{query: str} = q) do
     %{
@@ -112,7 +143,7 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
   defp maybe_query(q) when is_binary(q) and byte_size(q) > 0,
-    do: %{bool: %{must: %{match: %{message: q}}}}
+    do: %{bool: %{must: %{match: %{message: %{query: q, analyzer: "stop"}}}}}
   defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) do
@@ -124,4 +155,27 @@ defmodule Console.Logs.Provider.Elastic do
 
   defp sort(%Query{time: %Time{reverse: true}}), do: [%{"@timestamp": %{order: "asc"}}]
   defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]
+
+  defp build_aggregation_query(%Query{query: str} = q) do
+    %{
+      query: maybe_query(str)
+             |> add_terms(q)
+             |> add_range(q)
+             |> add_namespaces(q)
+             |> add_facets(q),
+      aggs: build_aggregations(q),
+      size: 0
+    }
+  end
+
+  defp build_aggregations(%Query{bucket_size: bucket_size}) do
+    %{
+      logs_over_time: %{
+        date_histogram: %{
+          field: "@timestamp",
+          fixed_interval: bucket_size || "1m"
+        }
+      }
+    }
+  end
 end

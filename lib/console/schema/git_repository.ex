@@ -42,6 +42,7 @@ defmodule Console.Schema.GitRepository do
     |> foreign_key_constraint(:id, name: :service_template, match: :prefix, message: "There is a service template attached to an active managed namespace or global service using this repository")
     |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "there is an active service using this repository")
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack using this repository")
+    |> foreign_key_constraint(:id, name: :deployment_settings, match: :prefix, message: "This git repository is currently used in your global deployment settings")
     |> foreign_key_constraint(:connection_id)
     |> validate_format(:url, ~r/((git|ssh|http(s)?)|(git@[\w\.-]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/, message: "must provide a valid git url")
     |> add_auth_method()

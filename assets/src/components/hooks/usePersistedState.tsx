@@ -1,3 +1,4 @@
+import { useDebounce } from '@react-hooks-library/core'
 import {
   Dispatch,
   SetStateAction,
@@ -12,25 +13,26 @@ const identity = (x: any) => x
 function usePersistedState<T>(
   key: string,
   defaultValue: T,
+  debounceMs: number = 0, // optional debounce, if 0 then will persist immediately on state change
   parser = identity
 ): [T, Dispatch<SetStateAction<T>>] {
   const getLocalStorageValue = useCallback(() => {
     try {
       const item = localStorage.getItem(`plural-${key}`)
-
       if (item) return parser(JSON.parse(item))
-    } catch (_) {
-      console.error('Error on localStorage.getItem of', key)
+    } catch (e) {
+      console.error('Error on localStorage.getItem of', key, e)
     }
-
     return defaultValue
   }, [key, defaultValue, parser])
 
   const [state, setState] = useState<T>(getLocalStorageValue())
+  const debouncedState = useDebounce(state, debounceMs)
 
   useEffect(() => {
-    localStorage.setItem(`plural-${key}`, JSON.stringify(state))
-  }, [key, state])
+    if (debouncedState === undefined) localStorage.removeItem(`plural-${key}`)
+    else localStorage.setItem(`plural-${key}`, JSON.stringify(debouncedState))
+  }, [key, debouncedState, debounceMs])
 
   return [state, setState]
 }

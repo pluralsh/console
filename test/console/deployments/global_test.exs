@@ -67,10 +67,22 @@ defmodule Console.Deployments.GlobalTest do
         template: %{
           repository_id: git.id,
           git: %{ref: "main", folder: "k8s"},
+          configuration: [%{name: "name", value: "value"}]
         }
       }, admin_user())
 
       assert global.name == "templated"
+
+      {:ok, updated} = Global.update(%{
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "dev", folder: "k8s"},
+          configuration: [%{name: "name", value: "value2"}]
+        }
+      }, global.id, admin_user())
+
+      assert updated.template.git.ref == "dev"
+      assert updated.template.revision_id == global.template.revision_id
 
       {:ok, deleted} = Global.delete(global.id, admin_user())
 
@@ -240,6 +252,91 @@ defmodule Console.Deployments.GlobalTest do
       assert synced.repository_id == git.id
       assert synced.git.ref == "main"
       assert synced.git.folder == "/"
+    end
+
+    test "it can sync a template global service with sources" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "/"},
+          name: "svc",
+          namespace: "prod",
+          sources: [%{path: "k8s/sources/git", repository_id: git.id, git: %{ref: "main", folder: "/k8s"}}]
+        }
+      )
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+      assert hd(synced.sources).path == "k8s/sources/git"
+      assert hd(synced.sources).repository_id == git.id
+      assert hd(synced.sources).git.ref == "main"
+      assert hd(synced.sources).git.folder == "/k8s"
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin_user())
+      assert id == service.id
+    end
+
+    test "it can sync a template global service with renderers" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "/"},
+          name: "svc",
+          namespace: "prod",
+          renderers: [%{path: "k8s/renderers/helm", type: :helm}]
+        }
+      )
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+      assert hd(synced.renderers).path == "k8s/renderers/helm"
+      assert hd(synced.renderers).type == :helm
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin_user())
+      assert id == service.id
+    end
+
+    test "it can sync a template global service with configuration" do
+      git = insert(:git_repository)
+      admin = admin_user()
+      {:ok, global} = Global.create(%{
+        name: "templated",
+        template: %{
+          name: "svc",
+          namespace: "prod",
+          repository_id: git.id,
+          git: %{ref: "main", folder: "k8s"},
+          configuration: [%{name: "name", value: "value"}]
+        }
+      }, admin)
+
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin)
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "k8s"
+
+      {:ok, secrets} = Services.configuration(synced)
+      assert map_size(secrets) == 1
+      assert secrets["name"] == "value"
+
+      %{id: id} = Global.sync_service(global, refetch(service), admin)
+      assert id == service.id
     end
   end
 
@@ -417,6 +514,62 @@ defmodule Console.Deployments.GlobalSyncTest do
       end
     end
 
+    test "it will sync to all targeted clusters with ignored clusters" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync3 = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      ignore1 = insert(:cluster, provider: cluster.provider)
+      ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+
+      global = insert(:global_service,
+        service: source,
+        provider: cluster.provider,
+        tags: [%{name: "sync", value: "test"}],
+        cascade: %{delete: true},
+        ignore_clusters: [sync3.id]
+      )
+
+      svc = insert(:service, owner: global, cluster: ignore1)
+      keep = insert(:service, name: "source", owner: global, cluster: sync2)
+
+      :ok = Global.sync_clusters(global)
+
+      refute Services.get_service_by_name(ignore1.id, "source")
+      refute Services.get_service_by_name(ignore2.id, "source")
+      refute Services.get_service_by_name(sync3.id, "source")
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      refute Global.diff?(source, synced)
+
+      keep = refetch(keep)
+      refute keep.deleted_at
+      refute Global.diff?(source, keep)
+
+      assert refetch(svc).deleted_at
+
+      :ok = Global.sync_clusters(global)
+
+      for cluster <- [sync, sync2] do
+        synced = Services.get_service_by_name(cluster.id, "source")
+        refute Global.diff?(source, synced)
+        refute synced.deleted_at
+      end
+    end
+
     test "it will sync by distro" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)
@@ -549,7 +702,8 @@ defmodule Console.Deployments.GlobalSyncTest do
           name: "source",
           namespace: "my-service",
           git: %{ref: "main", folder: "k8s"},
-          configuration: [%{name: "name", value: "value"}]
+          configuration: [%{name: "name", value: "value"}],
+          dependencies: [%{name: "cert-manager"}]
         ),
         cascade: %{delete: true},
         tags: [%{name: "sync", value: "test"}]
@@ -573,13 +727,19 @@ defmodule Console.Deployments.GlobalSyncTest do
 
       :ok = Global.sync_clusters(global)
 
-      svc = Services.get_service_by_name(sync.id, "source")
+      svc = Services.get_service_by_name(sync.id, "source") |> Repo.preload([:dependencies])
 
       assert svc.git.ref == "main"
       assert svc.git.folder == "k8s"
       assert svc.namespace == "my-service"
       assert svc.owner_id == global.id
       refute svc.deleted_at
+
+      %{dependencies: [dep]} = svc
+      assert dep.name == "cert-manager"
+      assert dep.status == :stale
+      refute dep.template_id
+      assert dep.service_id == svc.id
     end
 
     test "it can sync template global services with dynamic template overrides" do
@@ -1033,6 +1193,17 @@ defmodule Console.Deployments.GlobalSyncTest do
       assert svc2.owner_id == global.id
       assert MapSet.new(svc2.context_bindings, & &1.context_id)
              |> MapSet.equal?(MapSet.new([ctx3.id, ctx4.id]))
+    end
+  end
+
+  describe "#next_poll/1" do
+    test "it can set the next poll at" do
+      global = insert(:global_service, interval: "PT10M")
+
+      {:ok, updated} = Global.next_poll(global)
+
+      assert updated.next_poll_at
+      assert updated.interval == "PT10M"
     end
   end
 end

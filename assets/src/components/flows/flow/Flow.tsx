@@ -26,6 +26,7 @@ import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
+import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
 
 const directory: SubtabDirectory = [
@@ -35,6 +36,7 @@ const directory: SubtabDirectory = [
   { path: 'prs', label: 'PRs' },
   { path: 'alerts', label: 'Alerts' },
   { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
+  { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
 ]
 
 export const getFlowBreadcrumbs = (
@@ -100,6 +102,7 @@ export function Flow() {
           />
           <Flex
             gap="small"
+            align="center"
             flex={1}
           >
             <AppIcon

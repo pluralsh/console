@@ -40,6 +40,19 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
     end
   end
 
+  describe "ServiceDependenciesUpdated" do
+    test "it will push a service.event event" do
+      %{id: id} = cluster = insert(:cluster)
+      %{service: %{id: dep1_id}} = dep1 = insert(:service_dependency, service: insert(:service, cluster: cluster))
+      %{service: %{id: dep2_id}} = dep2 = insert(:service_dependency, service: insert(:service, cluster: cluster))
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^id, "service.event", %{"id" => ^dep1_id} -> :ok end)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^id, "service.event", %{"id" => ^dep2_id} -> :ok end)
+
+      event = %PubSub.ServiceDependenciesUpdated{item: [dep1, dep2]}
+      Broadcast.handle_event(event)
+    end
+  end
+
   describe "ClusterRestoreCreated" do
     test "it will push a restore.event event" do
       %{id: id, backup: %{cluster_id: cluster_id}} = restore = insert(:cluster_restore)
@@ -87,6 +100,16 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "stack.run.event", %{"id" => ^id} -> :ok end)
 
       event = %PubSub.StackRunDeleted{item: run}
+      Broadcast.handle_event(event)
+    end
+  end
+
+  describe "AgentRunCreated" do
+    test "it will push a stack.run.event event" do
+      %{runtime: %{cluster_id: cluster_id}, id: id} = run = insert(:agent_run)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "agent.run.event", %{"id" => ^id} -> :ok end)
+
+      event = %PubSub.AgentRunCreated{item: run}
       Broadcast.handle_event(event)
     end
   end

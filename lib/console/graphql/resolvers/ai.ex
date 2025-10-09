@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def threads(args, %{context: %{current_user: user}}) do
     ChatThread.for_user(user.id)
+    |> ChatThread.nonagent()
     |> ChatThread.ordered()
     |> thread_filters(args)
     |> maybe_search(ChatThread, args)
@@ -49,17 +50,20 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def chats(args, %{context: %{current_user: user}}) do
     with {:ok, q} <- maybe_thread(args, user) do
-      Chat.ordered(q)
+      Chat.ordered(q, chat_order(args))
       |> paginate(args)
     end
   end
+
+  defp chat_order(%{reverse: true}), do: [desc: :seq, desc: :inserted_at]
+  defp chat_order(_), do: [asc: :seq, asc: :inserted_at]
 
   def chat_tools(%{id: id}, _, %{context: %{current_user: user}}),
     do: ChatSvc.tools(id, user)
 
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
-    |> Chat.ordered()
+    |> Chat.ordered(chat_order(args))
     |> paginate(args)
   end
 
@@ -111,6 +115,9 @@ defmodule Console.GraphQl.Resolvers.AI do
   def fix_pr(%{insight_id: id, messages: chat}, %{context: %{current_user: user}}) do
     Fixer.pr(id, Enum.map(chat || [], fn %{role: r, content: c} -> {r, c} end), user)
   end
+
+  def refresh_insight(%{insight_id: id}, %{context: %{current_user: user}}),
+    do: Fixer.refresh(id, user)
 
   def save_chats(%{messages: msgs} = args, %{context: %{current_user: user}}),
     do: ChatSvc.save(msgs, args[:thread_id], user)

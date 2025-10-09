@@ -55,6 +55,19 @@ defmodule Console.Schema.Stack do
         field :parallelism, :integer
         field :refresh,     :boolean
       end
+
+      embeds_one :ansible, Ansible, on_replace: :update do
+        field :playbook,        :string
+        field :inventory,       :string
+        field :additional_args, {:array, :string}
+      end
+
+      embeds_one :ai_approval, AiApproval, on_replace: :update do
+        field :enabled,       :boolean
+        field :ignore_cancel, :boolean
+        embeds_one :git, Service.Git, on_replace: :update
+        field :file, :string
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
@@ -62,6 +75,8 @@ defmodule Console.Schema.Stack do
       |> cast(attrs, ~w(image version tag)a)
       |> cast_embed(:hooks, with: &hook_changeset/2)
       |> cast_embed(:terraform, with: &terraform_changeset/2)
+      |> cast_embed(:ansible, with: &ansible_changeset/2)
+      |> cast_embed(:ai_approval, with: &ai_approval_changeset/2)
     end
 
     defp hook_changeset(model, attrs) do
@@ -73,6 +88,18 @@ defmodule Console.Schema.Stack do
     def terraform_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(parallelism refresh)a)
+    end
+
+    def ansible_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(playbook inventory additional_args)a)
+    end
+
+    defp ai_approval_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(enabled ignore_cancel file)a)
+      |> cast_embed(:git)
+      |> validate_required(~w(enabled file)a)
     end
   end
 
@@ -97,6 +124,8 @@ defmodule Console.Schema.Stack do
     field :name,            :string
     field :type,            Type
     field :status,          Status
+    field :interval,        :string
+    field :next_poll_at,    :utc_datetime_usec
     field :paused,          :boolean, default: false
     field :approval,        :boolean
     field :sha,             :string
@@ -108,6 +137,7 @@ defmodule Console.Schema.Stack do
     field :polled_sha,      :string
     field :variables,       :map
     field :agent_id,        :string
+    field :ai_poll_at,      :utc_datetime_usec
 
     field :actor_changed, :boolean, virtual: true
     field :runnable,      :boolean, virtual: true
@@ -156,6 +186,11 @@ defmodule Console.Schema.Stack do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(s in query, where: is_nil(s.next_poll_at) or s.next_poll_at < ^now, order_by: [asc: :next_poll_at])
   end
 
   def lock(query \\ __MODULE__), do: from(s in query, lock: "FOR UPDATE")
@@ -208,6 +243,11 @@ defmodule Console.Schema.Stack do
     from(s in query, where: s.status == ^status)
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query, where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now, order_by: [asc: :ai_poll_at])
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   def stats(query \\ __MODULE__) do
@@ -219,7 +259,7 @@ defmodule Console.Schema.Stack do
     )
   end
 
-  @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id)a
+  @valid ~w(name type paused interval actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id agent_id repository_id cluster_id ai_poll_at)a
   @immutable ~w(project_id)a
 
 
@@ -243,6 +283,7 @@ defmodule Console.Schema.Stack do
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:actor_id)
     |> unique_constraint(:name)
+    |> duration(:interval)
     |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -260,6 +301,23 @@ defmodule Console.Schema.Stack do
       end
     end)
   end
+
+  def next_poll_changeset(model, interval) do
+    duration = poll_duration(interval)
+    jittered = Duration.add(duration, Duration.new!(second: jitter(duration)))
+
+    Ecto.Changeset.change(model, %{
+      next_poll_at: DateTime.shift(DateTime.utc_now(), jittered)
+    })
+  end
+
+  def poll_duration(interval) when is_binary(interval) do
+    case parse_duration(interval) do
+      {:ok, duration} -> duration
+      {:error, _} -> poll_duration(nil)
+    end
+  end
+  def poll_duration(_), do: Duration.new!(minute: 5)
 
   def complete_changeset(model, attrs) do
     model

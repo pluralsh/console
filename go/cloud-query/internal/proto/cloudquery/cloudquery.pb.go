@@ -27,6 +27,7 @@ type AwsCredentials struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	AccessKeyId     string                 `protobuf:"bytes,1,opt,name=access_key_id,json=accessKeyId,proto3" json:"access_key_id,omitempty"`
 	SecretAccessKey string                 `protobuf:"bytes,2,opt,name=secret_access_key,json=secretAccessKey,proto3" json:"secret_access_key,omitempty"`
+	Region          *string                `protobuf:"bytes,3,opt,name=region,proto3,oneof" json:"region,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -71,6 +72,13 @@ func (x *AwsCredentials) GetAccessKeyId() string {
 func (x *AwsCredentials) GetSecretAccessKey() string {
 	if x != nil {
 		return x.SecretAccessKey
+	}
+	return ""
+}
+
+func (x *AwsCredentials) GetRegion() string {
+	if x != nil && x.Region != nil {
+		return *x.Region
 	}
 	return ""
 }
@@ -714,10 +722,12 @@ var File_cloudquery_proto protoreflect.FileDescriptor
 const file_cloudquery_proto_rawDesc = "" +
 	"\n" +
 	"\x10cloudquery.proto\x12\n" +
-	"cloudquery\"`\n" +
+	"cloudquery\"\x88\x01\n" +
 	"\x0eAwsCredentials\x12\"\n" +
 	"\raccess_key_id\x18\x01 \x01(\tR\vaccessKeyId\x12*\n" +
-	"\x11secret_access_key\x18\x02 \x01(\tR\x0fsecretAccessKey\"\x9a\x01\n" +
+	"\x11secret_access_key\x18\x02 \x01(\tR\x0fsecretAccessKey\x12\x1b\n" +
+	"\x06region\x18\x03 \x01(\tH\x00R\x06region\x88\x01\x01B\t\n" +
+	"\a_region\"\x9a\x01\n" +
 	"\x10AzureCredentials\x12'\n" +
 	"\x0fsubscription_id\x18\x01 \x01(\tR\x0esubscriptionId\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +
@@ -824,6 +834,7 @@ func file_cloudquery_proto_init() {
 	if File_cloudquery_proto != nil {
 		return
 	}
+	file_cloudquery_proto_msgTypes[0].OneofWrappers = []any{}
 	file_cloudquery_proto_msgTypes[3].OneofWrappers = []any{
 		(*Connection_Aws)(nil),
 		(*Connection_Azure)(nil),

@@ -1,44 +1,34 @@
 import {
   AiSparkleOutlineIcon,
-  ArrowTopRightIcon,
-  Avatar,
   CatalogIcon,
   CostManagementIcon,
-  Sidebar as DSSidebar,
   EdgeComputeIcon,
   Flex,
   FlowIcon,
   GearTrainIcon,
-  GitHubLogoIcon,
   GitPullIcon,
+  HamburgerMenuCollapsedIcon,
+  HamburgerMenuCollapseIcon,
   HomeIcon,
   KubernetesAltIcon,
-  LogoutIcon,
-  Menu,
-  MenuItem,
-  PersonIcon,
-  ScrollIcon,
-  SidebarExpandButton,
-  SidebarExpandWrapper,
-  SidebarItem,
-  SidebarSection,
   StackIcon,
   Tooltip,
-  useSidebar,
   WarningShieldIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
 import {
+  createContext,
+  Dispatch,
   ReactElement,
+  ReactNode,
+  SetStateAction,
   use,
   useCallback,
   useMemo,
-  useRef,
-  useState,
 } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import { useLocation } from 'react-router-dom'
+import styled from 'styled-components'
 
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -49,23 +39,26 @@ import { SECURITY_ABS_PATH } from 'routes/securityRoutesConsts'
 import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts.tsx'
 
-import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
-import { useLogin } from '../contexts'
-
-import HelpLauncher from '../help/HelpLauncher'
+import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts.tsx'
+import { getStacksAbsPath } from '../../routes/stacksRoutesConsts.tsx'
+import { useLogin } from '../contexts.tsx'
 
 import {
   FeatureFlagContext,
   FeatureFlags,
 } from 'components/flows/FeatureFlagContext.tsx'
-import { useOutsideClick } from 'components/hooks/useOutsideClick.tsx'
+import usePersistedState from 'components/hooks/usePersistedState.tsx'
+import { SidebarItem } from 'components/utils/sidebar/SidebarItem.tsx'
+import { SidebarSection } from 'components/utils/sidebar/SidebarSection.tsx'
 import { TRUNCATE } from 'components/utils/truncate.ts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { SELF_SERVICE_ABS_PATH } from 'routes/selfServiceRoutesConsts.tsx'
-import { GITHUB_LINK } from 'utils/constants.ts'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
+
+const SIDEBAR_WIDTH = 64
+const SIDEBAR_EXPANDED_WIDTH = 180
 
 type MenuItem = {
   text: string
@@ -76,6 +69,26 @@ type MenuItem = {
   hotkeys?: string[]
   enabled?: boolean
   expandedLabel: string
+}
+
+type SidebarContextT = {
+  isExpanded: boolean
+  setIsExpanded: Dispatch<SetStateAction<boolean>>
+}
+export const SidebarContext = createContext<SidebarContextT>({
+  isExpanded: false,
+  setIsExpanded: () => {},
+})
+export function SidebarProvider({ children }: { children: ReactNode }) {
+  const [isExpanded, setIsExpanded] = usePersistedState<boolean>(
+    'sidebar-expanded',
+    false
+  )
+  const ctx = useMemo(
+    () => ({ isExpanded, setIsExpanded }),
+    [isExpanded, setIsExpanded]
+  )
+  return <SidebarContext value={ctx}>{children}</SidebarContext>
 }
 
 // Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
@@ -169,16 +182,6 @@ function getMenuItems({
       path: '/cost-management',
       hotkeys: ['shift C+M'],
     },
-    // {
-    //   text: 'Backups',
-    //   expandedLabel: 'Backups',
-    //   icon: <HistoryIcon />,
-    //   path: '/backups',
-    //   enabled:
-    //     isCDEnabled &&
-    //     !!(personaConfig?.all || personaConfig?.sidebar?.backups),
-    //   hotkeys: ['shift B', '9'],
-    // },
     {
       text: 'Settings',
       expandedLabel: 'Settings',
@@ -191,41 +194,26 @@ function getMenuItems({
   ].filter((item) => item.enabled !== false)
 }
 
+type MenuItemPath = { path: string; pathRegexp?: RegExp; ignoreRegexp?: RegExp }
 function isActiveMenuItem(
-  {
-    path,
-    pathRegexp,
-    ignoreRegexp,
-  }: Pick<MenuItem, 'path' | 'pathRegexp' | 'ignoreRegexp'>,
-  currentPath
+  { path, pathRegexp, ignoreRegexp }: MenuItemPath,
+  currentPath: string
 ) {
   return (
     (path === '/' ? currentPath === path : currentPath.startsWith(path)) ||
-    (pathRegexp &&
-      (currentPath.match(pathRegexp)?.length ?? 0 > 0) &&
+    (!!pathRegexp &&
+      (currentPath.match(pathRegexp)?.length ?? 0) > 0 &&
       (!ignoreRegexp || (currentPath.match(ignoreRegexp)?.length ?? 0) === 0))
   )
 }
 
-const SidebarSC = styled(DSSidebar).attrs(({ variant }) => ({
-  variant,
-}))((_) => ({
-  flexGrow: 1,
-  minHeight: 0,
-  height: 'auto',
-  overflow: 'visible',
-}))
-
-export default function Sidebar() {
-  const menuItemRef = useRef<HTMLDivElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
+export function Sidebar() {
+  const { isExpanded, setIsExpanded } = use(SidebarContext)
   const { me, configuration, personaConfiguration } = useLogin()
   const { featureFlags } = use(FeatureFlagContext)
   const { pathname } = useLocation()
   const isActive = useCallback(
-    (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
-      isActiveMenuItem(menuItem, pathname),
+    (menuItem: MenuItemPath) => isActiveMenuItem(menuItem, pathname),
     [pathname]
   )
   const isCDEnabled = useCDEnabled({ redirect: false })
@@ -249,128 +237,57 @@ export default function Sidebar() {
     ]
   )
 
-  const { logout } = useLogin()
-  const handleLogout = useCallback(() => {
-    setIsMenuOpen(false)
-    logout?.()
-  }, [logout])
-
-  useOutsideClick(menuRef, (event) => {
-    if (!menuItemRef.current?.contains(event.target as any)) {
-      setIsMenuOpen(false)
-    }
-  })
-
-  const theme = useTheme()
-
   if (!me) return null
 
   return (
-    <SidebarSC variant="console">
-      <SidebarExpandWrapper pathname={pathname}>
-        <SidebarSection flex={1}>
-          {menuItems.map((item, i) => (
-            <Tooltip
-              key={i}
-              label={
-                <div
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  {item.expandedLabel}
-                  <CommandPaletteShortcuts shortcuts={item.hotkeys} />
-                </div>
-              }
-            >
-              <SidebarItem
-                clickable
-                className={`sidebar-${item.text}`}
-                active={isActive(item)}
-                as={Link}
-                to={item.path}
-                expandedLabel={item.expandedLabel}
-              >
-                {item.icon}
-              </SidebarItem>
-            </Tooltip>
-          ))}
-          <Flex flex={1} />
-          <SidebarExpandButton />
-          <HelpLauncher />
+    <SidebarSC $isExpanded={isExpanded}>
+      <SidebarSection flex={1}>
+        {menuItems.map((item, i) => (
           <SidebarItem
-            ref={menuItemRef}
-            className="sidebar-menu"
-            active={isMenuOpen}
-            clickable
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsMenuOpen((x) => !x)
-            }}
-            expandedLabel="Menu"
-            css={{ paddingLeft: theme.spacing.xxsmall }}
+            key={i}
+            asLink
+            to={item.path}
+            active={isActive(item)}
+            expandedLabel={item.expandedLabel}
+            tooltip={
+              <Flex
+                gap="small"
+                align="center"
+              >
+                {item.expandedLabel}
+                <CommandPaletteShortcuts shortcuts={item.hotkeys} />
+              </Flex>
+            }
           >
-            <Avatar
-              name={me.name}
-              src={me.profile}
-              size={32}
-            />
+            {item.icon}
           </SidebarItem>
-          {configuration?.consoleVersion && (
-            <ConsoleVersion version={configuration.consoleVersion} />
+        ))}
+        <Flex flex={1} />
+        <HelpLauncher />
+        <SidebarItem
+          tooltip="Expand"
+          expandedLabel="Collapse"
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsExpanded((x: boolean) => !x)
+          }}
+        >
+          {isExpanded ? (
+            <HamburgerMenuCollapseIcon />
+          ) : (
+            <HamburgerMenuCollapsedIcon />
           )}
-        </SidebarSection>
-        {isMenuOpen && (
-          <ProfileMenuSC ref={menuRef}>
-            <MenuItem
-              as={Link}
-              to="/profile"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <PersonIcon marginRight="xsmall" />
-              My profile
-            </MenuItem>
-            <MenuItem
-              as="a"
-              href="https://docs.plural.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ScrollIcon marginRight="xsmall" />
-              <span css={{ flex: 1 }}>Docs</span>
-              <ArrowTopRightIcon />
-            </MenuItem>
-            <MenuItem
-              as="a"
-              href={`${GITHUB_LINK}/plural`}
-              target="_blank"
-              rel="noopener noreferrer"
-              expandedLabel="GitHub"
-            >
-              <GitHubLogoIcon marginRight="xsmall" />
-              <span css={{ flex: 1 }}>GitHub</span>
-              <ArrowTopRightIcon />
-            </MenuItem>
-            <MenuItem
-              as="a"
-              style={{ color: theme.colors['icon-danger'] }}
-              onClick={handleLogout}
-            >
-              <LogoutIcon marginRight="xsmall" />
-              Logout
-            </MenuItem>
-          </ProfileMenuSC>
+        </SidebarItem>
+        {configuration?.consoleVersion && (
+          <ConsoleVersion version={configuration.consoleVersion} />
         )}
-      </SidebarExpandWrapper>
+      </SidebarSection>
     </SidebarSC>
   )
 }
 
 function ConsoleVersion({ version }: { version: string }) {
-  const { isExpanded } = useSidebar()
+  const { isExpanded } = use(SidebarContext)
   return (
     <WrapWithIf
       condition={!isExpanded}
@@ -395,12 +312,18 @@ const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
   })
 )
 
-const ProfileMenuSC = styled(Menu)(({ theme }) => ({
-  zIndex: 999,
-  position: 'absolute',
-  bottom: 8,
-  minWidth: '175px',
-  left: 'calc(100% + 10px)',
-  '& a': { color: theme.colors.text, textDecoration: 'none' },
-  '& *:hover': { background: theme.colors['fill-two-hover'] },
+const SidebarSC = styled.div<{
+  $isExpanded: boolean
+}>(({ theme, $isExpanded }) => ({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: 1,
+  justifyContent: 'flex-start',
+  height: '100%',
+  transition: 'max-width 0.2s ease-in-out',
+  width: '100%',
+  maxWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
+  backgroundColor: theme.colors['fill-accent'],
+  borderRight: theme.borders.default,
 }))

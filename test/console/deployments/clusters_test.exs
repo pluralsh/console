@@ -1066,6 +1066,19 @@ defmodule Console.Deployments.ClustersTest do
       assert runtime.name == "ingress-nginx"
       assert runtime.version == "1.9.1"
     end
+
+    test "it can handle cilium versions" do
+      cluster = insert(:cluster)
+
+      {:ok, 1} = Clusters.create_runtime_services(%{services: [
+        %{name: "cilium", version: "1.18.0"}
+      ]}, nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "cilium"
+      assert runtime.version == "1.18.0"
+      assert runtime.addon_version
+    end
   end
 
   describe "#refresh_kubeconfig/2" do

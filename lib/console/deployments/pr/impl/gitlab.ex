@@ -107,11 +107,24 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   def approve(_, _, _), do: {:error, "not implemented"}
 
+  def commit_status(_, _, _, _, _), do: :ok
+
   def pr_info(url) do
     with {:ok, group, repo, number} <- get_pull_id(url) do
       {:ok, %{group: group, repo: repo, number: number}}
     end
   end
+
+  def slug(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+        [group, repo | _] <- String.split(path, "/", trim: true) do
+      {:ok, "#{group}/#{String.trim_trailing(repo, ".git")}"}
+    else
+      _ -> {:error, "could not parse gitlab url"}
+    end
+  end
+
+  def merge(_, _), do: :ok
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 

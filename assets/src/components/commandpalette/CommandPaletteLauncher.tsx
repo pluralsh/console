@@ -1,78 +1,36 @@
-import { Chip, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useState } from 'react'
-import { usePlatform } from 'components/hooks/usePlatform'
-import styled, { useTheme } from 'styled-components'
+import { Chip } from '@pluralsh/design-system'
 import { useHotkeys } from '@saas-ui/use-hotkeys'
+import { usePlatform } from 'components/hooks/usePlatform'
 
-import CommandPaletteDialog from './CommandPaletteDialog'
-import { useCommandsWithHotkeys } from './commands'
+import { use } from 'react'
+import styled from 'styled-components'
 import CommandHotkeys from './CommandHotkeys'
+import {
+  CommandPaletteContext,
+  CommandPaletteTab,
+} from './CommandPaletteContext.tsx'
+import { CommandPaletteDialog } from './CommandPaletteDialog'
+import { useCommandsWithHotkeys } from './commands.ts'
 
-export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  ...theme.partials.text.body2,
-  height: theme.spacing.xlarge,
-  padding: `${0}px ${theme.spacing.medium}px`,
-  background: 'transparent',
-  border: theme.borders.input,
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-xlight'],
-  '&, .content': {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  gap: theme.spacing.xsmall,
-  '.content': {
-    display: 'flex',
-    gap: theme.spacing.small,
-  },
-  '&:hover': {
-    background: theme.colors['fill-zero'],
-  },
-  '&:focus, &:focus-visible': {
-    outline: 'none',
-  },
-  '&:focus-visible': {
-    border: theme.borders['outline-focused'],
-  },
-}))
-
-export default function CommandPaletteLauncher() {
-  const theme = useTheme()
+export function CommandPaletteLauncher() {
   const { modKeyString, keyCombinerString } = usePlatform()
   const commands = useCommandsWithHotkeys()
-  const [open, setOpen] = useState(false)
-  const openCommandPalette = useCallback(
-    () => setOpen((open) => !open),
-    [setOpen]
-  )
+  const { setCmdkOpen } = use(CommandPaletteContext)
 
-  useHotkeys(['cmd K', 'ctrl K'], openCommandPalette)
+  useHotkeys(['cmd K', 'ctrl K'], () =>
+    setCmdkOpen(true, CommandPaletteTab.Commands)
+  )
 
   return (
     <>
-      <CommandPaletteLauncherSC onClick={openCommandPalette}>
-        <div className="content">
-          <SearchIcon
-            size={16}
-            color={theme.colors['text-light']}
-          />
-          <span>Search</span>
-          <Chip
-            fillLevel={3}
-            size="small"
-            userSelect="none"
-            whiteSpace="nowrap"
-          >
-            {modKeyString}
-            {keyCombinerString}K
-          </Chip>
-        </div>
-      </CommandPaletteLauncherSC>
-      <CommandPaletteDialog
-        open={open}
-        setOpen={setOpen}
-      />
+      <CmdKChipSC
+        clickable
+        onClick={() => setCmdkOpen(true, CommandPaletteTab.Commands)}
+      >
+        {modKeyString}
+        {keyCombinerString}K
+      </CmdKChipSC>
+      <CommandPaletteDialog />
       {commands.map(({ label, hotkeys, callback, options, deps }) => (
         <CommandHotkeys
           key={`${label}-${hotkeys[0]}`}
@@ -85,3 +43,11 @@ export default function CommandPaletteLauncher() {
     </>
   )
 }
+
+const CmdKChipSC = styled(Chip)(({ theme }) => ({
+  transition: 'background 0.16s ease-in-out',
+
+  background: theme.colors['fill-accent'],
+  '&& *': { color: theme.colors['text-xlight'] },
+  '&:hover': { background: theme.colors['fill-zero'] },
+}))

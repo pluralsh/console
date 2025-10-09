@@ -74,19 +74,6 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
-      - name: Docker meta
-        id: meta-ubuntu
-        uses: docker/metadata-action@v4
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            dkr.plural.sh/console/console-ubuntu
-            ghcr.io/pluralsh/console-ubuntu
-            gcr.io/pluralsh/console-ubuntu
-            docker.io/pluralsh/console-ubuntu
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -141,23 +128,8 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
-      - name: Build and push ubuntu images
-        uses: docker/build-push-action@v3
-        with:
-          context: "."
-          file: "./Dockerfile"
-          push: true
-          tags: ${{ steps.meta-ubuntu.outputs.tags }}
-          labels: ${{ steps.meta-ubuntu.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            GIT_COMMIT=${{ github.sha }}
-            ELIXIR_OS=ubuntu-focal-20250404
-            OS_VERSION=focal-20250404
-            OS_VARIANT=ubuntu
-            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+            VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
       - name: slack webhook
         uses: 8398a7/action-slack@v3
         with:
@@ -195,7 +167,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "^1.21.3"
       # - name: update controller crds
@@ -257,7 +229,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "^1.21.3"
       - name: push byok chart

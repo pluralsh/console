@@ -90,8 +90,13 @@ defmodule ConsoleWeb.GitControllerTest do
       |> get("/v1/git/tarballs", %{id: svc.id})
       |> response(402)
 
-      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      %{errors: [error]} = svc =
+        refetch(svc)
+        |> Console.Repo.preload([:errors])
+
+      assert svc.status == :stale
       assert error.source == "git"
+      assert error.warning
       assert error.message =~ "dependency #{dep.name} is not ready"
     end
 
@@ -178,8 +183,8 @@ defmodule ConsoleWeb.GitControllerTest do
 
   describe "#stack_tarball/2" do
     test "it will download stack git content for valid deploy tokens", %{conn: conn} do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      run = insert(:stack_run, repository: git, git: %{ref: "master", folder: "bin"})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      run = insert(:stack_run, repository: git, git: %{ref: "main", folder: "charts/deployment-operator"})
 
       conn
       |> add_auth_headers(run.cluster)

@@ -23,6 +23,19 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [
     do: {"cluster:#{cluster_id}", "service.event", %{"id" => id, "kick" => svc.kick}}
 end
 
+defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.ServiceDependenciesUpdated do
+  alias Console.Schema.{ServiceDependency, Service}
+
+  def message(%{item: [_ | _] = items}) do
+    items
+    |> Console.Repo.preload([:service])
+    |> Enum.map(fn %ServiceDependency{service: %Service{cluster_id: cid, id: id}} ->
+      {"cluster:#{cid}", "service.event", %{"id" => id}}
+    end)
+  end
+  def message(_), do: :ignore
+end
+
 defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.ServiceManifestsRequested do
   def message(%{item: %{id: id, cluster_id: cluster_id}}),
     do: {"cluster:#{cluster_id}", "service.manifests", %{"id" => id}}
@@ -43,4 +56,13 @@ end
 
 defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.StackRunCreated, Console.PubSub.StackRunUpdated, Console.PubSub.StackRunDeleted] do
   def message(%{item: %{cluster_id: cid, id: id}}), do: {"cluster:#{cid}", "stack.run.event", %{"id" => id}}
+end
+
+defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.AgentRunCreated] do
+  alias Console.Schema.AgentRun
+
+  def message(%{item: %AgentRun{} = run}) do
+    %{runtime: %{cluster_id: cid}} = Console.Repo.preload(run, [:runtime])
+    {"cluster:#{cid}", "agent.run.event", %{"id" => run.id}}
+  end
 end

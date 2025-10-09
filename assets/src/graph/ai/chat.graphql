@@ -1,17 +1,3 @@
-fragment AiPin on AiPin {
-  id
-  name
-  insight {
-    id
-    ...AiInsight
-  }
-  thread {
-    ...ChatThreadTiny
-  }
-  insertedAt
-  updatedAt
-}
-
 fragment Chat on Chat {
   id
   content
@@ -30,6 +16,7 @@ fragment Chat on Chat {
     }
     prCall {
       context
+      branch
     }
   }
   pullRequest {
@@ -69,23 +56,33 @@ fragment ChatThreadTiny on ChatThread {
   }
 }
 
-fragment ChatThread on ChatThread {
+fragment ChatThreadDetails on ChatThread {
   ...ChatThreadTiny
-  chats(first: 100) {
+  insight {
+    ...AiInsight
+  }
+  tools {
+    ...McpServerTool
+  }
+}
+
+fragment ChatThreadMessages on ChatThread {
+  id
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    reverse: $reverse
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
     edges {
       node {
         ...Chat
       }
     }
-  }
-  insight {
-    ...AiInsight
-  }
-  flow {
-    ...FlowBasic
-  }
-  tools {
-    ...McpServerTool
   }
 }
 
@@ -96,6 +93,7 @@ fragment ChatThreadSettings on ChatThreadSettings {
 fragment CloudConnectionTiny on CloudConnection {
   id
   name
+  provider
 }
 
 fragment AgentSession on AgentSession {
@@ -103,8 +101,49 @@ fragment AgentSession on AgentSession {
   type
   done
   planConfirmed
+  thread {
+    id
+    summary
+    insertedAt
+    lastMessageAt
+  }
+  connection {
+    id
+    name
+    provider
+  }
   cluster {
     id
+  }
+  pullRequest {
+    id
+    url
+  }
+  stack {
+    id
+    name
+  }
+  service {
+    id
+    name
+    cluster {
+      id
+    }
+  }
+}
+
+fragment ServiceDeploymentChat on ServiceDeployment {
+  ...ServiceDeploymentTiny
+  protect
+  insight {
+    ...AiInsightSummary
+  }
+}
+
+fragment StackChat on InfrastructureStack {
+  ...StackTiny
+  insight {
+    ...AiInsightSummary
   }
 }
 
@@ -119,32 +158,20 @@ fragment AiDelta on AiDelta {
   }
 }
 
-query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
-  aiPins(first: $first, last: $last, after: $after, before: $before) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...AiPin
-      }
-    }
-  }
-}
-
-query AIPin($insightId: ID, $threadId: ID) {
-  aiPin(insightId: $insightId, threadId: $threadId) {
-    ...AiPin
-  }
-}
-
 query ChatThreads(
   $first: Int = 100
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+  chatThreads(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -156,9 +183,80 @@ query ChatThreads(
   }
 }
 
+query ChatAgentSession($id: ID!) {
+  chatThread(id: $id) {
+    id
+    session {
+      id
+      done
+      pullRequest {
+        ...PullRequest
+      }
+      service {
+        ...ServiceDeploymentChat
+      }
+      stack {
+        ...StackChat
+      }
+      pullRequests(first: 100) {
+        edges {
+          node {
+            ...PullRequest
+          }
+        }
+      }
+      serviceDeployments(first: 100) {
+        edges {
+          node {
+            ...ServiceDeploymentTiny
+          }
+        }
+      }
+      stacks(first: 100) {
+        edges {
+          node {
+            ...StackTiny
+          }
+        }
+      }
+    }
+  }
+}
+
 query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
-    ...ChatThread
+    ...ChatThreadDetails
+  }
+}
+
+query ChatThreadMessages(
+  $id: ID!
+  $first: Int = 25
+  $last: Int
+  $after: String
+  $before: String
+  $reverse: Boolean = true
+) {
+  chatThread(id: $id) {
+    ...ChatThreadMessages
+  }
+}
+
+query AgentSessions(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  agentSessions(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentSession
+      }
+    }
   }
 }
 
@@ -167,8 +265,15 @@ query CloudConnections(
   $last: Int
   $after: String
   $before: String
+  $q: String
 ) {
-  cloudConnections(first: $first, last: $last, after: $after, before: $before) {
+  cloudConnections(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    q: $q
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -177,24 +282,6 @@ query CloudConnections(
         ...CloudConnectionTiny
       }
     }
-  }
-}
-
-mutation CreateAIPin($attributes: AiPinAttributes!) {
-  createPin(attributes: $attributes) {
-    ...AiPin
-  }
-}
-
-mutation DeleteAIPin($id: ID!) {
-  deletePin(id: $id) {
-    ...AiPin
-  }
-}
-
-mutation Chat($messages: [ChatMessage], $threadId: ID) {
-  chat(messages: $messages, threadId: $threadId) {
-    ...Chat
   }
 }
 
@@ -216,31 +303,21 @@ mutation ConfirmChatPlan($threadId: ID!) {
   }
 }
 
-mutation ClearChatHistory($before: Int) {
-  clearChatHistory(before: $before)
-}
-
 mutation DeleteChat($id: ID!) {
   deleteChat(id: $id) {
     ...Chat
   }
 }
 
-mutation SaveChats($messages: [ChatMessage], $threadId: ID) {
-  saveChats(messages: $messages, threadId: $threadId) {
-    ...Chat
-  }
-}
-
 mutation CreateChatThread($attributes: ChatThreadAttributes!) {
   createThread(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
 mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
   updateThread(id: $id, attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
@@ -252,7 +329,7 @@ mutation DeleteChatThread($id: ID!) {
 
 mutation CloneChatThread($id: ID!, $seq: Int) {
   cloneThread(id: $id, seq: $seq) {
-    ...ChatThread
+    ...ChatThreadDetails
   }
 }
 
@@ -268,7 +345,7 @@ mutation AddChatContext(
 
 mutation CreateAgentSession($attributes: AgentSessionAttributes!) {
   createAgentSession(attributes: $attributes) {
-    ...ChatThread
+    ...ChatThreadTiny
   }
 }
 

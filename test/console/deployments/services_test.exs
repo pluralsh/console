@@ -126,6 +126,21 @@ defmodule Console.Deployments.ServicesTest do
       }, cluster.id, user)
     end
 
+    test "you cannot create a service with an invalid helm url" do
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      {:error, _} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        helm: %{
+          url: "pluralsh.github.io/bootstrap",
+          chart: "stateless",
+          version: "0.1.0",
+        }
+      }, cluster.id, user)
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
@@ -765,11 +780,13 @@ defmodule Console.Deployments.ServicesTest do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)
       dependencies = for _ <- 1..3 do
-        insert(:service_dependency, service: build(:service, cluster: service.cluster), name: service.name)
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster), name: service.name)
       end
       ignore = [
         insert(:service_dependency, name: service.name),
-        insert(:service_dependency, service: build(:service, cluster: service.cluster))
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster)),
+        insert(:service_dependency, service: insert(:service, cluster: service.cluster), status: :stale),
+        insert(:service_dependency, name: service.name, service: insert(:service), status: :stale)
       ]
 
       {:ok, service} = Services.update_components(%{
@@ -820,6 +837,9 @@ defmodule Console.Deployments.ServicesTest do
       end
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+      assert_receive {:event, %PubSub.ServiceDependenciesUpdated{item: found}}
+
+      assert ids_equal(found, dependencies)
 
       :timer.sleep(:timer.seconds(1))
       {:ok, updated} = Services.update_components(%{
@@ -1440,9 +1460,9 @@ defmodule Console.Deployments.ServicesSyncTest do
       {:ok, ^sha} = Services.digest(svc)
     end
 
-    test "it can splice in a new values.yaml.tpl" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "master", folder: "charts/console"})
+    test "it can splice in a new values.yaml.static" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "main", folder: "charts/deployment-operator"})
 
       {:ok, sha} = Services.digest(svc)
       {:ok, ^sha} = Services.digest(svc)

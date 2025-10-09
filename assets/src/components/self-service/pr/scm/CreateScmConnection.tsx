@@ -8,27 +8,12 @@ import {
   ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
-import { appendConnection, updateCache } from 'utils/graphql'
+import { appendConnection, deepOmitFalsy, updateCache } from 'utils/graphql'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ScmConnectionForm } from './EditScmConnection'
-
-export const DEFAULT_SCM_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
-  apiUrl: '',
-  baseUrl: '',
-  name: '',
-  signingPrivateKey: '',
-  token: '',
-  github: {
-    appId: '',
-    installationId: '',
-    privateKey: '',
-  },
-  type: undefined,
-  username: '',
-}
 
 export function CreateScmConnectionModal({
   refetch,
@@ -40,9 +25,8 @@ export function CreateScmConnectionModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const { state: formState, update: updateFormState } = useUpdateState<
-    Partial<ScmConnectionAttributes>
-  >(DEFAULT_SCM_ATTRIBUTES)
+  const { state: formState, update: updateFormState } =
+    useUpdateState<ScmConnectionAttributes>({ type: ScmType.Github, name: '' })
 
   const [mutation, { loading, error }] = useCreateScmConnectionMutation({
     update: (cache, { data }) =>
@@ -58,12 +42,7 @@ export function CreateScmConnectionModal({
     },
   })
 
-  const { name, token, github, type } = formState
-  const allowSubmit =
-    name &&
-    type &&
-    (token || (github?.appId && github?.privateKey && github?.installationId))
-
+  const allowSubmit = isValidScmForm(formState)
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
@@ -72,7 +51,7 @@ export function CreateScmConnectionModal({
           variables: { attributes: sanitizeScmAttributes(formState) },
         })
     },
-    [allowSubmit, formState, mutation]
+    [allowSubmit, mutation, formState]
   )
 
   return (
@@ -101,6 +80,7 @@ export function CreateScmConnectionModal({
           </Button>
           <Button
             secondary
+            type="button"
             onClick={() => onClose?.()}
           >
             Cancel
@@ -142,18 +122,31 @@ export function CreateScmConnection({
   )
 }
 
-export const sanitizeScmAttributes = (
-  formState: Partial<ScmConnectionAttributes>
-): ScmConnectionAttributes => {
-  const { name, token, type, github } = formState
+// all forms need a name
+// gh auth only needs gh info (no token)
+// all other forms require a token
+// azure devops also requires azure info
+export const isValidScmForm = (
+  formState: ScmConnectionAttributes,
+  requireToken = true
+): boolean => {
+  const { name, type, token, github, azure } = formState
+  if (!name) return false
+  if (!!github)
+    return !!github.appId && !!github.privateKey && !!github.installationId
+  if (requireToken && !token) return false
+  if (type === ScmType.AzureDevops)
+    return !!azure?.username && !!azure?.organization && !!azure?.project
+  return true
+}
 
-  return {
-    name: name ?? '',
-    type: type ?? ScmType.Github,
-    ...(token === '' && type === ScmType.Github ? { github } : { token }),
-    apiUrl: formState.apiUrl || null,
-    baseUrl: formState.baseUrl || null,
-    username: formState.username || null,
-    signingPrivateKey: formState.signingPrivateKey || null,
-  }
+export const sanitizeScmAttributes = (
+  formState: ScmConnectionAttributes
+): ScmConnectionAttributes => {
+  const type = formState.type
+  const { github, azure, token, ...rest } = deepOmitFalsy(formState)
+  if (type === ScmType.Github)
+    return { ...(github ? { github } : { token }), ...rest }
+  if (type === ScmType.AzureDevops) return { azure, token, ...rest }
+  return { token, ...rest }
 }

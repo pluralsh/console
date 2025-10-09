@@ -15,10 +15,7 @@ import { Edge } from 'utils/graphql'
 
 import { useOutletContext } from 'react-router-dom'
 
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -29,10 +26,8 @@ export default function ServicesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
-  const { setRefetch, clusterId, setClusterId } =
-    useOutletContext<ServicesContextT>()
+  const { setRefetch, clusterId, q } = useOutletContext<ServicesContextT>()
   const tabStateRef = useRef<any>(null)
-  const [queryString, setQueryString] = useState()
   const [queryStatusFilter, setQueryStatusFilter] =
     useState<StatusTabKey>('ALL')
 
@@ -47,7 +42,7 @@ export default function ServicesTable() {
   } = useFetchPaginatedData(
     { queryHook: useServiceDeploymentsQuery, keyPath: ['serviceDeployments'] },
     {
-      q: queryString,
+      q,
       projectId,
       ...(clusterId ? { clusterId } : {}),
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
@@ -80,9 +75,6 @@ export default function ServicesTable() {
     >
       <ServicesFilters
         setQueryStatusFilter={setQueryStatusFilter}
-        setQueryString={setQueryString}
-        clusterId={clusterId}
-        setClusterId={setClusterId}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
       />
@@ -113,7 +105,6 @@ export default function ServicesTable() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             reactTableOptions={reactTableOptions}
-            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
         ) : (

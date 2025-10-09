@@ -16,8 +16,6 @@ import {
 import { FormEvent, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { cleanSmtpForm } from '../usermanagement/email/EmailSettingsForm'
-
 export function GlobalSettingsSMTP() {
   const theme = useTheme()
   const { smtp } = useDeploymentSettings()
@@ -170,4 +168,10 @@ const defaultForm = {
   sender: '',
   user: '',
   ssl: false,
+}
+
+const cleanSmtpForm = (smtp) => {
+  const { __typename, ...vals } = smtp || {}
+
+  return vals
 }

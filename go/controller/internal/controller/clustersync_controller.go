@@ -125,7 +125,7 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	}
 
-	return requeue, nil
+	return jitterRequeue(requeueDefault), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

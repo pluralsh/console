@@ -49,6 +49,7 @@ defmodule Console.Schema.Service do
 
   defmodule Helm do
     use Piazza.Ecto.Schema
+    import Console.Schema.Base, only: [helm_url: 2]
     alias Console.Schema.{NamespacedName, Service.Git}
 
     embedded_schema do
@@ -63,6 +64,7 @@ defmodule Console.Schema.Service do
       field :ignore_crds,   :boolean
       field :lua_script,    :string
       field :lua_file,      :string
+      field :lua_folder,    :string
 
       embeds_many :set, HelmValue, on_replace: :delete do
         field :name, :string
@@ -75,9 +77,10 @@ defmodule Console.Schema.Service do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script lua_file)a)
+      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script lua_folder lua_file)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
+      |> helm_url(:url)
       |> cast_embed(:git)
       |> validate_change(:values_files, fn :values_files, files ->
         case Enum.member?(files, "values.yaml") do
@@ -167,6 +170,8 @@ defmodule Console.Schema.Service do
     field :interval,         :string
     field :agent_id,         :string
 
+    field :ai_poll_at, :utc_datetime_usec
+
     field :norevise, :boolean, virtual: true, default: false
     field :kick,     :boolean, virtual: true, default: false
 
@@ -179,11 +184,17 @@ defmodule Console.Schema.Service do
       field :enforce_namespace, :boolean, default: false
       field :create_namespace,  :boolean, default: true
       field :delete_namespace,  :boolean, default: false
+      field :require_ownership, :boolean, default: true
     end
 
     embeds_one :kustomize, Kustomize, on_replace: :update do
       field :path, :string
       field :enable_helm, :boolean, default: false
+    end
+
+    embeds_one :metadata, Metadata, on_replace: :update do
+      field :images, {:array, :string}
+      field :fqdns, {:array, :string}
     end
 
     embeds_many :sources, Source, on_replace: :delete
@@ -362,6 +373,14 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def ai_pollable(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+    from(a in query,
+      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+      order_by: [asc: :ai_poll_at]
+    )
+  end
+
   def tree(query \\ __MODULE__) do
     recursion_query = from(s in __MODULE__, join: d in "descendants", on: d.id == s.parent_id)
     cte_query = union_all(query, ^recursion_query)
@@ -380,7 +399,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message ai_poll_at)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -388,11 +407,13 @@ defmodule Console.Schema.Service do
     |> cast(attrs, @valid)
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
+    |> validate_length(:name, max: 510)
     |> validate_format(:interval, ~r/\d+[mhs]/, message: "interval must be a valid go interval string")
     |> cast_embed(:git)
     |> cast_embed(:helm)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)
     |> cast_embed(:kustomize, with: &kustomize_changeset/2)
+    |> cast_embed(:metadata, with: &metadata_changeset/2)
     |> cast_embed(:sources)
     |> cast_embed(:renderers)
     |> cast_assoc(:components)
@@ -453,5 +474,10 @@ defmodule Console.Schema.Service do
     model
     |> cast(attrs, ~w(path enable_helm)a)
     |> validate_required(~w(path)a)
+  end
+
+  def metadata_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(images fqdns)a)
   end
 end
