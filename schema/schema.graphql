@@ -449,6 +449,8 @@ type RootQueryType {
 
   clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
+  sentinelRunJob(id: ID!): SentinelRunJob
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"

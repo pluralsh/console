@@ -172,8 +172,8 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
     Stacks.commit_status(run)
   end
 
-  def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
-    do: Console.Deployments.Stacks.Discovery.runner(run)
+  # def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
+  #   do: Console.Deployments.Stacks.Discovery.runner(run)
 
   def process(_), do: :ok
 end

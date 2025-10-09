@@ -133,6 +133,31 @@ defmodule Console.GraphQl.Deployments.SentinelQueriesTest do
     end
   end
 
+  describe "sentinelRunJob" do
+    test "clusters can fetch their sentinel run jobs" do
+      cluster = insert(:cluster)
+      job = insert(:sentinel_run_job, cluster: cluster)
+
+      {:ok, %{data: %{"sentinelRunJob" => found}}} = run_query("""
+        query SentinelRunJob($id: ID!) {
+          sentinelRunJob(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => job.id}, %{cluster: cluster})
+
+      assert found["id"] == job.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query SentinelRunJob($id: ID!) {
+          sentinelRunJob(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => job.id}, %{cluster: insert(:cluster)})
+    end
+  end
+
   describe "sentinelStatistics" do
     test "it can fetch sentinel statistics" do
       insert(:sentinel, status: :success)
