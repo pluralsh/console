@@ -114,6 +114,7 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_global_queries
     import_fields :public_stack_queries
     import_fields :public_agent_queries
+    import_fields :public_sentinel_queries
   end
 
   mutation do
@@ -124,6 +125,7 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_policy_mutations
     import_fields :public_stack_mutations
     import_fields :public_agent_mutations
+    import_fields :public_sentinel_mutations
   end
 
 

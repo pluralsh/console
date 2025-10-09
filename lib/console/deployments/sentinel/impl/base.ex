@@ -7,19 +7,20 @@ defmodule Console.Deployments.Sentinel.Impl.Base do
     send(pid, {:status, self(), status})
   end
 
+  def post_update(pid, status) do
+    send(pid, {:update, self(), status})
+  end
+
   def prepend(l, msg), do: [msg | l]
 
   def user_msgs(l), do: Enum.map(l, & {:user, &1})
 
   @spec ai_call(Provider.history, String.t) :: {:ok, status} | :ignore | {:error, binary}
   def ai_call(history, preface) do
-    Provider.tool_call(history, [Sentinel], preface: preface)
-    |> case do
-      {:ok, [%{sentinel_check: %{result: %Sentinel{passing: passing, reason: reason}}} | _]} ->
+    case Provider.simple_tool_call(history, Sentinel, preface: preface) do
+      {:ok, %Sentinel{passing: passing, reason: reason}} ->
         {:ok, %{status: if(passing, do: :success, else: :failed), reason: reason}}
-      {:ok, [%{sentinel_check: %{error: error}} | _]} ->
-        {:error, "AI tool call failed: #{inspect(error)}"}
-      _ -> :ignore
+      err -> err
     end
   end
 end

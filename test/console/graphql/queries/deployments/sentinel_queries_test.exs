@@ -111,6 +111,28 @@ defmodule Console.GraphQl.Deployments.SentinelQueriesTest do
     end
   end
 
+  describe "sentinelRun" do
+    test "a user can fetch a sentinel run" do
+      run = insert(:sentinel_run)
+      jobs = insert_list(3, :sentinel_run_job, sentinel_run: run)
+
+      {:ok, %{data: %{"sentinelRun" => found}}} = run_query("""
+        query SentinelRun($id: ID!) {
+          sentinelRun(id: $id) {
+            id
+            jobs(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: admin_user()})
+
+      assert found["id"] == run.id
+      assert from_connection(found["jobs"])
+             |> ids_equal(jobs)
+    end
+  end
+
   describe "sentinelStatistics" do
     test "it can fetch sentinel statistics" do
       insert(:sentinel, status: :success)
@@ -130,6 +152,25 @@ defmodule Console.GraphQl.Deployments.SentinelQueriesTest do
       assert by_status["SUCCESS"] == 1
       assert by_status["FAILED"] == 2
       assert by_status["PENDING"] == 3
+    end
+  end
+
+  describe "clusterSentinelRunJobs" do
+    test "it can fetch sentinel run jobs tied to the given cluster" do
+      cluster = insert(:cluster)
+      jobs = insert_list(3, :sentinel_run_job, cluster: cluster)
+      insert_list(2, :sentinel_run_job)
+
+      {:ok, %{data: %{"clusterSentinelRunJobs" => found}}} = run_query("""
+        query {
+          clusterSentinelRunJobs(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{cluster: cluster})
+
+      assert from_connection(found)
+             |> ids_equal(jobs)
     end
   end
 end

@@ -7516,6 +7516,7 @@ export type RootMutationType = {
   updateRunStep?: Maybe<RunStep>;
   updateScmConnection?: Maybe<ScmConnection>;
   updateSentinel?: Maybe<Sentinel>;
+  updateSentinelRunJob?: Maybe<SentinelRunJob>;
   updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
@@ -8583,6 +8584,12 @@ export type RootMutationTypeUpdateSentinelArgs = {
 };
 
 
+export type RootMutationTypeUpdateSentinelRunJobArgs = {
+  attributes?: InputMaybe<SentinelRunJobUpdateAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateServiceAccountArgs = {
   attributes: ServiceAccountAttributes;
   id: Scalars['ID']['input'];
@@ -8782,6 +8789,7 @@ export type RootQueryType = {
   clusterRegistrations?: Maybe<ClusterRegistrationConnection>;
   clusterRestore?: Maybe<ClusterRestore>;
   clusterRestores?: Maybe<ClusterRestoreConnection>;
+  clusterSentinelRunJobs?: Maybe<SentinelRunJobConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
   clusterStackRuns?: Maybe<StackRunConnection>;
@@ -8900,6 +8908,7 @@ export type RootQueryType = {
   scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
+  sentinelRun?: Maybe<SentinelRun>;
   sentinelStatistics?: Maybe<Array<Maybe<SentinelStatistic>>>;
   sentinels?: Maybe<SentinelConnection>;
   service?: Maybe<Service>;
@@ -9209,6 +9218,14 @@ export type RootQueryTypeClusterRestoresArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   clusterId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClusterSentinelRunJobsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -9959,6 +9976,11 @@ export type RootQueryTypeSentinelArgs = {
 };
 
 
+export type RootQueryTypeSentinelRunArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeSentinelStatisticsArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -10498,10 +10520,21 @@ export type SentinelCheckConfiguration = {
 };
 
 export type SentinelCheckConfigurationAttributes = {
+  /** the integration test configuration to use for this check */
+  integrationTest?: InputMaybe<SentinelCheckIntegrationTestConfigurationAttributes>;
   /** the kubernetes configuration to use for this check */
   kubernetes?: InputMaybe<SentinelCheckKubernetesConfigurationAttributes>;
   /** the log configuration to use for this check */
   log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
+};
+
+export type SentinelCheckIntegrationTestConfigurationAttributes = {
+  /** the distro to run the check on */
+  distro?: InputMaybe<ClusterDistro>;
+  /** the job to run for this check */
+  job?: InputMaybe<GateJobAttributes>;
+  /** the cluster tags to select where to run this job */
+  tags?: InputMaybe<Scalars['Json']['input']>;
 };
 
 export type SentinelCheckKubernetesConfiguration = {
@@ -10561,6 +10594,7 @@ export type SentinelCheckLogConfigurationAttributes = {
 };
 
 export enum SentinelCheckType {
+  IntegrationTest = 'INTEGRATION_TEST',
   Kubernetes = 'KUBERNETES',
   Log = 'LOG'
 }
@@ -10582,6 +10616,7 @@ export type SentinelRun = {
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  jobs?: Maybe<SentinelRunJobConnection>;
   /** the results of the run */
   results?: Maybe<Array<Maybe<SentinelRunResult>>>;
   /** the sentinel that was run */
@@ -10589,6 +10624,14 @@ export type SentinelRun = {
   /** the status of the run */
   status: SentinelRunStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SentinelRunJobsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SentinelRunConnection = {
@@ -10603,14 +10646,77 @@ export type SentinelRunEdge = {
   node?: Maybe<SentinelRun>;
 };
 
+export type SentinelRunJob = {
+  __typename?: 'SentinelRunJob';
+  /** the check that was run */
+  check?: Maybe<Scalars['String']['output']>;
+  /** the cluster that the job was run on */
+  cluster?: Maybe<Cluster>;
+  /** the format of the job */
+  format: SentinelRunJobFormat;
+  /** the id of the job */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the job that was run */
+  job?: Maybe<JobGateSpec>;
+  /** the output of the job */
+  output?: Maybe<Scalars['String']['output']>;
+  /** the reference to the job that was run */
+  reference?: Maybe<JobReference>;
+  /** the run that the job was run on */
+  sentinelRun?: Maybe<SentinelRun>;
+  /** the status of the job */
+  status: SentinelRunJobStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SentinelRunJobConnection = {
+  __typename?: 'SentinelRunJobConnection';
+  edges?: Maybe<Array<Maybe<SentinelRunJobEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type SentinelRunJobEdge = {
+  __typename?: 'SentinelRunJobEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<SentinelRunJob>;
+};
+
+export enum SentinelRunJobFormat {
+  Junit = 'JUNIT',
+  Plaintext = 'PLAINTEXT'
+}
+
+export enum SentinelRunJobStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Success = 'SUCCESS'
+}
+
+export type SentinelRunJobUpdateAttributes = {
+  /** the output of the job */
+  output?: InputMaybe<Scalars['String']['input']>;
+  /** the reference to the job that was run */
+  reference?: InputMaybe<NamespacedName>;
+  /** the status of the job */
+  status?: InputMaybe<SentinelRunJobStatus>;
+};
+
 export type SentinelRunResult = {
   __typename?: 'SentinelRunResult';
+  /** the number of jobs that failed */
+  failedCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of jobs that were run */
+  jobCount?: Maybe<Scalars['Int']['output']>;
   /** the name of the check */
   name?: Maybe<Scalars['String']['output']>;
   /** the reason for the result */
   reason?: Maybe<Scalars['String']['output']>;
   /** the status of the result */
   status: SentinelRunStatus;
+  /** the number of jobs that were successful */
+  successfulCount?: Maybe<Scalars['Int']['output']>;
 };
 
 export enum SentinelRunStatus {
