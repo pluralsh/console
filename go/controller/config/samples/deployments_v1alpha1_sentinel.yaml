@@ -1,4 +1,20 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: existing
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terratest-suite
+  namespace: default
+spec:
+  url: https://github.com/pluralsh/terratest-suite.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: Sentinel
 metadata:
   labels:
@@ -11,3 +27,28 @@ metadata:
 spec:
   name: test
   description: "test sentinel description"
+  checks:
+    - type: LOG
+      name: test-log
+      configuration:
+        log:
+          query: "*"
+          duration: 10m
+          clusterRef:
+            name: existing
+            namespace: default
+    - type: KUBERNETES
+      name: test-kubernetes
+      configuration:
+        kubernetes:
+          group: apps
+          version: v1
+          kind: Deployment
+          name: nginx-deployment
+          namespace: default
+          clusterRef:
+            name: existing
+            namespace: default
+  repositoryRef:
+    name: terratest-suite
+    namespace: default
