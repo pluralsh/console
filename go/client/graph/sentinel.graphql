@@ -1,3 +1,26 @@
+query ListClusterSentinelRunJobs($after: String, $first: Int, $before: String, $last: Int) {
+    clusterSentinelRunJobs(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            node {
+                ...SentinelRunJobFragment
+            }
+        }
+    }
+}
+
+query GetClusterSentinelRunJob($id: ID!) {
+    sentinelRunJob(id: $id) {
+        ...SentinelRunJobFragment
+    }
+}
+
+query GetSentinelRun($id: ID!) {
+    sentinelRun(id: $id) {
+        ...SentinelRunFragment
+    }
+}
+
 mutation CreateSentinel($attributes: SentinelAttributes) {
     createSentinel(attributes: $attributes) {
         ...SentinelFragment
@@ -19,6 +42,35 @@ mutation DeleteSentinel($id: ID!) {
 query GetSentinel($id: ID!) {
     sentinel(id: $id) {
         ...SentinelFragment
+    }
+}
+
+fragment SentinelRunJobFragment on SentinelRunJob {
+    id
+    status
+    format
+    check
+    output
+    job {
+        ...JobSpecFragment
+    }
+    reference {
+        name
+        namespace
+    }
+    sentinelRun {
+        ...SentinelRunFragment
+    }
+    cluster {
+        id
+    }
+}
+
+fragment SentinelRunFragment on SentinelRun {
+    id
+    status
+    sentinel {
+        id
     }
 }
 
