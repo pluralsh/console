@@ -21,6 +21,12 @@ query GetSentinelRun($id: ID!) {
     }
 }
 
+mutation UpdateSentinelRunJobStatus($id: ID!, $attributes: SentinelRunJobUpdateAttributes) {
+    updateSentinelRunJob(id: $id, attributes: $attributes) {
+        ...SentinelRunJobFragment
+    }
+}
+
 mutation CreateSentinel($attributes: SentinelAttributes) {
     createSentinel(attributes: $attributes) {
         ...SentinelFragment
