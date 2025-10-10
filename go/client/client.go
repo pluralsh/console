@@ -212,7 +212,7 @@ type ConsoleClient interface {
 	ListProviders(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListProviders, error)
 	UpdateRbac(ctx context.Context, rbac RbacAttributes, serviceID *string, clusterID *string, providerID *string, interceptors ...clientv2.RequestInterceptor) (*UpdateRbac, error)
 	ListClusterSentinelRunJobs(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterSentinelRunJobs, error)
-	GetClusterSentinelRunJob(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterSentinelRunJob, error)
+	GetSentinelRunJob(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelRunJob, error)
 	GetSentinelRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelRun, error)
 	UpdateSentinelRunJobStatus(ctx context.Context, id string, attributes *SentinelRunJobUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinelRunJobStatus, error)
 	CreateSentinel(ctx context.Context, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateSentinel, error)
@@ -17767,78 +17767,78 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs) GetEdges() []*ListCl
 	return t.Edges
 }
 
-type GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Name
 }
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Value
 }
 
-type GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
 	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
 	Secret    string "json:\"secret\" graphql:\"secret\""
 }
 
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.ConfigMap
 }
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
 
-type GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference struct {
 	Name      string "json:\"name\" graphql:\"name\""
 	Namespace string "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference) GetName() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference) GetName() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference{}
 	}
 	return t.Name
 }
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference) GetNamespace() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference) GetNamespace() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference{}
 	}
 	return t.Namespace
 }
 
-type GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
 
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel) GetID() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel) GetID() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Sentinel{}
 	}
 	return t.ID
 }
 
-type GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
 
-func (t *GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetID() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetID() string {
 	if t == nil {
-		t = &GetClusterSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
 	}
 	return t.ID
 }
@@ -22399,13 +22399,13 @@ func (t *ListClusterSentinelRunJobs) GetClusterSentinelRunJobs() *ListClusterSen
 	return t.ClusterSentinelRunJobs
 }
 
-type GetClusterSentinelRunJob struct {
+type GetSentinelRunJob struct {
 	SentinelRunJob *SentinelRunJobFragment "json:\"sentinelRunJob,omitempty\" graphql:\"sentinelRunJob\""
 }
 
-func (t *GetClusterSentinelRunJob) GetSentinelRunJob() *SentinelRunJobFragment {
+func (t *GetSentinelRunJob) GetSentinelRunJob() *SentinelRunJobFragment {
 	if t == nil {
-		t = &GetClusterSentinelRunJob{}
+		t = &GetSentinelRunJob{}
 	}
 	return t.SentinelRunJob
 }
@@ -37667,7 +37667,7 @@ func (c *Client) ListClusterSentinelRunJobs(ctx context.Context, after *string, 
 	return &res, nil
 }
 
-const GetClusterSentinelRunJobDocument = `query GetClusterSentinelRunJob ($id: ID!) {
+const GetSentinelRunJobDocument = `query GetSentinelRunJob ($id: ID!) {
 	sentinelRunJob(id: $id) {
 		... SentinelRunJobFragment
 	}
@@ -37738,13 +37738,13 @@ fragment SentinelRunFragment on SentinelRun {
 }
 `
 
-func (c *Client) GetClusterSentinelRunJob(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterSentinelRunJob, error) {
+func (c *Client) GetSentinelRunJob(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelRunJob, error) {
 	vars := map[string]any{
 		"id": id,
 	}
 
-	var res GetClusterSentinelRunJob
-	if err := c.Client.Post(ctx, "GetClusterSentinelRunJob", GetClusterSentinelRunJobDocument, &res, vars, interceptors...); err != nil {
+	var res GetSentinelRunJob
+	if err := c.Client.Post(ctx, "GetSentinelRunJob", GetSentinelRunJobDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -42695,7 +42695,7 @@ var DocumentOperationNames = map[string]string{
 	ListProvidersDocument:                             "ListProviders",
 	UpdateRbacDocument:                                "UpdateRbac",
 	ListClusterSentinelRunJobsDocument:                "ListClusterSentinelRunJobs",
-	GetClusterSentinelRunJobDocument:                  "GetClusterSentinelRunJob",
+	GetSentinelRunJobDocument:                         "GetSentinelRunJob",
 	GetSentinelRunDocument:                            "GetSentinelRun",
 	UpdateSentinelRunJobStatusDocument:                "UpdateSentinelRunJobStatus",
 	CreateSentinelDocument:                            "CreateSentinel",

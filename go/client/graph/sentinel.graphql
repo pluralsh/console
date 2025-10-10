@@ -9,7 +9,7 @@ query ListClusterSentinelRunJobs($after: String, $first: Int, $before: String, $
     }
 }
 
-query GetClusterSentinelRunJob($id: ID!) {
+query GetSentinelRunJob($id: ID!) {
     sentinelRunJob(id: $id) {
         ...SentinelRunJobFragment
     }
