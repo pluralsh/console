@@ -27,6 +27,8 @@ defimpl Console.PubSub.Auditable, for: [
 ] do
   alias Console.Schema.{Audit, User, PipelineGate}
 
+  def audit(%{actor: %User{service_account: true}}), do: :ok
+  def audit(%{actor: %User{email: "console@plural.sh"}}), do: :ok
   def audit(%{item: item, actor: %User{} = user}) do
     with {type, action} <- details(@for) do
       %Audit{
