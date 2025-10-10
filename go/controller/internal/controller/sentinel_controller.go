@@ -213,7 +213,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					Namespace: check.Configuration.Kubernetes.Namespace,
 				}
 				helper := utils.NewConsoleHelper(ctx, r.Client)
-				clusterID, err := helper.IDFromRef(check.Configuration.Log.ClusterRef, &v1alpha1.Cluster{})
+				clusterID, err := helper.IDFromRef(&check.Configuration.Kubernetes.ClusterRef, &v1alpha1.Cluster{})
 				if err != nil {
 					return nil, err
 				}
