@@ -1,13 +1,13 @@
 import {
   Button,
   LinkoutIcon,
+  MagicWandIcon,
   Markdown,
   PrOpenIcon,
   Toast,
 } from '@pluralsh/design-system'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import {
-  ComponentPropsWithRef,
   Dispatch,
   ReactNode,
   SetStateAction,
@@ -30,14 +30,7 @@ import { GqlError } from '../../utils/Alert.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
-import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
-
-type AISuggestFixProps = {
-  insight: Nullable<AiInsightFragment>
-  buttonProps?: ComponentPropsWithRef<typeof AISuggestFixButton>
-  iconOnly?: boolean
-}
 
 function fixMessage(fix: string): ChatMessage {
   return {
@@ -138,7 +131,7 @@ function FixPr({
   )
 }
 
-function AISuggestFix({ insight, buttonProps }: AISuggestFixProps) {
+function AISuggestFix({ insight }: { insight: Nullable<AiInsightFragment> }) {
   const settings = useDeploymentSettings()
   const ref = useRef<HTMLDivElement>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -179,10 +172,12 @@ function AISuggestFix({ insight, buttonProps }: AISuggestFixProps) {
 
   return (
     <div css={{ position: 'relative' }}>
-      <AISuggestFixButton
-        {...buttonProps}
+      <Button
+        startIcon={<MagicWandIcon />}
         onClick={showPanel}
-      />
+      >
+        Suggest a fix
+      </Button>
       <AIPanel
         ref={ref}
         open={open}

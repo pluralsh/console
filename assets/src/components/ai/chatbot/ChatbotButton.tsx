@@ -3,8 +3,6 @@ import {
   Button,
   ButtonProps,
   ChatOutlineIcon,
-  IconFrame,
-  Spinner,
 } from '@pluralsh/design-system'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
@@ -54,7 +52,7 @@ export function ChatWithAIButton({
   flowId,
   summaryText = 'Further questions about an insight from Plural AI',
   bodyText: bodyTextProp = 'Chat with AI',
-  iconOnly = false,
+  alwaysShow = false,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
@@ -62,7 +60,7 @@ export function ChatWithAIButton({
   flowId?: Nullable<string>
   summaryText?: string
   bodyText?: string
-  iconOnly?: boolean
+  alwaysShow?: boolean
 } & ButtonProps) {
   const {
     createNewThread,
@@ -81,27 +79,10 @@ export function ChatWithAIButton({
       messages: messages || [],
     })
   }
-  return iconOnly ? (
-    <IconFrame
-      clickable
-      {...(aiEnabled
-        ? {
-            onClick: handleClick,
-            icon: loading ? <Spinner /> : <ChatOutlineIcon />,
-            to: '',
-          }
-        : {
-            as: Link,
-            to: AI_ABS_PATH,
-            onClick: closeChatbot,
-            icon: <ArrowTopRightIcon />,
-          })}
-      tooltip
-      textValue={bodyText}
-      {...props}
-      type="secondary"
-    />
-  ) : (
+
+  if (!alwaysShow && !insightId && !flowId) return null
+
+  return (
     <Button
       loading={loading}
       {...(aiEnabled

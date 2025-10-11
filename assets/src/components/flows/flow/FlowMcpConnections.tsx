@@ -11,7 +11,7 @@ import {
   ColConfirm,
   ColInfo,
   McpTableAction,
-} from 'components/ai/McpServerTableCols'
+} from 'components/ai/mcp/McpServerTableCols'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import {

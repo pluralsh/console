@@ -65,14 +65,14 @@ export function AIAgent() {
     )
   }
 
-  const tableLoading = !data && loading
   return (
     <Table
       rowBg="raised"
       hideHeader
       fullHeightWrap
       virtualizeRows
-      loading={tableLoading}
+      padCells={false}
+      loading={!data && loading}
       data={agentSessions}
       columns={columns}
       hasNextPage={pageInfo?.hasNextPage}
@@ -80,11 +80,6 @@ export function AIAgent() {
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No agent sessions found.' }}
-      // hacky, should update logic in DS
-      {...(tableLoading && {
-        '& td div, & td span': { width: '100%', maxWidth: '100%' },
-      })}
-      padCells={tableLoading}
     />
   )
 }
