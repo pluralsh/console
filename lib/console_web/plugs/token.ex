@@ -28,7 +28,7 @@ defmodule ConsoleWeb.Plugs.Token do
   def fetch_resource(:user, token, {conn, opts}) do
     key = Guardian.Plug.Pipeline.fetch_key(conn, opts)
     with %User{token: token} = user <- Users.get_by_token(token) do
-      broadcast(token)
+      broadcast(user, token)
       conn
       |> Guardian.Plug.put_current_token(token.token, key: key)
       |> Guardian.Plug.put_current_resource(Console.Services.Rbac.preload(user))
@@ -54,7 +54,9 @@ defmodule ConsoleWeb.Plugs.Token do
     end
   end
 
-  def broadcast(token) do
+  def broadcast(%User{service_account: true}, _), do: :ok
+  def broadcast(%User{email: "console@plural.sh"}, _), do: :ok
+  def broadcast(_, token) do
     Console.PubSub.Broadcaster.notify(%Console.PubSub.AccessTokenUsage{
       item: token,
       context: Console.Services.Audits.context()
