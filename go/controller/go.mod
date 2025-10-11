@@ -10,8 +10,8 @@ require (
 	github.com/onsi/gomega v1.36.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pluralsh/console/go/client v1.48.0
-	github.com/pluralsh/polly v0.2.0
-	github.com/samber/lo v1.49.1
+	github.com/pluralsh/polly v0.3.4
+	github.com/samber/lo v1.50.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/time v0.10.0
 	k8s.io/api v0.33.3
@@ -24,7 +24,7 @@ require (
 )
 
 require (
-	dario.cat/mergo v1.0.1 // indirect
+	dario.cat/mergo v1.0.2 // indirect
 	github.com/99designs/gqlgen v0.17.73 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
