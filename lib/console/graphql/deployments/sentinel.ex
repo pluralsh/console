@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :description,   :string, description: "the description of the sentinel"
     field :repository_id, :id, description: "the repository to use for this sentinel"
     field :project_id,    :id, description: "the project to use for this sentinel"
-    field :git,           :git_attributes, description: "the git repository to use for this sentinel"
+    field :git,           :git_ref_attributes, description: "the git repository to use for this sentinel"
     field :checks,        list_of(:sentinel_check_attributes), description: "the checks to run for this sentinel"
   end
 
