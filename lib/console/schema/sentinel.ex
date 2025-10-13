@@ -17,7 +17,7 @@ defmodule Console.Schema.Sentinel do
 
   schema "sentinels" do
     field :name,        :string
-    field :status,      SentinelRun.Status
+    field :status,      SentinelRun.Status, default: :pending
     field :description, :string
     field :last_run_at, :utc_datetime_usec
 
@@ -102,7 +102,7 @@ defmodule Console.Schema.Sentinel do
     |> cast_embed(:git)
     |> cast_embed(:checks, with: &check_changeset/2)
     |> validate_length(:name, max: 255)
-    |> validate_required([:name])
+    |> validate_required([:name, :status])
   end
 
   defp check_changeset(model, attrs) do

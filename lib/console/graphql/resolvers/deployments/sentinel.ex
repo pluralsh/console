@@ -27,6 +27,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
     |> maybe_search(Sentinel, args)
     |> Sentinel.statuses()
     |> Console.Repo.all()
+    |> Enum.filter(& !is_nil(&1[:status]))
     |> ok()
   end
 
