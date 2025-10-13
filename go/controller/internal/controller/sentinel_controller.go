@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -218,6 +219,25 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					return nil, err
 				}
 				configuration.Kubernetes.ClusterID = lo.FromPtr(clusterID)
+			}
+			if check.Configuration.IntegrationTest != nil {
+				configuration.IntegrationTest = &console.SentinelCheckIntegrationTestConfigurationAttributes{
+					Distro: check.Configuration.IntegrationTest.Distro,
+				}
+				if check.Configuration.IntegrationTest.Job != nil {
+					jobSpec, err := gateJobAttributes(check.Configuration.IntegrationTest.Job)
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.Job = jobSpec
+				}
+				if len(check.Configuration.IntegrationTest.Tags) > 0 {
+					jsonTags, err := json.Marshal(check.Configuration.IntegrationTest.Tags)
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.Tags = lo.ToPtr(string(jsonTags))
+				}
 			}
 			checks[i].Configuration = configuration
 		}

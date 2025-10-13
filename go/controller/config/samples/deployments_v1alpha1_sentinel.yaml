@@ -28,27 +28,21 @@ spec:
   name: test
   description: "test sentinel description"
   checks:
-    - type: LOG
-      name: test-log
+    - type: INTEGRATION_TEST
+      name: test-integration
       configuration:
-        log:
-          query: "*"
-          duration: 10m
-          clusterRef:
-            name: existing
+        integrationTest:
+          distro: GENERIC
+          tags:
+            test: "test"
+          jobSpec:
             namespace: default
-    - type: KUBERNETES
-      name: test-kubernetes
-      configuration:
-        kubernetes:
-          group: apps
-          version: v1
-          kind: Deployment
-          name: nginx-deployment
-          namespace: default
-          clusterRef:
-            name: existing
-            namespace: default
+            containers:
+              - image: alpine:latest
+                env:
+                  - name: MY_ENV_VAR
+                    value: "Hello from Kubernetes!"
+                args: [ "sh", "-c", "echo The value of MY_ENV_VAR is: $MY_ENV_VAR" ]
   repositoryRef:
     name: terratest-suite
     namespace: default
