@@ -1958,6 +1958,7 @@ inline job definition with containers, resources, and Kubernetes-native configur
 _Appears in:_
 - [GateSpec](#gatespec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [StackSettings](#stacksettings)
 
 | Field | Description | Default | Validation |
@@ -3793,7 +3794,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[SentinelCheckType](#sentinelchecktype)_ | Type the type of check to run. |  | Enum: [LOG KUBERNETES] <br /> |
+| `type` _[SentinelCheckType](#sentinelchecktype)_ | Type the type of check to run. |  | Enum: [LOG KUBERNETES INTEGRATION_TEST] <br /> |
 | `name` _string_ | Name the name of the check. |  |  |
 | `ruleFile` _string_ | RuleFile the rule file to use for this check. |  |  |
 | `configuration` _[SentinelCheckConfiguration](#sentinelcheckconfiguration)_ | Configuration the configuration to use for this check. |  |  |
@@ -3814,6 +3815,25 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `log` _[SentinelCheckLogConfiguration](#sentinelchecklogconfiguration)_ | the log configuration to use for this check |  |  |
 | `kubernetes` _[SentinelCheckKubernetesConfiguration](#sentinelcheckkubernetesconfiguration)_ | the kubernetes configuration to use for this check |  |  |
+| `integrationTest` _[SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)_ | the integration test configuration to use for this check |  |  |
+
+
+#### SentinelCheckIntegrationTestConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckConfiguration](#sentinelcheckconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
+| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
