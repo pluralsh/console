@@ -176,7 +176,7 @@ defmodule Console.AI.OpenAI do
         stream: true,
         tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
       })
-      # |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
       |> Map.merge(reasoning_details(model))
       |> Console.drop_nils()
       |> Jason.encode!()
@@ -195,7 +195,7 @@ defmodule Console.AI.OpenAI do
       messages: history,
       tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
     })
-    # |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
     |> Map.merge(reasoning_details(model))
     |> Jason.encode!()
 

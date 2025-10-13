@@ -91,7 +91,7 @@ defmodule Console.AI.Anthropic do
         messages: history,
         max_tokens: @max_tokens,
         stream: true,
-        tool_choice: (if !Enum.empty?(tools), do: %{tool_choice: :any}, else: nil),
+        tool_choice: %{type: :auto},
         tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
       }), json_headers(token), [stream_to: self(), async: :once] ++ @options)
     end, stream)
@@ -106,7 +106,7 @@ defmodule Console.AI.Anthropic do
       system: system,
       messages: history,
       max_tokens: @max_tokens,
-      tool_choice: (if !Enum.empty?(tools), do: %{tool_choice: :any}, else: nil),
+      tool_choice: %{type: :auto},
       tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
     })), json_headers(token), @options)
     |> handle_response(MessageResponse.spec())
