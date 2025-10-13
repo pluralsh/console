@@ -63,7 +63,7 @@ type Git struct {
 
 type SentinelCheck struct {
 	// Type the type of check to run.
-	//+kubebuilder:validation:Enum=LOG;KUBERNETES
+	//+kubebuilder:validation:Enum=LOG;KUBERNETES;INTEGRATION_TEST
 	Type console.SentinelCheckType `json:"type"`
 	// Name the name of the check.
 	Name string `json:"name"`
@@ -78,6 +78,19 @@ type SentinelCheckConfiguration struct {
 	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfiguration `json:"integrationTest,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfiguration struct {
+	// the job to run for this check
+	Job *JobSpec `json:"jobSpec,omitempty"`
+	// the distro to run the check on
+	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
+	Distro *console.ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags map[string]string `json:"tags,omitempty"`
 }
 
 type SentinelCheckLogConfiguration struct {
