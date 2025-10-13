@@ -1492,30 +1492,6 @@ _Appears in:_
 
 
 
-#### Git
-
-
-
-
-
-
-
-_Appears in:_
-- [SentinelSpec](#sentinelspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `url` _string_ | URL the url of this repository. |  |  |
-| `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PrivateKeyRef reference to a secret containing ssh private key. |  |  |
-| `passphraseRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PassphraseRef reference to a secret containing passphrase for the private key. |  |  |
-| `usernameRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | UsernameRef reference to a secret containing http username. |  |  |
-| `passwordRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordRef reference to a secret containing http password. |  |  |
-| `httpsPath` _string_ | HTTPSPath a manually supplied https path for non standard git setups. |  |  |
-| `urlFormat` _string_ | URLFormat custom URL format, e.g. \{url\}/tree/\{ref\}/\{folder\}. |  |  |
-| `connectionId` _string_ | ConnectionID id of a scm connection to use for authentication. |  |  |
-| `decrypt` _boolean_ | Decrypt whether to run plural crypto on this repo. |  |  |
-
-
 #### GitHealth
 
 _Underlying type:_ _string_
@@ -1545,6 +1521,7 @@ _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
 - [ServiceTemplate](#servicetemplate)
@@ -3894,7 +3871,7 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
-| `git` _[Git](#git)_ | Git the git repository to use for this sentinel. |  |  |
+| `git` _[GitRef](#gitref)_ | Git the git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
 
 

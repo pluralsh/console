@@ -10481,7 +10481,7 @@ export type SentinelAttributes = {
   /** the description of the sentinel */
   description?: InputMaybe<Scalars['String']['input']>;
   /** the git repository to use for this sentinel */
-  git?: InputMaybe<GitAttributes>;
+  git?: InputMaybe<GitRefAttributes>;
   /** the name of the sentinel */
   name?: InputMaybe<Scalars['String']['input']>;
   /** the project to use for this sentinel */

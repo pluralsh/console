@@ -6280,7 +6280,7 @@ type SentinelAttributes struct {
 	// the project to use for this sentinel
 	ProjectID *string `json:"projectId,omitempty"`
 	// the git repository to use for this sentinel
-	Git *GitAttributes `json:"git,omitempty"`
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// the checks to run for this sentinel
 	Checks []*SentinelCheckAttributes `json:"checks,omitempty"`
 }

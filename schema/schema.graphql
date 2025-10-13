@@ -1662,7 +1662,7 @@ input SentinelAttributes {
   projectId: ID
 
   "the git repository to use for this sentinel"
-  git: GitAttributes
+  git: GitRefAttributes
 
   "the checks to run for this sentinel"
   checks: [SentinelCheckAttributes]

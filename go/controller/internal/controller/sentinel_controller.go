@@ -246,45 +246,13 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 	return checks, nil
 }
 
-func (r *SentinelReconciler) getGitAttributes(ctx context.Context, sentinel *v1alpha1.Sentinel) (*console.GitAttributes, error) {
+func (r *SentinelReconciler) getGitAttributes(ctx context.Context, sentinel *v1alpha1.Sentinel) (*console.GitRefAttributes, error) {
 	if sentinel.Spec.Git == nil {
 		return nil, nil
 	}
-	git := &console.GitAttributes{
-		URL:          sentinel.Spec.Git.URL,
-		Decrypt:      sentinel.Spec.Git.Decrypt,
-		HTTPSPath:    sentinel.Spec.Git.HTTPSPath,
-		URLFormat:    sentinel.Spec.Git.URLFormat,
-		ConnectionID: sentinel.Spec.Git.ConnectionID,
-	}
-	if sentinel.Spec.Git.PrivateKeyRef != nil {
-		privateKey, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PrivateKeyRef)
-		if err != nil {
-			return nil, err
-		}
-		git.PrivateKey = lo.ToPtr(privateKey)
-	}
-	if sentinel.Spec.Git.PassphraseRef != nil {
-		passphrase, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PassphraseRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Passphrase = lo.ToPtr(passphrase)
-	}
-	if sentinel.Spec.Git.UsernameRef != nil {
-		username, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.UsernameRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Username = lo.ToPtr(username)
-	}
-	if sentinel.Spec.Git.PasswordRef != nil {
-		password, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PasswordRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Password = lo.ToPtr(password)
-
+	git := &console.GitRefAttributes{
+		Ref:    sentinel.Spec.Git.Ref,
+		Folder: sentinel.Spec.Git.Folder,
 	}
 
 	return git, nil

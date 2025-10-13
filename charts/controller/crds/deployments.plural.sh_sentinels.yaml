@@ -9835,126 +9835,24 @@ spec:
                   what this Sentinel.
                 type: string
               git:
-                description: Git the git repository to use for this sentinel.
+                description: Git the git location to use for this sentinel.
                 properties:
-                  connectionId:
-                    description: ConnectionID id of a scm connection to use for authentication.
+                  files:
+                    description: Optional files to add to the manifests for this service
+                    items:
+                      type: string
+                    type: array
+                  folder:
+                    description: Folder is the folder in the Git repository where
+                      the manifests are located.
                     type: string
-                  decrypt:
-                    description: Decrypt whether to run plural crypto on this repo.
-                    type: boolean
-                  httpsPath:
-                    description: HTTPSPath a manually supplied https path for non
-                      standard git setups.
+                  ref:
+                    description: Ref is the Git reference (branch, tag, or commit)
+                      to use.
                     type: string
-                  passphraseRef:
-                    description: PassphraseRef reference to a secret containing passphrase
-                      for the private key.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  passwordRef:
-                    description: PasswordRef reference to a secret containing http
-                      password.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  privateKeyRef:
-                    description: PrivateKeyRef reference to a secret containing ssh
-                      private key.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  url:
-                    description: URL the url of this repository.
-                    type: string
-                  urlFormat:
-                    description: URLFormat custom URL format, e.g. {url}/tree/{ref}/{folder}.
-                    type: string
-                  usernameRef:
-                    description: UsernameRef reference to a secret containing http
-                      username.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
                 required:
-                - url
+                - folder
+                - ref
                 type: object
               name:
                 description: |-

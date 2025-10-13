@@ -68,9 +68,9 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 							Name:      projectName,
 							Namespace: namespace,
 						},
-						Git: &v1alpha1.Git{
-							URL:           repoUrl,
-							PrivateKeyRef: &v1.SecretKeySelector{LocalObjectReference: v1.LocalObjectReference{Name: secretName}, Key: "key"},
+						Git: &v1alpha1.GitRef{
+							Ref:    "main",
+							Folder: "sentinels/test",
 						},
 						Checks: []v1alpha1.SentinelCheck{
 							{
