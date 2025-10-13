@@ -755,7 +755,7 @@ type AzureOpenAISettings struct {
 }
 
 type BedrockSettings struct {
-	// ModelID is the AWS Bedrock Model ID to use.
+	// ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported.
 	//
 	// +kubebuilder:validation:Required
 	ModelID string `json:"modelId"`
@@ -783,7 +783,7 @@ type BedrockSettings struct {
 }
 
 type VertexSettings struct {
-	// Model is the Vertex AI model to use
+	// Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`

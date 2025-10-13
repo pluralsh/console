@@ -249,7 +249,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use. |  | Required: \{\} <br /> |
+| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Required: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
@@ -4596,7 +4596,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `model` _string_ | Model is the Vertex AI model to use |  | Optional: \{\} <br /> |
+| `model` _string_ | Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |

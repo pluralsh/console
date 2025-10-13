@@ -79,12 +79,12 @@ defmodule Console.AI.OpenAI do
 
   def new(opts) do
     %__MODULE__{
-      access_key: opts.access_token,
-      model: opts.model,
-      tool_model: opts.tool_model,
-      base_url: opts.base_url,
-      embedding_model: opts.embedding_model,
-      azure_token: Map.get(opts, :azure_token, nil),
+      access_key: Map.get(opts, :access_token),
+      model: Map.get(opts, :model),
+      tool_model: Map.get(opts, :tool_model),
+      base_url: Map.get(opts, :base_url),
+      embedding_model: Map.get(opts, :embedding_model),
+      azure_token: Map.get(opts, :azure_token),
       stream: Stream.stream()
     }
   end
@@ -170,12 +170,13 @@ defmodule Console.AI.OpenAI do
       all   = tools(opts)
       model = model(openai)
 
-      body = Map.merge(%{
+      body = Console.drop_nils(%{
         model: model,
         messages: history,
         stream: true,
         tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
-      }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      })
+      # |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
       |> Map.merge(reasoning_details(model))
       |> Console.drop_nils()
       |> Jason.encode!()
@@ -194,7 +195,7 @@ defmodule Console.AI.OpenAI do
       messages: history,
       tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
     })
-    |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+    # |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
     |> Map.merge(reasoning_details(model))
     |> Jason.encode!()
 
@@ -263,9 +264,11 @@ defmodule Console.AI.OpenAI do
   defp tool_role(:system, model) do
     case model do
       "gpt-4.1" <> _ -> :developer
-      "gpt-4" <> _ -> :system
-      "gpt-3" <> _ -> :system
-      _ -> :developer
+      "gpt-4" <> _   -> :system
+      "gpt-3" <> _   -> :system
+      "gpt" <> _     -> :developer
+      "o3" <> _      -> :developer
+      _ -> :system
     end
   end
   defp tool_role(r, _), do: r

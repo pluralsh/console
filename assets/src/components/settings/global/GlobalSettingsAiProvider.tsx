@@ -197,9 +197,13 @@ export function GlobalSettingsAiProvider() {
                 setProvider(v as AiProvider)
               }}
             >
-              <ListBoxItem
+              {/* <ListBoxItem
                 key={AiProvider.Bedrock}
                 label={'Amazon Bedrock'}
+              /> */}
+              <ListBoxItem
+                key={AiProvider.Openai}
+                label={'OpenAI'}
               />
               <ListBoxItem
                 key={AiProvider.Anthropic}
@@ -212,10 +216,6 @@ export function GlobalSettingsAiProvider() {
               <ListBoxItem
                 key={AiProvider.Ollama}
                 label={'Ollama'}
-              />
-              <ListBoxItem
-                key={AiProvider.Openai}
-                label={'OpenAI'}
               />
               <ListBoxItem
                 key={AiProvider.Vertex}
