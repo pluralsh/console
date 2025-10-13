@@ -15,7 +15,6 @@ fragment PrAutomation on PrAutomation {
   }
   repository {
     url
-    refs
   }
   role
   documentation

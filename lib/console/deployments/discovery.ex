@@ -12,20 +12,22 @@ defmodule Console.Deployments.Discovery do
   @concurrency 20
 
   def discovery(%Kazan.Server{} = server) do
-    {:ok, gvs} = fetch_group_versions(server)
-
-    Task.async_stream(gvs, fn group_version ->
-      %Kazan.Request{method: "get", path: "/apis/#{group_version}", content_type: @content_type}
-      |> Kazan.run(server: server)
-      |> case do
-        {:ok, %{resources: resources}} -> {:ok, gather_resources(group_version, resources)}
-        err -> err
-      end
-    end, max_concurrency: @concurrency)
-    |> Enum.reduce(get_core_apis(server), fn
-      {:ok, {:ok, results}}, acc -> Enum.into(results, acc)
-      _, acc -> acc
-    end)
+    with {:ok, gvs} <- fetch_group_versions(server) do
+      Task.async_stream(gvs, fn group_version ->
+        %Kazan.Request{method: "get", path: "/apis/#{group_version}", content_type: @content_type}
+        |> Kazan.run(server: server)
+        |> case do
+          {:ok, %{resources: resources}} -> {:ok, gather_resources(group_version, resources)}
+          err -> err
+        end
+      end, max_concurrency: @concurrency)
+      |> Enum.reduce(get_core_apis(server), fn
+        {:ok, {:ok, results}}, acc -> Enum.into(results, acc)
+        _, acc -> acc
+      end)
+    else
+      _ -> %{}
+    end
   end
 
   def api_spec(%Kazan.Server{} = server, group, version) do
