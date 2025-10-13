@@ -116,6 +116,17 @@ fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
     kubernetes{
         ...SentinelCheckKubernetesConfigurationFragment
     }
+    integrationTest {
+        ...SentinelCheckIntegrationTestConfigurationFragment
+    }
+}
+
+fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
+    distro
+    tags
+    job {
+        ...JobSpecFragment
+    }
 }
 
 fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
