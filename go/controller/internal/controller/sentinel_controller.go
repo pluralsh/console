@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -158,11 +159,7 @@ func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.
 	}
 	attr.Checks = checkAttr
 
-	gitAttr, err := r.getGitAttributes(ctx, sentinel)
-	if err != nil {
-		return nil, err
-	}
-	attr.Git = gitAttr
+	attr.Git = r.getGitAttributes(sentinel)
 
 	return attr, nil
 }
@@ -213,11 +210,30 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					Namespace: check.Configuration.Kubernetes.Namespace,
 				}
 				helper := utils.NewConsoleHelper(ctx, r.Client)
-				clusterID, err := helper.IDFromRef(check.Configuration.Log.ClusterRef, &v1alpha1.Cluster{})
+				clusterID, err := helper.IDFromRef(&check.Configuration.Kubernetes.ClusterRef, &v1alpha1.Cluster{})
 				if err != nil {
 					return nil, err
 				}
 				configuration.Kubernetes.ClusterID = lo.FromPtr(clusterID)
+			}
+			if check.Configuration.IntegrationTest != nil {
+				configuration.IntegrationTest = &console.SentinelCheckIntegrationTestConfigurationAttributes{
+					Distro: check.Configuration.IntegrationTest.Distro,
+				}
+				if check.Configuration.IntegrationTest.Job != nil {
+					jobSpec, err := gateJobAttributes(check.Configuration.IntegrationTest.Job)
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.Job = jobSpec
+				}
+				if len(check.Configuration.IntegrationTest.Tags) > 0 {
+					jsonTags, err := json.Marshal(check.Configuration.IntegrationTest.Tags)
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.Tags = lo.ToPtr(string(jsonTags))
+				}
 			}
 			checks[i].Configuration = configuration
 		}
@@ -226,59 +242,17 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 	return checks, nil
 }
 
-func (r *SentinelReconciler) getGitAttributes(ctx context.Context, sentinel *v1alpha1.Sentinel) (*console.GitAttributes, error) {
+func (r *SentinelReconciler) getGitAttributes(sentinel *v1alpha1.Sentinel) *console.GitRefAttributes {
 	if sentinel.Spec.Git == nil {
-		return nil, nil
-	}
-	git := &console.GitAttributes{
-		URL:          sentinel.Spec.Git.URL,
-		Decrypt:      sentinel.Spec.Git.Decrypt,
-		HTTPSPath:    sentinel.Spec.Git.HTTPSPath,
-		URLFormat:    sentinel.Spec.Git.URLFormat,
-		ConnectionID: sentinel.Spec.Git.ConnectionID,
-	}
-	if sentinel.Spec.Git.PrivateKeyRef != nil {
-		privateKey, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PrivateKeyRef)
-		if err != nil {
-			return nil, err
-		}
-		git.PrivateKey = lo.ToPtr(privateKey)
-	}
-	if sentinel.Spec.Git.PassphraseRef != nil {
-		passphrase, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PassphraseRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Passphrase = lo.ToPtr(passphrase)
-	}
-	if sentinel.Spec.Git.UsernameRef != nil {
-		username, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.UsernameRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Username = lo.ToPtr(username)
-	}
-	if sentinel.Spec.Git.PasswordRef != nil {
-		password, err := r.getSecretValueAndAddControllerRef(ctx, sentinel, sentinel.Namespace, sentinel.Spec.Git.PasswordRef)
-		if err != nil {
-			return nil, err
-		}
-		git.Password = lo.ToPtr(password)
-
+		return nil
 	}
 
-	return git, nil
-}
+	git := &console.GitRefAttributes{
+		Ref:    sentinel.Spec.Git.Ref,
+		Folder: sentinel.Spec.Git.Folder,
+	}
 
-func (r *SentinelReconciler) getSecretValueAndAddControllerRef(ctx context.Context, owner client.Object, namespace string, selector *corev1.SecretKeySelector) (string, error) {
-	secret, value, err := utils.GetSecretAndValue(ctx, r.Client, namespace, selector)
-	if err != nil {
-		return "", err
-	}
-	if err := utils.TryAddControllerRef(ctx, r.Client, owner, secret, r.Scheme); err != nil {
-		return "", err
-	}
-	return value, nil
+	return git
 }
 
 func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel *v1alpha1.Sentinel) *ctrl.Result {

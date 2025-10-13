@@ -53,7 +53,7 @@ defmodule Console.Application do
       Console.Bootstrapper,
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
-      Console.Watchers.Supervisor,
+      Console.Plural.Pinger,
       Console.AI.GothManager,
       Console.PromEx,
       Console.AI.Graph.Indexer.Supervisor,

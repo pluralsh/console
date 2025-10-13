@@ -1,0 +1,16 @@
+{
+    "type": "object",
+    "properties": {
+        "reason": {
+            "type": "string",
+            "description": "The reason for the approval decision.  This should be a clear, 3 sentence explanation of the justification, using the rules provided."
+        },
+        "result": {
+            "type": "string",
+            "description": "The final decision on whether to approve the stack run",
+            "enum": ["approved", "rejected", "indeterminate"]
+        }
+    },
+    "required": ["reason", "result"],
+    "additionalProperties": false
+}

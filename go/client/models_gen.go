@@ -300,8 +300,6 @@ type AgentPullRequestAttributes struct {
 	Title string `json:"title"`
 	// the body of the pull request
 	Body string `json:"body"`
-	// the repository the agent will be working in
-	Repository string `json:"repository"`
 	// the base branch of the pull request
 	Base string `json:"base"`
 	// the head branch of the pull request
@@ -496,6 +494,13 @@ type AiAnalysisRates struct {
 	Fast *int64 `json:"fast,omitempty"`
 	// the rate in seconds for slow analysis, eg when the prompt has not seen a material change
 	Slow *int64 `json:"slow,omitempty"`
+}
+
+type AiApprovalAttributes struct {
+	Enabled      bool             `json:"enabled"`
+	IgnoreCancel bool             `json:"ignoreCancel"`
+	Git          GitRefAttributes `json:"git"`
+	File         string           `json:"file"`
 }
 
 type AiDelta struct {
@@ -6247,6 +6252,8 @@ type Sentinel struct {
 	Name string `json:"name"`
 	// the description of the sentinel
 	Description *string `json:"description,omitempty"`
+	// the status of the sentinel's last run
+	Status *SentinelRunStatus `json:"status,omitempty"`
 	// the git location for rules files from the associated repository
 	Git *GitRef `json:"git,omitempty"`
 	// the git repository to use for fetching rules files for AI enabled analysis
@@ -6254,9 +6261,13 @@ type Sentinel struct {
 	// the project of this sentinel
 	Project *Project `json:"project,omitempty"`
 	// the checks to run for this sentinel
-	Checks     []*SentinelCheck `json:"checks,omitempty"`
-	InsertedAt *string          `json:"insertedAt,omitempty"`
-	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+	Checks []*SentinelCheck `json:"checks,omitempty"`
+	// the last time this sentinel was run
+	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// the runs of this sentinel, do not query w/in list fields
+	Runs       *SentinelRunConnection `json:"runs,omitempty"`
+	InsertedAt *string                `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                `json:"updatedAt,omitempty"`
 }
 
 type SentinelAttributes struct {
@@ -6269,7 +6280,7 @@ type SentinelAttributes struct {
 	// the project to use for this sentinel
 	ProjectID *string `json:"projectId,omitempty"`
 	// the git repository to use for this sentinel
-	Git *GitAttributes `json:"git,omitempty"`
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// the checks to run for this sentinel
 	Checks []*SentinelCheckAttributes `json:"checks,omitempty"`
 }
@@ -6303,6 +6314,8 @@ type SentinelCheckConfiguration struct {
 	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfiguration `json:"integrationTest,omitempty"`
 }
 
 type SentinelCheckConfigurationAttributes struct {
@@ -6310,6 +6323,26 @@ type SentinelCheckConfigurationAttributes struct {
 	Log *SentinelCheckLogConfigurationAttributes `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfigurationAttributes `json:"kubernetes,omitempty"`
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfigurationAttributes `json:"integrationTest,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfiguration struct {
+	// the job to run for this check
+	Job *JobGateSpec `json:"job,omitempty"`
+	// the distro to run the check on
+	Distro *ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags map[string]any `json:"tags,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfigurationAttributes struct {
+	// the job to run for this check
+	Job *GateJobAttributes `json:"job,omitempty"`
+	// the distro to run the check on
+	Distro *ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags *string `json:"tags,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {
@@ -6384,9 +6417,64 @@ type SentinelRun struct {
 	// the sentinel that was run
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
-	Results    []*SentinelRunResult `json:"results,omitempty"`
-	InsertedAt *string              `json:"insertedAt,omitempty"`
-	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+	Results    []*SentinelRunResult      `json:"results,omitempty"`
+	Jobs       *SentinelRunJobConnection `json:"jobs,omitempty"`
+	InsertedAt *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*SentinelRunEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunEdge struct {
+	Node   *SentinelRun `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
+}
+
+type SentinelRunJob struct {
+	// the id of the job
+	ID string `json:"id"`
+	// the status of the job
+	Status SentinelRunJobStatus `json:"status"`
+	// the format of the job
+	Format SentinelRunJobFormat `json:"format"`
+	// the check that was run
+	Check *string `json:"check,omitempty"`
+	// the output of the job
+	Output *string `json:"output,omitempty"`
+	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
+	Job *Job `json:"job,omitempty"`
+	// the job that was run
+	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
+	// the reference to the job that was run
+	Reference *JobReference `json:"reference,omitempty"`
+	// the cluster that the job was run on
+	Cluster *Cluster `json:"cluster,omitempty"`
+	// the run that the job was run on
+	SentinelRun *SentinelRun `json:"sentinelRun,omitempty"`
+	InsertedAt  *string      `json:"insertedAt,omitempty"`
+	UpdatedAt   *string      `json:"updatedAt,omitempty"`
+}
+
+type SentinelRunJobConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*SentinelRunJobEdge `json:"edges,omitempty"`
+}
+
+type SentinelRunJobEdge struct {
+	Node   *SentinelRunJob `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+type SentinelRunJobUpdateAttributes struct {
+	// the status of the job
+	Status *SentinelRunJobStatus `json:"status,omitempty"`
+	// the reference to the job that was run
+	Reference *NamespacedName `json:"reference,omitempty"`
+	// the output of the job
+	Output *string `json:"output,omitempty"`
 }
 
 type SentinelRunResult struct {
@@ -6396,6 +6484,19 @@ type SentinelRunResult struct {
 	Status SentinelRunStatus `json:"status"`
 	// the reason for the result
 	Reason *string `json:"reason,omitempty"`
+	// the number of jobs that were run
+	JobCount *int64 `json:"jobCount,omitempty"`
+	// the number of jobs that were successful
+	SuccessfulCount *int64 `json:"successfulCount,omitempty"`
+	// the number of jobs that failed
+	FailedCount *int64 `json:"failedCount,omitempty"`
+}
+
+type SentinelStatistic struct {
+	// the status of the sentinel
+	Status SentinelRunStatus `json:"status"`
+	// the count of the sentinel
+	Count int64 `json:"count"`
 }
 
 type Service struct {
@@ -6971,6 +7072,8 @@ type StackConfigurationAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
+	// the ai approval configuration for this stack
+	AiApproval *AiApprovalAttributes `json:"aiApproval,omitempty"`
 }
 
 type StackCron struct {
@@ -7132,6 +7235,8 @@ type StackRun struct {
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
+	// the result of the approval decision by the ai
+	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
@@ -7173,6 +7278,13 @@ type StackRun struct {
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
 	InsertedAt *string                 `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type StackRunApprovalResult struct {
+	// the reason for the approval decision by the ai
+	Reason *string `json:"reason,omitempty"`
+	// the result of the approval decision by the ai
+	Result *ApprovalResult `json:"result,omitempty"`
 }
 
 type StackRunAttributes struct {
@@ -8292,6 +8404,49 @@ func (e *AlertState) UnmarshalGQL(v any) error {
 }
 
 func (e AlertState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ApprovalResult string
+
+const (
+	ApprovalResultApproved      ApprovalResult = "APPROVED"
+	ApprovalResultRejected      ApprovalResult = "REJECTED"
+	ApprovalResultIndeterminate ApprovalResult = "INDETERMINATE"
+)
+
+var AllApprovalResult = []ApprovalResult{
+	ApprovalResultApproved,
+	ApprovalResultRejected,
+	ApprovalResultIndeterminate,
+}
+
+func (e ApprovalResult) IsValid() bool {
+	switch e {
+	case ApprovalResultApproved, ApprovalResultRejected, ApprovalResultIndeterminate:
+		return true
+	}
+	return false
+}
+
+func (e ApprovalResult) String() string {
+	return string(e)
+}
+
+func (e *ApprovalResult) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApprovalResult(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApprovalResult", str)
+	}
+	return nil
+}
+
+func (e ApprovalResult) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -10534,18 +10689,20 @@ func (e ScmType) MarshalGQL(w io.Writer) {
 type SentinelCheckType string
 
 const (
-	SentinelCheckTypeLog        SentinelCheckType = "LOG"
-	SentinelCheckTypeKubernetes SentinelCheckType = "KUBERNETES"
+	SentinelCheckTypeLog             SentinelCheckType = "LOG"
+	SentinelCheckTypeKubernetes      SentinelCheckType = "KUBERNETES"
+	SentinelCheckTypeIntegrationTest SentinelCheckType = "INTEGRATION_TEST"
 )
 
 var AllSentinelCheckType = []SentinelCheckType{
 	SentinelCheckTypeLog,
 	SentinelCheckTypeKubernetes,
+	SentinelCheckTypeIntegrationTest,
 }
 
 func (e SentinelCheckType) IsValid() bool {
 	switch e {
-	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes:
+	case SentinelCheckTypeLog, SentinelCheckTypeKubernetes, SentinelCheckTypeIntegrationTest:
 		return true
 	}
 	return false
@@ -10569,6 +10726,92 @@ func (e *SentinelCheckType) UnmarshalGQL(v any) error {
 }
 
 func (e SentinelCheckType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunJobFormat string
+
+const (
+	SentinelRunJobFormatPlaintext SentinelRunJobFormat = "PLAINTEXT"
+	SentinelRunJobFormatJunit     SentinelRunJobFormat = "JUNIT"
+)
+
+var AllSentinelRunJobFormat = []SentinelRunJobFormat{
+	SentinelRunJobFormatPlaintext,
+	SentinelRunJobFormatJunit,
+}
+
+func (e SentinelRunJobFormat) IsValid() bool {
+	switch e {
+	case SentinelRunJobFormatPlaintext, SentinelRunJobFormatJunit:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunJobFormat) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunJobFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunJobFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunJobFormat", str)
+	}
+	return nil
+}
+
+func (e SentinelRunJobFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SentinelRunJobStatus string
+
+const (
+	SentinelRunJobStatusPending SentinelRunJobStatus = "PENDING"
+	SentinelRunJobStatusRunning SentinelRunJobStatus = "RUNNING"
+	SentinelRunJobStatusSuccess SentinelRunJobStatus = "SUCCESS"
+	SentinelRunJobStatusFailed  SentinelRunJobStatus = "FAILED"
+)
+
+var AllSentinelRunJobStatus = []SentinelRunJobStatus{
+	SentinelRunJobStatusPending,
+	SentinelRunJobStatusRunning,
+	SentinelRunJobStatusSuccess,
+	SentinelRunJobStatusFailed,
+}
+
+func (e SentinelRunJobStatus) IsValid() bool {
+	switch e {
+	case SentinelRunJobStatusPending, SentinelRunJobStatusRunning, SentinelRunJobStatusSuccess, SentinelRunJobStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRunJobStatus) String() string {
+	return string(e)
+}
+
+func (e *SentinelRunJobStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRunJobStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRunJobStatus", str)
+	}
+	return nil
+}
+
+func (e SentinelRunJobStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

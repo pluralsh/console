@@ -322,4 +322,36 @@ defmodule Console.Deployments.AgentsTest do
       {:error, _} = Agents.share_agent_run(run.id, user)
     end
   end
+
+  describe "#agent_pull_request" do
+    test "it can create and appropriately tie a pull request from an agent run" do
+      user = insert(:user)
+      session = insert(:agent_session)
+      run = insert(:agent_run, user: user, session: session)
+      insert(:scm_connection, type: :github, default: true)
+
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{
+        head: "plrl/ai/pr-test",
+        title: "a pr",
+        body: "a body",
+        base: "main"
+      } ->
+        {:ok, %{"html_url" => "https://github.com/pr/url", "user" => %{"login" => "pluralsh"}}, %HTTPoison.Response{}}
+      end)
+
+      {:ok, pr} = Agents.agent_pull_request(%{
+        title: "a pr",
+        body: "a body",
+        repository: "https://github.com/pluralsh/console.git",
+        base: "main",
+        head: "plrl/ai/pr-test"
+      }, run.id, user)
+
+      assert pr.id
+      assert pr.title == "a pr"
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.agent_run_id == run.id
+      assert pr.session_id == session.id
+    end
+  end
 end

@@ -517,4 +517,46 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert stage.id == dev.id
     end
   end
+
+  describe "StackRunUpdated" do
+    test "it will delegate stack run approval to ai if configured" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+
+      git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
+      stack_run = insert(:stack_run,
+        status: :pending_approval,
+        type: :terraform,
+        git: %{folder: "terraform", ref: "main"},
+        repository: git,
+        configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
+      )
+      insert(:stack_state, plan: "terraform plan", run: stack_run)
+      expect(HTTPoison, :post, fn _, _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
+            %{
+              message: %{
+                tool_calls: [%{
+                  function: %{
+                    name: "approve_stack",
+                    arguments: Jason.encode!(%{
+                      reason: "approved",
+                      result: "approved"
+                    })
+                  }
+              }]
+            }
+          }
+        ]})}}
+      end)
+
+      event = %PubSub.StackRunUpdated{item: stack_run}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      assert updated.status == :pending_approval
+      assert updated.approver_id == bot.id
+      assert updated.approval_result.result == :approved
+      assert updated.approval_result.reason == "approved"
+    end
+  end
 end

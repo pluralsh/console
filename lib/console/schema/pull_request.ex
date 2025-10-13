@@ -177,11 +177,14 @@ defmodule Console.Schema.PullRequest do
   end
   def poll_duration(_), do: Duration.new!(minute: 5)
 
-  def next_merge_attempt(cs, cron \\ nil) do
-    case get_next_attempt(cron || get_change(cs, :merge_cron), get_field(cs, :merge_attempt_at)) do
-      {:ok, changes} -> Enum.reduce(changes, cs, fn {k, v}, cs -> put_change(cs, k, v) end)
-      {:error, err} -> add_error(cs, :merge_cron, "Failed to generate next run date: #{inspect(err)}")
-    end
+  def next_merge_attempt(cs) do
+    get_next_attempt(get_change(cs, :merge_cron), nil)
+    |> add_cron_changes(cs)
+  end
+
+  def next_merge_attempt(cs, cron) when is_binary(cron) do
+    get_next_attempt(cron || get_field(cs, :merge_cron), get_field(cs, :merge_attempt_at))
+    |> add_cron_changes(cs)
   end
 
   defp get_next_attempt(nil, _), do: {:ok, %{}}
@@ -190,6 +193,11 @@ defmodule Console.Schema.PullRequest do
          {:ok, ts} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(last_run || Timex.now())),
       do: {:ok, %{merge_attempt_at: convert_naive(ts)}}
   end
+
+  defp add_cron_changes({:ok, changes}, cs),
+    do: Enum.reduce(changes, cs, fn {k, v}, cs -> put_change(cs, k, v) end)
+  defp add_cron_changes({:error, err}, cs),
+    do: add_error(cs, :merge_cron, "Failed to generate next run date: #{inspect(err)}")
 
   defp convert_naive(ndt) do
     DateTime.from_naive!(ndt, "Etc/UTC")

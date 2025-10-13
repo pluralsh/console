@@ -137,3 +137,7 @@ if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
     s3_access_key_id: get_env("BACKUP_ACCESS_KEY"),
     s3_secret_access_key: get_env("BACKUP_SECRET_ACCESS_KEY")
 end
+
+if is_set("GIT_POLL_INTERVAL") do
+  config :console, :git_poll_interval, :timer.seconds(String.to_integer(get_env("GIT_POLL_INTERVAL")))
+end

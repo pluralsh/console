@@ -14,40 +14,6 @@ on:
       - ".github/workflows/assets.yaml"
       - "assets/**"
 jobs:
-  # e2e:
-  #   name: End-to-end test
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
-  #     CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-  #     BASE_URL: console.gcp.onplural.sh
-  #   defaults:
-  #     run:
-  #       working-directory: assets
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16.15.0
-  #     - run: yarn --immutable
-  #     - run: cd e2e && yarn --immutable
-  #     - run: yarn e2e:start
-  #     - uses: 8398a7/action-slack@v3
-  #       if: failure()
-  #       with:
-  #         status: ${{ job.status }}
-  #         fields: workflow,repo,commit,author,pullRequest
-  #       env:
-  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
-  #     - name: Upload Screenshots and Videos to Slack
-  #       if: failure()
-  #       uses: trymbill/cypress-slack-video-upload-action@v1.3.0
-  #       with:
-  #         token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
-  #         workdir: assets/e2e/cypress
-  #         channels: cypress-artifacts
-  #         message-text: "See the attached videos and screenshots for more information."
-
   test:
     name: Unit test
     runs-on: ubuntu-latest

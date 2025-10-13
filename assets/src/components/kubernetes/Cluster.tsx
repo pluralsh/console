@@ -20,6 +20,7 @@ import { GqlError } from '../utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator'
 
 import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
+import { DataSelectProvider } from './common/DataSelect'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
@@ -184,8 +185,10 @@ export default function Cluster() {
   if (!cluster) return <EmptyState message="No clusters found." />
 
   return (
-    <ClusterContext.Provider value={context}>
-      <Outlet />
-    </ClusterContext.Provider>
+    <ClusterContext value={context}>
+      <DataSelectProvider>
+        <Outlet />
+      </DataSelectProvider>
+    </ClusterContext>
   )
 }

@@ -4,7 +4,6 @@ import { LoginContext } from 'components/contexts'
 
 import { Toast } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import * as serviceWorker from '../../serviceWorkerRegistration'
 
 const BUNDLED_GIT_COMMIT = import.meta.env.VITE_GIT_COMMIT
 
@@ -27,7 +26,7 @@ export function ApplicationUpdateToast() {
         Time for a new update!
       </span>
       <a
-        onClick={() => reloadApplication()}
+        onClick={() => window.location.reload()}
         style={{
           textDecoration: 'none',
           cursor: 'pointer',
@@ -38,11 +37,4 @@ export function ApplicationUpdateToast() {
       </a>
     </Toast>
   )
-}
-
-const reloadApplication = () => {
-  const promise = serviceWorker.unregister() || Promise.resolve('done')
-  promise.then(() => {
-    window.location.reload()
-  })
 }

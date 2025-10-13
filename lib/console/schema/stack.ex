@@ -61,6 +61,13 @@ defmodule Console.Schema.Stack do
         field :inventory,       :string
         field :additional_args, {:array, :string}
       end
+
+      embeds_one :ai_approval, AiApproval, on_replace: :update do
+        field :enabled,       :boolean
+        field :ignore_cancel, :boolean
+        embeds_one :git, Service.Git, on_replace: :update
+        field :file, :string
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
@@ -69,6 +76,7 @@ defmodule Console.Schema.Stack do
       |> cast_embed(:hooks, with: &hook_changeset/2)
       |> cast_embed(:terraform, with: &terraform_changeset/2)
       |> cast_embed(:ansible, with: &ansible_changeset/2)
+      |> cast_embed(:ai_approval, with: &ai_approval_changeset/2)
     end
 
     defp hook_changeset(model, attrs) do
@@ -85,6 +93,13 @@ defmodule Console.Schema.Stack do
     def ansible_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(playbook inventory additional_args)a)
+    end
+
+    defp ai_approval_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(enabled ignore_cancel file)a)
+      |> cast_embed(:git)
+      |> validate_required(~w(enabled file)a)
     end
   end
 

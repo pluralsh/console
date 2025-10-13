@@ -1,6 +1,9 @@
 defmodule Console.Schema.SentinelRun do
   use Console.Schema.Base
-  alias Console.Schema.Sentinel
+  alias Console.Schema.{
+    Sentinel,
+    SentinelRunJob
+  }
 
   defenum Status, pending: 0, success: 1, failed: 2
 
@@ -9,12 +12,17 @@ defmodule Console.Schema.SentinelRun do
     field :polled_at, :utc_datetime_usec
 
     embeds_many :results, SentinelCheckResult, on_replace: :delete do
-      field :name,   :string
-      field :status, Status, default: :pending
-      field :reason, :string
+      field :name,             :string
+      field :status,           Status, default: :pending
+      field :reason,           :string
+
+      field :job_count,        :integer, default: 0
+      field :successful_count, :integer, default: 0
+      field :failed_count,     :integer, default: 0
     end
 
     belongs_to :sentinel, Sentinel
+    has_many :jobs, SentinelRunJob, on_delete: :delete_all
 
     timestamps()
   end
@@ -25,6 +33,11 @@ defmodule Console.Schema.SentinelRun do
 
   def for_sentinel(query \\ __MODULE__, sentinel_id) do
     from(s in query, where: s.sentinel_id == ^sentinel_id)
+  end
+
+  def expired(query \\ __MODULE__) do
+    expiry = Timex.now() |> Timex.shift(days: -14)
+    from(s in query, where: s.inserted_at < ^expiry)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :inserted_at]) do
@@ -42,7 +55,7 @@ defmodule Console.Schema.SentinelRun do
 
   defp result_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(name status reason)a)
+    |> cast(attrs, ~w(name status reason job_count successful_count failed_count)a)
     |> validate_required(~w(name status)a)
   end
 end

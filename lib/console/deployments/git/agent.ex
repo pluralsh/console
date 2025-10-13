@@ -17,8 +17,6 @@ defmodule Console.Deployments.Git.Agent do
   require Logger
 
   @poll :timer.seconds(120)
-  @jitter 120
-  @jitter_offset :timer.seconds(60)
   @timeout :timer.seconds(10)
   @limit 50
   @limit_interval :timer.seconds(1)
@@ -114,9 +112,8 @@ defmodule Console.Deployments.Git.Agent do
     table = :ets.new(:git_cache_entries, [:set, :protected, read_concurrency: true])
     Supervisor.register(self(), table)
     cache = Cache.new(repo, table)
-    # :timer.send_interval(@poll, :pull)
     schedule_pull()
-    :timer.send_interval(@poll, :move)
+    :timer.send_interval(poll_interval(), :move)
     send self(), :clone
     :telemetry.execute(metric_scope(:git_agent), %{count: 1}, %{url: repo.url})
 
@@ -274,7 +271,10 @@ defmodule Console.Deployments.Git.Agent do
   defp save_status({:ok, _}, git), do: Git.status(git, %{health: :pullable, pulled_at: Timex.now(), error: nil})
   defp save_status({:error, err}, git), do: Git.status(git, %{health: :failed, error: err})
 
-  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + jitter())
+  defp schedule_pull() do
+    poll = poll_interval()
+    Process.send_after(self(), :pull, poll + Console.jitter(ceil(poll / 2)))
+  end
 
   defp should_pull?(%State{last_pull: nil}), do: true
   defp should_pull?(%State{last_pull: last_pull}) do
@@ -282,8 +282,5 @@ defmodule Console.Deployments.Git.Agent do
     |> Timex.after?(last_pull)
   end
 
-  defp jitter() do
-    seconds = :rand.uniform(@jitter) |> :timer.seconds()
-    seconds - @jitter_offset
-  end
+  defp poll_interval(), do: Console.conf(:git_poll_interval) || @poll
 end

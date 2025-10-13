@@ -121,6 +121,25 @@ _Appears in:_
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: \{\} <br /> |
 
 
+#### AiApprovalConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled indicates if AI approval is enabled for this stack. |  | Required: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git references the Git repository containing the rules file. |  | Required: \{\} <br /> |
+| `file` _string_ | File is the name of the rules file within the Git repository. |  | Required: \{\} <br /> |
+| `ignoreCancel` _boolean_ | IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI. |  | Optional: \{\} <br /> |
+
+
 #### AnalysisRates
 
 
@@ -1473,30 +1492,6 @@ _Appears in:_
 
 
 
-#### Git
-
-
-
-
-
-
-
-_Appears in:_
-- [SentinelSpec](#sentinelspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `url` _string_ | URL the url of this repository. |  |  |
-| `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PrivateKeyRef reference to a secret containing ssh private key. |  |  |
-| `passphraseRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PassphraseRef reference to a secret containing passphrase for the private key. |  |  |
-| `usernameRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | UsernameRef reference to a secret containing http username. |  |  |
-| `passwordRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordRef reference to a secret containing http password. |  |  |
-| `httpsPath` _string_ | HTTPSPath a manually supplied https path for non standard git setups. |  |  |
-| `urlFormat` _string_ | URLFormat custom URL format, e.g. \{url\}/tree/\{ref\}/\{folder\}. |  |  |
-| `connectionId` _string_ | ConnectionID id of a scm connection to use for authentication. |  |  |
-| `decrypt` _boolean_ | Decrypt whether to run plural crypto on this repo. |  |  |
-
-
 #### GitHealth
 
 _Underlying type:_ _string_
@@ -1523,8 +1518,10 @@ GitRef represents a reference to a Git repository.
 
 
 _Appears in:_
+- [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
 - [ServiceTemplate](#servicetemplate)
@@ -1938,6 +1935,7 @@ inline job definition with containers, resources, and Kubernetes-native configur
 _Appears in:_
 - [GateSpec](#gatespec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [StackSettings](#stacksettings)
 
 | Field | Description | Default | Validation |
@@ -3773,7 +3771,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[SentinelCheckType](#sentinelchecktype)_ | Type the type of check to run. |  | Enum: [LOG KUBERNETES] <br /> |
+| `type` _[SentinelCheckType](#sentinelchecktype)_ | Type the type of check to run. |  | Enum: [LOG KUBERNETES INTEGRATION_TEST] <br /> |
 | `name` _string_ | Name the name of the check. |  |  |
 | `ruleFile` _string_ | RuleFile the rule file to use for this check. |  |  |
 | `configuration` _[SentinelCheckConfiguration](#sentinelcheckconfiguration)_ | Configuration the configuration to use for this check. |  |  |
@@ -3794,6 +3792,25 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `log` _[SentinelCheckLogConfiguration](#sentinelchecklogconfiguration)_ | the log configuration to use for this check |  |  |
 | `kubernetes` _[SentinelCheckKubernetesConfiguration](#sentinelcheckkubernetesconfiguration)_ | the kubernetes configuration to use for this check |  |  |
+| `integrationTest` _[SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)_ | the integration test configuration to use for this check |  |  |
+
+
+#### SentinelCheckIntegrationTestConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckConfiguration](#sentinelcheckconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
+| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
@@ -3854,7 +3871,7 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
-| `git` _[Git](#git)_ | Git the git repository to use for this sentinel. |  |  |
+| `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
 
 
@@ -4272,6 +4289,7 @@ _Appears in:_
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
+| `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
 
 #### StackCron

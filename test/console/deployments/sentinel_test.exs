@@ -1,6 +1,7 @@
 defmodule Console.Deployments.SentinelTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Sentinels
+  alias Console.Schema.SentinelRunJob
 
   describe "create_sentinel/2" do
     test "project writers can create a sentinel" do
@@ -92,6 +93,8 @@ defmodule Console.Deployments.SentinelTest do
 
       assert run.sentinel_id == sentinel.id
       assert run.status == :pending
+
+      assert refetch(sentinel).last_run_at
     end
 
     test "non project readers cannot run a sentinel" do
@@ -102,6 +105,54 @@ defmodule Console.Deployments.SentinelTest do
       {:error, _} = Sentinels.run_sentinel(sentinel.id, user)
 
       assert refetch(sentinel)
+    end
+  end
+
+  describe "#spawn_jobs/2" do
+    test "it can create job runs in all matching clusters" do
+      sentinel = insert(:sentinel,
+        checks: [%{
+          type: :integration_test,
+          name: "test",
+          configuration: %{
+            integration_test: %{
+              format: :junit,
+              job: %{
+                namespace: "test",
+              },
+              tags: %{"tier" => "dev"},
+              distro: :eks
+            }
+          }
+        }]
+      )
+      run = insert(:sentinel_run, sentinel: sentinel)
+      clusters = insert_list(3, :cluster, distro: :eks, tags: [%{name: "tier", value: "dev"}])
+      insert_list(2, :cluster, distro: :aks, tags: [%{name: "tier", value: "dev"}])
+      insert_list(2, :cluster, distro: :eks, tags: [%{name: "tier", value: "prod"}])
+
+      {:ok, 3} = Sentinels.spawn_jobs(run, "test")
+
+      jobs = Repo.all(SentinelRunJob)
+
+      assert MapSet.new(jobs, & &1.cluster_id)
+             |> MapSet.equal?(MapSet.new(clusters, & &1.id))
+      assert Enum.all?(jobs, & &1.sentinel_run_id == run.id)
+      assert Enum.all?(jobs, & &1.job.namespace == "test")
+    end
+  end
+
+  describe "#update_sentinel_job/3" do
+    test "clusters can update their own run jobs" do
+      cluster = insert(:cluster)
+      job = insert(:sentinel_run_job, cluster: cluster)
+
+      {:ok, updated} = Sentinels.update_sentinel_job(%{status: :success}, job.id, cluster)
+
+      assert updated.status == :success
+      assert updated.id == job.id
+
+      {:error, _} = Sentinels.update_sentinel_job(%{status: :success}, job.id, insert(:cluster))
     end
   end
 end

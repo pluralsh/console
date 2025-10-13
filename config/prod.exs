@@ -42,7 +42,7 @@ config :console, Console.Cron.Scheduler,
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_clusters, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_services, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :install_clusters, []}},
-    {"*/10 * * * *",   {Console.Deployments.Cron, :place_run_workers, []}},
+    # {"*/10 * * * *",   {Console.Deployments.Cron, :place_run_workers, []}},
     {"*/30 * * * *",   {Console.Deployments.Cron, :spawn_stack_crons, []}},
     {"*/4 * * * *",    {Console.Deployments.Cron, :scan_pipeline_stages, []}},
     {"*/4 * * * *",    {Console.Deployments.Cron, :scan_pending_promotions, []}},
@@ -80,7 +80,8 @@ config :console, Console.Cron.Scheduler,
     {"15 */2 * * *",   {Console.AI.Cron, :vector_expire, []}},
     {"45 2 * * *",     {Console.Cost.Cron, :history, []}},
     {"0 3 * * *",      {Console.Cost.Cron, :prune, []}},
-    {"0 0 * * 0",      {Console.AI.Cron, :chats, []}}
+    {"15 3 * * *",     {Console.AI.Cron, :trim_sentinel_runs, []}},
+    {"0 0 * * 0",      {Console.AI.Cron, :chats, []}},
   ]
 
 config :ex_aws,

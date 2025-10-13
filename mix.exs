@@ -150,7 +150,6 @@ defmodule Console.MixProject do
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
       {:telemetry, "~> 1.0"},
       {:apq, "~> 2.0"},
-      {:evel, "~> 0.1"},
       {:deep_merge, "~> 1.0"},
       {:ymlr, "~> 2.0"},
       {:remote_ip, "~> 1.2.0"},

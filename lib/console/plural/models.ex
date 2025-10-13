@@ -162,6 +162,10 @@ defmodule Console.Plural.UpgradeQueue do
   defstruct [:id]
 end
 
+defmodule Console.Plural.PingCluster do
+  defstruct [:id]
+end
+
 defmodule Console.Plural.Incident do
   defstruct [:id, :title, :description, :severity, :status]
 end

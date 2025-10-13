@@ -455,9 +455,10 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 	}
 
 	attrs := &console.StackConfigurationAttributes{
-		Version: conf.Version,
-		Image:   conf.Image,
-		Tag:     conf.Tag,
+		Version:    conf.Version,
+		Image:      conf.Image,
+		Tag:        conf.Tag,
+		AiApproval: conf.AiApproval.Attributes(),
 	}
 
 	if conf.Terraform != nil {

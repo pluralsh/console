@@ -431,7 +431,11 @@ type RootQueryType {
 
   sentinel(id: ID, name: String): Sentinel
 
-  sentinels(after: String, first: Int, before: String, last: Int, q: String): SentinelConnection
+  sentinelRun(id: ID): SentinelRun
+
+  sentinels(after: String, first: Int, before: String, last: Int, q: String, status: SentinelRunStatus): SentinelConnection
+
+  sentinelStatistics(q: String): [SentinelStatistic]
 
   sharedAgentRun(id: ID!): AgentRun
 
@@ -442,6 +446,10 @@ type RootQueryType {
   agentRuntime(id: ID!): AgentRuntime
 
   agentRun(id: ID!): AgentRun
+
+  clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
+
+  sentinelRunJob(id: ID!): SentinelRunJob
 
   aiInsight(id: ID!): AiInsight
 
@@ -1033,6 +1041,8 @@ type RootMutationType {
 
   updateAgentRun(id: ID!, attributes: AgentRunStatusAttributes!): AgentRun
 
+  updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1273,9 +1283,6 @@ input AgentPullRequestAttributes {
 
   "the body of the pull request"
   body: String!
-
-  "the repository the agent will be working in"
-  repository: String!
 
   "the base branch of the pull request"
   base: String!
@@ -1620,12 +1627,25 @@ type AgentRunConnection {
 enum SentinelCheckType {
   LOG
   KUBERNETES
+  INTEGRATION_TEST
 }
 
 enum SentinelRunStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum SentinelRunJobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum SentinelRunJobFormat {
+  PLAINTEXT
+  JUNIT
 }
 
 input SentinelAttributes {
@@ -1642,7 +1662,7 @@ input SentinelAttributes {
   projectId: ID
 
   "the git repository to use for this sentinel"
-  git: GitAttributes
+  git: GitRefAttributes
 
   "the checks to run for this sentinel"
   checks: [SentinelCheckAttributes]
@@ -1668,6 +1688,9 @@ input SentinelCheckConfigurationAttributes {
 
   "the kubernetes configuration to use for this check"
   kubernetes: SentinelCheckKubernetesConfigurationAttributes
+
+  "the integration test configuration to use for this check"
+  integrationTest: SentinelCheckIntegrationTestConfigurationAttributes
 }
 
 input SentinelCheckLogConfigurationAttributes {
@@ -1707,6 +1730,28 @@ input SentinelCheckKubernetesConfigurationAttributes {
   clusterId: ID!
 }
 
+input SentinelCheckIntegrationTestConfigurationAttributes {
+  "the job to run for this check"
+  job: GateJobAttributes
+
+  "the distro to run the check on"
+  distro: ClusterDistro
+
+  "the cluster tags to select where to run this job"
+  tags: Json
+}
+
+input SentinelRunJobUpdateAttributes {
+  "the status of the job"
+  status: SentinelRunJobStatus
+
+  "the reference to the job that was run"
+  reference: NamespacedName
+
+  "the output of the job"
+  output: String
+}
+
 type Sentinel {
   "the id of the sentinel"
   id: String!
@@ -1716,6 +1761,9 @@ type Sentinel {
 
   "the description of the sentinel"
   description: String
+
+  "the status of the sentinel's last run"
+  status: SentinelRunStatus
 
   "the git location for rules files from the associated repository"
   git: GitRef
@@ -1728,6 +1776,12 @@ type Sentinel {
 
   "the checks to run for this sentinel"
   checks: [SentinelCheck]
+
+  "the last time this sentinel was run"
+  lastRunAt: DateTime
+
+  "the runs of this sentinel, do not query w\/in list fields"
+  runs(after: String, first: Int, before: String, last: Int): SentinelRunConnection
 
   insertedAt: DateTime
 
@@ -1757,6 +1811,9 @@ type SentinelCheckConfiguration {
 
   "the kubernetes configuration to use for this check"
   kubernetes: SentinelCheckKubernetesConfiguration
+
+  "the integration test configuration to use for this check"
+  integrationTest: SentinelCheckIntegrationTestConfiguration
 }
 
 type SentinelCheckLogConfiguration {
@@ -1793,6 +1850,17 @@ type SentinelCheckKubernetesConfiguration {
   namespace: String
 }
 
+type SentinelCheckIntegrationTestConfiguration {
+  "the job to run for this check"
+  job: JobGateSpec
+
+  "the distro to run the check on"
+  distro: ClusterDistro
+
+  "the cluster tags to select where to run this job"
+  tags: Map
+}
+
 type SentinelRun {
   "the id of the run"
   id: String!
@@ -1805,6 +1873,8 @@ type SentinelRun {
 
   "the results of the run"
   results: [SentinelRunResult]
+
+  jobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
   insertedAt: DateTime
 
@@ -1820,11 +1890,74 @@ type SentinelRunResult {
 
   "the reason for the result"
   reason: String
+
+  "the number of jobs that were run"
+  jobCount: Int
+
+  "the number of jobs that were successful"
+  successfulCount: Int
+
+  "the number of jobs that failed"
+  failedCount: Int
+}
+
+type SentinelStatistic {
+  "the status of the sentinel"
+  status: SentinelRunStatus!
+
+  "the count of the sentinel"
+  count: Int!
+}
+
+type SentinelRunJob {
+  "the id of the job"
+  id: String!
+
+  "the status of the job"
+  status: SentinelRunJobStatus!
+
+  "the format of the job"
+  format: SentinelRunJobFormat!
+
+  "the check that was run"
+  check: String
+
+  "the output of the job"
+  output: String
+
+  "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+  job: Job
+
+  "the job that was run"
+  jobSpec: JobGateSpec
+
+  "the reference to the job that was run"
+  reference: JobReference
+
+  "the cluster that the job was run on"
+  cluster: Cluster
+
+  "the run that the job was run on"
+  sentinelRun: SentinelRun
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type SentinelConnection {
   pageInfo: PageInfo!
   edges: [SentinelEdge]
+}
+
+type SentinelRunConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelRunEdge]
+}
+
+type SentinelRunJobConnection {
+  pageInfo: PageInfo!
+  edges: [SentinelRunJobEdge]
 }
 
 input FlowAttributes {
@@ -3037,6 +3170,12 @@ enum PolicyEngineType {
   TRIVY
 }
 
+enum ApprovalResult {
+  APPROVED
+  REJECTED
+  INDETERMINATE
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -3128,6 +3267,9 @@ input StackConfigurationAttributes {
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
+
+  "the ai approval configuration for this stack"
+  aiApproval: AiApprovalAttributes
 }
 
 input StackOverridesAttributes {
@@ -3163,6 +3305,13 @@ input AnsibleConfigurationAttributes {
 
   "additional args for the playbook"
   additionalArgs: [String]
+}
+
+input AiApprovalAttributes {
+  enabled: Boolean!
+  ignoreCancel: Boolean!
+  git: GitRefAttributes!
+  file: String!
 }
 
 input StackCronAttributes {
@@ -3570,6 +3719,9 @@ type StackRun {
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
 
+  "the result of the approval decision by the ai"
+  approvalResult: StackRunApprovalResult
+
   "Arbitrary variables to add to a stack run"
   variables: Map
 
@@ -3734,6 +3886,14 @@ type StackDefinition {
   steps: [CustomRunStep]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type StackRunApprovalResult {
+  "the reason for the approval decision by the ai"
+  reason: String
+
+  "the result of the approval decision by the ai"
+  result: ApprovalResult
 }
 
 type CustomRunStep {
@@ -11259,6 +11419,16 @@ type McpServerEdge {
 
 type FlowEdge {
   node: Flow
+  cursor: String
+}
+
+type SentinelRunJobEdge {
+  node: SentinelRunJob
+  cursor: String
+}
+
+type SentinelRunEdge {
+  node: SentinelRun
   cursor: String
 }
 

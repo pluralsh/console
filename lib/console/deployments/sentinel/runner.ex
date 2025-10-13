@@ -1,5 +1,20 @@
 defmodule Console.Deployments.Sentinel.Runner do
+  @moduledoc """
+  This is a top-level coordinator genserver for individual checks within a sentinel.  The basic flow is:
+
+  * spawn each check as a separate linked genserver process.
+  * genservers report back to this process via {:update, _, _} or {:status, _, _} messages.
+  * persist results of those messages accordingly
+  * if a status reports a check as failed, remove it from the tracked checks
+  * once all checks are done, finalize the state of the sentinel run
+
+  Also need to handle down events from children appropriately (hence the linking).
+
+  This is modeled via genservers because it is simply the easiest way to organize them as independent concurrent
+  processes.
+  """
   use GenServer
+  use Console.Services.Base
   alias Console.Repo
   alias Console.Schema.{Sentinel, SentinelRun, GitRepository}
   alias Console.Deployments.{Git.Discovery, Tar}
@@ -22,7 +37,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} = run ->
         {:ok, rules} = rule_files(run)
         check_runners = Enum.reduce(checks, %{}, fn check, acc ->
-          {:ok, pid} = start_check(check, rules)
+          {:ok, pid} = start_check(check, run, rules)
           Process.monitor(pid)
           Map.put(acc, pid, check)
         end)
@@ -41,6 +56,15 @@ defmodule Console.Deployments.Sentinel.Runner do
         save_results(%{state | checks: checks, results: results})
       _ ->
         {:noreply, state}
+    end
+  end
+
+  def handle_info({:update, pid, status}, %State{checks: checks, results: results} = state) do
+    case Map.get(checks, pid) do
+      %{^pid => %Sentinel.SentinelCheck{name: name}} ->
+        results = Map.put(results, name, status)
+        save_results(%{state | results: results, checks: checks})
+      _ -> {:noreply, state}
     end
   end
 
@@ -77,8 +101,16 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   defp do_update(attrs, %SentinelRun{} = run) do
-    SentinelRun.changeset(run, attrs)
-    |> Repo.update()
+    start_transaction()
+    |> add_operation(:sentinel, fn _ ->
+      Sentinel.changeset(run.sentinel, Map.take(attrs, [:status]))
+      |> Repo.update()
+    end)
+    |> add_operation(:run, fn _ ->
+      SentinelRun.changeset(run, attrs)
+      |> Repo.update()
+    end)
+    |> execute(extract: :run)
   end
 
   defp rule_files(%SentinelRun{sentinel: %Sentinel{repository: %GitRepository{} = repo, git: git}}) do
@@ -97,10 +129,11 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   defp to_status(name, result) do
-    Map.take(result, [:status, :reason])
+    Map.take(result, ~w(status reason job_count successful_count failed_count)a)
     |> Map.put(:name, name)
   end
 
-  defp start_check(%Sentinel.SentinelCheck{type: :log} = check, rules), do: Impl.Log.start(check, self(), rules)
-  defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, rules), do: Impl.Kubernetes.start(check, self(), rules)
+  defp start_check(%Sentinel.SentinelCheck{type: :integration_test} = check, run, _), do: Impl.Job.start(run, check, self())
+  defp start_check(%Sentinel.SentinelCheck{type: :log} = check, _, rules), do: Impl.Log.start(check, self(), rules)
+  defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, _, rules), do: Impl.Kubernetes.start(check, self(), rules)
 end

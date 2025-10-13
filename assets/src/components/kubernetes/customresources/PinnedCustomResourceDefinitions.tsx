@@ -62,6 +62,7 @@ export default function PinnedCustomResourceDefinitions({
         .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
         .map(({ id, name, displayName }) => (
           <LinkButton
+            key={id}
             tertiary
             onClick={() =>
               navigate(

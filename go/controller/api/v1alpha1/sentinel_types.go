@@ -26,44 +26,15 @@ type SentinelSpec struct {
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Git the git repository to use for this sentinel.
-	Git *Git `json:"git,omitempty"`
+	// The git location to use for this sentinel.
+	Git *GitRef `json:"git,omitempty"`
 
 	Checks []SentinelCheck `json:"checks,omitempty"`
 }
 
-type Git struct {
-	// URL the url of this repository.
-	URL string `json:"url"`
-
-	// PrivateKeyRef reference to a secret containing ssh private key.
-	PrivateKeyRef *corev1.SecretKeySelector `json:"privateKeyRef,omitempty"`
-
-	// PassphraseRef reference to a secret containing passphrase for the private key.
-	PassphraseRef *corev1.SecretKeySelector `json:"passphraseRef,omitempty"`
-
-	// UsernameRef reference to a secret containing http username.
-	UsernameRef *corev1.SecretKeySelector `json:"usernameRef,omitempty"`
-
-	// PasswordRef reference to a secret containing http password.
-	PasswordRef *corev1.SecretKeySelector `json:"passwordRef,omitempty"`
-
-	// HTTPSPath a manually supplied https path for non standard git setups.
-	HTTPSPath *string `json:"httpsPath,omitempty"`
-
-	// URLFormat custom URL format, e.g. {url}/tree/{ref}/{folder}.
-	URLFormat *string `json:"urlFormat,omitempty"`
-
-	// ConnectionID id of a scm connection to use for authentication.
-	ConnectionID *string `json:"connectionId,omitempty"`
-
-	// Decrypt whether to run plural crypto on this repo.
-	Decrypt *bool `json:"decrypt,omitempty"`
-}
-
 type SentinelCheck struct {
 	// Type the type of check to run.
-	//+kubebuilder:validation:Enum=LOG;KUBERNETES
+	//+kubebuilder:validation:Enum=LOG;KUBERNETES;INTEGRATION_TEST
 	Type console.SentinelCheckType `json:"type"`
 	// Name the name of the check.
 	Name string `json:"name"`
@@ -78,6 +49,19 @@ type SentinelCheckConfiguration struct {
 	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfiguration `json:"integrationTest,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfiguration struct {
+	// the job to run for this check
+	Job *JobSpec `json:"jobSpec,omitempty"`
+	// the distro to run the check on
+	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
+	Distro *console.ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags map[string]string `json:"tags,omitempty"`
 }
 
 type SentinelCheckLogConfiguration struct {
