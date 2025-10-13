@@ -26,7 +26,7 @@ type SentinelSpec struct {
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
-	// Git the git location to use for this sentinel.
+	// The git location to use for this sentinel.
 	Git *GitRef `json:"git,omitempty"`
 
 	Checks []SentinelCheck `json:"checks,omitempty"`

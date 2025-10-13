@@ -3871,7 +3871,7 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
-| `git` _[GitRef](#gitref)_ | Git the git location to use for this sentinel. |  |  |
+| `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
 
 

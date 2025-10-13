@@ -159,11 +159,7 @@ func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.
 	}
 	attr.Checks = checkAttr
 
-	gitAttr, err := r.getGitAttributes(ctx, sentinel)
-	if err != nil {
-		return nil, err
-	}
-	attr.Git = gitAttr
+	attr.Git = r.getGitAttributes(sentinel)
 
 	return attr, nil
 }
@@ -246,27 +242,17 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 	return checks, nil
 }
 
-func (r *SentinelReconciler) getGitAttributes(ctx context.Context, sentinel *v1alpha1.Sentinel) (*console.GitRefAttributes, error) {
+func (r *SentinelReconciler) getGitAttributes(sentinel *v1alpha1.Sentinel) *console.GitRefAttributes {
 	if sentinel.Spec.Git == nil {
-		return nil, nil
+		return nil
 	}
+
 	git := &console.GitRefAttributes{
 		Ref:    sentinel.Spec.Git.Ref,
 		Folder: sentinel.Spec.Git.Folder,
 	}
 
-	return git, nil
-}
-
-func (r *SentinelReconciler) getSecretValueAndAddControllerRef(ctx context.Context, owner client.Object, namespace string, selector *corev1.SecretKeySelector) (string, error) {
-	secret, value, err := utils.GetSecretAndValue(ctx, r.Client, namespace, selector)
-	if err != nil {
-		return "", err
-	}
-	if err := utils.TryAddControllerRef(ctx, r.Client, owner, secret, r.Scheme); err != nil {
-		return "", err
-	}
-	return value, nil
+	return git
 }
 
 func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel *v1alpha1.Sentinel) *ctrl.Result {
