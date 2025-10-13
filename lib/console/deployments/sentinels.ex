@@ -9,7 +9,8 @@ defmodule Console.Deployments.Sentinels do
     SentinelRunJob,
     Sentinel.SentinelCheck
   }
-  alias Console.Deployments.Settings
+  alias Kazan.Apis.Batch.V1, as: BatchV1
+  alias Console.Deployments.{Settings, Clusters}
 
   @type error :: Console.error
   @type sentinel_resp :: {:ok, Sentinel.t} | error
@@ -125,4 +126,18 @@ defmodule Console.Deployments.Sentinels do
     |> allow(cluster, :write)
     |> when_ok(:update)
   end
+
+  @doc """
+  Attempts to fetch the job resource for the given sentinel from k8s
+  """
+  @spec run_job(SentinelRunJob.t) :: {:ok, BatchV1.Job.t} | error
+  def run_job(%SentinelRunJob{reference: %{namespace: ns, name: name}} = rj) do
+    %SentinelRunJob{cluster: cluster} = Repo.preload(rj, [:cluster])
+    Clusters.control_plane(cluster)
+    |> Kube.Utils.save_kubeconfig()
+
+    BatchV1.read_namespaced_job!(ns, name)
+    |> Kube.Utils.run()
+  end
+  def run_job(_), do: {:ok, nil}
 end

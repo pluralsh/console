@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.Sentinel do
   use Console.GraphQl.Schema.Base
+  alias Console.Deployments.Sentinels
   alias Console.GraphQl.Resolvers.Deployments
 
   ecto_enum :sentinel_check_type, Console.Schema.Sentinel.CheckType
@@ -88,6 +89,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_check_configuration do
     field :log,        :sentinel_check_log_configuration, description: "the log configuration to use for this check"
     field :kubernetes, :sentinel_check_kubernetes_configuration, description: "the kubernetes configuration to use for this check"
+    field :integration_test, :sentinel_check_integration_test_configuration, description: "the integration test configuration to use for this check"
   end
 
   object :sentinel_check_log_configuration do
@@ -104,6 +106,12 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :kind,      non_null(:string), description: "the kind to use when fetching this resource"
     field :name,      non_null(:string), description: "the name to use when fetching this resource"
     field :namespace, :string, description: "the namespace to use when fetching this resource"
+  end
+
+  object :sentinel_check_integration_test_configuration do
+    field :job,    :job_gate_spec, description: "the job to run for this check"
+    field :distro, :cluster_distro, description: "the distro to run the check on"
+    field :tags,   :map, description: "the cluster tags to select where to run this job"
   end
 
   object :sentinel_run do
@@ -140,7 +148,13 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :check,         :string, description: "the check that was run"
     field :output,        :string, description: "the output of the job"
 
-    field :job,           :job_gate_spec, description: "the job that was run"
+    @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+    field :job, :job do
+      resolve fn run, _, _ -> Sentinels.run_job(run) end
+      middleware ErrorHandler
+    end
+
+    field :job_spec,      :job_gate_spec, description: "the job that was run"
     field :reference,     :job_reference, description: "the reference to the job that was run"
 
     field :cluster,       :cluster, resolve: dataloader(Deployments), description: "the cluster that the job was run on"

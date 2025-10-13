@@ -10517,6 +10517,8 @@ export type SentinelCheckAttributes = {
 
 export type SentinelCheckConfiguration = {
   __typename?: 'SentinelCheckConfiguration';
+  /** the integration test configuration to use for this check */
+  integrationTest?: Maybe<SentinelCheckIntegrationTestConfiguration>;
   /** the kubernetes configuration to use for this check */
   kubernetes?: Maybe<SentinelCheckKubernetesConfiguration>;
   /** the log configuration to use for this check */
@@ -10530,6 +10532,16 @@ export type SentinelCheckConfigurationAttributes = {
   kubernetes?: InputMaybe<SentinelCheckKubernetesConfigurationAttributes>;
   /** the log configuration to use for this check */
   log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
+};
+
+export type SentinelCheckIntegrationTestConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestConfiguration';
+  /** the distro to run the check on */
+  distro?: Maybe<ClusterDistro>;
+  /** the job to run for this check */
+  job?: Maybe<JobGateSpec>;
+  /** the cluster tags to select where to run this job */
+  tags?: Maybe<Scalars['Map']['output']>;
 };
 
 export type SentinelCheckIntegrationTestConfigurationAttributes = {
@@ -10661,8 +10673,10 @@ export type SentinelRunJob = {
   /** the id of the job */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation) */
+  job?: Maybe<Job>;
   /** the job that was run */
-  job?: Maybe<JobGateSpec>;
+  jobSpec?: Maybe<JobGateSpec>;
   /** the output of the job */
   output?: Maybe<Scalars['String']['output']>;
   /** the reference to the job that was run */

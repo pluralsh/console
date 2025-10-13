@@ -869,8 +869,11 @@ defmodule Console.Deployments.Stacks do
   @spec run_job(StackRun.t) :: {:ok, BatchV1.Job.t} | error
   def run_job(%StackRun{job_ref: %{namespace: ns, name: name}} = run) do
     %{cluster: cluster} = Repo.preload(run, [:cluster])
+    Clusters.control_plane(cluster)
+    |> Kube.Utils.save_kubeconfig()
+
     BatchV1.read_namespaced_job!(ns, name)
-    |> Kazan.run(server: Clusters.control_plane(cluster))
+    |> Kube.Utils.run()
   end
   def run_job(_), do: {:ok, nil}
 
