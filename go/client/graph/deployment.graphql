@@ -140,6 +140,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
     dryRun
     templated
     sha
+    status
     cluster {
         id
         name

@@ -6,6 +6,5 @@
             "description": "The id of the Plural service to get the files for, this is a UUID and not a name"
         }
     },
-    "required": ["service_id"],
-    "additionalProperties": false
+    "required": ["service_id"]
 }

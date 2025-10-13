@@ -40,6 +40,5 @@
             }
         }
     },
-    "required": ["service_deployment", "cluster"],
-    "additionalProperties": false
+    "required": ["service_deployment", "cluster"]
 }

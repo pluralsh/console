@@ -103,7 +103,7 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
-    case chat(openai, msg_history(model(openai), messages), opts) do
+    case chat(openai, msg_history(model(openai, opts[:client]), messages), opts) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, content, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -168,7 +168,7 @@ defmodule Console.AI.OpenAI do
   defp chat(%__MODULE__{stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
       all   = tools(opts)
-      model = model(openai)
+      model = model(openai, opts[:client])
 
       body = Console.drop_nils(%{
         model: model,
@@ -188,7 +188,7 @@ defmodule Console.AI.OpenAI do
 
   defp chat(%__MODULE__{} = openai, history, opts) do
     all   = tools(opts)
-    model = model(openai)
+    model = model(openai, opts[:client])
 
     body = Console.drop_nils(%{
       model: model,
@@ -249,8 +249,9 @@ defmodule Console.AI.OpenAI do
     |> Enum.filter(& &1)
   end
 
-  defp model(%__MODULE__{model: m}) when is_binary(m), do: m
-  defp model(_), do: @model
+  defp model(%__MODULE__{tool_model: m}, :tool) when is_binary(m), do: m
+  defp model(%__MODULE__{model: m}, _) when is_binary(m), do: m
+  defp model(_, _), do: @model
 
   defp window("gpt-5" <> _), do: 400_000 * 4
   defp window("gpt-4.1" <> _), do: 1_000_000 * 4

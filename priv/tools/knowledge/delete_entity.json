@@ -6,6 +6,5 @@
             "description": "the name of the entity in the knowledge graph to delete"
         }
     },
-    "required": ["name"],
-    "additionalProperties": false
+    "required": ["name"]
 }

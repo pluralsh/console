@@ -20,6 +20,5 @@
             }
         }
     },
-    "required": ["plan"],
-    "additionalProperties": false
+    "required": ["plan"]
 }

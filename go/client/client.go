@@ -1262,6 +1262,7 @@ type ServiceDeploymentForAgent struct {
 	DryRun        *bool                                      "json:\"dryRun,omitempty\" graphql:\"dryRun\""
 	Templated     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
 	Sha           *string                                    "json:\"sha,omitempty\" graphql:\"sha\""
+	Status        ServiceDeploymentStatus                    "json:\"status\" graphql:\"status\""
 	Cluster       *ServiceDeploymentForAgent_Cluster         "json:\"cluster,omitempty\" graphql:\"cluster\""
 	Kustomize     *KustomizeFragment                         "json:\"kustomize,omitempty\" graphql:\"kustomize\""
 	Helm          *ServiceDeploymentForAgent_Helm            "json:\"helm,omitempty\" graphql:\"helm\""
@@ -1326,6 +1327,12 @@ func (t *ServiceDeploymentForAgent) GetSha() *string {
 		t = &ServiceDeploymentForAgent{}
 	}
 	return t.Sha
+}
+func (t *ServiceDeploymentForAgent) GetStatus() *ServiceDeploymentStatus {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return &t.Status
 }
 func (t *ServiceDeploymentForAgent) GetCluster() *ServiceDeploymentForAgent_Cluster {
 	if t == nil {
@@ -31599,6 +31606,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	dryRun
 	templated
 	sha
+	status
 	cluster {
 		id
 		name
@@ -32097,6 +32105,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	dryRun
 	templated
 	sha
+	status
 	cluster {
 		id
 		name

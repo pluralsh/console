@@ -6,6 +6,5 @@
             "description": "a query to search the knowledge graph"
         }
     },
-    "required": [],
-    "additionalProperties": false
+    "required": []
 }

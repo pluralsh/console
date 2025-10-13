@@ -77,13 +77,13 @@ defmodule Console.AI.Provider do
 
   def completion([_ | _] = history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    with {:ok, %mod{} = client} <- client(settings),
+    with {:ok, %mod{} = client} <- client(settings, opts[:client]),
       do: mod.completion(client, add_preface(history, opts), opts)
   end
 
   def tool_call([_ | _] = history, tools, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    with {:ok, %mod{} = client} <- tool_client(settings),
+    with {:ok, %mod{} = client} <- client(settings, opts[:client] || :tool),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
       do: handle_tool_calls(result, tools)
   end
@@ -98,9 +98,9 @@ defmodule Console.AI.Provider do
     end
   end
 
-  def embeddings(text) do
+  def embeddings(text, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    with {:ok, %mod{} = client} <- embedding_client(settings),
+    with {:ok, %mod{} = client} <- client(settings, opts[:client] || :embedding),
       do: mod.embeddings(client, text)
   end
 
@@ -113,6 +113,10 @@ defmodule Console.AI.Provider do
   defp tool_client(%DeploymentSettings{ai: %AI{tool_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))
   defp tool_client(settings), do: client(settings)
+
+  defp client(settings, :tool), do: tool_client(settings)
+  defp client(settings, :embedding), do: embedding_client(settings)
+  defp client(settings, _), do: client(settings)
 
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}

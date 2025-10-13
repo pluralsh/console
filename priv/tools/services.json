@@ -10,6 +10,5 @@
             "description": "the cluster handle to search for services in"
         }
     },
-    "required": [],
-    "additionalProperties": false
+    "required": []
 }

@@ -6,6 +6,5 @@
             "description": "Whether to filter results by pipelines with a name matching this string"
         }
     },
-    "required": [],
-    "additionalProperties": false
+    "required": []
 }

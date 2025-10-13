@@ -10,6 +10,5 @@
             "description": "The url of the repository to create a PR for"
         }
     },
-    "required": ["plan", "repo_url"],
-    "additionalProperties": false
+    "required": ["plan", "repo_url"]
 }

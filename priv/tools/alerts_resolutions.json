@@ -6,6 +6,5 @@
             "description": "A search string to query for alert resolutions using semantic vector search."
         }
     },
-    "required": ["query"],
-    "additionalProperties": false
+    "required": ["query"]
 }

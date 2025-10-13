@@ -9,17 +9,18 @@ defmodule Console.AI.Stream.Result do
         index: index,
         id: attrs["call_id"] || attrs["id"],
         name: attrs["name"],
-        arguments: attrs["arguments"]
+        arguments: attrs["arguments"] || ""
       }
     end
 
     def args(%__MODULE__{arguments: args} = t, next),
       do: put_in(t.arguments, args <> next)
 
-    def format(%__MODULE__{id: id, name: n, arguments: args}) do
+    def format(%__MODULE__{id: id, name: n, arguments: args}) when is_binary(args) and byte_size(args) > 0  do
       with {:ok, args} <- Jason.decode(args),
         do: {:ok, %Console.AI.Tool{id: id, name: n, arguments: args}}
     end
+    def format(%__MODULE__{id: id, name: n}), do: {:ok, %Console.AI.Tool{id: id, name: n, arguments: %{}}}
   end
 
   @type t :: %__MODULE__{text: [binary], tools: %{binary => Tool.t}}

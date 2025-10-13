@@ -6,6 +6,5 @@
             "description": "The id of the stack to get the files for, this is a UUID and not a name"
         }
     },
-    "required": ["stack_id"],
-    "additionalProperties": false
+    "required": ["stack_id"]
 }

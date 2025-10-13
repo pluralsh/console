@@ -10,6 +10,5 @@
             "description": "A short two sentence description of the reason for the passing or failing status"
         }
     },
-    "required": ["passing", "reason"],
-    "additionalProperties": false
+    "required": ["passing", "reason"]
 }

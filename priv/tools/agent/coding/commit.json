@@ -29,8 +29,7 @@
                         "type": "string"
                     }
                 },
-                "required": ["file_name", "replacement", "previous"],
-                "additionalProperties": false
+                "required": ["file_name", "replacement", "previous"]
             }
         },
         "file_deletes": {
@@ -45,8 +44,7 @@
                         "type": "string"
                     }
                 },
-                "required": ["file_name"],
-                "additionalProperties": false
+                "required": ["file_name"]
             }
         },
         "file_creates": {
@@ -65,11 +63,9 @@
                         "type": "string"
                     }
                 },
-                "required": ["file_name", "content"],
-                "additionalProperties": false
+                "required": ["file_name", "content"]
             }
         }
     },
-    "required": ["repo_url", "commit_message"],
-    "additionalProperties": false
+    "required": ["repo_url", "commit_message"]
 }

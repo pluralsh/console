@@ -10,6 +10,5 @@
             "description": "The query to search the knowledge base with"
         }
     },
-    "required": ["required", "query"],
-    "additionalProperties": false
+    "required": ["required", "query"]
 }

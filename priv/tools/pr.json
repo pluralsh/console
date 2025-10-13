@@ -54,11 +54,9 @@
                         "type": "string"
                     }
                 },
-                "required": ["file_name", "replacement", "previous"],
-                "additionalProperties": false
+                "required": ["file_name", "replacement", "previous"]
             }
         }
     },
-    "required": ["repo_url", "branch_name", "file_updates", "commit_message", "pr_title", "pr_body", "pr_description"],
-    "additionalProperties": false
+    "required": ["repo_url", "branch_name", "file_updates", "commit_message", "pr_title", "pr_body", "pr_description"]
 }

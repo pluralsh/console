@@ -11,6 +11,5 @@
             "enum": ["approved", "rejected", "indeterminate"]
         }
     },
-    "required": ["reason", "result"],
-    "additionalProperties": false
+    "required": ["reason", "result"]
 }

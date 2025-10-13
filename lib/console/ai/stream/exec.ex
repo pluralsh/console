@@ -18,16 +18,19 @@ defmodule Console.AI.Stream.Exec do
   defp handle_openai(_), do: :pass
 
   @spec handle_anthropic(map) :: stream_message
-  defp handle_anthropic(%{"type" => "content_block_start", "content_block" => %{"text" => t}}) when is_binary(t), do: t
+  defp handle_anthropic(%{
+    "type" => "content_block_start",
+    "content_block" => %{"text" => t}
+  }) when is_binary(t), do: t
   defp handle_anthropic(%{
     "type" => "content_block_start",
     "index" => ind,
     "content_block" => %{"type" => "tool_use"} = tool_use
-  }), do: {:tools, [{ind, tool_use}]}
+  }), do: {:tools, [{ind, Map.put(tool_use, "arguments", "")}]}
   defp handle_anthropic(%{
     "type" => "content_block_delta",
     "index" => ind,
-    "content_block" => %{"type" => "input_json_delta", "partial_json" => json}
+    "delta" => %{"type" => "input_json_delta", "partial_json" => json}
   }), do: {:tools, [{ind, %{"arguments" => json}}]}
   defp handle_anthropic(%{"type" => "content_block_delta", "delta" => %{"text" => t}}) when is_binary(t), do: t
   defp handle_anthropic(_), do: :pass

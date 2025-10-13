@@ -64,7 +64,7 @@ defmodule Console.AI.Chat.Engine do
     thread = current_thread(thread)
 
     preface = prompt(thread)
-    opts = include_tools([preface: preface], thread)
+    opts = include_tools([preface: preface, client: :tool], thread)
     Enum.concat(messages, completion)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
@@ -256,7 +256,8 @@ defmodule Console.AI.Chat.Engine do
   defp trim_messages(total, [msg | rest], window),
     do: trim_messages(total - msg_size(msg), rest, window)
 
-  defp msg_size(%{content: content}), do: byte_size(content)
+  defp msg_size(%{content: content}) when is_binary(content), do: byte_size(content)
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, _}), do: byte_size(content)
+  defp msg_size(_), do: 0
 end
