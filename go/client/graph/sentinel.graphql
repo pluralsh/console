@@ -57,7 +57,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
     format
     check
     output
-    job {
+    jobSpec {
         ...JobSpecFragment
     }
     reference {

@@ -1811,6 +1811,9 @@ type SentinelCheckConfiguration {
 
   "the kubernetes configuration to use for this check"
   kubernetes: SentinelCheckKubernetesConfiguration
+
+  "the integration test configuration to use for this check"
+  integrationTest: SentinelCheckIntegrationTestConfiguration
 }
 
 type SentinelCheckLogConfiguration {
@@ -1845,6 +1848,17 @@ type SentinelCheckKubernetesConfiguration {
 
   "the namespace to use when fetching this resource"
   namespace: String
+}
+
+type SentinelCheckIntegrationTestConfiguration {
+  "the job to run for this check"
+  job: JobGateSpec
+
+  "the distro to run the check on"
+  distro: ClusterDistro
+
+  "the cluster tags to select where to run this job"
+  tags: Map
 }
 
 type SentinelRun {
@@ -1911,8 +1925,11 @@ type SentinelRunJob {
   "the output of the job"
   output: String
 
+  "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+  job: Job
+
   "the job that was run"
-  job: JobGateSpec
+  jobSpec: JobGateSpec
 
   "the reference to the job that was run"
   reference: JobReference

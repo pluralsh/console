@@ -49,8 +49,11 @@ defmodule Console.Deployments.Pipelines do
 
   def gate_job(%PipelineGate{status: %{job_ref: %{namespace: ns, name: name}}} = gate) do
     %{cluster: cluster} = Repo.preload(gate, [:cluster])
+    Clusters.control_plane(cluster)
+    |> Kube.Utils.save_kubeconfig()
+
     BatchV1.read_namespaced_job!(ns, name)
-    |> Kazan.run(server: Clusters.control_plane(cluster))
+    |> Kube.Utils.run()
   end
   def gate_job(_), do: {:ok, nil}
 

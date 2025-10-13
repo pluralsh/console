@@ -6314,6 +6314,8 @@ type SentinelCheckConfiguration struct {
 	Log *SentinelCheckLogConfiguration `json:"log,omitempty"`
 	// the kubernetes configuration to use for this check
 	Kubernetes *SentinelCheckKubernetesConfiguration `json:"kubernetes,omitempty"`
+	// the integration test configuration to use for this check
+	IntegrationTest *SentinelCheckIntegrationTestConfiguration `json:"integrationTest,omitempty"`
 }
 
 type SentinelCheckConfigurationAttributes struct {
@@ -6323,6 +6325,15 @@ type SentinelCheckConfigurationAttributes struct {
 	Kubernetes *SentinelCheckKubernetesConfigurationAttributes `json:"kubernetes,omitempty"`
 	// the integration test configuration to use for this check
 	IntegrationTest *SentinelCheckIntegrationTestConfigurationAttributes `json:"integrationTest,omitempty"`
+}
+
+type SentinelCheckIntegrationTestConfiguration struct {
+	// the job to run for this check
+	Job *JobGateSpec `json:"job,omitempty"`
+	// the distro to run the check on
+	Distro *ClusterDistro `json:"distro,omitempty"`
+	// the cluster tags to select where to run this job
+	Tags map[string]any `json:"tags,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -6433,8 +6444,10 @@ type SentinelRunJob struct {
 	Check *string `json:"check,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
+	Job *Job `json:"job,omitempty"`
 	// the job that was run
-	Job *JobGateSpec `json:"job,omitempty"`
+	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
 	// the reference to the job that was run
 	Reference *JobReference `json:"reference,omitempty"`
 	// the cluster that the job was run on

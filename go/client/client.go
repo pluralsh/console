@@ -4482,7 +4482,7 @@ type SentinelRunJobFragment struct {
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
 	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Output      *string                           "json:\"output,omitempty\" graphql:\"output\""
-	Job         *JobSpecFragment                  "json:\"job,omitempty\" graphql:\"job\""
+	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
 	SentinelRun *SentinelRunFragment              "json:\"sentinelRun,omitempty\" graphql:\"sentinelRun\""
 	Cluster     *SentinelRunJobFragment_Cluster   "json:\"cluster,omitempty\" graphql:\"cluster\""
@@ -4518,11 +4518,11 @@ func (t *SentinelRunJobFragment) GetOutput() *string {
 	}
 	return t.Output
 }
-func (t *SentinelRunJobFragment) GetJob() *JobSpecFragment {
+func (t *SentinelRunJobFragment) GetJobSpec() *JobSpecFragment {
 	if t == nil {
 		t = &SentinelRunJobFragment{}
 	}
-	return t.Job
+	return t.JobSpec
 }
 func (t *SentinelRunJobFragment) GetReference() *SentinelRunJobFragment_Reference {
 	if t == nil {
@@ -8489,38 +8489,38 @@ func (t *PreviewEnvironmentTemplateFragment_Template) GetName() *string {
 	return t.Name
 }
 
-type SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+type SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
 	if t == nil {
-		t = &SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Name
 }
-func (t *SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
 	if t == nil {
-		t = &SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Value
 }
 
-type SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+type SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
 	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
 	Secret    string "json:\"secret\" graphql:\"secret\""
 }
 
-func (t *SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
 	if t == nil {
-		t = &SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.ConfigMap
 }
-func (t *SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
-		t = &SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -17662,38 +17662,38 @@ func (t *ListProviders_ClusterProviders) GetEdges() []*ListProviders_ClusterProv
 	return t.Edges
 }
 
-type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
 	if t == nil {
-		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Name
 }
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
 	if t == nil {
-		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Value
 }
 
-type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
 	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
 	Secret    string "json:\"secret\" graphql:\"secret\""
 }
 
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
 	if t == nil {
-		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.ConfigMap
 }
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
-		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -17767,38 +17767,38 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs) GetEdges() []*ListCl
 	return t.Edges
 }
 
-type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
 	if t == nil {
-		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Name
 }
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
 	if t == nil {
-		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Value
 }
 
-type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
 	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
 	Secret    string "json:\"secret\" graphql:\"secret\""
 }
 
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
 	if t == nil {
-		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.ConfigMap
 }
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
-		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -17854,38 +17854,38 @@ func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Sentinel) GetID() string
 	return t.ID
 }
 
-type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
 }
 
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
 	if t == nil {
-		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Name
 }
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
 	if t == nil {
-		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
 	}
 	return t.Value
 }
 
-type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
 	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
 	Secret    string "json:\"secret\" graphql:\"secret\""
 }
 
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
 	if t == nil {
-		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.ConfigMap
 }
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
-		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -37587,7 +37587,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	format
 	check
 	output
-	job {
+	jobSpec {
 		... JobSpecFragment
 	}
 	reference {
@@ -37678,7 +37678,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	format
 	check
 	output
-	job {
+	jobSpec {
 		... JobSpecFragment
 	}
 	reference {
@@ -37797,7 +37797,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	format
 	check
 	output
-	job {
+	jobSpec {
 		... JobSpecFragment
 	}
 	reference {
