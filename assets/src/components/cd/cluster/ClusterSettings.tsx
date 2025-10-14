@@ -1,8 +1,10 @@
 import {
   Button,
+  Flex,
   FormField,
   GearTrainIcon,
   IconFrame,
+  Input,
   Modal,
   Switch,
 } from '@pluralsh/design-system'
@@ -19,7 +21,6 @@ import {
 } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import { ComponentProps, useMemo, useState } from 'react'
-import { useTheme } from 'styled-components'
 
 import { tagsToNameValue } from '../services/CreateGlobalService'
 import { TagSelection } from '../services/TagSelection'
@@ -34,7 +35,6 @@ function ClusterSettingsModalInner({
 }: ComponentProps<typeof Modal> & {
   cluster: ClustersRowFragment
 }) {
-  const theme = useTheme()
   const initialTags: Record<string, string> = useMemo(
     () =>
       Object.fromEntries(
@@ -50,23 +50,15 @@ function ClusterSettingsModalInner({
     update: updateState,
     hasUpdates,
   } = useUpdateState(
-    {
-      protect: !!cluster?.protect,
-      tags: initialTags,
-    },
-    {
-      tags: (a, b) => !isEqual(a, b),
-    }
+    { name: cluster?.name, protect: !!cluster?.protect, tags: initialTags },
+    { tags: (a, b) => !isEqual(a, b) }
   )
   const [mutation, { loading, error }] = useUpdateClusterMutation({
-    onCompleted: () => {
-      onClose?.()
-    },
+    onCompleted: () => onClose?.(),
   })
 
-  if (!cluster) {
-    return null
-  }
+  if (!cluster) return null
+
   const allowSubmit = hasUpdates
 
   return (
@@ -84,6 +76,7 @@ function ClusterSettingsModalInner({
               variables: {
                 id: cluster.id,
                 attributes: {
+                  name: state.name,
                   protect: state.protect,
                   tags: tagsToNameValue(state.tags),
                 },
@@ -93,12 +86,9 @@ function ClusterSettingsModalInner({
         },
       }}
       actions={
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row-reverse',
-            gap: theme.spacing.medium,
-          }}
+        <Flex
+          direction="row-reverse"
+          gap="medium"
         >
           <Button
             primary
@@ -111,23 +101,24 @@ function ClusterSettingsModalInner({
           <Button
             secondary
             type="button"
-            onClick={() => {
-              onClose?.()
-            }}
+            onClick={() => onClose?.()}
           >
             Cancel
           </Button>
-        </div>
+        </Flex>
       }
       {...props}
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-        }}
+      <Flex
+        direction="column"
+        gap="large"
       >
+        <FormField label="Name">
+          <Input
+            value={state.name}
+            onChange={(e) => updateState({ name: e.target.value })}
+          />
+        </FormField>
         {!cluster.self && (
           <Switch
             checked={state.protect}
@@ -143,7 +134,7 @@ function ClusterSettingsModalInner({
           />
         </FormField>
         {error && <GqlError error={error} />}
-      </div>
+      </Flex>
     </Modal>
   )
 }
