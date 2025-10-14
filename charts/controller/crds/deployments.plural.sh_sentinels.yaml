@@ -9835,7 +9835,7 @@ spec:
                   what this Sentinel.
                 type: string
               git:
-                description: Git the git location to use for this sentinel.
+                description: The git location to use for this sentinel.
                 properties:
                   files:
                     description: Optional files to add to the manifests for this service

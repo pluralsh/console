@@ -170,19 +170,12 @@ defmodule Console.AI.OpenAI do
       all   = tools(opts)
       model = model(openai, opts[:client])
 
-      body = Console.drop_nils(%{
-        model: model,
-        messages: history,
-        stream: true,
-        tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
-      })
-      |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
-      |> Map.merge(reasoning_details(model))
-      |> Console.drop_nils()
-      |> Jason.encode!()
-
       url(openai, "/chat/completions")
-      |> HTTPoison.post(body, json_headers(openai), [stream_to: self(), async: :once] ++ @options)
+      |> HTTPoison.post(
+        chat_body(model, history, all, opts, true),
+        json_headers(openai),
+        [stream_to: self(), async: :once] ++ @options
+      )
     end, stream)
   end
 
@@ -190,18 +183,25 @@ defmodule Console.AI.OpenAI do
     all   = tools(opts)
     model = model(openai, opts[:client])
 
-    body = Console.drop_nils(%{
+    url(openai, "/chat/completions")
+    |> HTTPoison.post(
+      chat_body(model, history, all, opts),
+      json_headers(openai),
+      @options
+    )
+    |> handle_response(CompletionResponse.spec())
+  end
+
+  defp chat_body(model, history, tools, opts, stream \\ false) do
+    Map.merge(%{
       model: model,
       messages: history,
-      tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
-    })
-    |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+      stream: stream,
+      tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
+    }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
     |> Map.merge(reasoning_details(model))
+    |> Console.drop_nils()
     |> Jason.encode!()
-
-    url(openai, "/chat/completions")
-    |> HTTPoison.post(body, json_headers(openai), @options)
-    |> handle_response(CompletionResponse.spec())
   end
 
   defp embed(%__MODULE__{embedding_model: model} = openai, text) do

@@ -843,6 +843,7 @@ specifications that are populated with data from the discovered clusters.
 
 Example usage:
 
+	```yaml
 	apiVersion: deployments.plural.sh/v1alpha1
 	kind: ClusterSync
 	metadata:
@@ -861,6 +862,7 @@ Example usage:
 	      handle: "{{ .cluster.handle }}"
 	      version: "{{ .cluster.version }}"
 	      cloud: "{{ .cluster.cloud }}"
+	 ````
 
 
 
@@ -1146,6 +1148,7 @@ monitoring integrations, and AI-powered features.
 
 Example usage:
 
+	```yaml
 	apiVersion: deployments.plural.sh/v1alpha1
 	kind: DeploymentSettings
 	metadata:
@@ -1183,6 +1186,7 @@ Example usage:
 	  cost:
 	    recommendationCushion: 20
 	    recommendationThreshold: 100
+	```
 
 
 

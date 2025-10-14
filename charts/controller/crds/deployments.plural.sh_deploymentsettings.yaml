@@ -191,7 +191,9 @@ spec:
                         description: EmbeddingModel to use for generating embeddings
                         type: string
                       modelId:
-                        description: ModelID is the AWS Bedrock Model ID to use.
+                        description: ModelID is the AWS Bedrock Model ID to use.  This
+                          will use the openai compatible endpoint, so the model id
+                          must be supported.
                         type: string
                       region:
                         description: Region is the AWS region the model is hosted
@@ -596,7 +598,8 @@ spec:
                           from
                         type: string
                       model:
-                        description: Model is the Vertex AI model to use
+                        description: 'Model is the Vertex AI model to use.  Must support
+                          the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview'
                         type: string
                       project:
                         description: Project is the GCP project you'll be using
