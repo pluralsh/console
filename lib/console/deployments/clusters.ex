@@ -9,6 +9,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Compatibilities.{Table, AddOn, Version, CloudAddOns}
   alias Console.Deployments.Ecto.Validations
+  alias Console.Deployments.KubeVersions.Table, as: KubeTable
   alias Console.Services.Users
   alias Console.Cached.ClusterNodes
   alias Kazan.Apis.Core.V1, as: Core
@@ -402,6 +403,10 @@ defmodule Console.Deployments.Clusters do
     |> Service.drainable()
     |> Console.Repo.exists?()
   end
+
+  def extended_support(%Cluster{current_version: vsn, distro: dist}) when is_binary(vsn),
+    do: KubeTable.info(dist, vsn)
+  def extended_support(_), do: nil
 
   @doc """
   creates a new cluster and a service alongside to deploy the cluster via CAPI

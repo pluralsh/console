@@ -21,11 +21,25 @@ defmodule Console.Deployments.KubeVersions.Table do
   defmodule Version do
     @type t :: %__MODULE__{version: binary, extended: boolean}
 
-    defstruct [:version, :extended]
+    defstruct [:version, :extended, :extended_from]
 
     def new(attrs) do
-      %__MODULE__{version: attrs["version"], extended: attrs["extended"]}
+      %__MODULE__{
+        version: attrs["version"],
+        extended: attrs["extended"],
+        extended_from: parse_date(attrs["extended_from"])
+      }
     end
+
+    defp parse_date(from) when is_binary(from) do
+      with {:ok, ts} <- Timex.parse(from, "{YYYY}-{0M}-{0D}"),
+           %DateTime{} = datetime <- Timex.to_datetime(ts) do
+        datetime
+      else
+        _ -> nil
+      end
+    end
+    defp parse_date(_), do: nil
   end
 
   @type distro :: :eks | :aks | :gke
@@ -52,6 +66,16 @@ defmodule Console.Deployments.KubeVersions.Table do
         _ -> {distro, nil}
       end
     end)
+  end
+
+
+  def info(distro, version) do
+    with [_ | _] = versions <- fetch(distro),
+         %Version{} = vsn <- Enum.find(versions, &later?(version, &1.version)) do
+      vsn
+    else
+      _ -> nil
+    end
   end
 
   @spec extended?(distro, binary) :: boolean

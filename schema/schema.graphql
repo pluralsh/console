@@ -7103,6 +7103,9 @@ type Cluster {
   "the url of the kas server you can access this cluster from"
   kasUrl: String
 
+  "information about the extended support status of this cluster"
+  extendedSupport: ExtendedSupportInfo
+
   "the url this clusters deployment operator will use for gql requests"
   agentUrl: String
 
@@ -7486,6 +7489,15 @@ type DeprecatedCustomResource {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"information about the extended support status of a kubernetes cluster"
+type ExtendedSupportInfo {
+  "the date this version will reach extended support on"
+  extendedFrom: DateTime
+
+  "whether this version is extended support"
+  extended: Boolean
 }
 
 "a service encapsulating a controller like istio\/ingress-nginx\/etc that is meant to extend the kubernetes api"

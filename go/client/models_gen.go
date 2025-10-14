@@ -1455,6 +1455,8 @@ type Cluster struct {
 	Healthy *bool `json:"healthy,omitempty"`
 	// the url of the kas server you can access this cluster from
 	KasURL *string `json:"kasUrl,omitempty"`
+	// information about the extended support status of this cluster
+	ExtendedSupport *ExtendedSupportInfo `json:"extendedSupport,omitempty"`
 	// the url this clusters deployment operator will use for gql requests
 	AgentURL *string `json:"agentUrl,omitempty"`
 	// a auth token to be used by the deploy operator, only readable on create
@@ -2839,6 +2841,14 @@ type Event struct {
 	Message       *string `json:"message,omitempty"`
 	Reason        *string `json:"reason,omitempty"`
 	Type          *string `json:"type,omitempty"`
+}
+
+// information about the extended support status of a kubernetes cluster
+type ExtendedSupportInfo struct {
+	// the date this version will reach extended support on
+	ExtendedFrom *string `json:"extendedFrom,omitempty"`
+	// whether this version is extended support
+	Extended *bool `json:"extended,omitempty"`
 }
 
 // A federated credential is a way to authenticate users from an external identity provider

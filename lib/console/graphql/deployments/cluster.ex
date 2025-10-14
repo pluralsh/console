@@ -464,7 +464,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     end
 
     field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
-      _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
+      _, _, _ -> {:ok, Clusters.kas_proxy_url()}
+    end
+
+    @desc "information about the extended support status of this cluster"
+    field :extended_support, :extended_support_info, resolve: fn
+      cluster, _, _ -> {:ok, Clusters.extended_support(cluster)}
     end
 
     field :agent_url, :string,
@@ -772,6 +777,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cluster,      :cluster, resolve: dataloader(Deployments), description: "the cluster this resource belongs to"
 
     timestamps()
+  end
+
+  @desc "information about the extended support status of a kubernetes cluster"
+  object :extended_support_info do
+    field :extended_from, :datetime, description: "the date this version will reach extended support on"
+    field :extended,      :boolean, description: "whether this version is extended support"
   end
 
   @desc "a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api"

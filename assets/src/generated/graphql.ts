@@ -1766,6 +1766,8 @@ export type Cluster = {
   distro?: Maybe<ClusterDistro>;
   /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** information about the extended support status of this cluster */
+  extendedSupport?: Maybe<ExtendedSupportInfo>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: Maybe<Scalars['String']['output']>;
   /** The health score of the cluster */
@@ -3474,6 +3476,15 @@ export enum EvidenceType {
   Log = 'LOG',
   Pr = 'PR'
 }
+
+/** information about the extended support status of a kubernetes cluster */
+export type ExtendedSupportInfo = {
+  __typename?: 'ExtendedSupportInfo';
+  /** whether this version is extended support */
+  extended?: Maybe<Scalars['Boolean']['output']>;
+  /** the date this version will reach extended support on */
+  extendedFrom?: Maybe<Scalars['DateTime']['output']>;
+};
 
 /** A federated credential is a way to authenticate users from an external identity provider */
 export type FederatedCredential = {

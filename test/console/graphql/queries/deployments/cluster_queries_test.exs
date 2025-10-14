@@ -140,6 +140,23 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["id"] == cluster.id
     end
 
+    test "it can fetch extended support info from a cluster" do
+      cluster = insert(:cluster, distro: :eks, current_version: "1.28")
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            extendedSupport { extended extendedFrom }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert found["id"] == cluster.id
+      assert found["extendedSupport"]["extended"]
+      assert found["extendedSupport"]["extendedFrom"]
+    end
+
     test "it can sideload insight components" do
       cluster = insert(:cluster)
       components = insert_list(3, :cluster_insight_component, cluster: cluster)
