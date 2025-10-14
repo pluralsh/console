@@ -27,6 +27,7 @@ def fetch_extended_versions(service):
         for release in releases:
             if not isinstance(release, dict):
                 continue
+            print(release)
             version = release.get('name')
             
             if not re.match(r'^\d+\.\d+$', str(version)):
@@ -35,7 +36,9 @@ def fetch_extended_versions(service):
             is_maintained = release.get('isMaintained', False)
             is_eol = release.get('isEol', False)
             is_eoas = release.get('isEoas', False)
-            extended_from = release.get('eoasFrom') if service == 'google-kubernetes-engine' else release.get('eoesFrom')
+            extended_from = release.get('eoasFrom')
+            if service in ["amazon-eks", "azure-kubernetes-service"]:
+                extended_from = release.get('eolFrom')
             
             is_extended = False
             if service in ['amazon-eks', 'azure-kubernetes-service', 'google-kubernetes-engine']:

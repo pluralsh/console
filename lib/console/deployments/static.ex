@@ -14,4 +14,11 @@ defmodule Console.Deployments.Static do
   def deprecations(), do: @deprecations
   def cloud_addons(), do: @cloud_addons
   def versions(), do: @versions
+
+  def __mix_recompile__?() do
+    @compatibilities != Deployments.Compatibilities.Table.static() or
+    @cloud_addons != Deployments.Compatibilities.CloudAddOns.static() or
+    @deprecations != Deployments.Deprecations.Table.static() or
+    @versions != Deployments.KubeVersions.Table.static()
+  end
 end
