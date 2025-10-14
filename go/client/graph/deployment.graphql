@@ -82,8 +82,8 @@ mutation RollbackService($id: ID!, $revisionId: ID!) {
     }
 }
 
-mutation updateServiceComponents($id: ID!, $components: [ComponentAttributes],$revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes], $metadata: ServiceMetadataAttributes) {
-    updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors, metadata: $metadata) {
+mutation updateServiceComponents($id: ID!, $components: [ComponentAttributes],$revisionId: ID!, $sha: String, $errors: [ServiceErrorAttributes]) {
+    updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors) {
         ...ServiceDeploymentFragment
     }
 }

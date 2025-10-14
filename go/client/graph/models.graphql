@@ -78,10 +78,6 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
             ...DiffNormalizerFragment
         }
     }
-    metadata {
-        images
-        fqdns
-    }
 }
 
 fragment ServiceDeploymentExtended on ServiceDeployment {
