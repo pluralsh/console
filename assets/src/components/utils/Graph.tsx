@@ -1,12 +1,11 @@
-import type { LineSeries, PointTooltipProps } from '@nivo/line'
 import { ResponsiveLine } from '@nivo/line'
 import { type PartialTheme as NivoThemeType } from '@nivo/theming'
-import { Card, Flex } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
 import { last } from 'lodash'
 import { Key, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
+import { SliceTooltip } from './ChartTooltip'
 import { CaptionP } from './typography/Text'
 
 export function dateFormat(date) {
@@ -14,15 +13,8 @@ export function dateFormat(date) {
 }
 
 export function useGraphTheme(): NivoThemeType {
-  const { colors, boxShadows } = useTheme()
+  const { colors } = useTheme()
   return {
-    tooltip: {
-      container: {
-        background: colors['fill-two'],
-        color: colors['text-light'],
-        boxShadow: boxShadows.moderate,
-      },
-    },
     legends: {
       text: { fill: colors['text-light'] },
       title: { text: { fill: colors['text-light'] } },
@@ -43,35 +35,6 @@ export function useGraphTheme(): NivoThemeType {
     grid: { line: { stroke: colors.border } },
     crosshair: { line: { stroke: colors['border-fill-three'] } },
   }
-}
-
-const SliceTootipWrapperSC = styled(Card)(({ theme }) => ({
-  ...theme.partials.text.caption,
-  display: 'flex',
-  alignItems: 'center',
-  width: 'max-content',
-  gap: theme.spacing.xsmall,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-}))
-
-export function SliceTooltip({ point }: PointTooltipProps<LineSeries>) {
-  const { seriesColor, seriesId, data } = point
-
-  return (
-    <SliceTootipWrapperSC fillLevel={2}>
-      <Flex
-        width={12}
-        height={12}
-        flexShrink={0}
-        backgroundColor={seriesColor}
-      />
-      <div>
-        {seriesId}: <span css={{ fontWeight: 700 }}>{data.yFormatted}</span>
-        <br />
-        {data.xFormatted}
-      </div>
-    </SliceTootipWrapperSC>
-  )
 }
 
 export function Graph({

@@ -5,9 +5,10 @@ import { ClusterUsageHistoryFragment } from 'generated/graphql'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { formatDateTime } from 'utils/datetime'
-import { SliceTooltip, useGraphTheme } from '../../utils/Graph'
-import { dollarize } from '../ClusterUsagesTableCols'
+import { SliceTooltip } from 'components/utils/ChartTooltip'
+import { useGraphTheme } from 'components/utils/Graph'
 import { LineGraphData } from 'components/utils/NivoLineForecastingLayer'
+import { dollarize } from '../ClusterUsagesTableCols'
 
 export const GRAPH_CARD_MAX_HEIGHT = 330
 
