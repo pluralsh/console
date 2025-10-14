@@ -216,6 +216,10 @@ fragment ClustersRow on Cluster {
   insight {
     ...AiInsightSummary
   }
+  extendedSupport {
+    extended
+    extendedFrom
+  }
 }
 
 fragment ClusterUpgradePlan on ClusterUpgradePlan {
