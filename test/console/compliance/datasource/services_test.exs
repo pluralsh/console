@@ -37,7 +37,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       assert result.helm_url == "https://charts.example.com"
       assert result.helm_chart == "test-chart"
       assert result.helm_version == "1.0.0"
-      assert result.images == ["nginx:1.21", "redis:6.2", "postgres:13"]
+      assert result.images == "nginx:1.21 redis:6.2 postgres:13"
       assert result.created_at == service.inserted_at
     end
 
@@ -68,7 +68,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       assert result.helm_url == nil
       assert result.helm_chart == nil
       assert result.helm_version == nil
-      assert result.images == []
+      assert result.images == ""
       assert result.created_at == service.inserted_at
     end
 
@@ -77,7 +77,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       cluster = insert(:cluster, project: project)
 
       # Test with various image formats that might appear in CSV
-      service = insert(:service, %{
+      _service = insert(:service, %{
         name: "csv-test-service",
         namespace: "csv-namespace",
         status: :healthy,
@@ -94,22 +94,23 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       result = Services.stream()
                |> Enum.find(& &1.service == "csv-test-service" && &1.namespace == "csv-namespace")
 
-      # Verify images are returned as a list for proper CSV handling
-      assert is_list(result.images)
-      assert length(result.images) == 5
-      assert "nginx:1.21" in result.images
-      assert "redis:6.2-alpine" in result.images
-      assert "postgres:13" in result.images
-      assert "my-registry.com/app:v1.2.3" in result.images
-      assert "quay.io/operator:latest" in result.images
+      # Verify images are returned as a comma-separated string for proper CSV handling
+      assert is_binary(result.images)
 
-      # Test that images can be properly joined for CSV (simulating CSV export)
-      csv_images = Enum.join(result.images, ",")
-      assert csv_images =~ "nginx:1.21"
-      assert csv_images =~ "redis:6.2-alpine"
-      assert csv_images =~ "postgres:13"
-      assert csv_images =~ "my-registry.com/app:v1.2.3"
-      assert csv_images =~ "quay.io/operator:latest"
+      images_list = String.split(result.images, " ")
+      assert length(images_list) == 5
+      assert "nginx:1.21" in images_list
+      assert "redis:6.2-alpine" in images_list
+      assert "postgres:13" in images_list
+      assert "my-registry.com/app:v1.2.3" in images_list
+      assert "quay.io/operator:latest" in images_list
+
+      # Test that the CSV string contains all expected images
+      assert result.images =~ "nginx:1.21"
+      assert result.images =~ "redis:6.2-alpine"
+      assert result.images =~ "postgres:13"
+      assert result.images =~ "my-registry.com/app:v1.2.3"
+      assert result.images =~ "quay.io/operator:latest"
     end
   end
 end
