@@ -37,7 +37,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       assert result.helm_url == "https://charts.example.com"
       assert result.helm_chart == "test-chart"
       assert result.helm_version == "1.0.0"
-      assert result.images == "nginx:1.21,redis:6.2,postgres:13"
+      assert result.images == "nginx:1.21 redis:6.2 postgres:13"
       assert result.created_at == service.inserted_at
     end
 
@@ -97,7 +97,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       # Verify images are returned as a comma-separated string for proper CSV handling
       assert is_binary(result.images)
 
-      images_list = String.split(result.images, ",")
+      images_list = String.split(result.images, " ")
       assert length(images_list) == 5
       assert "nginx:1.21" in images_list
       assert "redis:6.2-alpine" in images_list
