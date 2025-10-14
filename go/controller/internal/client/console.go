@@ -2,23 +2,12 @@ package client
 
 import (
 	"context"
-	"net/http"
 
 	console "github.com/pluralsh/console/go/client"
-
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/polly/http"
 )
-
-type authedTransport struct {
-	token   string
-	wrapped http.RoundTripper
-}
-
-func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Token "+t.token)
-	return t.wrapped.RoundTrip(req)
-}
 
 type client struct {
 	ctx           context.Context
@@ -196,12 +185,8 @@ type ConsoleClient interface {
 
 func New(url, token string) ConsoleClient {
 	return &client{
-		consoleClient: console.NewClient(NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
+		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
 		url:           url,
 		ctx:           context.Background(),
 	}
-}
-
-func NewHttpClient(token string) *http.Client {
-	return &http.Client{Transport: &authedTransport{token: token, wrapped: http.DefaultTransport}}
 }
