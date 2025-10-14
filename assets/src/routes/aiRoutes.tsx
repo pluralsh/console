@@ -11,6 +11,7 @@ import {
   AI_SENTINELS_REL_PATH,
 } from './aiRoutesConsts'
 import { AISentinels } from 'components/ai/sentinel/AISentinels.tsx'
+import { AISentinel } from 'components/ai/sentinel/AISentinel.tsx'
 
 export const aiRoutes = (
   <Route
@@ -41,6 +42,10 @@ export const aiRoutes = (
     <Route
       path={AI_SENTINELS_REL_PATH}
       element={<AISentinels />}
+    />
+    <Route
+      path={`${AI_SENTINELS_REL_PATH}/:id`}
+      element={<AISentinel />}
     />
   </Route>
 )

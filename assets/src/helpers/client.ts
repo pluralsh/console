@@ -25,6 +25,11 @@ const GQL_URL = '/gql'
 const WS_URI = '/socket'
 const GQL_WS_URI = '/socket/gql-ws'
 
+export const { client, socket } = buildClient(
+  { gql: GQL_URL, ws: WS_URI, gqlws: GQL_WS_URI },
+  fetchToken
+)
+
 export const authlessClient = new ApolloClient({
   link: createLink({ uri: GQL_URL }),
   cache: new InMemoryCache(),
@@ -101,7 +106,6 @@ export function buildClient(
   )
 
   const client = new ApolloClient({
-    // @ts-ignore
     link: splitLink,
     cache: new InMemoryCache({
       possibleTypes: fragments.possibleTypes,
@@ -149,13 +153,6 @@ export function buildClient(
 
   return { client, socket }
 }
-
-const { client, socket } = buildClient(
-  { gql: GQL_URL, ws: WS_URI, gqlws: GQL_WS_URI },
-  fetchToken
-)
-
-export { client, socket }
 
 // partially adapted from https://github.com/apollographql/apollo-utils/blob/main/packages/persisted-query-lists/
 function getPersistedQueryLinkOptions() {

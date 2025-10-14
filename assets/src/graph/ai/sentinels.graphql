@@ -11,6 +11,7 @@ fragment Sentinel on Sentinel {
   repository {
     id
     url
+    httpsPath
   }
   checks {
     ...SentinelCheck
@@ -56,6 +57,11 @@ fragment SentinelRun on SentinelRun {
   updatedAt
 }
 
+fragment SentinelStatistic on SentinelStatistic {
+  status
+  count
+}
+
 query Sentinels(
   $first: Int = 100
   $after: String
@@ -98,8 +104,7 @@ query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
 
 query SentinelStatistics($q: String) {
   sentinelStatistics(q: $q) {
-    status
-    count
+    ...SentinelStatistic
   }
 }
 

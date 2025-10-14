@@ -13,9 +13,6 @@ fragment PrAutomation on PrAutomation {
     id
     name
   }
-  repository {
-    url
-  }
   role
   documentation
   connection {
