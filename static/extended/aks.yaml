@@ -1,26 +1,39 @@
 - version: '1.33'
   extended: false
+  extended_from: '2027-06-30'
 - version: '1.32'
   extended: false
+  extended_from: '2027-03-31'
 - version: '1.31'
   extended: false
+  extended_from: '2026-11-30'
 - version: '1.30'
   extended: true
+  extended_from: '2026-07-31'
 - version: '1.29'
   extended: true
+  extended_from: '2026-04-30'
 - version: '1.28'
   extended: true
+  extended_from: '2026-02-28'
 - version: '1.27'
   extended: true
+  extended_from: '2025-07-31'
 - version: '1.26'
   extended: true
+  extended_from: null
 - version: '1.25'
   extended: true
+  extended_from: null
 - version: '1.24'
   extended: true
+  extended_from: null
 - version: '1.23'
   extended: true
+  extended_from: null
 - version: '1.22'
   extended: true
+  extended_from: null
 - version: '1.21'
   extended: true
+  extended_from: null

@@ -35,18 +35,16 @@ def fetch_extended_versions(service):
             is_maintained = release.get('isMaintained', False)
             is_eol = release.get('isEol', False)
             is_eoas = release.get('isEoas', False)
+            extended_from = release.get('eoasFrom') if service == 'google-kubernetes-engine' else release.get('eoesFrom')
             
             is_extended = False
-            if service in ['amazon-eks', 'azure-kubernetes-service']:
-                # For EKS and AKS, extended support is when it's maintained AND in EOL
+            if service in ['amazon-eks', 'azure-kubernetes-service', 'google-kubernetes-engine']:
                 is_extended = not is_maintained or is_eol or is_eoas
-            elif service == 'google-kubernetes-engine':
-                # For GKE, extended support is when it's maintained AND in EOAS
-                is_extended = not is_maintained or is_eoas or is_eol
-                
+        
             versions.append({
                 "version": version,
-                "extended": is_extended
+                "extended": is_extended,
+                "extended_from": extended_from
             })
     except (ValueError, KeyError) as e:
         print(f"Failed to parse response for {service}: {str(e)}")
