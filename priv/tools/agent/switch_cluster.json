@@ -6,6 +6,5 @@
             "description": "The handle of the cluster to switch to."
         }
     },
-    "required": ["handle"],
-    "additionalProperties": false
+    "required": ["handle"]
 }

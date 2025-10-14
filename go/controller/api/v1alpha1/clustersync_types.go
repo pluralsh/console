@@ -35,6 +35,7 @@ type ClusterSyncList struct {
 //
 // Example usage:
 //
+//	```yaml
 //	apiVersion: deployments.plural.sh/v1alpha1
 //	kind: ClusterSync
 //	metadata:
@@ -53,6 +54,7 @@ type ClusterSyncList struct {
 //	      handle: "{{ .cluster.handle }}"
 //	      version: "{{ .cluster.version }}"
 //	      cloud: "{{ .cluster.cloud }}"
+//	 ````
 type ClusterSync struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

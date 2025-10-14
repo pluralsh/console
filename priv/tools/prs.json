@@ -6,6 +6,5 @@
             "description": "A search string to query for pr file contents using semantic vector search. This should ideally target actual code functionality."
         }
     },
-    "required": ["query"],
-    "additionalProperties": false
+    "required": ["query"]
 }

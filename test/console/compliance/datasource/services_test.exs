@@ -77,7 +77,7 @@ defmodule Console.Compliance.Datasource.ServicesTest do
       cluster = insert(:cluster, project: project)
 
       # Test with various image formats that might appear in CSV
-      _service = insert(:service, %{
+      insert(:service, %{
         name: "csv-test-service",
         namespace: "csv-namespace",
         status: :healthy,

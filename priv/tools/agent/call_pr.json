@@ -14,6 +14,5 @@
             "description": "The branch to create the PR on.  It should be a concise name descriptive of the change being made."
         }
     },
-    "required": ["pr_automation_id", "branch"],
-    "additionalProperties": false
+    "required": ["pr_automation_id", "branch"]
 }

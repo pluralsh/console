@@ -4,7 +4,8 @@ defmodule Console.AI.Vertex do
   """
   @behaviour Console.AI.Provider
   alias Console.AI.GothManager
-  alias Console.AI.OpenAI
+  alias Console.AI.{OpenAI, Anthropic}
+  alias Console.AI.Stream
   alias Console.AI.Utils
 
   @default_model "gemini-2.5-flash"
@@ -43,15 +44,35 @@ defmodule Console.AI.Vertex do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = vertex, messages, opts) do
+    model = model(vertex, opts[:client])
     with {:ok, %{token: token}} <- client(vertex) do
-      OpenAI.new(%{
-        base_url: openai_url(vertex),
-        access_token: token,
-        model: openai_model(vertex),
-        tool_model: openai_model(vertex)
-      })
-      |> OpenAI.completion(messages, opts)
+      case model do
+        "anthropic/" <> _ -> anthropic_completion(vertex, token, messages, opts)
+        _ -> openai_completion(vertex, token, messages, opts)
+      end
     end
+  end
+
+  defp openai_completion(vertex, token, messages, opts) do
+    model = model(vertex, opts[:client])
+    OpenAI.new(%{
+      base_url: openai_url(vertex),
+      access_token: token,
+      model: openai_model(model),
+      tool_model: openai_model(model)
+    })
+    |> OpenAI.completion(messages, opts)
+  end
+
+  defp anthropic_completion(vertex, token, messages, opts) do
+    {_, model} = model_info(model(vertex, opts[:client]))
+    Anthropic.new(%{
+      full_url: anthropic_url(vertex, model, Stream.stream()),
+      access_token: token,
+      model: model,
+      body: %{"anthropic_version" => "vertex-2023-10-16"}
+    })
+    |> Anthropic.completion(messages, opts)
   end
 
   @doc """
@@ -59,14 +80,11 @@ defmodule Console.AI.Vertex do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = vertex, messages, tools) do
-    with {:ok, %{token: token}} <- client(vertex) do
-      OpenAI.new(%{
-        base_url: openai_url(vertex),
-        access_token: token,
-        model: openai_model(vertex),
-        tool_model: openai_model(vertex)
-      })
-      |> OpenAI.tool_call(messages, tools)
+    case completion(vertex, messages, plural: tools, require_tools: true, client: :tool) do
+      {:ok, _, [_ | _] = tools} -> {:ok, tools}
+      {:ok, content, _} -> {:error, "Tool call failed: #{content}"}
+      {:ok, content}    -> {:error, "Tool call failed: #{content}"}
+      error -> error
     end
   end
 
@@ -94,7 +112,7 @@ defmodule Console.AI.Vertex do
   end
 
   defp embed(url, token, text) do
-    HTTPoison.post(url, Jason.encode!(%{
+    HTTPoison.post("#{url}:predict", Jason.encode!(%{
       instances: [%{content: String.slice(text, 0, 8100)}],
       parameters: %{
         outputDimensionality: Utils.embedding_dims()
@@ -109,6 +127,11 @@ defmodule Console.AI.Vertex do
 
   defp openai_url(%__MODULE__{project: p, location: l} = c),
     do: "https://#{l}-aiplatform.googleapis.com/v1beta1/projects/#{p}/locations/#{l}/endpoints/#{ep(c)}"
+
+  defp anthropic_url(%__MODULE__{project: p, location: l}, model, %Console.AI.Stream{}),
+    do: "https://#{l}-aiplatform.googleapis.com/v1/projects/#{p}/locations/#{l}/publishers/anthropic/models/#{model}:rawPredict"
+  defp anthropic_url(%__MODULE__{project: p, location: l}, model, _),
+    do: "https://#{l}-aiplatform.googleapis.com/v1/projects/#{p}/locations/#{l}/publishers/anthropic/models/#{model}:streamRawPredict"
 
   defp vertex_url(%__MODULE__{project: p, location: l}, publisher, model),
     do: "https://#{l}-aiplatform.googleapis.com/v1beta1/projects/#{p}/locations/#{l}/publishers/#{publisher}/models/#{model}"
@@ -130,6 +153,10 @@ defmodule Console.AI.Vertex do
     end
   end
   defp openai_model(_), do: "google/#{@default_model}"
+
+  defp model(%__MODULE__{tool_model: m}, :tool) when is_binary(m), do: m
+  defp model(%__MODULE__{model: m}, _) when is_binary(m), do: m
+  defp model(_, _), do: @default_model
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}), do: Jason.decode(body)
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}}),

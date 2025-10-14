@@ -26,6 +26,5 @@
             "description": "The kubernetes resource name"
         }
     },
-    "required": ["service_deployment", "cluster", "api_version", "kind", "name"],
-    "additionalProperties": false
+    "required": ["service_deployment", "cluster", "api_version", "kind", "name"]
 }

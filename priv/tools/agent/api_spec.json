@@ -14,6 +14,5 @@
             "description": "a search query to use to find the relevant kind within that api group and version"
         }
     },
-    "required": ["group", "version", "query"],
-    "additionalProperties": false
+    "required": ["group", "version", "query"]
 }

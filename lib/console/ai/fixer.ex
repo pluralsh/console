@@ -70,7 +70,7 @@ defmodule Console.AI.Fixer do
   def fix(%AiInsight{service: svc, stack: stack, alert: alert} = insight)
       when is_map(svc) or is_map(stack) or is_map(alert) do
     with {:ok, prompt} <- fix_prompt(insight),
-      do: Provider.completion(ask(prompt))
+      do: Provider.completion(ask(prompt), client: :tool)
   end
 
   def fix(_), do: {:error, "ai fix recommendations not supported for this insight"}

@@ -26,7 +26,7 @@ defmodule Console.Cost.Pr do
       prompt
       |> append({:user, cost_prompt(rec)})
       |> append({:user, "Be sure to explicitly state the Git repository and full file names that are needed to change, alongside the content of the files that need to be modified with enough surrounding context to understand what changed.  Also provide a git-style diff comparison for each changed file where possible."})
-      |> Provider.completion(preface: @pr)
+      |> Provider.completion(preface: @pr, client: :tool)
     end
   end
 

@@ -154,7 +154,10 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       middleware ErrorHandler
     end
 
-    field :job_spec,      :job_gate_spec, description: "the job that was run"
+    field :job_spec, :job_gate_spec, description: "the job that was run", resolve: fn
+      run, _, _ -> {:ok, Map.get(run, :job)}
+    end
+
     field :reference,     :job_reference, description: "the reference to the job that was run"
 
     field :cluster,       :cluster, resolve: dataloader(Deployments), description: "the cluster that the job was run on"

@@ -6,6 +6,5 @@
             "description": "a string to query for cluster by name or tag"
         }
     },
-    "required": [],
-    "additionalProperties": false
+    "required": []
 }

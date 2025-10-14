@@ -79,12 +79,12 @@ defmodule Console.AI.OpenAI do
 
   def new(opts) do
     %__MODULE__{
-      access_key: opts.access_token,
-      model: opts.model,
-      tool_model: opts.tool_model,
-      base_url: opts.base_url,
-      embedding_model: opts.embedding_model,
-      azure_token: Map.get(opts, :azure_token, nil),
+      access_key: Map.get(opts, :access_token),
+      model: Map.get(opts, :model),
+      tool_model: Map.get(opts, :tool_model),
+      base_url: Map.get(opts, :base_url),
+      embedding_model: Map.get(opts, :embedding_model),
+      azure_token: Map.get(opts, :azure_token),
       stream: Stream.stream()
     }
   end
@@ -103,7 +103,7 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
-    case chat(openai, msg_history(model(openai), messages), opts) do
+    case chat(openai, msg_history(model(openai, opts[:client]), messages), opts) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, content, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -168,39 +168,40 @@ defmodule Console.AI.OpenAI do
   defp chat(%__MODULE__{stream: %Stream{} = stream} = openai, history, opts) do
     Stream.Exec.openai(fn ->
       all   = tools(opts)
-      model = model(openai)
-
-      body = Map.merge(%{
-        model: model,
-        messages: history,
-        stream: true,
-        tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
-      }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
-      |> Map.merge(reasoning_details(model))
-      |> Console.drop_nils()
-      |> Jason.encode!()
+      model = model(openai, opts[:client])
 
       url(openai, "/chat/completions")
-      |> HTTPoison.post(body, json_headers(openai), [stream_to: self(), async: :once] ++ @options)
+      |> HTTPoison.post(
+        chat_body(model, history, all, opts, true),
+        json_headers(openai),
+        [stream_to: self(), async: :once] ++ @options
+      )
     end, stream)
   end
 
   defp chat(%__MODULE__{} = openai, history, opts) do
     all   = tools(opts)
-    model = model(openai)
-
-    body = Console.drop_nils(%{
-      model: model,
-      messages: history,
-      tools: (if !Enum.empty?(all), do: Enum.map(all, &tool_args/1), else: nil)
-    })
-    |> Map.merge((if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
-    |> Map.merge(reasoning_details(model))
-    |> Jason.encode!()
+    model = model(openai, opts[:client])
 
     url(openai, "/chat/completions")
-    |> HTTPoison.post(body, json_headers(openai), @options)
+    |> HTTPoison.post(
+      chat_body(model, history, all, opts),
+      json_headers(openai),
+      @options
+    )
     |> handle_response(CompletionResponse.spec())
+  end
+
+  defp chat_body(model, history, tools, opts, stream \\ false) do
+    Map.merge(%{
+      model: model,
+      messages: history,
+      stream: stream,
+      tools: (if !Enum.empty?(tools), do: Enum.map(tools, &tool_args/1), else: nil)
+    }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge(reasoning_details(model))
+    |> Console.drop_nils()
+    |> Jason.encode!()
   end
 
   defp embed(%__MODULE__{embedding_model: model} = openai, text) do
@@ -248,8 +249,9 @@ defmodule Console.AI.OpenAI do
     |> Enum.filter(& &1)
   end
 
-  defp model(%__MODULE__{model: m}) when is_binary(m), do: m
-  defp model(_), do: @model
+  defp model(%__MODULE__{tool_model: m}, :tool) when is_binary(m), do: m
+  defp model(%__MODULE__{model: m}, _) when is_binary(m), do: m
+  defp model(_, _), do: @model
 
   defp window("gpt-5" <> _), do: 400_000 * 4
   defp window("gpt-4.1" <> _), do: 1_000_000 * 4
@@ -263,9 +265,11 @@ defmodule Console.AI.OpenAI do
   defp tool_role(:system, model) do
     case model do
       "gpt-4.1" <> _ -> :developer
-      "gpt-4" <> _ -> :system
-      "gpt-3" <> _ -> :system
-      _ -> :developer
+      "gpt-4" <> _   -> :system
+      "gpt-3" <> _   -> :system
+      "gpt" <> _     -> :developer
+      "o3" <> _      -> :developer
+      _ -> :system
     end
   end
   defp tool_role(r, _), do: r

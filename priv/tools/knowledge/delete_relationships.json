@@ -21,11 +21,9 @@
                         "description": "the type of the relationship to delete"
                     }
                 },
-                "required": ["from", "to", "type"],
-                "additionalProperties": false
+                "required": ["from", "to", "type"]
             }
         }
     },
-    "required": ["relationships"],
-    "additionalProperties": false
+    "required": ["relationships"]
 }

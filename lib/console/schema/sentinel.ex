@@ -142,6 +142,6 @@ defmodule Console.Schema.Sentinel do
     model
     |> cast(attrs, ~w(tags distro)a)
     |> cast_embed(:job)
-    |> validate_required(~w(tags distro)a)
+    |> validate_required(~w(distro)a)
   end
 end

@@ -6,6 +6,5 @@
             "description": "Whether a seasoned kubernetes expert would think that container logs are necessary to diagnose the given issues"
         }
     },
-    "required": ["required"],
-    "additionalProperties": false
+    "required": ["required"]
 }

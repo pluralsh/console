@@ -10,6 +10,5 @@
             "description": "The Plural cluster handle the service is deployed to"
         }
     },
-    "required": ["service_deployment", "cluster"],
-    "additionalProperties": false
+    "required": ["service_deployment", "cluster"]
 }

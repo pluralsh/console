@@ -6,6 +6,5 @@
             "description": "The query to use to search for a kubernetes resource deployed through a Plural Service.  This should be a natural language query that describes the kubernetes resource you are looking for."
         }
     },
-    "required": ["query"],
-    "additionalProperties": false
+    "required": ["query"]
 }

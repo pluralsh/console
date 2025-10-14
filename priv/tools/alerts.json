@@ -23,6 +23,5 @@
             "description": "Optional. Filter alerts by type. If omitted, alerts of all types are returned."
         }
     },
-    "required": [],
-    "additionalProperties": false
+    "required": []
 }

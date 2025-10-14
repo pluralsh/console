@@ -10,6 +10,5 @@
             "description": "A few sentences to run as a query against a vector store to extract additional data to troubleshoot this issue. This should ideally include useful semantic information like function names, error messages, etc. to explain what's happening."
         }
     },
-    "required": ["required", "query"],
-    "additionalProperties": false
+    "required": ["required", "query"]
 }

@@ -58,6 +58,7 @@ type DeploymentSettingsList struct {
 //
 // Example usage:
 //
+//	```yaml
 //	apiVersion: deployments.plural.sh/v1alpha1
 //	kind: DeploymentSettings
 //	metadata:
@@ -95,6 +96,7 @@ type DeploymentSettingsList struct {
 //	  cost:
 //	    recommendationCushion: 20
 //	    recommendationThreshold: 100
+//	```
 type DeploymentSettings struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -557,12 +559,11 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 	}
 	attr.AnalysisRates = analysisRates
 
-	switch *in.Provider {
-	case console.AiProviderOpenai:
-		if in.OpenAI == nil {
-			return nil, nil // nil if you're using internal plural cloud auth to openai
-		}
+	if err := in.validateProviders(); err != nil {
+		return nil, err
+	}
 
+	if in.OpenAI != nil {
 		token, err := in.OpenAI.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -575,11 +576,9 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.OpenAI.ToolModel,
 			EmbeddingModel: in.OpenAI.EmbeddingModel,
 		}
-	case console.AiProviderAnthropic:
-		if in.Anthropic == nil {
-			return nil, fmt.Errorf("must provide anthropic configuration to set the provider to ANTHROPIC")
-		}
+	}
 
+	if in.Anthropic != nil {
 		token, err := in.Anthropic.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -591,11 +590,9 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Anthropic.ToolModel,
 			EmbeddingModel: in.Anthropic.EmbeddingModel,
 		}
-	case console.AiProviderAzure:
-		if in.Azure == nil {
-			return nil, fmt.Errorf("must provide azure openai configuration to set the provider to AZURE")
-		}
+	}
 
+	if in.Azure != nil {
 		token, err := in.Azure.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -609,7 +606,9 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
 		}
-	case console.AiProviderVertex:
+	}
+
+	if in.Vertex != nil {
 		if in.Vertex == nil {
 			return nil, fmt.Errorf("must provide vertex ai configuration to set the provider to VERTEX")
 		}
@@ -628,7 +627,9 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			EmbeddingModel:     in.Vertex.EmbeddingModel,
 			ToolModel:          in.Vertex.ToolModel,
 		}
-	case console.AiProviderBedrock:
+	}
+
+	if in.Bedrock != nil {
 		if in.Bedrock == nil {
 			return nil, fmt.Errorf("must provide bedrock configuration to set the provider to BEDROCK")
 		}
@@ -645,11 +646,9 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Region:         lo.ToPtr(in.Bedrock.Region),
 			EmbeddingModel: in.Bedrock.EmbeddingModel,
 		}
-	case console.AiProviderOllama:
-		if in.Ollama == nil {
-			return nil, fmt.Errorf("must provide ollama configuration to set the provider to OLLAMA")
-		}
+	}
 
+	if in.Ollama != nil {
 		auth, err := in.Ollama.Authorization(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -664,6 +663,60 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 	}
 
 	return attr, nil
+}
+
+func (in *AISettings) validateProviders() error {
+	if in.Provider == nil {
+		return fmt.Errorf("must set a provider")
+	}
+
+	if err := in.checkProvider(in.Provider, "provider"); err != nil {
+		return err
+	}
+
+	if err := in.checkProvider(in.ToolProvider, "tool provider"); err != nil {
+		return err
+	}
+
+	if err := in.checkProvider(in.EmbeddingProvider, "embedding provider"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (in *AISettings) checkProvider(provider *console.AiProvider, ptype string) error {
+	if provider == nil {
+		return nil
+	}
+
+	switch *provider {
+	case console.AiProviderOpenai:
+		if in.OpenAI == nil {
+			return fmt.Errorf("must provide openai configuration to set the %s to OPENAI", ptype)
+		}
+	case console.AiProviderAnthropic:
+		if in.Anthropic == nil {
+			return fmt.Errorf("must provide anthropic configuration to set the %s to ANTHROPIC", ptype)
+		}
+	case console.AiProviderAzure:
+		if in.Azure == nil {
+			return fmt.Errorf("must provide azure openai configuration to set the %s to AZURE", ptype)
+		}
+	case console.AiProviderVertex:
+		if in.Vertex == nil {
+			return fmt.Errorf("must provide vertex ai configuration to set the %s to VERTEX", ptype)
+		}
+	case console.AiProviderBedrock:
+		if in.Bedrock == nil {
+			return fmt.Errorf("must provide bedrock configuration to set the %s to BEDROCK", ptype)
+		}
+	case console.AiProviderOllama:
+		if in.Ollama == nil {
+			return fmt.Errorf("must provide ollama configuration to set the %s to OLLAMA", ptype)
+		}
+	}
+	return nil
 }
 
 type AIProviderSettings struct {
@@ -755,7 +808,7 @@ type AzureOpenAISettings struct {
 }
 
 type BedrockSettings struct {
-	// ModelID is the AWS Bedrock Model ID to use.
+	// ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported.
 	//
 	// +kubebuilder:validation:Required
 	ModelID string `json:"modelId"`
@@ -783,7 +836,7 @@ type BedrockSettings struct {
 }
 
 type VertexSettings struct {
-	// Model is the Vertex AI model to use
+	// Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
