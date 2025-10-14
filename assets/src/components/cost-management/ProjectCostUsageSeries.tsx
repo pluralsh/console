@@ -7,7 +7,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { COLORS } from 'utils/color'
 
 import { useProjectsContext } from 'components/contexts/ProjectsContext'
-import { SliceTooltip, useGraphTheme } from 'components/utils/Graph'
+import { useGraphTheme } from 'components/utils/Graph'
 import {
   ForecastingLayer,
   LineGraphData,
@@ -24,6 +24,7 @@ import {
   formatCpu,
   formatMemory,
 } from './details/recommendations/ClusterScalingRecsTableCols'
+import { SliceTooltip } from 'components/utils/ChartTooltip'
 
 export function ProjectUsageTimeSeries({
   data,

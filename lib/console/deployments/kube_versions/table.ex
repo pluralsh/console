@@ -56,6 +56,11 @@ defmodule Console.Deployments.KubeVersions.Table do
   end
   def fetch(_), do: fetch(:gke)
 
+  @spec fetch_strict(distro) :: [Version.t]
+  def fetch_strict(distro) when distro in @distros,
+    do: fetch(distro)
+  def fetch_strict(_), do: []
+
   @spec extended_versions() :: %{distro => binary | nil}
   def extended_versions() do
     Map.new(@distros, fn distro ->
@@ -70,7 +75,7 @@ defmodule Console.Deployments.KubeVersions.Table do
 
 
   def info(distro, version) do
-    with [_ | _] = versions <- fetch(distro),
+    with [_ | _] = versions <- fetch_strict(distro),
          %Version{} = vsn <- Enum.find(versions, &later?(version, &1.version)) do
       vsn
     else

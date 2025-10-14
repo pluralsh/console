@@ -5,12 +5,13 @@ import { createPortal } from 'react-dom'
 import styled, { useTheme } from 'styled-components'
 
 import { useCursorPosition } from './CursorPosition'
+import { LineSeries, PointTooltipProps } from '@nivo/line'
 
-const ChartTooltipSC = styled.div.attrs(() => ({}))((_) => ({
+const TooltipSC = styled.div.attrs(() => ({}))((_) => ({
   width: '0',
   height: '0',
 }))
-const ChartTooltipContentSC = styled(Card).attrs(() => ({
+const TooltipContentSC = styled(Card).attrs(() => ({
   fillLevel: 2,
 }))(({ theme }) => ({
   '&&': {
@@ -22,7 +23,7 @@ const ChartTooltipContentSC = styled(Card).attrs(() => ({
     transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
   },
 }))
-const ChartTooltipSwatchSC = styled.div.attrs(() => ({
+const TooltipSwatchSC = styled.div.attrs(() => ({
   'aria-hidden': true,
 }))<{ $color: string }>(({ $color }) => ({
   width: 12,
@@ -37,16 +38,14 @@ const springConfig = {
   precision: 0.01,
 }
 
-export function ChartTooltip({
+function TooltipWrapper({
   color,
-  label,
-  value,
   tooltipStyles,
+  children,
 }: {
   color: string
-  label: ReactNode
-  value: ReactNode
   tooltipStyles?: CSSProperties
+  children: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const cursorPos = useCursorPosition()
@@ -68,18 +67,48 @@ export function ChartTooltip({
         ...springProps,
       }}
     >
-      <ChartTooltipContentSC style={tooltipStyles}>
-        <ChartTooltipSwatchSC $color={color} />
-        <div>
-          {label}: <b>{value}</b>
-        </div>
-      </ChartTooltipContentSC>
+      <TooltipContentSC style={tooltipStyles}>
+        <TooltipSwatchSC $color={color} />
+        {children}
+      </TooltipContentSC>
     </AnimatedDiv>
   )
 
   return (
-    <ChartTooltipSC ref={ref as any}>
+    <TooltipSC ref={ref as any}>
       {createPortal(content, document.body)}
-    </ChartTooltipSC>
+    </TooltipSC>
+  )
+}
+
+export function ChartTooltip({
+  label,
+  value,
+  ...props
+}: {
+  label: ReactNode
+  value: ReactNode
+  color: string
+  tooltipStyles?: CSSProperties
+}) {
+  return (
+    <TooltipWrapper {...props}>
+      <div>
+        {label}: <b>{value}</b>
+      </div>
+    </TooltipWrapper>
+  )
+}
+
+export function SliceTooltip({ point }: PointTooltipProps<LineSeries>) {
+  const { seriesColor, seriesId, data } = point
+  return (
+    <TooltipWrapper color={seriesColor}>
+      <div>
+        {seriesId}: <b>{data.yFormatted}</b>
+        <br />
+        {data.xFormatted}
+      </div>
+    </TooltipWrapper>
   )
 }

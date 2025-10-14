@@ -2,6 +2,8 @@ import {
   Chip,
   Flex,
   GearTrainIcon,
+  IconFrame,
+  InfoOutlineIcon,
   ListBoxItem,
   PeopleIcon,
   ReturnIcon,
@@ -11,6 +13,7 @@ import {
   SmallNodeIcon,
   SmallPodIcon,
   TrashCanIcon,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { SortingFn } from '@tanstack/table-core'
@@ -43,6 +46,8 @@ import { isUpgrading, toNiceVersion } from 'utils/semver'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts.tsx'
 import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 
+import { CaptionP } from 'components/utils/typography/Text.tsx'
+import { formatDateTime } from 'utils/datetime.ts'
 import { UsageBar } from '../../utils/UsageBar.tsx'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
@@ -180,16 +185,50 @@ export const ColVersion = columnHelper.accessor(
         original: { node },
       },
     }) {
+      const { extendedSupport } = node || {}
       return (
-        <div>
-          {node?.currentVersion && (
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+        >
+          {node?.currentVersion ? (
             <StackedText
               truncate={true}
               first={
-                <div css={{ display: 'flex', flexDirection: 'column' }}>
-                  <TabularNumbers>
-                    Control Plane: {toNiceVersion(node?.currentVersion)}
-                  </TabularNumbers>
+                <div>
+                  <Flex
+                    align="center"
+                    gap="xxxsmall"
+                  >
+                    <TabularNumbers>
+                      Control Plane: {toNiceVersion(node?.currentVersion)}
+                    </TabularNumbers>
+                    {extendedSupport && (
+                      <IconFrame
+                        size="xsmall"
+                        tooltip={
+                          extendedSupport.extendedFrom ? (
+                            <CaptionP $color="text-light">
+                              Extended support from:{' '}
+                              <b>
+                                {formatDateTime(
+                                  extendedSupport.extendedFrom,
+                                  'MMM D, YYYY'
+                                )}
+                              </b>
+                            </CaptionP>
+                          ) : undefined
+                        }
+                        icon={
+                          extendedSupport.extended ? (
+                            <WarningIcon color="icon-warning" />
+                          ) : (
+                            <InfoOutlineIcon />
+                          )
+                        }
+                      />
+                    )}
+                  </Flex>
                   <TabularNumbers>
                     {node?.self || !node?.version
                       ? null
@@ -203,9 +242,10 @@ export const ColVersion = columnHelper.accessor(
                 </span>
               }
             />
+          ) : (
+            <>-</>
           )}
-          {!node?.currentVersion && <>-</>}
-        </div>
+        </Flex>
       )
     },
   }
