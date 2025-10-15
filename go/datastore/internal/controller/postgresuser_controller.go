@@ -60,14 +60,14 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
+		if err := scope.PatchObject(); client.IgnoreNotFound(err) != nil && retErr == nil {
 			retErr = err
 		}
 	}()
 
 	if !user.DeletionTimestamp.IsZero() {
 		if err = r.handleDelete(ctx, user); err != nil {
-			return ctrl.Result{}, err
+			return handleRequeuePostgres(nil, err, user.SetCondition)
 		}
 		return ctrl.Result{}, nil
 	}
