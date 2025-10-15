@@ -68,7 +68,7 @@ export const consoleComponentRoutes = [
   ...cdRoutes,
   settingsRoutes,
   kubernetesRoutes,
-  aiRoutes,
+  ...aiRoutes,
   ...flowRoutes,
   ...selfServiceRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))

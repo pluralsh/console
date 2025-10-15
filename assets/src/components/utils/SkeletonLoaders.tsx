@@ -1,3 +1,8 @@
+import {
+  SemanticSpacingKey,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 import styled, {
   CSSObject,
   CSSProperties,
@@ -23,6 +28,7 @@ const LinearGradient = styled.linearGradient`
   }
 `
 
+// pretty much deprecated in favor of "loading" prop on tables
 export function TableSkeleton({
   width = 870,
   height = 312,
@@ -158,24 +164,47 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
   )
 }
 
-export const RectangleSkeleton = styled.div(({ theme }) => ({
+export const RectangleSkeleton = styled.div<{
+  $height?: SemanticSpacingKey
+  $fixedWidth?: CSSProperties['width']
+}>(({ theme, $height = 'small', $fixedWidth }) => ({
   '@keyframes moving-gradient': {
     '0%': { backgroundPosition: '-250px 0' },
     '100%': { backgroundPosition: '250px 0' },
   },
-  maxWidth: '400px',
-  width: '100%',
+  width: $fixedWidth ?? '100%',
   position: 'relative',
   '&::after': {
     content: '""',
     borderRadius: theme.borderRadiuses.medium,
-    maxWidth: '400px',
-    width: 'unset',
-    minWidth: '150px',
+    minWidth: $fixedWidth ?? '150px',
     display: 'block',
-    height: '12px',
+    height: theme.spacing[$height],
     background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
     backgroundSize: '500px 100px',
     animation: 'moving-gradient 2s infinite linear forwards',
   },
 }))
+
+export function SidecarSkeleton({ num = 6 }: { num?: number }) {
+  const { spacing } = useTheme()
+  return (
+    <Sidecar>
+      {Array.from({ length: num }).map((_, index) => (
+        <SidecarItem
+          css={{ '& > *': { lineHeight: '30px' } }}
+          key={index}
+          heading={
+            <RectangleSkeleton
+              css={{ marginBottom: spacing.xsmall }}
+              $height="xsmall"
+              $fixedWidth="40%"
+            />
+          }
+        >
+          <RectangleSkeleton />
+        </SidecarItem>
+      ))}
+    </Sidecar>
+  )
+}

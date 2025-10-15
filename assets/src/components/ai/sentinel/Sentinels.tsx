@@ -25,11 +25,12 @@ import {
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
-import { sentinelsCols } from './AISentinelsTableCols.tsx'
+import { sentinelsCols } from './SentinelsTableCols.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 type StatusFilterKey = 'All' | SentinelRunStatus
 
-export function AISentinels() {
+export function Sentinels() {
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const [filterString, setFilterString] = useState('')
@@ -48,7 +49,10 @@ export function AISentinels() {
   const sentinels = useMemo(() => mapExistingNodes(data?.sentinels), [data])
 
   const { data: statsData, previousData: statsPreviousData } =
-    useSentinelStatisticsQuery({ variables: { q: debouncedFilterString } })
+    useSentinelStatisticsQuery({
+      variables: { q: debouncedFilterString },
+      pollInterval: POLL_INTERVAL,
+    })
   const { sentinelStatistics } = statsData || statsPreviousData || {}
   const statusCounts = useMemo(
     () => getStatusCountMap(sentinelStatistics?.filter(isNonNullable) ?? []),

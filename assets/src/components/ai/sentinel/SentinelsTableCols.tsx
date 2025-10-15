@@ -19,7 +19,11 @@ import { CHART_ICON_LIGHT } from 'components/utils/Provider.tsx'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { TRUNCATE_LEFT } from 'components/utils/truncate.ts'
-import { Body2P, CaptionP } from 'components/utils/typography/Text.tsx'
+import {
+  Body1BoldP,
+  Body2P,
+  CaptionP,
+} from 'components/utils/typography/Text.tsx'
 import { capitalize, groupBy, isEmpty } from 'lodash'
 import pluralize from 'pluralize'
 import styled from 'styled-components'
@@ -225,16 +229,8 @@ const ColActions = columnHelper.accessor((sentinel) => sentinel, {
   id: 'actions',
   header: '',
   cell: function Cell({ getValue }) {
-    const { id, name } = getValue()
     const [menuKey, setMenuKey] = useState<Nullable<'run'>>()
-    const [showToast, setShowToast] = useState(false)
-    const [mutation, { loading, error }] = useRunSentinelMutation({
-      variables: { id },
-      onCompleted: () => {
-        setMenuKey(null)
-        setShowToast(true)
-      },
-    })
+
     return (
       <>
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
@@ -244,28 +240,73 @@ const ColActions = columnHelper.accessor((sentinel) => sentinel, {
             textValue="Run sentinel"
           />
         </MoreMenu>
-        <Confirm
+        <SentinelRunDialog
+          sentinel={getValue()}
           open={menuKey === 'run'}
-          close={() => setMenuKey(null)}
-          error={error}
-          loading={loading}
-          submit={() => mutation()}
-          title="Confirm sentinel run"
-          text={`This will run the configured AI checks for ${name}. It's read-only and won't change your infrastructure. Results, plus AI reasoning per check, will appear in Run Details.`}
+          onClose={() => setMenuKey(null)}
         />
-        <Toast
-          show={showToast}
-          severity="success"
-          margin="medium"
-          closeTimeout={5000}
-          onClose={() => setShowToast(false)}
-        >
-          {name} sentinel run started
-        </Toast>
       </>
     )
   },
 })
+
+export function SentinelRunDialog({
+  sentinel,
+  open,
+  onClose,
+}: {
+  sentinel: Nullable<SentinelFragment>
+  open: boolean
+  onClose: () => void
+}) {
+  const [showToast, setShowToast] = useState(false)
+  const [mutation, { loading, error }] = useRunSentinelMutation({
+    onCompleted: () => {
+      onClose()
+      setShowToast(true)
+    },
+    awaitRefetchQueries: true,
+    refetchQueries: ['Sentinel', 'Sentinels'],
+  })
+
+  if (!sentinel) return null
+  return (
+    <>
+      <Confirm
+        open={open}
+        close={onClose}
+        error={error}
+        loading={loading}
+        submit={() => mutation({ variables: { id: sentinel.id } })}
+        title="Confirm sentinel run"
+        label="Run sentinel"
+        text={
+          <span>
+            {'This will run the configured AI checks for '}
+            <Body1BoldP
+              as="span"
+              $color="icon-info"
+            >
+              {sentinel.name}
+            </Body1BoldP>
+            {
+              ". It's read-only and won't change your infrastructure. Results, plus AI reasoning per check, will appear in Run Details."
+            }
+          </span>
+        }
+      />
+      <Toast
+        show={showToast}
+        severity="success"
+        margin="medium"
+        closeTimeout={5000}
+        onClose={() => setShowToast(false)}
+      >
+        {sentinel.name} sentinel run started
+      </Toast>
+    </>
+  )
+}
 
 export const sentinelsCols = [
   ColName,

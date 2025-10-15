@@ -29,7 +29,7 @@ const directory: SubtabDirectory = [
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
 ]
 
-const getBreadcrumbs = (tab: string = '') => [
+export const getAIBreadcrumbs = (tab: string = '') => [
   { label: 'plural-ai', url: AI_ABS_PATH },
   { label: tab, url: `${AI_ABS_PATH}/${tab}` },
 ]
@@ -38,7 +38,7 @@ export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
   const loading = useLoadingDeploymentSettings()
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(tab), [tab]))
+  useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
 
   if (loading) return <LoadingIndicator />
 

@@ -16,6 +16,8 @@ fragment Sentinel on Sentinel {
   checks {
     ...SentinelCheck
   }
+  insertedAt
+  updatedAt
 }
 
 fragment SentinelCheck on SentinelCheck {

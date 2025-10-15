@@ -9,11 +9,12 @@ import {
   AI_MCP_SERVERS_REL_PATH,
   AI_AGENT_REL_PATH,
   AI_SENTINELS_REL_PATH,
+  AI_SENTINELS_ABS_PATH,
 } from './aiRoutesConsts'
-import { AISentinels } from 'components/ai/sentinel/AISentinels.tsx'
-import { AISentinel } from 'components/ai/sentinel/AISentinel.tsx'
+import { Sentinels } from 'components/ai/sentinel/Sentinels.tsx'
+import { Sentinel } from 'components/ai/sentinel/Sentinel.tsx'
 
-export const aiRoutes = (
+export const aiRoutes = [
   <Route
     path={AI_ABS_PATH}
     element={<AI />}
@@ -41,11 +42,11 @@ export const aiRoutes = (
     />
     <Route
       path={AI_SENTINELS_REL_PATH}
-      element={<AISentinels />}
+      element={<Sentinels />}
     />
-    <Route
-      path={`${AI_SENTINELS_REL_PATH}/:id`}
-      element={<AISentinel />}
-    />
-  </Route>
-)
+  </Route>,
+  <Route
+    path={`${AI_SENTINELS_ABS_PATH}/:id`}
+    element={<Sentinel />}
+  />,
+]
