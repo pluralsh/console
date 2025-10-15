@@ -1031,15 +1031,15 @@ type RootMutationType {
 
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
-  updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
-
-  updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
-
   upsertAgentRuntime(attributes: AgentRuntimeAttributes!): AgentRuntime
 
   deleteAgentRuntime(id: ID!): AgentRuntime
 
   updateAgentRun(id: ID!, attributes: AgentRunStatusAttributes!): AgentRun
+
+  updateAgentRunAnalysis(id: ID!, attributes: AgentAnalysisAttributes!): AgentRun
+
+  updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
 
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
 
