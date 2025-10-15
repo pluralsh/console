@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/datastore/api/v1alpha1"
@@ -78,4 +80,35 @@ func deleteRefSecret(ctx context.Context, k8sclient client.Client, namespace, na
 	}
 
 	return nil
+}
+
+// handleRequeuePostgres allows avoiding rate limiting when some Postgres errors occur,
+// i.e., when dependent objects are still existing.
+//
+// If the result is set, then any potential error will be saved in a condition
+// and ignored in the return to avoid rate limiting.
+//
+// If dependent objects error is detected, then the result is automatically changed to
+// wait for resources.
+//
+// It is important that at least one from a result or an error have to be non-nil.
+// nolint:unparam
+func handleRequeuePostgres(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
+	if err != nil && IsDependentObjectsError(err) {
+		result = lo.ToPtr(jitterRequeue(requeueWaitForResources))
+	}
+
+	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
+		v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
+	return lo.FromPtr(result), lo.Ternary(result != nil, nil, err)
+}
+
+// IsDependentObjectsError checks if the error is a PostgreSQL "2BP01" error.
+// 2BP01 = dependent_objects_still_exist
+func IsDependentObjectsError(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "2BP01"
+	}
+	return false
 }

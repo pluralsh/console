@@ -69,7 +69,6 @@ func (r *PostgresCredentialsReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: credentials.Spec.PasswordSecretKeyRef.Name, Namespace: credentials.Namespace})
 	if err != nil {
-		logger.V(7).Error(err, "failed to get password")
 		return handleRequeue(nil, err, credentials.SetCondition)
 	}
 	if err := utils.TryAddFinalizer(ctx, r.Client, secret, PostgresSecretProtectionFinalizerName); err != nil {
