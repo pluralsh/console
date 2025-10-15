@@ -54,9 +54,6 @@ query GetSentinel($id: ID!) {
 fragment SentinelRunJobFragment on SentinelRunJob {
     id
     status
-    format
-    check
-    output
     jobSpec {
         ...JobSpecFragment
     }
