@@ -166,18 +166,18 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
 
 export const RectangleSkeleton = styled.div<{
   $height?: SemanticSpacingKey
-  $fixedWidth?: CSSProperties['width']
-}>(({ theme, $height = 'small', $fixedWidth }) => ({
+  $width?: CSSProperties['width']
+}>(({ theme, $height = 'small', $width }) => ({
   '@keyframes moving-gradient': {
     '0%': { backgroundPosition: '-250px 0' },
     '100%': { backgroundPosition: '250px 0' },
   },
-  width: $fixedWidth ?? '100%',
+  width: $width ?? '100%',
   position: 'relative',
   '&::after': {
     content: '""',
     borderRadius: theme.borderRadiuses.medium,
-    minWidth: $fixedWidth ?? '150px',
+    width: $width ?? '150px',
     display: 'block',
     height: theme.spacing[$height],
     background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
@@ -198,7 +198,7 @@ export function SidecarSkeleton({ num = 6 }: { num?: number }) {
             <RectangleSkeleton
               css={{ marginBottom: spacing.xsmall }}
               $height="xsmall"
-              $fixedWidth="40%"
+              $width="40%"
             />
           }
         >

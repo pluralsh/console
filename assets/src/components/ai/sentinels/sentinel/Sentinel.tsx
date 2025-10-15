@@ -8,39 +8,25 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useSentinelQuery, useSentinelRunsQuery } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useSentinelQuery } from 'generated/graphql'
+import { ReactNode, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AI_SENTINELS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { getAIBreadcrumbs } from '../AI'
-import { SentinelSidecar } from './SentinelSidecar'
-import { SentinelRunDialog } from './SentinelsTableCols'
+import { getAIBreadcrumbs } from '../../AI'
+import { SentinelChecksAccordion } from './SentinelChecksAccordion'
+import { SentinelRunsTable } from './SentinelRunsTable'
+import { SentinelDetailsSidecar } from './SentinelSidecars'
+import { SentinelRunDialog } from '../SentinelsTableCols'
 
 export function Sentinel() {
-  const { breakpoints } = useTheme()
   const { id } = useParams()
   const [runModalOpen, setRunModalOpen] = useState(false)
-  const {
-    data: sentinelData,
-    error: sentinelError,
-    loading: _sentinelLoading,
-  } = useSentinelQuery({ variables: { id }, fetchPolicy: 'network-only' })
-  const sentinelLoading = !sentinelData && _sentinelLoading
-  const sentinel = sentinelData?.sentinel
-
-  const {
-    data: sentinelRunsData,
-    error: sentinelRunsError,
-    loading: sentinelRunsLoading,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useSentinelRunsQuery, keyPath: ['sentinel', 'runs'] },
-    { id }
-  )
+  const { data, error, loading } = useSentinelQuery({
+    variables: { id },
+  })
+  const sentinelLoading = !data && loading
+  const sentinel = data?.sentinel
 
   useSetBreadcrumbs(
     useMemo(
@@ -49,18 +35,18 @@ export function Sentinel() {
     )
   )
 
-  if (sentinelError) return <GqlError error={sentinelError} />
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
+      />
+    )
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      padding="large"
-      maxWidth={breakpoints.desktopLarge}
-      alignSelf="center"
-    >
-      <MainContentSC>
-        <HeaderSC>
+    <SentinelDetailsPageWrapper
+      header={
+        <>
           <StackedText
             loading={sentinelLoading}
             first={sentinel?.name}
@@ -87,15 +73,48 @@ export function Sentinel() {
           >
             Run
           </Button>
-        </HeaderSC>
+          <SentinelRunDialog
+            sentinel={sentinel}
+            open={runModalOpen}
+            onClose={() => setRunModalOpen(false)}
+          />
+        </>
+      }
+      content={
+        <>
+          <SentinelChecksAccordion />
+          {id && <SentinelRunsTable id={id} />}
+        </>
+      }
+      sidecar={<SentinelDetailsSidecar sentinel={sentinel} />}
+    />
+  )
+}
+
+export function SentinelDetailsPageWrapper({
+  header,
+  content,
+  sidecar,
+}: {
+  header: ReactNode
+  content: ReactNode
+  sidecar: ReactNode
+}) {
+  const { breakpoints } = useTheme()
+  return (
+    <Flex
+      height="100%"
+      width="100%"
+      padding="large"
+      maxWidth={breakpoints.desktopLarge}
+      alignSelf="center"
+    >
+      <MainContentSC>
+        <HeaderSC>{header}</HeaderSC>
         <Divider backgroundColor="border" />
+        {content}
       </MainContentSC>
-      <SentinelSidecar sentinel={sentinel} />
-      <SentinelRunDialog
-        sentinel={sentinel}
-        open={runModalOpen}
-        onClose={() => setRunModalOpen(false)}
-      />
+      {sidecar}
     </Flex>
   )
 }

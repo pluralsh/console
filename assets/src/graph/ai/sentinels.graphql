@@ -48,15 +48,34 @@ fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
   }
 }
 
-fragment SentinelRun on SentinelRun {
+fragment SentinelRunTiny on SentinelRun {
   id
   status
+  insertedAt
+}
+
+fragment SentinelRun on SentinelRun {
+  ...SentinelRunTiny
   results {
-    name
-    reason
-    status
+    ...SentinelRunResult
   }
-  updatedAt
+  sentinel {
+    id
+    name
+    description
+    repository {
+      url
+    }
+  }
+}
+
+fragment SentinelRunResult on SentinelRunResult {
+  name
+  reason
+  status
+  successfulCount
+  failedCount
+  jobCount
 }
 
 fragment SentinelStatistic on SentinelStatistic {
@@ -97,10 +116,16 @@ query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
       }
       edges {
         node {
-          ...SentinelRun
+          ...SentinelRunTiny
         }
       }
     }
+  }
+}
+
+query SentinelRun($id: ID!) {
+  sentinelRun(id: $id) {
+    ...SentinelRun
   }
 }
 
@@ -112,6 +137,6 @@ query SentinelStatistics($q: String) {
 
 mutation RunSentinel($id: ID!) {
   runSentinel(id: $id) {
-    ...SentinelRun
+    ...SentinelRunTiny
   }
 }

@@ -181,49 +181,62 @@ const ColStatus = columnHelper.accessor((sentinel) => sentinel.status, {
   enableSorting: true,
   cell: function Cell({ getValue, row: { original } }) {
     const status = getValue()
-    const isPending = status === SentinelRunStatus.Pending
     if (!status) return null
 
     return (
-      <WrapWithIf
-        condition={isPending}
-        wrapper={
-          <Tooltip
-            placement="top"
-            label={
-              <Flex direction="column">
-                <CaptionP $color="text-light">Run started:</CaptionP>
-                <CaptionP $color="text-light">
-                  {fromNow(original.lastRunAt)}
-                </CaptionP>
-              </Flex>
-            }
-          />
-        }
-      >
-        <Chip
-          inactive
-          css={{
-            ...(isPending && { border: 'none', background: 'none' }),
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            {statusToIcon[status]}
-            {isPending ? (
-              <CaptionP $color="icon-info">In progress</CaptionP>
-            ) : (
-              <span>{statusToText[status]}</span>
-            )}
-          </Flex>
-        </Chip>
-      </WrapWithIf>
+      <SentinelStatusChip
+        status={status}
+        lastRunAt={original.lastRunAt}
+      />
     )
   },
 })
+
+export function SentinelStatusChip({
+  status,
+  lastRunAt,
+}: {
+  status: SentinelRunStatus
+  lastRunAt?: Nullable<string>
+}) {
+  const isPending = status === SentinelRunStatus.Pending
+  return (
+    <WrapWithIf
+      condition={isPending && !!lastRunAt}
+      wrapper={
+        <Tooltip
+          placement="top"
+          label={
+            <Flex direction="column">
+              <CaptionP $color="text-light">Run started:</CaptionP>
+              <CaptionP $color="text-light">{fromNow(lastRunAt)}</CaptionP>
+            </Flex>
+          }
+        />
+      }
+    >
+      <Chip
+        inactive
+        css={{
+          ...(isPending && { border: 'none', background: 'none' }),
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          {statusToIcon[status]}
+          {isPending ? (
+            <CaptionP $color="icon-info">In progress</CaptionP>
+          ) : (
+            <span>{statusToText[status]}</span>
+          )}
+        </Flex>
+      </Chip>
+    </WrapWithIf>
+  )
+}
 
 const ColActions = columnHelper.accessor((sentinel) => sentinel, {
   id: 'actions',

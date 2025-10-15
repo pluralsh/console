@@ -157,20 +157,25 @@
          "name": "Sentinel",
          "body": "query Sentinel($id: ID, $name: String) {\n  sentinel(id: $id, name: $name) {\n    ...Sentinel\n    __typename\n  }\n}\n\nfragment Sentinel on Sentinel {\n  id\n  name\n  description\n  status\n  lastRunAt\n  git {\n    ref\n    folder\n    __typename\n  }\n  repository {\n    id\n    url\n    httpsPath\n    __typename\n  }\n  checks {\n    ...SentinelCheck\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment SentinelCheck on SentinelCheck {\n  id\n  name\n  type\n  ruleFile\n  configuration {\n    ...SentinelCheckConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment SentinelCheckConfiguration on SentinelCheckConfiguration {\n  log {\n    namespaces\n    query\n    clusterId\n    facets {\n      ...LogFacet\n      __typename\n    }\n    __typename\n  }\n  kubernetes {\n    group\n    version\n    kind\n    name\n    namespace\n    __typename\n  }\n  __typename\n}\n\nfragment LogFacet on LogFacet {\n  key\n  value\n  __typename\n}"
       },
-      "sha256:c84cebb09f4ac82b791d21d90a505ce8cb5ab9fa7cfb63020ce45d7b826cf73d": {
+      "sha256:c96b249abd17ba1b09f322bb1ae7a2866aa9148ed75308195181ad64f7322e80": {
          "type": "query",
          "name": "SentinelRuns",
-         "body": "query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {\n  sentinel(id: $id, name: $name) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...SentinelRun\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment SentinelRun on SentinelRun {\n  id\n  status\n  results {\n    name\n    reason\n    status\n    __typename\n  }\n  updatedAt\n  __typename\n}"
+         "body": "query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {\n  sentinel(id: $id, name: $name) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...SentinelRunTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}"
+      },
+      "sha256:35b6ad4ed8059b12c7f72b74054759b4a5d6a7e9ccfc0fa0c03f68c1f004c6e2": {
+         "type": "query",
+         "name": "SentinelRun",
+         "body": "query SentinelRun($id: ID!) {\n  sentinelRun(id: $id) {\n    ...SentinelRun\n    __typename\n  }\n}\n\nfragment SentinelRun on SentinelRun {\n  ...SentinelRunTiny\n  results {\n    ...SentinelRunResult\n    __typename\n  }\n  sentinel {\n    id\n    name\n    description\n    repository {\n      url\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}\n\nfragment SentinelRunResult on SentinelRunResult {\n  name\n  reason\n  status\n  successfulCount\n  failedCount\n  jobCount\n  __typename\n}"
       },
       "sha256:03258985dd02458157841e15424f44ea872745cbad0214c5b4f4f9d16b49c0fa": {
          "type": "query",
          "name": "SentinelStatistics",
          "body": "query SentinelStatistics($q: String) {\n  sentinelStatistics(q: $q) {\n    ...SentinelStatistic\n    __typename\n  }\n}\n\nfragment SentinelStatistic on SentinelStatistic {\n  status\n  count\n  __typename\n}"
       },
-      "sha256:e576f909265355fd56dfb47e0647da6bb8d667e6e39c40ce30df9d2c32e74a16": {
+      "sha256:4178c12c8cf40a8ab7f30c7af08b57b28b0501a691c6171785ba52e4c0a32893": {
          "type": "mutation",
          "name": "RunSentinel",
-         "body": "mutation RunSentinel($id: ID!) {\n  runSentinel(id: $id) {\n    ...SentinelRun\n    __typename\n  }\n}\n\nfragment SentinelRun on SentinelRun {\n  id\n  status\n  results {\n    name\n    reason\n    status\n    __typename\n  }\n  updatedAt\n  __typename\n}"
+         "body": "mutation RunSentinel($id: ID!) {\n  runSentinel(id: $id) {\n    ...SentinelRunTiny\n    __typename\n  }\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}"
       },
       "sha256:e949305075ff2d8b05cc17e8c6f5398585d56545e5f661e31c30071564669970": {
          "type": "query",

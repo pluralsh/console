@@ -84,7 +84,7 @@ export const StackedText = memo(
           $truncate={truncate}
           $color={firstColor}
         >
-          {loading ? <RectangleSkeleton /> : first}
+          {loading ? <RectangleSkeleton $width={120} /> : first}
         </FirstSC>
         {(second || loading) && (
           <SecondSC
@@ -92,7 +92,7 @@ export const StackedText = memo(
             $partialType={secondPartialType}
             $color={secondColor}
           >
-            {loading ? <RectangleSkeleton /> : second}
+            {loading ? <RectangleSkeleton $width={150} /> : second}
           </SecondSC>
         )}
       </StackedTextSC>
