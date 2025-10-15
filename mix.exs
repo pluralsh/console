@@ -129,7 +129,7 @@ defmodule Console.MixProject do
       {:absinthe_phoenix, "~> 2.0"},
       {:dataloader, "~> 2.0"},
       {:cors_plug, "~> 2.0"},
-      {:timex, "~> 3.7"},
+      {:timex, "~> 3.7.13"},
       {:zstream, "~> 0.6"},
       {:csv, "~> 3.2"},
       {:yaml_elixir, "~> 2.9"},

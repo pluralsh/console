@@ -22,7 +22,7 @@ defmodule ConsoleWeb do
       use Phoenix.Controller, namespace: ConsoleWeb
 
       import Plug.Conn
-      import ConsoleWeb.Gettext
+      use Gettext, backend: ConsoleWeb.Gettext
       alias ConsoleWeb.Router.Helpers, as: Routes
     end
   end
@@ -40,7 +40,7 @@ defmodule ConsoleWeb do
       use Phoenix.HTML
 
       import ConsoleWeb.ErrorHelpers
-      import ConsoleWeb.Gettext
+      use Gettext, backend: ConsoleWeb.Gettext
       alias ConsoleWeb.Router.Helpers, as: Routes
     end
   end
@@ -56,7 +56,7 @@ defmodule ConsoleWeb do
   def channel do
     quote do
       use Phoenix.Channel, log_join: :debug, log_handle_in: false
-      import ConsoleWeb.Gettext
+      use Gettext, backend: ConsoleWeb.Gettext
     end
   end
 
