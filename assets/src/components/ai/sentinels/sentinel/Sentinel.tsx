@@ -105,6 +105,7 @@ export function SentinelDetailsPageWrapper({
     <Flex
       height="100%"
       width="100%"
+      minHeight={0}
       padding="large"
       maxWidth={breakpoints.desktopLarge}
       alignSelf="center"
