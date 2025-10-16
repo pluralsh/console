@@ -66,6 +66,12 @@ spec:
                               - K3S
                               - OPENSHIFT
                               type: string
+                            format:
+                              description: the test output format of the job
+                              enum:
+                              - PLAINTEXT
+                              - JUNIT
+                              type: string
                             jobSpec:
                               description: the job to run for this check
                               properties:

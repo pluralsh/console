@@ -21,7 +21,7 @@ spec:
           Deployment (CD) operations. This resource defines\ncluster-wide settings
           that control how the Plural deployment\nsystem operates, including access
           policies, repository configuration,\nmonitoring integrations, and AI-powered
-          features.\n\nExample usage:\n\n\tapiVersion: deployments.plural.sh/v1alpha1\n\tkind:
+          features.\n\nExample usage:\n\n\t```yaml\n\tapiVersion: deployments.plural.sh/v1alpha1\n\tkind:
           DeploymentSettings\n\tmetadata:\n\t  name: global-deployment-settings\n\t
           \ namespace: plrl-deploy-operator\n\tspec:\n\t  agentHelmValues:\n\t    annotations:\n\t
           \     company.com/team: \"platform\"\n\t  managementRepo: \"https://github.com/company/infrastructure\"\n\t
@@ -33,7 +33,7 @@ spec:
           \     key: \"password\"\n\t  ai:\n\t    enabled: true\n\t    provider: OPENAI\n\t
           \   openAI:\n\t      model: \"gpt-4\"\n\t      tokenSecretRef:\n\t        name:
           \"openai-secret\"\n\t        key: \"token\"\n\t  cost:\n\t    recommendationCushion:
-          20\n\t    recommendationThreshold: 100"
+          20\n\t    recommendationThreshold: 100\n\t```"
         properties:
           apiVersion:
             description: |-

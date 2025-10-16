@@ -1739,6 +1739,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the cluster tags to select where to run this job"
   tags: Json
+
+  "the format of the job output"
+  format: SentinelRunJobFormat!
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -1859,6 +1862,9 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "the cluster tags to select where to run this job"
   tags: Map
+
+  "the format of the job"
+  format: SentinelRunJobFormat!
 }
 
 type SentinelRun {
@@ -1916,7 +1922,7 @@ type SentinelRunJob {
   "the status of the job"
   status: SentinelRunJobStatus!
 
-  "the format of the job"
+  "the format of the job output"
   format: SentinelRunJobFormat!
 
   "the check that was run"
