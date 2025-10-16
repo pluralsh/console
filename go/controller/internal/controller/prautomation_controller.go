@@ -17,7 +17,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -26,10 +25,8 @@ import (
 // Implements reconcile.Reconciler and types.Controller
 type PrAutomationReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 const (
@@ -143,10 +140,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 		return pra, sha, nil, err
 	}
 
-	if err = in.ensure(prAutomation); err != nil {
-		return pra, sha, nil, err
-	}
-
 	attributes, result, err := in.Attributes(ctx, prAutomation)
 	if result != nil || err != nil {
 		return pra, sha, result, err
@@ -176,28 +169,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 
 func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.PrAutomation) {
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
-	if prAutomation.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Create = bindings
-
-	bindings, err = ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

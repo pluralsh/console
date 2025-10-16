@@ -160,6 +160,8 @@ spec:
                   ProviderRef restricts deployment to clusters associated with a specific cloud provider.
                   This enables provider-specific service deployments that may require particular
                   cloud integrations or provider-native services.
+                  Deprecated.
+                  Do not use.
                 properties:
                   apiVersion:
                     description: API version of the referent.

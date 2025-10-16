@@ -28,7 +28,7 @@ spec:
           infrastructure, making it ideal\nfor scenarios where clusters are provisioned
           externally (e.g., via Terraform) without\ndirect CRD creation capability.\n\nThe
           resource supports optional filtering by project and tags, and uses templatable\nspecifications
-          that are populated with data from the discovered clusters.\n\nExample usage:\n\n\tapiVersion:
+          that are populated with data from the discovered clusters.\n\nExample usage:\n\n\t```yaml\n\tapiVersion:
           deployments.plural.sh/v1alpha1\n\tkind: ClusterSync\n\tmetadata:\n\t  name:
           my-cluster-sync\n\t  namespace: default\n\tspec:\n\t  projectRef:\n\t    name:
           my-project  # optional: only sync clusters from this project\n\t  tags:\n\t
@@ -36,7 +36,7 @@ spec:
           \   metadata:\n\t      name: \"{{ .cluster.name }}\"  # templated from discovered
           cluster\n\t      namespace: clusters\n\t    spec:\n\t      handle: \"{{
           .cluster.handle }}\"\n\t      version: \"{{ .cluster.version }}\"\n\t      cloud:
-          \"{{ .cluster.cloud }}\""
+          \"{{ .cluster.cloud }}\"\n\t ````"
         properties:
           apiVersion:
             description: |-

@@ -60,7 +60,6 @@ rules:
   - previewenvironmenttemplates
   - prgovernances
   - projects
-  - providers
   - scmconnections
   - sentinels
   - serviceaccounts
@@ -111,7 +110,6 @@ rules:
   - previewenvironmenttemplates/finalizers
   - prgovernances/finalizers
   - projects/finalizers
-  - providers/finalizers
   - scmconnections/finalizers
   - sentinels/finalizers
   - serviceaccounts/finalizers
@@ -156,7 +154,6 @@ rules:
   - previewenvironmenttemplates/status
   - prgovernances/status
   - projects/status
-  - providers/status
   - scmconnections/status
   - sentinels/status
   - serviceaccounts/status

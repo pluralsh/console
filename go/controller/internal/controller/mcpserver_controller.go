@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -17,7 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -33,7 +33,6 @@ type MCPServerReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=mcpservers,verbs=get;list;watch;create;update;patch;delete
@@ -80,10 +79,6 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.handleDelete(ctx, mcpServer)
 	}
 
-	if err = r.ensure(mcpServer); err != nil {
-		return handleRequeue(nil, err, mcpServer.SetCondition)
-	}
-
 	changed, sha, err := mcpServer.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate MCP server SHA")
@@ -91,7 +86,12 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 	if changed {
-		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, mcpServer.Attributes())
+		attrs, err := r.Attributes(mcpServer)
+		if err != nil {
+			return handleRequeue(nil, err, mcpServer.SetCondition)
+		}
+
+		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update MCP server")
 			utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -109,6 +109,45 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
+func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {
+	attrs := console.McpServerAttributes{
+		Name:    mcp.GetServerName(),
+		URL:     mcp.Spec.URL,
+		Confirm: mcp.Spec.Confirm,
+	}
+
+	if mcp.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(mcp.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(mcp.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if mcp.Spec.Authentication != nil {
+		attrs.Authentication = &console.McpServerAuthenticationAttributes{
+			Plural: mcp.Spec.Authentication.Plural,
+		}
+
+		if len(mcp.Spec.Authentication.Headers) > 0 {
+			attrs.Authentication.Headers = make([]*console.McpHeaderAttributes, 0)
+			for k, v := range mcp.Spec.Authentication.Headers {
+				attrs.Authentication.Headers = append(attrs.Authentication.Headers, &console.McpHeaderAttributes{
+					Name: k, Value: v,
+				})
+			}
+		}
+	}
+
+	return &attrs, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *MCPServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
@@ -116,27 +155,6 @@ func (r *MCPServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.MCPServerList))).
 		For(&v1alpha1.MCPServer{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *MCPServerReconciler) ensure(server *v1alpha1.MCPServer) error {
-	if server.Spec.Bindings == nil {
-		return nil
-	}
-	bindings, err := ensureBindings(server.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(server.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 func (r *MCPServerReconciler) handleDelete(ctx context.Context, mcpServer *v1alpha1.MCPServer) error {

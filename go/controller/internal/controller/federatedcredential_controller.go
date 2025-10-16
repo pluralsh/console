@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -14,7 +15,6 @@ import (
 
 	consoleapi "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -27,9 +27,7 @@ const (
 
 type FederatedCredentialReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=federatedcredentials,verbs=get;list;watch;create;update;patch;delete
@@ -122,7 +120,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 }
 
 func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
-	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
+	userID, err := identity.Cache().GetUserID(credential.Spec.User)
 	if err != nil {
 		return nil, err
 	}

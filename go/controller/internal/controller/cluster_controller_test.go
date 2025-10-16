@@ -6,7 +6,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -64,17 +63,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		byokReadonlyNamespacedName := types.NamespacedName{Name: byokReadonlyClusterName, Namespace: namespace}
 
 		BeforeAll(func() {
-			By("Creating AWS provider")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: awsProviderName},
-				Spec: v1alpha1.ProviderSpec{
-					Cloud: "aws",
-					Name:  awsProviderName,
-				},
-			}, func(p *v1alpha1.Provider) {
-				p.Status.ID = lo.ToPtr(awsProviderConsoleID)
-			})).To(Succeed())
-
 			By("Creating AWS cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
@@ -570,7 +558,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
@@ -625,7 +612,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})

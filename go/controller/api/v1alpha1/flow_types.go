@@ -4,9 +4,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	console "github.com/pluralsh/console/go/client"
-	"github.com/samber/lo"
 )
 
 func init() {
@@ -58,23 +55,6 @@ func (in *Flow) ConsoleID() *string {
 // ConsoleName implements PluralResource interface
 func (in *Flow) ConsoleName() string {
 	return in.FlowName()
-}
-
-func (in *Flow) Attributes(projectID *string, serverAssociations []*console.McpServerAssociationAttributes) console.FlowAttributes {
-	attrs := console.FlowAttributes{
-		Name:               in.FlowName(),
-		Description:        in.Spec.Description,
-		Icon:               in.Spec.Icon,
-		ProjectID:          projectID,
-		ServerAssociations: serverAssociations,
-		Repositories:       lo.ToSlicePtr(in.Spec.Repositories),
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-	}
-	return attrs
 }
 
 func (in *Flow) Diff(hasher Hasher) (changed bool, sha string, err error) {

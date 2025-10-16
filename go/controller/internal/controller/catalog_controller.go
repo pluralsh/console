@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -30,10 +30,8 @@ const (
 // CatalogReconciler reconciles a Catalog object
 type CatalogReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=catalogs,verbs=get;list;watch;create;update;patch;delete
@@ -86,11 +84,6 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Sync Catalog CRD with the Console API
-	if err := r.ensure(catalog); err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
-	}
-
 	// Get Catalog SHA that can be saved back in the status to check for changes
 	changed, sha, err := catalog.Diff(utils.HashObject)
 	if err != nil {
@@ -104,7 +97,12 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			return handleRequeue(res, err, catalog.SetCondition)
 		}
 
-		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalog.Attributes(project.Status.ID))
+		catalogAttributes, err := r.Attributes(catalog, project.Status.ID)
+		if err != nil {
+			return handleRequeue(nil, err, catalog.SetCondition)
+		}
+
+		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalogAttributes)
 		if err != nil {
 			logger.Error(err, "unable to create or update catalog")
 			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -117,6 +115,46 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, retErr
+}
+
+func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *string) (*console.CatalogAttributes, error) {
+	attrs := &console.CatalogAttributes{
+		Name:        catalog.CatalogName(),
+		Author:      catalog.Spec.Author,
+		Description: catalog.Spec.Description,
+		Category:    catalog.Spec.Category,
+		Icon:        catalog.Spec.Icon,
+		DarkIcon:    catalog.Spec.DarkIcon,
+		ProjectID:   projectID,
+	}
+
+	if len(catalog.Spec.Tags) > 0 {
+		attrs.Tags = make([]*console.TagAttributes, 0)
+		for k, v := range catalog.Spec.Tags {
+			attrs.Tags = append(attrs.Tags, &console.TagAttributes{Name: k, Value: v})
+		}
+	}
+
+	if catalog.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(catalog.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(catalog.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.CreateBindings, err = bindingsAttributes(catalog.Spec.Bindings.Create)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return attrs, nil
 }
 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {
@@ -200,32 +238,6 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 		controllerutil.RemoveFinalizer(catalog, CatalogProtectionFinalizerName)
 		return &ctrl.Result{}
 	}
-
-	return nil
-}
-
-func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
-	if catalog.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(catalog.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Write = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Create = bindings
 
 	return nil
 }

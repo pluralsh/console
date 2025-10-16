@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -39,7 +40,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
@@ -56,7 +56,6 @@ type InfrastructureStackReconciler struct {
 	client.Client
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	CredentialsCache credentials.NamespaceCredentialsCache
 	StackQueue       workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
@@ -326,7 +325,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	}
 
 	if stack.Spec.Actor != nil {
-		userID, err := r.UserGroupCache.GetUserID(*stack.Spec.Actor)
+		userID, err := identity.Cache().GetUserID(*stack.Spec.Actor)
 		if err != nil {
 			return nil, err
 		}
@@ -406,11 +405,15 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		if err := r.ensure(stack); err != nil {
+		attr.ReadBindings, err = bindingsAttributes(stack.Spec.Bindings.Read)
+		if err != nil {
 			return nil, err
 		}
-		attr.ReadBindings = policyBindings(stack.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
+
+		attr.WriteBindings, err = bindingsAttributes(stack.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if id, ok := stack.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
@@ -584,26 +587,4 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 	}
 
 	return metrics, nil, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureStack) error {
-	if stack.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Write = bindings
-
-	return nil
 }

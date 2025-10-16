@@ -21,7 +21,6 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -30,10 +29,8 @@ import (
 // Implements reconcile.Reconciler and types.Controller.
 type ProjectReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 const (
@@ -208,6 +205,29 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	return jitterRequeue(requeueDefault), nil
 }
 
+func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.ProjectAttributes, error) {
+	attrs := &console.ProjectAttributes{
+		Name:        project.ConsoleName(),
+		Description: project.Spec.Description,
+	}
+
+	if project.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(project.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(project.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return attrs, nil
+}
+
 func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {
 	logger := log.FromContext(ctx)
 	exists, err := in.ConsoleClient.IsProjectExists(ctx, nil, lo.ToPtr(project.ConsoleName()))
@@ -215,14 +235,15 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return nil, err
 	}
 
-	if err := in.ensure(project); err != nil {
-		return nil, err
-	}
-
 	// Update only if Project has changed
 	if changed && exists {
+		attrs, err := in.attributes(project)
+		if err != nil {
+			return nil, err
+		}
+
 		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
-		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), project.Attributes())
+		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), *attrs)
 	}
 
 	// Read the Project from Console API if it already exists
@@ -230,30 +251,13 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	}
 
+	attrs, err := in.attributes(project)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
-	return in.ConsoleClient.CreateProject(ctx, project.Attributes())
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
-	if project.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Write = bindings
-
-	return nil
+	return in.ConsoleClient.CreateProject(ctx, *attrs)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

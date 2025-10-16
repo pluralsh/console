@@ -93,12 +93,17 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	if p.Spec.Bindings != nil {
-		if err := r.ensure(p); err != nil {
-			return nil, nil, err // Not found error will be checked above in the requeue handler.
+		var err error
+
+		attr.ReadBindings, err = bindingsAttributes(p.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
 		}
 
-		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(p.Spec.Bindings.Write)
+		attr.WriteBindings, err = bindingsAttributes(p.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return attr, nil, nil
@@ -217,26 +222,4 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 	return &console.GateSpecAttributes{
 		Job: job,
 	}, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
-	if p.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Write = bindings
-
-	return nil
 }

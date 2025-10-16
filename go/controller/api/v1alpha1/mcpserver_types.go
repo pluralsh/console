@@ -3,8 +3,6 @@ package v1alpha1
 import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -52,36 +50,6 @@ func (in *MCPServer) GetServerName() string {
 	}
 
 	return in.Name
-}
-
-func (in *MCPServer) Attributes() console.McpServerAttributes {
-	attrs := console.McpServerAttributes{
-		Name:    in.GetServerName(),
-		URL:     in.Spec.URL,
-		Confirm: in.Spec.Confirm,
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-	}
-
-	if in.Spec.Authentication != nil {
-		attrs.Authentication = &console.McpServerAuthenticationAttributes{
-			Plural: in.Spec.Authentication.Plural,
-		}
-
-		if len(in.Spec.Authentication.Headers) > 0 {
-			attrs.Authentication.Headers = make([]*console.McpHeaderAttributes, 0)
-			for k, v := range in.Spec.Authentication.Headers {
-				attrs.Authentication.Headers = append(attrs.Authentication.Headers, &console.McpHeaderAttributes{
-					Name: k, Value: v,
-				})
-			}
-		}
-	}
-
-	return attrs
 }
 
 func (in *MCPServer) Diff(hasher Hasher) (changed bool, sha string, err error) {

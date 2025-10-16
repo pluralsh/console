@@ -61,18 +61,17 @@ type GlobalService struct {
 }
 
 // Attributes converts the GlobalService spec to console API attributes for upstream synchronization.
-func (gs *GlobalService) Attributes(providerId, projectId *string) console.GlobalServiceAttributes {
+func (gs *GlobalService) Attributes(projectId *string) console.GlobalServiceAttributes {
 	return console.GlobalServiceAttributes{
-		Name:       gs.Name,
-		Distro:     gs.Spec.Distro,
-		ProviderID: providerId,
-		ProjectID:  projectId,
-		Mgmt:       gs.Spec.Mgmt,
-		Interval:   gs.Spec.Interval,
-		Reparent:   gs.Spec.Reparent,
-		Cascade:    gs.Spec.Cascade.Attributes(),
-		Tags:       gs.Spec.TagsAttribute(),
-		Context:    gs.Spec.Context.Attributes(),
+		Name:      gs.Name,
+		Distro:    gs.Spec.Distro,
+		ProjectID: projectId,
+		Mgmt:      gs.Spec.Mgmt,
+		Interval:  gs.Spec.Interval,
+		Reparent:  gs.Spec.Reparent,
+		Cascade:   gs.Spec.Cascade.Attributes(),
+		Tags:      gs.Spec.TagsAttribute(),
+		Context:   gs.Spec.Context.Attributes(),
 	}
 }
 
@@ -136,6 +135,8 @@ type GlobalServiceSpec struct {
 	// ProviderRef restricts deployment to clusters associated with a specific cloud provider.
 	// This enables provider-specific service deployments that may require particular
 	// cloud integrations or provider-native services.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 

@@ -27,7 +27,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/errors"
@@ -45,7 +44,6 @@ const (
 type ServiceDeploymentReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
 	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]
@@ -139,10 +137,6 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 			return jitterRequeue(requeueWaitForResources), nil
 		}
-	}
-
-	if err = r.ensure(service); err != nil {
-		return handleRequeue(nil, err, service.SetCondition)
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
@@ -324,8 +318,15 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 
 	if service.Spec.Bindings != nil {
-		attr.ReadBindings = policyBindings(service.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(service.Spec.Bindings.Write)
+		attr.ReadBindings, err = bindingsAttributes(service.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(service.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	if service.Spec.Helm != nil {
@@ -644,28 +645,6 @@ func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) erro
 		return r.ConsoleClient.DetachService(id)
 	}
 	return r.ConsoleClient.DeleteService(id)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceDeploymentReconciler) ensure(service *v1alpha1.ServiceDeployment) error {
-	if service.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 func isServiceReady(components []v1alpha1.ServiceComponent) bool {

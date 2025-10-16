@@ -4,7 +4,6 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/polly/http"
 )
@@ -34,13 +33,6 @@ type ConsoleClient interface {
 	DeleteCluster(id string) (*console.DeleteCluster_DeleteCluster, error)
 	IsClusterExisting(id *string) (bool, error)
 	IsClusterDeleting(id *string) bool
-	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes) (*console.ClusterProviderFragment, error)
-	GetProvider(ctx context.Context, id string) (*console.ClusterProviderFragment, error)
-	GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider) (*console.ClusterProviderFragment, error)
-	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes) (*console.ClusterProviderFragment, error)
-	DeleteProvider(ctx context.Context, id string) error
-	IsProviderExists(ctx context.Context, id string) (bool, error)
-	IsProviderDeleting(ctx context.Context, id string) bool
 	IsServiceExisting(id string) (bool, error)
 	IsServiceDeleting(id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error

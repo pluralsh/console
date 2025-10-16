@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/polly/algorithms"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -50,32 +49,6 @@ type Binding struct {
 
 	// +kubebuilder:validation:Optional
 	GroupName *string `json:"groupName,omitempty"`
-}
-
-func (b *Binding) Attributes() *console.PolicyBindingAttributes {
-	if b == nil {
-		return nil
-	}
-
-	return &console.PolicyBindingAttributes{
-		ID:      b.ID,
-		UserID:  b.UserID,
-		GroupID: b.GroupID,
-	}
-}
-
-func PolicyBindings(bindings []Binding) []*console.PolicyBindingAttributes {
-	if bindings == nil {
-		return nil
-	}
-
-	filtered := algorithms.Filter(bindings, func(b Binding) bool {
-		return b.UserID != nil || b.GroupID != nil
-	})
-
-	return algorithms.Map(filtered, func(b Binding) *console.PolicyBindingAttributes {
-		return b.Attributes()
-	})
 }
 
 // Taint represents a Kubernetes taint.

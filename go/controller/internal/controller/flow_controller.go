@@ -6,7 +6,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
@@ -35,7 +34,6 @@ type FlowReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	FlowQueue        workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
@@ -94,9 +92,6 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, r.handleDelete(ctx, flow)
 	}
 
-	if err = r.ensure(flow); err != nil {
-		return handleRequeue(nil, err, flow.SetCondition)
-	}
 	changed, sha, err := flow.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate flow SHA")
@@ -114,8 +109,12 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID, serverAssociationAttributes))
+		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes)
+		if err != nil {
+			return handleRequeue(nil, err, flow.SetCondition)
+		}
 
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -131,6 +130,33 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes) (*console.FlowAttributes, error) {
+	attrs := console.FlowAttributes{
+		Name:               flow.FlowName(),
+		Description:        flow.Spec.Description,
+		Icon:               flow.Spec.Icon,
+		ProjectID:          projectID,
+		ServerAssociations: serverAssociations,
+		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
+	}
+
+	if flow.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(flow.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(flow.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attrs, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -159,27 +185,6 @@ func (r *FlowReconciler) handleDelete(ctx context.Context, flow *v1alpha1.Flow) 
 		}
 		controllerutil.RemoveFinalizer(flow, FlowFinalizer)
 	}
-	return nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
-	if flow.Spec.Bindings == nil {
-		return nil
-	}
-	bindings, err := ensureBindings(flow.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(flow.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Write = bindings
-
 	return nil
 }
 

@@ -23,7 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,7 +50,6 @@ type NotificationSinkReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=notificationsinks,verbs=get;list;watch;create;update;patch;delete
@@ -111,7 +109,6 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.handleExisting(ctx, notificationSink)
 	}
 
-	err = r.ensureNotificationSink(notificationSink)
 	if err != nil {
 		return handleRequeue(nil, err, notificationSink.SetCondition)
 	}
@@ -130,8 +127,13 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 	if !exists || !notificationSink.Status.IsSHAEqual(sha) {
+		attrs, err := genNotificationSinkAttr(notificationSink)
+		if err != nil {
+			return handleRequeue(nil, err, notificationSink.SetCondition)
+		}
+
 		logger.Info("upsert notification sink", "name", notificationSink.NotificationName())
-		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, genNotificationSinkAttr(notificationSink))
+		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, *attrs)
 		if err != nil {
 			utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -259,17 +261,19 @@ func (r *NotificationSinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) console.NotificationSinkAttributes {
+func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) (*console.NotificationSinkAttributes, error) {
 	attr := console.NotificationSinkAttributes{
 		Name:          notificationSink.NotificationName(),
 		Type:          notificationSink.Spec.Type,
 		Configuration: console.SinkConfigurationAttributes{},
 	}
+
 	if notificationSink.Spec.Configuration.Slack != nil {
 		attr.Configuration.Slack = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Slack.URL,
 		}
 	}
+
 	if notificationSink.Spec.Configuration.Teams != nil {
 		attr.Configuration.Teams = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Teams.URL,
@@ -284,23 +288,12 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 	}
 
 	if notificationSink.Spec.Type == console.SinkTypePlural {
-		attr.NotificationBindings = policyBindings(notificationSink.Spec.Bindings)
-	}
-	return attr
-}
+		var err error
 
-// ensureNotificationSink makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *NotificationSinkReconciler) ensureNotificationSink(notificationSink *v1alpha1.NotificationSink) error {
-	if notificationSink.Spec.Bindings == nil {
-		return nil
+		attr.NotificationBindings, err = bindingsAttributes(notificationSink.Spec.Bindings)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	bindings, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	notificationSink.Spec.Bindings = bindings
-
-	return nil
+	return &attr, nil
 }

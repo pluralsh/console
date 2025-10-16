@@ -20,7 +20,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -34,9 +33,8 @@ const (
 // CloudConnectionReconciler reconciles a CloudConnection object
 type CloudConnectionReconciler struct {
 	client.Client
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections,verbs=get;list;watch;create;update;patch;delete
@@ -96,10 +94,6 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if err = r.ensure(connection); err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
-	}
-
 	// Get Connection SHA that can be saved back in the status to check for changes
 	changed, sha, err := connection.Diff(ctx, r.toCloudConnectionAttributes, utils.HashObject)
 	if err != nil {
@@ -110,9 +104,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	apiConnection, err := r.sync(ctx, connection, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update cloud connection")
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
@@ -132,24 +124,15 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	if err != nil {
 		return nil, err
 	}
+
 	attr.Name = connection.CloudConnectionName()
-	attr.ReadBindings = policyBindings(connection.Spec.ReadBindings)
+
+	attr.ReadBindings, err = bindingsAttributes(connection.Spec.ReadBindings)
+	if err != nil {
+		return nil, err
+	}
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
-}
-
-func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection) error {
-	if connection.Spec.ReadBindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(connection.Spec.ReadBindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	connection.Spec.ReadBindings = bindings
-
-	return nil
 }
 
 func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {
