@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -74,6 +75,57 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	}
 
 	return defaultMessage
+}
+
+func bindingsAttributes(bindings []v1alpha1.Binding) ([]*console.PolicyBindingAttributes, error) {
+	if bindings == nil {
+		return nil, nil
+	}
+
+	attrs := make([]*console.PolicyBindingAttributes, 0)
+	for _, b := range bindings {
+		attr, err := bindingAttributes(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if attr != nil {
+			attrs = append(attrs, attr)
+		}
+	}
+
+	return attrs, nil
+}
+
+func bindingAttributes(b v1alpha1.Binding) (*console.PolicyBindingAttributes, error) {
+	userId := b.UserID
+	groupId := b.GroupID
+
+	if userId == nil && b.UserEmail != nil {
+		id, err := identity.Cache().GetUserID(*b.UserEmail)
+		if err != nil {
+			return nil, err
+		}
+		userId = lo.EmptyableToPtr(id)
+	}
+
+	if groupId == nil && b.GroupName != nil {
+		id, err := identity.Cache().GetGroupID(*b.GroupName)
+		if err != nil {
+			return nil, err
+		}
+		groupId = lo.EmptyableToPtr(id)
+	}
+
+	if userId == nil && groupId == nil {
+		return nil, nil
+	}
+
+	return &console.PolicyBindingAttributes{
+		ID:      b.ID,
+		UserID:  userId,
+		GroupID: groupId,
+	}, nil
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {

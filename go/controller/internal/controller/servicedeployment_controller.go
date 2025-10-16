@@ -318,8 +318,15 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 
 	if service.Spec.Bindings != nil {
-		attr.ReadBindings = v1alpha1.PolicyBindings(service.Spec.Bindings.Read)
-		attr.WriteBindings = v1alpha1.PolicyBindings(service.Spec.Bindings.Write)
+		attr.ReadBindings, err = bindingsAttributes(service.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(service.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	if service.Spec.Helm != nil {
