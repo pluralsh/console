@@ -405,8 +405,15 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		attr.ReadBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Read)
-		attr.WriteBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Write)
+		attr.ReadBindings, err = bindingsAttributes(stack.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(stack.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if id, ok := stack.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
