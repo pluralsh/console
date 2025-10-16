@@ -309,15 +309,6 @@ func init() {
 		}
 	})
 
-	types.RegisterController(types.ProviderReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
-		return &controller.ProviderReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
-		}
-	})
-
 	types.RegisterController(types.ScmConnectionReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.ScmConnectionReconciler{
