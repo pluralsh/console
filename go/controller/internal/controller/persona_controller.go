@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
@@ -147,6 +148,27 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 	return nil
 }
 
+func (in *PersonaReconciler) Attributes(persona *v1alpha1.Persona) (*console.PersonaAttributes, error) {
+	attrs, err := bindingsAttributes(persona.Spec.Bindings)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.PersonaAttributes{
+		Name:          lo.ToPtr(persona.PersonaName()),
+		Description:   persona.Spec.Description,
+		Role:          persona.Spec.Role,
+		Configuration: persona.Spec.Configuration.Attributes(),
+		Bindings: algorithms.Map(attrs, func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
+			return &console.BindingAttributes{
+				ID:      binding.ID,
+				UserID:  binding.UserID,
+				GroupID: binding.GroupID,
+			}
+		}),
+	}, nil
+}
+
 func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona, changed bool) (*console.PersonaFragment, error) {
 	logger := log.FromContext(ctx)
 	exists, err := in.ConsoleClient.IsPersonaExists(ctx, persona.Status.GetID())
@@ -156,8 +178,13 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 
 	// Update only if the persona has changed.
 	if changed && exists {
+		attrs, err := in.Attributes(persona)
+		if err != nil {
+			return nil, err
+		}
+
 		logger.Info(fmt.Sprintf("updating persona %s", persona.ConsoleName()))
-		return in.ConsoleClient.UpdatePersona(ctx, persona.Status.GetID(), persona.Attributes())
+		return in.ConsoleClient.UpdatePersona(ctx, persona.Status.GetID(), *attrs)
 	}
 
 	// Read the persona from Console API if it already exists.
@@ -165,8 +192,13 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 		return in.ConsoleClient.GetPersona(ctx, persona.Status.GetID())
 	}
 
+	attrs, err := in.Attributes(persona)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Info(fmt.Sprintf("%s persona does not exist, creating it", persona.ConsoleName()))
-	return in.ConsoleClient.CreatePersona(ctx, persona.Attributes())
+	return in.ConsoleClient.CreatePersona(ctx, *attrs)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

@@ -17,8 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -99,24 +97,6 @@ func (in *Persona) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	}
 
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
-}
-
-// Attributes converts the Persona spec to Console API attributes for upstream synchronization.
-func (in *Persona) Attributes() console.PersonaAttributes {
-	return console.PersonaAttributes{
-		Name:          lo.ToPtr(in.PersonaName()),
-		Description:   in.Spec.Description,
-		Role:          in.Spec.Role,
-		Configuration: in.Spec.Configuration.Attributes(),
-		Bindings: algorithms.Map(PolicyBindings(in.Spec.Bindings),
-			func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
-				return &console.BindingAttributes{
-					ID:      binding.ID,
-					UserID:  binding.UserID,
-					GroupID: binding.GroupID,
-				}
-			}),
-	}
 }
 
 // PersonaSpec defines the desired state of Persona.
