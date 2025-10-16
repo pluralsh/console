@@ -92,8 +92,8 @@ data: ## dir for test sqlite data
 testup: secrets data ## sets up dependent services for test
 	docker compose up -d
 	# Sleep since we need to wait for services to start
-	@echo "Waiting 10 seconds for containers to start..."
-	@sleep 10 
+	@echo "Waiting 15 seconds for containers to start..."
+	@sleep 10
 	@echo "Creating OpenSearch domain (opensearch-local)..."
 	# access key id, secret access key, session token must be the same values as in config/test.exs under :opensearch
 	aws configure set aws_access_key_id test-access-key --no-cli-pager

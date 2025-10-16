@@ -28,7 +28,7 @@ defmodule Console.Schema.SentinelRun do
   end
 
   def unpolled(query \\ __MODULE__) do
-    from(s in query, where: is_nil(s.polled_at))
+    from(s in query, where: is_nil(s.polled_at) and s.status == :pending)
   end
 
   def for_sentinel(query \\ __MODULE__, sentinel_id) do
@@ -40,7 +40,7 @@ defmodule Console.Schema.SentinelRun do
     from(s in query, where: s.inserted_at < ^expiry)
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :inserted_at]) do
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(s in query, order_by: ^order)
   end
 

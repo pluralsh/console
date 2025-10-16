@@ -254,7 +254,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :run_sentinel, :sentinel_run do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.run_sentinel/2
     end

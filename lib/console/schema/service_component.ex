@@ -116,7 +116,7 @@ defmodule Console.Schema.ServiceComponent.Mini do
 
   defp service_mini(%Service{} = service) do
     Console.mapify(service)
-    |> Map.take(~w(name helm git repository cluster namespace)a)
+    |> Map.take(~w(name helm git repository cluster namespace metadata)a)
     |> add_cluster_info()
     |> add_git_info()
     |> add_helm_info()

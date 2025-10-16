@@ -8334,7 +8334,8 @@ export type RootMutationTypeRollbackServiceArgs = {
 
 
 export type RootMutationTypeRunSentinelArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 

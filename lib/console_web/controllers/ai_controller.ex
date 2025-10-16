@@ -1,11 +1,10 @@
 defmodule ConsoleWeb.AIController do
   use ConsoleWeb, :controller
-  import ConsoleWeb.IngestController, only: [convert_headers: 2, to_method: 1]
-  alias ReverseProxyPlug.HTTPClient.Adapters.Req
+  import ConsoleWeb.IngestController, only: [convert_headers: 2]
   alias Console.Schema.Cluster
   alias Console.Deployments.Agents
 
-  @timeouts [receive_timeout: :timer.seconds(300)]
+  @options [recv_timeout: :infinity, timeout: :infinity]
 
   plug :verify
 
@@ -40,20 +39,54 @@ defmodule ConsoleWeb.AIController do
   def maybe_add_params(conn, _), do: conn
 
   def do_proxy(conn, upstream) do
-    opts = ReverseProxyPlug.init(upstream: upstream, response_mode: :stream)
     {body, conn} = ReverseProxyPlug.read_body(conn)
     conn = add_nginx_headers(conn)
-    %ReverseProxyPlug.HTTPClient.Request{
-      method: to_method(conn.method),
-      url: upstream,
-      headers: convert_headers(conn, upstream),
-      body: body,
-      options: @timeouts
-    }
-    |> Req.request_stream()
-    |> ReverseProxyPlug.response(conn, opts)
-    |> halt()
+
+    url = find_uri(upstream, conn.query_string)
+
+    case HTTPoison.post(
+      url,
+      Enum.reverse(body) |> IO.iodata_to_binary(),
+      convert_headers(conn, upstream),
+      [stream_to: self(), async: :once] ++ @options
+    ) do
+      {:ok, %HTTPoison.AsyncResponse{} = resp} ->
+        do_stream(conn, resp)
+      {:error, _} ->
+        send_resp(conn, 500, "error proxying request")
+    end
   end
+
+  defp do_stream(conn, %HTTPoison.AsyncResponse{} = resp) do
+    with {:ok, resp} <- HTTPoison.stream_next(resp) do
+      receive do
+        %HTTPoison.AsyncStatus{code: code} ->
+          put_status(conn, code)
+          |> do_stream(resp)
+
+        %HTTPoison.AsyncHeaders{headers: headers} ->
+          Enum.reduce(headers, conn, fn {k, v}, conn ->
+            put_resp_header(conn, String.downcase(k), v)
+          end)
+          |> send_chunked(conn.status)
+          |> do_stream(resp)
+
+        %HTTPoison.AsyncChunk{chunk: chunk} ->
+          case chunk(conn, chunk) do
+            {:ok, conn} -> do_stream(conn, resp)
+            {:error, _} -> conn
+          end
+
+        %HTTPoison.AsyncEnd{} -> conn
+      end
+    else
+      _ -> send_resp(conn, 500, "error streaming response")
+    end
+  end
+
+  defp find_uri(upstream, query_string) when is_binary(query_string) and byte_size(query_string) > 0,
+    do: "#{upstream}?#{query_string}"
+  defp find_uri(upstream, _), do: upstream
 
   def verify(conn, _) do
     with [token | _] <- get_req_header(conn, "authorization"),

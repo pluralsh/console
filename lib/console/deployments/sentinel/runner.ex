@@ -19,6 +19,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   alias Console.Schema.{Sentinel, SentinelRun, GitRepository}
   alias Console.Deployments.{Git.Discovery, Tar}
   alias Console.Deployments.Sentinel.Impl
+  require Logger
 
   defmodule State, do: defstruct [:run, checks: %{}, results: %{}]
 
@@ -33,16 +34,22 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   def handle_continue(:boot, %State{run: run} = state) do
-    case Repo.preload(run, [sentinel: :repository]) do
-      %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} = run ->
-        {:ok, rules} = rule_files(run)
-        check_runners = Enum.reduce(checks, %{}, fn check, acc ->
-          {:ok, pid} = start_check(check, run, rules)
-          Process.monitor(pid)
-          Map.put(acc, pid, check)
-        end)
+    run = Repo.preload(run, [sentinel: :repository])
+    Logger.info "booting sentinel run #{run.id}"
+    with %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} <- run,
+         {:ok, rules} <- rule_files(run) do
+      check_runners = Enum.reduce(checks, %{}, fn check, acc ->
+        {:ok, pid} = start_check(check, run, rules)
+        Logger.info "started check #{check.name}"
+        Process.monitor(pid)
+        Map.put(acc, pid, check)
+      end)
 
-        {:noreply, %{state | run: run, checks: check_runners}}
+      {:noreply, %{state | run: run, checks: check_runners}}
+    else
+      {:error, _} ->
+        do_update(%{status: :failed}, run)
+        {:stop, :normal, state}
       _ ->
         do_update(%{status: :success}, run)
         {:stop, :normal, state}
@@ -70,6 +77,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   def handle_info({:status, pid, status}, %State{checks: checks, results: results} = state) do
     case Map.pop(checks, pid) do
       {%Sentinel.SentinelCheck{name: name}, checks} ->
+        Logger.info "check #{name} status: #{inspect(status)}"
         results = Map.put(results, name, status)
         save_results(%{state | results: results, checks: checks})
       _ -> {:noreply, state}

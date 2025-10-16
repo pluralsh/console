@@ -1,6 +1,6 @@
 services:
   db:
-    image: public.ecr.aws/docker/library/postgres:14
+    image: postgres:14
     restart: always
     ports:
     - 5432:5432
@@ -9,7 +9,7 @@ services:
     volumes:
     - database_data:/var/lib/postgresql/data
   es:
-    image: public.ecr.aws/docker/library/elasticsearch:8.11.4
+    image: elasticsearch:8.11.4
     restart: always
     ports:
     - 9200:9200
@@ -49,7 +49,7 @@ services:
     - opensearch_data:/usr/share/opensearch/data
   localstack:
     container_name: localstack-main
-    image: public.ecr.aws/localstack/localstack
+    image: localstack/localstack
     ports:
     - 4566:4566
     environment:

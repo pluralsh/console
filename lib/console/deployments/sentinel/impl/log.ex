@@ -71,11 +71,12 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp build_query(%LogConfiguration{query: q, cluster_id: c, namespaces: ns}, %State{latest: l}) do
+  defp build_query(%LogConfiguration{query: q, cluster_id: c, namespaces: ns} = conf, %State{latest: l}) do
     Query.new(
       query: q,
       cluster_id: c,
       namespaces: ns,
+      facets: conf.facets,
       limit: 100,
       time: %{after: l, reverse: true}
     )
