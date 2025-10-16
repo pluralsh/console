@@ -211,10 +211,6 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 	}
 	if settings.Spec.Bindings != nil {
-		if err := r.ensure(settings); err != nil {
-			return nil, err
-		}
-
 		attr.ReadBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Read)
 		attr.WriteBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Write)
 		attr.CreateBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Create)
@@ -238,38 +234,4 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 
 	return attr, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *DeploymentSettingsReconciler) ensure(settings *v1alpha1.DeploymentSettings) error {
-	if settings.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(settings.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Write = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Create, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Create = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Git, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Git = bindings
-
-	return nil
 }

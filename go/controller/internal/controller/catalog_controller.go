@@ -83,11 +83,6 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Sync Catalog CRD with the Console API
-	if err := r.ensure(catalog); err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
-	}
-
 	// Get Catalog SHA that can be saved back in the status to check for changes
 	changed, sha, err := catalog.Diff(utils.HashObject)
 	if err != nil {
@@ -197,32 +192,6 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 		controllerutil.RemoveFinalizer(catalog, CatalogProtectionFinalizerName)
 		return &ctrl.Result{}
 	}
-
-	return nil
-}
-
-func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
-	if catalog.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(catalog.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Write = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Create = bindings
 
 	return nil
 }

@@ -176,28 +176,6 @@ func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.Pr
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 }
 
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
-	if prAutomation.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Create = bindings
-
-	bindings, err = ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Write = bindings
-
-	return nil
-}
-
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (in *PrAutomationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "prautomation_reconciler")

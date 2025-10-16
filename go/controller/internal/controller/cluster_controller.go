@@ -175,9 +175,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return jitterRequeue(requeueDefault), err
 	}
-	if err := r.ensure(cluster); err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
-	}
+
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.ReadOnlyUpdateAttributes())
 	if err != nil {
@@ -299,10 +297,6 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 		return nil, err
 	}
 
-	if err := r.ensure(cluster); err != nil {
-		return nil, err
-	}
-
 	if !cluster.Status.IsSHAEqual(sha) && exists {
 		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
@@ -315,28 +309,4 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId, projectId))
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ClusterReconciler) ensure(cluster *v1alpha1.Cluster) error {
-	if cluster.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-
-	cluster.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-
-	cluster.Spec.Bindings.Write = bindings
-
-	return nil
 }

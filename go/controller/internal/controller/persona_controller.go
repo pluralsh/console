@@ -155,10 +155,6 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 		return nil, err
 	}
 
-	if err := in.ensure(persona); err != nil {
-		return nil, err
-	}
-
 	// Update only if the persona has changed.
 	if changed && exists {
 		logger.Info(fmt.Sprintf("updating persona %s", persona.ConsoleName()))
@@ -172,22 +168,6 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 
 	logger.Info(fmt.Sprintf("%s persona does not exist, creating it", persona.ConsoleName()))
 	return in.ConsoleClient.CreatePersona(ctx, persona.Attributes())
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PersonaReconciler) ensure(persona *v1alpha1.Persona) error {
-	if persona.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(persona.Spec.Bindings, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	persona.Spec.Bindings = bindings
-
-	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

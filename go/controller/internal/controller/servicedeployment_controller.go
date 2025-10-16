@@ -140,10 +140,6 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		}
 	}
 
-	if err = r.ensure(service); err != nil {
-		return handleRequeue(nil, err, service.SetCondition)
-	}
-
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if result != nil || err != nil {
 		return handleRequeue(result, err, service.SetCondition)
@@ -643,28 +639,6 @@ func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) erro
 		return r.ConsoleClient.DetachService(id)
 	}
 	return r.ConsoleClient.DeleteService(id)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceDeploymentReconciler) ensure(service *v1alpha1.ServiceDeployment) error {
-	if service.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 func isServiceReady(components []v1alpha1.ServiceComponent) bool {

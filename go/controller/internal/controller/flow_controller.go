@@ -93,9 +93,6 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, r.handleDelete(ctx, flow)
 	}
 
-	if err = r.ensure(flow); err != nil {
-		return handleRequeue(nil, err, flow.SetCondition)
-	}
 	changed, sha, err := flow.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate flow SHA")
@@ -158,27 +155,6 @@ func (r *FlowReconciler) handleDelete(ctx context.Context, flow *v1alpha1.Flow) 
 		}
 		controllerutil.RemoveFinalizer(flow, FlowFinalizer)
 	}
-	return nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
-	if flow.Spec.Bindings == nil {
-		return nil
-	}
-	bindings, err := ensureBindings(flow.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(flow.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Write = bindings
-
 	return nil
 }
 

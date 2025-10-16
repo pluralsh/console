@@ -93,10 +93,6 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	if p.Spec.Bindings != nil {
-		if err := r.ensure(p); err != nil {
-			return nil, nil, err // Not found error will be checked above in the requeue handler.
-		}
-
 		attr.ReadBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Read)
 		attr.WriteBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Write)
 	}
@@ -217,26 +213,4 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 	return &console.GateSpecAttributes{
 		Job: job,
 	}, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
-	if p.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Write = bindings
-
-	return nil
 }

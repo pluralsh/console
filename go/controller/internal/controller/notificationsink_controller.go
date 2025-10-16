@@ -23,7 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,7 +109,6 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.handleExisting(ctx, notificationSink)
 	}
 
-	err = r.ensureNotificationSink(notificationSink)
 	if err != nil {
 		return handleRequeue(nil, err, notificationSink.SetCondition)
 	}
@@ -286,20 +284,4 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 		attr.NotificationBindings = v1alpha1.PolicyBindings(notificationSink.Spec.Bindings)
 	}
 	return attr
-}
-
-// ensureNotificationSink makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *NotificationSinkReconciler) ensureNotificationSink(notificationSink *v1alpha1.NotificationSink) error {
-	if notificationSink.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	notificationSink.Spec.Bindings = bindings
-
-	return nil
 }

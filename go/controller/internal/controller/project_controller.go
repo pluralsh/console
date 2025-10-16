@@ -213,10 +213,6 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return nil, err
 	}
 
-	if err := in.ensure(project); err != nil {
-		return nil, err
-	}
-
 	// Update only if Project has changed
 	if changed && exists {
 		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
@@ -230,28 +226,6 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 
 	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
 	return in.ConsoleClient.CreateProject(ctx, project.Attributes())
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
-	if project.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

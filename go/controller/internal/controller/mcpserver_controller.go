@@ -17,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -79,10 +78,6 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.handleDelete(ctx, mcpServer)
 	}
 
-	if err = r.ensure(mcpServer); err != nil {
-		return handleRequeue(nil, err, mcpServer.SetCondition)
-	}
-
 	changed, sha, err := mcpServer.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate MCP server SHA")
@@ -115,27 +110,6 @@ func (r *MCPServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.MCPServerList))).
 		For(&v1alpha1.MCPServer{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *MCPServerReconciler) ensure(server *v1alpha1.MCPServer) error {
-	if server.Spec.Bindings == nil {
-		return nil
-	}
-	bindings, err := ensureBindings(server.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(server.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 func (r *MCPServerReconciler) handleDelete(ctx context.Context, mcpServer *v1alpha1.MCPServer) error {

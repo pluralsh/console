@@ -20,7 +20,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -95,10 +94,6 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if err = r.ensure(connection); err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
-	}
-
 	// Get Connection SHA that can be saved back in the status to check for changes
 	changed, sha, err := connection.Diff(ctx, r.toCloudConnectionAttributes, utils.HashObject)
 	if err != nil {
@@ -135,20 +130,6 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	attr.ReadBindings = v1alpha1.PolicyBindings(connection.Spec.ReadBindings)
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
-}
-
-func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection) error {
-	if connection.Spec.ReadBindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(connection.Spec.ReadBindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	connection.Spec.ReadBindings = bindings
-
-	return nil
 }
 
 func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {

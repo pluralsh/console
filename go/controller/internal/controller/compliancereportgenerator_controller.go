@@ -79,10 +79,6 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, r.handleDelete(ctx, complianceReportGenerator)
 	}
 
-	if err = r.ensure(complianceReportGenerator); err != nil {
-		return handleRequeue(nil, err, complianceReportGenerator.SetCondition)
-	}
-
 	changed, sha, err := complianceReportGenerator.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate compliance report generator SHA")
@@ -115,22 +111,6 @@ func (r *ComplianceReportGeneratorReconciler) SetupWithManager(mgr ctrl.Manager)
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ComplianceReportGeneratorList))).
 		For(&v1alpha1.ComplianceReportGenerator{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ComplianceReportGeneratorReconciler) ensure(server *v1alpha1.ComplianceReportGenerator) error {
-	if server.Spec.ReadBindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(server.Spec.ReadBindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.ReadBindings = bindings
-
-	return nil
 }
 
 func (r *ComplianceReportGeneratorReconciler) handleDelete(ctx context.Context, complianceReportGenerator *v1alpha1.ComplianceReportGenerator) error {

@@ -39,7 +39,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
@@ -405,9 +404,6 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		if err := r.ensure(stack); err != nil {
-			return nil, err
-		}
 		attr.ReadBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Read)
 		attr.WriteBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Write)
 	}
@@ -583,26 +579,4 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 	}
 
 	return metrics, nil, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureStack) error {
-	if stack.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Write = bindings
-
-	return nil
 }
