@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -31,7 +30,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -76,45 +74,6 @@ func defaultErrMessage(err error, defaultMessage string) string {
 	}
 
 	return defaultMessage
-}
-
-func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, error) {
-	for i := range bindings {
-		binding, err := ensureBinding(bindings[i], userGroupCache)
-		if err != nil {
-			return bindings, err
-		}
-
-		bindings[i] = binding
-	}
-
-	return bindings, nil
-}
-
-func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, error) {
-	if binding.GroupName == nil && binding.UserEmail == nil {
-		return binding, apierrors.NewNotFound(schema.GroupResource{Resource: "group/user"}, "nil")
-	}
-
-	if binding.GroupName != nil {
-		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
-		if err != nil {
-			return binding, err
-		}
-
-		binding.GroupID = lo.EmptyableToPtr(groupID)
-	}
-
-	if binding.UserEmail != nil {
-		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
-		if err != nil {
-			return binding, err
-		}
-
-		binding.UserID = lo.EmptyableToPtr(userID)
-	}
-
-	return binding, nil
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
