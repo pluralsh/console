@@ -35,8 +35,8 @@ import (
 )
 
 const (
-	requeueDefault          = 60 * time.Second
-	requeueWaitForResources = 15 * time.Second
+	requeueDefault          = 90 * time.Second
+	requeueWaitForResources = 30 * time.Second
 
 	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
