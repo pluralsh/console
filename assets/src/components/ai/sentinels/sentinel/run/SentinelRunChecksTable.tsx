@@ -29,6 +29,7 @@ export function SentinelRunChecksTable({
     <Flex
       direction="column"
       gap="xsmall"
+      overflow="hidden"
     >
       <StackedText
         first="Run checks"
@@ -40,6 +41,7 @@ export function SentinelRunChecksTable({
       />
       <Table
         hideHeader
+        fullHeightWrap
         fillLevel={1}
         rowBg="base"
         data={results}
