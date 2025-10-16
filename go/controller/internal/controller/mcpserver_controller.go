@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -85,7 +86,12 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 	if changed {
-		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, mcpServer.Attributes())
+		attrs, err := r.Attributes(mcpServer)
+		if err != nil {
+			return handleRequeue(nil, err, mcpServer.SetCondition)
+		}
+
+		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update MCP server")
 			utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -101,6 +107,45 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {
+	attrs := console.McpServerAttributes{
+		Name:    mcp.GetServerName(),
+		URL:     mcp.Spec.URL,
+		Confirm: mcp.Spec.Confirm,
+	}
+
+	if mcp.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(mcp.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(mcp.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if mcp.Spec.Authentication != nil {
+		attrs.Authentication = &console.McpServerAuthenticationAttributes{
+			Plural: mcp.Spec.Authentication.Plural,
+		}
+
+		if len(mcp.Spec.Authentication.Headers) > 0 {
+			attrs.Authentication.Headers = make([]*console.McpHeaderAttributes, 0)
+			for k, v := range mcp.Spec.Authentication.Headers {
+				attrs.Authentication.Headers = append(attrs.Authentication.Headers, &console.McpHeaderAttributes{
+					Name: k, Value: v,
+				})
+			}
+		}
+	}
+
+	return &attrs, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
