@@ -42,7 +42,6 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [PrGovernance](#prgovernance)
 - [PreviewEnvironmentTemplate](#previewenvironmenttemplate)
 - [Project](#project)
-- [Provider](#provider)
 - [ScmConnection](#scmconnection)
 - [Sentinel](#sentinel)
 - [ServiceAccount](#serviceaccount)
@@ -514,43 +513,18 @@ _Appears in:_
 
 _Underlying type:_ _string_
 
-CloudProvider represents the supported cloud service providers for cluster provisioning.
-This type defines which cloud platforms can be used for deploying and managing
-Kubernetes clusters through the Plural Console CAPI integration.
+CloudProvider represents the supported cloud service providers.
 
 
 
 _Appears in:_
 - [CloudConnectionSpec](#cloudconnectionspec)
-- [ProviderSpec](#providerspec)
 
 | Field | Description |
 | --- | --- |
 | `aws` | AWS represents Amazon Web Services as a cloud provider<br /> |
 | `azure` | Azure represents Microsoft Azure as a cloud provider<br /> |
 | `gcp` | GCP represents Google Cloud Platform as a cloud provider<br /> |
-
-
-#### CloudProviderSettings
-
-
-
-CloudProviderSettings defines references to Kubernetes secrets containing cloud provider credentials.
-Each cloud provider requires different types of credentials and authentication methods.
-Only one cloud provider's credentials should be specified, matching the Cloud field in ProviderSpec.
-
-
-
-_Appears in:_
-- [ProviderSpec](#providerspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `aws` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | AWS specifies a reference to a Kubernetes Secret containing AWS credentials.<br />The secret should contain the necessary access keys and configuration for<br />provisioning resources in Amazon Web Services, typically including<br />access key ID and secret access key pairs. |  | Optional: \{\} <br /> |
-| `azure` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Azure specifies a reference to a Kubernetes Secret containing Azure credentials.<br />The secret should contain service principal credentials for Microsoft Azure,<br />including client ID, client secret, tenant ID, and subscription ID needed<br />for provisioning resources in Azure. |  | Optional: \{\} <br /> |
-| `gcp` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | GCP specifies a reference to a Kubernetes Secret containing Google Cloud Platform credentials.<br />The secret should contain a service account key in JSON format with the necessary<br />permissions for provisioning resources in Google Cloud Platform. |  | Optional: \{\} <br /> |
-
-
 
 
 #### Cluster
@@ -797,16 +771,16 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `handle` _string_ | Handle is a short, unique human-readable name used to identify this cluster.<br />Does not necessarily map to the cloud resource name.<br />This has to be specified to adopt the existing cluster. |  | Optional: \{\} <br />Type: string <br /> |
-| `version` _string_ | Version specifies the Kubernetes version to use for this cluster.<br />Can be skipped only for BYOK (Bring Your Own Kubernetes) clusters where a version is externally managed. |  | Optional: \{\} <br />Type: string <br /> |
-| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef references the cloud provider to use for this cluster.<br />Can be skipped only for BYOK clusters where infrastructure is externally provisioned. |  | Optional: \{\} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this cluster belongs to for multi-tenancy and access control.<br />If not provided, the cluster will be assigned to the default project. |  | Optional: \{\} <br /> |
-| `cloud` _string_ | Cloud specifies the cloud provider to use for this cluster.<br />Determines the infrastructure platform where the cluster will be provisioned and managed.<br />For BYOK clusters, this field is set to "byok" and no cloud provider is required. |  | Enum: [aws azure gcp byok] <br />Optional: \{\} <br />Type: string <br /> |
-| `protect` _boolean_ | Protect prevents accidental deletion of this cluster.<br />When enabled, the cluster cannot be deleted through the Console UI or API. |  | Optional: \{\} <br /> |
+| `version` _string_ | Version specifies the Kubernetes version to use for this cluster.<br />Can be skipped only for BYOK (Bring Your Own Kubernetes) clusters where a version is externally managed.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br />Type: string <br /> |
+| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef references the cloud provider to use for this cluster.<br />Can be skipped only for BYOK clusters where infrastructure is externally provisioned.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this cluster belongs to for multi-tenancy and access control.<br />If not provided, the cluster will be assigned to the default project.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
+| `cloud` _string_ | Cloud specifies the cloud provider to use for this cluster.<br />Determines the infrastructure platform where the cluster will be provisioned and managed.<br />For BYOK clusters, this field is set to "byok" and no cloud provider is required.<br />Deprecated.<br />Do not use. |  | Enum: [aws azure gcp byok] <br />Optional: \{\} <br />Type: string <br /> |
+| `protect` _boolean_ | Protect prevents accidental deletion of this cluster.<br />When enabled, the cluster cannot be deleted through the Console UI or API.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags are key-value pairs used to categorize and filter clusters in fleet management.<br />Used for organizing clusters by environment, team, or other operational criteria. |  | Optional: \{\} <br /> |
 | `metadata` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write access policies for this cluster.<br />Controls which users and groups can view or manage this cluster through RBAC. |  | Optional: \{\} <br /> |
-| `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this cluster. |  | Optional: \{\} <br /> |
-| `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools defines the worker node configurations managed by this cluster. |  | Optional: \{\} <br /> |
+| `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
+| `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools defines the worker node configurations managed by this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 
 
 #### ClusterSpecTemplate
@@ -3582,47 +3556,6 @@ _Appears in:_
 | `name` _string_ | Name of the project. |  | Required: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
-
-
-#### Provider
-
-
-
-Provider configures cloud provider integration for Kubernetes cluster provisioning using Cluster API (CAPI).
-It defines cloud-specific settings, credentials, and configuration needed to provision and manage
-Kubernetes clusters on cloud platforms like AWS, Azure, or Google Cloud Platform.
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `Provider` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `spec` _[ProviderSpec](#providerspec)_ | Spec defines the desired state of the Provider, including cloud provider type,<br />credentials configuration, and namespace settings for CAPI resource deployment. |  | Required: \{\} <br /> |
-
-
-#### ProviderSpec
-
-
-
-ProviderSpec defines the desired state of Provider.
-It specifies the cloud provider configuration, credentials, and deployment settings
-needed for provisioning and managing Kubernetes clusters through Cluster API.
-
-
-
-_Appears in:_
-- [Provider](#provider)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `cloud` _[CloudProvider](#cloudprovider)_ | Cloud specifies the name of the cloud service for this Provider.<br />This determines which cloud platform will be used for cluster provisioning<br />and must match one of the supported cloud providers: aws, gcp, or azure.<br />The cloud provider selection affects available features, instance types, and<br />networking options for clusters created with this provider. |  | Enum: [gcp aws azure] <br />Required: \{\} <br />Type: string <br /> |
-| `cloudSettings` _[CloudProviderSettings](#cloudprovidersettings)_ | CloudSettings references cloud provider credential secrets used for provisioning clusters.<br />These credentials provide the necessary access to create, modify, and delete cloud resources<br />such as virtual machines, networks, and storage volumes. The specific credential format<br />depends on the cloud provider - AWS requires access keys, Azure uses service principals,<br />and GCP requires service account keys. Not required for bring-your-own-cluster (BYOK) scenarios. |  | Optional: \{\} <br />Type: object <br /> |
-| `name` _string_ | Name is a human-readable identifier for this Provider.<br />This name should be descriptive and help distinguish between multiple providers<br />for the same cloud platform, such as "aws-production" or "gcp-development".<br />The name is immutable once set to ensure consistency across references. |  | Required: \{\} <br /> |
-| `namespace` _string_ | Namespace specifies the Kubernetes namespace where Cluster API resources are deployed.<br />This namespace will contain the provider-specific controllers, custom resources,<br />and other CAPI components needed for cluster lifecycle management. Different<br />providers can use separate namespaces for better organization and isolation. |  | Optional: \{\} <br /> |
 
 
 #### RegexReplacement
