@@ -23,7 +23,7 @@ defimpl Console.Deployments.PubSub.Previewable, for: [
   def reconcile(%@for{item: %PullRequest{status: s} = pr}) when s in ~w(merged closed)a,
     do: Preview.delete_instance(pr)
   def reconcile(%@for{item: %PullRequest{} = pr}) do
-    Utils.deduplicate({:pr_updated, pr.id}, fn ->
+    Utils.deduplicate({:preview_pr_updated, pr.id}, fn ->
       Preview.sync_instance(pr)
     end, ttl: :timer.minutes(2))
   end
@@ -31,8 +31,13 @@ end
 
 defimpl Console.Deployments.PubSub.Previewable, for: Console.PubSub.PreviewEnvironmentInstanceCreated do
   alias Console.Deployments.Flows.Preview
+  alias Console.Deployments.Notifications.Utils
 
-  def reconcile(%@for{item: inst}), do: Preview.pr_comment(inst)
+  def reconcile(%@for{item: inst}) do
+    Utils.deduplicate({:previw_pr_comment, inst.id}, fn ->
+      Preview.pr_comment(inst)
+    end, ttl: :timer.minutes(2))
+  end
 end
 
 defimpl Console.Deployments.PubSub.Previewable, for: [

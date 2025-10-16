@@ -278,6 +278,22 @@ defmodule Console.GraphQl.Deployments.Agent do
 
       resolve &Deployments.update_agent_run/2
     end
+
+    field :update_agent_run_analysis, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:agent_analysis_attributes)
+
+      resolve &Deployments.update_agent_run_analysis/2
+    end
+
+    field :update_agent_run_todos, :agent_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :todos, list_of(:agent_todo_attributes)
+
+      resolve &Deployments.update_agent_run_todos/2
+    end
   end
 
   object :agent_queries do
@@ -332,22 +348,6 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_pull_request_attributes)
 
       resolve &Deployments.agent_pull_request/2
-    end
-
-    field :update_agent_run_analysis, :agent_run do
-      middleware Authenticated
-      arg :id, non_null(:id)
-      arg :attributes, non_null(:agent_analysis_attributes)
-
-      resolve &Deployments.update_agent_run_analysis/2
-    end
-
-    field :update_agent_run_todos, :agent_run do
-      middleware Authenticated
-      arg :id, non_null(:id)
-      arg :todos, list_of(:agent_todo_attributes)
-
-      resolve &Deployments.update_agent_run_todos/2
     end
   end
 end

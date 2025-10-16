@@ -728,6 +728,8 @@ defmodule Console.Deployments.Services do
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
       case {base_status(components), latest_vsn(service, attrs), status_from_errors(service)} do
+        {:failed, true, _} ->
+          update_status(service, :failed, component_status)
         {_, _, status} when not is_nil(status) ->
           update_status(service, status, component_status)
         {:healthy, latest, _} ->

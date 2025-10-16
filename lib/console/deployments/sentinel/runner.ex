@@ -78,12 +78,13 @@ defmodule Console.Deployments.Sentinel.Runner do
     end
   end
 
-  def handle_info(:timeout, %State{run: run}), do: {:stop, :normal, run}
-  def handle_info(_, state), do: {:noreply, state}
+  def handle_info(:timeout, %State{run: run}),
+    do: {:stop, :normal, do_update(%{status: :failed}, run)}
+  def handle_info(_, state),
+    do: {:noreply, state}
 
-  def terminate(_, %State{run: run, checks: checks}) when map_size(checks) > 0 do
-    do_update(%{status: :failed}, run)
-  end
+  def terminate(_, %State{run: run, checks: checks}) when map_size(checks) > 0,
+    do: do_update(%{status: :failed}, run)
   def terminate(_, _), do: :ok
 
   defp save_results(%State{run: run, results: results, checks: checks} = state) do
@@ -133,7 +134,10 @@ defmodule Console.Deployments.Sentinel.Runner do
     |> Map.put(:name, name)
   end
 
-  defp start_check(%Sentinel.SentinelCheck{type: :integration_test} = check, run, _), do: Impl.Job.start(run, check, self())
-  defp start_check(%Sentinel.SentinelCheck{type: :log} = check, _, rules), do: Impl.Log.start(check, self(), rules)
-  defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, _, rules), do: Impl.Kubernetes.start(check, self(), rules)
+  defp start_check(%Sentinel.SentinelCheck{type: :integration_test} = check, run, _),
+    do: Impl.Job.start(run, check, self())
+  defp start_check(%Sentinel.SentinelCheck{type: :log} = check, _, rules),
+    do: Impl.Log.start(check, self(), rules)
+  defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, _, rules),
+    do: Impl.Kubernetes.start(check, self(), rules)
 end
