@@ -104,10 +104,6 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 						Name:      serviceName,
 						Namespace: namespace,
 					},
-					ProviderRef: &corev1.ObjectReference{
-						Name:      providerName,
-						Namespace: namespace,
-					},
 					Template: &v1alpha1.ServiceTemplate{
 						SyncConfig: &v1alpha1.SyncConfigAttributes{
 							CreateNamespace: lo.ToPtr(false),
