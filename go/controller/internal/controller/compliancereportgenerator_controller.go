@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -85,7 +86,12 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 	if changed {
-		apiComplianceReportGenerator, err := r.ConsoleClient.UpsertComplianceReportGenerator(ctx, complianceReportGenerator.Attributes())
+		attrs, err := r.Attributes(complianceReportGenerator)
+		if err != nil {
+			return handleRequeue(nil, err, complianceReportGenerator.SetCondition)
+		}
+
+		apiComplianceReportGenerator, err := r.ConsoleClient.UpsertComplianceReportGenerator(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update compliance report generator")
 			utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -101,6 +107,19 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *ComplianceReportGeneratorReconciler) Attributes(g *v1alpha1.ComplianceReportGenerator) (*console.ComplianceReportGeneratorAttributes, error) {
+	bindings, err := bindingsAttributes(g.Spec.ReadBindings)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.ComplianceReportGeneratorAttributes{
+		Name:         g.ComplianceReportGeneratorName(),
+		Format:       g.Spec.Format,
+		ReadBindings: bindings,
+	}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
