@@ -3,20 +3,16 @@ package controller
 import (
 	"context"
 	"fmt"
-	"slices"
-	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,13 +51,12 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
 		logger.Error(err, "Unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewDefaultScope(ctx, r.Client, cluster)
 	if err != nil {
@@ -73,6 +68,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -88,64 +85,19 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return *result, nil
 	}
 
-	// Handle existing resource.
 	exists, err := r.isExisting(cluster)
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
-	if exists {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExisting(cluster)
-	}
-
-	// Mark resource as managed by this operator.
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
-	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
-	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
-	if result != nil || err != nil {
-		return handleRequeue(result, err, cluster.SetCondition)
-	}
-
-	// Get Project from the reference if it is set and ensure that controller reference is set properly.
-	project, res, err := GetProject(ctx, r.Client, r.Scheme, cluster)
-	if res != nil || err != nil {
-		return handleRequeue(res, err, cluster.SetCondition)
-	}
-
-	attrs, err := r.UpdateAttributes(cluster)
-	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
-	}
-
-	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(*attrs)
-	if err != nil {
+	if !exists {
+		err = fmt.Errorf("cluster not found")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return jitterRequeue(requeueWaitForResources), nil
 	}
 
-	// Sync resource with Console API.
-	apiCluster, err := r.sync(ctx, cluster, providerId, project.Status.ID, sha)
-	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
-	}
-
-	// Update resource status.
-	cluster.Status.ID = &apiCluster.ID
-	cluster.Status.KasURL = apiCluster.KasURL
-	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
-	cluster.Status.PingedAt = apiCluster.PingedAt
-	cluster.Status.SHA = &sha
-	if apiCluster.Status != nil {
-		for _, condition := range apiCluster.Status.Conditions {
-			utils.SyncCondition(cluster.SetCondition, condition.Type, condition.Status, condition.Reason, condition.Message)
-		}
-	}
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(requeueDefault), nil
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+	return r.handleExisting(cluster)
 }
 
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
@@ -184,7 +136,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	attrs, err := r.ReadOnlyUpdateAttributes(cluster)
+	attrs, err := r.Attributes(cluster)
 	if err != nil {
 		return handleRequeue(nil, err, cluster.SetCondition)
 	}
@@ -262,151 +214,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 	return nil
 }
 
-func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
-	logger := log.FromContext(ctx)
-
-	if cluster.Spec.IsProviderRefRequired() {
-		if !cluster.Spec.HasProviderRef() {
-			return nil, nil, fmt.Errorf("could not get provider, reference is not set but required")
-		}
-
-		provider := &v1alpha1.Provider{}
-		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name}, provider); err != nil {
-			return nil, nil, fmt.Errorf("could not get provider, got error: %+v", err)
-		}
-
-		// Once provider is marked with deletion timestamp we should delete cluster as well.
-		// Provider cannot be deleted until cluster exists so that ensures cascading deletion.
-		if !provider.DeletionTimestamp.IsZero() {
-			logger.Info(fmt.Sprintf("Provider is being deleted, deleting %s cluster as well", cluster.Name))
-			err := r.Delete(ctx, cluster)
-			if err != nil {
-				return nil, nil, fmt.Errorf("could not delete %s cluster, got error: %+v", cluster.Name, err)
-			}
-
-			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
-		}
-
-		if !provider.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("provider does not have ID set yet")
-		}
-
-		err := controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
-		if err != nil {
-			return nil, nil, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
-		}
-
-		return provider.Status.ID, nil, nil
-	}
-
-	return nil, nil, nil
-}
-
-func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId, projectId *string, sha string) (*console.ClusterFragment, error) {
-	logger := log.FromContext(ctx)
-	exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	if !cluster.Status.IsSHAEqual(sha) && exists {
-		attrs, err := r.UpdateAttributes(cluster)
-		if err != nil {
-			return nil, err
-		}
-
-		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
-		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, *attrs)
-	}
-
-	if exists {
-		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", cluster.Name))
-		return r.ConsoleClient.GetCluster(cluster.Status.ID)
-	}
-
-	attrs, err := r.Attributes(cluster, providerId, projectId)
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
-	return r.ConsoleClient.CreateCluster(*attrs)
-}
-
-func (r *ClusterReconciler) Attributes(c *v1alpha1.Cluster, providerId, projectId *string) (*console.ClusterAttributes, error) {
-	attrs := console.ClusterAttributes{
-		Name:          c.ConsoleName(),
-		Handle:        c.Spec.Handle,
-		ProviderID:    providerId,
-		ProjectID:     projectId,
-		Version:       c.Spec.Version,
-		Protect:       c.Spec.Protect,
-		CloudSettings: c.Spec.CloudSettings.Attributes(),
-		NodePools: algorithms.Map(c.Spec.NodePools,
-			func(np v1alpha1.ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() }),
-	}
-
-	if c.Spec.Tags != nil {
-		tags := make([]*console.TagAttributes, 0)
-		for name, value := range c.Spec.Tags {
-			tags = append(tags, &console.TagAttributes{Name: name, Value: value})
-		}
-		attrs.Tags = tags
-	}
-
-	if c.Spec.Metadata != nil {
-		attrs.Metadata = lo.ToPtr(string(c.Spec.Metadata.Raw))
-	}
-
-	if c.Spec.Bindings != nil {
-		var err error
-
-		attrs.ReadBindings, err = bindingsAttributes(c.Spec.Bindings.Read)
-		if err != nil {
-			return nil, err
-		}
-
-		attrs.WriteBindings, err = bindingsAttributes(c.Spec.Bindings.Write)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &attrs, nil
-}
-
-func (r *ClusterReconciler) UpdateAttributes(c *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
-	nodePools := algorithms.Map(c.Spec.NodePools, func(np v1alpha1.ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() })
-	slices.SortFunc(nodePools, func(a, b *console.NodePoolAttributes) int { return strings.Compare(a.Name, b.Name) })
-	tagAttr := c.TagUpdateAttributes()
-	attr := console.ClusterUpdateAttributes{
-		Name:      lo.ToPtr(c.ConsoleName()),
-		Handle:    c.Spec.Handle,
-		Version:   c.Spec.Version,
-		Protect:   c.Spec.Protect,
-		NodePools: nodePools,
-		Tags:      tagAttr.Tags,
-		Metadata:  tagAttr.Metadata,
-	}
-
-	if c.Spec.Bindings != nil {
-		var err error
-
-		attr.ReadBindings, err = bindingsAttributes(c.Spec.Bindings.Read)
-		if err != nil {
-			return nil, err
-		}
-
-		attr.WriteBindings, err = bindingsAttributes(c.Spec.Bindings.Write)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &attr, nil
-}
-
-func (r *ClusterReconciler) ReadOnlyUpdateAttributes(c *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
+func (r *ClusterReconciler) Attributes(c *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
 	tagAttr := c.TagUpdateAttributes()
 
 	attr := console.ClusterUpdateAttributes{

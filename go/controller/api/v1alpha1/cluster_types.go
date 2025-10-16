@@ -1,19 +1,15 @@
 package v1alpha1
 
 import (
-	"bytes"
 	"slices"
 	"strings"
 
-	"github.com/pluralsh/polly/algorithms"
+	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/json"
-
-	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -98,6 +94,8 @@ type ClusterSpec struct {
 
 	// Version specifies the Kubernetes version to use for this cluster.
 	// Can be skipped only for BYOK (Bring Your Own Kubernetes) clusters where a version is externally managed.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:="1.25.11"
@@ -105,17 +103,23 @@ type ClusterSpec struct {
 
 	// ProviderRef references the cloud provider to use for this cluster.
 	// Can be skipped only for BYOK clusters where infrastructure is externally provisioned.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// ProjectRef references the project this cluster belongs to for multi-tenancy and access control.
 	// If not provided, the cluster will be assigned to the default project.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// Cloud specifies the cloud provider to use for this cluster.
 	// Determines the infrastructure platform where the cluster will be provisioned and managed.
 	// For BYOK clusters, this field is set to "byok" and no cloud provider is required.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
@@ -125,6 +129,8 @@ type ClusterSpec struct {
 
 	// Protect prevents accidental deletion of this cluster.
 	// When enabled, the cluster cannot be deleted through the Console UI or API.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:example:=false
 	Protect *bool `json:"protect,omitempty"`
@@ -145,29 +151,21 @@ type ClusterSpec struct {
 	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// CloudSettings contains cloud provider-specific configuration for this cluster.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	// +structType=atomic
 	CloudSettings *ClusterCloudSettings `json:"cloudSettings,omitempty"`
 
 	// NodePools defines the worker node configurations managed by this cluster.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
 }
 
 func (cs *ClusterSpec) HasHandle() bool {
 	return cs.Handle != nil
-}
-
-func (cs *ClusterSpec) IsProviderRefRequired() bool {
-	return cs.Cloud != "byok"
-}
-
-func (cs *ClusterSpec) HasProviderRef() bool {
-	return cs.ProviderRef != nil
-}
-
-func (cs *ClusterSpec) HasProjectRef() bool {
-	return cs.ProjectRef != nil
 }
 
 // ClusterCloudSettings contains cloud provider-specific configuration for cluster infrastructure.
@@ -186,18 +184,6 @@ type ClusterCloudSettings struct {
 	GCP *ClusterGCPCloudSettings `json:"gcp,omitempty"`
 }
 
-func (cs *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.CloudSettingsAttributes{
-		AWS:   cs.AWS.Attributes(),
-		Azure: cs.Azure.Attributes(),
-		GCP:   cs.GCP.Attributes(),
-	}
-}
-
 // ClusterAWSCloudSettings contains AWS-specific configuration for cluster deployment.
 type ClusterAWSCloudSettings struct {
 	// Region in AWS to deploy this cluster to.
@@ -205,16 +191,6 @@ type ClusterAWSCloudSettings struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
-}
-
-func (cs *ClusterAWSCloudSettings) Attributes() *console.AWSCloudAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.AWSCloudAttributes{
-		Region: &cs.Region,
-	}
 }
 
 // ClusterAzureCloudSettings contains Azure-specific configuration for cluster deployment.
@@ -243,19 +219,6 @@ type ClusterAzureCloudSettings struct {
 	Location string `json:"location"`
 }
 
-func (cs *ClusterAzureCloudSettings) Attributes() *console.AzureCloudAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.AzureCloudAttributes{
-		Location:       &cs.Location,
-		SubscriptionID: &cs.SubscriptionId,
-		ResourceGroup:  &cs.ResourceGroup,
-		Network:        &cs.Network,
-	}
-}
-
 // ClusterGCPCloudSettings contains Google Cloud Platform specific configuration for cluster deployment.
 type ClusterGCPCloudSettings struct {
 	// Project specifies the GCP project ID where this cluster will be deployed.
@@ -272,18 +235,6 @@ type ClusterGCPCloudSettings struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
-}
-
-func (cs *ClusterGCPCloudSettings) Attributes() *console.GCPCloudAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.GCPCloudAttributes{
-		Project: &cs.Project,
-		Network: &cs.Network,
-		Region:  &cs.Region,
-	}
 }
 
 // ClusterNodePool defines the configuration for a group of worker nodes in the cluster.
@@ -322,48 +273,11 @@ type ClusterNodePool struct {
 	CloudSettings *ClusterNodePoolCloudSettings `json:"cloudSettings,omitempty"`
 }
 
-func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
-	if np == nil {
-		return nil
-	}
-
-	taints := algorithms.Map(np.Taints, func(t Taint) *console.TaintAttributes { return t.Attributes() })
-	slices.SortFunc(taints, func(a, b *console.TaintAttributes) int { return strings.Compare(a.Key, b.Key) })
-
-	attrs := &console.NodePoolAttributes{
-		Name:          np.Name,
-		MinSize:       np.MinSize,
-		MaxSize:       np.MaxSize,
-		InstanceType:  np.InstanceType,
-		CloudSettings: np.CloudSettings.Attributes(),
-		Taints:        taints,
-	}
-
-	if np.Labels != nil {
-		if marshalledLabels, err := json.Marshal(np.Labels); err == nil { // Ignoring errors.
-			labels := bytes.NewBuffer(marshalledLabels).String()
-			attrs.Labels = &labels
-		}
-	}
-
-	return attrs
-}
-
 // ClusterNodePoolCloudSettings contains cloud provider-specific settings for node pools.
 type ClusterNodePoolCloudSettings struct {
 	// AWS contains Amazon Web Services specific node pool configuration.
 	// +kubebuilder:validation:Optional
 	AWS *ClusterNodePoolAWSCloudSettings `json:"aws,omitempty"`
-}
-
-func (cs *ClusterNodePoolCloudSettings) Attributes() *console.NodePoolCloudAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.NodePoolCloudAttributes{
-		AWS: cs.AWS.Attributes(),
-	}
 }
 
 // ClusterNodePoolAWSCloudSettings contains AWS-specific configuration for node pool deployment.
@@ -372,16 +286,6 @@ type ClusterNodePoolAWSCloudSettings struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	LaunchTemplateId *string `json:"launchTemplateId,omitempty"`
-}
-
-func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AWSNodeCloudAttributes {
-	if cs == nil {
-		return nil
-	}
-
-	return &console.AWSNodeCloudAttributes{
-		LaunchTemplateID: cs.LaunchTemplateId,
-	}
 }
 
 // ClusterStatus represents the observed state of a Cluster.
