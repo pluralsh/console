@@ -133,7 +133,7 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 		return nil, err
 	}
 	attr.Name = connection.CloudConnectionName()
-	attr.ReadBindings = policyBindings(connection.Spec.ReadBindings)
+	attr.ReadBindings = v1alpha1.PolicyBindings(connection.Spec.ReadBindings)
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
 }

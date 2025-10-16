@@ -117,20 +117,6 @@ func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache
 	return binding, nil
 }
 
-func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttributes {
-	if bindings == nil {
-		return nil
-	}
-
-	filtered := algorithms.Filter(bindings, func(b v1alpha1.Binding) bool {
-		return b.UserID != nil || b.GroupID != nil
-	})
-
-	return algorithms.Map(filtered, func(b v1alpha1.Binding) *console.PolicyBindingAttributes {
-		return b.Attributes()
-	})
-}
-
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
 	syncConf, err := srv.SyncConfig.Attributes()
 	if err != nil {

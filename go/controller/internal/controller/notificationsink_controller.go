@@ -284,7 +284,7 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 	}
 
 	if notificationSink.Spec.Type == console.SinkTypePlural {
-		attr.NotificationBindings = policyBindings(notificationSink.Spec.Bindings)
+		attr.NotificationBindings = v1alpha1.PolicyBindings(notificationSink.Spec.Bindings)
 	}
 	return attr
 }

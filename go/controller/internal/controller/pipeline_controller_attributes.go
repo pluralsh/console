@@ -97,8 +97,8 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 			return nil, nil, err // Not found error will be checked above in the requeue handler.
 		}
 
-		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(p.Spec.Bindings.Write)
+		attr.ReadBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Read)
+		attr.WriteBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Write)
 	}
 
 	return attr, nil, nil

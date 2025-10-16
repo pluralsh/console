@@ -409,8 +409,8 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		if err := r.ensure(stack); err != nil {
 			return nil, err
 		}
-		attr.ReadBindings = policyBindings(stack.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
+		attr.ReadBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Read)
+		attr.WriteBindings = v1alpha1.PolicyBindings(stack.Spec.Bindings.Write)
 	}
 
 	if id, ok := stack.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
