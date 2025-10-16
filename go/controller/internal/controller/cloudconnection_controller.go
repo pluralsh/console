@@ -104,9 +104,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	apiConnection, err := r.sync(ctx, connection, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update cloud connection")
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
@@ -126,8 +124,13 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	if err != nil {
 		return nil, err
 	}
+
 	attr.Name = connection.CloudConnectionName()
-	attr.ReadBindings = v1alpha1.PolicyBindings(connection.Spec.ReadBindings)
+
+	attr.ReadBindings, err = bindingsAttributes(connection.Spec.ReadBindings)
+	if err != nil {
+		return nil, err
+	}
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
 }
