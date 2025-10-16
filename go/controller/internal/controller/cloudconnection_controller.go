@@ -34,9 +34,8 @@ const (
 // CloudConnectionReconciler reconciles a CloudConnection object
 type CloudConnectionReconciler struct {
 	client.Client
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections,verbs=get;list;watch;create;update;patch;delete

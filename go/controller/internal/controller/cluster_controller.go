@@ -34,7 +34,6 @@ type ClusterReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
-	UserGroupCache   cache.UserGroupCache
 	CredentialsCache credentials.NamespaceCredentialsCache
 }
 

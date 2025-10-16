@@ -35,7 +35,6 @@ type FlowReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	FlowQueue        workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 

@@ -33,7 +33,6 @@ type ComplianceReportGeneratorReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=complianceReportGenerators,verbs=get;list;watch;create;update;patch;delete

@@ -16,7 +16,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -30,10 +29,8 @@ const (
 // CatalogReconciler reconciles a Catalog object
 type CatalogReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=catalogs,verbs=get;list;watch;create;update;patch;delete

@@ -38,7 +38,6 @@ type PersonaReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 }
 

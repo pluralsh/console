@@ -141,7 +141,7 @@ var _ = Describe("Persona Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := pr.Reconcile(ctx, reconcile.Request{
@@ -174,7 +174,7 @@ var _ = Describe("Persona Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := pr.Reconcile(ctx, reconcile.Request{

@@ -570,7 +570,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache:   identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
@@ -625,7 +625,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache:   identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})

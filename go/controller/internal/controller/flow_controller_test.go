@@ -142,7 +142,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := fr.Process(ctx, reconcile.Request{

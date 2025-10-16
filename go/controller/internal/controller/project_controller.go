@@ -30,10 +30,8 @@ import (
 // Implements reconcile.Reconciler and types.Controller.
 type ProjectReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 const (

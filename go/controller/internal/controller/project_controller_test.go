@@ -165,7 +165,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
-			userGroupCache := cache.NewUserGroupCache(fakeConsoleClient)
+			userGroupCache := identitycache.NewUserGroupCache(fakeConsoleClient)
 
 			nsReconciler := &controller.ProjectReconciler{
 				Client:         k8sClient,

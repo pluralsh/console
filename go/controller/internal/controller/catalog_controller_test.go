@@ -176,7 +176,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := nr.Reconcile(ctx, reconcile.Request{
@@ -197,7 +197,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := nr.Reconcile(ctx, reconcile.Request{

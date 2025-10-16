@@ -31,10 +31,8 @@ const (
 // BootstrapTokenReconciler reconciles a BootstrapToken object
 type BootstrapTokenReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=bootstraptokens,verbs=get;list;watch;create;update;patch;delete

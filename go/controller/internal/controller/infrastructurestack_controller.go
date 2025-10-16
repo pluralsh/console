@@ -56,7 +56,6 @@ type InfrastructureStackReconciler struct {
 	client.Client
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	CredentialsCache credentials.NamespaceCredentialsCache
 	StackQueue       workqueue.TypedRateLimitingInterface[ctrl.Request]
 }

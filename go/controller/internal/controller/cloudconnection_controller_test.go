@@ -125,7 +125,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
@@ -177,7 +177,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
@@ -221,7 +221,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				Client:         k8sClient,
 				Scheme:         k8sClient.Scheme(),
 				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: readonlyNamespacedName})

@@ -45,7 +45,6 @@ const (
 type ServiceDeploymentReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
 	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]

@@ -24,8 +24,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -36,8 +34,6 @@ import (
 
 	deploymentsv1alpha "github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/cmd/args"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 )
@@ -89,24 +85,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	consoleClient := client.New(args.ConsoleUrl(), args.ConsoleToken())
-	userGroupCache := cache.NewUserGroupCache(consoleClient)
-	go func() {
-		_ = wait.PollUntilContextCancel(context.Background(), args.WipeCacheInterval(), true,
-			func(ctx context.Context) (done bool, err error) {
-				userGroupCache.Wipe()
-				return true, nil
-			})
-	}()
-
 	credentialsCache, err := credentials.NewNamespaceCredentialsCache(args.ConsoleToken(), scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to initialize credentials cache")
 		os.Exit(1)
 	}
 
-	controllers, shardedControllers, err := args.Reconcilers().ToControllers(
-		mgr, args.ConsoleUrl(), args.ConsoleToken(), userGroupCache, credentialsCache)
+	controllers, shardedControllers, err := args.Reconcilers().ToControllers(mgr, args.ConsoleUrl(),
+		args.ConsoleToken(), credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

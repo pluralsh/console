@@ -8,7 +8,6 @@ import (
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 )
@@ -65,10 +64,10 @@ const (
 
 // ToController maps a Reconciler to its corresponding Controller.
 func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) (Controller, error) {
+	credentialsCache credentials.NamespaceCredentialsCache) (Controller, error) {
 
 	if factory, exists := controllerFactories[sc]; exists {
-		return factory(mgr, consoleClient, userGroupCache, credentialsCache), nil
+		return factory(mgr, consoleClient, credentialsCache), nil
 	}
 	return nil, fmt.Errorf("reconciler %q is not supported", sc)
 }
@@ -105,12 +104,12 @@ func ShardedReconcilers() ReconcilerList {
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
 func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string,
-	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) ([]Controller, []Processor, error) {
+	credentialsCache credentials.NamespaceCredentialsCache) ([]Controller, []Processor, error) {
 	controllers := make([]Controller, len(rl))
 	shardedReconcilersList := ShardedReconcilers()
 	shardedControllers := make([]Processor, 0, len(shardedReconcilersList))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, client.New(url, token), userGroupCache, credentialsCache)
+		controller, err := r.ToController(mgr, client.New(url, token), credentialsCache)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -129,7 +128,6 @@ func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string,
 type ControllerFactoryFunc func(
 	mgr ctrl.Manager,
 	consoleClient client.ConsoleClient,
-	userGroupCache cache.UserGroupCache,
 	credentialsCache credentials.NamespaceCredentialsCache,
 ) Controller
 

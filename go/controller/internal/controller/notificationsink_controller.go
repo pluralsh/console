@@ -51,7 +51,6 @@ type NotificationSinkReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=notificationsinks,verbs=get;list;watch;create;update;patch;delete
