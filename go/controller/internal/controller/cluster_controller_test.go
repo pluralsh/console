@@ -63,17 +63,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		byokReadonlyNamespacedName := types.NamespacedName{Name: byokReadonlyClusterName, Namespace: namespace}
 
 		BeforeAll(func() {
-			By("Creating AWS provider")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: awsProviderName},
-				Spec: v1alpha1.ProviderSpec{
-					Cloud: "aws",
-					Name:  awsProviderName,
-				},
-			}, func(p *v1alpha1.Provider) {
-				p.Status.ID = lo.ToPtr(awsProviderConsoleID)
-			})).To(Succeed())
-
 			By("Creating AWS cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{

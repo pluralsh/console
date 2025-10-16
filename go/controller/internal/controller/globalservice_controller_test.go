@@ -83,18 +83,6 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				p.Status.Health = v1alpha1.GitHealthPullable
 			})).To(Succeed())
 
-			By("creating the custom resource for the Kind Provider")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: providerName, Namespace: namespace},
-				Spec: v1alpha1.ProviderSpec{
-					Cloud:     "aws",
-					Name:      providerName,
-					Namespace: namespace,
-				},
-			}, func(p *v1alpha1.Provider) {
-				p.Status.ID = lo.ToPtr(id)
-			})).To(Succeed())
-
 			By("creating the custom resource for the Kind GlobalService")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GlobalService{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
