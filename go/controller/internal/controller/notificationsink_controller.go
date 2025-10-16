@@ -127,8 +127,13 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 	if !exists || !notificationSink.Status.IsSHAEqual(sha) {
+		attrs, err := genNotificationSinkAttr(notificationSink)
+		if err != nil {
+			return handleRequeue(nil, err, notificationSink.SetCondition)
+		}
+
 		logger.Info("upsert notification sink", "name", notificationSink.NotificationName())
-		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, genNotificationSinkAttr(notificationSink))
+		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, *attrs)
 		if err != nil {
 			utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -256,17 +261,19 @@ func (r *NotificationSinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) console.NotificationSinkAttributes {
+func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) (*console.NotificationSinkAttributes, error) {
 	attr := console.NotificationSinkAttributes{
 		Name:          notificationSink.NotificationName(),
 		Type:          notificationSink.Spec.Type,
 		Configuration: console.SinkConfigurationAttributes{},
 	}
+
 	if notificationSink.Spec.Configuration.Slack != nil {
 		attr.Configuration.Slack = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Slack.URL,
 		}
 	}
+
 	if notificationSink.Spec.Configuration.Teams != nil {
 		attr.Configuration.Teams = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Teams.URL,
@@ -281,7 +288,12 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 	}
 
 	if notificationSink.Spec.Type == console.SinkTypePlural {
-		attr.NotificationBindings = v1alpha1.PolicyBindings(notificationSink.Spec.Bindings)
+		var err error
+
+		attr.NotificationBindings, err = bindingsAttributes(notificationSink.Spec.Bindings)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return attr
+	return &attr, nil
 }

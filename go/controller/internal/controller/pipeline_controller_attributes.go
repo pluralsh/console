@@ -93,8 +93,17 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	if p.Spec.Bindings != nil {
-		attr.ReadBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Read)
-		attr.WriteBindings = v1alpha1.PolicyBindings(p.Spec.Bindings.Write)
+		var err error
+
+		attr.ReadBindings, err = bindingsAttributes(p.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(p.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return attr, nil, nil
