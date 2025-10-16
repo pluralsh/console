@@ -21,7 +21,6 @@ fragment Sentinel on Sentinel {
 }
 
 fragment SentinelCheck on SentinelCheck {
-  id
   name
   type
   ruleFile

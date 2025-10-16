@@ -53,15 +53,21 @@ const ColName = columnHelper.accessor((sentinel) => sentinel, {
   },
 })
 
-const checkTypeToIcon = {
-  [SentinelCheckType.Log]: <LogsIcon />,
-  [SentinelCheckType.Kubernetes]: (
-    <img
-      style={{ width: 16, height: 16 }}
-      alt="Kubernetes"
-      src={CHART_ICON_LIGHT}
-    />
-  ),
+export const getSentinelCheckIcon = (type: SentinelCheckType) => {
+  switch (type) {
+    case SentinelCheckType.Log:
+      return <LogsIcon />
+    case SentinelCheckType.Kubernetes:
+      return (
+        <img
+          style={{ width: 16, height: 16 }}
+          alt="Kubernetes"
+          src={CHART_ICON_LIGHT}
+        />
+      )
+    default:
+      return <LogsIcon />
+  }
 }
 
 const ColChecks = columnHelper.accessor((sentinel) => sentinel.checks, {
@@ -88,7 +94,7 @@ const ColChecks = columnHelper.accessor((sentinel) => sentinel.checks, {
                 gap="small"
                 align="center"
               >
-                {checkTypeToIcon[type] ?? <LogsIcon />}
+                {getSentinelCheckIcon(type as SentinelCheckType)}
                 <Body2P css={{ flex: 1 }}>{pluralize(capitalize(type))}</Body2P>
                 <Chip
                   fillLevel={3}

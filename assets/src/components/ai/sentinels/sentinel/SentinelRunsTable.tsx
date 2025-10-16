@@ -73,50 +73,47 @@ export function SentinelRunsTable({ id }: { id: string }) {
 
 const columnHelper = createColumnHelper<SentinelRunFragment>()
 
-const ColName = columnHelper.accessor((run) => getRunNameFromId(run.id), {
-  id: 'name',
-  meta: { gridTemplate: '1fr' },
-  cell: function Cell({ getValue }) {
-    return <Body2P $color="text">{getValue()}</Body2P>
-  },
-})
-
-const ColStartedAt = columnHelper.accessor((run) => run, {
-  id: 'startedAt',
-  cell: function Cell({ getValue }) {
-    const { status, insertedAt } = getValue()
-    return !!insertedAt && status !== SentinelRunStatus.Pending
-      ? fromNow(insertedAt)
-      : '---'
-  },
-})
-
-const ColStatus = columnHelper.accessor((run) => run, {
-  id: 'status',
-  cell: function Cell({ getValue }) {
-    const { status, insertedAt } = getValue()
-    return (
-      <SentinelStatusChip
-        lastRunAt={insertedAt}
-        status={status}
-      />
-    )
-  },
-})
-
-const ColActions = columnHelper.display({
-  id: 'actions',
-  cell: function Cell() {
-    return (
-      <IconFrame
-        clickable
-        tooltip="View run details"
-        icon={<CaretRightIcon />}
-      />
-    )
-  },
-})
-
-const runsCols = [ColName, ColStartedAt, ColStatus, ColActions]
+const runsCols = [
+  columnHelper.accessor((run) => getRunNameFromId(run.id), {
+    id: 'name',
+    meta: { gridTemplate: '1fr' },
+    cell: function Cell({ getValue }) {
+      return <Body2P $color="text">{getValue()}</Body2P>
+    },
+  }),
+  columnHelper.accessor((run) => run, {
+    id: 'startedAt',
+    cell: function Cell({ getValue }) {
+      const { status, insertedAt } = getValue()
+      return !!insertedAt && status !== SentinelRunStatus.Pending
+        ? fromNow(insertedAt)
+        : '---'
+    },
+  }),
+  columnHelper.accessor((run) => run, {
+    id: 'status',
+    cell: function Cell({ getValue }) {
+      const { status, insertedAt } = getValue()
+      return (
+        <SentinelStatusChip
+          lastRunAt={insertedAt}
+          status={status}
+        />
+      )
+    },
+  }),
+  columnHelper.display({
+    id: 'actions',
+    cell: function Cell() {
+      return (
+        <IconFrame
+          clickable
+          tooltip="View run details"
+          icon={<CaretRightIcon />}
+        />
+      )
+    },
+  }),
+]
 
 export const getRunNameFromId = (id: string) => `run-${id.split('-').shift()}`

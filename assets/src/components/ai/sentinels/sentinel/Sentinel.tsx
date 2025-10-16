@@ -82,7 +82,10 @@ export function Sentinel() {
       }
       content={
         <>
-          <SentinelChecksAccordion sentinel={sentinel} />
+          <SentinelChecksAccordion
+            sentinel={sentinel}
+            loading={sentinelLoading}
+          />
           {id && <SentinelRunsTable id={id} />}
         </>
       }
