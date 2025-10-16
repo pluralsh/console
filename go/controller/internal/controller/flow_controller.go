@@ -109,8 +109,12 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 			return handleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID, serverAssociationAttributes))
+		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes)
+		if err != nil {
+			return handleRequeue(nil, err, flow.SetCondition)
+		}
 
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -126,6 +130,33 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes) (*console.FlowAttributes, error) {
+	attrs := console.FlowAttributes{
+		Name:               flow.FlowName(),
+		Description:        flow.Spec.Description,
+		Icon:               flow.Spec.Icon,
+		ProjectID:          projectID,
+		ServerAssociations: serverAssociations,
+		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
+	}
+
+	if flow.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(flow.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(flow.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attrs, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
