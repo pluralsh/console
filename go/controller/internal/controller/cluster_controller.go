@@ -3,12 +3,15 @@ package controller
 import (
 	"context"
 	"fmt"
+	"slices"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -111,8 +114,13 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return handleRequeue(res, err, cluster.SetCondition)
 	}
 
+	attrs, err := r.UpdateAttributes(cluster)
+	if err != nil {
+		return handleRequeue(nil, err, cluster.SetCondition)
+	}
+
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(cluster.UpdateAttributes())
+	sha, err := utils.HashObject(*attrs)
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -176,13 +184,18 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(cluster.ReadOnlyUpdateAttributes())
+	attrs, err := r.ReadOnlyUpdateAttributes(cluster)
+	if err != nil {
+		return handleRequeue(nil, err, cluster.SetCondition)
+	}
+
+	sha, err := utils.HashObject(*attrs)
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if !cluster.Status.IsSHAEqual(sha) {
-		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.ReadOnlyUpdateAttributes()); err != nil {
+		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, *attrs); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -297,8 +310,13 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 	}
 
 	if !cluster.Status.IsSHAEqual(sha) && exists {
+		attrs, err := r.UpdateAttributes(cluster)
+		if err != nil {
+			return nil, err
+		}
+
 		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
-		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
+		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, *attrs)
 	}
 
 	if exists {
@@ -306,6 +324,110 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
+	attrs, err := r.Attributes(cluster, providerId, projectId)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
-	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId, projectId))
+	return r.ConsoleClient.CreateCluster(*attrs)
+}
+
+func (r *ClusterReconciler) Attributes(c *v1alpha1.Cluster, providerId, projectId *string) (*console.ClusterAttributes, error) {
+	attrs := console.ClusterAttributes{
+		Name:          c.ConsoleName(),
+		Handle:        c.Spec.Handle,
+		ProviderID:    providerId,
+		ProjectID:     projectId,
+		Version:       c.Spec.Version,
+		Protect:       c.Spec.Protect,
+		CloudSettings: c.Spec.CloudSettings.Attributes(),
+		NodePools: algorithms.Map(c.Spec.NodePools,
+			func(np v1alpha1.ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() }),
+	}
+
+	if c.Spec.Tags != nil {
+		tags := make([]*console.TagAttributes, 0)
+		for name, value := range c.Spec.Tags {
+			tags = append(tags, &console.TagAttributes{Name: name, Value: value})
+		}
+		attrs.Tags = tags
+	}
+
+	if c.Spec.Metadata != nil {
+		attrs.Metadata = lo.ToPtr(string(c.Spec.Metadata.Raw))
+	}
+
+	if c.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = bindingsAttributes(c.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = bindingsAttributes(c.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attrs, nil
+}
+
+func (r *ClusterReconciler) UpdateAttributes(c *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
+	nodePools := algorithms.Map(c.Spec.NodePools, func(np v1alpha1.ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() })
+	slices.SortFunc(nodePools, func(a, b *console.NodePoolAttributes) int { return strings.Compare(a.Name, b.Name) })
+	tagAttr := c.TagUpdateAttributes()
+	attr := console.ClusterUpdateAttributes{
+		Name:      lo.ToPtr(c.ConsoleName()),
+		Handle:    c.Spec.Handle,
+		Version:   c.Spec.Version,
+		Protect:   c.Spec.Protect,
+		NodePools: nodePools,
+		Tags:      tagAttr.Tags,
+		Metadata:  tagAttr.Metadata,
+	}
+
+	if c.Spec.Bindings != nil {
+		var err error
+
+		attr.ReadBindings, err = bindingsAttributes(c.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(c.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attr, nil
+}
+
+func (r *ClusterReconciler) ReadOnlyUpdateAttributes(c *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
+	tagAttr := c.TagUpdateAttributes()
+
+	attr := console.ClusterUpdateAttributes{
+		Handle:   c.Spec.Handle,
+		Tags:     tagAttr.Tags,
+		Metadata: tagAttr.Metadata,
+	}
+
+	if c.Spec.Bindings != nil {
+		var err error
+
+		attr.ReadBindings, err = bindingsAttributes(c.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(c.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attr, nil
 }
