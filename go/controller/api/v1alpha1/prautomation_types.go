@@ -104,10 +104,8 @@ func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositor
 	}
 
 	if in.Spec.Bindings != nil {
-		attrs.CreateBindings = algorithms.Map(in.Spec.Bindings.Create,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attrs.WriteBindings = algorithms.Map(in.Spec.Bindings.Write,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attrs.CreateBindings = PolicyBindings(in.Spec.Bindings.Create)
+		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
 	}
 
 	return &attrs
