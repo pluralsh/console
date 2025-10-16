@@ -3,8 +3,6 @@ package controller_test
 import (
 	"context"
 
-	"github.com/pluralsh/console/go/controller/internal/cache"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
@@ -122,10 +120,9 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			}, nil)
 
 			controllerReconciler := &controller.CloudConnectionReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
@@ -174,10 +171,9 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			}, nil)
 
 			controllerReconciler := &controller.CloudConnectionReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
@@ -218,10 +214,9 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			}, nil).Once()
 
 			controllerReconciler := &controller.CloudConnectionReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: identitycache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: readonlyNamespacedName})

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -119,7 +120,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 }
 
 func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
-	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
+	userID, err := identity.Cache().GetUserID(credential.Spec.User)
 	if err != nil {
 		return nil, err
 	}

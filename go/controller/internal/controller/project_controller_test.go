@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -165,13 +164,11 @@ var _ = Describe("Project Controller", Ordered, func() {
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
-			userGroupCache := identitycache.NewUserGroupCache(fakeConsoleClient)
 
 			nsReconciler := &controller.ProjectReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: userGroupCache,
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			result, err := nsReconciler.Reconcile(ctx, reconcile.Request{

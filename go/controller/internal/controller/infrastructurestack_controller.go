@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -324,7 +325,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	}
 
 	if stack.Spec.Actor != nil {
-		userID, err := r.UserGroupCache.GetUserID(*stack.Spec.Actor)
+		userID, err := identity.Cache().GetUserID(*stack.Spec.Actor)
 		if err != nil {
 			return nil, err
 		}

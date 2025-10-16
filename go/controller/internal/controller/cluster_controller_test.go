@@ -6,7 +6,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -570,7 +569,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
@@ -625,7 +623,6 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
-				UserGroupCache:   identitycache.NewUserGroupCache(fakeConsoleClient),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})

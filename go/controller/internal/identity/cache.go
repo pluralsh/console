@@ -27,7 +27,6 @@ func init() {
 	go func() {
 		_ = wait.PollUntilContextCancel(context.Background(), args.WipeCacheInterval(), true,
 			func(ctx context.Context) (done bool, err error) {
-				klog.V(log.LogLevelDefault).InfoS("wiping user group cache")
 				cache.Wipe()
 				return false, nil
 			})
@@ -85,4 +84,7 @@ func (u *identityCache) GetGroupID(name string) (string, error) {
 func (u *identityCache) Wipe() {
 	u.userMap.Clear()
 	u.groupMap.Clear()
+
+	klog.V(log.LogLevelDefault).InfoS("wiped user group cache")
+
 }

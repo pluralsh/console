@@ -17,7 +17,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -138,10 +137,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	}
 
 	if exists && !prAutomation.Status.HasID() {
-		return pra, sha, nil, err
-	}
-
-	if err = in.ensure(prAutomation); err != nil {
 		return pra, sha, nil, err
 	}
 

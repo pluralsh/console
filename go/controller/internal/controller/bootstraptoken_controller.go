@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,6 @@ import (
 
 	consoleapi "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -135,7 +135,7 @@ func (in *BootstrapTokenReconciler) sync(ctx context.Context, bootstrapToken *v1
 	attributes := consoleapi.BootstrapTokenAttributes{ProjectID: lo.FromPtr(project.ConsoleID())}
 
 	if !lo.IsEmpty(bootstrapToken.Spec.User) {
-		userID, err := in.UserGroupCache.GetUserID(*bootstrapToken.Spec.User)
+		userID, err := identity.Cache().GetUserID(*bootstrapToken.Spec.User)
 		if err != nil {
 			return nil, err
 		}
