@@ -2,18 +2,20 @@ import {
   ChecklistIcon,
   CheckRoundedIcon,
   Chip,
+  ChipSeverity,
   ErrorIcon,
   Flex,
   GitHubLogoIcon,
   ListBoxItem,
   LogsIcon,
-  StatusIpIcon,
+  PendingOutlineIcon,
   Toast,
   Tooltip,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Overline } from 'components/cd/utils/PermissionsModal.tsx'
+import { Confirm } from 'components/utils/Confirm.tsx'
 import { MoreMenu } from 'components/utils/MoreMenu.tsx'
 import { CHART_ICON_LIGHT } from 'components/utils/Provider.tsx'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol.tsx'
@@ -21,12 +23,14 @@ import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { TRUNCATE_LEFT } from 'components/utils/truncate.ts'
 import {
   Body1BoldP,
+  Body2BoldP,
   Body2P,
   CaptionP,
 } from 'components/utils/typography/Text.tsx'
 import { capitalize, groupBy, isEmpty } from 'lodash'
 import pluralize from 'pluralize'
-import styled from 'styled-components'
+import { useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime.ts'
 import {
   SentinelCheckType,
@@ -34,8 +38,6 @@ import {
   SentinelRunStatus,
   useRunSentinelMutation,
 } from '../../../generated/graphql.ts'
-import { useState } from 'react'
-import { Confirm } from 'components/utils/Confirm.tsx'
 
 const columnHelper = createColumnHelper<SentinelFragment>()
 
@@ -161,26 +163,6 @@ const ColLastRun = columnHelper.accessor((sentinel) => sentinel.lastRunAt, {
   },
 })
 
-const statusToIcon = {
-  [SentinelRunStatus.Success]: (
-    <CheckRoundedIcon
-      color="icon-success"
-      size={12}
-    />
-  ),
-  [SentinelRunStatus.Failed]: (
-    <ErrorIcon
-      color="icon-danger"
-      size={12}
-    />
-  ),
-  [SentinelRunStatus.Pending]: <StatusIpIcon size={12} />,
-}
-const statusToText = {
-  [SentinelRunStatus.Success]: 'Passed',
-  [SentinelRunStatus.Failed]: 'Failed',
-}
-
 const ColStatus = columnHelper.accessor((sentinel) => sentinel.status, {
   id: 'status',
   header: 'Status',
@@ -191,58 +173,13 @@ const ColStatus = columnHelper.accessor((sentinel) => sentinel.status, {
 
     return (
       <SentinelStatusChip
+        showIcon
         status={status}
         lastRunAt={original.lastRunAt}
       />
     )
   },
 })
-
-export function SentinelStatusChip({
-  status,
-  lastRunAt,
-}: {
-  status: SentinelRunStatus
-  lastRunAt?: Nullable<string>
-}) {
-  const isPending = status === SentinelRunStatus.Pending
-  return (
-    <WrapWithIf
-      condition={isPending && !!lastRunAt}
-      wrapper={
-        <Tooltip
-          placement="top"
-          label={
-            <Flex direction="column">
-              <CaptionP $color="text-light">Run started:</CaptionP>
-              <CaptionP $color="text-light">{fromNow(lastRunAt)}</CaptionP>
-            </Flex>
-          }
-        />
-      }
-    >
-      <Chip
-        inactive
-        css={{
-          ...(isPending && { border: 'none', background: 'none' }),
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <Flex
-          gap="xsmall"
-          align="center"
-        >
-          {statusToIcon[status]}
-          {isPending ? (
-            <CaptionP $color="icon-info">In progress</CaptionP>
-          ) : (
-            <span>{statusToText[status]}</span>
-          )}
-        </Flex>
-      </Chip>
-    </WrapWithIf>
-  )
-}
 
 const ColActions = columnHelper.accessor((sentinel) => sentinel, {
   id: 'actions',
@@ -327,6 +264,77 @@ export function SentinelRunDialog({
   )
 }
 
+export function SentinelStatusChip({
+  status,
+  lastRunAt,
+  numErrors,
+  showIcon = false,
+  showSeverity = false,
+  filled = false,
+  small = false,
+}: {
+  status: SentinelRunStatus
+  lastRunAt?: Nullable<string>
+  numErrors?: number
+  showIcon?: boolean
+  showSeverity?: boolean
+  filled?: boolean
+  small?: boolean
+}) {
+  const { borders } = useTheme()
+  const isPending = status === SentinelRunStatus.Pending
+  const TextComponent = small ? CaptionP : Body2BoldP
+  return (
+    <WrapWithIf
+      condition={isPending && !!lastRunAt}
+      wrapper={
+        <Tooltip
+          placement="top"
+          label={
+            <Flex direction="column">
+              <CaptionP $color="text-light">Run started:</CaptionP>
+              <CaptionP $color="text-light">{fromNow(lastRunAt)}</CaptionP>
+            </Flex>
+          }
+        />
+      }
+    >
+      <Chip
+        severity={statusToSeverity[status]}
+        css={{
+          whiteSpace: 'nowrap',
+          border: isPending ? 'none' : borders.default,
+          ...((!filled || isPending) && { background: 'none' }),
+          ...(numErrors && { height: 32 }),
+        }}
+        size={small ? 'small' : 'medium'}
+      >
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          {(showIcon || isPending) && statusToIcon[status]}
+          {isPending ? (
+            <CaptionP $color="icon-info">In progress</CaptionP>
+          ) : (
+            <TextComponent $color={showSeverity ? undefined : 'text-light'}>
+              {statusToText[status]}
+            </TextComponent>
+          )}
+          {!!numErrors && (
+            <Chip
+              size="small"
+              severity="danger"
+            >
+              {numErrors} {pluralize('error', numErrors)}
+            </Chip>
+          )}
+        </Flex>
+      </Chip>
+    </WrapWithIf>
+  )
+}
+
 export const sentinelsCols = [
   ColName,
   ColChecks,
@@ -335,3 +343,23 @@ export const sentinelsCols = [
   ColStatus,
   ColActions,
 ]
+
+const statusToIcon = {
+  [SentinelRunStatus.Success]: <CheckRoundedIcon size={12} />,
+  [SentinelRunStatus.Failed]: <ErrorIcon size={12} />,
+  [SentinelRunStatus.Pending]: (
+    <PendingOutlineIcon
+      color="icon-light"
+      size={12}
+    />
+  ),
+}
+const statusToSeverity: Record<SentinelRunStatus, ChipSeverity> = {
+  [SentinelRunStatus.Success]: 'success',
+  [SentinelRunStatus.Failed]: 'danger',
+  [SentinelRunStatus.Pending]: 'info',
+}
+const statusToText = {
+  [SentinelRunStatus.Success]: 'Passed',
+  [SentinelRunStatus.Failed]: 'Failed',
+}

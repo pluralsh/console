@@ -56,7 +56,12 @@ export function SentinelRunSidecar({
         <Sidecar>
           {run.status && (
             <SidecarItem heading="Status">
-              <SentinelStatusChip status={run.status} />
+              <SentinelStatusChip
+                small
+                filled
+                showSeverity
+                status={run.status}
+              />
             </SidecarItem>
           )}
           {run.insertedAt && (

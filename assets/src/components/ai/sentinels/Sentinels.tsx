@@ -111,7 +111,6 @@ export function Sentinels() {
         </TabList>
       </StretchedFlex>
       <Table
-        rowBg="raised"
         fullHeightWrap
         virtualizeRows
         loading={!data && loading}

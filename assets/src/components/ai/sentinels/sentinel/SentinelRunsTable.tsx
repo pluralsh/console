@@ -96,6 +96,7 @@ const runsCols = [
       const { status, insertedAt } = getValue()
       return (
         <SentinelStatusChip
+          showSeverity
           lastRunAt={insertedAt}
           status={status}
         />

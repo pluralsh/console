@@ -162,10 +162,10 @@
          "name": "SentinelRuns",
          "body": "query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {\n  sentinel(id: $id, name: $name) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...SentinelRunTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}"
       },
-      "sha256:35b6ad4ed8059b12c7f72b74054759b4a5d6a7e9ccfc0fa0c03f68c1f004c6e2": {
+      "sha256:3026ceb0d17d491223c8f72d2bf8a4efdd9f732d78bd35051c41bd28476d2638": {
          "type": "query",
          "name": "SentinelRun",
-         "body": "query SentinelRun($id: ID!) {\n  sentinelRun(id: $id) {\n    ...SentinelRun\n    __typename\n  }\n}\n\nfragment SentinelRun on SentinelRun {\n  ...SentinelRunTiny\n  results {\n    ...SentinelRunResult\n    __typename\n  }\n  sentinel {\n    id\n    name\n    description\n    repository {\n      url\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}\n\nfragment SentinelRunResult on SentinelRunResult {\n  name\n  reason\n  status\n  successfulCount\n  failedCount\n  jobCount\n  __typename\n}"
+         "body": "query SentinelRun($id: ID!) {\n  sentinelRun(id: $id) {\n    ...SentinelRun\n    __typename\n  }\n}\n\nfragment SentinelRun on SentinelRun {\n  ...SentinelRunTiny\n  results {\n    ...SentinelRunResult\n    __typename\n  }\n  sentinel {\n    id\n    name\n    description\n    status\n    repository {\n      url\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment SentinelRunTiny on SentinelRun {\n  id\n  status\n  insertedAt\n  __typename\n}\n\nfragment SentinelRunResult on SentinelRunResult {\n  name\n  reason\n  status\n  successfulCount\n  failedCount\n  jobCount\n  __typename\n}"
       },
       "sha256:03258985dd02458157841e15424f44ea872745cbad0214c5b4f4f9d16b49c0fa": {
          "type": "query",

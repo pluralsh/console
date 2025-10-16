@@ -6,13 +6,14 @@ import {
 import { getAIBreadcrumbs } from 'components/ai/AI'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { useSentinelRunQuery } from 'generated/graphql'
+import { SentinelRunStatus, useSentinelRunQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_SENTINELS_RUNS_PARAM_RUN_ID,
   getSentinelAbsPath,
 } from 'routes/aiRoutesConsts'
+import { SentinelStatusChip } from '../../SentinelsTableCols'
 import { SentinelDetailsPageWrapper } from '../Sentinel'
 import { getRunNameFromId } from '../SentinelRunsTable'
 import { SentinelRunSidecar } from '../SentinelSidecars'
@@ -28,6 +29,11 @@ export function SentinelRun() {
   const sentinelRunLoading = !data && loading
   const sentinelRun = data?.sentinelRun
   const parentSentinel = sentinelRun?.sentinel
+
+  const numErrors =
+    sentinelRun?.results?.filter(
+      (result) => result?.status === SentinelRunStatus.Failed
+    )?.length ?? 0
 
   useSetBreadcrumbs(
     useMemo(
@@ -75,7 +81,15 @@ export function SentinelRun() {
               />
             }
           />
-          {/* TODO: errors chip here */}
+          {sentinelRun?.status && (
+            <SentinelStatusChip
+              filled
+              showIcon
+              showSeverity
+              status={sentinelRun.status}
+              numErrors={numErrors}
+            />
+          )}
         </>
       }
       content={sentinelRun && <SentinelRunChecksTable run={sentinelRun} />}
