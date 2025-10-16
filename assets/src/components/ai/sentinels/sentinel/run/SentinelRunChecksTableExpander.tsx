@@ -2,7 +2,7 @@ import { Card, Markdown } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { RawYaml } from 'components/component/ComponentRaw'
 import { SentinelFragment, SentinelRunResultFragment } from 'generated/graphql'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
 
 export function SentinelRunChecksTableExpander({
@@ -12,8 +12,8 @@ export function SentinelRunChecksTableExpander({
   row: Row<SentinelRunResultFragment>
   parentSentinel: Nullable<SentinelFragment>
 }) {
+  const { spacing } = useTheme()
   const result = row.original
-
   const checkDef = parentSentinel?.checks?.find(
     (check) => check?.name === result.name
   )
@@ -24,6 +24,7 @@ export function SentinelRunChecksTableExpander({
         <Card
           fillLevel={1}
           header={{ content: 'reason' }}
+          css={{ padding: spacing.medium }}
         >
           <Markdown text={result.reason} />
         </Card>
@@ -35,10 +36,7 @@ export function SentinelRunChecksTableExpander({
         >
           <RawYaml
             showHeader={false}
-            css={{
-              border: 'none',
-              background: 'transparent',
-            }}
+            css={{ border: 'none', background: 'transparent' }}
             raw={deepOmitFalsy(checkDef)}
           />
         </Card>

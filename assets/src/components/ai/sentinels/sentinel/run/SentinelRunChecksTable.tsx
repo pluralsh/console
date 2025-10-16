@@ -55,6 +55,7 @@ export function SentinelRunChecksTable({
           />
         )}
         onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+        emptyStateProps={{ message: 'No checks found for this run.' }}
       />
     </Flex>
   )
