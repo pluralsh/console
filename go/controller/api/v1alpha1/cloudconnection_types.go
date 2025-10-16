@@ -94,6 +94,23 @@ type CloudConnectionSpec struct {
 	ReadBindings []Binding `json:"readBindings,omitempty"`
 }
 
+// Hasher provides a function interface for generating hash values from objects
+// to enable drift detection and state comparison for Provider resources.
+// +kubebuilder:object:generate:=false
+type Hasher func(interface{}) (string, error)
+
+// CloudProvider represents the supported cloud service providers.
+type CloudProvider string
+
+const (
+	// AWS represents Amazon Web Services as a cloud provider
+	AWS CloudProvider = "aws"
+	// Azure represents Microsoft Azure as a cloud provider
+	Azure CloudProvider = "azure"
+	// GCP represents Google Cloud Platform as a cloud provider
+	GCP CloudProvider = "gcp"
+)
+
 // CloudConnectionConfiguration contains provider-specific credential configurations.
 // Only one provider configuration should be specified per CloudConnection instance.
 type CloudConnectionConfiguration struct {
