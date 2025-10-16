@@ -1,7 +1,8 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/controller/internal/identity"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,30 +53,58 @@ type Binding struct {
 	GroupName *string `json:"groupName,omitempty"`
 }
 
-func (b *Binding) Attributes() *console.PolicyBindingAttributes {
+func (b *Binding) Attributes() (*console.PolicyBindingAttributes, error) {
 	if b == nil {
-		return nil
+		return nil, nil
+	}
+
+	if b.UserID == nil && b.UserEmail != nil {
+		userID, err := identity.Cache().GetUserID(*b.UserEmail)
+		if err != nil {
+			return nil, err
+		}
+
+		b.UserID = lo.EmptyableToPtr(userID)
+	}
+
+	if b.GroupID == nil && b.GroupName != nil {
+		groupID, err := identity.Cache().GetGroupID(*b.GroupName)
+		if err != nil {
+			return nil, err
+		}
+
+		b.GroupID = lo.EmptyableToPtr(groupID)
+	}
+
+	if b.UserID == nil && b.GroupID == nil {
+		return nil, nil
 	}
 
 	return &console.PolicyBindingAttributes{
 		ID:      b.ID,
 		UserID:  b.UserID,
 		GroupID: b.GroupID,
-	}
+	}, nil
 }
 
-func PolicyBindings(bindings []Binding) []*console.PolicyBindingAttributes {
+func PolicyBindings(bindings []Binding) ([]*console.PolicyBindingAttributes, error) {
 	if bindings == nil {
-		return nil
+		return nil, nil
 	}
 
-	filtered := algorithms.Filter(bindings, func(b Binding) bool {
-		return b.UserID != nil || b.GroupID != nil
-	})
+	attrs := make([]*console.PolicyBindingAttributes, 0)
+	for _, b := range bindings {
+		attr, err := b.Attributes()
+		if err != nil {
+			return nil, err
+		}
 
-	return algorithms.Map(filtered, func(b Binding) *console.PolicyBindingAttributes {
-		return b.Attributes()
-	})
+		if attr != nil {
+			attrs = append(attrs, attr)
+		}
+	}
+
+	return attrs, nil
 }
 
 // Taint represents a Kubernetes taint.
