@@ -210,10 +210,27 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 	}
 	if settings.Spec.Bindings != nil {
-		attr.ReadBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Read)
-		attr.WriteBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Write)
-		attr.CreateBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Create)
-		attr.GitBindings = v1alpha1.PolicyBindings(settings.Spec.Bindings.Git)
+		var err error
+
+		attr.ReadBindings, err = bindingsAttributes(settings.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.WriteBindings, err = bindingsAttributes(settings.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.CreateBindings, err = bindingsAttributes(settings.Spec.Bindings.Create)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.GitBindings, err = bindingsAttributes(settings.Spec.Bindings.Git)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if settings.Spec.DeploymentRepositoryRef != nil {
