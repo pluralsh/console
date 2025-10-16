@@ -163,6 +163,7 @@ export { default as PagerdutyLogoIcon } from './components/icons/PagerdutyLogoIc
 export { default as PaperclipIcon } from './components/icons/PaperclipIcon'
 export { default as PauseIcon } from './components/icons/PauseIcon'
 export { default as PencilIcon } from './components/icons/PencilIcon'
+export { default as PendingOutlineIcon } from './components/icons/PendingOutlineIcon'
 export { default as PeopleIcon } from './components/icons/PeopleIcon'
 export { default as PeoplePlusIcon } from './components/icons/PeoplePlusIcon'
 export { default as PersonIcon } from './components/icons/PersonIcon'
