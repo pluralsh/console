@@ -55,11 +55,17 @@ type SentinelCheckConfiguration struct {
 }
 
 type SentinelCheckIntegrationTestConfiguration struct {
+	// the test output format of the job
+	//+kubebuilder:validation:Enum=PLAINTEXT;JUNIT
+	Format console.SentinelRunJobFormat `json:"format,omitempty"`
+
 	// the job to run for this check
 	Job *JobSpec `json:"jobSpec,omitempty"`
+
 	// the distro to run the check on
 	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
+
 	// the cluster tags to select where to run this job
 	Tags map[string]string `json:"tags,omitempty"`
 }

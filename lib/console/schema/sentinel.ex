@@ -56,7 +56,7 @@ defmodule Console.Schema.Sentinel do
         embeds_one :integration_test, IntegrationTestConfiguration, on_replace: :update do
           embeds_one :job, JobSpec, on_replace: :update
 
-          field :format, SentinelRunJob.Format
+          field :format, SentinelRunJob.Format, default: :junit
           field :tags,   :map
           field :distro, Cluster.Distro
         end
@@ -140,8 +140,8 @@ defmodule Console.Schema.Sentinel do
 
   defp integration_test_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(tags distro)a)
+    |> cast(attrs, ~w(tags distro format)a)
     |> cast_embed(:job)
-    |> validate_required(~w(distro)a)
+    |> validate_required(~w(distro format)a)
   end
 end

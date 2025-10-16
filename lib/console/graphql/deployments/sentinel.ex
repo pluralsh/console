@@ -51,6 +51,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :job,    :gate_job_attributes, description: "the job to run for this check"
     field :distro, :cluster_distro, description: "the distro to run the check on"
     field :tags,   :json, description: "the cluster tags to select where to run this job"
+    field :format, non_null(:sentinel_run_job_format), description: "the format of the job output"
   end
 
   input_object :sentinel_run_job_update_attributes do
@@ -112,6 +113,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :job,    :job_gate_spec, description: "the job to run for this check"
     field :distro, :cluster_distro, description: "the distro to run the check on"
     field :tags,   :map, description: "the cluster tags to select where to run this job"
+    field :format, non_null(:sentinel_run_job_format), description: "the format of the job"
   end
 
   object :sentinel_run do
@@ -144,7 +146,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_run_job do
     field :id,            non_null(:string), description: "the id of the job"
     field :status,        non_null(:sentinel_run_job_status), description: "the status of the job"
-    field :format,        non_null(:sentinel_run_job_format), description: "the format of the job"
+    field :format,        non_null(:sentinel_run_job_format), description: "the format of the job output"
     field :check,         :string, description: "the check that was run"
     field :output,        :string, description: "the output of the job"
 

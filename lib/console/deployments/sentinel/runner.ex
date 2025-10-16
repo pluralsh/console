@@ -54,8 +54,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       {%Sentinel.SentinelCheck{name: name}, checks} ->
         results = Map.put(results, name, %{status: :failed, reason: "Check process ended prematurely"})
         save_results(%{state | checks: checks, results: results})
-      _ ->
-        {:noreply, state}
+      _ -> {:noreply, state}
     end
   end
 
@@ -73,15 +72,15 @@ defmodule Console.Deployments.Sentinel.Runner do
       {%Sentinel.SentinelCheck{name: name}, checks} ->
         results = Map.put(results, name, status)
         save_results(%{state | results: results, checks: checks})
-      _ ->
-        {:noreply, state}
+      _ -> {:noreply, state}
     end
   end
 
-  def handle_info(:timeout, %State{run: run}),
-    do: {:stop, :normal, do_update(%{status: :failed}, run)}
-  def handle_info(_, state),
-    do: {:noreply, state}
+  def handle_info(:timeout, %State{checks: checks} = state) do
+    Enum.each(checks, fn {pid, _} -> GenServer.stop(pid) end)
+    {:stop, :normal, state}
+  end
+  def handle_info(_, state), do: {:noreply, state}
 
   def terminate(_, %State{run: run, checks: checks}) when map_size(checks) > 0,
     do: do_update(%{status: :failed}, run)

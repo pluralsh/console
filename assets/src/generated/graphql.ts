@@ -10549,6 +10549,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestConfiguration';
   /** the distro to run the check on */
   distro?: Maybe<ClusterDistro>;
+  /** the format of the job */
+  format: SentinelRunJobFormat;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
   /** the cluster tags to select where to run this job */
@@ -10558,6 +10560,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
 export type SentinelCheckIntegrationTestConfigurationAttributes = {
   /** the distro to run the check on */
   distro?: InputMaybe<ClusterDistro>;
+  /** the format of the job output */
+  format: SentinelRunJobFormat;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
   /** the cluster tags to select where to run this job */
@@ -10679,7 +10683,7 @@ export type SentinelRunJob = {
   check?: Maybe<Scalars['String']['output']>;
   /** the cluster that the job was run on */
   cluster?: Maybe<Cluster>;
-  /** the format of the job */
+  /** the format of the job output */
   format: SentinelRunJobFormat;
   /** the id of the job */
   id: Scalars['String']['output'];
