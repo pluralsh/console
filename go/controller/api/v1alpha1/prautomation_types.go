@@ -75,42 +75,6 @@ func (in *PrAutomation) ConsoleName() string {
 	return in.Name
 }
 
-func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositoryID, projectID *string) *console.PrAutomationAttributes {
-	attrs := console.PrAutomationAttributes{
-		Name:          lo.ToPtr(in.ConsoleName()),
-		Role:          in.Spec.Role,
-		Identifier:    in.Spec.Identifier,
-		Documentation: in.Spec.Documentation,
-		Title:         in.Spec.Title,
-		Message:       in.Spec.Message,
-		Branch:        in.Spec.Branch,
-		Icon:          in.Spec.Icon,
-		DarkIcon:      in.Spec.DarkIcon,
-		Updates:       in.Spec.Updates.Attributes(),
-		Creates:       in.Spec.Creates.Attributes(),
-		Deletes:       in.Spec.Deletes.Attributes(),
-		Addon:         in.Spec.Addon,
-		ClusterID:     clusterID,
-		ServiceID:     serviceID,
-		ConnectionID:  connectionID,
-		RepositoryID:  repositoryID,
-		ProjectID:     projectID,
-		Patch:         in.Spec.Patch,
-		Confirmation:  in.Spec.Confirmation.Attributes(),
-		Secrets:       in.Spec.Secrets.Attributes(),
-		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
-			return c.Attributes()
-		}),
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.CreateBindings = PolicyBindings(in.Spec.Bindings.Create)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-	}
-
-	return &attrs
-}
-
 func (in *PrAutomation) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Spec)
 	if err != nil {
