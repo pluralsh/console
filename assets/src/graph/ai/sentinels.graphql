@@ -59,13 +59,7 @@ fragment SentinelRun on SentinelRun {
     ...SentinelRunResult
   }
   sentinel {
-    id
-    name
-    description
-    status
-    repository {
-      url
-    }
+    ...Sentinel
   }
 }
 

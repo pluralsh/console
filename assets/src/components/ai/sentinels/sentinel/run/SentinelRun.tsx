@@ -92,7 +92,13 @@ export function SentinelRun() {
           )}
         </>
       }
-      content={sentinelRun && <SentinelRunChecksTable run={sentinelRun} />}
+      content={
+        <SentinelRunChecksTable
+          run={sentinelRun}
+          parentSentinel={parentSentinel}
+          loading={sentinelRunLoading}
+        />
+      }
       sidecar={<SentinelRunSidecar run={sentinelRun} />}
     />
   )
