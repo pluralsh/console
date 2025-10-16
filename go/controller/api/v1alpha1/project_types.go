@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -51,20 +50,6 @@ func (in *Project) ConsoleID() *string {
 // ConsoleName implements [PluralResource] interface
 func (in *Project) ConsoleName() string {
 	return in.Spec.Name
-}
-
-func (in *Project) Attributes() console.ProjectAttributes {
-	attrs := console.ProjectAttributes{
-		Name:        in.ConsoleName(),
-		Description: in.Spec.Description,
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-	}
-
-	return attrs
 }
 
 func (in *Project) Diff(hasher Hasher) (changed bool, sha string, err error) {
