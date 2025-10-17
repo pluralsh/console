@@ -49,12 +49,10 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if err := r.Get(ctx, req.NamespacedName, catalog); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := NewDefaultScope(ctx, r.Client, catalog)
 	if err != nil {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, catalog.SetCondition)
 	}
 
 	// Always patch object when exiting this function, so we can persist any object changes.
@@ -64,24 +62,25 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 	}()
 
+	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Handle proper resource deletion via finalizer
 	result := r.addOrRemoveFinalizer(ctx, catalog)
 	if result != nil {
 		return *result, retErr
 	}
 
-	// Check if resource already exists in the API and only sync the ID
+	// Check if the resource already exists in the API and only sync the ID.
 	exists, err := r.isAlreadyExists(ctx, catalog)
 	if err != nil {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return handleRequeue(nil, err, catalog.SetCondition)
 	}
 	if exists {
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExistingResource(ctx, catalog)
 	}
 
-	// Mark resource as managed by this operator.
+	// Mark the resource as managed by this operator.
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Get Catalog SHA that can be saved back in the status to check for changes
@@ -89,7 +88,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if err != nil {
 		logger.Error(err, "unable to calculate catalog SHA")
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return catalog.Spec.Reconciliation.Requeue(), err
 	}
 	if changed {
 		project, res, err := GetProject(ctx, r.Client, r.Scheme, catalog)
@@ -104,9 +103,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalogAttributes)
 		if err != nil {
-			logger.Error(err, "unable to create or update catalog")
-			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return handleRequeue(nil, err, catalog.SetCondition)
 		}
 		catalog.Status.ID = &apiCatalog.ID
 		catalog.Status.SHA = &sha
@@ -114,7 +111,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, retErr
+	return catalog.Spec.Reconciliation.Requeue(), retErr
 }
 
 func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *string) (*console.CatalogAttributes, error) {
@@ -165,7 +162,7 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 	if !exists {
 		catalog.Status.ID = nil
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources(), nil
+		return wait(), nil
 	}
 
 	apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
@@ -178,7 +175,7 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue(), nil
+	return catalog.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alpha1.Catalog) (bool, error) {
@@ -215,12 +212,12 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 	if !catalog.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 		if err != nil {
-			return lo.ToPtr(requeue())
+			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 		}
 
 		apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 		if err != nil {
-			return lo.ToPtr(requeue())
+			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove Pipeline from Console API if it exists.
@@ -229,11 +226,12 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(requeue())
+				return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 			}
 
 			// catalog deletion is synchronous so can just fall back to removing the finalizer and reconciling
 		}
+
 		// Stop reconciliation as the item is being deleted
 		controllerutil.RemoveFinalizer(catalog, CatalogProtectionFinalizerName)
 		return &ctrl.Result{}

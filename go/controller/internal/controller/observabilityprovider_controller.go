@@ -218,7 +218,7 @@ func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Co
 	if !exists {
 		provider.Status.ID = nil
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources(), nil
+		return wait(), nil
 	}
 
 	apiProvider, err := in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))

@@ -146,7 +146,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 	if !exists {
 		scm.Status.ID = nil
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources(), nil
+		return wait(), nil
 	}
 
 	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())

@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -41,19 +39,10 @@ const (
 	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
 )
 
-// TODO: Remove.
-func waitForResources() ctrl.Result {
-	return ctrl.Result{RequeueAfter: jitter(30 * time.Second)}
-}
-
-// TODO: Remove.
-func requeue() ctrl.Result {
-	return ctrl.Result{RequeueAfter: jitter(30 * time.Minute)}
-}
-
-// TODO: Remove.
-func jitter(t time.Duration) time.Duration {
-	return t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))
+// wait returns result to requeue after a short delay.
+// Used for waiting for other resources to be ready.
+func wait() ctrl.Result {
+	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(v1alpha1.WaitDefault)}
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,
@@ -68,7 +57,7 @@ func jitter(t time.Duration) time.Duration {
 // It is important that at least one from a result or an error have to be non-nil.
 func handleRequeue(result *ctrl.Result, err error, setCondition func(condition metav1.Condition)) (ctrl.Result, error) {
 	if err != nil && apierrors.IsNotFound(err) {
-		result = lo.ToPtr(waitForResources())
+		result = lo.ToPtr(wait())
 	}
 
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
@@ -465,7 +454,7 @@ func GetProject(ctx context.Context, c runtimeclient.Client, scheme *runtime.Sch
 	}
 
 	if !project.Status.HasID() {
-		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("project is not ready")
+		return nil, lo.ToPtr(wait()), fmt.Errorf("project is not ready")
 	}
 
 	if err := controllerutil.SetOwnerReference(project, objMeta, scheme); err != nil {

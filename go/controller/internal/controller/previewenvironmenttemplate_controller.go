@@ -137,7 +137,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(waitForResources())
+		return lo.ToPtr(wait())
 	}
 
 	// try to delete the resource
@@ -145,7 +145,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(waitForResources())
+		return lo.ToPtr(wait())
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -175,7 +175,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		return nil, nil, err
 	}
 	if flowID == nil {
-		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("flow is not ready")
+		return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")
 	}
 	attr.FlowID = *flowID
 
@@ -184,7 +184,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		return nil, nil, err
 	}
 	if serviceID == nil {
-		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(wait()), fmt.Errorf("service is not ready")
 	}
 	attr.ReferenceServiceID = *serviceID
 
@@ -194,7 +194,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 			return nil, nil, err
 		}
 		if connectionID == nil {
-			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("scm connection is not ready")
+			return nil, lo.ToPtr(wait()), fmt.Errorf("scm connection is not ready")
 		}
 		attr.ConnectionID = connectionID
 	}

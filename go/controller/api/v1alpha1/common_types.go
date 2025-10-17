@@ -1,12 +1,8 @@
 package v1alpha1
 
 import (
-	"math/rand"
-	"time"
-
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	console "github.com/pluralsh/console/go/client"
@@ -53,54 +49,6 @@ type Binding struct {
 
 	// +kubebuilder:validation:Optional
 	GroupName *string `json:"groupName,omitempty"`
-}
-
-// Reconciliation parameters for a specific resource.
-type Reconciliation struct {
-	// DriftDetection enables drift detection for this resource.
-	// Use with Interval to set how often drift detection runs.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	// +kubebuilder:example:=false
-	DriftDetection *bool `json:"driftDetection,omitempty"`
-
-	// Interval for DriftDetection mechanism.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:default="30m"
-	// +kubebuilder:example:="5m30s"
-	Interval *string `json:"interval,omitempty"`
-}
-
-// Requeue returns ctrl.Result based on the resource Reconciliation spec.
-// Used for drift detection.
-func (r *Reconciliation) Requeue() ctrl.Result {
-	if r == nil || r.DriftDetection == nil || !*r.DriftDetection {
-		return ctrl.Result{}
-	}
-
-	interval := 30 * time.Minute
-	if r.Interval != nil {
-		if parsed, err := time.ParseDuration(*r.Interval); err == nil {
-			interval = parsed
-		}
-	}
-
-	return ctrl.Result{RequeueAfter: jitter(interval)}
-}
-
-// Wait returns ctrl.Result to requeue after a short delay.
-// Used for waiting for other resources to be ready.
-func (r *Reconciliation) Wait() ctrl.Result {
-	return ctrl.Result{RequeueAfter: jitter(30 * time.Second)}
-}
-
-// jitter adds a random jitter to the given duration.
-// This helps to avoid thundering herd problems when multiple resources
-// are reconciled at the same time.
-// The jitter is up to half of the given duration plus 30 seconds.
-func jitter(t time.Duration) time.Duration {
-	return t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))
 }
 
 // Taint represents a Kubernetes taint.

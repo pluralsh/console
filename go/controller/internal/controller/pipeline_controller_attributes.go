@@ -87,7 +87,7 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 			return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
@@ -116,7 +116,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if !service.Status.HasID() {
-		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(wait()), fmt.Errorf("service is not ready")
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
@@ -152,7 +152,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		}
 
 		if !prAutomation.Status.HasID() {
-			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("pr automation is not ready")
+			return nil, lo.ToPtr(wait()), fmt.Errorf("pr automation is not ready")
 		}
 
 		prAutomationID = prAutomation.Status.ID
@@ -203,7 +203,7 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 	}
 
 	if !cluster.Status.HasID() {
-		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("cluster is not ready")
+		return nil, lo.ToPtr(wait()), fmt.Errorf("cluster is not ready")
 	}
 
 	return cluster.Status.ID, nil, nil

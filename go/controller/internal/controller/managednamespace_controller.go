@@ -291,7 +291,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 
 		if !repository.Status.HasID() {
-			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("repository is not ready")
+			return nil, lo.ToPtr(wait()), fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

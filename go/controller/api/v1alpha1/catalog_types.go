@@ -121,6 +121,11 @@ type CatalogSpec struct {
 	// Bindings contain read and write policies of this Catalog.
 	// +kubebuilder:validation:Optional
 	Bindings *CatalogBindings `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this catalog.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // CatalogBindings defines the RBAC permissions for a catalog, controlling access to PR automations.

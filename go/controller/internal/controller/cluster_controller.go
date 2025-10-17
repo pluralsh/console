@@ -93,7 +93,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	if !exists {
 		err = fmt.Errorf("cluster not found")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return waitForResources(), nil
+		return wait(), nil
 	}
 
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())

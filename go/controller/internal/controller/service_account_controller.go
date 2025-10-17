@@ -138,7 +138,7 @@ func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Cont
 	if !exists {
 		sa.Status.ID = nil
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return waitForResources(), nil
+		return wait(), nil
 	}
 
 	apiServiceAccount, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
