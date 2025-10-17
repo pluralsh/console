@@ -222,7 +222,7 @@ export function SentinelRunDialog({
       setShowToast(true)
     },
     awaitRefetchQueries: true,
-    refetchQueries: ['Sentinel', 'Sentinels'],
+    refetchQueries: ['Sentinel', 'Sentinels', 'SentinelRuns'],
   })
 
   if (!sentinel) return null
