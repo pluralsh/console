@@ -1,3 +1,23 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: full-access
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: full-access-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: full-access
+    namespace: default
+---
+
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Sentinel
 metadata:
@@ -8,6 +28,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
   name: sentinel-terratest
+  namespace: default
 spec:
   name: terratest
   description: "test sentinel for terratest"
@@ -20,6 +41,7 @@ spec:
           format: JUNIT
           jobSpec:
             namespace: terratest
+            serviceAccount: full-access
             containers:
               - image: ghcr.io/pluralsh/sentinel-harness-terratest:latest
 
