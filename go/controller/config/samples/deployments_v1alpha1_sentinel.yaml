@@ -15,7 +15,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: full-access
-    namespace: default
+    namespace: terratest
 ---
 
 apiVersion: deployments.plural.sh/v1alpha1
