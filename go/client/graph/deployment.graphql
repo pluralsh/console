@@ -112,6 +112,14 @@ query GetServiceDeployment($id: ID!) {
     }
 }
 
+
+query GetServiceDeploymentTiny($id: ID!) {
+    serviceDeployment(id: $id) {
+        id
+        name
+    }
+}
+
 query GetServiceDeploymentComponents($id: ID!) {
     serviceDeployment(id: $id) {
         id
@@ -264,6 +272,13 @@ query ListServiceDeploymentByHandle($after: String, $before: String, $last: Int,
 query GetServiceContext($name: String!) {
     serviceContext(name: $name) {
         ...ServiceContextFragment
+    }
+}
+
+query GetServiceContextTiny($name: String!) {
+    serviceContext(name: $name) {
+        id
+        name
     }
 }
 

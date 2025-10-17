@@ -51,6 +51,13 @@ query GetSentinel($id: ID!) {
     }
 }
 
+query GetSentinelTiny($id: ID!) {
+    sentinel(id: $id) {
+        id
+        name
+    }
+}
+
 fragment SentinelRunJobFragment on SentinelRunJob {
     id
     status

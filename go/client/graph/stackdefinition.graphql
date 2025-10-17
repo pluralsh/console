@@ -2,6 +2,14 @@ query GetStackDefinition($id: ID!) {
     stackDefinition(id: $id) { ...StackDefinitionFragment }
 }
 
+query GetStackDefinitionTiny($id: ID!) {
+    stackDefinition(id: $id) {
+        id
+        name
+    }
+}
+
+
 query ListStackDefinitions($after: String, $first: Int, $before: String, $last: Int) {
     stackDefinitions(after: $after, first: $first, before: $before, last: $last) {
         pageInfo { ...PageInfoFragment }

@@ -28,7 +28,6 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			cloud                  = "aws"
 			namespace              = "default"
 			providerName           = "pipeline-provider"
-			providerConsoleID      = "pipeline-provider-console-id"
 			devClusterName         = "pipeline-dev"
 			devClusterConsoleID    = "pipeline-dev-console-id"
 			prodClusterName        = "pipeline-prod"

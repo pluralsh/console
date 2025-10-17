@@ -40,6 +40,13 @@ query GetPersona($id: ID!) {
     }
 }
 
+query GetPersonaTiny($id: ID!) {
+    persona(id: $id){
+        id
+        name
+    }
+}
+
 mutation CreatePersona($attributes: PersonaAttributes!) {
     createPersona(attributes: $attributes){
         ...PersonaFragment

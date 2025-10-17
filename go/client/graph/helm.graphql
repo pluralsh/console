@@ -26,6 +26,12 @@ query GetHelmRepository($url: String!) {
     }
 }
 
+query GetHelmRepositoryTiny($url: String!) {
+    helmRepository(url: $url) {
+        id
+    }
+}
+
 mutation UpsertHelmRepository($url: String!, $attributes: HelmRepositoryAttributes) {
     upsertHelmRepository(url: $url, attributes: $attributes) {
         ...HelmRepositoryFragment
