@@ -13,6 +13,8 @@ defmodule Console.Deployments.Sentinel.Impl.Base do
 
   def prepend(l, msg), do: [msg | l]
 
+  def append(l, msg), do: l ++ [msg]
+
   def user_msgs(l), do: Enum.map(l, & {:user, &1})
 
   @spec ai_call(Provider.history, String.t) :: {:ok, status} | :ignore | {:error, binary}

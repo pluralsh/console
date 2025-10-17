@@ -52,7 +52,7 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> add_operation(:update, fn %{fetch: sentinel} ->
       sentinel
-      |> Sentinel.changeset(attrs)
+      |> Sentinel.changeset(Map.delete(attrs, :status))
       |> allow(user, :write)
       |> when_ok(:update)
     end)

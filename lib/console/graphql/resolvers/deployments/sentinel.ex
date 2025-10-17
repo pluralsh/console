@@ -71,7 +71,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
 
   def run_sentinel(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
     sentinel = Sentinels.get_sentinel_by_name!(name)
-    SentinelRun.run_sentinel(sentinel.id, user)
+    Sentinels.run_sentinel(sentinel.id, user)
   end
   def run_sentinel(%{id: id}, %{context: %{current_user: user}}) when is_binary(id),
     do: Sentinels.run_sentinel(id, user)

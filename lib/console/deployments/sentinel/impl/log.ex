@@ -16,7 +16,7 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
 
   @interval :timer.seconds(15)
 
-  defmodule State, do: defstruct [:check, :config, :pid, :latest, logs: [], rules: %{}]
+  defmodule State, do: defstruct [:check, :config, :pid, :before, :after, logs: [], rules: %{}]
 
   def start(%SentinelCheck{} = check, pid, rules) do
     GenServer.start(__MODULE__, {check, pid, rules})
@@ -28,7 +28,8 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
       check: check,
       config: log,
       pid: pid,
-      latest: DateTime.utc_now(),
+      after: Timex.now() |> Timex.shift(minutes: -1),
+      before: Timex.now(),
       rules: rules
     }
     {:ok, state, {:continue, :setup}}
@@ -64,21 +65,21 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
     |> Provider.query()
     |> case do
       {:ok, new_logs} ->
-        {:noreply, %{state | logs: Enum.concat(logs, new_logs), latest: DateTime.utc_now()}}
+        {:noreply, %{state | logs: Enum.concat(logs, new_logs), after: state.before, before: Timex.now()}}
       _ -> {:noreply, state}
     end
   end
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp build_query(%LogConfiguration{query: q, cluster_id: c, namespaces: ns} = conf, %State{latest: l}) do
+  defp build_query(%LogConfiguration{query: q, cluster_id: c, namespaces: ns} = conf, %State{} = s) do
     Query.new(
       query: q,
       cluster_id: c,
       namespaces: ns,
       facets: conf.facets,
       limit: 100,
-      time: %{after: l, reverse: true}
+      time: Map.take(s, [:before, :after])
     )
   end
 
