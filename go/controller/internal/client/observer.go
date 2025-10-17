@@ -53,8 +53,34 @@ func (c *client) GetObserver(ctx context.Context, id, name *string) (*console.Ob
 	return response.Observer, err
 }
 
+func (c *client) GetObserverTiny(ctx context.Context, id, name *string) (*console.GetObserverTiny_Observer, error) {
+	if id != nil && name != nil {
+		return nil, fmt.Errorf("cannot specify both id and name")
+	}
+
+	if id == nil && name == nil {
+		return nil, fmt.Errorf("no id or name specified")
+	}
+
+	resourceName := lo.If(id != nil, id).Else(name)
+	response, err := c.consoleClient.GetObserverTiny(ctx, id, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+
+	if err == nil && (response == nil || response.Observer == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.Observer, err
+}
+
 func (c *client) IsObserverExists(ctx context.Context, name string) (bool, error) {
-	response, err := c.GetObserver(ctx, nil, &name)
+	response, err := c.GetObserverTiny(ctx, nil, &name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

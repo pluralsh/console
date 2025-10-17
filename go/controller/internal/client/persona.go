@@ -29,12 +29,31 @@ func (c *client) GetPersona(ctx context.Context, id string) (*console.PersonaFra
 	return response.Persona, err
 }
 
+func (c *client) GetPersonaTiny(ctx context.Context, id string) (*console.GetPersonaTiny_Persona, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no id specified")
+	}
+
+	response, err := c.consoleClient.GetPersonaTiny(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.Persona == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.Persona, err
+}
+
 func (c *client) IsPersonaExists(ctx context.Context, id string) (bool, error) {
 	if id == "" {
 		return false, nil
 	}
 
-	persona, err := c.GetPersona(ctx, id)
+	persona, err := c.GetPersonaTiny(ctx, id)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

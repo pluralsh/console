@@ -34,8 +34,24 @@ func (c *client) GetHelmRepository(ctx context.Context, url string) (*console.He
 	return response.HelmRepository, err
 }
 
+func (c *client) GetHelmRepositoryTiny(ctx context.Context, url string) (*console.GetHelmRepositoryTiny_HelmRepository, error) {
+	response, err := c.consoleClient.GetHelmRepositoryTiny(ctx, url)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, url)
+	}
+	if err == nil && (response == nil || response.HelmRepository == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, url)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.HelmRepository, err
+}
+
 func (c *client) IsHelmRepositoryExists(ctx context.Context, url string) (bool, error) {
-	repo, err := c.GetHelmRepository(ctx, url)
+	repo, err := c.GetHelmRepositoryTiny(ctx, url)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

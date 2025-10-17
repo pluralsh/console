@@ -46,8 +46,27 @@ func (c *client) GetServiceById(id string) (*console.ServiceDeploymentExtended, 
 	return response.ServiceDeployment, err
 }
 
+func (c *client) GetServiceTinyById(id string) (*console.GetServiceDeploymentTiny_ServiceDeployment, error) {
+	if id == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
+
+	response, err := c.consoleClient.GetServiceDeploymentTiny(c.ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.ServiceDeployment == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ServiceDeployment, err
+}
+
 func (c *client) IsServiceExisting(id string) (bool, error) {
-	service, err := c.GetServiceById(id)
+	service, err := c.GetServiceTinyById(id)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
