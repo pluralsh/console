@@ -1874,6 +1874,9 @@ type SentinelRun {
   "the status of the run"
   status: SentinelRunStatus!
 
+  "the time the run completed"
+  completedAt: DateTime
+
   "the sentinel that was run"
   sentinel: Sentinel
 

@@ -8,8 +8,9 @@ defmodule Console.Schema.SentinelRun do
   defenum Status, pending: 0, success: 1, failed: 2
 
   schema "sentinel_runs" do
-    field :status, Status, default: :pending
-    field :polled_at, :utc_datetime_usec
+    field :status,       Status, default: :pending
+    field :polled_at,    :utc_datetime_usec
+    field :completed_at, :utc_datetime_usec
 
     embeds_many :results, SentinelCheckResult, on_replace: :delete do
       field :name,             :string
@@ -51,11 +52,20 @@ defmodule Console.Schema.SentinelRun do
     |> cast(attrs, @valid)
     |> cast_embed(:results, with: &result_changeset/2)
     |> validate_required(~w(status)a)
+    |> add_completed_at()
   end
 
   defp result_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name status reason job_count successful_count failed_count)a)
     |> validate_required(~w(name status)a)
+  end
+
+
+  defp add_completed_at(cs) do
+    case get_change(cs, :status) do
+      s when s in ~w(success failed)a -> put_change(cs, :completed_at, DateTime.utc_now())
+      _ -> cs
+    end
   end
 end

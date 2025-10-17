@@ -10645,6 +10645,8 @@ export type SentinelEdge = {
 
 export type SentinelRun = {
   __typename?: 'SentinelRun';
+  /** the time the run completed */
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
