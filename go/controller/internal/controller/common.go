@@ -35,8 +35,6 @@ import (
 )
 
 const (
-	requeueDefault = 30 * time.Minute
-
 	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
 	// but still be able to reconcile them.
@@ -44,11 +42,15 @@ const (
 )
 
 func waitForResources() ctrl.Result {
-	return jitterRequeue(30 * time.Second)
+	return ctrl.Result{RequeueAfter: jitter(30 * time.Second)}
 }
 
-func jitterRequeue(t time.Duration) ctrl.Result {
-	return ctrl.Result{RequeueAfter: t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))}
+func requeue() ctrl.Result {
+	return ctrl.Result{RequeueAfter: jitter(30 * time.Minute)}
+}
+
+func jitter(t time.Duration) time.Duration {
+	return t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,

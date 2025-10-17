@@ -308,7 +308,7 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 
 			// If deletion process started requeue so that we can make sure observability observer
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
+			return lo.ToPtr(requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

@@ -211,7 +211,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return requeue(), nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -276,7 +276,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
+				return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
@@ -290,7 +290,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		}
 		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
-			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
 			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("flow is not ready")
@@ -300,7 +300,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 
 	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
 	if err != nil {
-		return nil, lo.ToPtr(jitterRequeue(requeueDefault)), err
+		return nil, lo.ToPtr(requeue()), err
 	}
 
 	// we only want to explicitly set the configuration field in attr if the user specified it via
@@ -355,7 +355,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			ref := service.Spec.Helm.RepositoryRef
 			var repo v1alpha1.GitRepository
 			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting repository: %s", err.Error())
+				return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
 			if !repo.Status.HasID() {
@@ -368,7 +368,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting values config map: %s", err.Error())
+				return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting values config map: %s", err.Error())
 			}
 			attr.Helm.Values = &val
 		}
@@ -613,7 +613,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 
 		// Remove service from Console API if it exists and is not read-only.

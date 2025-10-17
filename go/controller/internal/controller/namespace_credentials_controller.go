@@ -81,12 +81,12 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 	nc.Status.TokenSHA = lo.ToPtr(utils.HashString(token))
 	if err != nil {
 		utils.MarkFalse(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return jitterRequeue(requeueDefault), nil
+		return requeue(), nil
 	}
 
 	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(requeueDefault), nil
+	return requeue(), nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

@@ -111,7 +111,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return requeue(), nil
 }
 
 func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
@@ -129,7 +129,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 
 		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Status.ID, nil)
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 
 		// Remove project from Console API if it exists.
@@ -138,7 +138,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(jitterRequeue(requeueDefault))
+				return lo.ToPtr(requeue())
 			}
 		}
 
@@ -202,7 +202,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return requeue(), nil
 }
 
 func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.ProjectAttributes, error) {

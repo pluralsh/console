@@ -76,7 +76,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if !pipeline.Status.HasID() {
 		logger.Info("pipeline is not ready", "name", pipeline.Name, "namespace", pipeline.Namespace)
-		return jitterRequeue(requeueDefault), nil
+		return requeue(), nil
 	}
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {

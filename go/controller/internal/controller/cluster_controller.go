@@ -128,11 +128,11 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	if errors.IsNotFound(err) {
 		cluster.Status.ID = nil
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Cluster in Console API")
-		return jitterRequeue(requeueDefault), nil
+		return requeue(), nil
 	}
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return jitterRequeue(requeueDefault), err
+		return requeue(), err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
@@ -163,7 +163,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(requeueDefault), nil
+	return requeue(), nil
 }
 
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
@@ -182,12 +182,12 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 		// If object is already being deleted from Console API requeue.
 		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 
 		exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 
 		// Remove Cluster from Console API if it exists and is not read-only.
@@ -201,7 +201,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 
 		// If our finalizer is present, remove it.

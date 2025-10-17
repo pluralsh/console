@@ -271,7 +271,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 
 		exists, err := r.ConsoleClient.IsSentinelExists(ctx, sentinel.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(requeue())
 		}
 		if exists {
 			if err := r.ConsoleClient.DeleteSentinel(ctx, sentinel.Status.GetID()); err != nil {
