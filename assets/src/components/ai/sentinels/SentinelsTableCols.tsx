@@ -130,14 +130,20 @@ const ColSource = columnHelper.accessor((sentinel) => sentinel, {
   cell: function Cell({ getValue }) {
     const { git, repository } = getValue()
     if (!git || !repository) return null
+    const source = `${repository.httpsPath?.replace(/^https?:\/\//, '') || repository.url}@${git.ref}`
     return (
       <SourceWrapperSC>
         <GitHubLogoIcon css={{ width: 20, flexShrink: 0 }} />
-        <StackedText
-          truncate
-          first={`${repository.httpsPath?.replace(/^https?:\/\//, '') || repository.url}@${git.ref}`}
-          second={git.folder}
-        />
+        <Tooltip
+          placement="top"
+          label={source}
+        >
+          <StackedText
+            truncate
+            first={source}
+            second={git.folder}
+          />
+        </Tooltip>
       </SourceWrapperSC>
     )
   },
