@@ -10,6 +10,7 @@ import {
   AI_ABS_PATH,
   AI_AGENT_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
+  AI_SENTINELS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -25,9 +26,10 @@ const directory: SubtabDirectory = [
   { label: 'Agent sessions', path: AI_AGENT_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
+  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
 ]
 
-const getBreadcrumbs = (tab: string = '') => [
+export const getAIBreadcrumbs = (tab: string = '') => [
   { label: 'plural-ai', url: AI_ABS_PATH },
   { label: tab, url: `${AI_ABS_PATH}/${tab}` },
 ]
@@ -36,7 +38,7 @@ export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
   const loading = useLoadingDeploymentSettings()
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(tab), [tab]))
+  useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
 
   if (loading) return <LoadingIndicator />
 

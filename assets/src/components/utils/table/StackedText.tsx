@@ -1,7 +1,7 @@
 import { ComponentProps, ReactNode, memo } from 'react'
 import styled, { DefaultTheme } from 'styled-components'
 
-import { SemanticColorKey } from '@pluralsh/design-system'
+import { Flex, SemanticColorKey, WrapWithIf } from '@pluralsh/design-system'
 import { TRUNCATE } from '../truncate'
 import { RectangleSkeleton } from '../SkeletonLoaders'
 
@@ -56,6 +56,7 @@ export const StackedText = memo(
     secondColor,
     gap,
     loading = false,
+    icon,
     ...props
   }: {
     first: ReactNode
@@ -67,28 +68,52 @@ export const StackedText = memo(
     secondColor?: SemanticColorKey
     gap?: SpacingType
     loading?: boolean
+    icon?: ReactNode
   } & ComponentProps<typeof StackedTextSC>) => (
-    <StackedTextSC
-      $truncate={truncate}
-      $gap={loading ? 'xxsmall' : gap}
-      {...props}
+    <WrapWithIf
+      condition={!!icon}
+      wrapper={<IconWrapper icon={icon} />}
     >
-      <FirstSC
-        $partialType={firstPartialType}
+      <StackedTextSC
         $truncate={truncate}
-        $color={firstColor}
+        $gap={loading ? 'xsmall' : gap}
+        {...props}
       >
-        {loading ? <RectangleSkeleton /> : first}
-      </FirstSC>
-      {second && (
-        <SecondSC
+        <FirstSC
+          $partialType={firstPartialType}
           $truncate={truncate}
-          $partialType={secondPartialType}
-          $color={secondColor}
+          $color={firstColor}
         >
-          {loading ? <RectangleSkeleton /> : second}
-        </SecondSC>
-      )}
-    </StackedTextSC>
+          {loading ? <RectangleSkeleton $width={120} /> : first}
+        </FirstSC>
+        {(second || loading) && (
+          <SecondSC
+            $truncate={truncate}
+            $partialType={secondPartialType}
+            $color={secondColor}
+          >
+            {loading ? <RectangleSkeleton $width={150} /> : second}
+          </SecondSC>
+        )}
+      </StackedTextSC>
+    </WrapWithIf>
   )
 )
+
+function IconWrapper({
+  icon,
+  children,
+}: {
+  icon: ReactNode
+  children?: ReactNode
+}) {
+  return (
+    <Flex
+      gap="small"
+      align="center"
+    >
+      {icon}
+      {children}
+    </Flex>
+  )
+}
