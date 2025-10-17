@@ -64,8 +64,9 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Job *JobSpec `json:"jobSpec,omitempty"`
 
 	// the distro to run the check on
+	//+kubebuilder:validation:Required
 	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
-	Distro *console.ClusterDistro `json:"distro,omitempty"`
+	Distro console.ClusterDistro `json:"distro"`
 
 	// the cluster tags to select where to run this job
 	Tags map[string]string `json:"tags,omitempty"`

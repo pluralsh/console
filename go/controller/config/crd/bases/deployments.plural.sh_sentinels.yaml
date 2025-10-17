@@ -9676,6 +9676,7 @@ spec:
                                 this job
                               type: object
                           required:
+                          - distro
                           - format
                           type: object
                         kubernetes:

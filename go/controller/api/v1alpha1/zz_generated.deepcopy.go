@@ -6736,11 +6736,6 @@ func (in *SentinelCheckIntegrationTestConfiguration) DeepCopyInto(out *SentinelC
 		*out = new(JobSpec)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Distro != nil {
-		in, out := &in.Distro, &out.Distro
-		*out = new(client.ClusterDistro)
-		**out = **in
-	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
 		*out = make(map[string]string, len(*in))
