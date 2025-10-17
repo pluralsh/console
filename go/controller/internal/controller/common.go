@@ -88,7 +88,6 @@ func bindingsAttributes(bindings []v1alpha1.Binding) ([]*console.PolicyBindingAt
 		if err != nil {
 			return nil, err
 		}
-
 		if attr != nil {
 			attrs = append(attrs, attr)
 		}
@@ -121,11 +120,7 @@ func bindingAttributes(b v1alpha1.Binding) (*console.PolicyBindingAttributes, er
 		return nil, nil
 	}
 
-	return &console.PolicyBindingAttributes{
-		ID:      b.ID,
-		UserID:  userId,
-		GroupID: groupId,
-	}, nil
+	return &console.PolicyBindingAttributes{ID: b.ID, UserID: userId, GroupID: groupId}, nil
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
