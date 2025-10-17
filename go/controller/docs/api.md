@@ -3558,6 +3558,8 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
 
 
+
+
 #### RegexReplacement
 
 

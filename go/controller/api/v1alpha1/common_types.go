@@ -51,6 +51,23 @@ type Binding struct {
 	GroupName *string `json:"groupName,omitempty"`
 }
 
+// Reconciliation parameters for a specific resource.
+type Reconciliation struct {
+	// DriftDetection enables drift detection for this resource.
+	// Use with Interval to set how often drift detection runs.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	// +kubebuilder:example:=false
+	DriftDetection *bool `json:"driftDetection,omitempty"`
+
+	// Interval for DriftDetection mechanism.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:default="30m"
+	// +kubebuilder:example:="5m"
+	Interval *string `json:"interval,omitempty"`
+}
+
 // Taint represents a Kubernetes taint.
 type Taint struct {
 	// Effect specifies the effect for the taint.
