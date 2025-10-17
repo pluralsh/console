@@ -119,6 +119,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_run do
     field :id,               non_null(:string), description: "the id of the run"
     field :status,           non_null(:sentinel_run_status), description: "the status of the run"
+    field :completed_at,     :datetime, description: "the time the run completed"
     field :sentinel,         :sentinel, resolve: dataloader(Deployments), description: "the sentinel that was run"
     field :results,          list_of(:sentinel_run_result), description: "the results of the run"
 
@@ -254,7 +255,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :run_sentinel, :sentinel_run do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.run_sentinel/2
     end

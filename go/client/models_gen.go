@@ -6428,6 +6428,8 @@ type SentinelRun struct {
 	ID string `json:"id"`
 	// the status of the run
 	Status SentinelRunStatus `json:"status"`
+	// the time the run completed
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the sentinel that was run
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run

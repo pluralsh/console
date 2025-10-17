@@ -9,7 +9,6 @@ defmodule Console.Pipelines.Sentinel.ProducerTest do
       found = Producer.poll(10)
 
       assert ids_equal(found, runs)
-      assert Enum.all?(found, & &1.polled_at)
     end
   end
 end

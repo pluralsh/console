@@ -8334,7 +8334,8 @@ export type RootMutationTypeRollbackServiceArgs = {
 
 
 export type RootMutationTypeRunSentinelArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -10644,6 +10645,8 @@ export type SentinelEdge = {
 
 export type SentinelRun = {
   __typename?: 'SentinelRun';
+  /** the time the run completed */
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
