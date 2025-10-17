@@ -41,14 +41,17 @@ const (
 	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
 )
 
+// TODO: Remove.
 func waitForResources() ctrl.Result {
 	return ctrl.Result{RequeueAfter: jitter(30 * time.Second)}
 }
 
+// TODO: Remove.
 func requeue() ctrl.Result {
 	return ctrl.Result{RequeueAfter: jitter(30 * time.Minute)}
 }
 
+// TODO: Remove.
 func jitter(t time.Duration) time.Duration {
 	return t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))
 }
