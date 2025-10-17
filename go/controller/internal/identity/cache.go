@@ -11,31 +11,29 @@ import (
 	"k8s.io/klog/v2"
 )
 
-var (
-	cache *identityCache
-)
-
-func init() {
-	klog.V(log.LogLevelDefault).InfoS("initializing user group cache")
-
-	cache = &identityCache{
-		consoleClient: client.New(args.ConsoleUrl(), args.ConsoleToken()),
-		userMap:       cmap.New[string](),
-		groupMap:      cmap.New[string](),
-	}
-
-	go func() {
-		_ = wait.PollUntilContextCancel(context.Background(), args.WipeCacheInterval(), true,
-			func(ctx context.Context) (done bool, err error) {
-				cache.Wipe()
-				return false, nil
-			})
-	}()
-
-	klog.V(log.LogLevelDefault).InfoS("user group cache initialized")
-}
+var cache *identityCache
 
 func Cache() IdentityCache {
+	if cache == nil {
+		klog.V(log.LogLevelDefault).InfoS("initializing user group cache")
+
+		cache = &identityCache{
+			consoleClient: client.New(args.ConsoleUrl(), args.ConsoleToken()),
+			userMap:       cmap.New[string](),
+			groupMap:      cmap.New[string](),
+		}
+
+		go func() {
+			_ = wait.PollUntilContextCancel(context.Background(), args.WipeCacheInterval(), false,
+				func(ctx context.Context) (done bool, err error) {
+					cache.Wipe()
+					return false, nil
+				})
+		}()
+
+		klog.V(log.LogLevelDefault).InfoS("user group cache initialized")
+	}
+
 	return cache
 }
 

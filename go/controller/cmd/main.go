@@ -37,6 +37,8 @@ import (
 	"github.com/pluralsh/console/go/controller/cmd/args"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
+
+	_ "github.com/pluralsh/console/go/controller/internal/identity"
 )
 
 var (
