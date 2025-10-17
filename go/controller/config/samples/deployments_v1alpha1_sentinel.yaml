@@ -40,7 +40,7 @@ spec:
           distro: EKS
           format: JUNIT
           jobSpec:
-            namespace: terratest
+            namespace: default
             serviceAccount: full-access
             containers:
               - image: ghcr.io/pluralsh/sentinel-harness-terratest:latest
