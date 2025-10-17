@@ -135,7 +135,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 		}
 
 		if clusterID == nil {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
+			return nil, lo.ToPtr(waitForResources()), fmt.Errorf("cluster is not ready")
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)

@@ -169,7 +169,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		}
 
 		if !notifSink.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
+			return nil, lo.ToPtr(waitForResources()), nil
 		}
 
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})

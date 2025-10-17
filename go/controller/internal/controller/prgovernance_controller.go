@@ -125,7 +125,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+		return lo.ToPtr(waitForResources())
 	}
 
 	// try to delete the resource
@@ -133,7 +133,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+		return lo.ToPtr(waitForResources())
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -155,7 +155,7 @@ func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v
 		return nil, nil, err
 	}
 	if !connection.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("scm connection is not ready")
 	}
 	attributes.ConnectionID = *connection.Status.ID
 

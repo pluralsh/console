@@ -498,7 +498,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if !cluster.Status.HasID() {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
+		return "", lo.ToPtr(waitForResources()), fmt.Errorf("cluster is not ready")
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -514,11 +514,11 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	if !repository.Status.HasID() {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
+		return "", lo.ToPtr(waitForResources()), fmt.Errorf("repository is not ready")
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not healthy")
+		return "", lo.ToPtr(waitForResources()), fmt.Errorf("repository is not healthy")
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -542,7 +542,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	}
 
 	if !stackDefinition.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack definition is not ready")
+		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("stack definition is not ready")
 	}
 
 	return stackDefinition.Status.ID, nil, nil

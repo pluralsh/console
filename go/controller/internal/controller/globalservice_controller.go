@@ -206,11 +206,11 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		if err := r.Delete(ctx, globalService); err != nil {
 			return nil, nil, err
 		}
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
+		return nil, lo.ToPtr(waitForResources()), nil
 	}
 
 	if !service.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(waitForResources()), fmt.Errorf("service is not ready")
 	}
 
 	return service, nil, nil
