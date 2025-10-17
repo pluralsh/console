@@ -16,6 +16,7 @@ spec:
       name: test-integration
       configuration:
         integrationTest:
+          distro: EKS
           format: JUNIT
           jobSpec:
             namespace: terratest
