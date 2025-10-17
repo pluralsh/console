@@ -100,7 +100,9 @@ export function Sentinels() {
               className="statusTab"
               css={{ display: 'flex', gap: 12 }}
             >
-              {capitalize(label)}
+              {label === SentinelRunStatus.Pending
+                ? 'In progress'
+                : capitalize(label)}
               <Chip
                 size="small"
                 severity={sentinelStatusToSeverity(label as StatusFilterKey)}

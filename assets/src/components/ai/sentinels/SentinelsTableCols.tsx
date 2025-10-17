@@ -154,7 +154,7 @@ const SourceWrapperSC = styled.div(({ theme }) => ({
 
 const ColLastRun = columnHelper.accessor((sentinel) => sentinel.lastRunAt, {
   id: 'lastRun',
-  header: 'Last Run',
+  header: 'Last run',
   enableSorting: true,
   sortingFn: 'datetime',
   cell: function Cell({ getValue, row: { original } }) {
