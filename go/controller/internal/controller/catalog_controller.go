@@ -52,7 +52,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	scope, err := NewDefaultScope(ctx, r.Client, catalog)
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return ctrl.Result{}, err
 	}
 
 	// Always patch object when exiting this function, so we can persist any object changes.

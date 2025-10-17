@@ -122,7 +122,7 @@ type CatalogSpec struct {
 	// +kubebuilder:validation:Optional
 	Bindings *CatalogBindings `json:"bindings,omitempty"`
 
-	// Reconciliation settings for this catalog.
+	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`

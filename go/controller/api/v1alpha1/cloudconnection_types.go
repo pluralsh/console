@@ -92,6 +92,11 @@ type CloudConnectionSpec struct {
 	// who can use this CloudConnection.
 	// +kubebuilder:validation:Optional
 	ReadBindings []Binding `json:"readBindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // Hasher provides a function interface for generating hash values from objects

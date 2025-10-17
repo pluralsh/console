@@ -162,6 +162,11 @@ type ClusterSpec struct {
 	// Do not use.
 	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (cs *ClusterSpec) HasHandle() bool {
