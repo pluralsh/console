@@ -1,20 +1,4 @@
 apiVersion: deployments.plural.sh/v1alpha1
-kind: Cluster
-metadata:
-  name: existing
-  namespace: default
-spec:
-  handle: mgmt
----
-apiVersion: deployments.plural.sh/v1alpha1
-kind: GitRepository
-metadata:
-  name: terratest-suite
-  namespace: default
-spec:
-  url: https://github.com/pluralsh/terratest-suite.git
----
-apiVersion: deployments.plural.sh/v1alpha1
 kind: Sentinel
 metadata:
   labels:
@@ -23,26 +7,19 @@ metadata:
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
-  name: sentinel-sample
+  name: sentinel-terratest
 spec:
-  name: test
-  description: "test sentinel description"
+  name: terratest
+  description: "test sentinel for terratest"
   checks:
     - type: INTEGRATION_TEST
       name: test-integration
       configuration:
         integrationTest:
-          distro: GENERIC
-          tags:
-            test: "test"
+          distro: EKS
           jobSpec:
-            namespace: default
+            namespace: terratest
             containers:
-              - image: alpine:latest
-                env:
-                  - name: MY_ENV_VAR
-                    value: "Hello from Kubernetes!"
-                args: [ "sh", "-c", "echo The value of MY_ENV_VAR is: $MY_ENV_VAR" ]
-  repositoryRef:
-    name: terratest-suite
-    namespace: default
+              - image: ghcr.io/pluralsh/sentinel-harness-terratest:latest
+
+
