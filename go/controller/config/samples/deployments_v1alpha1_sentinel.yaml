@@ -1,19 +1,23 @@
-apiVersion: deployments.plural.sh/v1alpha1
-kind: Cluster
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: existing
-  namespace: default
-spec:
-  handle: mgmt
+  name: full-access
+  namespace: terratest
 ---
-apiVersion: deployments.plural.sh/v1alpha1
-kind: GitRepository
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: terratest-suite
-  namespace: default
-spec:
-  url: https://github.com/pluralsh/terratest-suite.git
+  name: full-access-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: full-access
+    namespace: terratest
 ---
+
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Sentinel
 metadata:
@@ -23,26 +27,22 @@ metadata:
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
-  name: sentinel-sample
+  name: sentinel-terratest
+  namespace: default
 spec:
-  name: test
-  description: "test sentinel description"
+  name: terratest
+  description: "test sentinel for terratest"
   checks:
     - type: INTEGRATION_TEST
       name: test-integration
       configuration:
         integrationTest:
-          distro: GENERIC
-          tags:
-            test: "test"
+          distro: EKS
+          format: JUNIT
           jobSpec:
-            namespace: default
+            namespace: terratest
+            serviceAccount: full-access
             containers:
-              - image: alpine:latest
-                env:
-                  - name: MY_ENV_VAR
-                    value: "Hello from Kubernetes!"
-                args: [ "sh", "-c", "echo The value of MY_ENV_VAR is: $MY_ENV_VAR" ]
-  repositoryRef:
-    name: terratest-suite
-    namespace: default
+              - image: ghcr.io/pluralsh/sentinel-harness-terratest:latest
+
+
