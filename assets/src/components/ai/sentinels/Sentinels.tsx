@@ -51,6 +51,7 @@ export function Sentinels() {
   const { data: statsData, previousData: statsPreviousData } =
     useSentinelStatisticsQuery({
       variables: { q: debouncedFilterString },
+      fetchPolicy: 'cache-and-network',
       pollInterval: POLL_INTERVAL,
     })
   const { sentinelStatistics } = statsData || statsPreviousData || {}
@@ -77,7 +78,7 @@ export function Sentinels() {
       />
       <StretchedFlex gap="medium">
         <Input
-          css={{ width: '40%' }}
+          style={{ width: '40%' }}
           startIcon={<SearchIcon />}
           placeholder="Search by sentinel name"
           value={filterString}
@@ -99,7 +100,9 @@ export function Sentinels() {
               className="statusTab"
               css={{ display: 'flex', gap: 12 }}
             >
-              {capitalize(label)}
+              {label === SentinelRunStatus.Pending
+                ? 'In progress'
+                : capitalize(label)}
               <Chip
                 size="small"
                 severity={sentinelStatusToSeverity(label as StatusFilterKey)}

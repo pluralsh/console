@@ -18,12 +18,15 @@ import { SentinelDetailsPageWrapper } from '../Sentinel'
 import { getRunNameFromId } from '../SentinelRunsTable'
 import { SentinelRunSidecar } from '../SentinelSidecars'
 import { SentinelRunChecksTable } from './SentinelRunChecksTable'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 export function SentinelRun() {
   const id = useParams()[AI_SENTINELS_RUNS_PARAM_RUN_ID]
 
   const { data, error, loading } = useSentinelRunQuery({
     variables: { id: id ?? '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
     skip: !id,
   })
   const sentinelRunLoading = !data && loading

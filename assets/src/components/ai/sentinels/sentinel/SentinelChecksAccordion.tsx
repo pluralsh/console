@@ -28,7 +28,7 @@ export function SentinelChecksAccordion({
   sentinel: Nullable<SentinelFragment>
   loading?: boolean
 }) {
-  const { borders } = useTheme()
+  const { borders, colors } = useTheme()
   if (!loading && isEmpty(sentinel?.checks)) return null
   return (
     <Accordion
@@ -38,6 +38,11 @@ export function SentinelChecksAccordion({
       <AccordionItem
         caret="none" // doing a custom one per design
         paddingArea="trigger-only"
+        css={{
+          '&:hover:not(:has(table:hover))': {
+            backgroundColor: colors['fill-one-hover'],
+          },
+        }}
         trigger={
           <Flex
             gap="small"

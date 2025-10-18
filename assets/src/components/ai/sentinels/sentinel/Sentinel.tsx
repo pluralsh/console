@@ -18,12 +18,16 @@ import { SentinelChecksAccordion } from './SentinelChecksAccordion'
 import { SentinelRunsTable } from './SentinelRunsTable'
 import { SentinelDetailsSidecar } from './SentinelSidecars'
 import { SentinelRunDialog } from '../SentinelsTableCols'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 export function Sentinel() {
   const { id } = useParams()
   const [runModalOpen, setRunModalOpen] = useState(false)
   const { data, error, loading } = useSentinelQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+    skip: !id,
   })
   const sentinelLoading = !data && loading
   const sentinel = data?.sentinel
