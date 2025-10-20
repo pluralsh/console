@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,8 +34,8 @@ type Catalog struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   CatalogSpec `json:"spec,omitempty"`
-	Status Status      `json:"status,omitempty"`
+	Spec   CatalogSpec   `json:"spec,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 func (in *Catalog) CatalogName() string {
@@ -125,7 +126,7 @@ type CatalogSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // CatalogBindings defines the RBAC permissions for a catalog, controlling access to PR automations.
@@ -135,15 +136,15 @@ type CatalogBindings struct {
 	// Create bindings control who can generate new PR automations using this catalog.
 	// Users with create permissions can trigger self-service workflows but cannot modify the catalog itself.
 	// +kubebuilder:validation:Optional
-	Create []Binding `json:"create,omitempty"`
+	Create []common.Binding `json:"create,omitempty"`
 
 	// Read bindings control who can view and browse this catalog and its PR automations.
 	// Users with read permissions can see available automations but cannot execute or modify them.
 	// +kubebuilder:validation:Optional
-	Read []Binding `json:"read,omitempty"`
+	Read []common.Binding `json:"read,omitempty"`
 
 	// Write bindings control who can modify the catalog and its PR automations.
 	// Users with write permissions can add, update, or remove PR automations within this catalog.
 	// +kubebuilder:validation:Optional
-	Write []Binding `json:"write,omitempty"`
+	Write []common.Binding `json:"write,omitempty"`
 }

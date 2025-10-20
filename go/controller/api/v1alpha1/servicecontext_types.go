@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +27,7 @@ type ServiceContextSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -42,7 +43,7 @@ type ServiceContext struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ServiceContextSpec `json:"spec,omitempty"`
-	Status Status             `json:"status,omitempty"`
+	Status common.Status      `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

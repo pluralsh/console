@@ -20,6 +20,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,7 +58,7 @@ type GlobalService struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   GlobalServiceSpec `json:"spec,omitempty"`
-	Status Status            `json:"status,omitempty"`
+	Status common.Status     `json:"status,omitempty"`
 }
 
 // Attributes converts the GlobalService spec to console API attributes for upstream synchronization.
@@ -155,7 +156,7 @@ type GlobalServiceSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // TagsAttribute converts the tags map to console API tag attributes format.

@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -43,7 +44,7 @@ type ServiceAccount struct {
 
 	// Status represents the current state of this ServiceAccount resource.
 	// +kubebuilder:validation:Optional
-	Status Status `json:"status,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 // ConsoleID returns an ID used in Console API.
@@ -104,7 +105,7 @@ type ServiceAccountSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttributes) {

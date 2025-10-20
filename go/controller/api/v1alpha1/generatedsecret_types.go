@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,7 +67,7 @@ type GeneratedSecretSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // GeneratedSecretDestination defines a target location where the generated secret should be created.
@@ -84,7 +85,7 @@ type GeneratedSecretDestination struct {
 // GeneratedSecretStatus defines the observed state of GeneratedSecret.
 type GeneratedSecretStatus struct {
 	// Status contains the common status fields including conditions.
-	Status `json:",inline"`
+	common.Status `json:",inline"`
 
 	// RenderedTemplateSecretRef references the secret containing the final rendered template data.
 	// +kubebuilder:validation:Optional

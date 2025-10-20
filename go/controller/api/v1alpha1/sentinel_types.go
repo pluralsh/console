@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,14 +28,14 @@ type SentinelSpec struct {
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// The git location to use for this sentinel.
-	Git *GitRef `json:"git,omitempty"`
+	Git *common.GitRef `json:"git,omitempty"`
 
 	Checks []SentinelCheck `json:"checks,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type SentinelCheck struct {
@@ -108,8 +109,8 @@ type Sentinel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SentinelSpec `json:"spec,omitempty"`
-	Status Status       `json:"status,omitempty"`
+	Spec   SentinelSpec  `json:"spec,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

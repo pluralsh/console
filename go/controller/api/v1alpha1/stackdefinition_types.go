@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -36,7 +37,7 @@ type StackDefinition struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   StackDefinitionSpec `json:"spec,omitempty"`
-	Status Status              `json:"status,omitempty"`
+	Status common.Status       `json:"status,omitempty"`
 }
 
 func (in *StackDefinition) StackName() string {
@@ -118,7 +119,7 @@ type StackDefinitionSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // CustomRunStep defines a custom execution step within a StackDefinition template.

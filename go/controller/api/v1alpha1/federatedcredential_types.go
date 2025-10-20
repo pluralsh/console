@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ type FederatedCredential struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   FederatedCredentialSpec `json:"spec,omitempty"`
-	Status Status                  `json:"status,omitempty"`
+	Status common.Status           `json:"status,omitempty"`
 }
 
 func (in *FederatedCredential) Diff(hasher Hasher) (changed bool, sha string, err error) {
@@ -95,5 +96,5 @@ type FederatedCredentialSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }

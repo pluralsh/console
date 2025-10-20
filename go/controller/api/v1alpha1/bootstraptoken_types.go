@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +35,7 @@ type BootstrapToken struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   BootstrapTokenSpec `json:"spec,omitempty"`
-	Status Status             `json:"status,omitempty"`
+	Status common.Status      `json:"status,omitempty"`
 }
 
 // BootstrapTokenSpec defines the desired state of BootstrapToken
@@ -58,7 +59,7 @@ type BootstrapTokenSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *BootstrapToken) SetCondition(condition metav1.Condition) {

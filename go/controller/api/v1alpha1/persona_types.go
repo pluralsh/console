@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -58,7 +59,7 @@ type Persona struct {
 
 	// Status represents the current state of this Persona resource, including
 	// synchronization status with the Console API.
-	Status Status `json:"status,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 // PersonaName returns the effective name to be used for this persona.
@@ -132,12 +133,12 @@ type PersonaSpec struct {
 	// Users can be assigned to multiple personas, with permissions being additive.
 	// This enables flexible role combinations while maintaining clear base configurations.
 	// +kubebuilder:validation:Optional
-	Bindings []Binding `json:"bindings,omitempty"`
+	Bindings []common.Binding `json:"bindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PersonaConfiguration defines the complete UI customization settings for a persona.

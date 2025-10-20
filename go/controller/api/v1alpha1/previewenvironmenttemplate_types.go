@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,7 +57,7 @@ type PreviewEnvironmentTemplate struct {
 
 	// Status represents the current state of this PreviewEnvironmentTemplate resource, including
 	// synchronization status with the Console API and any deployment information.
-	Status Status `json:"status,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 // ConsoleName returns the effective name to be used for this preview environment template.
@@ -132,5 +133,5 @@ type PreviewEnvironmentTemplateSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }

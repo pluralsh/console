@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -46,12 +47,12 @@ type PipelineSpec struct {
 
 	// Bindings contain read and write policies controlling access to this pipeline.
 	// +kubebuilder:validation:Optional
-	Bindings *Bindings `json:"bindings,omitempty"`
+	Bindings *common.Bindings `json:"bindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PipelineStage represents a logical unit within the pipeline, typically corresponding to
@@ -276,8 +277,8 @@ type Pipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PipelineSpec `json:"spec,omitempty"`
-	Status Status       `json:"status,omitempty"`
+	Spec   PipelineSpec  `json:"spec,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 func (p *Pipeline) SetCondition(condition metav1.Condition) {

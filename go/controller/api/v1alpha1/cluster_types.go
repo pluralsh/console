@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -148,7 +149,7 @@ type ClusterSpec struct {
 	// Bindings contain read and write access policies for this cluster.
 	// Controls which users and groups can view or manage this cluster through RBAC.
 	// +kubebuilder:validation:Optional
-	Bindings *Bindings `json:"bindings,omitempty"`
+	Bindings *common.Bindings `json:"bindings,omitempty"`
 
 	// CloudSettings contains cloud provider-specific configuration for this cluster.
 	// Deprecated.
@@ -166,7 +167,7 @@ type ClusterSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (cs *ClusterSpec) HasHandle() bool {
@@ -270,7 +271,7 @@ type ClusterNodePool struct {
 
 	// Taints are restrictions applied to nodes to control which pods can be scheduled.
 	// +kubebuilder:validation:Optional
-	Taints []Taint `json:"taints,omitempty"`
+	Taints []common.Taint `json:"taints,omitempty"`
 
 	// CloudSettings contains cloud provider-specific configuration for this node pool.
 	// +kubebuilder:validation:Optional
@@ -295,7 +296,7 @@ type ClusterNodePoolAWSCloudSettings struct {
 
 // ClusterStatus represents the observed state of a Cluster.
 type ClusterStatus struct {
-	Status `json:",inline"`
+	common.Status `json:",inline"`
 
 	// CurrentVersion contains the actual Kubernetes version currently running on this cluster.
 	// +kubebuilder:validation:Optional

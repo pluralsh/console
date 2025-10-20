@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +51,7 @@ type ManagedNamespace struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ManagedNamespaceSpec `json:"spec,omitempty"`
-	Status Status               `json:"status,omitempty"`
+	Status common.Status        `json:"status,omitempty"`
 }
 
 // SetCondition sets a condition on the ManagedNamespace status.
@@ -128,7 +129,7 @@ type ManagedNamespaceSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // ClusterTarget defines the criteria for selecting target clusters where managed namespaces should be created.
@@ -192,7 +193,7 @@ type ServiceTemplate struct {
 	// This includes repository references, branch/tag specifications,
 	// and subdirectory paths within the Git repository.
 	// +kubebuilder:validation:Optional
-	Git *GitRef `json:"git,omitempty"`
+	Git *common.GitRef `json:"git,omitempty"`
 
 	// Helm defines Helm-specific settings for deploying Helm charts as part of this service.
 	// This includes chart specifications, values files, repository references,

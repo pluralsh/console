@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -31,7 +32,7 @@ type ComplianceReportGenerator struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ComplianceReportGeneratorSpec `json:"spec,omitempty"`
-	Status Status                        `json:"status,omitempty"`
+	Status common.Status                 `json:"status,omitempty"`
 }
 
 func (in *ComplianceReportGenerator) ComplianceReportGeneratorName() string {
@@ -68,10 +69,10 @@ type ComplianceReportGeneratorSpec struct {
 
 	// ReadBindings represent the download policy for this report.
 	// +kubebuilder:validation:Optional
-	ReadBindings []Binding `json:"readBindings,omitempty"`
+	ReadBindings []common.Binding `json:"readBindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }

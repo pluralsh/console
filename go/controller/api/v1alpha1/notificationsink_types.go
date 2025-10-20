@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pluralsh/console/go/controller/api/common"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -55,7 +56,7 @@ type NotificationSink struct {
 
 	// Status represents the current state of this NotificationSink resource, including
 	// synchronization status and operational health information.
-	Status Status `json:"status,omitempty"`
+	Status common.Status `json:"status,omitempty"`
 }
 
 // SetCondition sets a condition on the NotificationSink status.
@@ -101,12 +102,12 @@ type NotificationSinkSpec struct {
 	// This is only applicable for PLURAL type sinks that deliver in-app notifications.
 	// For external sinks like Slack or Teams, notifications are sent to the configured webhook.
 	// +kubebuilder:validation:Optional
-	Bindings []Binding `json:"bindings,omitempty"`
+	Bindings []common.Binding `json:"bindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // SinkConfiguration contains type-specific configuration for different notification channels.

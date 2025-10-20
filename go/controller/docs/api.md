@@ -255,58 +255,6 @@ _Appears in:_
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
-#### Binding
-
-
-
-Binding represents a policy binding.
-
-
-
-_Appears in:_
-- [Bindings](#bindings)
-- [CatalogBindings](#catalogbindings)
-- [CloudConnectionSpec](#cloudconnectionspec)
-- [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
-- [DeploymentSettingsBindings](#deploymentsettingsbindings)
-- [NotificationSinkSpec](#notificationsinkspec)
-- [PersonaSpec](#personaspec)
-- [PrAutomationBindings](#prautomationbindings)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `id` _string_ |  |  | Optional: \{\} <br /> |
-| `UserID` _string_ |  |  | Optional: \{\} <br /> |
-| `userEmail` _string_ |  |  | Optional: \{\} <br /> |
-| `groupID` _string_ |  |  | Optional: \{\} <br /> |
-| `groupName` _string_ |  |  | Optional: \{\} <br /> |
-
-
-#### Bindings
-
-
-
-Bindings represents policy bindings that
-can be used to define read/write permissions
-to this resource for users/groups in the system.
-
-
-
-_Appears in:_
-- [ClusterSpec](#clusterspec)
-- [FlowSpec](#flowspec)
-- [InfrastructureStackSpec](#infrastructurestackspec)
-- [MCPServerSpec](#mcpserverspec)
-- [PipelineSpec](#pipelinespec)
-- [ProjectSpec](#projectspec)
-- [ServiceSpec](#servicespec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `read` _[Binding](#binding) array_ | Read bindings. |  | Optional: \{\} <br /> |
-| `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: \{\} <br /> |
-
-
 #### BindingsTemplate
 
 
@@ -422,9 +370,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `create` _[Binding](#binding) array_ | Create bindings control who can generate new PR automations using this catalog.<br />Users with create permissions can trigger self-service workflows but cannot modify the catalog itself. |  | Optional: \{\} <br /> |
-| `read` _[Binding](#binding) array_ | Read bindings control who can view and browse this catalog and its PR automations.<br />Users with read permissions can see available automations but cannot execute or modify them. |  | Optional: \{\} <br /> |
-| `write` _[Binding](#binding) array_ | Write bindings control who can modify the catalog and its PR automations.<br />Users with write permissions can add, update, or remove PR automations within this catalog. |  | Optional: \{\} <br /> |
+| `create` _Binding array_ | Create bindings control who can generate new PR automations using this catalog.<br />Users with create permissions can trigger self-service workflows but cannot modify the catalog itself. |  | Optional: \{\} <br /> |
+| `read` _Binding array_ | Read bindings control who can view and browse this catalog and its PR automations.<br />Users with read permissions can see available automations but cannot execute or modify them. |  | Optional: \{\} <br /> |
+| `write` _Binding array_ | Write bindings control who can modify the catalog and its PR automations.<br />Users with write permissions can add, update, or remove PR automations within this catalog. |  | Optional: \{\} <br /> |
 
 
 #### CatalogSpec
@@ -508,7 +456,7 @@ _Appears in:_
 | `name` _string_ | Name of this CloudConnection. If not provided CloudConnection's own name<br />from CloudConnection.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: \{\} <br />Type: string <br /> |
 | `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ | Configuration contains the cloud connection configuration. |  | Required: \{\} <br /> |
-| `readBindings` _[Binding](#binding) array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: \{\} <br /> |
+| `readBindings` _Binding array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
 
 
@@ -641,7 +589,7 @@ _Appears in:_
 | `minSize` _integer_ | MinSize is the minimum number of nodes that must be running in this pool. |  | Minimum: 1 <br />Required: \{\} <br /> |
 | `maxSize` _integer_ | MaxSize is the maximum number of nodes that can be running in this pool. |  | Minimum: 1 <br />Required: \{\} <br /> |
 | `labels` _object (keys:string, values:string)_ | Labels are key-value pairs applied to nodes for workload scheduling and organization. |  | Optional: \{\} <br /> |
-| `taints` _[Taint](#taint) array_ | Taints are restrictions applied to nodes to control which pods can be scheduled. |  | Optional: \{\} <br /> |
+| `taints` _Taint array_ | Taints are restrictions applied to nodes to control which pods can be scheduled. |  | Optional: \{\} <br /> |
 | `cloudSettings` _[ClusterNodePoolCloudSettings](#clusternodepoolcloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this node pool. |  | Optional: \{\} <br /> |
 
 
@@ -944,7 +892,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: \{\} <br /> |
 | `format` _[ComplianceReportFormat](#compliancereportformat)_ | Format of the report to be generated. |  | Enum: [CSV JSON] <br />Required: \{\} <br /> |
-| `readBindings` _[Binding](#binding) array_ | ReadBindings represent the download policy for this report. |  | Optional: \{\} <br /> |
+| `readBindings` _Binding array_ | ReadBindings represent the download policy for this report. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
 
 
@@ -980,12 +928,6 @@ _Appears in:_
 | `field` _string_ |  |  | Required: \{\} <br /> |
 | `operation` _[Operation](#operation)_ |  |  | Enum: [NOT GT LT EQ GTE LTE PREFIX SUFFIX] <br />Required: \{\} <br /> |
 | `value` _string_ |  |  | Optional: \{\} <br /> |
-
-
-
-
-
-
 
 
 #### Container
@@ -1195,10 +1137,10 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `read` _[Binding](#binding) array_ | Read bindings. |  | Optional: \{\} <br /> |
-| `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: \{\} <br /> |
-| `create` _[Binding](#binding) array_ | Create bindings. |  | Optional: \{\} <br /> |
-| `git` _[Binding](#binding) array_ | Git bindings. |  | Optional: \{\} <br /> |
+| `read` _Binding array_ | Read bindings. |  | Optional: \{\} <br /> |
+| `write` _Binding array_ | Write bindings. |  | Optional: \{\} <br /> |
+| `create` _Binding array_ | Create bindings. |  | Optional: \{\} <br /> |
+| `git` _Binding array_ | Git bindings. |  | Optional: \{\} <br /> |
 
 
 #### DeploymentSettingsSpec
@@ -1497,31 +1439,6 @@ _Appears in:_
 | --- | --- |
 | `PULLABLE` |  |
 | `FAILED` |  |
-
-
-#### GitRef
-
-
-
-GitRef represents a reference to a Git repository.
-
-
-
-_Appears in:_
-- [AiApprovalConfiguration](#aiapprovalconfiguration)
-- [InfrastructureStackSpec](#infrastructurestackspec)
-- [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
-- [SentinelSpec](#sentinelspec)
-- [ServiceHelm](#servicehelm)
-- [ServiceSpec](#servicespec)
-- [ServiceTemplate](#servicetemplate)
-- [Source](#source)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `folder` _string_ | Folder is the folder in the Git repository where the manifests are located. |  | Required: \{\} <br /> |
-| `ref` _string_ | Ref is the Git reference (branch, tag, or commit) to use. |  | Required: \{\} <br /> |
-| `files` _string array_ | Optional files to add to the manifests for this service |  | Optional: \{\} <br /> |
 
 
 #### GitRepository
@@ -2237,7 +2154,7 @@ _Appears in:_
 | `name` _string_ | Name specifies the name for this notification sink.<br />If not provided, the name from the resource metadata will be used. // +kubebuilder:validation:Optional |  |  |
 | `type` _[SinkType](#sinktype)_ | Type specifies the channel type of this sink.<br />Determines which configuration section will be used and how notifications are delivered.<br />SLACK and TEAMS require webhook URLs, while PLURAL delivers in-app notifications. |  | Enum: [SLACK TEAMS PLURAL] <br />Required: \{\} <br /> |
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration contains the type-specific settings for this notification sink.<br />Only one configuration section should be populated based on the Type field.<br />Each type has different requirements for delivery setup and authentication. |  | Optional: \{\} <br /> |
-| `bindings` _[Binding](#binding) array_ | Bindings define the users and groups who can receive notifications through this sink.<br />This is only applicable for PLURAL type sinks that deliver in-app notifications.<br />For external sinks like Slack or Teams, notifications are sent to the configured webhook. |  | Optional: \{\} <br /> |
+| `bindings` _Binding array_ | Bindings define the users and groups who can receive notifications through this sink.<br />This is only applicable for PLURAL type sinks that deliver in-app notifications.<br />For external sinks like Slack or Teams, notifications are sent to the configured webhook. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
 
 
@@ -2877,7 +2794,7 @@ _Appears in:_
 | `description` _string_ | Description provides a detailed explanation of this persona's purpose and intended users.<br />This helps administrators understand which teams or roles should be assigned to this persona<br />and what kind of experience it provides. Examples might describe responsibilities like<br />"Platform engineers managing infrastructure" or "Developers deploying applications". |  | Optional: \{\} <br /> |
 | `role` _[PersonaRole](#personarole)_ | Role defines the primary responsibility area for users assigned to this persona.<br />This controls the default homepage layout and highlights relevant features.<br />Different roles provide different perspectives on the same underlying data,<br />optimized for specific workflows and responsibilities. |  | Optional: \{\} <br /> |
 | `configuration` _[PersonaConfiguration](#personaconfiguration)_ | Configuration contains detailed UI customization settings for this persona.<br />These settings are additive across multiple personas assigned to a user,<br />allowing for flexible permission combinations while maintaining role-based defaults. |  | Optional: \{\} <br /> |
-| `bindings` _[Binding](#binding) array_ | Bindings define which users and groups are assigned to this persona.<br />Users can be assigned to multiple personas, with permissions being additive.<br />This enables flexible role combinations while maintaining clear base configurations. |  | Optional: \{\} <br /> |
+| `bindings` _Binding array_ | Bindings define which users and groups are assigned to this persona.<br />Users can be assigned to multiple personas, with permissions being additive.<br />This enables flexible role combinations while maintaining clear base configurations. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
 
 
@@ -3131,8 +3048,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `create` _[Binding](#binding) array_ | Create bindings. |  | Optional: \{\} <br /> |
-| `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: \{\} <br /> |
+| `create` _Binding array_ | Create bindings. |  | Optional: \{\} <br /> |
+| `write` _Binding array_ | Write bindings. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomationConfiguration
@@ -3588,60 +3505,6 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
-
-
-#### Reconciliation
-
-
-
-Reconciliation parameters for a specific resource.
-
-
-
-_Appears in:_
-- [BootstrapTokenSpec](#bootstraptokenspec)
-- [CatalogSpec](#catalogspec)
-- [CloudConnectionSpec](#cloudconnectionspec)
-- [ClusterRestoreSpec](#clusterrestorespec)
-- [ClusterSpec](#clusterspec)
-- [ClusterSyncSpec](#clustersyncspec)
-- [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
-- [CustomStackRunSpec](#customstackrunspec)
-- [DeploymentSettingsSpec](#deploymentsettingsspec)
-- [FederatedCredentialSpec](#federatedcredentialspec)
-- [FlowSpec](#flowspec)
-- [GeneratedSecretSpec](#generatedsecretspec)
-- [GitRepositorySpec](#gitrepositoryspec)
-- [GlobalServiceSpec](#globalservicespec)
-- [HelmRepositorySpec](#helmrepositoryspec)
-- [InfrastructureStackSpec](#infrastructurestackspec)
-- [MCPServerSpec](#mcpserverspec)
-- [ManagedNamespaceSpec](#managednamespacespec)
-- [NamespaceCredentialsSpec](#namespacecredentialsspec)
-- [NotificationRouterSpec](#notificationrouterspec)
-- [NotificationSinkSpec](#notificationsinkspec)
-- [OIDCProviderSpec](#oidcproviderspec)
-- [ObservabilityProviderSpec](#observabilityproviderspec)
-- [ObserverSpec](#observerspec)
-- [PersonaSpec](#personaspec)
-- [PipelineContextSpec](#pipelinecontextspec)
-- [PipelineSpec](#pipelinespec)
-- [PrAutomationSpec](#prautomationspec)
-- [PrAutomationTriggerSpec](#prautomationtriggerspec)
-- [PrGovernanceSpec](#prgovernancespec)
-- [PreviewEnvironmentTemplateSpec](#previewenvironmenttemplatespec)
-- [ProjectSpec](#projectspec)
-- [ScmConnectionSpec](#scmconnectionspec)
-- [SentinelSpec](#sentinelspec)
-- [ServiceAccountSpec](#serviceaccountspec)
-- [ServiceContextSpec](#servicecontextspec)
-- [ServiceSpec](#servicespec)
-- [StackDefinitionSpec](#stackdefinitionspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `driftDetection` _boolean_ | DriftDetection enables drift detection for this resource.<br />Use with Interval to set how often drift detection runs. | true | Optional: \{\} <br /> |
-| `interval` _string_ | Interval for DriftDetection mechanism. | 30m | Optional: \{\} <br />Type: string <br /> |
 
 
 #### RegexReplacement
@@ -4466,27 +4329,6 @@ _Appears in:_
 | `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConnectionRef reference to ScmConnection. |  | Optional: \{\} <br /> |
 
 
-#### Status
-
-
-
-
-
-
-
-_Appears in:_
-- [ClusterStatus](#clusterstatus)
-- [GeneratedSecretStatus](#generatedsecretstatus)
-- [GitRepositoryStatus](#gitrepositorystatus)
-- [ServiceStatus](#servicestatus)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `id` _string_ | ID of the resource in the Console API. |  | Optional: \{\} <br />Type: string <br /> |
-| `sha` _string_ | SHA of last applied configuration. |  | Optional: \{\} <br />Type: string <br /> |
-| `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
-
-
 #### SyncConfigAttributes
 
 
@@ -4508,37 +4350,6 @@ _Appears in:_
 | `labels` _object (keys:string, values:string)_ |  |  | Optional: \{\} <br /> |
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: \{\} <br /> |
 | `diffNormalizers` _[DiffNormalizers](#diffnormalizers) array_ | DiffNormalizers a list of diff normalizers to apply to the service which controls how drift detection works. |  | Optional: \{\} <br /> |
-
-
-#### Taint
-
-
-
-Taint represents a Kubernetes taint.
-
-
-
-_Appears in:_
-- [ClusterNodePool](#clusternodepool)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `effect` _[TaintEffect](#tainteffect)_ | Effect specifies the effect for the taint. |  | Enum: [NoSchedule NoExecute PreferNoSchedule] <br /> |
-| `key` _string_ | Key is the key of the taint. |  |  |
-| `value` _string_ | Value is the value of the taint. |  |  |
-
-
-#### TaintEffect
-
-_Underlying type:_ _string_
-
-TaintEffect is the effect for a Kubernetes taint.
-
-
-
-_Appears in:_
-- [Taint](#taint)
-
 
 
 #### TemplateContext
