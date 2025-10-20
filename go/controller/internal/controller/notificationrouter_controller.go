@@ -60,49 +60,46 @@ type NotificationRouterReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	notificationRouter := &v1alpha1.NotificationRouter{}
-	if err := r.Get(ctx, req.NamespacedName, notificationRouter); err != nil {
+	router := &v1alpha1.NotificationRouter{}
+	if err := r.Get(ctx, req.NamespacedName, router); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := common.NewDefaultScope(ctx, r.Client, notificationRouter)
+	scope, err := common.NewDefaultScope(ctx, r.Client, router)
 	if err != nil {
-		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
 
+	utils.MarkCondition(router.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	credentials.SyncCredentialsInfo(notificationRouter, notificationRouter.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(router, router.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
-		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
 		return ctrl.Result{}, err
 	}
 
-	if !notificationRouter.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, notificationRouter)
+	if !router.GetDeletionTimestamp().IsZero() {
+		return ctrl.Result{}, r.handleDelete(ctx, router)
 	}
 
 	// Mark resource as managed by this operator.
-	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-	logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
-	attr, res, err := r.genNotificationRouterAttr(ctx, notificationRouter)
+	utils.MarkCondition(router.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	logger.Info("upsert notification router", "name", router.NotificationName())
+	attr, res, err := r.genNotificationRouterAttr(ctx, router)
 	if res != nil || err != nil {
-		return common.HandleRequeue(res, err, notificationRouter.SetCondition)
+		return common.HandleRequeue(res, err, router.SetCondition)
 	}
 
 	sha, err := utils.HashObject(attr)
@@ -110,21 +107,21 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	if !notificationRouter.Status.IsSHAEqual(sha) {
+	if !router.Status.IsSHAEqual(sha) {
 		ns, err := r.ConsoleClient.UpsertNotificationRouter(ctx, *attr)
 		if err != nil {
-			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		notificationRouter.Status.ID = lo.ToPtr(ns.ID)
-		notificationRouter.Status.SHA = lo.ToPtr(sha)
-		controllerutil.AddFinalizer(notificationRouter, NotificationRouterFinalizer)
+		router.Status.ID = lo.ToPtr(ns.ID)
+		router.Status.SHA = lo.ToPtr(sha)
+		controllerutil.AddFinalizer(router, NotificationRouterFinalizer)
 	}
 
-	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(router.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(router.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return notificationRouter.Spec.Reconciliation.Requeue(), nil
+	return router.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Context, router *v1alpha1.NotificationRouter) (*console.NotificationRouterAttributes, *ctrl.Result, error) {

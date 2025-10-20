@@ -79,18 +79,15 @@ func (r *PipelineReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctr
 func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read resource from Kubernetes cluster.
 	pipeline := &v1alpha1.Pipeline{}
 	if err := r.Get(ctx, req.NamespacedName, pipeline); err != nil {
 		logger.Error(err, "Unable to fetch pipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	// Ensure that status updates will always be persisted when exiting this function.
+
 	scope, err := common.NewDefaultScope(ctx, r.Client, pipeline)
 	if err != nil {
-		logger.Error(err, "Failed to create pipeline scope")
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -98,6 +95,8 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)

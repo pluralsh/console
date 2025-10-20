@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	consoleapi "github.com/pluralsh/console/go/client"
@@ -39,27 +40,27 @@ type FederatedCredentialReconciler struct {
 // move the current state of the cluster closer to the desired state.
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	logger := log.FromContext(ctx)
+
 	credential := new(v1alpha1.FederatedCredential)
 	if err := in.Get(ctx, req.NamespacedName, credential); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
-
 	scope, err := common.NewDefaultScope(ctx, in.Client, credential)
 	if err != nil {
-		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	if result := in.addOrRemoveFinalizer(ctx, credential); result != nil {

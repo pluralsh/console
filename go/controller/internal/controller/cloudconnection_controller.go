@@ -51,12 +51,12 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := r.Get(ctx, req.NamespacedName, connection); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	scope, err := common.NewDefaultScope(ctx, r.Client, connection)
 	if err != nil {
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err

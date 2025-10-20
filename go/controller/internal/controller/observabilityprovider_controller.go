@@ -50,21 +50,18 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
 	scope, err := common.NewDefaultScope(ctx, in.Client, provider)
 	if err != nil {
-		logger.Error(err, "failed to create observability provider scope")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := in.ConsoleClient.UseCredentials(req.Namespace, in.CredentialsCache)

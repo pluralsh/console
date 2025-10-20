@@ -49,7 +49,7 @@ type PersonaReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.Persona closer to the desired state
 // and syncs it with the Console API state.
-func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, retErr error) {
+func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	persona := new(v1alpha1.Persona)
@@ -59,14 +59,12 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	scope, err := common.NewDefaultScope(ctx, in.Client, persona)
 	if err != nil {
-		utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 

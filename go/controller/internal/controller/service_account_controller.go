@@ -51,14 +51,12 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	if err := r.Get(ctx, req.NamespacedName, sa); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	scope, err := common.NewDefaultScope(ctx, r.Client, sa)
 	if err != nil {
-		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
@@ -14,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -45,24 +45,25 @@ type NamespaceCredentialsReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to sync v1alpha1.NamespaceCredentials
 // with a global credentials map that will be later used by other reconcilers.
 func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
+	logger := log.FromContext(ctx)
+
 	nc := new(v1alpha1.NamespaceCredentials)
 	if err := r.Get(ctx, req.NamespacedName, nc); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := common.NewDefaultScope(ctx, r.Client, nc)
 	if err != nil {
-		utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to create scope: %s", err.Error()))
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch the object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// If the object is not being deleted and if it does not have our finalizer, then lets add the finalizer.
 	// This is equivalent to registering our finalizer.

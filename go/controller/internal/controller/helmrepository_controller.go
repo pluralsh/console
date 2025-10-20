@@ -50,27 +50,26 @@ func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.HelmRepository closer to the desired state
 // and syncs it with the Console API state.
-func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, retErr error) {
+func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	helmRepository := new(v1alpha1.HelmRepository)
 	if err := in.Get(ctx, req.NamespacedName, helmRepository); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := common.NewDefaultScope(ctx, in.Client, helmRepository)
 	if err != nil {
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := in.ConsoleClient.UseCredentials(req.Namespace, in.CredentialsCache)

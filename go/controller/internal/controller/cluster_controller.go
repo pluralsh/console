@@ -51,9 +51,9 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := common.NewDefaultScope(ctx, r.Client, cluster)
 	if err != nil {
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
 	defer func() {

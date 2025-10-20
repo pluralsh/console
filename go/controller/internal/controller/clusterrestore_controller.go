@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -54,6 +55,8 @@ type ClusterRestoreReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
+	logger := log.FromContext(ctx)
+
 	restore := &v1alpha1.ClusterRestore{}
 	if err := r.Get(ctx, req.NamespacedName, restore); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -61,6 +64,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	scope, err := common.NewDefaultScope(ctx, r.Client, restore)
 	if err != nil {
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
 	defer func() {

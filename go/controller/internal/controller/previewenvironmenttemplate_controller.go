@@ -43,64 +43,59 @@ type PreviewEnvironmentTemplateReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *PreviewEnvironmentTemplateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *PreviewEnvironmentTemplateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	logger.V(5).Info("reconciling preview environment template")
 
-	previewEnvTmpl := new(v1alpha1.PreviewEnvironmentTemplate)
-	if err := r.Get(ctx, req.NamespacedName, previewEnvTmpl); err != nil {
+	template := new(v1alpha1.PreviewEnvironmentTemplate)
+	if err := r.Get(ctx, req.NamespacedName, template); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
-
-	scope, err := common.NewDefaultScope(ctx, r.Client, previewEnvTmpl)
+	scope, err := common.NewDefaultScope(ctx, r.Client, template)
 	if err != nil {
-		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 
+	utils.MarkCondition(template.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
+
 	// Handle proper resource deletion via finalizer
-	if result := r.addOrRemoveFinalizer(ctx, previewEnvTmpl); result != nil {
+	if result := r.addOrRemoveFinalizer(ctx, template); result != nil {
 		return *result, nil
 	}
 
 	// Get Catalog SHA that can be saved back in the status to check for changes
-	changed, sha, err := previewEnvTmpl.Diff(utils.HashObject)
+	changed, sha, err := template.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate catalog SHA")
-		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if changed {
-		attr, res, err := getAttributes(ctx, r.Client, *previewEnvTmpl)
+		attr, res, err := getAttributes(ctx, r.Client, *template)
 		if res != nil || err != nil {
-			return common.HandleRequeue(res, err, previewEnvTmpl.SetCondition)
+			return common.HandleRequeue(res, err, template.SetCondition)
 		}
 		apiPreviewEnvironmentTemplate, err := r.ConsoleClient.UpsertPreviewEnvironmentTemplate(ctx, *attr)
 		if err != nil {
 			logger.Error(err, "unable to create or update catalog")
-			utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		previewEnvTmpl.Status.ID = &apiPreviewEnvironmentTemplate.ID
-		previewEnvTmpl.Status.SHA = &sha
+		template.Status.ID = &apiPreviewEnvironmentTemplate.ID
+		template.Status.SHA = &sha
 	}
-	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(template.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return previewEnvTmpl.Spec.Reconciliation.Requeue(), nil
+	return template.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -111,55 +106,55 @@ func (r *PreviewEnvironmentTemplateReconciler) SetupWithManager(mgr ctrl.Manager
 		Complete(r)
 }
 
-func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, previewEnvTmpl *v1alpha1.PreviewEnvironmentTemplate) *ctrl.Result {
+func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.Context, template *v1alpha1.PreviewEnvironmentTemplate) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if previewEnvTmpl.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(previewEnvTmpl, PreviewEnvironmentTemplateFinalizerName) {
-		controllerutil.AddFinalizer(previewEnvTmpl, PreviewEnvironmentTemplateFinalizerName)
+	if template.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(template, PreviewEnvironmentTemplateFinalizerName) {
+		controllerutil.AddFinalizer(template, PreviewEnvironmentTemplateFinalizerName)
 	}
 
 	// If object is not being deleted, do nothing
-	if previewEnvTmpl.GetDeletionTimestamp().IsZero() {
+	if template.GetDeletionTimestamp().IsZero() {
 		return nil
 	}
 
 	// if object is being deleted but there is no console ID available to delete the resource
 	// remove the finalizer and stop reconciliation
-	if !previewEnvTmpl.Status.HasID() {
+	if !template.Status.HasID() {
 		// stop reconciliation as there is no console ID available to delete the resource
-		controllerutil.RemoveFinalizer(previewEnvTmpl, PreviewEnvironmentTemplateFinalizerName)
+		controllerutil.RemoveFinalizer(template, PreviewEnvironmentTemplateFinalizerName)
 		return &ctrl.Result{}
 	}
 
-	_, err := r.ConsoleClient.GetPreviewEnvironmentTemplate(ctx, previewEnvTmpl.Status.ID, nil)
+	_, err := r.ConsoleClient.GetPreviewEnvironmentTemplate(ctx, template.Status.ID, nil)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			controllerutil.RemoveFinalizer(previewEnvTmpl, PreviewEnvironmentTemplateFinalizerName)
+			controllerutil.RemoveFinalizer(template, PreviewEnvironmentTemplateFinalizerName)
 			return &ctrl.Result{}
 		}
-		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return lo.ToPtr(common.Wait())
 	}
 
 	// try to delete the resource
-	if err := r.ConsoleClient.DeletePreviewEnvironmentTemplate(ctx, previewEnvTmpl.Status.GetID()); err != nil {
+	if err := r.ConsoleClient.DeletePreviewEnvironmentTemplate(ctx, template.Status.GetID()); err != nil {
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
-		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(template.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return lo.ToPtr(common.Wait())
 	}
 
 	// stop reconciliation as the item has been deleted
-	controllerutil.RemoveFinalizer(previewEnvTmpl, PreviewEnvironmentTemplateFinalizerName)
+	controllerutil.RemoveFinalizer(template, PreviewEnvironmentTemplateFinalizerName)
 	return &ctrl.Result{}
 }
 
-func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl v1alpha1.PreviewEnvironmentTemplate) (*console.PreviewEnvironmentTemplateAttributes, *ctrl.Result, error) {
+func getAttributes(ctx context.Context, kubeClient client.Client, template v1alpha1.PreviewEnvironmentTemplate) (*console.PreviewEnvironmentTemplateAttributes, *ctrl.Result, error) {
 	attr := &console.PreviewEnvironmentTemplateAttributes{
-		Name:            previewEnvTmpl.ConsoleName(),
-		CommentTemplate: previewEnvTmpl.Spec.CommentTemplate,
+		Name:            template.ConsoleName(),
+		CommentTemplate: template.Spec.CommentTemplate,
 	}
-	sta, err := common.ServiceTemplateAttributes(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
+	sta, err := common.ServiceTemplateAttributes(ctx, kubeClient, template.Namespace, &template.Spec.Template, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -167,11 +162,11 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 
 	helper := utils.NewConsoleHelper(ctx, kubeClient)
 
-	ns := previewEnvTmpl.Spec.FlowRef.Namespace
+	ns := template.Spec.FlowRef.Namespace
 	if ns == "" {
-		previewEnvTmpl.Spec.FlowRef.Namespace = previewEnvTmpl.Namespace
+		template.Spec.FlowRef.Namespace = template.Namespace
 	}
-	flowID, err := helper.IDFromRef(&previewEnvTmpl.Spec.FlowRef, &v1alpha1.Flow{})
+	flowID, err := helper.IDFromRef(&template.Spec.FlowRef, &v1alpha1.Flow{})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -180,7 +175,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 	}
 	attr.FlowID = *flowID
 
-	serviceID, err := helper.IDFromRef(&previewEnvTmpl.Spec.ReferenceServiceRef, &v1alpha1.ServiceDeployment{})
+	serviceID, err := helper.IDFromRef(&template.Spec.ReferenceServiceRef, &v1alpha1.ServiceDeployment{})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -189,8 +184,8 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 	}
 	attr.ReferenceServiceID = *serviceID
 
-	if previewEnvTmpl.Spec.ScmConnectionRef != nil {
-		connectionID, err := helper.IDFromRef(previewEnvTmpl.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
+	if template.Spec.ScmConnectionRef != nil {
+		connectionID, err := helper.IDFromRef(template.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
 		if err != nil {
 			return nil, nil, err
 		}

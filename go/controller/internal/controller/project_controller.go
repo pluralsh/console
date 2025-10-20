@@ -47,25 +47,22 @@ const (
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.Project closer to the desired state
 // and syncs it with the Console API state.
-func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, retErr error) {
+func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	project := new(v1alpha1.Project)
 	if err := in.Get(ctx, req.NamespacedName, project); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := common.NewDefaultScope(ctx, in.Client, project)
 	if err != nil {
-		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 
@@ -236,7 +233,6 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return nil, err
 	}
 
-	// Update only if Project has changed
 	if changed && exists {
 		attrs, err := in.attributes(project)
 		if err != nil {
@@ -247,7 +243,6 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), *attrs)
 	}
 
-	// Read the Project from Console API if it already exists
 	if exists {
 		return in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	}

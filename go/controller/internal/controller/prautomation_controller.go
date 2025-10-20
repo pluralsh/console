@@ -46,19 +46,16 @@ const (
 func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read PrAutomation CRD from the K8S API
 	prAutomation := new(v1alpha1.PrAutomation)
 	if err := in.Get(ctx, req.NamespacedName, prAutomation); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkFalse(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
+
 	scope, err := common.NewDefaultScope(ctx, in.Client, prAutomation)
 	if err != nil {
-		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err

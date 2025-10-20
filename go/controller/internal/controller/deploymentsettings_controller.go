@@ -60,9 +60,6 @@ type DeploymentSettingsReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -71,20 +68,18 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
 	scope, err := common.NewDefaultScope(ctx, r.Client, settings)
 	if err != nil {
-		logger.Error(err, "failed to create deployment settings scope")
-		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// make sure there is only one CRD object with the `global` name and the agent namespace
 	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {

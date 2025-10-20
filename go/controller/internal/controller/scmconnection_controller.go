@@ -52,20 +52,16 @@ const (
 func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read ScmConnection CRD from the K8S API
 	scm := new(v1alpha1.ScmConnection)
 	if err := r.Get(ctx, req.NamespacedName, scm); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := common.NewDefaultScope(ctx, r.Client, scm)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err

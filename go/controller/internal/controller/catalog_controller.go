@@ -41,9 +41,7 @@ type CatalogReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	catalog := new(v1alpha1.Catalog)
@@ -53,13 +51,12 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	scope, err := common.NewDefaultScope(ctx, r.Client, catalog)
 	if err != nil {
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 
@@ -68,7 +65,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Handle proper resource deletion via finalizer
 	result := r.addOrRemoveFinalizer(ctx, catalog)
 	if result != nil {
-		return *result, retErr
+		return *result, reterr
 	}
 
 	// Check if the resource already exists in the API and only sync the ID.
@@ -112,7 +109,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return catalog.Spec.Reconciliation.Requeue(), retErr
+	return catalog.Spec.Reconciliation.Requeue(), reterr
 }
 
 func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *string) (*console.CatalogAttributes, error) {

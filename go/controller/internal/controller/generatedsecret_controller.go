@@ -46,30 +46,30 @@ type GeneratedSecretReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
-	generatedSecret := &v1alpha1.GeneratedSecret{}
+	logger := log.FromContext(ctx)
 
+	generatedSecret := &v1alpha1.GeneratedSecret{}
 	if err := r.Get(ctx, req.NamespacedName, generatedSecret); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	if !generatedSecret.GetDeletionTimestamp().IsZero() {
 		return ctrl.Result{}, r.handleDelete(ctx, generatedSecret)
 	}
-	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	scope, err := common.NewDefaultScope(ctx, r.Client, generatedSecret)
 	if err != nil {
-		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	bindings, err := r.prepareBindings(ctx, generatedSecret)
 	if err != nil {
