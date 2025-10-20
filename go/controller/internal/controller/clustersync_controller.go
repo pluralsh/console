@@ -125,7 +125,7 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		utils.MarkCondition(clusterSync.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	}
 
-	return requeue(), nil
+	return clusterSync.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -278,6 +278,5 @@ func templateCluster(clusterAPI *console.ClusterEdgeFragment, template string) (
 	if cst.Spec.Cloud == "" {
 		unstructured.RemoveNestedField(unstructuredObj, "spec", "cloud")
 	}
-	u := &unstructured.Unstructured{Object: unstructuredObj}
-	return cst, u, nil
+	return cst, &unstructured.Unstructured{Object: unstructuredObj}, nil
 }
