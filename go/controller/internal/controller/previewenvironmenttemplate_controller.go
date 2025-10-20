@@ -159,7 +159,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		Name:            previewEnvTmpl.ConsoleName(),
 		CommentTemplate: previewEnvTmpl.Spec.CommentTemplate,
 	}
-	sta, err := common.ServiceTemplate(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
+	sta, err := common.ServiceTemplateAttributes(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
 	if err != nil {
 		return nil, nil, err
 	}

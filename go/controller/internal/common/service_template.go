@@ -17,7 +17,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func ServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
+func ServiceTemplateAttributes(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
 	syncConf, err := srv.SyncConfig.Attributes()
 	if err != nil {
 		return nil, err

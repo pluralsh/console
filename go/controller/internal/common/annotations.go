@@ -16,20 +16,20 @@ import (
 )
 
 const (
-	// OwnedByAnnotationName is an annotation used to mark resources that are owned by our CRDs.
+	// OwnedByAnnotation is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
 	// but still be able to reconcile them.
-	OwnedByAnnotationName = "deployments.plural.sh/owned-by"
+	OwnedByAnnotation = "deployments.plural.sh/owned-by"
 )
 
 func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
-		if !HasAnnotation(obj, OwnedByAnnotationName) {
+		if !hasOwnedByAnnotation(obj) {
 			return nil
 		}
 
-		ownedBy := obj.GetAnnotations()[OwnedByAnnotationName]
-		annotationGk, namespacedName, err := fromAnnotation(ownedBy)
+		ownedBy := obj.GetAnnotations()[OwnedByAnnotation]
+		annotationGk, namespacedName, err := fromOwnedByAnnotation(ownedBy)
 		if err != nil {
 			klog.ErrorS(err, "failed to parse owned-by annotation", "annotation", ownedBy)
 			return nil
@@ -51,9 +51,11 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	})
 }
 
-func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object, child runtimeclient.Object) error {
-	if HasAnnotation(child, OwnedByAnnotationName) {
-		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists", "annotation", OwnedByAnnotationName, "owner", owner.GetName(), "child", child.GetName())
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
+	child runtimeclient.Object) error {
+	if hasOwnedByAnnotation(child) {
+		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists",
+			"annotation", OwnedByAnnotation, "owner", owner.GetName(), "child", child.GetName())
 		return nil
 	}
 
@@ -63,42 +65,35 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 	}
 
 	gvk := owner.GetObjectKind().GroupVersionKind()
-	annotations[OwnedByAnnotationName] = toAnnotation(
-		metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind},
-		types.NamespacedName{Namespace: owner.GetNamespace(), Name: owner.GetName()})
+	annotations[OwnedByAnnotation] = toOwnedByAnnotation(gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	child.SetAnnotations(annotations)
 
-	klog.V(log.LogLevelDebug).InfoS("adding owned-by annotation", "annotation", OwnedByAnnotationName, "owner", owner.GetName(), "child", child.GetName())
+	klog.V(log.LogLevelDebug).InfoS("adding owned-by annotation",
+		"annotation", OwnedByAnnotation, "owner", owner.GetName(), "child", child.GetName())
 	return utils.TryToUpdate(ctx, client, child)
 }
 
-func HasAnnotation(obj runtimeclient.Object, annotation string) bool {
+func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 	if obj.GetAnnotations() == nil {
 		return false
 	}
 
-	value, exists := obj.GetAnnotations()[annotation]
-	_, _, err := fromAnnotation(value)
+	value, exists := obj.GetAnnotations()[OwnedByAnnotation]
+	_, _, err := fromOwnedByAnnotation(value)
 	return exists && err == nil
 }
 
-func fromAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
+func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
 	parts := strings.Split(annotation, "/")
 	if len(parts) != 4 {
-		return metav1.GroupKind{}, types.NamespacedName{}, fmt.Errorf("the annotation has wrong format %s", annotation)
+		return metav1.GroupKind{}, types.NamespacedName{},
+			fmt.Errorf("%s annotation has wrong format %s", OwnedByAnnotation, annotation)
 	}
 
-	gk := metav1.GroupKind{
-		Group: parts[0],
-		Kind:  parts[1],
-	}
-
-	return gk, types.NamespacedName{
-		Namespace: parts[2],
-		Name:      parts[3],
-	}, nil
+	return metav1.GroupKind{Group: parts[0], Kind: parts[1]},
+		types.NamespacedName{Namespace: parts[2], Name: parts[3]}, nil
 }
 
-func toAnnotation(gk metav1.GroupKind, namespacedName types.NamespacedName) string {
-	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", gk.Group, gk.Kind, namespacedName.Namespace, namespacedName.Name))
+func toOwnedByAnnotation(group, kind, namespace, name string) string {
+	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", group, kind, namespace, name))
 }

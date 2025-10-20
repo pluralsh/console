@@ -133,7 +133,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		st, err := common.ServiceTemplate(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
 		if err != nil {
 			return ctrl.Result{}, err
 		}

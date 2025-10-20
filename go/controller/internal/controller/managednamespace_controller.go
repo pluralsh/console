@@ -259,7 +259,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		}
 
 		namespace := ns.GetNamespace()
-		st, err := common.ServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, namespace, srv, repository.Status.ID)
 		if err != nil {
 			return nil, nil, err
 		}

@@ -62,7 +62,7 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 	return &console.GateJobAttributes{
 		Namespace: job.Namespace,
 		Raw:       raw,
-		Resources: containerResources(job.Resources),
+		Resources: containerResourcesAttributes(job.Resources),
 		Containers: algorithms.Map(job.Containers,
 			func(c *v1alpha1.Container) *console.ContainerAttributes {
 				return &console.ContainerAttributes{
@@ -71,7 +71,7 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 					Env: algorithms.Map(c.Env, func(e *v1alpha1.Env) *console.EnvAttributes {
 						return &console.EnvAttributes{Name: e.Name, Value: e.Value}
 					}),
-					Resources: containerResources(c.Resources),
+					Resources: containerResourcesAttributes(c.Resources),
 					EnvFrom: algorithms.Map(c.EnvFrom, func(e *v1alpha1.EnvFrom) *console.EnvFromAttributes {
 						return &console.EnvFromAttributes{Secret: e.Secret, ConfigMap: e.ConfigMap}
 					}),
@@ -85,24 +85,21 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 	}, nil
 }
 
-func containerResourceRequests(requests *v1alpha1.ContainerResourceRequests) *console.ResourceRequestAttributes {
+func resourceRequestAttributes(requests *v1alpha1.ContainerResourceRequests) *console.ResourceRequestAttributes {
 	if requests == nil {
 		return nil
 	}
 
-	return &console.ResourceRequestAttributes{
-		CPU:    requests.CPU,
-		Memory: requests.Memory,
-	}
+	return &console.ResourceRequestAttributes{CPU: requests.CPU, Memory: requests.Memory}
 }
 
-func containerResources(resources *v1alpha1.ContainerResources) *console.ContainerResourcesAttributes {
+func containerResourcesAttributes(resources *v1alpha1.ContainerResources) *console.ContainerResourcesAttributes {
 	if resources == nil {
 		return nil
 	}
 
 	return &console.ContainerResourcesAttributes{
-		Requests: containerResourceRequests(resources.Requests),
-		Limits:   containerResourceRequests(resources.Limits),
+		Requests: resourceRequestAttributes(resources.Requests),
+		Limits:   resourceRequestAttributes(resources.Limits),
 	}
 }
