@@ -83,13 +83,13 @@ mutation UpdateAgentRun($id: ID!, $attributes: AgentRunStatusAttributes!) {
 
 mutation UpdateAgentRunAnalysis($id: ID!, $attributes: AgentAnalysisAttributes!) {
     updateAgentRunAnalysis(id: $id, attributes: $attributes) {
-        ...AgentRunFragment
+        ...AgentRunBaseFragment
     }
 }
 
 mutation UpdateAgentRunTodos($id: ID!, $todos: [AgentTodoAttributes]) {
     updateAgentRunTodos(id: $id, todos: $todos) {
-        ...AgentRunFragment
+        ...AgentRunBaseFragment
     }
 }
 
@@ -140,21 +140,25 @@ fragment PluralCredsFragment on PluralCreds {
     url
 }
 
+fragment AgentRunBaseFragment on AgentRun {
+  id
+  prompt
+  repository
+  mode
+  todos {
+    ...AgentTodoFragment
+  }
+}
+
 fragment AgentRunFragment on AgentRun {
-    id
-    prompt
-    repository
+    ...AgentRunBaseFragment
     status
-    mode
     podReference {
         ...AgentPodReferenceFragment
     }
     error
     analysis {
         ...AgentAnalysisFragment
-    }
-    todos {
-        ...AgentTodoFragment
     }
     scmCreds {
         ...ScmCredentialFragment
