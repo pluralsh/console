@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,7 +38,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 	if connectionID == nil {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})
@@ -78,12 +79,12 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 	}
 
 	if pra.Spec.Bindings != nil {
-		attrs.CreateBindings, err = bindingsAttributes(pra.Spec.Bindings.Create)
+		attrs.CreateBindings, err = common.BindingsAttributes(pra.Spec.Bindings.Create)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		attrs.WriteBindings, err = bindingsAttributes(pra.Spec.Bindings.Write)
+		attrs.WriteBindings, err = common.BindingsAttributes(pra.Spec.Bindings.Write)
 		if err != nil {
 			return nil, nil, err
 		}

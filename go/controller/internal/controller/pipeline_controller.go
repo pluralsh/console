@@ -23,6 +23,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -112,15 +113,15 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 		return *result, nil
 	}
 
-	project, res, err := GetProject(ctx, r.Client, r.Scheme, pipeline)
+	project, res, err := common.Project(ctx, r.Client, r.Scheme, pipeline)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, pipeline.SetCondition)
+		return common.HandleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, res, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, pipeline.SetCondition)
+		return common.HandleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.

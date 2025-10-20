@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -88,7 +89,7 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if changed {
 		attrs, err := r.Attributes(mcpServer)
 		if err != nil {
-			return handleRequeue(nil, err, mcpServer.SetCondition)
+			return common.HandleRequeue(nil, err, mcpServer.SetCondition)
 		}
 
 		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, *attrs)
@@ -119,12 +120,12 @@ func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpS
 	if mcp.Spec.Bindings != nil {
 		var err error
 
-		attrs.ReadBindings, err = bindingsAttributes(mcp.Spec.Bindings.Read)
+		attrs.ReadBindings, err = common.BindingsAttributes(mcp.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attrs.WriteBindings, err = bindingsAttributes(mcp.Spec.Bindings.Write)
+		attrs.WriteBindings, err = common.BindingsAttributes(mcp.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}

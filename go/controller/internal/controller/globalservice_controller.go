@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -113,12 +114,12 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 
 	service, result, err := r.getService(ctx, globalService)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, globalService.SetCondition)
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, globalService)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, globalService)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, globalService.SetCondition)
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
 	attr := globalService.Attributes(project.Status.ID)
@@ -132,7 +133,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		st, err := genServiceTemplate(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
+		st, err := common.ServiceTemplate(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -206,11 +207,11 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		if err := r.Delete(ctx, globalService); err != nil {
 			return nil, nil, err
 		}
-		return nil, lo.ToPtr(wait()), nil
+		return nil, lo.ToPtr(common.Wait()), nil
 	}
 
 	if !service.Status.HasID() {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 	}
 
 	return service, nil, nil

@@ -6,6 +6,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -67,16 +68,16 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
 	credentials.SyncCredentialsInfo(cluster, cluster.SetCondition, nc, err)
 	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
+		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
 
 	exists, err := r.isExisting(cluster)
 	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
+		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
 	if !exists {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "cluster not found")
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
@@ -121,12 +122,12 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	attrs, err := r.Attributes(cluster)
 	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
+		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
 
 	sha, err := utils.HashObject(*attrs)
 	if err != nil {
-		return handleRequeue(nil, err, cluster.SetCondition)
+		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
 
 	if !cluster.Status.IsSHAEqual(sha) {
@@ -159,12 +160,12 @@ func (r *ClusterReconciler) Attributes(cluster *v1alpha1.Cluster) (*console.Clus
 	var readBindings, writeBindings []*console.PolicyBindingAttributes
 	var err error
 	if cluster.Spec.Bindings != nil {
-		readBindings, err = bindingsAttributes(cluster.Spec.Bindings.Read)
+		readBindings, err = common.BindingsAttributes(cluster.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		writeBindings, err = bindingsAttributes(cluster.Spec.Bindings.Write)
+		writeBindings, err = common.BindingsAttributes(cluster.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}

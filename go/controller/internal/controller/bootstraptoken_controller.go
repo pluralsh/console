@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -78,15 +79,15 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	}
 
-	project, result, err := GetProject(ctx, in.Client, in.Scheme, bootstrapToken)
+	project, result, err := common.Project(ctx, in.Client, in.Scheme, bootstrapToken)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, bootstrapToken.SetCondition)
+		return common.HandleRequeue(result, err, bootstrapToken.SetCondition)
 	}
 
 	// Create token and generate secret
 	apiBootstrapToken, err := in.sync(ctx, bootstrapToken, *project)
 	if err != nil {
-		return handleRequeue(nil, err, bootstrapToken.SetCondition)
+		return common.HandleRequeue(nil, err, bootstrapToken.SetCondition)
 	}
 
 	bootstrapToken.Status.ID = &apiBootstrapToken.ID

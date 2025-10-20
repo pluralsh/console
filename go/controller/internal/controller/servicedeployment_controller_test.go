@@ -383,10 +383,10 @@ var _ = Describe("Service Controller", Ordered, func() {
 	})
 })
 
-var _ = Describe("wait for resources", Ordered, func() {
+var _ = Describe("Wait for resources", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			serviceName = "wait-service-test"
+			serviceName = "Wait-service-test"
 			clusterName = "cluster-test"
 			repoName    = "repo-test"
 			namespace   = "default"
@@ -432,7 +432,7 @@ var _ = Describe("wait for resources", Ordered, func() {
 			}
 		})
 
-		It("should wait for resources", func() {
+		It("should Wait for resources", func() {
 			By("Create resource")
 			test := struct {
 				returnGetService *gqlclient.ServiceDeploymentExtended

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -102,17 +103,17 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
 	if err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
 	// This is just a temporary cleanup step to remove the owner reference from the secret.
 	// We can probably remove this in the future.
 	if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
-	if err := TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+	if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil {
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
@@ -126,7 +127,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync ScmConnection CRD with the Console API
 	apiScmConnection, err := r.sync(ctx, scm, changed)
 	if err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
 	scm.Status.ID = &apiScmConnection.ID
@@ -141,17 +142,17 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
 	if err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 	if !exists {
 		scm.Status.ID = nil
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
 	if err != nil {
-		return handleRequeue(nil, err, scm.SetCondition)
+		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
 	// Default field should also be editable even if the resource is in the read-only mode.
@@ -161,7 +162,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 			Type:    scm.Spec.Type,
 			Default: scm.Spec.Default,
 		}); err != nil {
-			return handleRequeue(nil, err, scm.SetCondition)
+			return common.HandleRequeue(nil, err, scm.SetCondition)
 		}
 	}
 
@@ -296,9 +297,6 @@ func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Watches(&corev1.Secret{}, OwnedByEventHandler(&metav1.GroupKind{
-			Group: gvk.Group,
-			Kind:  gvk.Kind,
-		})).
+		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})).
 		Complete(r)
 }

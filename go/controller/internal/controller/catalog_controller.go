@@ -4,6 +4,7 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -73,7 +74,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Check if the resource already exists in the API and only sync the ID.
 	exists, err := r.isAlreadyExists(ctx, catalog)
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 	if exists {
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
@@ -91,19 +92,19 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return catalog.Spec.Reconciliation.Requeue(), err
 	}
 	if changed {
-		project, res, err := GetProject(ctx, r.Client, r.Scheme, catalog)
+		project, res, err := common.Project(ctx, r.Client, r.Scheme, catalog)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, catalog.SetCondition)
+			return common.HandleRequeue(res, err, catalog.SetCondition)
 		}
 
 		catalogAttributes, err := r.Attributes(catalog, project.Status.ID)
 		if err != nil {
-			return handleRequeue(nil, err, catalog.SetCondition)
+			return common.HandleRequeue(nil, err, catalog.SetCondition)
 		}
 
 		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalogAttributes)
 		if err != nil {
-			return handleRequeue(nil, err, catalog.SetCondition)
+			return common.HandleRequeue(nil, err, catalog.SetCondition)
 		}
 		catalog.Status.ID = &apiCatalog.ID
 		catalog.Status.SHA = &sha
@@ -135,17 +136,17 @@ func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *str
 	if catalog.Spec.Bindings != nil {
 		var err error
 
-		attrs.ReadBindings, err = bindingsAttributes(catalog.Spec.Bindings.Read)
+		attrs.ReadBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attrs.WriteBindings, err = bindingsAttributes(catalog.Spec.Bindings.Write)
+		attrs.WriteBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}
 
-		attrs.CreateBindings, err = bindingsAttributes(catalog.Spec.Bindings.Create)
+		attrs.CreateBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Create)
 		if err != nil {
 			return nil, err
 		}
@@ -157,17 +158,17 @@ func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *str
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {
 	exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 	if !exists {
 		catalog.Status.ID = nil
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 
 	catalog.Status.ID = &apiCatalog.ID

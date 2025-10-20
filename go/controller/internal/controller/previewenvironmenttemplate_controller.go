@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -85,7 +86,7 @@ func (r *PreviewEnvironmentTemplateReconciler) Reconcile(ctx context.Context, re
 	if changed {
 		attr, res, err := getAttributes(ctx, r.Client, *previewEnvTmpl)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, previewEnvTmpl.SetCondition)
+			return common.HandleRequeue(res, err, previewEnvTmpl.SetCondition)
 		}
 		apiPreviewEnvironmentTemplate, err := r.ConsoleClient.UpsertPreviewEnvironmentTemplate(ctx, *attr)
 		if err != nil {
@@ -137,7 +138,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(wait())
+		return lo.ToPtr(common.Wait())
 	}
 
 	// try to delete the resource
@@ -145,7 +146,7 @@ func (r *PreviewEnvironmentTemplateReconciler) addOrRemoveFinalizer(ctx context.
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(wait())
+		return lo.ToPtr(common.Wait())
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -158,7 +159,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		Name:            previewEnvTmpl.ConsoleName(),
 		CommentTemplate: previewEnvTmpl.Spec.CommentTemplate,
 	}
-	sta, err := genServiceTemplate(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
+	sta, err := common.ServiceTemplate(ctx, kubeClient, previewEnvTmpl.Namespace, &previewEnvTmpl.Spec.Template, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -175,7 +176,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		return nil, nil, err
 	}
 	if flowID == nil {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
 	}
 	attr.FlowID = *flowID
 
@@ -184,7 +185,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 		return nil, nil, err
 	}
 	if serviceID == nil {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 	}
 	attr.ReferenceServiceID = *serviceID
 
@@ -194,7 +195,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, previewEnvTmpl
 			return nil, nil, err
 		}
 		if connectionID == nil {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("scm connection is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 		}
 		attr.ConnectionID = connectionID
 	}

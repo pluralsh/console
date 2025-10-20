@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -212,18 +213,18 @@ func (in *ObservabilityProviderReconciler) sync(
 func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (ctrl.Result, error) {
 	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 	if err != nil {
-		return handleRequeue(nil, err, provider.SetCondition)
+		return common.HandleRequeue(nil, err, provider.SetCondition)
 	}
 
 	if !exists {
 		provider.Status.ID = nil
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiProvider, err := in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, provider.SetCondition)
+		return common.HandleRequeue(nil, err, provider.SetCondition)
 	}
 
 	provider.Status.ID = &apiProvider.ID

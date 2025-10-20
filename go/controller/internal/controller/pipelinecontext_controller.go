@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -76,7 +77,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if !pipeline.Status.HasID() {
 		logger.Info("pipeline is not ready", "name", pipeline.Name, "namespace", pipeline.Namespace)
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {

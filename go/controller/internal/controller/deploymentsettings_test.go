@@ -132,7 +132,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
-		It("should wait for PrometheusConnection secret", func() {
+		It("should Wait for PrometheusConnection secret", func() {
 			test := struct {
 				returnResource *gqlclient.DeploymentSettingsFragment
 				expectedStatus v1alpha1.Status
@@ -198,7 +198,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 
 		})
 
-		It("should wait for Loki secret", func() {
+		It("should Wait for Loki secret", func() {
 			test := struct {
 				returnResource *gqlclient.DeploymentSettingsFragment
 				expectedStatus v1alpha1.Status
@@ -264,7 +264,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 
 		})
 
-		It("should wait for AI OpenAPI secret", func() {
+		It("should Wait for AI OpenAPI secret", func() {
 			test := struct {
 				returnResource *gqlclient.DeploymentSettingsFragment
 				expectedStatus v1alpha1.Status

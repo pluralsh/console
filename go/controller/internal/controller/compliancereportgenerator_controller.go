@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -88,7 +89,7 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 	if changed {
 		attrs, err := r.Attributes(complianceReportGenerator)
 		if err != nil {
-			return handleRequeue(nil, err, complianceReportGenerator.SetCondition)
+			return common.HandleRequeue(nil, err, complianceReportGenerator.SetCondition)
 		}
 
 		apiComplianceReportGenerator, err := r.ConsoleClient.UpsertComplianceReportGenerator(ctx, *attrs)
@@ -110,7 +111,7 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 }
 
 func (r *ComplianceReportGeneratorReconciler) Attributes(g *v1alpha1.ComplianceReportGenerator) (*console.ComplianceReportGeneratorAttributes, error) {
-	bindings, err := bindingsAttributes(g.Spec.ReadBindings)
+	bindings, err := common.BindingsAttributes(g.Spec.ReadBindings)
 	if err != nil {
 		return nil, err
 	}

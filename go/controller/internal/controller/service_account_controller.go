@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -132,18 +133,18 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
-		return handleRequeue(nil, err, sa.SetCondition)
+		return common.HandleRequeue(nil, err, sa.SetCondition)
 	}
 
 	if !exists {
 		sa.Status.ID = nil
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiServiceAccount, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
-		return handleRequeue(nil, err, sa.SetCondition)
+		return common.HandleRequeue(nil, err, sa.SetCondition)
 	}
 
 	sa.Status.ID = &apiServiceAccount.ID

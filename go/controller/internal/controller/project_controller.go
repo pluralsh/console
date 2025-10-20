@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -102,7 +103,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Sync Project CRD with the Console API
 	apiProject, err := in.sync(ctx, project, changed)
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID
@@ -183,18 +184,18 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 
 	exists, err := in.ConsoleClient.IsProjectExists(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	if !exists {
 		project.Status.ID = nil
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID
@@ -214,12 +215,12 @@ func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.Pro
 	if project.Spec.Bindings != nil {
 		var err error
 
-		attrs.ReadBindings, err = bindingsAttributes(project.Spec.Bindings.Read)
+		attrs.ReadBindings, err = common.BindingsAttributes(project.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attrs.WriteBindings, err = bindingsAttributes(project.Spec.Bindings.Write)
+		attrs.WriteBindings, err = common.BindingsAttributes(project.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}

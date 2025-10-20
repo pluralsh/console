@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +75,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
 	credentials.SyncCredentialsInfo(restore, restore.SetCondition, nc, err)
 	if err != nil {
-		return handleRequeue(nil, err, restore.SetCondition)
+		return common.HandleRequeue(nil, err, restore.SetCondition)
 	}
 
 	// Handle resource deletion both in the Kubernetes cluster and in the Console.
@@ -89,7 +90,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	// Sync resource with the Console.
 	apiRestore, result, err := r.sync(ctx, restore)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, restore.SetCondition)
+		return common.HandleRequeue(result, err, restore.SetCondition)
 	}
 
 	// Update resource status.
@@ -129,7 +130,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 		}
 
 		if clusterID == nil {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("cluster is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)

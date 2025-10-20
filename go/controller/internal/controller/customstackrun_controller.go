@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -108,7 +109,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("create custom stack run", "name", stack.CustomStackRunName())
 		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
 		if result != nil || err != nil {
-			return handleRequeue(result, err, stack.SetCondition)
+			return common.HandleRequeue(result, err, stack.SetCondition)
 		}
 
 		st, err := r.ConsoleClient.CreateCustomStackRun(ctx, *attr)
@@ -124,7 +125,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("upsert custom stack run", "name", stack.CustomStackRunName())
 		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
 		if result != nil || err != nil {
-			return handleRequeue(result, err, stack.SetCondition)
+			return common.HandleRequeue(result, err, stack.SetCondition)
 		}
 
 		_, err = r.ConsoleClient.UpdateCustomStackRun(ctx, stack.Status.GetID(), *attr)
@@ -196,7 +197,7 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		}
 
 		if !stack.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("stack is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("stack is not ready")
 		}
 
 		attr.StackID = stack.Status.ID

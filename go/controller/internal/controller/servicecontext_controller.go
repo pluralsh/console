@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -93,9 +94,9 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, serviceContext)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, serviceContext)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, serviceContext.SetCondition)
+		return common.HandleRequeue(result, err, serviceContext.SetCondition)
 	}
 
 	apiServiceContext, err := r.sync(serviceContext, project)
@@ -131,18 +132,18 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceContextExists(sc.GetName())
 	if err != nil {
-		return handleRequeue(nil, err, sc.SetCondition)
+		return common.HandleRequeue(nil, err, sc.SetCondition)
 	}
 
 	if !exists {
 		sc.Status.ID = nil
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())
 	if err != nil {
-		return handleRequeue(nil, err, sc.SetCondition)
+		return common.HandleRequeue(nil, err, sc.SetCondition)
 	}
 
 	sc.Status.ID = &apiServiceContext.ID
@@ -201,7 +202,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(wait())
+		return lo.ToPtr(common.Wait())
 	}
 
 	if !serviceContext.Status.IsReadonly() && serviceContext.Status.HasID() {
@@ -210,7 +211,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			// If it fails to delete the external dependency here, return with error
 			// so that it can be retried.
 			utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return lo.ToPtr(wait())
+			return lo.ToPtr(common.Wait())
 		}
 	}
 

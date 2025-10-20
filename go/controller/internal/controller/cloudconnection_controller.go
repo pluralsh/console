@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -73,7 +74,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, connection)
 	if err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 	if exists {
 		logger.V(9).Info("CloudConnection already exists in the API, running in read-only mode")
@@ -85,18 +86,18 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	err = r.tryAddControllerRef(ctx, connection)
 	if err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	// Get Connection SHA that can be saved back in the status to check for changes
 	changed, sha, err := connection.Diff(ctx, r.toCloudConnectionAttributes, utils.HashObject)
 	if err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	apiConnection, err := r.sync(ctx, connection, changed)
 	if err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
@@ -119,7 +120,7 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 
 	attr.Name = connection.CloudConnectionName()
 
-	attr.ReadBindings, err = bindingsAttributes(connection.Spec.ReadBindings)
+	attr.ReadBindings, err = common.BindingsAttributes(connection.Spec.ReadBindings)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +148,7 @@ func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context
 		if errors.IsNotFound(err) {
 			connection.Status.ID = nil
 		}
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
@@ -208,7 +209,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(wait()), nil
+			return lo.ToPtr(common.Wait()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

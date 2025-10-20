@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -107,18 +108,18 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		return handleRequeue(nil, err, service.SetCondition)
+		return common.HandleRequeue(nil, err, service.SetCondition)
 	}
 
 	if !cluster.Status.HasID() {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return wait(), nil
+		return common.Wait(), nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-			return handleRequeue(nil, err, service.SetCondition)
+			return common.HandleRequeue(nil, err, service.SetCondition)
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -126,22 +127,22 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return wait(), nil
+			return common.Wait(), nil
 		}
 
 		if !repository.Status.HasID() {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return wait(), nil
+			return common.Wait(), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return wait(), nil
+			return common.Wait(), nil
 		}
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, service.SetCondition)
+		return common.HandleRequeue(result, err, service.SetCondition)
 	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
@@ -207,7 +208,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
-		return wait(), nil
+		return common.Wait(), nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
@@ -293,7 +294,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
@@ -318,12 +319,12 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 
 	if service.Spec.Bindings != nil {
-		attr.ReadBindings, err = bindingsAttributes(service.Spec.Bindings.Read)
+		attr.ReadBindings, err = common.BindingsAttributes(service.Spec.Bindings.Read)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		attr.WriteBindings, err = bindingsAttributes(service.Spec.Bindings.Write)
+		attr.WriteBindings, err = common.BindingsAttributes(service.Spec.Bindings.Write)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -359,7 +360,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			}
 
 			if !repo.Status.HasID() {
-				return nil, lo.ToPtr(wait()), fmt.Errorf("repository is not ready")
+				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -608,7 +609,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
-			return lo.ToPtr(wait())
+			return lo.ToPtr(common.Wait())
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
@@ -627,7 +628,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(wait())
+			return lo.ToPtr(common.Wait())
 		}
 
 		// If our finalizer is present, remove it.

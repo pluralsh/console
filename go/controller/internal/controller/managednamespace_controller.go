@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -109,7 +110,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("create managed namespace", "name", managedNamespace.Name)
 		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, managedNamespace.SetCondition)
+			return common.HandleRequeue(res, err, managedNamespace.SetCondition)
 		}
 
 		ns, err := r.ConsoleClient.CreateNamespace(ctx, *attr)
@@ -125,7 +126,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("update managed namespace", "name", managedNamespace.Name)
 		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, managedNamespace.SetCondition)
+			return common.HandleRequeue(res, err, managedNamespace.SetCondition)
 		}
 
 		if !managedNamespace.Status.HasID() {
@@ -258,7 +259,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		}
 
 		namespace := ns.GetNamespace()
-		st, err := genServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
+		st, err := common.ServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -274,7 +275,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		attr.Service = st
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, ns)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, ns)
 	if result != nil || err != nil {
 		return nil, result, err
 	}
@@ -291,7 +292,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 
 		if !repository.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("repository is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

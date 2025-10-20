@@ -7,6 +7,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
@@ -79,23 +80,23 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	repository := &v1alpha1.GitRepository{}
 	if sentinel.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: sentinel.Spec.RepositoryRef.Name, Namespace: sentinel.Spec.RepositoryRef.Namespace}, repository); err != nil {
-			return handleRequeue(nil, err, sentinel.SetCondition)
+			return common.HandleRequeue(nil, err, sentinel.SetCondition)
 		}
 		if !repository.Status.HasID() {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return wait(), nil
+			return common.Wait(), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return wait(), nil
+			return common.Wait(), nil
 		}
 	}
 	project := &v1alpha1.Project{}
 	if sentinel.Spec.ProjectRef != nil {
 		var res *ctrl.Result
-		project, res, err = GetProject(ctx, r.Client, r.Scheme, sentinel)
+		project, res, err = common.Project(ctx, r.Client, r.Scheme, sentinel)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, sentinel.SetCondition)
+			return common.HandleRequeue(res, err, sentinel.SetCondition)
 		}
 	}
 
@@ -221,7 +222,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					Distro: check.Configuration.IntegrationTest.Distro,
 				}
 				if check.Configuration.IntegrationTest.Job != nil {
-					jobSpec, err := gateJobAttributes(check.Configuration.IntegrationTest.Job)
+					jobSpec, err := common.GateJobAttributes(check.Configuration.IntegrationTest.Job)
 					if err != nil {
 						return nil, err
 					}
@@ -280,7 +281,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 			}
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(wait())
+			return lo.ToPtr(common.Wait())
 		}
 		// If our finalizer is present, remove it.
 		controllerutil.RemoveFinalizer(sentinel, SentinelFinalizer)

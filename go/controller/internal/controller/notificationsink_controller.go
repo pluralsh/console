@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -110,7 +111,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	if err != nil {
-		return handleRequeue(nil, err, notificationSink.SetCondition)
+		return common.HandleRequeue(nil, err, notificationSink.SetCondition)
 	}
 
 	// Mark resource as managed by this operator.
@@ -129,7 +130,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if !exists || !notificationSink.Status.IsSHAEqual(sha) {
 		attrs, err := genNotificationSinkAttr(notificationSink)
 		if err != nil {
-			return handleRequeue(nil, err, notificationSink.SetCondition)
+			return common.HandleRequeue(nil, err, notificationSink.SetCondition)
 		}
 
 		logger.Info("upsert notification sink", "name", notificationSink.NotificationName())
@@ -157,7 +158,7 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 		if errors.IsNotFound(err) {
 			notificationSink.Status.ID = nil
 		}
-		return handleRequeue(nil, err, notificationSink.SetCondition)
+		return common.HandleRequeue(nil, err, notificationSink.SetCondition)
 	}
 
 	notificationSink.Spec.Type = existing.Type
@@ -290,7 +291,7 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) (*cons
 	if notificationSink.Spec.Type == console.SinkTypePlural {
 		var err error
 
-		attr.NotificationBindings, err = bindingsAttributes(notificationSink.Spec.Bindings)
+		attr.NotificationBindings, err = common.BindingsAttributes(notificationSink.Spec.Bindings)
 		if err != nil {
 			return nil, err
 		}

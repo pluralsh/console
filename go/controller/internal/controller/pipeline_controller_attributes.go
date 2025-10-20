@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -87,7 +88,7 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 			return nil, lo.ToPtr(p.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
@@ -95,12 +96,12 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	if p.Spec.Bindings != nil {
 		var err error
 
-		attr.ReadBindings, err = bindingsAttributes(p.Spec.Bindings.Read)
+		attr.ReadBindings, err = common.BindingsAttributes(p.Spec.Bindings.Read)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		attr.WriteBindings, err = bindingsAttributes(p.Spec.Bindings.Write)
+		attr.WriteBindings, err = common.BindingsAttributes(p.Spec.Bindings.Write)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -116,7 +117,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if !service.Status.HasID() {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
@@ -152,7 +153,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		}
 
 		if !prAutomation.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("pr automation is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("pr automation is not ready")
 		}
 
 		prAutomationID = prAutomation.Status.ID
@@ -203,7 +204,7 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 	}
 
 	if !cluster.Status.HasID() {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("cluster is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 	}
 
 	return cluster.Status.ID, nil, nil
@@ -214,7 +215,7 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 		return nil, nil
 	}
 
-	job, err := gateJobAttributes(spec.Job)
+	job, err := common.GateJobAttributes(spec.Job)
 	if err != nil {
 		return nil, err
 	}

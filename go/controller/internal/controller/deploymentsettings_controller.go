@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,6 +28,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -117,7 +119,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("upsert deployment settings", "name", settings.Name)
 		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
 		if err != nil {
-			return handleRequeue(nil, err, settings.SetCondition)
+			return common.HandleRequeue(nil, err, settings.SetCondition)
 		}
 
 		_, err = r.ConsoleClient.UpdateDeploymentSettings(ctx, *attr)
@@ -192,7 +194,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		var err error
 		var connectionID *string
 		if settings.Spec.Stacks.JobSpec != nil {
-			jobSpec, err = gateJobAttributes(settings.Spec.Stacks.JobSpec)
+			jobSpec, err = common.GateJobAttributes(settings.Spec.Stacks.JobSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -212,22 +214,22 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	if settings.Spec.Bindings != nil {
 		var err error
 
-		attr.ReadBindings, err = bindingsAttributes(settings.Spec.Bindings.Read)
+		attr.ReadBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attr.WriteBindings, err = bindingsAttributes(settings.Spec.Bindings.Write)
+		attr.WriteBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}
 
-		attr.CreateBindings, err = bindingsAttributes(settings.Spec.Bindings.Create)
+		attr.CreateBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Create)
 		if err != nil {
 			return nil, err
 		}
 
-		attr.GitBindings, err = bindingsAttributes(settings.Spec.Bindings.Git)
+		attr.GitBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Git)
 		if err != nil {
 			return nil, err
 		}
@@ -250,4 +252,12 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 
 	return attr, nil
+}
+
+func getGitRepoID(ctx context.Context, c runtimeclient.Client, namespacedName v1alpha1.NamespacedName) (*string, error) {
+	gitRepo := &v1alpha1.GitRepository{}
+	if err := c.Get(ctx, types.NamespacedName{Name: namespacedName.Name, Namespace: namespacedName.Namespace}, gitRepo); err != nil {
+		return nil, err
+	}
+	return gitRepo.Status.ID, nil
 }

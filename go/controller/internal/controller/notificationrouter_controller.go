@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -101,7 +102,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
 	attr, res, err := r.genNotificationRouterAttr(ctx, notificationRouter)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, notificationRouter.SetCondition)
+		return common.HandleRequeue(res, err, notificationRouter.SetCondition)
 	}
 
 	sha, err := utils.HashObject(attr)
@@ -169,7 +170,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		}
 
 		if !notifSink.Status.HasID() {
-			return nil, lo.ToPtr(wait()), nil
+			return nil, lo.ToPtr(common.Wait()), nil
 		}
 
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})

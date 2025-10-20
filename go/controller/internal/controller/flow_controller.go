@@ -7,6 +7,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -99,19 +100,19 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, err
 	}
 	if changed {
-		project, res, err := GetProject(ctx, r.Client, r.Scheme, flow)
+		project, res, err := common.Project(ctx, r.Client, r.Scheme, flow)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, flow.SetCondition)
+			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
 		serverAssociationAttributes, res, err := r.getServerAssociationAttributes(ctx, flow)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, flow.SetCondition)
+			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
 		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes)
 		if err != nil {
-			return handleRequeue(nil, err, flow.SetCondition)
+			return common.HandleRequeue(nil, err, flow.SetCondition)
 		}
 
 		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, *attrs)
@@ -145,12 +146,12 @@ func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serv
 	if flow.Spec.Bindings != nil {
 		var err error
 
-		attrs.ReadBindings, err = bindingsAttributes(flow.Spec.Bindings.Read)
+		attrs.ReadBindings, err = common.BindingsAttributes(flow.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attrs.WriteBindings, err = bindingsAttributes(flow.Spec.Bindings.Write)
+		attrs.WriteBindings, err = common.BindingsAttributes(flow.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}
@@ -202,7 +203,7 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 		}
 
 		if !mcpServer.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("MCP server %s is not ready", ref.Name)
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCP server %s is not ready", ref.Name)
 		}
 
 		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{

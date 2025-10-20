@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -98,7 +99,7 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Sync ObservabilityProvider CRD with the Console API
 	apiProvider, res, err := r.sync(ctx, observer, changed)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, observer.SetCondition)
+		return common.HandleRequeue(res, err, observer.SetCondition)
 	}
 
 	observer.Status.ID = &apiProvider.ID
@@ -130,7 +131,7 @@ func (r *ObserverReconciler) sync(
 		return apiObserver, nil, nil
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, observer)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, observer)
 	if result != nil || err != nil {
 		return nil, result, err
 	}
@@ -156,7 +157,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, helm.Provider, helm.Auth)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, lo.ToPtr(wait()), err
+				return target, actions, lo.ToPtr(common.Wait()), err
 			}
 
 			return target, actions, nil, err
@@ -172,13 +173,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		gitRepo := &v1alpha1.GitRepository{}
 		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, lo.ToPtr(wait()), err
+				return target, actions, lo.ToPtr(common.Wait()), err
 			}
 
 			return target, actions, nil, err
 		}
 		if !gitRepo.Status.HasID() {
-			return target, actions, lo.ToPtr(wait()), fmt.Errorf("repository is not ready")
+			return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 		}
 		var filter *console.ObserverGitFilterAttributes
 		if git.Filter != nil {
@@ -197,7 +198,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, observer.Namespace, oci.Provider, oci.Auth)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				return target, actions, lo.ToPtr(wait()), err
+				return target, actions, lo.ToPtr(common.Wait()), err
 			}
 
 			return target, actions, nil, err
@@ -236,13 +237,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				prAutomation := &v1alpha1.PrAutomation{}
 				if err = r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
 					if errors.IsNotFound(err) {
-						return target, actions, lo.ToPtr(wait()), err
+						return target, actions, lo.ToPtr(common.Wait()), err
 					}
 
 					return target, actions, nil, err
 				}
 				if !prAutomation.Status.HasID() {
-					return target, actions, lo.ToPtr(wait()), fmt.Errorf("pr automation is not ready")
+					return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("pr automation is not ready")
 				}
 
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
@@ -259,13 +260,13 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				pipeline := &v1alpha1.Pipeline{}
 				if err = r.Get(ctx, client.ObjectKey{Name: p.PipelineRef.Name, Namespace: p.PipelineRef.Namespace}, pipeline); err != nil {
 					if errors.IsNotFound(err) {
-						return target, actions, lo.ToPtr(wait()), err
+						return target, actions, lo.ToPtr(common.Wait()), err
 					}
 
 					return target, actions, nil, err
 				}
 				if !pipeline.Status.HasID() {
-					return target, actions, lo.ToPtr(wait()), fmt.Errorf("pipeline is not ready")
+					return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("pipeline is not ready")
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),

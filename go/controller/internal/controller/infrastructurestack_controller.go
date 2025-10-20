@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -117,22 +118,22 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 
 	clusterID, result, err := r.handleClusterRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, stack)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	metrics, result, err := r.handleObservableMetrics(ctx, stack)
@@ -158,7 +159,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	if !exists {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			return handleRequeue(nil, err, stack.SetCondition)
+			return common.HandleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -179,7 +180,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	} else {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			return handleRequeue(nil, err, stack.SetCondition)
+			return common.HandleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -398,19 +399,19 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		})
 	}
 
-	jobSpec, err := gateJobAttributes(stack.Spec.JobSpec)
+	jobSpec, err := common.GateJobAttributes(stack.Spec.JobSpec)
 	if err != nil {
 		return nil, err
 	}
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		attr.ReadBindings, err = bindingsAttributes(stack.Spec.Bindings.Read)
+		attr.ReadBindings, err = common.BindingsAttributes(stack.Spec.Bindings.Read)
 		if err != nil {
 			return nil, err
 		}
 
-		attr.WriteBindings, err = bindingsAttributes(stack.Spec.Bindings.Write)
+		attr.WriteBindings, err = common.BindingsAttributes(stack.Spec.Bindings.Write)
 		if err != nil {
 			return nil, err
 		}
@@ -498,7 +499,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if !cluster.Status.HasID() {
-		return "", lo.ToPtr(wait()), fmt.Errorf("cluster is not ready")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -514,11 +515,11 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	if !repository.Status.HasID() {
-		return "", lo.ToPtr(wait()), fmt.Errorf("repository is not ready")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		return "", lo.ToPtr(wait()), fmt.Errorf("repository is not healthy")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("repository is not healthy")
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -542,7 +543,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	}
 
 	if !stackDefinition.Status.HasID() {
-		return nil, lo.ToPtr(wait()), fmt.Errorf("stack definition is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("stack definition is not ready")
 	}
 
 	return stackDefinition.Status.ID, nil, nil

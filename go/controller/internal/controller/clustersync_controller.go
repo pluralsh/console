@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -73,9 +74,9 @@ func (r *ClusterSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}()
 
-	project, res, err := GetProject(ctx, r.Client, r.Scheme, clusterSync)
+	project, res, err := common.Project(ctx, r.Client, r.Scheme, clusterSync)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, clusterSync.SetCondition)
+		return common.HandleRequeue(res, err, clusterSync.SetCondition)
 	}
 
 	yamlTemplateBytes, err := yaml.Marshal(clusterSync.Spec.ClusterSpec)

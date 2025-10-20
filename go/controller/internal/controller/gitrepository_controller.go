@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,7 +93,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	attrs, result, err := r.getRepositoryAttributes(ctx, repo)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, repo.SetCondition)
+		return common.HandleRequeue(result, err, repo.SetCondition)
 	}
 
 	sha, err := utils.HashObject(attrs)
@@ -173,7 +174,7 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, nil, err
 		}
 		if !connection.Status.HasID() {
-			return nil, lo.ToPtr(wait()), fmt.Errorf("scm connection is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {

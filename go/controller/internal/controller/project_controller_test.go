@@ -92,7 +92,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 			fakeConsoleClient.On("CreateProject", mock.Anything, mock.Anything).Return(test.projectFragment, nil)
 
@@ -115,7 +115,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should wait for bindings", func() {
+		It("should Wait for bindings", func() {
 			By("Create resource")
 			test := struct {
 				projectFragment *gqlclient.ProjectFragment
@@ -161,7 +161,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(k8sClient.Update(ctx, project)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
 
@@ -198,7 +198,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("DeleteProject", mock.Anything, mock.Anything).Return(nil)
 

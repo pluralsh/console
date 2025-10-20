@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -76,7 +77,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync PrAutomation CRD with the Console API
 	apiPrAutomation, sha, result, err := in.sync(ctx, prAutomation)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, prAutomation.SetCondition)
+		return common.HandleRequeue(result, err, prAutomation.SetCondition)
 	}
 
 	if apiPrAutomation == nil {

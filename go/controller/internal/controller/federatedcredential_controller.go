@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,7 +75,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 
 	apiCredential, err := in.sync(ctx, credential, changed)
 	if err != nil {
-		return handleRequeue(nil, err, credential.SetCondition)
+		return common.HandleRequeue(nil, err, credential.SetCondition)
 	}
 
 	credential.Status.ID = &apiCredential.ID

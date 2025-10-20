@@ -394,7 +394,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 var _ = Describe("Waiting for Secret", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			scmName   = "scm-connection-wait"
+			scmName   = "scm-connection-Wait"
 			scmType   = gqlclient.ScmTypeGithub
 			namespace = "default"
 			id        = "123"
@@ -438,7 +438,7 @@ var _ = Describe("Waiting for Secret", Ordered, func() {
 			}
 		})
 
-		It("should wait for secret on create", func() {
+		It("should Wait for secret on create", func() {
 			By("Create resource")
 			test := struct {
 				returnGetScmConnection *gqlclient.ScmConnectionFragment

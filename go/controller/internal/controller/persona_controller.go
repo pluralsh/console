@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -98,7 +99,7 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Sync persona CRD with the Console API
 	apiPersona, err := in.sync(ctx, persona, changed)
 	if err != nil {
-		return handleRequeue(nil, err, persona.SetCondition)
+		return common.HandleRequeue(nil, err, persona.SetCondition)
 	}
 
 	persona.Status.ID = &apiPersona.ID
@@ -149,7 +150,7 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 }
 
 func (in *PersonaReconciler) Attributes(persona *v1alpha1.Persona) (*console.PersonaAttributes, error) {
-	attrs, err := bindingsAttributes(persona.Spec.Bindings)
+	attrs, err := common.BindingsAttributes(persona.Spec.Bindings)
 	if err != nil {
 		return nil, err
 	}
