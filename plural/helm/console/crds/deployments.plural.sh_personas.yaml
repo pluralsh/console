@@ -249,6 +249,24 @@ spec:
                   Name specifies the name for this persona.
                   If not provided, the name from the resource metadata will be used.
                 type: string
+              reconciliation:
+                description: |-
+                  Reconciliation settings for this resource.
+                  Controls drift detection and reconciliation intervals for this resource.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: Interval for DriftDetection mechanism.
+                    example: 5m30s
+                    type: string
+                type: object
               role:
                 description: |-
                   Role defines the primary responsibility area for users assigned to this persona.

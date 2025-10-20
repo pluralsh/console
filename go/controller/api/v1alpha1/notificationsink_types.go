@@ -102,6 +102,11 @@ type NotificationSinkSpec struct {
 	// For external sinks like Slack or Teams, notifications are sent to the configured webhook.
 	// +kubebuilder:validation:Optional
 	Bindings []Binding `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // SinkConfiguration contains type-specific configuration for different notification channels.

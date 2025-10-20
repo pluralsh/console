@@ -43,6 +43,11 @@ type PrAutomationTriggerSpec struct {
 	// configuration schema defined in the referenced PrAutomation.
 	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 //+kubebuilder:object:root=true

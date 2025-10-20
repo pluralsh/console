@@ -69,4 +69,9 @@ type ComplianceReportGeneratorSpec struct {
 	// ReadBindings represent the download policy for this report.
 	// +kubebuilder:validation:Optional
 	ReadBindings []Binding `json:"readBindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

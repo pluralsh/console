@@ -169,6 +169,11 @@ type DeploymentSettingsSpec struct {
 	//
 	// +kubebuilder:validation:Optional
 	ScaffoldsRepositoryRef *NamespacedName `json:"scaffoldsRepositoryRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type LoggingSettings struct {

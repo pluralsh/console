@@ -151,6 +151,11 @@ type GlobalServiceSpec struct {
 	// and deployment parameters that will be instantiated on each matching cluster.
 	// +kubebuilder:validation:Optional
 	Template *ServiceTemplate `json:"template,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // TagsAttribute converts the tags map to console API tag attributes format.

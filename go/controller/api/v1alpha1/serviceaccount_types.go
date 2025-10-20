@@ -100,6 +100,11 @@ type ServiceAccountSpec struct {
 	// and management of credentials within the cluster.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttributes) {

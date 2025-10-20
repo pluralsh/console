@@ -202,6 +202,11 @@ type PrAutomationSpec struct {
 	// of the PR, useful for cleanup or migration scenarios.
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PrAutomationDeleteConfiguration specifies files and folders to delete as part of the PR operation.

@@ -22,6 +22,11 @@ type ServiceContextSpec struct {
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // +kubebuilder:object:root=true

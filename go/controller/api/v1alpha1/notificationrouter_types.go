@@ -109,6 +109,11 @@ type NotificationRouterSpec struct {
 	// It is a reference to the NotificationSink resource.
 	// +kubebuilder:validation:Optional
 	Sinks []corev1.ObjectReference `json:"sinks,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // RouterFilters defines filtering criteria for routing events to notification destinations.

@@ -133,6 +133,11 @@ type PersonaSpec struct {
 	// This enables flexible role combinations while maintaining clear base configurations.
 	// +kubebuilder:validation:Optional
 	Bindings []Binding `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PersonaConfiguration defines the complete UI customization settings for a persona.

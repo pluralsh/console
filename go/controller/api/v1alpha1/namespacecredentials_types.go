@@ -55,6 +55,11 @@ type NamespaceCredentialsSpec struct {
 	// when reconciling resources within the specified namespaces, overriding default operator credentials.
 	// +kubebuilder:validation:Required
 	SecretRef corev1.SecretReference `json:"secretRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type NamespaceCredentialsStatus struct {

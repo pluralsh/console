@@ -47,6 +47,11 @@ type PipelineSpec struct {
 	// Bindings contain read and write policies controlling access to this pipeline.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PipelineStage represents a logical unit within the pipeline, typically corresponding to

@@ -124,6 +124,11 @@ type ManagedNamespaceSpec struct {
 	// on clusters belonging to the designated project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // ClusterTarget defines the criteria for selecting target clusters where managed namespaces should be created.

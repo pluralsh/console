@@ -97,6 +97,11 @@ type FlowSpec struct {
 	// Can also be managed within the Plural Console UI securely.
 	// +kubebuilder:validation:Optional
 	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *FlowSpec) HasProjectRef() bool {

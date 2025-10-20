@@ -324,6 +324,11 @@ type ServiceSpec struct {
 	// It is used for UI linking and otherwise ignored.
 	// +kubebuilder:validation:Optional
 	AgentId *string `json:"agentId,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type Source struct {

@@ -129,4 +129,9 @@ type OIDCProviderSpec struct {
 	// The secret will contain two keys: 'clientId' and 'clientSecret'.
 	// +kubebuilder:validation:Required
 	CredentialsSecretRef corev1.LocalObjectReference `json:"credentialsSecretRef"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

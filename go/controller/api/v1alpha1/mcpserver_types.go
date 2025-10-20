@@ -92,6 +92,11 @@ type MCPServerSpec struct {
 	// an additional safety mechanism for sensitive operations. Defaults to false.
 	// +kubebuilder:validation:Optional
 	Confirm *bool `json:"confirm,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // MCPServerAuthentication defines the authentication configuration for an MCP server.

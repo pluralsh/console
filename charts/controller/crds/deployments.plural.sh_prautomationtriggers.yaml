@@ -102,6 +102,24 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              reconciliation:
+                description: |-
+                  Reconciliation settings for this resource.
+                  Controls drift detection and reconciliation intervals for this resource.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: Interval for DriftDetection mechanism.
+                    example: 5m30s
+                    type: string
+                type: object
             required:
             - branch
             type: object

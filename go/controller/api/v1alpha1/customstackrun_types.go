@@ -86,6 +86,11 @@ type CustomStackRunSpec struct {
 	// Configuration self-service configuration which will be presented in UI before triggering
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals for this resource.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type CommandAttributes struct {
