@@ -106,7 +106,7 @@ func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, reterr
+	return stack.Spec.Reconciliation.Requeue(), reterr
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -144,7 +144,7 @@ func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, s
 
 			// If deletion process started requeue so that we can make sure stack definition
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(requeue()), nil
+			return lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

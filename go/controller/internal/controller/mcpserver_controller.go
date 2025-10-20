@@ -106,7 +106,7 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	utils.MarkCondition(mcpServer.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return mcpServer.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {

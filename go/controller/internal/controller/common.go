@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
@@ -43,7 +42,7 @@ const (
 // wait returns result to requeue after a short delay.
 // Used for waiting for other resources to be ready.
 func wait() ctrl.Result {
-	return ctrl.Result{RequeueAfter: common.Jitter(common.WaitDefault)}
+	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(v1alpha1.WaitDefault)}
 }
 
 // handleRequeue allows avoiding rate limiting when some errors occur,

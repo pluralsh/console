@@ -130,7 +130,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sentinel.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return sentinel.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *SentinelReconciler) sync(ctx context.Context, sentinel *v1alpha1.Sentinel, attr *console.SentinelAttributes) (*console.SentinelFragment, error) {
@@ -271,7 +271,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 
 		exists, err := r.ConsoleClient.IsSentinelExists(ctx, sentinel.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(requeue())
+			return lo.ToPtr(sentinel.Spec.Reconciliation.Requeue())
 		}
 		if exists {
 			if err := r.ConsoleClient.DeleteSentinel(ctx, sentinel.Status.GetID()); err != nil {

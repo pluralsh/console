@@ -76,7 +76,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if !pipeline.Status.HasID() {
 		logger.Info("pipeline is not ready", "name", pipeline.Name, "namespace", pipeline.Namespace)
-		return requeue(), nil
+		return wait(), nil
 	}
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {
@@ -133,7 +133,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return pipelineContext.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

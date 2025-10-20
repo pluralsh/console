@@ -99,7 +99,7 @@ func (r *PreviewEnvironmentTemplateReconciler) Reconcile(ctx context.Context, re
 	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(previewEnvTmpl.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return previewEnvTmpl.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

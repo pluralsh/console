@@ -83,7 +83,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return credential.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Context, credential *v1alpha1.FederatedCredential) *ctrl.Result {
@@ -111,7 +111,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(requeue())
+		return lo.ToPtr(credential.Spec.Reconciliation.Requeue())
 	}
 
 	// stop reconciliation as the item has been deleted

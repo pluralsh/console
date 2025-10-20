@@ -120,7 +120,7 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	controllerutil.AddFinalizer(generatedSecret, GeneratedSecretFinalizer)
 
-	return ctrl.Result{}, nil
+	return generatedSecret.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *GeneratedSecretReconciler) prepareBindings(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (map[string]interface{}, error) {

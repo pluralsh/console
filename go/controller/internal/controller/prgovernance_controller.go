@@ -95,7 +95,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return prGovernance.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGovernance *v1alpha1.PrGovernance) *ctrl.Result {

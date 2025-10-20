@@ -150,7 +150,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue(), nil
+	return sc.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ServiceContextReconciler) isAlreadyExists(ctx context.Context, serviceContext *v1alpha1.ServiceContext) (bool, error) {

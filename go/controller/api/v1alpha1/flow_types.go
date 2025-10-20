@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,8 +31,8 @@ type Flow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   FlowSpec      `json:"spec,omitempty"`
-	Status common.Status `json:"status,omitempty"`
+	Spec   FlowSpec `json:"spec,omitempty"`
+	Status Status   `json:"status,omitempty"`
 }
 
 func (in *Flow) FlowName() string {
@@ -88,7 +87,7 @@ type FlowSpec struct {
 
 	// Bindings contain read and write policies of this Flow.
 	// +kubebuilder:validation:Optional
-	Bindings *common.Bindings `json:"bindings,omitempty"`
+	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// Repositories contains a list of git https urls of the application code repositories used in this flow.
 	// +kubebuilder:validation:Optional
@@ -102,7 +101,7 @@ type FlowSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *FlowSpec) HasProjectRef() bool {

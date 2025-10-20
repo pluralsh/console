@@ -107,7 +107,7 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	utils.MarkCondition(observer.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, reterr
+	return observer.Spec.Reconciliation.Requeue(), reterr
 }
 
 func (r *ObserverReconciler) sync(
@@ -308,7 +308,7 @@ func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer 
 
 			// If deletion process started requeue so that we can make sure observability observer
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(requeue()), nil
+			return lo.ToPtr(observer.Spec.Reconciliation.Requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

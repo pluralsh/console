@@ -123,7 +123,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return notificationRouter.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Context, router *v1alpha1.NotificationRouter) (*console.NotificationRouterAttributes, *ctrl.Result, error) {

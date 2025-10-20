@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,7 +46,7 @@ type HelmRepository struct {
 	// Status represents the current state of this HelmRepository resource, including
 	// synchronization status with the Console API and any error conditions.
 	// +kubebuilder:validation:Optional
-	Status common.Status `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // ConsoleID returns the unique identifier used in the Console API for this Helm repository.
@@ -130,7 +129,7 @@ type HelmRepositorySpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // HelmRepositoryAuth defines the authentication configuration for a Helm repository.

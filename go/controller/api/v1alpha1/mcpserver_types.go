@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,7 +33,7 @@ type MCPServer struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   MCPServerSpec `json:"spec,omitempty"`
-	Status common.Status `json:"status,omitempty"`
+	Status Status        `json:"status,omitempty"`
 }
 
 // SetCondition sets a condition on the MCPServer status.
@@ -80,7 +79,7 @@ type MCPServerSpec struct {
 	// These control which users and groups can view, modify, or execute tools
 	// provided by this server, enabling fine-grained access control.
 	// +kubebuilder:validation:Optional
-	Bindings *common.Bindings `json:"bindings,omitempty"`
+	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// Authentication specifies the authentication configuration for accessing this MCP server.
 	// Different authentication methods are supported including built-in Plural JWT
@@ -97,7 +96,7 @@ type MCPServerSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // MCPServerAuthentication defines the authentication configuration for an MCP server.

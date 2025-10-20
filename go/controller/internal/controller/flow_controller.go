@@ -129,7 +129,7 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	utils.MarkCondition(flow.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return flow.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes) (*console.FlowAttributes, error) {

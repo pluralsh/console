@@ -162,18 +162,18 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 	if errors.IsNotFound(err) {
 		globalService.Status.ID = nil
-		return requeue(), r.handleCreate(sha, globalService, service, attr)
+		return globalService.Spec.Reconciliation.Requeue(), r.handleCreate(sha, globalService, service, attr)
 	}
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue(), err
+		return globalService.Spec.Reconciliation.Requeue(), err
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
 		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
 		if err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return requeue(), err
+			return globalService.Spec.Reconciliation.Requeue(), err
 		}
 	}
 
@@ -187,7 +187,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return requeue(), nil
+	return globalService.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {

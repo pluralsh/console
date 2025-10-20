@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,7 +53,7 @@ type PrGovernance struct {
 
 	// Status represents the current state of this PrGovernance resource, including
 	// synchronization status with the Console API and governance rule enforcement status.
-	Status common.Status `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // SetCondition sets a condition on the PrGovernance status.
@@ -107,7 +106,7 @@ type PrGovernanceSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PrGovernanceConfiguration defines the configuration settings for PR governance enforcement.

@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,7 +53,7 @@ type ClusterRestoreTrigger struct {
 	Spec ClusterRestoreTriggerSpec `json:"spec,omitempty"`
 
 	// Status represents the current state of the cluster restore trigger operation.
-	Status common.Status `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // SetCondition updates the status conditions of the ClusterRestoreTrigger.

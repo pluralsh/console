@@ -84,7 +84,7 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 		}
 		nsn := types.NamespacedName{Name: p.Spec.FlowRef.Name, Namespace: ns}
 		if err := r.Get(ctx, nsn, flow); err != nil {
-			return nil, lo.ToPtr(requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(p.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
 			return nil, lo.ToPtr(wait()), fmt.Errorf("flow is not ready")

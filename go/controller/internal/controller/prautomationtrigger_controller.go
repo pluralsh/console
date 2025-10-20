@@ -124,7 +124,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(trigger.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return trigger.Spec.Reconciliation.Requeue(), nil
 }
 
 func isAlreadyExists(trigger *v1alpha1.PrAutomationTrigger) bool {

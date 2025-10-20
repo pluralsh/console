@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -36,7 +35,7 @@ type CloudConnection struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   CloudConnectionSpec `json:"spec,omitempty"`
-	Status common.Status       `json:"status,omitempty"`
+	Status Status              `json:"status,omitempty"`
 }
 
 // CloudConnectionGetter is just a helper function that can be implemented to properly
@@ -92,12 +91,12 @@ type CloudConnectionSpec struct {
 	// ReadBindings is a list of bindings that defines
 	// who can use this CloudConnection.
 	// +kubebuilder:validation:Optional
-	ReadBindings []common.Binding `json:"readBindings,omitempty"`
+	ReadBindings []Binding `json:"readBindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // Hasher provides a function interface for generating hash values from objects

@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,7 +31,7 @@ type GitRepositorySpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type GitHealth string
@@ -43,7 +42,7 @@ const (
 )
 
 type GitRepositoryStatus struct {
-	common.Status `json:",inline"`
+	Status `json:",inline"`
 
 	// Health status.
 	// One of PULLABLE, FAILED.

@@ -120,7 +120,7 @@ func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.R
 	utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, reterr
+	return oidcProvider.Spec.Reconciliation.Requeue(), reterr
 }
 
 func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidcProvider *v1alpha1.OIDCProvider) (*ctrl.Result, error) {

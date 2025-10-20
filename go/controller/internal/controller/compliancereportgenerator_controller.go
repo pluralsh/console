@@ -106,7 +106,7 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return complianceReportGenerator.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ComplianceReportGeneratorReconciler) Attributes(g *v1alpha1.ComplianceReportGenerator) (*console.ComplianceReportGeneratorAttributes, error) {

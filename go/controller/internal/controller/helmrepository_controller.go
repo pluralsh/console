@@ -116,7 +116,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return helmRepository.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {

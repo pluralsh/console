@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +38,7 @@ type ScmConnection struct {
 	// +kubebuilder:validation:Required
 	Spec ScmConnectionSpec `json:"spec"`
 	// +kubebuilder:validation:Optional
-	Status common.Status `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // ConsoleID implements PluralResource interface
@@ -153,7 +152,7 @@ type ScmConnectionSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type ScmGithubConnection struct {

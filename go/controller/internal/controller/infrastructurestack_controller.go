@@ -258,7 +258,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 			}
 			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return requeue(), nil
+				return stack.Spec.Reconciliation.Requeue(), nil
 			}
 			if existingNotificationSink != nil {
 				if stack.Spec.Detach {
@@ -272,7 +272,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return requeue(), nil
+				return stack.Spec.Reconciliation.Requeue(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
@@ -577,7 +577,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, lo.ToPtr(requeue()), nil
+			return nil, lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{

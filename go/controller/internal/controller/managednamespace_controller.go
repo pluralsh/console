@@ -132,7 +132,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
 			if err != nil {
 				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return requeue(), err
+				return managedNamespace.Spec.Reconciliation.Requeue(), err
 			}
 			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
 		}

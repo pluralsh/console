@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	"encoding/json"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -83,7 +82,7 @@ type ServiceHelm struct {
 
 	// Git contains a reference to a Git folder and ref where the Helm chart is located.
 	// +kubebuilder:validation:Optional
-	Git *common.GitRef `json:"git,omitempty"`
+	Git *GitRef `json:"git,omitempty"`
 
 	// IgnoreHooks indicates whether to completely ignore Helm hooks when actualizing this service.
 	// +kubebuilder:validation:Optional
@@ -259,7 +258,7 @@ type ServiceSpec struct {
 
 	// Git reference within the repository where the service manifests are located.
 	// +kubebuilder:validation:Optional
-	Git *common.GitRef `json:"git,omitempty"`
+	Git *GitRef `json:"git,omitempty"`
 
 	// Helm configuration for deploying Helm charts, including values and repository settings.
 	// +kubebuilder:validation:Optional
@@ -291,7 +290,7 @@ type ServiceSpec struct {
 
 	// Bindings contain read and write policies controlling access to this service.
 	// +kubebuilder:validation:Optional
-	Bindings *common.Bindings `json:"bindings,omitempty"`
+	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// Dependencies specify services that must be healthy before this service can be deployed.
 	// +kubebuilder:validation:Optional
@@ -329,7 +328,7 @@ type ServiceSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type Source struct {
@@ -340,7 +339,7 @@ type Source struct {
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
 	// Git contains a location in a Git repository to use.
-	Git *common.GitRef `json:"git,omitempty"`
+	Git *GitRef `json:"git,omitempty"`
 }
 
 type Renderer struct {
@@ -391,7 +390,7 @@ func (ss *ServiceSpec) TemplatedAttribute() *bool {
 }
 
 type ServiceStatus struct {
-	common.Status `json:",inline"`
+	Status `json:",inline"`
 
 	// +kubebuilder:validation:Optional
 	Errors []ServiceError `json:"errors,omitempty"`

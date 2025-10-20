@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,7 +53,7 @@ type InfrastructureStack struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   InfrastructureStackSpec `json:"spec,omitempty"`
-	Status common.Status           `json:"status,omitempty"`
+	Status Status                  `json:"status,omitempty"`
 }
 
 // InfrastructureStackSpec defines the desired state of the InfrastructureStack.
@@ -88,7 +87,7 @@ type InfrastructureStackSpec struct {
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// Git contains reference within the repository where the IaC manifests are located.
-	Git common.GitRef `json:"git"`
+	Git GitRef `json:"git"`
 
 	// ManageState indicates whether Plural should manage the Terraform state of this stack.
 	// +kubebuilder:validation:Optional
@@ -118,7 +117,7 @@ type InfrastructureStackSpec struct {
 
 	// Bindings contain read and write policies of this stack.
 	// +kubebuilder:validation:Optional
-	Bindings *common.Bindings `json:"bindings,omitempty"`
+	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// Environment variables to inject into the stack execution environment.
 	// +kubebuilder:validation:Optional
@@ -170,7 +169,7 @@ type InfrastructureStackSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // StackFile represents	a file to mount from secrets into the stack execution environment.
@@ -246,7 +245,7 @@ type AiApprovalConfiguration struct {
 
 	// Git references the Git repository containing the rules file.
 	// +kubebuilder:validation:Required
-	Git common.GitRef `json:"git"`
+	Git GitRef `json:"git"`
 
 	// File is the name of the rules file within the Git repository.
 	// +kubebuilder:validation:Required

@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,7 +60,7 @@ type ClusterSync struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ClusterSyncSpec `json:"spec,omitempty"`
-	Status common.Status   `json:"status,omitempty"`
+	Status Status          `json:"status,omitempty"`
 }
 
 func (in *ClusterSync) SetCondition(condition metav1.Condition) {
@@ -85,7 +84,7 @@ type ClusterSyncSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type ClusterSpecTemplate struct {

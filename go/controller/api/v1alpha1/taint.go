@@ -1,4 +1,4 @@
-package common
+package v1alpha1
 
 import console "github.com/pluralsh/console/go/client"
 

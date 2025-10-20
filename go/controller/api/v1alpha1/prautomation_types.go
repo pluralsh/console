@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -21,11 +20,11 @@ func init() {
 type PrAutomationBindings struct {
 	// Create bindings.
 	// +kubebuilder:validation:Optional
-	Create []common.Binding `json:"create,omitempty"`
+	Create []Binding `json:"create,omitempty"`
 
 	// Write bindings.
 	// +kubebuilder:validation:Optional
-	Write []common.Binding `json:"write,omitempty"`
+	Write []Binding `json:"write,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -59,7 +58,7 @@ type PrAutomation struct {
 
 	// Status represents the current state of this PrAutomation resource.
 	// +kubebuilder:validation:Optional
-	Status common.Status `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 // ConsoleID implements PluralResource interface
@@ -207,7 +206,7 @@ type PrAutomationSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PrAutomationDeleteConfiguration specifies files and folders to delete as part of the PR operation.
@@ -236,7 +235,7 @@ func (in *PrAutomationDeleteConfiguration) Attributes() *console.PrAutomationDel
 type PrAutomationCreateConfiguration struct {
 	// Git location to source external files from.
 	// +kubebuilder:validation:Optional
-	Git *common.GitRef `json:"git,omitempty"`
+	Git *GitRef `json:"git,omitempty"`
 
 	// Template files to use to generate file content
 	// +kubebuilder:validation:Optional

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pluralsh/console/go/controller/api/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -103,7 +102,7 @@ type DeploymentSettings struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   DeploymentSettingsSpec `json:"spec,omitempty"`
-	Status common.Status          `json:"status,omitempty"`
+	Status Status                 `json:"status,omitempty"`
 }
 
 func (in *DeploymentSettings) SetCondition(condition metav1.Condition) {
@@ -174,7 +173,7 @@ type DeploymentSettingsSpec struct {
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals for this resource.
 	// +kubebuilder:validation:Optional
-	Reconciliation *common.Reconciliation `json:"reconciliation,omitempty"`
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type LoggingSettings struct {
@@ -329,22 +328,22 @@ type DeploymentSettingsBindings struct {
 	// Read bindings.
 	//
 	// +kubebuilder:validation:Optional
-	Read []common.Binding `json:"read,omitempty"`
+	Read []Binding `json:"read,omitempty"`
 
 	// Write bindings.
 	//
 	// +kubebuilder:validation:Optional
-	Write []common.Binding `json:"write,omitempty"`
+	Write []Binding `json:"write,omitempty"`
 
 	// Create bindings.
 	//
 	// +kubebuilder:validation:Optional
-	Create []common.Binding `json:"create,omitempty"`
+	Create []Binding `json:"create,omitempty"`
 
 	// Git bindings.
 	//
 	// +kubebuilder:validation:Optional
-	Git []common.Binding `json:"git,omitempty"`
+	Git []Binding `json:"git,omitempty"`
 }
 
 type StackSettings struct {
