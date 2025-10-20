@@ -52,7 +52,7 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> add_operation(:update, fn %{fetch: sentinel} ->
       sentinel
-      |> Sentinel.changeset(attrs)
+      |> Sentinel.changeset(Map.delete(attrs, :status))
       |> allow(user, :write)
       |> when_ok(:update)
     end)
@@ -77,7 +77,7 @@ defmodule Console.Deployments.Sentinels do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
       get_sentinel!(id)
-      |> Sentinel.changeset(%{last_run_at: DateTime.utc_now()})
+      |> Sentinel.changeset(%{last_run_at: DateTime.utc_now(), status: :pending})
       |> allow(user, :read)
       |> when_ok(:update)
     end)

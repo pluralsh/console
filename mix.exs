@@ -170,6 +170,7 @@ defmodule Console.MixProject do
       {:tesla, "~> 1.13"},
       {:oidcc, "~> 3.3"},
       {:hackney, "== 1.20.1"},
+      {:bandit, "~> 1.8"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

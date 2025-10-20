@@ -128,8 +128,8 @@ defmodule Console.Schema.Sentinel do
   end
 
   defp facet_changeset(model, attrs) do
-    cast(model, attrs, ~w(name value)a)
-    |> validate_required(~w(name value)a)
+    cast(model, attrs, ~w(key value)a)
+    |> validate_required(~w(key value)a)
   end
 
   defp kubernetes_changeset(model, attrs) do
@@ -142,6 +142,6 @@ defmodule Console.Schema.Sentinel do
     model
     |> cast(attrs, ~w(tags distro format)a)
     |> cast_embed(:job)
-    |> validate_required(~w(distro format)a)
+    |> validate_required(~w(format)a)
   end
 end

@@ -1021,7 +1021,7 @@ type RootMutationType {
 
   deleteSentinel(id: ID!): Sentinel
 
-  runSentinel(id: ID!): SentinelRun
+  runSentinel(id: ID, name: String): SentinelRun
 
   cancelAgentRun(id: ID!): AgentRun
 
@@ -1873,6 +1873,9 @@ type SentinelRun {
 
   "the status of the run"
   status: SentinelRunStatus!
+
+  "the time the run completed"
+  completedAt: DateTime
 
   "the sentinel that was run"
   sentinel: Sentinel
