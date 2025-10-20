@@ -218,7 +218,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 			}
 			if check.Configuration.IntegrationTest != nil {
 				configuration.IntegrationTest = &console.SentinelCheckIntegrationTestConfigurationAttributes{
-					Distro: check.Configuration.IntegrationTest.Distro,
+					Distro: lo.ToPtr(check.Configuration.IntegrationTest.Distro),
 					Format: check.Configuration.IntegrationTest.Format,
 				}
 
