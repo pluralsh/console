@@ -72,7 +72,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, notificationSink)
+	scope, err := common.NewDefaultScope(ctx, r.Client, notificationSink)
 	if err != nil {
 		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

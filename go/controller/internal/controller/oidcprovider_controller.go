@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,7 +64,7 @@ func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, oidcProvider)
+	scope, err := common.NewDefaultScope(ctx, in.Client, oidcProvider)
 	if err != nil {
 		logger.Error(err, "failed to create oidc provider scope")
 		utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

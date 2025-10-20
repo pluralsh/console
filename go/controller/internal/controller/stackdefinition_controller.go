@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,7 +50,7 @@ func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, stack)
+	scope, err := common.NewDefaultScope(ctx, in.Client, stack)
 	if err != nil {
 		logger.Error(err, "failed to create stack definition scope")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

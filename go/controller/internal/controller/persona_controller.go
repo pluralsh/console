@@ -57,7 +57,7 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewDefaultScope(ctx, in.Client, persona)
+	scope, err := common.NewDefaultScope(ctx, in.Client, persona)
 	if err != nil {
 		utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

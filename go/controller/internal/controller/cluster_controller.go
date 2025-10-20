@@ -52,7 +52,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Ensure that status updates will always be persisted when exiting this function.
-	scope, err := NewDefaultScope(ctx, r.Client, cluster)
+	scope, err := common.NewDefaultScope(ctx, r.Client, cluster)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

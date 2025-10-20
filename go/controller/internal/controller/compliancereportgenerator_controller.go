@@ -55,7 +55,7 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, complianceReportGenerator)
+	scope, err := common.NewDefaultScope(ctx, r.Client, complianceReportGenerator)
 	if err != nil {
 		utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

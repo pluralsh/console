@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/template"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -58,7 +59,7 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, r.handleDelete(ctx, generatedSecret)
 	}
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, generatedSecret)
+	scope, err := common.NewDefaultScope(ctx, r.Client, generatedSecret)
 	if err != nil {
 		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

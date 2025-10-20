@@ -7,6 +7,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -58,7 +59,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	}
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, helmRepository)
+	scope, err := common.NewDefaultScope(ctx, in.Client, helmRepository)
 	if err != nil {
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

@@ -51,7 +51,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := r.Get(ctx, req.NamespacedName, connection); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	scope, err := NewDefaultScope(ctx, r.Client, connection)
+	scope, err := common.NewDefaultScope(ctx, r.Client, connection)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

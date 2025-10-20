@@ -52,7 +52,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewDefaultScope(ctx, in.Client, bootstrapToken)
+	scope, err := common.NewDefaultScope(ctx, in.Client, bootstrapToken)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

@@ -59,7 +59,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewDefaultScope(ctx, r.Client, restore)
+	scope, err := common.NewDefaultScope(ctx, r.Client, restore)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

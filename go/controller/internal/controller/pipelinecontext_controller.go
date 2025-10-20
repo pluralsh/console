@@ -83,7 +83,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {
 		return ctrl.Result{}, err
 	}
-	scope, err := NewDefaultScope(ctx, r.Client, pipelineContext)
+	scope, err := common.NewDefaultScope(ctx, r.Client, pipelineContext)
 	if err != nil {
 		utils.MarkFalse(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

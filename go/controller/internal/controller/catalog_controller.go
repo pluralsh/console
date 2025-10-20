@@ -51,7 +51,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewDefaultScope(ctx, r.Client, catalog)
+	scope, err := common.NewDefaultScope(ctx, r.Client, catalog)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

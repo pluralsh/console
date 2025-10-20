@@ -54,7 +54,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, prGovernance)
+	scope, err := common.NewDefaultScope(ctx, r.Client, prGovernance)
 	if err != nil {
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

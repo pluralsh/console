@@ -52,7 +52,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	utils.MarkCondition(sentinel.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, sentinel)
+	scope, err := common.NewDefaultScope(ctx, r.Client, sentinel)
 	if err != nil {
 		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

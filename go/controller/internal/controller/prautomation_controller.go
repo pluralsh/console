@@ -52,7 +52,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	utils.MarkFalse(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, in.Client, prAutomation)
+	scope, err := common.NewDefaultScope(ctx, in.Client, prAutomation)
 	if err != nil {
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

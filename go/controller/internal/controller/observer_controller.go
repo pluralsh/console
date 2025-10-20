@@ -54,7 +54,7 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	utils.MarkCondition(observer.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, observer)
+	scope, err := common.NewDefaultScope(ctx, r.Client, observer)
 	if err != nil {
 		logger.Error(err, "failed to create observer scope")
 		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

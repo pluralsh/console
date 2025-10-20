@@ -52,7 +52,7 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, provider)
+	scope, err := common.NewDefaultScope(ctx, in.Client, provider)
 	if err != nil {
 		logger.Error(err, "failed to create observability provider scope")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

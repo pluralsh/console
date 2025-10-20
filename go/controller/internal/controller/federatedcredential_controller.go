@@ -48,7 +48,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, credential)
+	scope, err := common.NewDefaultScope(ctx, in.Client, credential)
 	if err != nil {
 		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

@@ -16,7 +16,6 @@ import (
 )
 
 // Project checks resource for a project reference and then fetches the corresponding resource.
-// If the project is not ready, it returns a requeue result. If no project reference is found, it returns nil.
 // It also sets the owner reference of the project to the provided object.
 func Project(ctx context.Context, c runtimeclient.Client, scheme *runtime.Scheme, obj interface{}) (*v1alpha1.Project, *ctrl.Result, error) {
 	project := &v1alpha1.Project{}

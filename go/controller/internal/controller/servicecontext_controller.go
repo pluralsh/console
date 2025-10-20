@@ -54,7 +54,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, serviceContext)
+	scope, err := common.NewDefaultScope(ctx, r.Client, serviceContext)
 	if err != nil {
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
