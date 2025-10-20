@@ -428,16 +428,55 @@ func (t *PluralCredsFragment) GetURL() *string {
 	return t.URL
 }
 
+type AgentRunBaseFragment struct {
+	ID         string               "json:\"id\" graphql:\"id\""
+	Prompt     string               "json:\"prompt\" graphql:\"prompt\""
+	Repository string               "json:\"repository\" graphql:\"repository\""
+	Mode       AgentRunMode         "json:\"mode\" graphql:\"mode\""
+	Todos      []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+}
+
+func (t *AgentRunBaseFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunBaseFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunBaseFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunBaseFragment) GetMode() *AgentRunMode {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return &t.Mode
+}
+func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Todos
+}
+
 type AgentRunFragment struct {
 	ID           string                     "json:\"id\" graphql:\"id\""
 	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
 	Repository   string                     "json:\"repository\" graphql:\"repository\""
-	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
 	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
 	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
 	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
@@ -464,17 +503,23 @@ func (t *AgentRunFragment) GetRepository() string {
 	}
 	return t.Repository
 }
-func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return &t.Status
-}
 func (t *AgentRunFragment) GetMode() *AgentRunMode {
 	if t == nil {
 		t = &AgentRunFragment{}
 	}
 	return &t.Mode
+}
+func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Todos
+}
+func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return &t.Status
 }
 func (t *AgentRunFragment) GetPodReference() *AgentPodReferenceFragment {
 	if t == nil {
@@ -493,12 +538,6 @@ func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Analysis
-}
-func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.Todos
 }
 func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
 	if t == nil {
@@ -10072,92 +10111,6 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetID() string {
 func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
 	if t == nil {
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
-	}
-	return t.Name
-}
-
-type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User struct {
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
-}
-
-func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
-	}
-	return t.Name
-}
-func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-
-type UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRunAnalysis_UpdateAgentRunAnalysis_AgentRunFragment_Flow{}
-	}
-	return t.Name
-}
-
-type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User struct {
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
-}
-
-func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
-	}
-	return t.Name
-}
-func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-
-type UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRunTodos_UpdateAgentRunTodos_AgentRunFragment_Flow{}
 	}
 	return t.Name
 }
@@ -21198,10 +21151,10 @@ func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunFragment {
 }
 
 type UpdateAgentRunAnalysis struct {
-	UpdateAgentRunAnalysis *AgentRunFragment "json:\"updateAgentRunAnalysis,omitempty\" graphql:\"updateAgentRunAnalysis\""
+	UpdateAgentRunAnalysis *AgentRunBaseFragment "json:\"updateAgentRunAnalysis,omitempty\" graphql:\"updateAgentRunAnalysis\""
 }
 
-func (t *UpdateAgentRunAnalysis) GetUpdateAgentRunAnalysis() *AgentRunFragment {
+func (t *UpdateAgentRunAnalysis) GetUpdateAgentRunAnalysis() *AgentRunBaseFragment {
 	if t == nil {
 		t = &UpdateAgentRunAnalysis{}
 	}
@@ -21209,10 +21162,10 @@ func (t *UpdateAgentRunAnalysis) GetUpdateAgentRunAnalysis() *AgentRunFragment {
 }
 
 type UpdateAgentRunTodos struct {
-	UpdateAgentRunTodos *AgentRunFragment "json:\"updateAgentRunTodos,omitempty\" graphql:\"updateAgentRunTodos\""
+	UpdateAgentRunTodos *AgentRunBaseFragment "json:\"updateAgentRunTodos,omitempty\" graphql:\"updateAgentRunTodos\""
 }
 
-func (t *UpdateAgentRunTodos) GetUpdateAgentRunTodos() *AgentRunFragment {
+func (t *UpdateAgentRunTodos) GetUpdateAgentRunTodos() *AgentRunBaseFragment {
 	if t == nil {
 		t = &UpdateAgentRunTodos{}
 	}
@@ -24195,20 +24148,14 @@ const GetAgentRunDocument = `query GetAgentRun ($id: ID!) {
 	}
 }
 fragment AgentRunFragment on AgentRun {
-	id
-	prompt
-	repository
+	... AgentRunBaseFragment
 	status
-	mode
 	podReference {
 		... AgentPodReferenceFragment
 	}
 	error
 	analysis {
 		... AgentAnalysisFragment
-	}
-	todos {
-		... AgentTodoFragment
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -24232,6 +24179,20 @@ fragment AgentRunFragment on AgentRun {
 		... PullRequestFragment
 	}
 }
+fragment AgentRunBaseFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	todos {
+		... AgentTodoFragment
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
 	namespace
@@ -24240,11 +24201,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
@@ -24340,20 +24296,14 @@ const ListAgentRunsDocument = `query ListAgentRuns ($after: String, $first: Int,
 	}
 }
 fragment AgentRunFragment on AgentRun {
-	id
-	prompt
-	repository
+	... AgentRunBaseFragment
 	status
-	mode
 	podReference {
 		... AgentPodReferenceFragment
 	}
 	error
 	analysis {
 		... AgentAnalysisFragment
-	}
-	todos {
-		... AgentTodoFragment
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -24377,6 +24327,20 @@ fragment AgentRunFragment on AgentRun {
 		... PullRequestFragment
 	}
 }
+fragment AgentRunBaseFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	todos {
+		... AgentTodoFragment
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
 	namespace
@@ -24385,11 +24349,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
@@ -24494,20 +24453,14 @@ const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns (
 	}
 }
 fragment AgentRunFragment on AgentRun {
-	id
-	prompt
-	repository
+	... AgentRunBaseFragment
 	status
-	mode
 	podReference {
 		... AgentPodReferenceFragment
 	}
 	error
 	analysis {
 		... AgentAnalysisFragment
-	}
-	todos {
-		... AgentTodoFragment
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -24531,6 +24484,20 @@ fragment AgentRunFragment on AgentRun {
 		... PullRequestFragment
 	}
 }
+fragment AgentRunBaseFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	todos {
+		... AgentTodoFragment
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
 	namespace
@@ -24539,11 +24506,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
@@ -24664,20 +24626,14 @@ const CreateAgentRunDocument = `mutation CreateAgentRun ($runtimeId: ID!, $attri
 	}
 }
 fragment AgentRunFragment on AgentRun {
-	id
-	prompt
-	repository
+	... AgentRunBaseFragment
 	status
-	mode
 	podReference {
 		... AgentPodReferenceFragment
 	}
 	error
 	analysis {
 		... AgentAnalysisFragment
-	}
-	todos {
-		... AgentTodoFragment
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -24701,6 +24657,20 @@ fragment AgentRunFragment on AgentRun {
 		... PullRequestFragment
 	}
 }
+fragment AgentRunBaseFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	todos {
+		... AgentTodoFragment
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
 	namespace
@@ -24709,11 +24679,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
@@ -24803,20 +24768,14 @@ const UpdateAgentRunDocument = `mutation UpdateAgentRun ($id: ID!, $attributes: 
 	}
 }
 fragment AgentRunFragment on AgentRun {
-	id
-	prompt
-	repository
+	... AgentRunBaseFragment
 	status
-	mode
 	podReference {
 		... AgentPodReferenceFragment
 	}
 	error
 	analysis {
 		... AgentAnalysisFragment
-	}
-	todos {
-		... AgentTodoFragment
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -24840,6 +24799,20 @@ fragment AgentRunFragment on AgentRun {
 		... PullRequestFragment
 	}
 }
+fragment AgentRunBaseFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	todos {
+		... AgentTodoFragment
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
 	namespace
@@ -24848,11 +24821,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
@@ -24938,122 +24906,22 @@ func (c *Client) UpdateAgentRun(ctx context.Context, id string, attributes Agent
 
 const UpdateAgentRunAnalysisDocument = `mutation UpdateAgentRunAnalysis ($id: ID!, $attributes: AgentAnalysisAttributes!) {
 	updateAgentRunAnalysis(id: $id, attributes: $attributes) {
-		... AgentRunFragment
+		... AgentRunBaseFragment
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunBaseFragment on AgentRun {
 	id
 	prompt
 	repository
-	status
 	mode
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
 	todos {
 		... AgentTodoFragment
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
-	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
-		name
-		email
-	}
-	flow {
-		id
-		name
-	}
-	pullRequests {
-		... PullRequestFragment
-	}
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
 }
 `
 
@@ -25077,122 +24945,22 @@ func (c *Client) UpdateAgentRunAnalysis(ctx context.Context, id string, attribut
 
 const UpdateAgentRunTodosDocument = `mutation UpdateAgentRunTodos ($id: ID!, $todos: [AgentTodoAttributes]) {
 	updateAgentRunTodos(id: $id, todos: $todos) {
-		... AgentRunFragment
+		... AgentRunBaseFragment
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunBaseFragment on AgentRun {
 	id
 	prompt
 	repository
-	status
 	mode
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
 	todos {
 		... AgentTodoFragment
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
-	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
-		name
-		email
-	}
-	flow {
-		id
-		name
-	}
-	pullRequests {
-		... PullRequestFragment
-	}
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
 }
 `
 
