@@ -3812,7 +3812,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br /> |
+| `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br />Required: \{\} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |

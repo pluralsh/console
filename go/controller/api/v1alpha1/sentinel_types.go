@@ -56,8 +56,9 @@ type SentinelCheckConfiguration struct {
 
 type SentinelCheckIntegrationTestConfiguration struct {
 	// the test output format of the job
+	//+kubebuilder:validation:Required
 	//+kubebuilder:validation:Enum=PLAINTEXT;JUNIT
-	Format console.SentinelRunJobFormat `json:"format,omitempty"`
+	Format console.SentinelRunJobFormat `json:"format"`
 
 	// the job to run for this check
 	Job *JobSpec `json:"jobSpec,omitempty"`

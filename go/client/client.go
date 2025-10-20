@@ -4500,6 +4500,7 @@ func (t *ProviderCredentialFragment) GetKind() string {
 type SentinelRunJobFragment struct {
 	ID          string                            "json:\"id\" graphql:\"id\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
+	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
 	SentinelRun *SentinelRunFragment              "json:\"sentinelRun,omitempty\" graphql:\"sentinelRun\""
@@ -4517,6 +4518,12 @@ func (t *SentinelRunJobFragment) GetStatus() *SentinelRunJobStatus {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Status
+}
+func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return &t.Format
 }
 func (t *SentinelRunJobFragment) GetJobSpec() *JobSpecFragment {
 	if t == nil {
@@ -38621,6 +38628,7 @@ fragment PageInfoFragment on PageInfo {
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
+	format
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -38709,6 +38717,7 @@ const GetSentinelRunJobDocument = `query GetSentinelRunJob ($id: ID!) {
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
+	format
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -38825,6 +38834,7 @@ const UpdateSentinelRunJobStatusDocument = `mutation UpdateSentinelRunJobStatus 
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
+	format
 	jobSpec {
 		... JobSpecFragment
 	}
