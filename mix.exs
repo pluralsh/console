@@ -174,7 +174,7 @@ defmodule Console.MixProject do
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},
-      {:req, "~> 0.5", override: true},
+      {:req, "~> 0.5.15", override: true},
       {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
