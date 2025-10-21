@@ -224,6 +224,12 @@ export type AgentMessageCostAttributes = {
   total: Scalars['Float']['input'];
 };
 
+export type AgentMessageDelta = {
+  __typename?: 'AgentMessageDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<AgentMessage>;
+};
+
 export type AgentMessageFile = {
   __typename?: 'AgentMessageFile';
   /** the end of the file */
@@ -7326,6 +7332,7 @@ export type RootMutationType = {
   /** Reads and deletes a given shared secret */
   consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
+  createAgentMessage?: Maybe<AgentMessage>;
   createAgentMigration?: Maybe<AgentMigration>;
   createAgentRun?: Maybe<AgentRun>;
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
@@ -7673,6 +7680,12 @@ export type RootMutationTypeConsumeSecretArgs = {
 
 export type RootMutationTypeCreateAccessTokenArgs = {
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
+};
+
+
+export type RootMutationTypeCreateAgentMessageArgs = {
+  attributes: AgentMessageAttributes;
+  runId: Scalars['ID']['input'];
 };
 
 
@@ -10194,11 +10207,17 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
 
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
+  agentMessageDelta?: Maybe<AgentMessageDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+};
+
+
+export type RootSubscriptionTypeAgentMessageDeltaArgs = {
+  runId: Scalars['ID']['input'];
 };
 
 

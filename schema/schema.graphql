@@ -1041,6 +1041,8 @@ type RootMutationType {
 
   updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
 
+  createAgentMessage(runId: ID!, attributes: AgentMessageAttributes!): AgentMessage
+
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
 
   "a reusable mutation for updating rbac settings on core services"
@@ -1140,6 +1142,8 @@ type RootSubscriptionType {
     "the id of the scaling recommendation you're streaming a cost PR suggestion for"
     recommendationId: ID
   ): AiDelta
+
+  agentMessageDelta(runId: ID!): AgentMessageDelta
 }
 
 type OauthResponse {
@@ -1622,6 +1626,11 @@ type AgentRuntimeConnection {
 type AgentRunConnection {
   pageInfo: PageInfo!
   edges: [AgentRunEdge]
+}
+
+type AgentMessageDelta {
+  delta: Delta
+  payload: AgentMessage
 }
 
 enum SentinelCheckType {

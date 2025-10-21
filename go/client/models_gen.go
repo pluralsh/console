@@ -169,6 +169,11 @@ type AgentMessageCostAttributes struct {
 	Tokens *AgentMessageTokensAttributes `json:"tokens,omitempty"`
 }
 
+type AgentMessageDelta struct {
+	Delta   *Delta        `json:"delta,omitempty"`
+	Payload *AgentMessage `json:"payload,omitempty"`
+}
+
 type AgentMessageFile struct {
 	// the name of the file
 	Name *string `json:"name,omitempty"`
