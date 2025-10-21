@@ -130,7 +130,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -186,7 +186,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -250,7 +250,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

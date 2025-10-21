@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -166,9 +167,12 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 				}
 			})).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
 			fakeConsoleClient.On("UpsertCatalog", mock.Anything, mock.Anything).Return(test.catalogFragment, nil)
 
 			nr := &controller.CatalogReconciler{
@@ -187,9 +191,12 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 			catalog := &v1alpha1.Catalog{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, catalog)).NotTo(HaveOccurred())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
 
 			nr := &controller.CatalogReconciler{
 				Client:        k8sClient,
@@ -197,9 +204,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			result, err := nr.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
+			result, err := nr.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.RequeueAfter).ToNot(BeZero())
 		})

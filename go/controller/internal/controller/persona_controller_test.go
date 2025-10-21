@@ -3,6 +3,7 @@ package controller_test
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -131,10 +132,13 @@ var _ = Describe("Persona Controller", Ordered, func() {
 				}
 			})).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("IsPersonaExists", mock.Anything, mock.Anything).Return(false, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
 
 			pr := &controller.PersonaReconciler{
 				Client:        k8sClient,

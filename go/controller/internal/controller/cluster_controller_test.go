@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -141,13 +142,16 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				}
 			})).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
 				ID:             byokReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
 			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Return(nil, nil)
 
 			controllerReconciler := &controller.ClusterReconciler{
@@ -196,13 +200,16 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		})
 
 		It("should requeue after get bindings error", func() {
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
 				ID:             byokReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
 
 			controllerReconciler := &controller.ClusterReconciler{
 				Client:           k8sClient,

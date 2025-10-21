@@ -37,6 +37,15 @@ func Cache() IdentityCache {
 	return cache
 }
 
+// ResetCache should be used for testing purposes only.
+func ResetCache(c client.ConsoleClient) {
+	cache = &identityCache{
+		consoleClient: c,
+		userMap:       cmap.New[string](),
+		groupMap:      cmap.New[string](),
+	}
+}
+
 type IdentityCache interface {
 	GetGroupID(name string) (string, error)
 	GetUserID(email string) (string, error)

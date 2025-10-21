@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -92,7 +93,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 			fakeConsoleClient.On("CreateProject", mock.Anything, mock.Anything).Return(test.projectFragment, nil)
 
@@ -160,10 +161,13 @@ var _ = Describe("Project Controller", Ordered, func() {
 			}
 			Expect(k8sClient.Update(ctx, project)).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
 
 			nsReconciler := &controller.ProjectReconciler{
 				Client:        k8sClient,
@@ -198,7 +202,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("common.GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("DeleteProject", mock.Anything, mock.Anything).Return(nil)
 
