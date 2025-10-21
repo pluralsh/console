@@ -7,7 +7,7 @@ defmodule Console.Schema.AgentMessage do
   schema "agent_messages" do
     field :role,    Console.Schema.Chat.Role
     field :message, :binary
-    field :seq,     :integer
+    field :seq,     :integer, writable: :never, read_after_writes: true
 
     embeds_one :cost, Cost, on_replace: :update do
       field :total,  :float

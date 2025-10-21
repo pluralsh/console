@@ -371,4 +371,32 @@ defmodule Console.Deployments.AgentsTest do
       assert pr.session_id == session.id
     end
   end
+
+  describe "create_agent_message/3" do
+    test "it can create an agent message" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, created} = Agents.create_agent_message(%{
+        message: "a message",
+        role: :user
+      }, run.id, runtime.cluster)
+
+      assert created.agent_run_id == run.id
+      assert created.role == :user
+      assert created.message == "a message"
+      assert is_integer(created.seq)
+
+      assert_receive {:event, %PubSub.AgentMessageCreated{item: ^created}}
+    end
+
+    test "clusters cannot create agent messages for other's runs" do
+      run = insert(:agent_run)
+
+      {:error, _} = Agents.create_agent_message(%{
+        message: "a message",
+        role: :user
+      }, run.id, insert(:cluster))
+    end
+  end
 end

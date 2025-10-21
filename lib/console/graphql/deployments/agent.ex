@@ -240,6 +240,8 @@ defmodule Console.GraphQl.Deployments.Agent do
   connection node_type: :agent_runtime
   connection node_type: :agent_run
 
+  delta :agent_message
+
   object :public_agent_queries do
     field :agent_runtime, :agent_runtime do
       middleware Authenticated, :cluster
@@ -293,6 +295,14 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :todos, list_of(:agent_todo_attributes)
 
       resolve &Deployments.update_agent_run_todos/2
+    end
+
+    field :create_agent_message, :agent_message do
+      middleware ClusterAuthenticated
+      arg :run_id, non_null(:id)
+      arg :attributes, non_null(:agent_message_attributes)
+
+      resolve &Deployments.create_agent_message/2
     end
   end
 
@@ -348,6 +358,18 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_pull_request_attributes)
 
       resolve &Deployments.agent_pull_request/2
+    end
+  end
+
+  object :agent_subscriptions do
+    field :agent_message_delta, :agent_message_delta do
+      middleware Authenticated
+      arg :run_id, non_null(:id)
+
+      config fn %{run_id: run_id}, ctx ->
+        with {:ok, run} <- Deployments.agent_run(%{id: run_id}, ctx),
+          do: {:ok, topic: "agent_runs:msgs:#{run.id}"}
+      end
     end
   end
 end

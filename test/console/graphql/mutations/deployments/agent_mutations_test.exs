@@ -230,4 +230,27 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "createAgentMessage" do
+    test "a user can create an agent message" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, %{data: %{"createAgentMessage" => message}}} = run_query("""
+        mutation Create($runId: ID!, $attrs: AgentMessageAttributes!) {
+          createAgentMessage(runId: $runId, attributes: $attrs) {
+            id
+            message
+            role
+          }
+        }
+      """, %{
+        "runId" => run.id,
+        "attrs" => %{"message" => "a message", "role" => "USER"}
+      }, %{cluster: runtime.cluster})
+
+      assert message["id"]
+      assert message["message"] == "a message"
+      assert message["role"] == "USER"
+    end
+  end
 end
