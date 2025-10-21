@@ -1,0 +1,136 @@
+fragment Sentinel on Sentinel {
+  id
+  name
+  description
+  status
+  lastRunAt
+  git {
+    ref
+    folder
+  }
+  repository {
+    id
+    url
+    httpsPath
+  }
+  checks {
+    ...SentinelCheck
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment SentinelCheck on SentinelCheck {
+  name
+  type
+  ruleFile
+  configuration {
+    ...SentinelCheckConfiguration
+  }
+}
+
+fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
+  log {
+    namespaces
+    query
+    clusterId
+    facets {
+      ...LogFacet
+    }
+  }
+  kubernetes {
+    group
+    version
+    kind
+    name
+    namespace
+  }
+}
+
+fragment SentinelRunTiny on SentinelRun {
+  id
+  status
+  insertedAt
+}
+
+fragment SentinelRun on SentinelRun {
+  ...SentinelRunTiny
+  results {
+    ...SentinelRunResult
+  }
+  sentinel {
+    ...Sentinel
+  }
+}
+
+fragment SentinelRunResult on SentinelRunResult {
+  name
+  reason
+  status
+  successfulCount
+  failedCount
+  jobCount
+}
+
+fragment SentinelStatistic on SentinelStatistic {
+  status
+  count
+}
+
+query Sentinels(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $status: SentinelRunStatus
+) {
+  sentinels(first: $first, after: $after, q: $q, status: $status) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Sentinel
+      }
+    }
+  }
+}
+
+query Sentinel($id: ID, $name: String) {
+  sentinel(id: $id, name: $name) {
+    ...Sentinel
+  }
+}
+
+query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
+  sentinel(id: $id, name: $name) {
+    id
+    runs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...SentinelRunTiny
+        }
+      }
+    }
+  }
+}
+
+query SentinelRun($id: ID!) {
+  sentinelRun(id: $id) {
+    ...SentinelRun
+  }
+}
+
+query SentinelStatistics($q: String) {
+  sentinelStatistics(q: $q) {
+    ...SentinelStatistic
+  }
+}
+
+mutation RunSentinel($id: ID!) {
+  runSentinel(id: $id) {
+    ...SentinelRunTiny
+  }
+}

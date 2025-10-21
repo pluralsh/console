@@ -112,9 +112,8 @@ export function CostManagementDetails() {
             icon={<ReturnIcon />}
             size="large"
             onClick={() => navigate(COST_MANAGEMENT_ABS_PATH)}
-          >
-            Back
-          </IconFrame>
+            tooltip="Back to cost management overview"
+          />
           <Subtitle1H1>
             {namespacesQuery?.data?.clusterUsage?.cluster?.name}
           </Subtitle1H1>

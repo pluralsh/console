@@ -66,6 +66,12 @@ spec:
                               - K3S
                               - OPENSHIFT
                               type: string
+                            format:
+                              description: the test output format of the job
+                              enum:
+                              - PLAINTEXT
+                              - JUNIT
+                              type: string
                             jobSpec:
                               description: the job to run for this check
                               properties:
@@ -9669,6 +9675,8 @@ spec:
                               description: the cluster tags to select where to run
                                 this job
                               type: object
+                          required:
+                          - format
                           type: object
                         kubernetes:
                           description: the kubernetes configuration to use for this

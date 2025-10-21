@@ -1,10 +1,14 @@
 fragment LogLine on LogLine {
   facets {
-    key
-    value
+    ...LogFacet
   }
   log
   timestamp
+}
+
+fragment LogFacet on LogFacet {
+  key
+  value
 }
 
 query LogAggregation(

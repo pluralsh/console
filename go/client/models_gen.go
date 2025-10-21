@@ -6344,6 +6344,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Distro *ClusterDistro `json:"distro,omitempty"`
 	// the cluster tags to select where to run this job
 	Tags map[string]any `json:"tags,omitempty"`
+	// the format of the job
+	Format SentinelRunJobFormat `json:"format"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -6353,6 +6355,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Distro *ClusterDistro `json:"distro,omitempty"`
 	// the cluster tags to select where to run this job
 	Tags *string `json:"tags,omitempty"`
+	// the format of the job output
+	Format SentinelRunJobFormat `json:"format"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {
@@ -6424,6 +6428,8 @@ type SentinelRun struct {
 	ID string `json:"id"`
 	// the status of the run
 	Status SentinelRunStatus `json:"status"`
+	// the time the run completed
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the sentinel that was run
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
@@ -6448,7 +6454,7 @@ type SentinelRunJob struct {
 	ID string `json:"id"`
 	// the status of the job
 	Status SentinelRunJobStatus `json:"status"`
-	// the format of the job
+	// the format of the job output
 	Format SentinelRunJobFormat `json:"format"`
 	// the check that was run
 	Check *string `json:"check,omitempty"`

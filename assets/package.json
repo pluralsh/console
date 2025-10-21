@@ -43,7 +43,7 @@
     "@nivo/radial-bar": "0.99.0",
     "@nivo/tooltip": "0.99.0",
     "@nivo/treemap": "0.99.0",
-    "@pluralsh/design-system": "5.25.2",
+    "@pluralsh/design-system": "5.27.0",
     "@react-hooks-library/core": "0.6.0",
     "@react-spring/web": "10.0.3",
     "@saas-ui/use-hotkeys": "1.1.3",

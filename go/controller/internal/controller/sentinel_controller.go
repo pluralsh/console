@@ -217,7 +217,9 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 			if check.Configuration.IntegrationTest != nil {
 				configuration.IntegrationTest = &console.SentinelCheckIntegrationTestConfigurationAttributes{
 					Distro: check.Configuration.IntegrationTest.Distro,
+					Format: check.Configuration.IntegrationTest.Format,
 				}
+
 				if check.Configuration.IntegrationTest.Job != nil {
 					jobSpec, err := common.GateJobAttributes(check.Configuration.IntegrationTest.Job)
 					if err != nil {

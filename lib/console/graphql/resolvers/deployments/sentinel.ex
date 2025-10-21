@@ -69,8 +69,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   def delete_sentinel(%{id: id}, %{context: %{current_user: user}}),
     do: Sentinels.delete_sentinel(id, user)
 
-  def run_sentinel(%{id: id}, %{context: %{current_user: user}}),
+  def run_sentinel(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
+    sentinel = Sentinels.get_sentinel_by_name!(name)
+    Sentinels.run_sentinel(sentinel.id, user)
+  end
+  def run_sentinel(%{id: id}, %{context: %{current_user: user}}) when is_binary(id),
     do: Sentinels.run_sentinel(id, user)
+  def run_sentinel(_, _), do: {:error, "Must specify either id or name"}
 
   def update_sentinel_run_job(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Sentinels.update_sentinel_job(attrs, id, cluster)

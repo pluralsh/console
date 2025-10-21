@@ -27,7 +27,7 @@ export function useFillMockArr<T>(sample: T[], size: number): T[] {
       Array(size)
         .fill(sample)
         .flat()
-        .map((item, i) => ({ ...item, id: i })),
+        .map((item, i) => ({ ...item, id: `${i}` })),
     [sample, size]
   )
 }
