@@ -23,6 +23,8 @@ func Jitter(t time.Duration) time.Duration {
 // Reconciliation parameters for a specific resource.
 type Reconciliation struct {
 	// DriftDetection enables drift detection for this resource.
+	// It is destined to detect changes made to the related
+	// resources that are not referenced with owner ref.
 	// Use with Interval to set how often drift detection runs.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true

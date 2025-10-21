@@ -159,6 +159,8 @@ spec:
                     default: true
                     description: |-
                       DriftDetection enables drift detection for this resource.
+                      It is destined to detect changes made to the related
+                      resources that are not referenced with owner ref.
                       Use with Interval to set how often drift detection runs.
                     example: false
                     type: boolean
