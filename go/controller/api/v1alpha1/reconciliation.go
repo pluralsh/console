@@ -40,12 +40,12 @@ type Reconciliation struct {
 // Requeue returns ctrl.Result based on the resource Reconciliation spec.
 // Used for drift detection.
 func (r *Reconciliation) Requeue() ctrl.Result {
-	if r == nil || r.DriftDetection == nil || !*r.DriftDetection {
+	if r != nil && r.DriftDetection != nil && !*r.DriftDetection {
 		return ctrl.Result{}
 	}
 
 	interval := RequeueDefault
-	if r.Interval != nil {
+	if r != nil && r.Interval != nil {
 		if parsed, err := time.ParseDuration(*r.Interval); err == nil {
 			interval = parsed
 		}
