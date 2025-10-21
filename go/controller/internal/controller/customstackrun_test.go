@@ -123,8 +123,8 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			}
 		})
 
-		It("should Wait for infrastructure stack", func() {
-			By("Wait for infrastructure stack")
+		It("should wait for infrastructure stack", func() {
+			By("wait for infrastructure stack")
 			test := struct {
 				returnCreateCustomStackRun *gqlclient.CustomStackRunFragment
 				expectedStatus             v1alpha1.Status

@@ -348,7 +348,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			Expect(sanitizeRepoConditions(repository.Status)).To(Equal(sanitizeRepoConditions(test.expectedStatus)))
 		})
 
-		It("should Wait for SCM connection", func() {
+		It("should wait for SCM connection", func() {
 			By("Reconciling the updated resource")
 			test := struct {
 				returnGetRepository      *gqlclient.GetGitRepository

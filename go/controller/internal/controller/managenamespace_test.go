@@ -147,8 +147,8 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should Wait for project", func() {
-			By("Project doesn't exist, should Wait for project to be created")
+		It("should wait for project", func() {
+			By("Project doesn't exist, should wait for project to be created")
 			test := struct {
 				returnCreateNamespace *gqlclient.ManagedNamespaceFragment
 				expectedStatus        v1alpha1.Status

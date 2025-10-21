@@ -115,7 +115,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(mns.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should Wait for bindings", func() {
+		It("should wait for bindings", func() {
 			By("Create resource")
 			test := struct {
 				projectFragment *gqlclient.ProjectFragment

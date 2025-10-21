@@ -178,7 +178,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should Wait for service deployment", func() {
+		It("should wait for service deployment", func() {
 			By("Service deployment not found")
 			test := struct {
 				returnCreateService *gqlclient.GlobalServiceFragment
@@ -242,7 +242,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should Wait for service deployment", func() {
+		It("should wait for service deployment", func() {
 			By("Service deployment not ready yet")
 			test := struct {
 				returnCreateService *gqlclient.GlobalServiceFragment
