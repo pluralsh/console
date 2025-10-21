@@ -72,12 +72,11 @@ export function SentinelRunSidecar({
               {formatLocalizedDateTime(run.insertedAt)}
             </SidecarItem>
           )}
-          {/* TODO: add when field is available on the query */}
-          {/* {run.completedAt && (
+          {run.completedAt && (
             <SidecarItem heading="Completed">
               {formatLocalizedDateTime(run.completedAt)}
             </SidecarItem>
-          )} */}
+          )}
           {run.sentinel?.repository?.httpsPath && (
             <SidecarItem heading="Source">
               <InlineA href={run.sentinel.repository.httpsPath}>
