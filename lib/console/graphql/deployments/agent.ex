@@ -363,7 +363,6 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   object :agent_subscriptions do
     field :agent_message_delta, :agent_message_delta do
-      middleware Authenticated
       arg :run_id, non_null(:id)
 
       config fn %{run_id: run_id}, ctx ->
