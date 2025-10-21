@@ -37,7 +37,6 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
   end
 
   describe "agentMessageDelta" do
-    @tag :skip
     test "new messages will broadcast deltas" do
       user = insert(:user)
 
@@ -69,7 +68,7 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       assert delta["delta"]              == "CREATE"
       assert delta["payload"]["id"]      == message.id
       assert delta["payload"]["message"] == message.message
-      assert delta["payload"]["role"]    == message.role
+      assert delta["payload"]["role"]    == "USER"
     end
   end
 end

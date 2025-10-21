@@ -341,7 +341,7 @@ defmodule Console.Schema.Service do
   end
 
   def stable(query \\ __MODULE__) do
-    at = Timex.now() |> Timex.shift(minutes: -5)
+    at = Timex.now() |> Timex.shift(minutes: -10)
     from(s in query, where: s.status != :stale or coalesce(s.updated_at, s.inserted_at) <= ^at)
   end
 
