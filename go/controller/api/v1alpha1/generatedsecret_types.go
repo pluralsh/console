@@ -64,7 +64,7 @@ type GeneratedSecretSpec struct {
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 
 	// Reconciliation settings for this resource.
-	// Controls drift detection and reconciliation intervals for this resource.
+	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

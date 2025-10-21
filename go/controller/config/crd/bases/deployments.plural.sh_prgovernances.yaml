@@ -128,7 +128,7 @@ spec:
               reconciliation:
                 description: |-
                   Reconciliation settings for this resource.
-                  Controls drift detection and reconciliation intervals for this resource.
+                  Controls drift detection and reconciliation intervals.
                 properties:
                   driftDetection:
                     default: true

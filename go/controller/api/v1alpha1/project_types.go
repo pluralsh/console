@@ -86,7 +86,7 @@ type ProjectSpec struct {
 	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// Reconciliation settings for this resource.
-	// Controls drift detection and reconciliation intervals for this resource.
+	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

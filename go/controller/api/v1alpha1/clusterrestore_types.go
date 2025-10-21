@@ -90,7 +90,7 @@ type ClusterRestoreSpec struct {
 	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
 
 	// Reconciliation settings for this resource.
-	// Controls drift detection and reconciliation intervals for this resource.
+	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

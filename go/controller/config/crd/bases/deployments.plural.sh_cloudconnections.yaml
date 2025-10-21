@@ -187,7 +187,8 @@ spec:
                   ReadBindings is a list of bindings that defines
                   who can use this CloudConnection.
                 items:
-                  description: Binding represents a policy binding.
+                  description: Binding that can be used to assign permissions to a
+                    resource for a user and a group in the system.
                   properties:
                     UserID:
                       type: string
@@ -204,7 +205,7 @@ spec:
               reconciliation:
                 description: |-
                   Reconciliation settings for this resource.
-                  Controls drift detection and reconciliation intervals for this resource.
+                  Controls drift detection and reconciliation intervals.
                 properties:
                   driftDetection:
                     default: true

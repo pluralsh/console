@@ -259,7 +259,7 @@ _Appears in:_
 
 
 
-Binding represents a policy binding.
+Binding that can be used to assign permissions to a resource for a user and a group in the system.
 
 
 
@@ -286,9 +286,7 @@ _Appears in:_
 
 
 
-Bindings represents policy bindings that
-can be used to define read/write permissions
-to this resource for users/groups in the system.
+Bindings that can be used to assign read and write permissions to this resource for users and groups in the system.
 
 
 
@@ -362,7 +360,7 @@ _Appears in:_
 | `user` _string_ | User is an optional email to attribute bootstrap token operations in audit logs. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef is the project that all clusters registered with this token will belong to. |  | Required: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef points to a secret where the generated bootstrap token will be stored.<br />The secret is created automatically and must not already exist when the BootstrapToken is created. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Cascade
@@ -449,7 +447,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef links this catalog to a specific project for permission inheritance.<br />When set, the catalog inherits the project's RBAC policies and is scoped to that project.<br />ProjectRef owning project of the catalog, permissions will propagate down |  | Optional: \{\} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags provide key-value metadata for filtering and organizing catalogs.<br />Useful for adding custom labels like environment, team, or technology stack. |  | Optional: \{\} <br /> |
 | `bindings` _[CatalogBindings](#catalogbindings)_ | Bindings define the read, write, and create permissions for this catalog.<br />Controls who can view, modify, and use the PR automations within this catalog.<br />Bindings contain read and write policies of this Catalog. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### CloudConnection
@@ -509,7 +507,7 @@ _Appears in:_
 | `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: \{\} <br />Type: string <br /> |
 | `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ | Configuration contains the cloud connection configuration. |  | Required: \{\} <br /> |
 | `readBindings` _[Binding](#binding) array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### CloudProvider
@@ -714,7 +712,7 @@ _Appears in:_
 | `backupName` _string_ | BackupName is a name of the backup to restore.<br />BackupNamespace and BackupClusterRef have to be specified as well with it.<br />If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed. |  | Optional: \{\} <br />Type: string <br /> |
 | `backupNamespace` _string_ | BackupNamespace is a namespace of the backup to restore.<br />BackupName and BackupClusterRef have to be specified as well with it.<br />If BackupName, BackupNamespace, and BackupCluster are specified, then BackupID is not needed. |  | Optional: \{\} <br />Type: string <br /> |
 | `backupClusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | BackupClusterID is an ID of a cluster where the backup to restore is located.<br />BackupName and BackupNamespace have to be specified as well with it.<br />If BackupName, BackupNamespace, and BackupClusterRef are specified, then BackupID is not needed. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 
@@ -785,7 +783,7 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write access policies for this cluster.<br />Controls which users and groups can view or manage this cluster through RBAC. |  | Optional: \{\} <br /> |
 | `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools defines the worker node configurations managed by this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ClusterSpecTemplate
@@ -871,7 +869,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project to sync clusters from. |  | Optional: \{\} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags used to filter clusters. |  | Optional: \{\} <br /> |
 | `clusterSpec` _[ClusterSpecTemplate](#clusterspectemplate)_ | ClusterSpec contains specifications of the cluster. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ClusterTarget
@@ -945,7 +943,7 @@ _Appears in:_
 | `name` _string_ | Name, if not provided name from object meta will be used. |  | Optional: \{\} <br /> |
 | `format` _[ComplianceReportFormat](#compliancereportformat)_ | Format of the report to be generated. |  | Enum: [CSV JSON] <br />Required: \{\} <br /> |
 | `readBindings` _[Binding](#binding) array_ | ReadBindings represent the download policy for this report. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ComponentState
@@ -1115,7 +1113,7 @@ _Appears in:_
 | `documentation` _string_ | Documentation to explain what this custom run does. |  | Optional: \{\} <br /> |
 | `commands` _[CommandAttributes](#commandattributes) array_ | Commands to execute as part of this custom run. |  | Optional: \{\} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration self-service configuration which will be presented in UI before triggering |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### DeploymentSettings
@@ -1225,7 +1223,7 @@ _Appears in:_
 | `cost` _[CostSettings](#costsettings)_ | Cost settings for managing Plural's cost management features |  | Optional: \{\} <br /> |
 | `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | DeploymentRepositoryRef is a pointer to the deployment GIT repository to use |  | Optional: \{\} <br /> |
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### DiffNormalizers
@@ -1326,7 +1324,7 @@ _Appears in:_
 | `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: \{\} <br /> |
 | `claimsLike` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />All the value strings should be a valid regular expression.<br />Example:<br />	...<br />	claimsLike:<br />		sub: "repo:myaccount/myrepo:ref:refs/heads/.*" |  | Optional: \{\} <br /> |
 | `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Flow
@@ -1385,7 +1383,7 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: \{\} <br /> |
 | `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: \{\} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### GCPCloudConnection
@@ -1477,7 +1475,7 @@ _Appears in:_
 | `template` _object (keys:string, values:string)_ | Template defines the secret data as key-value pairs in string form. |  | Optional: \{\} <br /> |
 | `destinations` _[GeneratedSecretDestination](#generatedsecretdestination) array_ | Destinations describe the target name and namespace for the generated secrets. |  | Optional: \{\} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef references a Secret containing configuration data used to populate template variables. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 
@@ -1561,7 +1559,7 @@ _Appears in:_
 | `url` _string_ | Url of the GitRepository, supporting both HTTPS and SSH protocols.<br />This field is immutable once set. |  |  |
 | `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConnectionRef references an ScmConnection to reuse existing credentials and configuration<br />for authenticating with GitRepository. |  | Optional: \{\} <br /> |
 | `credentialsRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | CredentialsRef references a Secret containing authentication credentials for this repository.<br />The secret should contain keys for privateKey, passphrase, username, and password as needed<br />for the repository's authentication method. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 
@@ -1613,7 +1611,7 @@ _Appears in:_
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef restricts deployment to clusters associated with a specific cloud provider.<br />This enables provider-specific service deployments that may require particular<br />cloud integrations or provider-native services.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef constrains the global service scope to clusters within a specific project.<br />This provides project-level isolation and ensures services are only deployed<br />to clusters belonging to the designated project. |  | Optional: \{\} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ | Template defines the service deployment specification to be applied across target clusters.<br />This contains the core service definition including Helm charts, configurations,<br />and deployment parameters that will be instantiated on each matching cluster. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### GraphStore
@@ -1836,7 +1834,7 @@ _Appears in:_
 | `url` _string_ | URL specifies the HTTP/HTTPS URL of the Helm repository.<br />This field is immutable once set to prevent accidental changes that could break<br />existing service deployments that depend on this repository.<br />Supported formats include standard Helm repository URLs and OCI registry URLs. |  | Required: \{\} <br /> |
 | `provider` _[HelmAuthProvider](#helmauthprovider)_ | Provider specifies the authentication provider type for this Helm repository.<br />This determines which authentication method will be used when accessing the repository.<br />Different providers support different authentication mechanisms optimized for their platforms. |  | Enum: [BASIC BEARER GCP AZURE AWS] <br />Type: string <br /> |
 | `auth` _[HelmRepositoryAuth](#helmrepositoryauth)_ | Auth contains the authentication configuration for accessing the Helm repository.<br />The specific authentication method used depends on the Provider field.<br />Only one authentication method should be configured per repository. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### HttpProxyConfiguration
@@ -1914,7 +1912,7 @@ _Appears in:_
 | `variables` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Variables represent a file with variables in the stack run environment.<br />It will be automatically passed to the specific tool depending on the<br />stack Type (except [console.StackTypeCustom]). |  | Optional: \{\} <br /> |
 | `policyEngine` _[PolicyEngine](#policyengine)_ | PolicyEngine is a configuration for applying policy enforcement to a stack. |  | Optional: \{\} <br /> |
 | `agentId` _string_ | AgentId represents agent session ID that created this stack.<br />It is used for UI linking and otherwise ignored. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### JobSpec
@@ -2023,7 +2021,7 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings define the read and write access policies for this MCP server.<br />These control which users and groups can view, modify, or execute tools<br />provided by this server, enabling fine-grained access control. |  | Optional: \{\} <br /> |
 | `authentication` _[MCPServerAuthentication](#mcpserverauthentication)_ | Authentication specifies the authentication configuration for accessing this MCP server.<br />Different authentication methods are supported including built-in Plural JWT<br />and custom HTTP headers for integration with various authentication systems. |  | Optional: \{\} <br /> |
 | `confirm` _boolean_ | Confirm determines whether tool calls against this server require explicit user confirmation.<br />When true, users must approve each tool execution before it proceeds, providing<br />an additional safety mechanism for sensitive operations. Defaults to false. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ManagedNamespace
@@ -2070,7 +2068,7 @@ _Appears in:_
 | `service` _[ServiceTemplate](#servicetemplate)_ | Service defines the service deployment specification to be created within this namespace.<br />This allows for automatic deployment of applications or infrastructure components<br />as part of the namespace provisioning process. |  | Optional: \{\} <br /> |
 | `target` _[ClusterTarget](#clustertarget)_ | Target specifies the targeting criteria for selecting which clusters should receive this namespace.<br />This enables flexible namespace distribution based on tags and Kubernetes distributions. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef constrains the managed namespace scope to clusters within a specific project.<br />This provides project-level isolation and ensures namespaces are only created<br />on clusters belonging to the designated project. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### MetadataTemplate
@@ -2128,7 +2126,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `namespaces` _string array_ | Namespaces specifies the list of Kubernetes namespaces that will use the credentials<br />from SecretRef during resource reconciliation, enabling namespace-level credential isolation. |  | Required: \{\} <br /> |
 | `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef references a Secret containing the credentials that operators will use<br />when reconciling resources within the specified namespaces, overriding default operator credentials. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 
@@ -2195,7 +2193,7 @@ _Appears in:_
 | `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications. Common events include deployment updates,<br />service health changes, pipeline status changes, and security alerts. |  | Optional: \{\} <br /> |
 | `filters` _[RouterFilters](#routerfilters) array_ | Filters define criteria for selectively routing events.<br />These filters control which events trigger notifications, allowing teams<br />to focus on relevant events. Multiple filters can be combined. |  | Optional: \{\} <br /> |
 | `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Sinks specify the notification destinations where filtered events should be delivered.<br />Each sink represents a configured notification channel such as Slack webhooks,<br />Microsoft Teams channels, or in-app notification systems. Events matching the<br />router's criteria will be formatted and sent to all configured sinks.<br />It is a reference to the NotificationSink resource. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### NotificationSink
@@ -2238,7 +2236,7 @@ _Appears in:_
 | `type` _[SinkType](#sinktype)_ | Type specifies the channel type of this sink.<br />Determines which configuration section will be used and how notifications are delivered.<br />SLACK and TEAMS require webhook URLs, while PLURAL delivers in-app notifications. |  | Enum: [SLACK TEAMS PLURAL] <br />Required: \{\} <br /> |
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration contains the type-specific settings for this notification sink.<br />Only one configuration section should be populated based on the Type field.<br />Each type has different requirements for delivery setup and authentication. |  | Optional: \{\} <br /> |
 | `bindings` _[Binding](#binding) array_ | Bindings define the users and groups who can receive notifications through this sink.<br />This is only applicable for PLURAL type sinks that deliver in-app notifications.<br />For external sinks like Slack or Teams, notifications are sent to the configured webhook. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### OIDCProvider
@@ -2283,7 +2281,7 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable description of this OIDC provider.<br />This helps administrators understand the purpose and intended use of this OIDC client,<br />such as which application or service it's configured for. |  | Optional: \{\} <br /> |
 | `redirectUris` _string array_ | RedirectUris specifies the list of allowed redirect URIs for this OIDC client.<br />These URIs define where the authorization server can redirect users after authentication.<br />Each URI must be an exact match to be considered valid during the OIDC flow.<br />Common patterns include application callback URLs or localhost URLs for development. |  | Optional: \{\} <br /> |
 | `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef references a Kubernetes Secret that will contain the generated OIDC client credentials.<br />Once the OIDCProvider is successfully created in the Console API, this secret will be populated<br />with the client ID and client secret needed for OIDC authentication flows.<br />The secret will contain two keys: 'clientId' and 'clientSecret'. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ObjectKeyReference
@@ -2383,7 +2381,7 @@ _Appears in:_
 | `name` _string_ | Name specifies the name for this observability provider.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
 | `type` _[ObservabilityProviderType](#observabilityprovidertype)_ | Type specifies the observability platform this provider connects to.<br />Currently supported providers include Datadog for comprehensive monitoring and alerting,<br />and New Relic for application performance monitoring and infrastructure insights. |  | Enum: [DATADOG NEWRELIC] <br />Required: \{\} <br /> |
 | `credentials` _[ObservabilityProviderCredentials](#observabilityprovidercredentials)_ | Credentials contains the authentication information needed to connect to the observability provider.<br />The specific credential format depends on the provider type. Each provider requires different<br />API keys and authentication methods as specified in their respective credential specifications. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ObservableMetric
@@ -2620,7 +2618,7 @@ _Appears in:_
 | `target` _[ObserverTarget](#observertarget)_ | Target specifies the external source to monitor for changes.<br />This defines what type of resource to poll (Helm chart, OCI image, Git tags, etc.)<br />and the specific configuration needed to access that resource. |  | Required: \{\} <br /> |
 | `actions` _[ObserverAction](#observeraction) array_ | Actions define the automated responses to execute when new values are detected.<br />Each action specifies what should happen when the observer discovers an update,<br />such as creating pull requests or triggering pipeline deployments. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this observer belongs to.<br />If not provided, the observer will use the default project.<br />This helps organize observers and control access permissions. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ObserverTarget
@@ -2878,7 +2876,7 @@ _Appears in:_
 | `role` _[PersonaRole](#personarole)_ | Role defines the primary responsibility area for users assigned to this persona.<br />This controls the default homepage layout and highlights relevant features.<br />Different roles provide different perspectives on the same underlying data,<br />optimized for specific workflows and responsibilities. |  | Optional: \{\} <br /> |
 | `configuration` _[PersonaConfiguration](#personaconfiguration)_ | Configuration contains detailed UI customization settings for this persona.<br />These settings are additive across multiple personas assigned to a user,<br />allowing for flexible permission combinations while maintaining role-based defaults. |  | Optional: \{\} <br /> |
 | `bindings` _[Binding](#binding) array_ | Bindings define which users and groups are assigned to this persona.<br />Users can be assigned to multiple personas, with permissions being additive.<br />This enables flexible role combinations while maintaining clear base configurations. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Pipeline
@@ -2936,7 +2934,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef references the Pipeline this context will be applied to. |  | Optional: \{\} <br /> |
 | `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is a templated context map that will be passed to the pipeline.<br />This context can contain variables, configuration data, and other information needed. |  |  |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PipelineEdge
@@ -2999,7 +2997,7 @@ _Appears in:_
 | `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this pipeline belongs within. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this pipeline belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies controlling access to this pipeline. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PipelineStage
@@ -3306,7 +3304,7 @@ _Appears in:_
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: \{\} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomationTemplate
@@ -3367,7 +3365,7 @@ _Appears in:_
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef points to the source PrAutomation resource that defines<br />the templates, operations, and target repository for the generated PR. |  | Optional: \{\} <br /> |
 | `branch` _string_ | Branch specifies the name of the branch that should be created for this PR<br />against the PrAutomation's configured base branch. This allows multiple<br />triggers to operate on the same automation without conflicts. |  | Required: \{\} <br /> |
 | `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context provides the configuration values that will be used to template<br />the PR content, file modifications, and metadata. This should match the<br />configuration schema defined in the referenced PrAutomation. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomationUniqBy
@@ -3480,7 +3478,7 @@ _Appears in:_
 | `name` _string_ | Name specifies the name for this PR governance controller.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
 | `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConnectionRef references an ScmConnection to reuse its credentials for this governance controller's authentication. |  | Required: \{\} <br /> |
 | `configuration` _[PrGovernanceConfiguration](#prgovernanceconfiguration)_ | Configuration contains the specific governance settings and rules to enforce on pull requests.<br />This includes webhook configurations, approval requirements, and other policy enforcement<br />mechanisms that control how pull requests are managed and processed. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PrGovernanceWebhook
@@ -3546,7 +3544,7 @@ _Appears in:_
 | `referenceServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ReferenceServiceRef specifies the existing service deployment to use as a template.<br />This service will be cloned and customized according to the Template configuration<br />to create preview environments. The referenced service should be a stable, working<br />deployment that represents the base configuration for preview environments. |  | Required: \{\} <br /> |
 | `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef references the flow that owns and manages this preview environment template.<br />The flow defines the overall workflow and permissions for creating and managing<br />preview environments based on this template. |  | Required: \{\} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ | Template defines the service configuration overrides and customizations to apply<br />when cloning the reference service for preview environments. This includes<br />namespace changes, configuration overrides, and any other modifications needed<br />to create isolated preview environments. |  | Required: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Project
@@ -3587,7 +3585,7 @@ _Appears in:_
 | `name` _string_ | Name of the project. |  | Required: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Reconciliation
@@ -3743,7 +3741,7 @@ _Appears in:_
 | `azure` _[AzureDevopsSettings](#azuredevopssettings)_ | Settings for configuring Azure DevOps authentication |  | Optional: \{\} <br /> |
 | `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this SCM connection. |  | Optional: \{\} <br /> |
 | `default` _boolean_ |  |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ScmGithubConnection
@@ -3897,7 +3895,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ServiceAccount
@@ -3958,7 +3956,7 @@ _Appears in:_
 | `email` _string_ | Email address that will be bound to this service account for identification<br />and authentication purposes. This email serves as the unique identifier<br />for the service account within the Console API. |  | Required: \{\} <br />Type: string <br /> |
 | `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes define the access boundaries for this service account, controlling<br />which Console APIs and resources it can interact with. Each scope can restrict<br />access to specific API endpoints and resource identifiers, enabling fine-grained<br />permission control for automated processes. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef references a Kubernetes secret that should contain the<br />authentication token for this service account. This enables secure storage<br />and management of credentials within the cluster. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ServiceComponent
@@ -4019,7 +4017,7 @@ _Appears in:_
 | `name` _string_ | Name of this service context.<br />If not provided, the name from ServiceContext.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `configuration` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Configuration is a reusable configuration context that can include any JSON-compatible configuration data<br />that needs to be shared across multiple services. |  |  |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this service context belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### ServiceDependency
@@ -4178,7 +4176,7 @@ _Appears in:_
 | `sources` _[Source](#source) array_ | Sources specify additional Git repositories to source manifests from for multi-source deployments. |  | Optional: \{\} <br /> |
 | `renderers` _[Renderer](#renderer) array_ | Renderers define how to process and render manifests using different engines (Helm, Kustomize, etc.). |  | Optional: \{\} <br /> |
 | `agentId` _string_ | AgentId represents agent session ID that created this service.<br />It is used for UI linking and otherwise ignored. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 
@@ -4376,7 +4374,7 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of what this StackDefinition<br />template is intended for and how it should be used. |  | Optional: \{\} <br /> |
 | `steps` _[CustomRunStep](#customrunstep) array_ | Steps defines a list of custom run steps that will be executed as part of<br />any stack run using this definition. Each step specifies a command, arguments,<br />execution stage, and approval requirements. |  | Optional: \{\} <br /> |
 | `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration allows customization of the stack execution environment,<br />including Docker image settings, version specifications, and execution hooks. |  | Optional: \{\} <br /> |
-| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals for this resource. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### StackEnvironment
