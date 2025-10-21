@@ -375,8 +375,10 @@ defmodule Console.Schema.Service do
 
   def ai_pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(a in query,
-      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+    from(s in query,
+      join: c in ^Cluster.health(Cluster, true),
+        on: c.id == s.cluster_id,
+      where: (is_nil(s.ai_poll_at) or s.ai_poll_at < ^now),
       order_by: [asc: :ai_poll_at]
     )
   end

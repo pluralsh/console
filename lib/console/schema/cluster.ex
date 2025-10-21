@@ -389,13 +389,11 @@ defmodule Console.Schema.Cluster do
 
   def health(query \\ __MODULE__, health)
   def health(query, true) do
-    expired = health_threshold()
-    from(c in query, where: c.pinged_at > ^expired)
+    from(c in query, where: c.pinged_at > fragment("CURRENT_TIMESTAMP - coalesce(?, 10) * INTERVAL '1 minute'", c.ping_interval))
   end
 
   def health(query, _) do
-    expired = health_threshold()
-    from(c in query, where: c.pinged_at <= ^expired)
+    from(c in query, where: c.pinged_at <= fragment("CURRENT_TIMESTAMP - coalesce(?, 10) * INTERVAL '1 minute'", c.ping_interval))
   end
 
   def healthy(query \\ __MODULE__), do: health(query, true)
