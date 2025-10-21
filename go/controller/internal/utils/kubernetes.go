@@ -78,25 +78,6 @@ func TryAddControllerRef(ctx context.Context, client ctrlruntimeclient.Client, o
 // Patcher TODO ...
 type Patcher[PatchObject ctrlruntimeclient.Object] func(object PatchObject, original PatchObject) (compare any, compareTo any)
 
-// TryUpdateStatus TODO ...
-func TryUpdateStatus[PatchObject ctrlruntimeclient.Object](ctx context.Context, client ctrlruntimeclient.Client, object PatchObject, patch Patcher[PatchObject]) error {
-	key := ctrlruntimeclient.ObjectKeyFromObject(object)
-
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if err := client.Get(ctx, key, object); err != nil {
-			return fmt.Errorf("could not fetch current %s/%s state, got error: %+v", object.GetName(), object.GetNamespace(), err)
-		}
-
-		original := object.DeepCopyObject().(PatchObject)
-
-		if reflect.DeepEqual(patch(object, original)) {
-			return nil
-		}
-
-		return client.Status().Patch(ctx, object, ctrlruntimeclient.MergeFrom(original))
-	})
-}
-
 // RemoveFinalizer removes the given finalizers from the object.
 func RemoveFinalizer(obj metav1.Object, toRemove ...string) {
 	set := sets.NewString(obj.GetFinalizers()...)
@@ -148,44 +129,6 @@ func AddFinalizer(obj metav1.Object, finalizers ...string) {
 	obj.SetFinalizers(set.List())
 }
 
-func TryAddFinalizer(ctx context.Context, client ctrlruntimeclient.Client, obj ctrlruntimeclient.Object, finalizers ...string) error {
-	key := ctrlruntimeclient.ObjectKeyFromObject(obj)
-
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		// fetch the current state of the object
-		if err := client.Get(ctx, key, obj); err != nil {
-			return err
-		}
-
-		// cannot add new finalizers to deleted objects
-		if obj.GetDeletionTimestamp() != nil {
-			return nil
-		}
-
-		original := obj.DeepCopyObject().(ctrlruntimeclient.Object)
-
-		// modify it
-		previous := sets.NewString(obj.GetFinalizers()...)
-		AddFinalizer(obj, finalizers...)
-		current := sets.NewString(obj.GetFinalizers()...)
-
-		// save some work
-		if previous.Equal(current) {
-			return nil
-		}
-
-		// update the object
-		return client.Patch(ctx, obj, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
-	})
-
-	if err != nil {
-		kind := obj.GetObjectKind().GroupVersionKind().Kind
-		return fmt.Errorf("failed to add finalizers %v to %s %s: %w", finalizers, kind, key, err)
-	}
-
-	return nil
-}
-
 func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.SecretReference) (*corev1.Secret, error) {
 	namespace := "default"
 	if ref == nil {
@@ -201,30 +144,6 @@ func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1
 	}
 
 	return secret, nil
-}
-
-func GetSecretAndValue(ctx context.Context, c ctrlruntimeclient.Client, namespace string, selector *corev1.SecretKeySelector) (*corev1.Secret, string, error) {
-	if selector == nil {
-		return nil, "", nil
-	}
-
-	secret := &corev1.Secret{}
-	if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{
-		Namespace: namespace,
-		Name:      selector.Name,
-	}, secret); err != nil {
-		return nil, "", fmt.Errorf("failed to get secret %s/%s: %w", namespace, selector.Name, err)
-	}
-
-	val, ok := secret.Data[selector.Key]
-	if !ok {
-		if selector.Optional != nil && *selector.Optional {
-			return nil, "", nil
-		}
-		return nil, "", fmt.Errorf("key %q not found in secret %s/%s", selector.Key, namespace, selector.Name)
-	}
-
-	return secret, string(val), nil
 }
 
 func GetCluster(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.Cluster, error) {

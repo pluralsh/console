@@ -95,19 +95,13 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	ro, err := r.isReadOnly(ctx, sink)
 	if err != nil {
-		if err != nil {
-			utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
-		}
+		utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if ro {
 		logger.V(9).Info("Notification Sink already exists in the API, running in read-only mode")
 		utils.MarkCondition(sink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExisting(ctx, sink)
-	}
-
-	if err != nil {
-		return common.HandleRequeue(nil, err, sink.SetCondition)
 	}
 
 	// Mark resource as managed by this operator.

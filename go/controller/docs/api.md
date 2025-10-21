@@ -3410,7 +3410,7 @@ _Appears in:_
 
 
 
-A checkbox to render to confirm a PR prerequisite is satisfied
+PrConfirmationChecklist represents a checkbox to render to confirm a PR prerequisite is satisfied.
 
 
 

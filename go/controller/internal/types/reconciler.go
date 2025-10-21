@@ -51,7 +51,6 @@ const (
 	PrAutomationTriggerReconciler        Reconciler = "prautomationtrigger"
 	PreviewEnvironmentTemplateReconciler Reconciler = "previewenvironmenttemplate"
 	ProjectReconciler                    Reconciler = "project"
-	ProviderReconciler                   Reconciler = "provider"
 	ScmConnectionReconciler              Reconciler = "scmconnection"
 	ServiceAccountReconciler             Reconciler = "serviceaccount"
 	ServiceContextReconciler             Reconciler = "servicecontext"

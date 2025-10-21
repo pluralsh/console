@@ -25,14 +25,13 @@ import (
 var _ = Describe("Global Service Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			serviceName  = "global-service-test"
-			clusterName  = "cluster-test"
-			repoName     = "repo-test"
-			namespace    = "default"
-			id           = "123"
-			repoUrl      = "https://test"
-			providerName = "test"
-			notExisting  = "not-existing"
+			serviceName = "global-service-test"
+			clusterName = "cluster-test"
+			repoName    = "repo-test"
+			namespace   = "default"
+			id          = "123"
+			repoUrl     = "https://test"
+			notExisting = "not-existing"
 		)
 
 		ctx := context.Background()

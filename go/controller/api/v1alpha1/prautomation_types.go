@@ -416,7 +416,7 @@ type PrAutomationConfirmation struct {
 	Checklist []PrConfirmationChecklist `json:"checklist,omitempty"`
 }
 
-// A checkbox to render to confirm a PR prerequisite is satisfied
+// PrConfirmationChecklist represents a checkbox to render to confirm a PR prerequisite is satisfied.
 type PrConfirmationChecklist struct {
 	// The label of this checkbox
 	Label string `json:"label"`

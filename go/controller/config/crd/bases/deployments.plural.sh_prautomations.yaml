@@ -315,8 +315,8 @@ spec:
                     description: Checklist to present to confirm each prerequisite
                       is satisfied.
                     items:
-                      description: A checkbox to render to confirm a PR prerequisite
-                        is satisfied
+                      description: PrConfirmationChecklist represents a checkbox to
+                        render to confirm a PR prerequisite is satisfied.
                       properties:
                         label:
                           description: The label of this checkbox
