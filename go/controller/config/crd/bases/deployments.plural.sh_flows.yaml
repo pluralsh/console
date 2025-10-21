@@ -53,8 +53,8 @@ spec:
                   read:
                     description: Read bindings.
                     items:
-                      description: Binding that can be used to assign permissions
-                        to a resource for a user and a group in the system.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string
@@ -71,8 +71,8 @@ spec:
                   write:
                     description: Write bindings.
                     items:
-                      description: Binding that can be used to assign permissions
-                        to a resource for a user and a group in the system.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string

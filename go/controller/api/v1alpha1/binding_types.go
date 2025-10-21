@@ -1,6 +1,6 @@
 package v1alpha1
 
-// Bindings that can be used to assign read and write permissions to this resource for users and groups in the system.
+// Bindings used to assign read and write permissions to a resource for users and groups in the system.
 type Bindings struct {
 	// Read bindings.
 	// +kubebuilder:validation:Optional
@@ -11,7 +11,7 @@ type Bindings struct {
 	Write []Binding `json:"write,omitempty"`
 }
 
-// Binding that can be used to assign permissions to a resource for a user and a group in the system.
+// Binding used to assign permissions to a resource for a user or a group in the system.
 type Binding struct {
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`

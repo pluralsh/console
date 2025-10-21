@@ -259,7 +259,7 @@ _Appears in:_
 
 
 
-Binding that can be used to assign permissions to a resource for a user and a group in the system.
+Binding used to assign permissions to a resource for a user or a group in the system.
 
 
 
@@ -286,7 +286,7 @@ _Appears in:_
 
 
 
-Bindings that can be used to assign read and write permissions to this resource for users and groups in the system.
+Bindings used to assign read and write permissions to a resource for users and groups in the system.
 
 
 

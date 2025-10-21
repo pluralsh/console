@@ -187,8 +187,8 @@ spec:
                   ReadBindings is a list of bindings that defines
                   who can use this CloudConnection.
                 items:
-                  description: Binding that can be used to assign permissions to a
-                    resource for a user and a group in the system.
+                  description: Binding used to assign permissions to a resource for
+                    a user or a group in the system.
                   properties:
                     UserID:
                       type: string

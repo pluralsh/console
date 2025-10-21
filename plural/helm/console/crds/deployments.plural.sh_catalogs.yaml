@@ -65,8 +65,8 @@ spec:
                       Create bindings control who can generate new PR automations using this catalog.
                       Users with create permissions can trigger self-service workflows but cannot modify the catalog itself.
                     items:
-                      description: Binding that can be used to assign permissions
-                        to a resource for a user and a group in the system.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string
@@ -85,8 +85,8 @@ spec:
                       Read bindings control who can view and browse this catalog and its PR automations.
                       Users with read permissions can see available automations but cannot execute or modify them.
                     items:
-                      description: Binding that can be used to assign permissions
-                        to a resource for a user and a group in the system.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string
@@ -105,8 +105,8 @@ spec:
                       Write bindings control who can modify the catalog and its PR automations.
                       Users with write permissions can add, update, or remove PR automations within this catalog.
                     items:
-                      description: Binding that can be used to assign permissions
-                        to a resource for a user and a group in the system.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string

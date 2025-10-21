@@ -59,8 +59,8 @@ spec:
                   Users can be assigned to multiple personas, with permissions being additive.
                   This enables flexible role combinations while maintaining clear base configurations.
                 items:
-                  description: Binding that can be used to assign permissions to a
-                    resource for a user and a group in the system.
+                  description: Binding used to assign permissions to a resource for
+                    a user or a group in the system.
                   properties:
                     UserID:
                       type: string
