@@ -130,6 +130,23 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.status == :running
     end
 
+    test "it can update agent run messages" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, updated} = Agents.update_agent_run(%{
+        pod_reference: %{namespace: "ns", name: "name"},
+        status: :running,
+        messages: [%{role: :user, message: "a message"}]
+      }, run.id, cluster)
+
+      assert updated.id == run.id
+      assert updated.pod_reference.namespace == "ns"
+      assert updated.pod_reference.name == "name"
+      assert updated.status == :running
+    end
+
     test "clusters cannot update other's agent runs" do
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: insert(:cluster))

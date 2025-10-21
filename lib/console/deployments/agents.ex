@@ -126,7 +126,7 @@ defmodule Console.Deployments.Agents do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_agent_run!(run_id)
-      |> Repo.preload([:runtime])
+      |> Repo.preload([:runtime, :messages])
       |> case do
         %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
           {:ok, run}
