@@ -130,14 +130,20 @@ const ColSource = columnHelper.accessor((sentinel) => sentinel, {
   cell: function Cell({ getValue }) {
     const { git, repository } = getValue()
     if (!git || !repository) return null
+    const source = `${repository.httpsPath?.replace(/^https?:\/\//, '') || repository.url}@${git.ref}`
     return (
       <SourceWrapperSC>
         <GitHubLogoIcon css={{ width: 20, flexShrink: 0 }} />
-        <StackedText
-          truncate
-          first={`${repository.httpsPath?.replace(/^https?:\/\//, '') || repository.url}@${git.ref}`}
-          second={git.folder}
-        />
+        <Tooltip
+          placement="top"
+          label={source}
+        >
+          <StackedText
+            truncate
+            first={source}
+            second={git.folder}
+          />
+        </Tooltip>
       </SourceWrapperSC>
     )
   },
@@ -154,7 +160,7 @@ const SourceWrapperSC = styled.div(({ theme }) => ({
 
 const ColLastRun = columnHelper.accessor((sentinel) => sentinel.lastRunAt, {
   id: 'lastRun',
-  header: 'Last Run',
+  header: 'Last run',
   enableSorting: true,
   sortingFn: 'datetime',
   cell: function Cell({ getValue, row: { original } }) {
@@ -222,7 +228,7 @@ export function SentinelRunDialog({
       setShowToast(true)
     },
     awaitRefetchQueries: true,
-    refetchQueries: ['Sentinel', 'Sentinels'],
+    refetchQueries: ['Sentinel', 'Sentinels', 'SentinelRuns'],
   })
 
   if (!sentinel) return null
