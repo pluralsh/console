@@ -28,10 +28,6 @@ func (c *client) DeleteObservabilityProvider(ctx context.Context, id string) err
 }
 
 func (c *client) GetObservabilityProvider(ctx context.Context, id, name *string) (*console.ObservabilityProviderFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
@@ -54,10 +50,6 @@ func (c *client) GetObservabilityProvider(ctx context.Context, id, name *string)
 }
 
 func (c *client) GetObservabilityProviderTiny(ctx context.Context, id, name *string) (*console.GetObservabilityProviderTiny_ObservabilityProvider, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

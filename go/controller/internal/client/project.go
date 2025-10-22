@@ -23,10 +23,6 @@ func (c *client) CreateProject(ctx context.Context, attributes console.ProjectAt
 }
 
 func (c *client) GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
@@ -48,10 +44,6 @@ func (c *client) GetProject(ctx context.Context, id, name *string) (*console.Pro
 }
 
 func (c *client) GetProjectTiny(ctx context.Context, id, name *string) (*console.GetProjectTiny_Project, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

@@ -28,10 +28,6 @@ func (c *client) DeleteObserver(ctx context.Context, id string) error {
 }
 
 func (c *client) GetObserver(ctx context.Context, id, name *string) (*console.ObserverFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
@@ -54,10 +50,6 @@ func (c *client) GetObserver(ctx context.Context, id, name *string) (*console.Ob
 }
 
 func (c *client) GetObserverTiny(ctx context.Context, id, name *string) (*console.GetObserverTiny_Observer, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

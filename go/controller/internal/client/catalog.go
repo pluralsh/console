@@ -22,10 +22,6 @@ func (c *client) UpsertCatalog(ctx context.Context, attributes *console.CatalogA
 }
 
 func (c *client) GetCatalog(ctx context.Context, id, name *string) (*console.CatalogFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
@@ -47,10 +43,6 @@ func (c *client) GetCatalog(ctx context.Context, id, name *string) (*console.Cat
 }
 
 func (c *client) GetCatalogTiny(ctx context.Context, id, name *string) (*console.GetCatalogTiny_Catalog, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

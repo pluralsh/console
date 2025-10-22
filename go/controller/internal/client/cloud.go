@@ -22,10 +22,6 @@ func (c *client) UpsertCloudConnection(ctx context.Context, attributes console.C
 }
 
 func (c *client) GetCloudConnection(ctx context.Context, id, name *string) (*console.CloudConnectionFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

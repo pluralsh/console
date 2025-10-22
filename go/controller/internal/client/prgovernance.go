@@ -26,10 +26,6 @@ func (c *client) DeletePrGovernance(ctx context.Context, id string) error {
 }
 
 func (c *client) GetPrGovernance(ctx context.Context, id, name *string) (*console.PrGovernanceFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

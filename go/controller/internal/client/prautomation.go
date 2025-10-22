@@ -52,10 +52,6 @@ func (c *client) GetPrAutomation(ctx context.Context, id string) (*console.PrAut
 }
 
 func (c *client) GetPrAutomationTiny(ctx context.Context, id, name *string) (*console.GetPrAutomationTiny_PrAutomation, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
