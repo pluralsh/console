@@ -2,6 +2,8 @@ defmodule Console.Schema.ClusterInsightComponent do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, AiInsight}
 
+  @expiry [hours: -4]
+
   defenum Priority, low: 1, medium: 2, high: 3, critical: 4
 
   schema "cluster_insight_components" do
@@ -16,6 +18,11 @@ defmodule Console.Schema.ClusterInsightComponent do
     belongs_to :insight, AiInsight, on_replace: :update
 
     timestamps()
+  end
+
+  def expired(query \\ __MODULE__) do
+    expiry = Timex.now() |> Timex.shift(@expiry)
+    from(cic in query, where: coalesce(cic.updated_at, cic.inserted_at) < ^expiry)
   end
 
   def for_cluster(query \\ __MODULE__, cluster_id) do
