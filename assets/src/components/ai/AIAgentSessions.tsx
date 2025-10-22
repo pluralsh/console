@@ -37,7 +37,7 @@ import { AgentIcon } from './chatbot/AgentSelect.tsx'
 
 export const CLOSE_CHAT_ACTION_PANEL_EVENT = 'pointerdown'
 
-export function AIAgent() {
+export function AIAgentSessions() {
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       queryHook: useAgentSessionsQuery,
