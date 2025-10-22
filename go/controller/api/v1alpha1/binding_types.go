@@ -13,6 +13,9 @@ type Bindings struct {
 
 // Binding used to assign permissions to a resource for a user or a group in the system.
 type Binding struct {
+	// ID of a binding.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`
 

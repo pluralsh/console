@@ -65,6 +65,10 @@ spec:
                         groupName:
                           type: string
                         id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
                           type: string
                         userEmail:
                           type: string
@@ -83,6 +87,10 @@ spec:
                         groupName:
                           type: string
                         id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
                           type: string
                         userEmail:
                           type: string

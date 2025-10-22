@@ -275,7 +275,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `id` _string_ |  |  | Optional: \{\} <br /> |
+| `id` _string_ | ID of a binding.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `UserID` _string_ |  |  | Optional: \{\} <br /> |
 | `userEmail` _string_ |  |  | Optional: \{\} <br /> |
 | `groupID` _string_ |  |  | Optional: \{\} <br /> |

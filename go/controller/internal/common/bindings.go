@@ -53,5 +53,5 @@ func bindingAttributes(b v1alpha1.Binding) (*console.PolicyBindingAttributes, er
 		return nil, nil
 	}
 
-	return &console.PolicyBindingAttributes{ID: b.ID, UserID: userId, GroupID: groupId}, nil
+	return &console.PolicyBindingAttributes{UserID: userId, GroupID: groupId}, nil
 }
