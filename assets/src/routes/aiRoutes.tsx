@@ -9,6 +9,7 @@ import { Navigate, Route } from 'react-router-dom'
 import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
+  AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
@@ -25,6 +26,7 @@ import {
 import { jobRoutes } from './jobRoutes.tsx'
 import { SentinelRunJobK8sJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobK8sJob.tsx'
 import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobOutput.tsx'
+import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
 
 export const aiRoutes = [
   <Route
@@ -43,6 +45,10 @@ export const aiRoutes = [
     <Route
       path={AI_AGENT_SESSIONS_REL_PATH}
       element={<AIAgentSessions />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_REL_PATH}
+      element={<AIAgentRuns />}
     />
     <Route
       path={AI_THREADS_REL_PATH}

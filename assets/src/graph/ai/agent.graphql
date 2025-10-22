@@ -1,0 +1,118 @@
+fragment AgentRunTiny on AgentRun {
+  id
+  status
+  mode
+  prompt
+  shared
+  runtime {
+    id
+    name
+  }
+  repository
+  branch
+  pullRequests {
+    id
+    title
+  }
+}
+
+fragment AgentRun on AgentRun {
+  ...AgentRunTiny
+  messages {
+    ...AgentMessage
+  }
+}
+
+fragment AgentRuntime on AgentRuntime {
+  id
+  name
+  type
+  aiProxy
+  cluster {
+    id
+    name
+  }
+  default
+  createBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment AgentMessage on AgentMessage {
+  id
+  seq
+  role
+  message
+  cost {
+    ...AgentMessageCost
+  }
+  metadata {
+    ...AgentMessageMetadata
+  }
+}
+
+fragment AgentMessageMetadata on AgentMessageMetadata {
+  reasoning {
+    text
+    start
+    end
+  }
+  file {
+    name
+    text
+    start
+    end
+  }
+  tool {
+    name
+    state
+    output
+  }
+}
+
+fragment AgentMessageCost on AgentMessageCost {
+  total
+  tokens {
+    input
+    output
+    reasoning
+  }
+}
+
+query AgentRuns($after: String, $first: Int = 100) {
+  agentRuns(after: $after, first: $first) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRunTiny
+      }
+    }
+  }
+}
+
+query AgentRun($id: ID!) {
+  agentRun(id: $id) {
+    ...AgentRun
+  }
+}
+
+query AgentRuntimes($after: String, $first: Int = 100) {
+  agentRuntimes(after: $after, first: $first) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRuntime
+      }
+    }
+  }
+}
+
+query AgentRuntime($id: ID!) {
+  agentRuntime(id: $id) {
+    ...AgentRuntime
+  }
+}
