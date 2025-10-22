@@ -1,26 +1,21 @@
 import { Card, Markdown } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { RawYaml } from 'components/component/ComponentRaw'
-import { SentinelFragment, SentinelRunResultFragment } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
+import { SentinelCheckWithResult } from './SentinelRun'
 
 export function SentinelRunChecksTableExpander({
   row,
-  parentSentinel,
 }: {
-  row: Row<SentinelRunResultFragment>
-  parentSentinel: Nullable<SentinelFragment>
+  row: Row<SentinelCheckWithResult>
 }) {
   const { spacing } = useTheme()
-  const result = row.original
-  const checkDef = parentSentinel?.checks?.find(
-    (check) => check?.name === result.name
-  )
+  const { check, result } = row.original
 
   return (
     <WrapperSC>
-      {result.reason && (
+      {result?.reason && (
         <Card
           fillLevel={1}
           header={{ content: 'reason' }}
@@ -29,18 +24,16 @@ export function SentinelRunChecksTableExpander({
           <Markdown text={result.reason} />
         </Card>
       )}
-      {checkDef && (
-        <Card
-          fillLevel={1}
-          header={{ content: 'check definition' }}
-        >
-          <RawYaml
-            showHeader={false}
-            css={{ border: 'none', background: 'transparent' }}
-            raw={deepOmitFalsy(checkDef)}
-          />
-        </Card>
-      )}
+      <Card
+        fillLevel={1}
+        header={{ content: 'check definition' }}
+      >
+        <RawYaml
+          showHeader={false}
+          css={{ border: 'none', background: 'transparent' }}
+          raw={deepOmitFalsy(check)}
+        />
+      </Card>
     </WrapperSC>
   )
 }

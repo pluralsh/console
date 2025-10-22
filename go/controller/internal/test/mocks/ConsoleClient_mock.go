@@ -3630,6 +3630,64 @@ func (_c *ConsoleClientMock_GetGlobalService_Call) RunAndReturn(run func(string)
 	return _c
 }
 
+// GetGlobalServiceByName provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetGlobalServiceByName(name string) (*client.GlobalServiceFragment, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGlobalServiceByName")
+	}
+
+	var r0 *client.GlobalServiceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*client.GlobalServiceFragment, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *client.GlobalServiceFragment); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GlobalServiceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGlobalServiceByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGlobalServiceByName'
+type ConsoleClientMock_GetGlobalServiceByName_Call struct {
+	*mock.Call
+}
+
+// GetGlobalServiceByName is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetGlobalServiceByName(name interface{}) *ConsoleClientMock_GetGlobalServiceByName_Call {
+	return &ConsoleClientMock_GetGlobalServiceByName_Call{Call: _e.mock.On("GetGlobalServiceByName", name)}
+}
+
+func (_c *ConsoleClientMock_GetGlobalServiceByName_Call) Run(run func(name string)) *ConsoleClientMock_GetGlobalServiceByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGlobalServiceByName_Call) Return(_a0 *client.GlobalServiceFragment, _a1 error) *ConsoleClientMock_GetGlobalServiceByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGlobalServiceByName_Call) RunAndReturn(run func(string) (*client.GlobalServiceFragment, error)) *ConsoleClientMock_GetGlobalServiceByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetGroup provides a mock function with given fields: name
 func (_m *ConsoleClientMock) GetGroup(name string) (*client.GroupFragment, error) {
 	ret := _m.Called(name)

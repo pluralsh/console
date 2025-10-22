@@ -22,6 +22,7 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -37,7 +38,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -156,19 +156,22 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	if !globalService.Status.HasID() {
-		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
-		return ctrl.Result{}, r.handleCreate(sha, globalService, service, attr)
-	}
-
-	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
-	if errors.IsNotFound(err) {
-		globalService.Status.ID = nil
-		return globalService.Spec.Reconciliation.Requeue(), r.handleCreate(sha, globalService, service, attr)
-	}
-	if err != nil {
+	existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(globalService.ConsoleName())
+	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return globalService.Spec.Reconciliation.Requeue(), err
+		return ctrl.Result{}, err
+	}
+	if existingGlobalService == nil {
+		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
+		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		existingGlobalService, err = r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
+		if err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
@@ -180,13 +183,14 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	}
 
 	if service != nil {
-		if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService, r.Scheme); err != nil {
+		if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService.DeepCopy(), r.Scheme); err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
 	}
 
 	globalService.Status.SHA = &sha
+	globalService.Status.ID = &existingGlobalService.ID
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return globalService.Spec.Reconciliation.Requeue(), nil
@@ -232,8 +236,6 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	}
 	global.Status.ID = &createGlobalService.ID
 	global.Status.SHA = &sha
-	utils.MarkCondition(global.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(global.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return nil
 }
 

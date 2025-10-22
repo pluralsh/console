@@ -12,10 +12,10 @@ import {
   STACK_INSIGHTS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import StackStatusChip from './common/StackStatusChip'
 import { StackTypeIcon } from './common/StackTypeIcon'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 export default function StackEntry({
   stack,
@@ -94,15 +94,12 @@ export default function StackEntry({
         <StackStatusChip
           status={stack.status}
           deleting={!!stack.deletedAt}
-          css={
-            active
-              ? undefined
-              : {
-                  '.children': {
-                    color: theme.colors['text-xlight'],
-                  },
-                }
-          }
+          css={{ whiteSpace: 'nowrap' }}
+          style={{
+            '.children': {
+              color: active ? undefined : theme.colors['text-xlight'],
+            },
+          }}
         />
       </div>
       <div

@@ -7,7 +7,7 @@ defmodule Console.Schema.AgentMessage do
   schema "agent_messages" do
     field :role,    Console.Schema.Chat.Role
     field :message, :binary
-    field :seq,     :integer
+    field :seq,     :integer, writable: :never, read_after_writes: true
 
     embeds_one :cost, Cost, on_replace: :update do
       field :total,  :float
@@ -52,14 +52,14 @@ defmodule Console.Schema.AgentMessage do
     from(ap in query, order_by: ^order)
   end
 
-  @valid ~w(agent_run_id message)a
+  @valid ~w(agent_run_id message role)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:cost, with: &cost_changeset/2)
     |> cast_embed(:metadata, with: &metadata_changeset/2)
-    |> validate_required(@valid)
+    |> validate_required(~w(role message)a)
   end
 
   defp cost_changeset(model, attrs) do

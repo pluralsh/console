@@ -53,7 +53,7 @@ defmodule Console.Schema.SentinelRunJob do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
-  @valid ~w(check format status cluster_id sentinel_run_id)a
+  @valid ~w(check format status cluster_id output sentinel_run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

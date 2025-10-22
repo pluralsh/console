@@ -81,6 +81,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def share_agent_run(%{id: id}, %{context: %{current_user: user}}),
     do: Agents.share_agent_run(id, user)
 
+  def create_agent_message(%{run_id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
+    do: Agents.create_agent_message(attrs, id, cluster)
+
   defp runtime_filters(query, args) do
     Enum.reduce(args, query, fn
       {:type, t}, q when not is_nil(t) -> AgentRuntime.for_type(q, t)

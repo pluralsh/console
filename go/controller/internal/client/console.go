@@ -173,6 +173,7 @@ type ConsoleClient interface {
 	DeleteSentinel(ctx context.Context, id string) error
 	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 	UpdateSentinel(ctx context.Context, id string, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
+	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

@@ -3,6 +3,7 @@ import { SentinelFragment, SentinelRunFragment } from 'generated/graphql'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
+import { InlineA } from 'components/utils/typography/Text'
 import { formatLocalizedDateTime, fromNow } from '../../../../utils/datetime'
 import { SentinelStatusChip } from '../SentinelsTableCols'
 
@@ -25,9 +26,11 @@ export function SentinelDetailsSidecar({
           {sentinel.checks && (
             <SidecarItem heading="Checks">{sentinel.checks.length}</SidecarItem>
           )}
-          {sentinel.repository?.url && (
+          {sentinel.repository?.httpsPath && (
             <SidecarItem heading="Source">
-              {sentinel.repository.url}
+              <InlineA href={sentinel.repository.httpsPath}>
+                {sentinel.repository.httpsPath}
+              </InlineA>
             </SidecarItem>
           )}
           <SidecarItem heading="ID">{sentinel.id}</SidecarItem>
@@ -55,7 +58,7 @@ export function SentinelRunSidecar({
       ) : (
         <Sidecar>
           {run.status && (
-            <SidecarItem heading="Status">
+            <SidecarItem heading="Overall status">
               <SentinelStatusChip
                 small
                 filled
@@ -69,15 +72,16 @@ export function SentinelRunSidecar({
               {formatLocalizedDateTime(run.insertedAt)}
             </SidecarItem>
           )}
-          {/* TODO: add when field is available on the query */}
-          {/* {run.completedAt && (
+          {run.completedAt && (
             <SidecarItem heading="Completed">
               {formatLocalizedDateTime(run.completedAt)}
             </SidecarItem>
-          )} */}
-          {run.sentinel?.repository?.url && (
+          )}
+          {run.sentinel?.repository?.httpsPath && (
             <SidecarItem heading="Source">
-              {run.sentinel.repository.url}
+              <InlineA href={run.sentinel.repository.httpsPath}>
+                {run.sentinel.repository.httpsPath}
+              </InlineA>
             </SidecarItem>
           )}
         </Sidecar>

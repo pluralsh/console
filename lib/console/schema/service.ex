@@ -341,7 +341,7 @@ defmodule Console.Schema.Service do
   end
 
   def stable(query \\ __MODULE__) do
-    at = Timex.now() |> Timex.shift(minutes: -5)
+    at = Timex.now() |> Timex.shift(minutes: -10)
     from(s in query, where: s.status != :stale or coalesce(s.updated_at, s.inserted_at) <= ^at)
   end
 
@@ -375,8 +375,10 @@ defmodule Console.Schema.Service do
 
   def ai_pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(a in query,
-      where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now,
+    from(s in query,
+      join: c in ^Cluster.health(Cluster, true),
+        on: c.id == s.cluster_id,
+      where: (is_nil(s.ai_poll_at) or s.ai_poll_at < ^now),
       order_by: [asc: :ai_poll_at]
     )
   end

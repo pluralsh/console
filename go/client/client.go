@@ -22,6 +22,7 @@ type ConsoleClient interface {
 	UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error)
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
+	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
 	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -69,6 +70,7 @@ type ConsoleClient interface {
 	MyCluster(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyCluster, error)
 	UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error)
 	GetGlobalServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeployment, error)
+	GetGlobalServiceDeploymentByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeploymentByName, error)
 	CreateGlobalServiceDeployment(ctx context.Context, serviceID string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeployment, error)
 	CreateGlobalServiceDeploymentFromTemplate(ctx context.Context, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeploymentFromTemplate, error)
 	UpdateGlobalServiceDeployment(ctx context.Context, id string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGlobalServiceDeployment, error)
@@ -10129,6 +10131,24 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
 	return t.Name
 }
 
+type CreateAgentMessage_CreateAgentMessage struct {
+	ID      string "json:\"id\" graphql:\"id\""
+	Message string "json:\"message\" graphql:\"message\""
+}
+
+func (t *CreateAgentMessage_CreateAgentMessage) GetID() string {
+	if t == nil {
+		t = &CreateAgentMessage_CreateAgentMessage{}
+	}
+	return t.ID
+}
+func (t *CreateAgentMessage_CreateAgentMessage) GetMessage() string {
+	if t == nil {
+		t = &CreateAgentMessage_CreateAgentMessage{}
+	}
+	return t.Message
+}
+
 type ListScmWebhooks_ScmWebhooks_Edges struct {
 	Node *ScmWebhookFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -13281,6 +13301,28 @@ type GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Service stru
 func (t *GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Service) GetID() string {
 	if t == nil {
 		t = &GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Service{}
+	}
+	return t.ID
+}
+
+type GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider) GetID() string {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider{}
+	}
+	return t.ID
+}
+
+type GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service) GetID() string {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service{}
 	}
 	return t.ID
 }
@@ -21435,6 +21477,17 @@ func (t *CreateAgentPullRequest) GetAgentPullRequest() *PullRequestFragment {
 	return t.AgentPullRequest
 }
 
+type CreateAgentMessage struct {
+	CreateAgentMessage *CreateAgentMessage_CreateAgentMessage "json:\"createAgentMessage,omitempty\" graphql:\"createAgentMessage\""
+}
+
+func (t *CreateAgentMessage) GetCreateAgentMessage() *CreateAgentMessage_CreateAgentMessage {
+	if t == nil {
+		t = &CreateAgentMessage{}
+	}
+	return t.CreateAgentMessage
+}
+
 type AddClusterAuditLog struct {
 	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
 }
@@ -21948,6 +22001,17 @@ type GetGlobalServiceDeployment struct {
 func (t *GetGlobalServiceDeployment) GetGlobalService() *GlobalServiceFragment {
 	if t == nil {
 		t = &GetGlobalServiceDeployment{}
+	}
+	return t.GlobalService
+}
+
+type GetGlobalServiceDeploymentByName struct {
+	GlobalService *GlobalServiceFragment "json:\"globalService,omitempty\" graphql:\"globalService\""
+}
+
+func (t *GetGlobalServiceDeploymentByName) GetGlobalService() *GlobalServiceFragment {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName{}
 	}
 	return t.GlobalService
 }
@@ -25410,6 +25474,32 @@ func (c *Client) CreateAgentPullRequest(ctx context.Context, runID string, attri
 
 	var res CreateAgentPullRequest
 	if err := c.Client.Post(ctx, "CreateAgentPullRequest", CreateAgentPullRequestDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentMessageDocument = `mutation CreateAgentMessage ($runId: ID!, $attributes: AgentMessageAttributes!) {
+	createAgentMessage(runId: $runId, attributes: $attributes) {
+		id
+		message
+	}
+}
+`
+
+func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error) {
+	vars := map[string]any{
+		"runId":      runID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentMessage
+	if err := c.Client.Post(ctx, "CreateAgentMessage", CreateAgentMessageDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -29462,6 +29552,56 @@ func (c *Client) GetGlobalServiceDeployment(ctx context.Context, id string, inte
 
 	var res GetGlobalServiceDeployment
 	if err := c.Client.Post(ctx, "GetGlobalServiceDeployment", GetGlobalServiceDeploymentDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetGlobalServiceDeploymentByNameDocument = `query GetGlobalServiceDeploymentByName ($name: String!) {
+	globalService(name: $name) {
+		... GlobalServiceFragment
+	}
+}
+fragment GlobalServiceFragment on GlobalService {
+	id
+	name
+	distro
+	provider {
+		id
+	}
+	service {
+		id
+	}
+	tags {
+		... ClusterTags
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetGlobalServiceDeploymentByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeploymentByName, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetGlobalServiceDeploymentByName
+	if err := c.Client.Post(ctx, "GetGlobalServiceDeploymentByName", GetGlobalServiceDeploymentByNameDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -44212,6 +44352,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunAnalysisDocument:                    "UpdateAgentRunAnalysis",
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
+	CreateAgentMessageDocument:                        "CreateAgentMessage",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",
@@ -44259,6 +44400,7 @@ var DocumentOperationNames = map[string]string{
 	MyClusterDocument:                                 "MyCluster",
 	UpsertVirtualClusterDocument:                      "UpsertVirtualCluster",
 	GetGlobalServiceDeploymentDocument:                "GetGlobalServiceDeployment",
+	GetGlobalServiceDeploymentByNameDocument:          "GetGlobalServiceDeploymentByName",
 	CreateGlobalServiceDeploymentDocument:             "CreateGlobalServiceDeployment",
 	CreateGlobalServiceDeploymentFromTemplateDocument: "CreateGlobalServiceDeploymentFromTemplate",
 	UpdateGlobalServiceDeploymentDocument:             "UpdateGlobalServiceDeployment",
