@@ -480,6 +480,8 @@ export type AgentRuntime = {
   cluster?: Maybe<Cluster>;
   /** the policy for creating runs on this runtime */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** whether this is the default runtime for coding agents */
+  default?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this runtime */
@@ -503,6 +505,8 @@ export type AgentRuntimeAttributes = {
   aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
+  /** whether this is the default runtime for coding agents */
+  default?: InputMaybe<Scalars['Boolean']['input']>;
   /** the name of this runtime */
   name: Scalars['String']['input'];
   /** the type of this runtime */
