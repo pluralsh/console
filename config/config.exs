@@ -18,7 +18,7 @@ config :console,
     plural_login: false
 
 config :console, ConsoleWeb.Endpoint,
-  adapter: Bandit.PhoenixAdapter,
+  # adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   secret_key_base: "1rkd5+lxJbdTadyxW7qF/n1fNzKPV010PKf8SEGmUrXwMw0iAZyoyZgWEwr6nmCJ",
   render_errors: [view: ConsoleWeb.ErrorView, accepts: ~w(html json)],
