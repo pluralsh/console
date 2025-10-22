@@ -22,6 +22,7 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -37,7 +38,6 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -156,7 +156,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
+	existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(globalService.ConsoleName())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

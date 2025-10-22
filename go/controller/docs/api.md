@@ -1600,6 +1600,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `name` _string_ | Name of this service.<br />If not provided, the name from GlobalService.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags specify a set of key-value pairs used to select target clusters for this global service.<br />Only clusters that match all specified tags will be included in the deployment scope.<br />This provides a flexible mechanism for targeting specific cluster groups or environments. |  | Optional: \{\} <br /> |
 | `reparent` _boolean_ | Reparent indicates whether this global service should take ownership of existing<br />Plural services that match the targeting criteria. When true, existing services<br />will be brought under the management of this GlobalService resource. |  | Optional: \{\} <br /> |
 | `interval` _string_ | Interval specifies the reconciliation interval for the global service.<br />This controls how frequently the controller checks and updates the service deployments<br />across target clusters. Defaults to 10 minutes if not specified. |  | Optional: \{\} <br /> |
