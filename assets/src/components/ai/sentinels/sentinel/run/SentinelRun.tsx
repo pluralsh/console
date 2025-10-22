@@ -22,7 +22,7 @@ import {
 } from 'routes/aiRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { SentinelStatusChip } from '../../SentinelsTableCols'
-import { SentinelDetailsPageWrapper } from '../Sentinel'
+import { DetailsPageWithSidecarWrapper } from '../Sentinel'
 import { getRunNameFromId } from '../SentinelRunsTable'
 import { SentinelRunSidecar } from '../SentinelSidecars'
 import { SentinelRunChecksTable } from './SentinelRunChecksTable'
@@ -82,7 +82,7 @@ export function SentinelRun() {
     )
 
   return (
-    <SentinelDetailsPageWrapper
+    <DetailsPageWithSidecarWrapper
       header={
         <>
           <StackedText

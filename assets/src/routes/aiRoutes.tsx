@@ -8,6 +8,8 @@ import { Navigate, Route } from 'react-router-dom'
 import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
+  AI_AGENT_RUNS_ABS_PATH,
+  AI_AGENT_RUNS_PARAM_RUN_ID,
   AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
@@ -18,6 +20,7 @@ import {
   AI_THREADS_REL_PATH,
 } from './aiRoutesConsts'
 import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
+import { AIAgentRun } from 'components/ai/agent-runs/AIAgentRun.tsx'
 
 export const aiRoutes = [
   <Route
@@ -54,6 +57,7 @@ export const aiRoutes = [
       element={<Sentinels />}
     />
   </Route>,
+  // other sentinel routes
   <Route
     path={`${AI_SENTINELS_ABS_PATH}/:id`}
     element={<Sentinel />}
@@ -61,5 +65,10 @@ export const aiRoutes = [
   <Route
     path={`${AI_SENTINELS_ABS_PATH}/:id/${AI_SENTINELS_RUNS_REL_PATH}/:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`}
     element={<SentinelRun />}
+  />,
+  // other agent routes
+  <Route
+    path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}
+    element={<AIAgentRun />}
   />,
 ]
