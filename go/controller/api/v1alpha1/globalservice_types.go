@@ -84,6 +84,11 @@ func (gs *GlobalService) SetCondition(condition metav1.Condition) {
 // It enables the deployment and management of services across multiple Kubernetes clusters
 // with flexible targeting, templating, and lifecycle management capabilities.
 type GlobalServiceSpec struct {
+	// Name of this service.
+	// If not provided, the name from GlobalService.ObjectMeta will be used.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
+
 	// Tags specify a set of key-value pairs used to select target clusters for this global service.
 	// Only clusters that match all specified tags will be included in the deployment scope.
 	// This provides a flexible mechanism for targeting specific cluster groups or environments.
@@ -226,4 +231,13 @@ func (tc *TemplateContext) Attributes() *console.TemplateContextAttributes {
 	}
 
 	return &console.TemplateContextAttributes{Raw: lo.ToPtr(string(tc.Raw.Raw))}
+}
+
+// ConsoleName implements NamespacedPluralResource interface
+func (gs *GlobalService) ConsoleName() string {
+	if gs.Spec.Name != nil && len(*gs.Spec.Name) > 0 {
+		return *gs.Spec.Name
+	}
+
+	return gs.Name
 }

@@ -109,6 +109,11 @@ spec:
                   Management clusters typically host the Plural Console and operators, and may
                   require special consideration for service deployments.
                 type: boolean
+              name:
+                description: |-
+                  Name of this service.
+                  If not provided, the name from GlobalService.ObjectMeta will be used.
+                type: string
               projectRef:
                 description: |-
                   ProjectRef constrains the global service scope to clusters within a specific project.
