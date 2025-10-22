@@ -183,7 +183,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	}
 
 	if service != nil {
-		if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService, r.Scheme); err != nil {
+		if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService.DeepCopy(), r.Scheme); err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}

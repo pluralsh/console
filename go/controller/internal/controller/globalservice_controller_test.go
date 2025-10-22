@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -156,8 +157,11 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, serviceName))
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreateGlobalService", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
+			fakeConsoleClient.On("GetGlobalService", mock.Anything).Return(test.returnCreateService, nil)
+
 			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
@@ -408,7 +412,10 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, serviceName))
 			fakeConsoleClient.On("CreateGlobalServiceFromTemplate", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
+			fakeConsoleClient.On("GetGlobalService", mock.Anything).Return(test.returnCreateService, nil)
+
 			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
