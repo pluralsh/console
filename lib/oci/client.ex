@@ -2,7 +2,10 @@ defmodule Console.OCI.Client do
   alias Console.OCI.{Tags, Manifest}
   require Logger
 
-  @manifest_types ~w(application/vnd.oci.image.manifest.v1+json application/vnd.docker.container.image.v1+json)
+  @manifest_types Enum.join(
+    ~w(application/vnd.oci.image.manifest.v1+json application/vnd.docker.container.image.v1+json),
+    ", "
+  )
 
   defstruct [:client, :auth_client, :url]
 

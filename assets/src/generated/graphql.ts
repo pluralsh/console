@@ -9436,7 +9436,8 @@ export type RootQueryTypeGitRepositoryArgs = {
 
 
 export type RootQueryTypeGlobalServiceArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
