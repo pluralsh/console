@@ -190,6 +190,17 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 		It("should requeue when binding is not ready", func() {
 			catalog := &v1alpha1.Catalog{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, catalog)).NotTo(HaveOccurred())
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Catalog{
+				ObjectMeta: metav1.ObjectMeta{Name: catalogName, Namespace: namespace},
+			}, func(c *v1alpha1.Catalog) {
+				c.Spec.Bindings = &v1alpha1.CatalogBindings{
+					Read: []v1alpha1.Binding{
+						{
+							UserEmail: lo.ToPtr("chaneged@plural.sh"),
+						},
+					},
+				}
+			})).To(Succeed())
 
 			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
