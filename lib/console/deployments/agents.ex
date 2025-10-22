@@ -15,12 +15,14 @@ defmodule Console.Deployments.Agents do
     User,
     Group,
     ScmConnection,
-    PullRequest
+    PullRequest,
+    AgentMessage
   }
 
   @type error :: Console.error
   @type agent_run_resp :: {:ok, AgentRun.t} | error
   @type agent_runtime_resp :: {:ok, AgentRuntime.t} | error
+  @type agent_msg_resp :: {:ok, AgentMessage.t} | error
   @type history_resp :: {:ok, AgentPromptHistory.t} | error
 
   def get_agent_runtime!(id), do: Repo.get!(AgentRuntime, id)
@@ -126,7 +128,7 @@ defmodule Console.Deployments.Agents do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_agent_run!(run_id)
-      |> Repo.preload([:runtime])
+      |> Repo.preload([:runtime, :messages])
       |> case do
         %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
           {:ok, run}
@@ -140,6 +142,28 @@ defmodule Console.Deployments.Agents do
     end)
     |> execute(extract: :update)
     |> notify(:update)
+  end
+
+  @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp
+  def create_agent_message(attrs, run_id, %Cluster{id: cluster_id}) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> Repo.preload([:runtime])
+      |> case do
+        %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
+          {:ok, run}
+        _ ->
+          {:error, "clusters can only update their own agent runs"}
+      end
+    end)
+    |> add_operation(:create, fn %{run: run} ->
+      %AgentMessage{agent_run_id: run.id}
+      |> AgentMessage.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> execute(extract: :create)
+    |> notify(:create)
   end
 
   @doc """
@@ -266,5 +290,7 @@ defmodule Console.Deployments.Agents do
     do: handle_notify(PubSub.AgentRunCreated, run)
   defp notify({:ok, %AgentRun{} = run}, :update),
     do: handle_notify(PubSub.AgentRunUpdated, run)
+  defp notify({:ok, %AgentMessage{} = msg}, :create),
+    do: handle_notify(PubSub.AgentMessageCreated, msg)
   defp notify(pass, _), do: pass
 end

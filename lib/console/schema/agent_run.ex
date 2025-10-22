@@ -45,8 +45,8 @@ defmodule Console.Schema.AgentRun do
     belongs_to :session, AgentSession
 
     has_many :pull_requests, PullRequest
-    has_many :messages, AgentMessage, foreign_key: :agent_run_id
-    has_many :prompts, AgentPrompt, foreign_key: :agent_run_id
+    has_many :messages, AgentMessage, on_replace: :delete
+    has_many :prompts, AgentPrompt, on_replace: :delete
 
     timestamps()
   end

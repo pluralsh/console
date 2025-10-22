@@ -39,3 +39,7 @@ end
 defimpl Console.GraphQl.Topic, for: Console.Schema.Service do
   def infer(%{id: id}, _), do: [service_deployment_delta: "services:#{id}"]
 end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.AgentMessage do
+  def infer(%{agent_run_id: id}, _), do: [agent_message_delta: "agent_runs:msgs:#{id}"]
+end

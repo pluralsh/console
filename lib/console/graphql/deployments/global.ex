@@ -201,7 +201,8 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :global_service, :global_service do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       safe_resolve &Deployments.resolve_global/2
     end
