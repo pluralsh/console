@@ -162,13 +162,20 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	}
 
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
-	if errors.IsNotFound(err) {
-		globalService.Status.ID = nil
-		return globalService.Spec.Reconciliation.Requeue(), r.handleCreate(sha, globalService, service, attr)
-	}
-	if err != nil {
+	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return globalService.Spec.Reconciliation.Requeue(), err
+		return ctrl.Result{}, err
+	}
+	if existingGlobalService == nil {
+		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		existingGlobalService, err = r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
+		if err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
@@ -260,7 +267,7 @@ func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) 
 // SetupWithManager sets up the controller with the Manager.
 func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                           // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.GlobalServiceList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.GlobalService{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
