@@ -50,6 +50,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   def sentinel_run_jobs(%{id: id}, args, _) do
     SentinelRunJob.for_sentinel_run(id)
     |> SentinelRunJob.ordered()
+    |> run_job_filters(args)
     |> paginate(args)
   end
 
@@ -83,6 +84,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   def sentinel_filters(query, args) do
     Enum.reduce(args, query, fn
       {:status, status}, q -> Sentinel.for_status(q, status)
+      _, q -> q
+    end)
+  end
+
+  def run_job_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:check, check}, q when not is_nil(check) -> SentinelRunJob.for_check(q, check)
       _, q -> q
     end)
   end
