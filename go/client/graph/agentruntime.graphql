@@ -99,6 +99,13 @@ mutation CreateAgentPullRequest($runId: ID!, $attributes: AgentPullRequestAttrib
     }
 }
 
+mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
+  createAgentMessage(runId: $runId, attributes: $attributes) {
+    id
+    message
+  }
+}
+
 fragment AgentRuntimeFragment on AgentRuntime {
     id
     name
