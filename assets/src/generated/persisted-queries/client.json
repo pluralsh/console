@@ -2,6 +2,26 @@
    "format": "apollo-persisted-query-manifest",
    "version": 1,
    "operations": {
+      "sha256:5bf7d1888d479fbba239a4cd50366ed46be98a1c5ea77b33493dd470f587defb": {
+         "type": "query",
+         "name": "AgentRuns",
+         "body": "query AgentRuns($after: String, $first: Int = 100) {\n  agentRuns(after: $after, first: $first) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...AgentRunTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  runtime {\n    id\n    name\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    id\n    title\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:d3da3fff85318ea9cb11ebb10baa83b7abc8e02da63ab717ea6f6ee8255de5fe": {
+         "type": "query",
+         "name": "AgentRun",
+         "body": "query AgentRun($id: ID!) {\n  agentRun(id: $id) {\n    ...AgentRun\n    __typename\n  }\n}\n\nfragment AgentRun on AgentRun {\n  ...AgentRunTiny\n  messages {\n    ...AgentMessage\n    __typename\n  }\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  runtime {\n    id\n    name\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    id\n    title\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:f611ada340a6c1dba6e03c07f0fef037ffd6e08dccf19ec7243c266abef21036": {
+         "type": "query",
+         "name": "AgentRuntimes",
+         "body": "query AgentRuntimes($after: String, $first: Int = 100) {\n  agentRuntimes(after: $after, first: $first) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...AgentRuntime\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    id\n    name\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:95d8e5b63cbacc0348509ef3c8db0e309e5f481d7d0a28dec7e357ed27cbab85": {
+         "type": "query",
+         "name": "AgentRuntime",
+         "body": "query AgentRuntime($id: ID!) {\n  agentRuntime(id: $id) {\n    ...AgentRuntime\n    __typename\n  }\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    id\n    name\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:2d42fdb5ee1326b3b930fde636b9322bf409a2ab13f4861d8f8b38cbbc5bb294": {
          "type": "query",
          "name": "ChatThreads",

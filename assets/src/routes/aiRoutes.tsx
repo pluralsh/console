@@ -8,6 +8,7 @@ import { Navigate, Route } from 'react-router-dom'
 import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
+  AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_ABS_PATH,
@@ -16,6 +17,7 @@ import {
   AI_SENTINELS_RUNS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from './aiRoutesConsts'
+import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
 
 export const aiRoutes = [
   <Route
@@ -34,6 +36,10 @@ export const aiRoutes = [
     <Route
       path={AI_AGENT_SESSIONS_REL_PATH}
       element={<AIAgentSessions />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_REL_PATH}
+      element={<AIAgentRuns />}
     />
     <Route
       path={AI_THREADS_REL_PATH}
