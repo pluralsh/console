@@ -8993,6 +8993,7 @@ export type RootQueryTypeAgentRunsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  runtimeId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -10684,6 +10685,7 @@ export type SentinelRun = {
 export type SentinelRunJobsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  check?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };

@@ -44,6 +44,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def agent_runs(args, %{context: %{current_user: user}}) do
     AgentRun.ordered()
     |> AgentRun.for_user(user.id)
+    |> run_filters(args)
     |> paginate(args)
   end
 
@@ -87,6 +88,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   defp runtime_filters(query, args) do
     Enum.reduce(args, query, fn
       {:type, t}, q when not is_nil(t) -> AgentRuntime.for_type(q, t)
+      _, q -> q
+    end)
+  end
+
+  defp run_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:runtime_id, id}, q when not is_nil(id) -> AgentRun.for_runtime(q, id)
       _, q -> q
     end)
   end

@@ -441,7 +441,7 @@ type RootQueryType {
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
 
-  agentRuns(after: String, first: Int, before: String, last: Int): AgentRunConnection
+  agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
   agentRuntime(id: ID!): AgentRuntime
 
@@ -1892,7 +1892,7 @@ type SentinelRun {
   "the results of the run"
   results: [SentinelRunResult]
 
-  jobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
+  jobs(after: String, first: Int, before: String, last: Int, check: String): SentinelRunJobConnection
 
   insertedAt: DateTime
 

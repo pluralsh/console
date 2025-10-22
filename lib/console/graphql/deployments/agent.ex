@@ -324,6 +324,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     connection field :agent_runs, node_type: :agent_run do
       middleware Authenticated
+      arg :runtime_id, :id
 
       resolve &Deployments.agent_runs/2
     end
