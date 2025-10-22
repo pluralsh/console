@@ -48,7 +48,7 @@ export function Sentinel() {
     )
 
   return (
-    <SentinelDetailsPageWrapper
+    <DetailsPageWithSidecarWrapper
       header={
         <>
           <StackedText
@@ -98,7 +98,7 @@ export function Sentinel() {
   )
 }
 
-export function SentinelDetailsPageWrapper({
+export function DetailsPageWithSidecarWrapper({
   header,
   content,
   sidecar,

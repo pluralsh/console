@@ -18,6 +18,7 @@ export const AI_SENTINELS_ABS_PATH = `${AI_ABS_PATH}/${AI_SENTINELS_REL_PATH}`
 export const AI_SENTINELS_RUNS_PARAM_SENTINEL_ID = 'id'
 export const AI_SENTINELS_RUNS_PARAM_RUN_ID = 'runId'
 export const AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID = 'jobId'
+export const AI_AGENT_RUNS_PARAM_RUN_ID = 'runId'
 
 export const getSentinelAbsPath = (id: string) =>
   `${AI_SENTINELS_ABS_PATH}/${id}`

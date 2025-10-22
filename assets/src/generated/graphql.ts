@@ -12577,7 +12577,7 @@ export type YamlOverlayAttributes = {
 
 export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null };
 
-export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null };
+export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null };
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -12590,6 +12590,7 @@ export type AgentMessageCostFragment = { __typename?: 'AgentMessageCost', total:
 export type AgentRunsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  runtimeId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -12600,7 +12601,7 @@ export type AgentRunQueryVariables = Exact<{
 }>;
 
 
-export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null } | null };
+export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null } | null };
 
 export type AgentRuntimesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -12616,6 +12617,14 @@ export type AgentRuntimeQueryVariables = Exact<{
 
 
 export type AgentRuntimeQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type CreateAgentRunMutationVariables = Exact<{
+  runtimeId: Scalars['ID']['input'];
+  attributes: AgentRunAttributes;
+}>;
+
+
+export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null } | null };
 
 export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
 
@@ -15867,6 +15876,16 @@ export const AgentRunFragmentDoc = gql`
   ...AgentRunTiny
   messages {
     ...AgentMessage
+  }
+  todos {
+    title
+    description
+    done
+  }
+  analysis {
+    summary
+    analysis
+    bullets
   }
 }
     ${AgentRunTinyFragmentDoc}
@@ -20137,8 +20156,8 @@ export const VulnerabilityReportConnectionFragmentDoc = gql`
     ${PageInfoFragmentDoc}
 ${VulnerabilityReportTinyFragmentDoc}`;
 export const AgentRunsDocument = gql`
-    query AgentRuns($after: String, $first: Int = 100) {
-  agentRuns(after: $after, first: $first) {
+    query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
+  agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
     pageInfo {
       ...PageInfo
     }
@@ -20166,6 +20185,7 @@ ${AgentRunTinyFragmentDoc}`;
  *   variables: {
  *      after: // value for 'after'
  *      first: // value for 'first'
+ *      runtimeId: // value for 'runtimeId'
  *   },
  * });
  */
@@ -20314,6 +20334,40 @@ export type AgentRuntimeQueryHookResult = ReturnType<typeof useAgentRuntimeQuery
 export type AgentRuntimeLazyQueryHookResult = ReturnType<typeof useAgentRuntimeLazyQuery>;
 export type AgentRuntimeSuspenseQueryHookResult = ReturnType<typeof useAgentRuntimeSuspenseQuery>;
 export type AgentRuntimeQueryResult = Apollo.QueryResult<AgentRuntimeQuery, AgentRuntimeQueryVariables>;
+export const CreateAgentRunDocument = gql`
+    mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+  createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+    ...AgentRun
+  }
+}
+    ${AgentRunFragmentDoc}`;
+export type CreateAgentRunMutationFn = Apollo.MutationFunction<CreateAgentRunMutation, CreateAgentRunMutationVariables>;
+
+/**
+ * __useCreateAgentRunMutation__
+ *
+ * To run a mutation, you first call `useCreateAgentRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAgentRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAgentRunMutation, { data, loading, error }] = useCreateAgentRunMutation({
+ *   variables: {
+ *      runtimeId: // value for 'runtimeId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateAgentRunMutation(baseOptions?: Apollo.MutationHookOptions<CreateAgentRunMutation, CreateAgentRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAgentRunMutation, CreateAgentRunMutationVariables>(CreateAgentRunDocument, options);
+      }
+export type CreateAgentRunMutationHookResult = ReturnType<typeof useCreateAgentRunMutation>;
+export type CreateAgentRunMutationResult = Apollo.MutationResult<CreateAgentRunMutation>;
+export type CreateAgentRunMutationOptions = Apollo.BaseMutationOptions<CreateAgentRunMutation, CreateAgentRunMutationVariables>;
 export const ChatThreadsDocument = gql`
     query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
   chatThreads(first: $first, last: $last, after: $after, before: $before, q: $q) {
@@ -34138,6 +34192,7 @@ export const namedOperations = {
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate'
   },
   Mutation: {
+    CreateAgentRun: 'CreateAgentRun',
     HybridChat: 'HybridChat',
     ConfirmChat: 'ConfirmChat',
     ConfirmChatPlan: 'ConfirmChatPlan',

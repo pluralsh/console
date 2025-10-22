@@ -21,6 +21,16 @@ fragment AgentRun on AgentRun {
   messages {
     ...AgentMessage
   }
+  todos {
+    title
+    description
+    done
+  }
+  analysis {
+    summary
+    analysis
+    bullets
+  }
 }
 
 fragment AgentRuntime on AgentRuntime {
@@ -79,8 +89,8 @@ fragment AgentMessageCost on AgentMessageCost {
   }
 }
 
-query AgentRuns($after: String, $first: Int = 100) {
-  agentRuns(after: $after, first: $first) {
+query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
+  agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
     pageInfo {
       ...PageInfo
     }
@@ -114,5 +124,11 @@ query AgentRuntimes($after: String, $first: Int = 100) {
 query AgentRuntime($id: ID!) {
   agentRuntime(id: $id) {
     ...AgentRuntime
+  }
+}
+
+mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+  createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+    ...AgentRun
   }
 }
