@@ -32,6 +32,9 @@ spec:
     kind: Cluster
     name: existing
     namespace: default
+  reconciliation:
+    driftDetection: true
+    interval: 1m
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: GlobalService
@@ -42,3 +45,6 @@ spec:
   serviceRef:
     name: guestbook
     namespace: default
+  reconciliation:
+    driftDetection: true
+    interval: 1m

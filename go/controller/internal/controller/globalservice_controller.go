@@ -156,17 +156,13 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	if !globalService.Status.HasID() {
-		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
-		return ctrl.Result{}, r.handleCreate(sha, globalService, service, attr)
-	}
-
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if existingGlobalService == nil {
+		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
 		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
