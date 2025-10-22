@@ -13,10 +13,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
     |> allow(actor(ctx), :read)
   end
 
-  def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
+  def resolve_global(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
+    Global.get_by_name!(name)
+    |> allow(user, :read)
+  end
+  def resolve_global(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
     Global.get!(id)
     |> allow(user, :read)
   end
+  def resolve_global(_, _), do: {:error, "Must specify either id or name"}
 
   def list_global_services(args, %{context: %{current_user: user}}) do
     GlobalService.ordered()
