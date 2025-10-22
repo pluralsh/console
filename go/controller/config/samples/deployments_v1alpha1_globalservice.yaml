@@ -4,7 +4,7 @@ metadata:
   name: existing
   namespace: default
 spec:
-  handle: lukasz
+  handle: mgmt
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: GitRepository

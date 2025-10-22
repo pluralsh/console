@@ -190,6 +190,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	}
 
 	globalService.Status.SHA = &sha
+	globalService.Status.ID = &existingGlobalService.ID
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return globalService.Spec.Reconciliation.Requeue(), nil
@@ -235,8 +236,6 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	}
 	global.Status.ID = &createGlobalService.ID
 	global.Status.SHA = &sha
-	utils.MarkCondition(global.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(global.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return nil
 }
 
