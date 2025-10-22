@@ -1243,6 +1243,9 @@ input AgentRuntimeAttributes {
 
   "whether this runtime uses the built-in Plural AI proxy"
   aiProxy: Boolean
+
+  "whether this is the default runtime for coding agents"
+  default: Boolean
 }
 
 input AgentBindingAttributes {
@@ -1406,6 +1409,9 @@ type AgentRuntime {
 
   "whether this runtime uses the built-in Plural AI proxy"
   aiProxy: Boolean
+
+  "whether this is the default runtime for coding agents"
+  default: Boolean
 
   "the cluster this runtime is running on"
   cluster: Cluster

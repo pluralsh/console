@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :type,                non_null(:agent_runtime_type), description: "the type of this runtime"
     field :create_bindings,     list_of(:agent_binding_attributes), description: "the policy for creating runs on this runtime"
     field :ai_proxy,            :boolean, description: "whether this runtime uses the built-in Plural AI proxy"
+    field :default,             :boolean, description: "whether this is the default runtime for coding agents"
   end
 
   input_object :agent_binding_attributes do
@@ -103,6 +104,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :name,            non_null(:string), description: "the name of this runtime"
     field :type,            non_null(:agent_runtime_type), description: "the type of this runtime"
     field :ai_proxy,        :boolean, description: "whether this runtime uses the built-in Plural AI proxy"
+    field :default,         :boolean, description: "whether this is the default runtime for coding agents"
 
     field :cluster,         :cluster, resolve: dataloader(Deployments), description: "the cluster this runtime is running on"
     field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "the policy for creating runs on this runtime"
