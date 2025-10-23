@@ -1,6 +1,5 @@
 import { AIAgentRun } from 'components/ai/agent-runs/AIAgentRun.tsx'
-
-import { AIAgentRuntimes } from 'components/ai/agent-runs/AIAgentRuntimes.tsx'
+import { AIAgentRuntimes } from 'components/ai/agent-runtimes/AIAgentRuntimes.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { McpServers } from 'components/ai/mcp/McpServers.tsx'
@@ -32,7 +31,7 @@ import {
   getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
 import { jobRoutes } from './jobRoutes.tsx'
-import { AIAgentRuns } from 'components/ai/agent-runtimes/AIAgentRuns.tsx'
+import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
 
 export const aiRoutes = [
   <Route

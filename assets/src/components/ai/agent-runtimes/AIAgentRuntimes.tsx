@@ -12,15 +12,16 @@ import { AgentRuntimeFragment, useAgentRuntimesQuery } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ClusterNameAndIcon } from '../../cd/services/ServicesColumns.tsx'
 import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal.tsx'
 
 export function AIAgentRuntimes() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useAgentRuntimesQuery, keyPath: ['agentRuntimes'] },
-      {}
-    )
+    useFetchPaginatedData({
+      queryHook: useAgentRuntimesQuery,
+      keyPath: ['agentRuntimes'],
+    })
 
   const runtimes = useMemo(
     () => mapExistingNodes(data?.agentRuntimes),
@@ -89,13 +90,14 @@ const columns = [
     header: 'Cluster',
     cell: ({ getValue }) => <ClusterNameAndIcon cluster={getValue()} />,
   }),
-  columnHelper.accessor((runtime) => truncate(runtime.name, { length: 60 }), {
+  columnHelper.accessor((runtime) => runtime, {
     id: 'actions',
     header: '',
     meta: { gridTemplate: `fit-content(100px)` },
-    cell: function Cell({ row: { original } }) {
+    cell: function Cell({ getValue }) {
+      const { name, type, createBindings } = getValue()
+      const bindings = createBindings?.filter(isNonNullable) ?? []
       const [open, setOpen] = useState(false)
-
       return (
         <>
           <IconFrame
@@ -106,12 +108,11 @@ const columns = [
             type="floating"
           />
           <AIAgentRuntimePermissionsModal
-            id={original.id}
-            header={`${original.name} agent runtime permissions`}
-            name={original.name}
-            bindings={original.createBindings}
             open={open}
             onClose={() => setOpen(false)}
+            name={name}
+            type={type}
+            initialBindings={bindings}
           />
         </>
       )
