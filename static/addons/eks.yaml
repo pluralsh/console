@@ -928,7 +928,25 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.51.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.51.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.50.2-eksbuild.1
     compatibilities:
     - '1.34'
     - '1.33'
@@ -2433,6 +2451,15 @@
   publisher: eks
 - name: aws-mountpoint-s3-csi-driver
   versions:
+  - version: v2.1.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v2.0.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -2767,7 +2794,25 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.19.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.19.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.18.3-eksbuild.1
     compatibilities:
     - '1.34'
     - '1.33'
@@ -3518,6 +3563,13 @@
   publisher: Cribl
 - name: cyberark_cert-manager-eks
   versions:
+  - version: v1.18.3-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.18.2-eksbuild.1
     compatibilities:
     - '1.33'
