@@ -39,8 +39,7 @@ fragment AgentRuntime on AgentRuntime {
   type
   aiProxy
   cluster {
-    id
-    name
+    ...ClusterTiny
   }
   default
   createBindings {
