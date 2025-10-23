@@ -23,16 +23,33 @@ func (c *client) CreateProject(ctx context.Context, attributes console.ProjectAt
 }
 
 func (c *client) GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
 
 	resourceName := lo.If(id != nil, id).Else(name)
 	response, err := c.consoleClient.GetProject(ctx, id, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+	if err == nil && (response == nil || response.Project == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.Project, err
+}
+
+func (c *client) GetProjectTiny(ctx context.Context, id, name *string) (*console.GetProjectTiny_Project, error) {
+	if id == nil && name == nil {
+		return nil, fmt.Errorf("no id or name specified")
+	}
+
+	resourceName := lo.If(id != nil, id).Else(name)
+	response, err := c.consoleClient.GetProjectTiny(ctx, id, name)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
 	}
@@ -62,7 +79,7 @@ func (c *client) DeleteProject(ctx context.Context, id string) error {
 }
 
 func (c *client) IsProjectExists(ctx context.Context, id, name *string) (bool, error) {
-	scm, err := c.GetProject(ctx, id, name)
+	scm, err := c.GetProjectTiny(ctx, id, name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

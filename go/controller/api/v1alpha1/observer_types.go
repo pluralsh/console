@@ -141,6 +141,11 @@ type ObserverSpec struct {
 	// This helps organize observers and control access permissions.
 	// +kubebuilder:validation:Optional
 	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // ObserverAction defines an automated response to execute when the observer detects changes.

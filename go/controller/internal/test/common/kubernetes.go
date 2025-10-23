@@ -2,18 +2,13 @@ package common_test
 
 import (
 	"context"
-	"fmt"
-	"reflect"
-	"sort"
-	"strings"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sort"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Patcher[PatchObject client.Object] func(object PatchObject)
@@ -93,17 +88,4 @@ func SanitizeStatusConditions(status v1alpha1.Status) v1alpha1.Status {
 	})
 
 	return status
-}
-
-func AsGroupResource(groupName string, obj runtime.Object) schema.GroupResource {
-	t := reflect.TypeOf(obj)
-	if t.Kind() != reflect.Pointer {
-		panic("All types must be pointers to structs.")
-	}
-	t = t.Elem()
-
-	return schema.GroupResource{
-		Group:    groupName,
-		Resource: fmt.Sprintf("%ss", strings.ToLower(t.Name())),
-	}
 }

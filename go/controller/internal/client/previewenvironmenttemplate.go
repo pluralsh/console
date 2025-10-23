@@ -17,10 +17,6 @@ func (c *client) DeletePreviewEnvironmentTemplate(ctx context.Context, id string
 }
 
 func (c *client) GetPreviewEnvironmentTemplate(ctx context.Context, id, name *string) (*console.PreviewEnvironmentTemplateFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}

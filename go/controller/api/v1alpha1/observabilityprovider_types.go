@@ -121,6 +121,11 @@ type ObservabilityProviderSpec struct {
 	// API keys and authentication methods as specified in their respective credential specifications.
 	// +kubebuilder:validation:Optional
 	Credentials *ObservabilityProviderCredentials `json:"credentials,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // ObservabilityProviderCredentials defines the authentication credentials for different observability providers.

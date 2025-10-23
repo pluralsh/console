@@ -69,7 +69,7 @@ fix: --tool ## fix issues found by linters
 .PHONY: test
 test: TOOL = envtest controller-gen mockery
 test: --tool manifests generate genmock fmt vet ## run tests
-	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -vE '/e2e|/benchmark') -v
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test -p 1 $$(go list ./... | grep -vE '/e2e|/benchmark') -v
 
 .PHONY: bench
 bench: ## run benchmarks

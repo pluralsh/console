@@ -3,8 +3,6 @@ package v1alpha1
 import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -54,36 +52,6 @@ func (in *MCPServer) GetServerName() string {
 	return in.Name
 }
 
-func (in *MCPServer) Attributes() console.McpServerAttributes {
-	attrs := console.McpServerAttributes{
-		Name:    in.GetServerName(),
-		URL:     in.Spec.URL,
-		Confirm: in.Spec.Confirm,
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-	}
-
-	if in.Spec.Authentication != nil {
-		attrs.Authentication = &console.McpServerAuthenticationAttributes{
-			Plural: in.Spec.Authentication.Plural,
-		}
-
-		if len(in.Spec.Authentication.Headers) > 0 {
-			attrs.Authentication.Headers = make([]*console.McpHeaderAttributes, 0)
-			for k, v := range in.Spec.Authentication.Headers {
-				attrs.Authentication.Headers = append(attrs.Authentication.Headers, &console.McpHeaderAttributes{
-					Name: k, Value: v,
-				})
-			}
-		}
-	}
-
-	return attrs
-}
-
 func (in *MCPServer) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Spec)
 	if err != nil {
@@ -124,6 +92,11 @@ type MCPServerSpec struct {
 	// an additional safety mechanism for sensitive operations. Defaults to false.
 	// +kubebuilder:validation:Optional
 	Confirm *bool `json:"confirm,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // MCPServerAuthentication defines the authentication configuration for an MCP server.

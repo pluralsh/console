@@ -22,6 +22,11 @@ type ServiceContextSpec struct {
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -66,16 +71,16 @@ func (s *ServiceContext) ConsoleName() string {
 	return s.Name
 }
 
-func (p *ServiceContext) ProjectName() string {
-	if p.Spec.ProjectRef == nil {
+func (s *ServiceContext) ProjectName() string {
+	if s.Spec.ProjectRef == nil {
 		return ""
 	}
 
-	return p.Spec.ProjectRef.Name
+	return s.Spec.ProjectRef.Name
 }
 
-func (p *ServiceContext) HasProjectRef() bool {
-	return p.Spec.ProjectRef != nil
+func (s *ServiceContext) HasProjectRef() bool {
+	return s.Spec.ProjectRef != nil
 }
 
 func (s *ServiceContext) Diff(hasher Hasher) (changed bool, sha string, err error) {

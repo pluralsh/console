@@ -16,6 +16,14 @@ query GetCatalog($id: ID, $name: String) {
     }
 }
 
+query GetCatalogTiny($id: ID, $name: String) {
+    catalog(id: $id, name: $name) {
+        id
+        name
+    }
+}
+
+
 fragment CatalogFragment on Catalog {
     id
     name

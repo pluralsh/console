@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -17,7 +18,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -26,10 +26,8 @@ import (
 // Implements reconcile.Reconciler and types.Controller
 type PrAutomationReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 const (
@@ -48,19 +46,16 @@ const (
 func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read PrAutomation CRD from the K8S API
 	prAutomation := new(v1alpha1.PrAutomation)
 	if err := in.Get(ctx, req.NamespacedName, prAutomation); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkFalse(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, in.Client, prAutomation)
+
+	scope, err := common.NewDefaultScope(ctx, in.Client, prAutomation)
 	if err != nil {
-		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
@@ -79,7 +74,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync PrAutomation CRD with the Console API
 	apiPrAutomation, sha, result, err := in.sync(ctx, prAutomation)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, prAutomation.SetCondition)
+		return common.HandleRequeue(result, err, prAutomation.SetCondition)
 	}
 
 	if apiPrAutomation == nil {
@@ -94,7 +89,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return prAutomation.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (*ctrl.Result, error) {
@@ -122,7 +117,7 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 			// If deletion process started requeue so that we can make sure prAutomation
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
+			return lo.ToPtr(prAutomation.Spec.Reconciliation.Requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted
@@ -140,10 +135,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	}
 
 	if exists && !prAutomation.Status.HasID() {
-		return pra, sha, nil, err
-	}
-
-	if err = in.ensure(prAutomation); err != nil {
 		return pra, sha, nil, err
 	}
 
@@ -176,28 +167,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 
 func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.PrAutomation) {
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
-	if prAutomation.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Create = bindings
-
-	bindings, err = ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	prAutomation.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

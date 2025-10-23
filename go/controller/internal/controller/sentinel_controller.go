@@ -7,6 +7,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
@@ -39,9 +40,6 @@ type SentinelReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := ctrl.LoggerFrom(ctx)
 
@@ -50,18 +48,18 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(sentinel.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, sentinel)
+	scope, err := common.NewDefaultScope(ctx, r.Client, sentinel)
 	if err != nil {
-		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch an object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(sentinel.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -79,23 +77,23 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	repository := &v1alpha1.GitRepository{}
 	if sentinel.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: sentinel.Spec.RepositoryRef.Name, Namespace: sentinel.Spec.RepositoryRef.Namespace}, repository); err != nil {
-			return handleRequeue(nil, err, sentinel.SetCondition)
+			return common.HandleRequeue(nil, err, sentinel.SetCondition)
 		}
 		if !repository.Status.HasID() {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return jitterRequeue(requeueWaitForResources), nil
+			return common.Wait(), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return jitterRequeue(requeueWaitForResources), nil
+			return common.Wait(), nil
 		}
 	}
 	project := &v1alpha1.Project{}
 	if sentinel.Spec.ProjectRef != nil {
 		var res *ctrl.Result
-		project, res, err = GetProject(ctx, r.Client, r.Scheme, sentinel)
+		project, res, err = common.Project(ctx, r.Client, r.Scheme, sentinel)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, sentinel.SetCondition)
+			return common.HandleRequeue(res, err, sentinel.SetCondition)
 		}
 	}
 
@@ -130,7 +128,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sentinel.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return sentinel.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *SentinelReconciler) sync(ctx context.Context, sentinel *v1alpha1.Sentinel, attr *console.SentinelAttributes) (*console.SentinelFragment, error) {
@@ -223,7 +221,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 				}
 
 				if check.Configuration.IntegrationTest.Job != nil {
-					jobSpec, err := gateJobAttributes(check.Configuration.IntegrationTest.Job)
+					jobSpec, err := common.GateJobAttributes(check.Configuration.IntegrationTest.Job)
 					if err != nil {
 						return nil, err
 					}
@@ -273,7 +271,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 
 		exists, err := r.ConsoleClient.IsSentinelExists(ctx, sentinel.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(sentinel.Spec.Reconciliation.Requeue())
 		}
 		if exists {
 			if err := r.ConsoleClient.DeleteSentinel(ctx, sentinel.Status.GetID()); err != nil {
@@ -282,7 +280,7 @@ func (r *SentinelReconciler) addOrRemoveFinalizer(ctx context.Context, sentinel 
 			}
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+			return lo.ToPtr(common.Wait())
 		}
 		// If our finalizer is present, remove it.
 		controllerutil.RemoveFinalizer(sentinel, SentinelFinalizer)

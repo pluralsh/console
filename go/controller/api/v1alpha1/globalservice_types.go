@@ -61,18 +61,17 @@ type GlobalService struct {
 }
 
 // Attributes converts the GlobalService spec to console API attributes for upstream synchronization.
-func (gs *GlobalService) Attributes(providerId, projectId *string) console.GlobalServiceAttributes {
+func (gs *GlobalService) Attributes(projectId *string) console.GlobalServiceAttributes {
 	return console.GlobalServiceAttributes{
-		Name:       gs.Name,
-		Distro:     gs.Spec.Distro,
-		ProviderID: providerId,
-		ProjectID:  projectId,
-		Mgmt:       gs.Spec.Mgmt,
-		Interval:   gs.Spec.Interval,
-		Reparent:   gs.Spec.Reparent,
-		Cascade:    gs.Spec.Cascade.Attributes(),
-		Tags:       gs.Spec.TagsAttribute(),
-		Context:    gs.Spec.Context.Attributes(),
+		Name:      gs.Name,
+		Distro:    gs.Spec.Distro,
+		ProjectID: projectId,
+		Mgmt:      gs.Spec.Mgmt,
+		Interval:  gs.Spec.Interval,
+		Reparent:  gs.Spec.Reparent,
+		Cascade:   gs.Spec.Cascade.Attributes(),
+		Tags:      gs.Spec.TagsAttribute(),
+		Context:   gs.Spec.Context.Attributes(),
 	}
 }
 
@@ -85,6 +84,11 @@ func (gs *GlobalService) SetCondition(condition metav1.Condition) {
 // It enables the deployment and management of services across multiple Kubernetes clusters
 // with flexible targeting, templating, and lifecycle management capabilities.
 type GlobalServiceSpec struct {
+	// Name of this service.
+	// If not provided, the name from GlobalService.ObjectMeta will be used.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
+
 	// Tags specify a set of key-value pairs used to select target clusters for this global service.
 	// Only clusters that match all specified tags will be included in the deployment scope.
 	// This provides a flexible mechanism for targeting specific cluster groups or environments.
@@ -136,6 +140,8 @@ type GlobalServiceSpec struct {
 	// ProviderRef restricts deployment to clusters associated with a specific cloud provider.
 	// This enables provider-specific service deployments that may require particular
 	// cloud integrations or provider-native services.
+	// Deprecated.
+	// Do not use.
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
@@ -150,6 +156,11 @@ type GlobalServiceSpec struct {
 	// and deployment parameters that will be instantiated on each matching cluster.
 	// +kubebuilder:validation:Optional
 	Template *ServiceTemplate `json:"template,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // TagsAttribute converts the tags map to console API tag attributes format.
@@ -220,4 +231,13 @@ func (tc *TemplateContext) Attributes() *console.TemplateContextAttributes {
 	}
 
 	return &console.TemplateContextAttributes{Raw: lo.ToPtr(string(tc.Raw.Raw))}
+}
+
+// ConsoleName implements NamespacedPluralResource interface
+func (gs *GlobalService) ConsoleName() string {
+	if gs.Spec.Name != nil && len(*gs.Spec.Name) > 0 {
+		return *gs.Spec.Name
+	}
+
+	return gs.Name
 }

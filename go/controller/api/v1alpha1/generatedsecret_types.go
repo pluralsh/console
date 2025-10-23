@@ -62,6 +62,11 @@ type GeneratedSecretSpec struct {
 	// ConfigurationRef references a Secret containing configuration data used to populate template variables.
 	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // GeneratedSecretDestination defines a target location where the generated secret should be created.

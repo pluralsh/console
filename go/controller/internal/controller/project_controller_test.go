@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -161,17 +161,18 @@ var _ = Describe("Project Controller", Ordered, func() {
 			}
 			Expect(k8sClient.Update(ctx, project)).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetProject", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("IsProjectExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
-			userGroupCache := cache.NewUserGroupCache(fakeConsoleClient)
 
 			nsReconciler := &controller.ProjectReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: userGroupCache,
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			result, err := nsReconciler.Reconcile(ctx, reconcile.Request{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -21,7 +22,6 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -30,10 +30,8 @@ import (
 // Implements reconcile.Reconciler and types.Controller.
 type ProjectReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 const (
@@ -49,25 +47,22 @@ const (
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.Project closer to the desired state
 // and syncs it with the Console API state.
-func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, retErr error) {
+func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	project := new(v1alpha1.Project)
 	if err := in.Get(ctx, req.NamespacedName, project); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, in.Client, project)
+	scope, err := common.NewDefaultScope(ctx, in.Client, project)
 	if err != nil {
-		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 
@@ -105,7 +100,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Sync Project CRD with the Console API
 	apiProject, err := in.sync(ctx, project, changed)
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID
@@ -114,7 +109,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return project.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
@@ -132,7 +127,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 
 		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Status.ID, nil)
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(project.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove project from Console API if it exists.
@@ -141,7 +136,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(jitterRequeue(requeueDefault))
+				return lo.ToPtr(project.Spec.Reconciliation.Requeue())
 			}
 		}
 
@@ -186,18 +181,18 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 
 	exists, err := in.ConsoleClient.IsProjectExists(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	if !exists {
 		project.Status.ID = nil
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, project.SetCondition)
+		return common.HandleRequeue(nil, err, project.SetCondition)
 	}
 
 	project.Status.ID = &apiProject.ID
@@ -205,7 +200,30 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return project.Spec.Reconciliation.Requeue(), nil
+}
+
+func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.ProjectAttributes, error) {
+	attrs := &console.ProjectAttributes{
+		Name:        project.ConsoleName(),
+		Description: project.Spec.Description,
+	}
+
+	if project.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = common.BindingsAttributes(project.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = common.BindingsAttributes(project.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return attrs, nil
 }
 
 func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {
@@ -215,45 +233,27 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return nil, err
 	}
 
-	if err := in.ensure(project); err != nil {
-		return nil, err
-	}
-
-	// Update only if Project has changed
 	if changed && exists {
+		attrs, err := in.attributes(project)
+		if err != nil {
+			return nil, err
+		}
+
 		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
-		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), project.Attributes())
+		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), *attrs)
 	}
 
-	// Read the Project from Console API if it already exists
 	if exists {
 		return in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	}
 
+	attrs, err := in.attributes(project)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
-	return in.ConsoleClient.CreateProject(ctx, project.Attributes())
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
-	if project.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	project.Spec.Bindings.Write = bindings
-
-	return nil
+	return in.ConsoleClient.CreateProject(ctx, *attrs)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

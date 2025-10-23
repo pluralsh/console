@@ -129,7 +129,7 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 		})
 
 		It("should successfully reconcile the resource", func() {
-			By("Wait for resource")
+			By("wait for resource")
 			test := struct {
 				notificationRouterFragment *gqlclient.NotificationRouterFragment
 				expectedStatus             v1alpha1.Status

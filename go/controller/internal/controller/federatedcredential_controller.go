@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -10,11 +12,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	consoleapi "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -27,9 +29,7 @@ const (
 
 type FederatedCredentialReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=federatedcredentials,verbs=get;list;watch;create;update;patch;delete
@@ -40,27 +40,27 @@ type FederatedCredentialReconciler struct {
 // move the current state of the cluster closer to the desired state.
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	logger := log.FromContext(ctx)
+
 	credential := new(v1alpha1.FederatedCredential)
 	if err := in.Get(ctx, req.NamespacedName, credential); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, in.Client, credential)
+	scope, err := common.NewDefaultScope(ctx, in.Client, credential)
 	if err != nil {
-		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	if result := in.addOrRemoveFinalizer(ctx, credential); result != nil {
@@ -76,7 +76,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 
 	apiCredential, err := in.sync(ctx, credential, changed)
 	if err != nil {
-		return handleRequeue(nil, err, credential.SetCondition)
+		return common.HandleRequeue(nil, err, credential.SetCondition)
 	}
 
 	credential.Status.ID = &apiCredential.ID
@@ -85,7 +85,7 @@ func (in *FederatedCredentialReconciler) Reconcile(ctx context.Context, req ctrl
 	utils.MarkCondition(credential.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return credential.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Context, credential *v1alpha1.FederatedCredential) *ctrl.Result {
@@ -113,7 +113,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(credential.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueDefault))
+		return lo.ToPtr(credential.Spec.Reconciliation.Requeue())
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -122,7 +122,7 @@ func (in *FederatedCredentialReconciler) addOrRemoveFinalizer(ctx context.Contex
 }
 
 func (in *FederatedCredentialReconciler) sync(ctx context.Context, credential *v1alpha1.FederatedCredential, changed bool) (*consoleapi.FederatedCredentialFragment, error) {
-	userID, err := in.UserGroupCache.GetUserID(credential.Spec.User)
+	userID, err := identity.Cache().GetUserID(credential.Spec.User)
 	if err != nil {
 		return nil, err
 	}

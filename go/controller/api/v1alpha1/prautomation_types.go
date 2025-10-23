@@ -75,44 +75,6 @@ func (in *PrAutomation) ConsoleName() string {
 	return in.Name
 }
 
-func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositoryID, projectID *string) *console.PrAutomationAttributes {
-	attrs := console.PrAutomationAttributes{
-		Name:          lo.ToPtr(in.ConsoleName()),
-		Role:          in.Spec.Role,
-		Identifier:    in.Spec.Identifier,
-		Documentation: in.Spec.Documentation,
-		Title:         in.Spec.Title,
-		Message:       in.Spec.Message,
-		Branch:        in.Spec.Branch,
-		Icon:          in.Spec.Icon,
-		DarkIcon:      in.Spec.DarkIcon,
-		Updates:       in.Spec.Updates.Attributes(),
-		Creates:       in.Spec.Creates.Attributes(),
-		Deletes:       in.Spec.Deletes.Attributes(),
-		Addon:         in.Spec.Addon,
-		ClusterID:     clusterID,
-		ServiceID:     serviceID,
-		ConnectionID:  connectionID,
-		RepositoryID:  repositoryID,
-		ProjectID:     projectID,
-		Patch:         in.Spec.Patch,
-		Confirmation:  in.Spec.Confirmation.Attributes(),
-		Secrets:       in.Spec.Secrets.Attributes(),
-		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
-			return c.Attributes()
-		}),
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.CreateBindings = algorithms.Map(in.Spec.Bindings.Create,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attrs.WriteBindings = algorithms.Map(in.Spec.Bindings.Write,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-	}
-
-	return &attrs
-}
-
 func (in *PrAutomation) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Spec)
 	if err != nil {
@@ -240,6 +202,11 @@ type PrAutomationSpec struct {
 	// of the PR, useful for cleanup or migration scenarios.
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PrAutomationDeleteConfiguration specifies files and folders to delete as part of the PR operation.
@@ -449,7 +416,7 @@ type PrAutomationConfirmation struct {
 	Checklist []PrConfirmationChecklist `json:"checklist,omitempty"`
 }
 
-// A checkbox to render to confirm a PR prerequisite is satisfied
+// PrConfirmationChecklist represents a checkbox to render to confirm a PR prerequisite is satisfied.
 type PrConfirmationChecklist struct {
 	// The label of this checkbox
 	Label string `json:"label"`

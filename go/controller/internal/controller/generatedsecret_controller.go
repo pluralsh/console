@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/template"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -45,30 +46,30 @@ type GeneratedSecretReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
-	generatedSecret := &v1alpha1.GeneratedSecret{}
+	logger := log.FromContext(ctx)
 
+	generatedSecret := &v1alpha1.GeneratedSecret{}
 	if err := r.Get(ctx, req.NamespacedName, generatedSecret); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	if !generatedSecret.GetDeletionTimestamp().IsZero() {
 		return ctrl.Result{}, r.handleDelete(ctx, generatedSecret)
 	}
-	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, generatedSecret)
+
+	scope, err := common.NewDefaultScope(ctx, r.Client, generatedSecret)
 	if err != nil {
-		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	bindings, err := r.prepareBindings(ctx, generatedSecret)
 	if err != nil {
@@ -120,7 +121,7 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	controllerutil.AddFinalizer(generatedSecret, GeneratedSecretFinalizer)
 
-	return ctrl.Result{}, nil
+	return generatedSecret.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *GeneratedSecretReconciler) prepareBindings(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (map[string]interface{}, error) {

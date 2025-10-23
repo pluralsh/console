@@ -91,4 +91,9 @@ type FederatedCredentialSpec struct {
 	// User is the user email address that will be authenticated by this credential.
 	// +kubebuilder:validation:Required
 	User string `json:"user"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

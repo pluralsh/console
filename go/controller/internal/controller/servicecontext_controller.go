@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -41,35 +42,31 @@ type ServiceContextReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	serviceContext := new(v1alpha1.ServiceContext)
 	if err := r.Get(ctx, req.NamespacedName, serviceContext); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, serviceContext)
+	scope, err := common.NewDefaultScope(ctx, r.Client, serviceContext)
 	if err != nil {
-		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	result := r.addOrRemoveFinalizer(serviceContext)
 	if result != nil {
-		return *result, retErr
+		return *result, reterr
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -93,9 +90,9 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, serviceContext)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, serviceContext)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, serviceContext.SetCondition)
+		return common.HandleRequeue(result, err, serviceContext.SetCondition)
 	}
 
 	apiServiceContext, err := r.sync(serviceContext, project)
@@ -131,18 +128,18 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceContextExists(sc.GetName())
 	if err != nil {
-		return handleRequeue(nil, err, sc.SetCondition)
+		return common.HandleRequeue(nil, err, sc.SetCondition)
 	}
 
 	if !exists {
 		sc.Status.ID = nil
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())
 	if err != nil {
-		return handleRequeue(nil, err, sc.SetCondition)
+		return common.HandleRequeue(nil, err, sc.SetCondition)
 	}
 
 	sc.Status.ID = &apiServiceContext.ID
@@ -150,7 +147,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return sc.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ServiceContextReconciler) isAlreadyExists(ctx context.Context, serviceContext *v1alpha1.ServiceContext) (bool, error) {
@@ -201,7 +198,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+		return lo.ToPtr(common.Wait())
 	}
 
 	if !serviceContext.Status.IsReadonly() && serviceContext.Status.HasID() {
@@ -210,7 +207,7 @@ func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1
 			// If it fails to delete the external dependency here, return with error
 			// so that it can be retried.
 			utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+			return lo.ToPtr(common.Wait())
 		}
 	}
 

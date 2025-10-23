@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -167,16 +167,18 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 				}
 			})).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
 			fakeConsoleClient.On("UpsertCatalog", mock.Anything, mock.Anything).Return(test.catalogFragment, nil)
 
 			nr := &controller.CatalogReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			_, err := nr.Reconcile(ctx, reconcile.Request{
@@ -188,21 +190,32 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 		It("should requeue when binding is not ready", func() {
 			catalog := &v1alpha1.Catalog{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, catalog)).NotTo(HaveOccurred())
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Catalog{
+				ObjectMeta: metav1.ObjectMeta{Name: catalogName, Namespace: namespace},
+			}, func(c *v1alpha1.Catalog) {
+				c.Spec.Bindings = &v1alpha1.CatalogBindings{
+					Read: []v1alpha1.Binding{
+						{
+							UserEmail: lo.ToPtr("chaneged@plural.sh"),
+						},
+					},
+				}
+			})).To(Succeed())
+
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
+			identity.ResetCache(cacheConsoleClient)
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCatalog", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
 
 			nr := &controller.CatalogReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
-			result, err := nr.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
+			result, err := nr.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.RequeueAfter).ToNot(BeZero())
 		})

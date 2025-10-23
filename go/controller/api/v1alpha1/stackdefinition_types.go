@@ -114,6 +114,11 @@ type StackDefinitionSpec struct {
 	// including Docker image settings, version specifications, and execution hooks.
 	// +kubebuilder:validation:Optional
 	Configuration *StackConfiguration `json:"configuration,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // CustomRunStep defines a custom execution step within a StackDefinition template.

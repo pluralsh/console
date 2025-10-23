@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -36,7 +38,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 	if connectionID == nil {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})
@@ -49,7 +51,44 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 
-	attrs := pra.Attributes(clusterID, serviceID, connectionID, repositoryID, projectID)
-	attrs.CatalogID = catalogID
-	return attrs, nil, nil
+	attrs := console.PrAutomationAttributes{
+		Name:          lo.ToPtr(pra.ConsoleName()),
+		Role:          pra.Spec.Role,
+		Identifier:    pra.Spec.Identifier,
+		Documentation: pra.Spec.Documentation,
+		Title:         pra.Spec.Title,
+		Message:       pra.Spec.Message,
+		Branch:        pra.Spec.Branch,
+		Icon:          pra.Spec.Icon,
+		DarkIcon:      pra.Spec.DarkIcon,
+		Updates:       pra.Spec.Updates.Attributes(),
+		Creates:       pra.Spec.Creates.Attributes(),
+		Deletes:       pra.Spec.Deletes.Attributes(),
+		Addon:         pra.Spec.Addon,
+		ClusterID:     clusterID,
+		ServiceID:     serviceID,
+		ConnectionID:  connectionID,
+		RepositoryID:  repositoryID,
+		ProjectID:     projectID,
+		CatalogID:     catalogID,
+		Patch:         pra.Spec.Patch,
+		Confirmation:  pra.Spec.Confirmation.Attributes(),
+		Secrets:       pra.Spec.Secrets.Attributes(),
+		Configuration: algorithms.Map(pra.Spec.Configuration,
+			func(c v1alpha1.PrAutomationConfiguration) *console.PrConfigurationAttributes { return c.Attributes() }),
+	}
+
+	if pra.Spec.Bindings != nil {
+		attrs.CreateBindings, err = common.BindingsAttributes(pra.Spec.Bindings.Create)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		attrs.WriteBindings, err = common.BindingsAttributes(pra.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return &attrs, nil, nil
 }

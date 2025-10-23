@@ -30,6 +30,11 @@ type SentinelSpec struct {
 	Git *GitRef `json:"git,omitempty"`
 
 	Checks []SentinelCheck `json:"checks,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type SentinelCheck struct {

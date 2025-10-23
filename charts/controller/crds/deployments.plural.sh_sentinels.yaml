@@ -9912,6 +9912,29 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              reconciliation:
+                description: |-
+                  Reconciliation settings for this resource.
+                  Controls drift detection and reconciliation intervals.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      It is destined to detect changes made to the related
+                      resources that are not referenced with owner ref.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: |-
+                      Interval for the drift detection mechanism.
+                      It is subject to jitter to avoid the thundering herd problem,
+                      it is calculated as a random value between 50% and 150% of the given duration.
+                    example: 5m30s
+                    type: string
+                type: object
               repositoryRef:
                 description: RepositoryRef references a Git repository.
                 properties:

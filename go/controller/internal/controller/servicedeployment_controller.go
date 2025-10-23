@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -27,7 +28,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/errors"
@@ -45,7 +45,6 @@ const (
 type ServiceDeploymentReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
 	ServiceQueue     workqueue.TypedRateLimitingInterface[ctrl.Request]
@@ -75,23 +74,24 @@ func (r *ServiceDeploymentReconciler) Reconcile(_ context.Context, req ctrl.Requ
 // Process implements the types.Processor interface.
 func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
+
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, service)
+	scope, err := common.NewDefaultScope(ctx, r.Client, service)
 	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -109,18 +109,18 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		return handleRequeue(nil, err, service.SetCondition)
+		return common.HandleRequeue(nil, err, service.SetCondition)
 	}
 
 	if !cluster.Status.HasID() {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-			return handleRequeue(nil, err, service.SetCondition)
+			return common.HandleRequeue(nil, err, service.SetCondition)
 		}
 		if !repository.DeletionTimestamp.IsZero() {
 			logger.Info("deleting service after repository deletion")
@@ -128,26 +128,22 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return jitterRequeue(requeueWaitForResources), nil
+			return common.Wait(), nil
 		}
 
 		if !repository.Status.HasID() {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return jitterRequeue(requeueWaitForResources), nil
+			return common.Wait(), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-			return jitterRequeue(requeueWaitForResources), nil
+			return common.Wait(), nil
 		}
-	}
-
-	if err = r.ensure(service); err != nil {
-		return handleRequeue(nil, err, service.SetCondition)
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, service.SetCondition)
+		return common.HandleRequeue(result, err, service.SetCondition)
 	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
@@ -213,11 +209,11 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return service.Spec.Reconciliation.Requeue(), nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -282,7 +278,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
+				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
@@ -296,17 +292,17 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		}
 		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
-			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
 
 	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
 	if err != nil {
-		return nil, lo.ToPtr(jitterRequeue(requeueDefault)), err
+		return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), err
 	}
 
 	// we only want to explicitly set the configuration field in attr if the user specified it via
@@ -324,8 +320,15 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 
 	if service.Spec.Bindings != nil {
-		attr.ReadBindings = policyBindings(service.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(service.Spec.Bindings.Write)
+		attr.ReadBindings, err = common.BindingsAttributes(service.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		attr.WriteBindings, err = common.BindingsAttributes(service.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	if service.Spec.Helm != nil {
@@ -354,11 +357,11 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			ref := service.Spec.Helm.RepositoryRef
 			var repo v1alpha1.GitRepository
 			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting repository: %s", err.Error())
+				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository: %s", err.Error())
 			}
 
 			if !repo.Status.HasID() {
-				return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
+				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
@@ -367,7 +370,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
-				return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting values config map: %s", err.Error())
+				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting values config map: %s", err.Error())
 			}
 			attr.Helm.Values = &val
 		}
@@ -607,12 +610,12 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+			return lo.ToPtr(common.Wait())
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(service.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove service from Console API if it exists and is not read-only.
@@ -626,7 +629,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+			return lo.ToPtr(common.Wait())
 		}
 
 		// If our finalizer is present, remove it.
@@ -644,28 +647,6 @@ func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) erro
 		return r.ConsoleClient.DetachService(id)
 	}
 	return r.ConsoleClient.DeleteService(id)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ServiceDeploymentReconciler) ensure(service *v1alpha1.ServiceDeployment) error {
-	if service.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	service.Spec.Bindings.Write = bindings
-
-	return nil
 }
 
 func isServiceReady(components []v1alpha1.ServiceComponent) bool {

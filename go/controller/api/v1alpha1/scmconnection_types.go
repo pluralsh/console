@@ -148,6 +148,11 @@ type ScmConnectionSpec struct {
 
 	// +kubebuilder:validation:Optional
 	Default *bool `json:"default,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type ScmGithubConnection struct {

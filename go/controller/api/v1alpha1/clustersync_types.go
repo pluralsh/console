@@ -80,6 +80,11 @@ type ClusterSyncSpec struct {
 	// ClusterSpec contains specifications of the cluster.
 	// +kubebuilder:validation:Required
 	ClusterSpec ClusterSpecTemplate `json:"clusterSpec"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type ClusterSpecTemplate struct {

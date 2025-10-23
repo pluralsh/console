@@ -59,6 +59,11 @@ type PipelineContextSpec struct {
 	// Context is a templated context map that will be passed to the pipeline.
 	// This context can contain variables, configuration data, and other information needed.
 	Context runtime.RawExtension `json:"context,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (p *PipelineContext) SetCondition(condition metav1.Condition) {

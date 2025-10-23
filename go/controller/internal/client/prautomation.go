@@ -2,9 +2,11 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -49,6 +51,28 @@ func (c *client) GetPrAutomation(ctx context.Context, id string) (*console.PrAut
 	return response.PrAutomation, err
 }
 
+func (c *client) GetPrAutomationTiny(ctx context.Context, id, name *string) (*console.GetPrAutomationTiny_PrAutomation, error) {
+	if id == nil && name == nil {
+		return nil, fmt.Errorf("no id or name specified")
+	}
+
+	resourceName := lo.If(id != nil, id).Else(name)
+
+	response, err := c.consoleClient.GetPrAutomationTiny(ctx, id, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+	if err == nil && (response == nil || response.PrAutomation == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.PrAutomation, err
+}
+
 func (c *client) GetPrAutomationByName(ctx context.Context, name string) (*console.PrAutomationFragment, error) {
 	response, err := c.consoleClient.GetPrAutomationByName(ctx, name)
 	if internalerror.IsNotFound(err) {
@@ -66,7 +90,7 @@ func (c *client) GetPrAutomationByName(ctx context.Context, name string) (*conso
 }
 
 func (c *client) IsPrAutomationExists(ctx context.Context, id string) (bool, error) {
-	automation, err := c.GetPrAutomation(ctx, id)
+	automation, err := c.GetPrAutomationTiny(ctx, &id, nil)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -79,7 +103,7 @@ func (c *client) IsPrAutomationExists(ctx context.Context, id string) (bool, err
 }
 
 func (c *client) IsPrAutomationExistsByName(ctx context.Context, name string) (bool, error) {
-	automation, err := c.GetPrAutomationByName(ctx, name)
+	automation, err := c.GetPrAutomationTiny(ctx, nil, &name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

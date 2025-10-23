@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -34,7 +35,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -51,7 +51,6 @@ type DeploymentSettingsReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=deploymentsettings,verbs=get;list;watch;create;update;patch;delete
@@ -60,9 +59,6 @@ type DeploymentSettingsReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -71,20 +67,18 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, settings)
+	scope, err := common.NewDefaultScope(ctx, r.Client, settings)
 	if err != nil {
-		logger.Error(err, "failed to create deployment settings scope")
-		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// make sure there is only one CRD object with the `global` name and the agent namespace
 	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {
@@ -119,7 +113,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("upsert deployment settings", "name", settings.Name)
 		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
 		if err != nil {
-			return handleRequeue(nil, err, settings.SetCondition)
+			return common.HandleRequeue(nil, err, settings.SetCondition)
 		}
 
 		_, err = r.ConsoleClient.UpdateDeploymentSettings(ctx, *attr)
@@ -132,7 +126,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	settings.Status.ID = lo.ToPtr(ds.ID)
 	utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(settings.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return ctrl.Result{}, nil
+	return settings.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -194,7 +188,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		var err error
 		var connectionID *string
 		if settings.Spec.Stacks.JobSpec != nil {
-			jobSpec, err = gateJobAttributes(settings.Spec.Stacks.JobSpec)
+			jobSpec, err = common.GateJobAttributes(settings.Spec.Stacks.JobSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -212,14 +206,27 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 	}
 	if settings.Spec.Bindings != nil {
-		if err := r.ensure(settings); err != nil {
+		var err error
+
+		attr.ReadBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Read)
+		if err != nil {
 			return nil, err
 		}
 
-		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(settings.Spec.Bindings.Write)
-		attr.CreateBindings = policyBindings(settings.Spec.Bindings.Create)
-		attr.GitBindings = policyBindings(settings.Spec.Bindings.Git)
+		attr.WriteBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.CreateBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Create)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.GitBindings, err = common.BindingsAttributes(settings.Spec.Bindings.Git)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if settings.Spec.DeploymentRepositoryRef != nil {
@@ -241,36 +248,10 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	return attr, nil
 }
 
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *DeploymentSettingsReconciler) ensure(settings *v1alpha1.DeploymentSettings) error {
-	if settings.Spec.Bindings == nil {
-		return nil
+func getGitRepoID(ctx context.Context, c client.Client, namespacedName v1alpha1.NamespacedName) (*string, error) {
+	gitRepo := &v1alpha1.GitRepository{}
+	if err := c.Get(ctx, types.NamespacedName{Name: namespacedName.Name, Namespace: namespacedName.Namespace}, gitRepo); err != nil {
+		return nil, err
 	}
-
-	bindings, err := ensureBindings(settings.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Write = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Create, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Create = bindings
-
-	bindings, err = ensureBindings(settings.Spec.Bindings.Git, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	settings.Spec.Bindings.Git = bindings
-
-	return nil
+	return gitRepo.Status.ID, nil
 }

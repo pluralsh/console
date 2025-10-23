@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -17,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -33,7 +34,6 @@ type ComplianceReportGeneratorReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=complianceReportGenerators,verbs=get;list;watch;create;update;patch;delete
@@ -42,9 +42,6 @@ type ComplianceReportGeneratorReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -53,9 +50,7 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, complianceReportGenerator)
+	scope, err := common.NewDefaultScope(ctx, r.Client, complianceReportGenerator)
 	if err != nil {
 		utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -66,6 +61,8 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -80,10 +77,6 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, r.handleDelete(ctx, complianceReportGenerator)
 	}
 
-	if err = r.ensure(complianceReportGenerator); err != nil {
-		return handleRequeue(nil, err, complianceReportGenerator.SetCondition)
-	}
-
 	changed, sha, err := complianceReportGenerator.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate compliance report generator SHA")
@@ -91,7 +84,12 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 	if changed {
-		apiComplianceReportGenerator, err := r.ConsoleClient.UpsertComplianceReportGenerator(ctx, complianceReportGenerator.Attributes())
+		attrs, err := r.Attributes(complianceReportGenerator)
+		if err != nil {
+			return common.HandleRequeue(nil, err, complianceReportGenerator.SetCondition)
+		}
+
+		apiComplianceReportGenerator, err := r.ConsoleClient.UpsertComplianceReportGenerator(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update compliance report generator")
 			utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -106,7 +104,20 @@ func (r *ComplianceReportGeneratorReconciler) Reconcile(ctx context.Context, req
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(complianceReportGenerator.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return complianceReportGenerator.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *ComplianceReportGeneratorReconciler) Attributes(g *v1alpha1.ComplianceReportGenerator) (*console.ComplianceReportGeneratorAttributes, error) {
+	bindings, err := common.BindingsAttributes(g.Spec.ReadBindings)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.ComplianceReportGeneratorAttributes{
+		Name:         g.ComplianceReportGeneratorName(),
+		Format:       g.Spec.Format,
+		ReadBindings: bindings,
+	}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -116,22 +127,6 @@ func (r *ComplianceReportGeneratorReconciler) SetupWithManager(mgr ctrl.Manager)
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ComplianceReportGeneratorList))).
 		For(&v1alpha1.ComplianceReportGenerator{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *ComplianceReportGeneratorReconciler) ensure(server *v1alpha1.ComplianceReportGenerator) error {
-	if server.Spec.ReadBindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(server.Spec.ReadBindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	server.Spec.ReadBindings = bindings
-
-	return nil
 }
 
 func (r *ComplianceReportGeneratorReconciler) handleDelete(ctx context.Context, complianceReportGenerator *v1alpha1.ComplianceReportGenerator) error {

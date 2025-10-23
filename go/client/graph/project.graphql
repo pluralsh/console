@@ -34,6 +34,13 @@ query GetProject($id: ID, $name: String) {
     }
 }
 
+query GetProjectTiny($id: ID, $name: String) {
+    project(id: $id, name: $name) {
+        id
+        name
+    }
+}
+
 mutation CreateProject($attributes: ProjectAttributes!) {
     createProject(attributes: $attributes) {
         ...ProjectFragment

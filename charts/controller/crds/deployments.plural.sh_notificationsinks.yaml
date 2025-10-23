@@ -56,7 +56,8 @@ spec:
                   This is only applicable for PLURAL type sinks that deliver in-app notifications.
                   For external sinks like Slack or Teams, notifications are sent to the configured webhook.
                 items:
-                  description: Binding represents a policy binding.
+                  description: Binding used to assign permissions to a resource for
+                    a user or a group in the system.
                   properties:
                     UserID:
                       type: string
@@ -65,6 +66,10 @@ spec:
                     groupName:
                       type: string
                     id:
+                      description: |-
+                        ID of a binding.
+                        Deprecated.
+                        Do not use.
                       type: string
                     userEmail:
                       type: string
@@ -132,6 +137,29 @@ spec:
                   Name specifies the name for this notification sink.
                   If not provided, the name from the resource metadata will be used. // +kubebuilder:validation:Optional
                 type: string
+              reconciliation:
+                description: |-
+                  Reconciliation settings for this resource.
+                  Controls drift detection and reconciliation intervals.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      It is destined to detect changes made to the related
+                      resources that are not referenced with owner ref.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: |-
+                      Interval for the drift detection mechanism.
+                      It is subject to jitter to avoid the thundering herd problem,
+                      it is calculated as a random value between 50% and 150% of the given duration.
+                    example: 5m30s
+                    type: string
+                type: object
               type:
                 description: |-
                   Type specifies the channel type of this sink.

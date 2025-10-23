@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -20,7 +21,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -34,9 +34,8 @@ const (
 // CloudConnectionReconciler reconciles a CloudConnection object
 type CloudConnectionReconciler struct {
 	client.Client
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=cloudconnections,verbs=get;list;watch;create;update;patch;delete
@@ -45,30 +44,26 @@ type CloudConnectionReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read Provider CRD from the K8S API
 	connection := new(v1alpha1.CloudConnection)
 	if err := r.Get(ctx, req.NamespacedName, connection); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, connection)
+
+	scope, err := common.NewDefaultScope(ctx, r.Client, connection)
 	if err != nil {
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, connection)
@@ -79,8 +74,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, connection)
 	if err != nil {
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 	if exists {
 		logger.V(9).Info("CloudConnection already exists in the API, running in read-only mode")
@@ -92,27 +86,18 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	err = r.tryAddControllerRef(ctx, connection)
 	if err != nil {
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-
-	if err = r.ensure(connection); err != nil {
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	// Get Connection SHA that can be saved back in the status to check for changes
 	changed, sha, err := connection.Diff(ctx, r.toCloudConnectionAttributes, utils.HashObject)
 	if err != nil {
-		logger.Error(err, "unable to calculate provider SHA")
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	apiConnection, err := r.sync(ctx, connection, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update cloud connection")
-		utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
@@ -121,7 +106,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return connection.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alpha1.CloudConnection, changed bool) (*console.CloudConnectionFragment, error) {
@@ -132,24 +117,15 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	if err != nil {
 		return nil, err
 	}
+
 	attr.Name = connection.CloudConnectionName()
-	attr.ReadBindings = policyBindings(connection.Spec.ReadBindings)
+
+	attr.ReadBindings, err = common.BindingsAttributes(connection.Spec.ReadBindings)
+	if err != nil {
+		return nil, err
+	}
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
-}
-
-func (r *CloudConnectionReconciler) ensure(connection *v1alpha1.CloudConnection) error {
-	if connection.Spec.ReadBindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(connection.Spec.ReadBindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	connection.Spec.ReadBindings = bindings
-
-	return nil
 }
 
 func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {
@@ -172,14 +148,14 @@ func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context
 		if errors.IsNotFound(err) {
 			connection.Status.ID = nil
 		}
-		return handleRequeue(nil, err, connection.SetCondition)
+		return common.HandleRequeue(nil, err, connection.SetCondition)
 	}
 
 	connection.Status.ID = &apiConnection.ID
 	utils.MarkCondition(connection.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return connection.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connection *v1alpha1.CloudConnection) (bool, error) {
@@ -233,7 +209,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
+			return lo.ToPtr(common.Wait()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

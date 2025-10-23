@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -57,9 +58,6 @@ type ManagedNamespaceReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -68,19 +66,18 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, managedNamespace)
+	scope, err := common.NewDefaultScope(ctx, r.Client, managedNamespace)
 	if err != nil {
-		utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -109,7 +106,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("create managed namespace", "name", managedNamespace.Name)
 		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, managedNamespace.SetCondition)
+			return common.HandleRequeue(res, err, managedNamespace.SetCondition)
 		}
 
 		ns, err := r.ConsoleClient.CreateNamespace(ctx, *attr)
@@ -125,14 +122,14 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("update managed namespace", "name", managedNamespace.Name)
 		attr, res, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, managedNamespace.SetCondition)
+			return common.HandleRequeue(res, err, managedNamespace.SetCondition)
 		}
 
 		if !managedNamespace.Status.HasID() {
 			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
 			if err != nil {
 				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return jitterRequeue(requeueDefault), err
+				return managedNamespace.Spec.Reconciliation.Requeue(), err
 			}
 			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
 		}
@@ -258,7 +255,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		}
 
 		namespace := ns.GetNamespace()
-		st, err := genServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, namespace, srv, repository.Status.ID)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -274,7 +271,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		attr.Service = st
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, ns)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, ns)
 	if result != nil || err != nil {
 		return nil, result, err
 	}
@@ -291,7 +288,7 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 		}
 
 		if !repository.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 		}
 
 		if repository.Status.Health == v1alpha1.GitHealthFailed {

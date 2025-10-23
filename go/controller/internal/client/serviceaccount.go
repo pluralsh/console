@@ -27,6 +27,23 @@ func (c *client) GetServiceAccount(ctx context.Context, email string) (*console.
 	return response.User, nil
 }
 
+func (c *client) GetServiceAccountTiny(ctx context.Context, email string) (*console.GetUserTiny_User, error) {
+	response, err := c.consoleClient.GetUserTiny(ctx, email)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, email)
+	}
+
+	if err == nil && (response == nil || response.User == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, email)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.User, nil
+}
+
 func (c *client) CreateServiceAccount(ctx context.Context, attributes console.ServiceAccountAttributes) (*console.UserFragment, error) {
 	response, err := c.consoleClient.CreateServiceAccount(ctx, attributes)
 	if err != nil {
@@ -60,7 +77,7 @@ func (c *client) DeleteServiceAccount(ctx context.Context, id string) error {
 }
 
 func (c *client) IsServiceAccountExists(ctx context.Context, email string) (bool, error) {
-	sa, err := c.GetServiceAccount(ctx, email)
+	sa, err := c.GetServiceAccountTiny(ctx, email)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

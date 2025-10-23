@@ -22,8 +22,8 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -50,7 +50,6 @@ type PipelineReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	PipelineQueue    workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
@@ -80,18 +79,15 @@ func (r *PipelineReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctr
 func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read resource from Kubernetes cluster.
 	pipeline := &v1alpha1.Pipeline{}
 	if err := r.Get(ctx, req.NamespacedName, pipeline); err != nil {
 		logger.Error(err, "Unable to fetch pipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	// Ensure that status updates will always be persisted when exiting this function.
-	scope, err := NewDefaultScope(ctx, r.Client, pipeline)
+
+	scope, err := common.NewDefaultScope(ctx, r.Client, pipeline)
 	if err != nil {
-		logger.Error(err, "Failed to create pipeline scope")
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -99,6 +95,8 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -114,15 +112,15 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 		return *result, nil
 	}
 
-	project, res, err := GetProject(ctx, r.Client, r.Scheme, pipeline)
+	project, res, err := common.Project(ctx, r.Client, r.Scheme, pipeline)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, pipeline.SetCondition)
+		return common.HandleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, res, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if res != nil || err != nil {
-		return handleRequeue(res, err, pipeline.SetCondition)
+		return common.HandleRequeue(res, err, pipeline.SetCondition)
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
@@ -144,7 +142,7 @@ func (r *PipelineReconciler) Process(ctx context.Context, req ctrl.Request) (_ c
 	pipeline.Status.SHA = &sha
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	return jitterRequeue(requeueDefault), nil
+	return pipeline.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *ctrl.Result {
@@ -161,7 +159,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 		if pipeline.Status.GetID() != "" {
 			exists, err = r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 			if err != nil {
-				return lo.ToPtr(jitterRequeue(requeueDefault))
+				return lo.ToPtr(pipeline.Spec.Reconciliation.Requeue())
 			}
 		}
 
@@ -176,7 +174,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(pipeline.Spec.Reconciliation.Requeue())
 		}
 
 		// If our finalizer is present, remove it.

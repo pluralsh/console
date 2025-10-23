@@ -52,8 +52,25 @@ func (c *client) GetStackDefinition(ctx context.Context, id string) (*gqlclient.
 	return response.StackDefinition, err
 }
 
+func (c *client) GetStackDefinitionTiny(ctx context.Context, id string) (*gqlclient.GetStackDefinitionTiny_StackDefinition, error) {
+	response, err := c.consoleClient.GetStackDefinitionTiny(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if err == nil && (response == nil || response.StackDefinition == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.StackDefinition, err
+}
+
 func (c *client) IsStackDefinitionExists(ctx context.Context, id string) (bool, error) {
-	stack, err := c.GetStackDefinition(ctx, id)
+	stack, err := c.GetStackDefinitionTiny(ctx, id)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

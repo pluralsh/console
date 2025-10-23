@@ -65,8 +65,24 @@ func (c *client) GetScmConnectionByName(ctx context.Context, name string) (*gqlc
 	return response.ScmConnection, err
 }
 
+func (c *client) GetScmConnectionTinyByName(ctx context.Context, name string) (*gqlclient.GetScmConnectionTiny_ScmConnection, error) {
+	response, err := c.consoleClient.GetScmConnectionTiny(ctx, nil, &name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.ScmConnection == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ScmConnection, err
+}
+
 func (c *client) IsScmConnectionExists(ctx context.Context, name string) (bool, error) {
-	scm, err := c.GetScmConnectionByName(ctx, name)
+	scm, err := c.GetScmConnectionTinyByName(ctx, name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

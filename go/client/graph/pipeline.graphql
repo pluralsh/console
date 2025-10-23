@@ -45,7 +45,7 @@ mutation SavePipeline($name: String!, $attributes: PipelineAttributes!) {
 
 mutation DeletePipeline($id: ID!) {
     deletePipeline(id: $id) {
-        ... PipelineFragmentId
+        ...PipelineFragmentId
     }
 }
 

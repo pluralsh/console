@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -84,21 +85,26 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 		}
 		nsn := types.NamespacedName{Name: p.Spec.FlowRef.Name, Namespace: ns}
 		if err := r.Get(ctx, nsn, flow); err != nil {
-			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(p.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("flow is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
 		}
 		attr.FlowID = flow.Status.ID
 	}
 
 	if p.Spec.Bindings != nil {
-		if err := r.ensure(p); err != nil {
-			return nil, nil, err // Not found error will be checked above in the requeue handler.
+		var err error
+
+		attr.ReadBindings, err = common.BindingsAttributes(p.Spec.Bindings.Read)
+		if err != nil {
+			return nil, nil, err
 		}
 
-		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(p.Spec.Bindings.Write)
+		attr.WriteBindings, err = common.BindingsAttributes(p.Spec.Bindings.Write)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return attr, nil, nil
@@ -111,7 +117,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if !service.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("service is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
@@ -147,7 +153,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		}
 
 		if !prAutomation.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("pr automation is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("pr automation is not ready")
 		}
 
 		prAutomationID = prAutomation.Status.ID
@@ -198,7 +204,7 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 	}
 
 	if !cluster.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 	}
 
 	return cluster.Status.ID, nil, nil
@@ -209,7 +215,7 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 		return nil, nil
 	}
 
-	job, err := gateJobAttributes(spec.Job)
+	job, err := common.GateJobAttributes(spec.Job)
 	if err != nil {
 		return nil, err
 	}
@@ -217,26 +223,4 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 	return &console.GateSpecAttributes{
 		Job: job,
 	}, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
-	if p.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	p.Spec.Bindings.Write = bindings
-
-	return nil
 }

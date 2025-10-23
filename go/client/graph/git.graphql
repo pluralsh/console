@@ -45,9 +45,17 @@ query GetScmConnection($id: ID!) {
     }
 }
 
+
 query GetScmConnectionByName($name: String!) {
     scmConnection(name: $name) {
         ...ScmConnectionFragment
+    }
+}
+
+query GetScmConnectionTiny($id: ID, $name: String) {
+    scmConnection(id: $id, name: $name) {
+        id
+        name
     }
 }
 
@@ -89,6 +97,13 @@ query GetPrAutomation($id: ID!) {
 query GetPrAutomationByName($name: String!) {
     prAutomation(name: $name) {
         ...PrAutomationFragment
+    }
+}
+
+query GetPrAutomationTiny ($id: ID, $name: String) {
+    prAutomation(id: $id, name: $name) {
+        id
+        name
     }
 }
 

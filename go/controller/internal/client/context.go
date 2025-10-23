@@ -24,6 +24,23 @@ func (c *client) GetServiceContext(name string) (*console.ServiceContextFragment
 	return response.ServiceContext, nil
 }
 
+func (c *client) GetServiceContextTiny(name string) (*console.GetServiceContextTiny_ServiceContext, error) {
+	response, err := c.consoleClient.GetServiceContextTiny(c.ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+
+	if err == nil && (response == nil || response.ServiceContext == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ServiceContext, nil
+}
+
 func (c *client) SaveServiceContext(name string, attributes console.ServiceContextAttributes) (*console.ServiceContextFragment, error) {
 	response, err := c.consoleClient.SaveServiceContext(c.ctx, name, attributes)
 	if err != nil {
@@ -39,7 +56,7 @@ func (c *client) DeleteServiceContext(id string) error {
 }
 
 func (c *client) IsServiceContextExists(email string) (bool, error) {
-	sa, err := c.GetServiceContext(email)
+	sa, err := c.GetServiceContextTiny(email)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

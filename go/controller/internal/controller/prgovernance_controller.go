@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -38,33 +39,27 @@ type PrGovernanceReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	logger.V(5).Info("reconciling PrGovernance")
 
 	prGovernance := new(v1alpha1.PrGovernance)
 	if err := r.Get(ctx, req.NamespacedName, prGovernance); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, prGovernance)
+	scope, err := common.NewDefaultScope(ctx, r.Client, prGovernance)
 	if err != nil {
-		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	if result := r.addOrRemoveFinalizer(ctx, prGovernance); result != nil {
@@ -81,7 +76,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if changed {
 		attr, res, err := r.attributes(ctx, prGovernance)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, prGovernance.SetCondition)
+			return common.HandleRequeue(res, err, prGovernance.SetCondition)
 		}
 		apiPrGovernance, err := r.ConsoleClient.UpsertPrGovernance(ctx, *attr)
 		if err != nil {
@@ -95,7 +90,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return prGovernance.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGovernance *v1alpha1.PrGovernance) *ctrl.Result {
@@ -125,7 +120,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 			return &ctrl.Result{}
 		}
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+		return lo.ToPtr(common.Wait())
 	}
 
 	// try to delete the resource
@@ -133,7 +128,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 		// If it fails to delete the external dependency here, return with error
 		// so that it can be retried.
 		utils.MarkCondition(prGovernance.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(jitterRequeue(requeueWaitForResources))
+		return lo.ToPtr(common.Wait())
 	}
 
 	// stop reconciliation as the item has been deleted
@@ -155,7 +150,7 @@ func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v
 		return nil, nil, err
 	}
 	if !connection.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("scm connection is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 	}
 	attributes.ConnectionID = *connection.Status.ID
 

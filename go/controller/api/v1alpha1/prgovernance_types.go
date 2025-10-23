@@ -102,6 +102,11 @@ type PrGovernanceSpec struct {
 	// mechanisms that control how pull requests are managed and processed.
 	// +kubebuilder:validation:Optional
 	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PrGovernanceConfiguration defines the configuration settings for PR governance enforcement.

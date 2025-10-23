@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -56,9 +57,6 @@ type CustomStackRunReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -67,19 +65,18 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, stack)
+	scope, err := common.NewDefaultScope(ctx, r.Client, stack)
 	if err != nil {
-		logger.Error(err, "failed to create custom stack run")
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -108,7 +105,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("create custom stack run", "name", stack.CustomStackRunName())
 		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
 		if result != nil || err != nil {
-			return handleRequeue(result, err, stack.SetCondition)
+			return common.HandleRequeue(result, err, stack.SetCondition)
 		}
 
 		st, err := r.ConsoleClient.CreateCustomStackRun(ctx, *attr)
@@ -124,7 +121,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("upsert custom stack run", "name", stack.CustomStackRunName())
 		attr, result, err := r.genCustomStackRunAttr(ctx, stack)
 		if result != nil || err != nil {
-			return handleRequeue(result, err, stack.SetCondition)
+			return common.HandleRequeue(result, err, stack.SetCondition)
 		}
 
 		_, err = r.ConsoleClient.UpdateCustomStackRun(ctx, stack.Status.GetID(), *attr)
@@ -138,7 +135,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return stack.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -196,7 +193,7 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		}
 
 		if !stack.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("stack is not ready")
 		}
 
 		attr.StackID = stack.Status.ID

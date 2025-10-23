@@ -383,8 +383,8 @@ var _ = Describe("Service Controller", Ordered, func() {
 	})
 })
 
-var _ = Describe("Wait for resources", Ordered, func() {
-	Context("When reconciling a resource", func() {
+var _ = Describe("wait for resources", Ordered, func() {
+	Context("when reconciling a resource", func() {
 		const (
 			serviceName = "wait-service-test"
 			clusterName = "cluster-test"

@@ -17,8 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -101,24 +99,6 @@ func (in *Persona) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
-// Attributes converts the Persona spec to Console API attributes for upstream synchronization.
-func (in *Persona) Attributes() console.PersonaAttributes {
-	return console.PersonaAttributes{
-		Name:          lo.ToPtr(in.PersonaName()),
-		Description:   in.Spec.Description,
-		Role:          in.Spec.Role,
-		Configuration: in.Spec.Configuration.Attributes(),
-		Bindings: algorithms.Map(PolicyBindings(in.Spec.Bindings),
-			func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
-				return &console.BindingAttributes{
-					ID:      binding.ID,
-					UserID:  binding.UserID,
-					GroupID: binding.GroupID,
-				}
-			}),
-	}
-}
-
 // PersonaSpec defines the desired state of Persona.
 // It specifies the role-based configuration, UI customizations, and access controls
 // that define how the Console interface appears and behaves for users assigned to this persona.
@@ -153,6 +133,11 @@ type PersonaSpec struct {
 	// This enables flexible role combinations while maintaining clear base configurations.
 	// +kubebuilder:validation:Optional
 	Bindings []Binding `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // PersonaConfiguration defines the complete UI customization settings for a persona.

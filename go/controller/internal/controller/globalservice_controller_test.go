@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -25,14 +26,13 @@ import (
 var _ = Describe("Global Service Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			serviceName  = "global-service-test"
-			clusterName  = "cluster-test"
-			repoName     = "repo-test"
-			namespace    = "default"
-			id           = "123"
-			repoUrl      = "https://test"
-			providerName = "test"
-			notExisting  = "not-existing"
+			serviceName = "global-service-test"
+			clusterName = "cluster-test"
+			repoName    = "repo-test"
+			namespace   = "default"
+			id          = "123"
+			repoUrl     = "https://test"
+			notExisting = "not-existing"
 		)
 
 		ctx := context.Background()
@@ -83,18 +83,6 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				p.Status.Health = v1alpha1.GitHealthPullable
 			})).To(Succeed())
 
-			By("creating the custom resource for the Kind Provider")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: providerName, Namespace: namespace},
-				Spec: v1alpha1.ProviderSpec{
-					Cloud:     "aws",
-					Name:      providerName,
-					Namespace: namespace,
-				},
-			}, func(p *v1alpha1.Provider) {
-				p.Status.ID = lo.ToPtr(id)
-			})).To(Succeed())
-
 			By("creating the custom resource for the Kind GlobalService")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GlobalService{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
@@ -102,10 +90,6 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 					Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
 					ServiceRef: &corev1.ObjectReference{
 						Name:      serviceName,
-						Namespace: namespace,
-					},
-					ProviderRef: &corev1.ObjectReference{
-						Name:      providerName,
 						Namespace: namespace,
 					},
 					Template: &v1alpha1.ServiceTemplate{
@@ -147,7 +131,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -173,8 +157,11 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, serviceName))
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreateGlobalService", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
+			fakeConsoleClient.On("GetGlobalService", mock.Anything).Return(test.returnCreateService, nil)
+
 			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
@@ -203,7 +190,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -267,7 +254,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("AND63UMIWOCDXUWJUBSPFFZNRVBMVU75Q4HY3HOS5UFI4QVJYO6A===="),
+					SHA: lo.ToPtr("IOYJWGBAUZ7L7SUE6YN3HLM7VXTGIJ3ONLNW6WZ5NPBU52KSSUAA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -425,7 +412,10 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, serviceName))
 			fakeConsoleClient.On("CreateGlobalServiceFromTemplate", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
+			fakeConsoleClient.On("GetGlobalService", mock.Anything).Return(test.returnCreateService, nil)
+
 			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),

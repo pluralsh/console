@@ -11,6 +11,13 @@ query GetObservabilityProvider($id: ID, $name: String) {
   }
 }
 
+query GetObservabilityProviderTiny($id: ID, $name: String) {
+    observabilityProvider(id: $id, name: $name) {
+        id
+        name
+    }
+}
+
 mutation UpsertObservabilityProvider($attributes: ObservabilityProviderAttributes!) {
   upsertObservabilityProvider(attributes: $attributes) {
     ...ObservabilityProviderFragment

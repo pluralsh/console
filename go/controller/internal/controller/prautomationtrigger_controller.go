@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -51,9 +52,6 @@ type PrAutomationTriggerReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -75,19 +73,18 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	if !prAutomation.Status.HasID() {
 		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "pr automation is not ready")
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	if err := utils.TryAddControllerRef(ctx, r.Client, prAutomation, trigger, r.Scheme); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	scope, err := NewDefaultScope(ctx, r.Client, trigger)
+	scope, err := common.NewDefaultScope(ctx, r.Client, trigger)
 	if err != nil {
-		utils.MarkFalse(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
@@ -124,7 +121,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(trigger.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return trigger.Spec.Reconciliation.Requeue(), nil
 }
 
 func isAlreadyExists(trigger *v1alpha1.PrAutomationTrigger) bool {

@@ -63,7 +63,8 @@ spec:
                   read:
                     description: Read bindings.
                     items:
-                      description: Binding represents a policy binding.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string
@@ -72,6 +73,10 @@ spec:
                         groupName:
                           type: string
                         id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
                           type: string
                         userEmail:
                           type: string
@@ -80,7 +85,8 @@ spec:
                   write:
                     description: Write bindings.
                     items:
-                      description: Binding represents a policy binding.
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
                       properties:
                         UserID:
                           type: string
@@ -89,6 +95,10 @@ spec:
                         groupName:
                           type: string
                         id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
                           type: string
                         userEmail:
                           type: string
@@ -100,6 +110,8 @@ spec:
                   Cloud specifies the cloud provider to use for this cluster.
                   Determines the infrastructure platform where the cluster will be provisioned and managed.
                   For BYOK clusters, this field is set to "byok" and no cloud provider is required.
+                  Deprecated.
+                  Do not use.
                 enum:
                 - aws
                 - azure
@@ -111,8 +123,10 @@ spec:
                 - message: Cloud is immutable
                   rule: self == oldSelf
               cloudSettings:
-                description: CloudSettings contains cloud provider-specific configuration
-                  for this cluster.
+                description: |-
+                  CloudSettings contains cloud provider-specific configuration for this cluster.
+                  Deprecated.
+                  Do not use.
                 properties:
                   aws:
                     description: AWS contains Amazon Web Services specific cluster
@@ -191,8 +205,10 @@ spec:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               nodePools:
-                description: NodePools defines the worker node configurations managed
-                  by this cluster.
+                description: |-
+                  NodePools defines the worker node configurations managed by this cluster.
+                  Deprecated.
+                  Do not use.
                 items:
                   description: ClusterNodePool defines the configuration for a group
                     of worker nodes in the cluster.
@@ -274,6 +290,8 @@ spec:
                 description: |-
                   ProjectRef references the project this cluster belongs to for multi-tenancy and access control.
                   If not provided, the cluster will be assigned to the default project.
+                  Deprecated.
+                  Do not use.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -319,12 +337,16 @@ spec:
                 description: |-
                   Protect prevents accidental deletion of this cluster.
                   When enabled, the cluster cannot be deleted through the Console UI or API.
+                  Deprecated.
+                  Do not use.
                 example: false
                 type: boolean
               providerRef:
                 description: |-
                   ProviderRef references the cloud provider to use for this cluster.
                   Can be skipped only for BYOK clusters where infrastructure is externally provisioned.
+                  Deprecated.
+                  Do not use.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -366,6 +388,29 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              reconciliation:
+                description: |-
+                  Reconciliation settings for this resource.
+                  Controls drift detection and reconciliation intervals.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      It is destined to detect changes made to the related
+                      resources that are not referenced with owner ref.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: |-
+                      Interval for the drift detection mechanism.
+                      It is subject to jitter to avoid the thundering herd problem,
+                      it is calculated as a random value between 50% and 150% of the given duration.
+                    example: 5m30s
+                    type: string
+                type: object
               tags:
                 additionalProperties:
                   type: string
@@ -377,6 +422,8 @@ spec:
                 description: |-
                   Version specifies the Kubernetes version to use for this cluster.
                   Can be skipped only for BYOK (Bring Your Own Kubernetes) clusters where a version is externally managed.
+                  Deprecated.
+                  Do not use.
                 example: 1.25.11
                 type: string
             type: object

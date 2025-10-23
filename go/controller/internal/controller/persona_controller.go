@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
@@ -21,7 +23,6 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -38,7 +39,6 @@ type PersonaReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
 }
 
@@ -49,7 +49,7 @@ type PersonaReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.Persona closer to the desired state
 // and syncs it with the Console API state.
-func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, retErr error) {
+func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	persona := new(v1alpha1.Persona)
@@ -57,16 +57,14 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewDefaultScope(ctx, in.Client, persona)
+	scope, err := common.NewDefaultScope(ctx, in.Client, persona)
 	if err != nil {
-		utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
 
@@ -99,7 +97,7 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Sync persona CRD with the Console API
 	apiPersona, err := in.sync(ctx, persona, changed)
 	if err != nil {
-		return handleRequeue(nil, err, persona.SetCondition)
+		return common.HandleRequeue(nil, err, persona.SetCondition)
 	}
 
 	persona.Status.ID = &apiPersona.ID
@@ -108,7 +106,7 @@ func (in *PersonaReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(persona.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return persona.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *v1alpha1.Persona) *ctrl.Result {
@@ -126,7 +124,7 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 
 		exists, err := in.ConsoleClient.IsPersonaExists(ctx, persona.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(persona.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove persona from Console API if it exists.
@@ -135,7 +133,7 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(jitterRequeue(requeueDefault))
+				return lo.ToPtr(persona.Spec.Reconciliation.Requeue())
 			}
 		}
 
@@ -149,6 +147,27 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 	return nil
 }
 
+func (in *PersonaReconciler) Attributes(persona *v1alpha1.Persona) (*console.PersonaAttributes, error) {
+	attrs, err := common.BindingsAttributes(persona.Spec.Bindings)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.PersonaAttributes{
+		Name:          lo.ToPtr(persona.PersonaName()),
+		Description:   persona.Spec.Description,
+		Role:          persona.Spec.Role,
+		Configuration: persona.Spec.Configuration.Attributes(),
+		Bindings: algorithms.Map(attrs, func(binding *console.PolicyBindingAttributes) *console.BindingAttributes {
+			return &console.BindingAttributes{
+				ID:      binding.ID,
+				UserID:  binding.UserID,
+				GroupID: binding.GroupID,
+			}
+		}),
+	}, nil
+}
+
 func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona, changed bool) (*console.PersonaFragment, error) {
 	logger := log.FromContext(ctx)
 	exists, err := in.ConsoleClient.IsPersonaExists(ctx, persona.Status.GetID())
@@ -156,14 +175,15 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 		return nil, err
 	}
 
-	if err := in.ensure(persona); err != nil {
-		return nil, err
-	}
-
 	// Update only if the persona has changed.
 	if changed && exists {
+		attrs, err := in.Attributes(persona)
+		if err != nil {
+			return nil, err
+		}
+
 		logger.Info(fmt.Sprintf("updating persona %s", persona.ConsoleName()))
-		return in.ConsoleClient.UpdatePersona(ctx, persona.Status.GetID(), persona.Attributes())
+		return in.ConsoleClient.UpdatePersona(ctx, persona.Status.GetID(), *attrs)
 	}
 
 	// Read the persona from Console API if it already exists.
@@ -171,24 +191,13 @@ func (in *PersonaReconciler) sync(ctx context.Context, persona *v1alpha1.Persona
 		return in.ConsoleClient.GetPersona(ctx, persona.Status.GetID())
 	}
 
-	logger.Info(fmt.Sprintf("%s persona does not exist, creating it", persona.ConsoleName()))
-	return in.ConsoleClient.CreatePersona(ctx, persona.Attributes())
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (in *PersonaReconciler) ensure(persona *v1alpha1.Persona) error {
-	if persona.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(persona.Spec.Bindings, in.UserGroupCache)
+	attrs, err := in.Attributes(persona)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	persona.Spec.Bindings = bindings
 
-	return nil
+	logger.Info(fmt.Sprintf("%s persona does not exist, creating it", persona.ConsoleName()))
+	return in.ConsoleClient.CreatePersona(ctx, *attrs)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

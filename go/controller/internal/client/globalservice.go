@@ -4,14 +4,36 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
+
+func (c *client) GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error) {
+	resp, err := c.consoleClient.GetGlobalServiceDeploymentByName(c.ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (resp == nil || resp.GlobalService == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if resp == nil {
+		return nil, err
+	}
+	return resp.GlobalService, nil
+}
 
 func (c *client) GetGlobalService(id string) (*console.GlobalServiceFragment, error) {
 	resp, err := c.consoleClient.GetGlobalServiceDeployment(c.ctx, id)
-	if err != nil {
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (resp == nil || resp.GlobalService == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if resp == nil {
 		return nil, err
 	}
-
 	return resp.GlobalService, nil
 }
 

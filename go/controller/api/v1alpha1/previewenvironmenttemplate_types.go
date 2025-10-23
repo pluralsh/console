@@ -128,4 +128,9 @@ type PreviewEnvironmentTemplateSpec struct {
 	// to create isolated preview environments.
 	// +kubebuilder:validation:Required
 	Template ServiceTemplate `json:"template"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }

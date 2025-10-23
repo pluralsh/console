@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,21 +50,18 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, in.Client, provider)
+	scope, err := common.NewDefaultScope(ctx, in.Client, provider)
 	if err != nil {
-		logger.Error(err, "failed to create observability provider scope")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := in.ConsoleClient.UseCredentials(req.Namespace, in.CredentialsCache)
@@ -157,7 +155,7 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 
 			// If deletion process started requeue so that we can make sure observability provider
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
+			return lo.ToPtr(provider.Spec.Reconciliation.Requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted
@@ -212,18 +210,18 @@ func (in *ObservabilityProviderReconciler) sync(
 func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (ctrl.Result, error) {
 	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 	if err != nil {
-		return handleRequeue(nil, err, provider.SetCondition)
+		return common.HandleRequeue(nil, err, provider.SetCondition)
 	}
 
 	if !exists {
 		provider.Status.ID = nil
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	apiProvider, err := in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))
 	if err != nil {
-		return handleRequeue(nil, err, provider.SetCondition)
+		return common.HandleRequeue(nil, err, provider.SetCondition)
 	}
 
 	provider.Status.ID = &apiProvider.ID
@@ -231,7 +229,7 @@ func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Co
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return provider.Spec.Reconciliation.Requeue(), nil
 }
 
 func (in *ObservabilityProviderReconciler) credentials(

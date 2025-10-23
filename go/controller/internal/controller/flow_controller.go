@@ -6,8 +6,8 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -35,7 +35,6 @@ type FlowReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 	FlowQueue        workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
 
@@ -67,19 +66,18 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(flow.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, flow)
+	scope, err := common.NewDefaultScope(ctx, r.Client, flow)
 	if err != nil {
-		utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(flow.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -94,9 +92,6 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, r.handleDelete(ctx, flow)
 	}
 
-	if err = r.ensure(flow); err != nil {
-		return handleRequeue(nil, err, flow.SetCondition)
-	}
 	changed, sha, err := flow.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate flow SHA")
@@ -104,18 +99,22 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		return ctrl.Result{}, err
 	}
 	if changed {
-		project, res, err := GetProject(ctx, r.Client, r.Scheme, flow)
+		project, res, err := common.Project(ctx, r.Client, r.Scheme, flow)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, flow.SetCondition)
+			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
 		serverAssociationAttributes, res, err := r.getServerAssociationAttributes(ctx, flow)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, flow.SetCondition)
+			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
-		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, flow.Attributes(project.Status.ID, serverAssociationAttributes))
+		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes)
+		if err != nil {
+			return common.HandleRequeue(nil, err, flow.SetCondition)
+		}
 
+		apiFlow, err := r.ConsoleClient.UpsertFlow(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update flow")
 			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -130,7 +129,34 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	utils.MarkCondition(flow.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return flow.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes) (*console.FlowAttributes, error) {
+	attrs := console.FlowAttributes{
+		Name:               flow.FlowName(),
+		Description:        flow.Spec.Description,
+		Icon:               flow.Spec.Icon,
+		ProjectID:          projectID,
+		ServerAssociations: serverAssociations,
+		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
+	}
+
+	if flow.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = common.BindingsAttributes(flow.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = common.BindingsAttributes(flow.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &attrs, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -162,27 +188,6 @@ func (r *FlowReconciler) handleDelete(ctx context.Context, flow *v1alpha1.Flow) 
 	return nil
 }
 
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *FlowReconciler) ensure(flow *v1alpha1.Flow) error {
-	if flow.Spec.Bindings == nil {
-		return nil
-	}
-	bindings, err := ensureBindings(flow.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(flow.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	flow.Spec.Bindings.Write = bindings
-
-	return nil
-}
-
 func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flow *v1alpha1.Flow) ([]*console.McpServerAssociationAttributes, *ctrl.Result, error) {
 	if flow.Spec.ServerAssociations == nil {
 		return nil, nil, nil
@@ -197,7 +202,7 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 		}
 
 		if !mcpServer.Status.HasID() {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("MCP server %s is not ready", ref.Name)
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCP server %s is not ready", ref.Name)
 		}
 
 		serverAssociationAttrs = append(serverAssociationAttrs, &console.McpServerAssociationAttributes{

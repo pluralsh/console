@@ -28,7 +28,6 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			cloud                  = "aws"
 			namespace              = "default"
 			providerName           = "pipeline-provider"
-			providerConsoleID      = "pipeline-provider-console-id"
 			devClusterName         = "pipeline-dev"
 			devClusterConsoleID    = "pipeline-dev-console-id"
 			prodClusterName        = "pipeline-prod"
@@ -48,7 +47,6 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 		)
 
 		ctx := context.Background()
-		providerNamespacedName := types.NamespacedName{Name: providerName, Namespace: namespace}
 		devNamespacedName := types.NamespacedName{Name: devClusterName, Namespace: namespace}
 		prodNamespacedName := types.NamespacedName{Name: prodClusterName, Namespace: namespace}
 		repositoryNamespacedName := types.NamespacedName{Name: repositoryName, Namespace: namespace}
@@ -58,17 +56,6 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 		invalidRefPipelineNamespacedName := types.NamespacedName{Name: invalidRefPipelineName, Namespace: namespace}
 
 		BeforeAll(func() {
-			By("Creating provider")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: providerName},
-				Spec: v1alpha1.ProviderSpec{
-					Cloud: cloud,
-					Name:  providerName,
-				},
-			}, func(p *v1alpha1.Provider) {
-				p.Status.ID = lo.ToPtr(providerConsoleID)
-			})).To(Succeed())
-
 			By("Creating dev cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
@@ -237,12 +224,6 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, devNamespacedName, devCluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(k8sClient.Delete(ctx, devCluster)).To(Succeed())
-
-			By("Cleanup provider")
-			provider := &v1alpha1.Provider{}
-			err = k8sClient.Get(ctx, providerNamespacedName, provider)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(k8sClient.Delete(ctx, provider)).To(Succeed())
 		})
 
 		It("should successfully reconcile pipeline", func() {

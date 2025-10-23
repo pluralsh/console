@@ -4,6 +4,12 @@ query GetGlobalServiceDeployment($id: ID!) {
     }
 }
 
+query GetGlobalServiceDeploymentByName($name: String!) {
+    globalService(name: $name) {
+        ...GlobalServiceFragment
+    }
+}
+
 mutation CreateGlobalServiceDeployment($serviceId: ID!, $attributes: GlobalServiceAttributes!) {
     createGlobalService(serviceId: $serviceId, attributes: $attributes) {
         ...GlobalServiceFragment
@@ -109,6 +115,14 @@ query GetDeploymentSettings {
 query GetServiceDeployment($id: ID!) {
     serviceDeployment(id: $id) {
         ...ServiceDeploymentExtended
+    }
+}
+
+
+query GetServiceDeploymentTiny($id: ID!) {
+    serviceDeployment(id: $id) {
+        id
+        name
     }
 }
 
@@ -264,6 +278,13 @@ query ListServiceDeploymentByHandle($after: String, $before: String, $last: Int,
 query GetServiceContext($name: String!) {
     serviceContext(name: $name) {
         ...ServiceContextFragment
+    }
+}
+
+query GetServiceContextTiny($name: String!) {
+    serviceContext(name: $name) {
+        id
+        name
     }
 }
 

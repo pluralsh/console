@@ -1,7 +1,6 @@
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
 metadata:
-  name: existing
-  namespace: default
+  name: test
 spec:
   handle: mgmt

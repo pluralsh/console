@@ -125,6 +125,11 @@ type HelmRepositorySpec struct {
 	// Only one authentication method should be configured per repository.
 	// +kubebuilder:validation:Optional
 	Auth *HelmRepositoryAuth `json:"auth,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // HelmRepositoryAuth defines the authentication configuration for a Helm repository.

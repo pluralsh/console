@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/pluralsh/console/go/controller/internal/cache"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -133,16 +133,18 @@ var _ = Describe("Flow Controller", Ordered, func() {
 				}
 			})).To(Succeed())
 
+			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
+			identity.ResetCache(cacheConsoleClient)
+
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
 
 			fr := &controller.FlowReconciler{
-				Client:         k8sClient,
-				Scheme:         k8sClient.Scheme(),
-				ConsoleClient:  fakeConsoleClient,
-				UserGroupCache: cache.NewUserGroupCache(fakeConsoleClient),
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
 			}
 
 			result, err := fr.Process(ctx, reconcile.Request{

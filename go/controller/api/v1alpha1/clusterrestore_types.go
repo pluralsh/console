@@ -88,6 +88,11 @@ type ClusterRestoreSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupClusterRef is immutable"
 	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (p *ClusterRestoreSpec) HasBackupID() bool {

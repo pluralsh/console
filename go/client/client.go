@@ -43,6 +43,7 @@ type ConsoleClient interface {
 	UpsertCatalog(ctx context.Context, attributes *CatalogAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCatalog, error)
 	DeleteCatalog(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCatalog, error)
 	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
+	GetCatalogTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalogTiny, error)
 	UpsertCloudConnection(ctx context.Context, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCloudConnection, error)
 	DeleteCloudConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCloudConnection, error)
 	GetCloudConnection(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCloudConnection, error)
@@ -69,6 +70,7 @@ type ConsoleClient interface {
 	MyCluster(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyCluster, error)
 	UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error)
 	GetGlobalServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeployment, error)
+	GetGlobalServiceDeploymentByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeploymentByName, error)
 	CreateGlobalServiceDeployment(ctx context.Context, serviceID string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeployment, error)
 	CreateGlobalServiceDeploymentFromTemplate(ctx context.Context, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeploymentFromTemplate, error)
 	UpdateGlobalServiceDeployment(ctx context.Context, id string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGlobalServiceDeployment, error)
@@ -87,6 +89,7 @@ type ConsoleClient interface {
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
 	GetServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeployment, error)
+	GetServiceDeploymentTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTiny, error)
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
@@ -96,6 +99,7 @@ type ConsoleClient interface {
 	PagedClusterServiceIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServiceIds, error)
 	ListServiceDeploymentByHandle(ctx context.Context, after *string, before *string, last *int64, cluster *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeploymentByHandle, error)
 	GetServiceContext(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceContext, error)
+	GetServiceContextTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceContextTiny, error)
 	SaveServiceContext(ctx context.Context, name string, attributes ServiceContextAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveServiceContext, error)
 	DeleteServiceContext(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteServiceContext, error)
 	CreateGlobalService(ctx context.Context, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalService, error)
@@ -113,6 +117,7 @@ type ConsoleClient interface {
 	DeleteClusterIsoImage(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteClusterIsoImage, error)
 	GetClusterIsoImage(ctx context.Context, id *string, image *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIsoImage, error)
 	GetFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredential, error)
+	GetFederatedCredentialTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredentialTiny, error)
 	CreateFederatedCredential(ctx context.Context, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateFederatedCredential, error)
 	DeleteFederatedCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFederatedCredential, error)
 	UpdateFederatedCredential(ctx context.Context, id string, attributes FederatedCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateFederatedCredential, error)
@@ -131,12 +136,14 @@ type ConsoleClient interface {
 	GetGitRepository(ctx context.Context, id *string, url *string, interceptors ...clientv2.RequestInterceptor) (*GetGitRepository, error)
 	GetScmConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnection, error)
 	GetScmConnectionByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnectionByName, error)
+	GetScmConnectionTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnectionTiny, error)
 	ListScmConnections(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmConnections, error)
 	CreateScmConnection(ctx context.Context, attributes ScmConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateScmConnection, error)
 	UpdateScmConnection(ctx context.Context, id string, attributes ScmConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateScmConnection, error)
 	DeleteScmConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteScmConnection, error)
 	GetPrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPrAutomation, error)
 	GetPrAutomationByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetPrAutomationByName, error)
+	GetPrAutomationTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrAutomationTiny, error)
 	ListPrAutomations(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListPrAutomations, error)
 	CreatePrAutomation(ctx context.Context, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePrAutomation, error)
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
@@ -151,6 +158,7 @@ type ConsoleClient interface {
 	DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error)
 	ListHelmRepositories(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListHelmRepositories, error)
 	GetHelmRepository(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepository, error)
+	GetHelmRepositoryTiny(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepositoryTiny, error)
 	UpsertHelmRepository(ctx context.Context, url string, attributes *HelmRepositoryAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertHelmRepository, error)
 	IngestClusterCost(ctx context.Context, costs CostIngestAttributes, interceptors ...clientv2.RequestInterceptor) (*IngestClusterCost, error)
 	GetMCPServers(ctx context.Context, q *string, first *int64, after *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetMCPServers, error)
@@ -178,15 +186,18 @@ type ConsoleClient interface {
 	DeleteOIDCProvider(ctx context.Context, id string, typeArg OidcProviderType, interceptors ...clientv2.RequestInterceptor) (*DeleteOIDCProvider, error)
 	ListObservabilityProviders(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityProviders, error)
 	GetObservabilityProvider(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
+	GetObservabilityProviderTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProviderTiny, error)
 	UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error)
 	DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error)
 	UpsertObserver(ctx context.Context, attributes ObserverAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObserver, error)
 	DeleteObserver(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObserver, error)
 	GetObserver(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserver, error)
+	GetObserverTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserverTiny, error)
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
 	ListPolicyConstraints(ctx context.Context, after *string, first *int64, before *string, last *int64, namespace *string, kind *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicyConstraints, error)
 	ListViolationStatistics(ctx context.Context, field ConstraintViolationField, interceptors ...clientv2.RequestInterceptor) (*ListViolationStatistics, error)
 	GetPersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPersona, error)
+	GetPersonaTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPersonaTiny, error)
 	CreatePersona(ctx context.Context, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePersona, error)
 	UpdatePersona(ctx context.Context, id string, attributes PersonaAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePersona, error)
 	DeletePersona(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePersona, error)
@@ -205,6 +216,7 @@ type ConsoleClient interface {
 	DeletePreviewEnvironmentTemplate(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePreviewEnvironmentTemplate, error)
 	ListProjects(ctx context.Context, after *string, before *string, first *int64, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListProjects, error)
 	GetProject(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetProject, error)
+	GetProjectTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetProjectTiny, error)
 	CreateProject(ctx context.Context, attributes ProjectAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateProject, error)
 	UpdateProject(ctx context.Context, id string, attributes ProjectAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateProject, error)
 	DeleteProject(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteProject, error)
@@ -220,6 +232,7 @@ type ConsoleClient interface {
 	UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error)
 	DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error)
 	GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error)
+	GetSentinelTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelTiny, error)
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
@@ -251,6 +264,7 @@ type ConsoleClient interface {
 	ListStackRuns(ctx context.Context, id string, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListStackRuns, error)
 	TriggerRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*TriggerRun, error)
 	GetStackDefinition(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackDefinition, error)
+	GetStackDefinitionTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackDefinitionTiny, error)
 	ListStackDefinitions(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListStackDefinitions, error)
 	CreateStackDefinition(ctx context.Context, attributes StackDefinitionAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateStackDefinition, error)
 	UpdateStackDefinition(ctx context.Context, id string, attributes StackDefinitionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStackDefinition, error)
@@ -262,6 +276,7 @@ type ConsoleClient interface {
 	DeleteAccessToken(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*DeleteAccessToken, error)
 	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, addons []*CloudAddonAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
+	GetUserTiny(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUserTiny, error)
 	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
 	UpsertUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUser, error)
@@ -10258,6 +10273,24 @@ func (t *DeleteBootstrapToken_DeleteBootstrapToken) GetID() string {
 	return t.ID
 }
 
+type GetCatalogTiny_Catalog struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetCatalogTiny_Catalog) GetID() string {
+	if t == nil {
+		t = &GetCatalogTiny_Catalog{}
+	}
+	return t.ID
+}
+func (t *GetCatalogTiny_Catalog) GetName() string {
+	if t == nil {
+		t = &GetCatalogTiny_Catalog{}
+	}
+	return t.Name
+}
+
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -13272,6 +13305,28 @@ func (t *GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Service)
 	return t.ID
 }
 
+type GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider) GetID() string {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Provider{}
+	}
+	return t.ID
+}
+
+type GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service) GetID() string {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName_GlobalService_GlobalServiceFragment_Service{}
+	}
+	return t.ID
+}
+
 type CreateGlobalServiceDeployment_CreateGlobalService_GlobalServiceFragment_Provider struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -15546,6 +15601,24 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 	return t.Fqdns
 }
 
+type GetServiceDeploymentTiny_ServiceDeployment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetServiceDeploymentTiny_ServiceDeployment) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentTiny_ServiceDeployment{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentTiny_ServiceDeployment) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentTiny_ServiceDeployment{}
+	}
+	return t.Name
+}
+
 type GetServiceDeploymentComponents_ServiceDeployment_Components struct {
 	Kind  string          "json:\"kind\" graphql:\"kind\""
 	State *ComponentState "json:\"state,omitempty\" graphql:\"state\""
@@ -16459,6 +16532,24 @@ func (t *ListServiceDeploymentByHandle_ServiceDeployments) GetEdges() []*Service
 	return t.Edges
 }
 
+type GetServiceContextTiny_ServiceContext struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetServiceContextTiny_ServiceContext) GetID() string {
+	if t == nil {
+		t = &GetServiceContextTiny_ServiceContext{}
+	}
+	return t.ID
+}
+func (t *GetServiceContextTiny_ServiceContext) GetName() string {
+	if t == nil {
+		t = &GetServiceContextTiny_ServiceContext{}
+	}
+	return t.Name
+}
+
 type CreateGlobalService_CreateGlobalService_GlobalServiceFragment_Provider struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -16957,6 +17048,17 @@ func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_
 	return t.Email
 }
 
+type GetFederatedCredentialTiny_FederatedCredential struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetFederatedCredentialTiny_FederatedCredential) GetID() string {
+	if t == nil {
+		t = &GetFederatedCredentialTiny_FederatedCredential{}
+	}
+	return t.ID
+}
+
 type CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User struct {
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
@@ -17231,6 +17333,24 @@ func (t *ListGitRepositories_GitRepositories) GetEdges() []*GitRepositoryEdgeFra
 	return t.Edges
 }
 
+type GetScmConnectionTiny_ScmConnection struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetScmConnectionTiny_ScmConnection) GetID() string {
+	if t == nil {
+		t = &GetScmConnectionTiny_ScmConnection{}
+	}
+	return t.ID
+}
+func (t *GetScmConnectionTiny_ScmConnection) GetName() string {
+	if t == nil {
+		t = &GetScmConnectionTiny_ScmConnection{}
+	}
+	return t.Name
+}
+
 type ListScmConnections_ScmConnections_Edges struct {
 	Node   *ScmConnectionFragment "json:\"node,omitempty\" graphql:\"node\""
 	Cursor *string                "json:\"cursor,omitempty\" graphql:\"cursor\""
@@ -17258,6 +17378,24 @@ func (t *ListScmConnections_ScmConnections) GetEdges() []*ListScmConnections_Scm
 		t = &ListScmConnections_ScmConnections{}
 	}
 	return t.Edges
+}
+
+type GetPrAutomationTiny_PrAutomation struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetPrAutomationTiny_PrAutomation) GetID() string {
+	if t == nil {
+		t = &GetPrAutomationTiny_PrAutomation{}
+	}
+	return t.ID
+}
+func (t *GetPrAutomationTiny_PrAutomation) GetName() string {
+	if t == nil {
+		t = &GetPrAutomationTiny_PrAutomation{}
+	}
+	return t.Name
 }
 
 type ListPrAutomations_PrAutomations_Edges struct {
@@ -17316,6 +17454,17 @@ func (t *ListHelmRepositories_HelmRepositories) GetEdges() []*ListHelmRepositori
 		t = &ListHelmRepositories_HelmRepositories{}
 	}
 	return t.Edges
+}
+
+type GetHelmRepositoryTiny_HelmRepository struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetHelmRepositoryTiny_HelmRepository) GetID() string {
+	if t == nil {
+		t = &GetHelmRepositoryTiny_HelmRepository{}
+	}
+	return t.ID
 }
 
 type GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers struct {
@@ -17560,6 +17709,42 @@ func (t *ListObservabilityProviders_ObservabilityProviders) GetEdges() []*ListOb
 	return t.Edges
 }
 
+type GetObservabilityProviderTiny_ObservabilityProvider struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetObservabilityProviderTiny_ObservabilityProvider) GetID() string {
+	if t == nil {
+		t = &GetObservabilityProviderTiny_ObservabilityProvider{}
+	}
+	return t.ID
+}
+func (t *GetObservabilityProviderTiny_ObservabilityProvider) GetName() string {
+	if t == nil {
+		t = &GetObservabilityProviderTiny_ObservabilityProvider{}
+	}
+	return t.Name
+}
+
+type GetObserverTiny_Observer struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetObserverTiny_Observer) GetID() string {
+	if t == nil {
+		t = &GetObserverTiny_Observer{}
+	}
+	return t.ID
+}
+func (t *GetObserverTiny_Observer) GetName() string {
+	if t == nil {
+		t = &GetObserverTiny_Observer{}
+	}
+	return t.Name
+}
+
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
 	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
 	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
@@ -17668,6 +17853,24 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+
+type GetPersonaTiny_Persona struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetPersonaTiny_Persona) GetID() string {
+	if t == nil {
+		t = &GetPersonaTiny_Persona{}
+	}
+	return t.ID
+}
+func (t *GetPersonaTiny_Persona) GetName() string {
+	if t == nil {
+		t = &GetPersonaTiny_Persona{}
+	}
+	return t.Name
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -18252,6 +18455,24 @@ func (t *ListProjects_Projects) GetEdges() []*ListProjects_Projects_Edges {
 		t = &ListProjects_Projects{}
 	}
 	return t.Edges
+}
+
+type GetProjectTiny_Project struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetProjectTiny_Project) GetID() string {
+	if t == nil {
+		t = &GetProjectTiny_Project{}
+	}
+	return t.ID
+}
+func (t *GetProjectTiny_Project) GetName() string {
+	if t == nil {
+		t = &GetProjectTiny_Project{}
+	}
+	return t.Name
 }
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -18886,6 +19107,24 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetSentinelTiny_Sentinel struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetSentinelTiny_Sentinel) GetID() string {
+	if t == nil {
+		t = &GetSentinelTiny_Sentinel{}
+	}
+	return t.ID
+}
+func (t *GetSentinelTiny_Sentinel) GetName() string {
+	if t == nil {
+		t = &GetSentinelTiny_Sentinel{}
+	}
+	return t.Name
 }
 
 type ServiceAccounts_ServiceAccounts_Edges struct {
@@ -20508,6 +20747,24 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetRe
 	return t.RequireApproval
 }
 
+type GetStackDefinitionTiny_StackDefinition struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetStackDefinitionTiny_StackDefinition) GetID() string {
+	if t == nil {
+		t = &GetStackDefinitionTiny_StackDefinition{}
+	}
+	return t.ID
+}
+func (t *GetStackDefinitionTiny_StackDefinition) GetName() string {
+	if t == nil {
+		t = &GetStackDefinitionTiny_StackDefinition{}
+	}
+	return t.Name
+}
+
 type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks struct {
 	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
 	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
@@ -21015,6 +21272,24 @@ func (t *SaveUpgradeInsights_SaveUpgradeInsights) GetVersion() *string {
 	return t.Version
 }
 
+type GetUserTiny_User struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetUserTiny_User) GetID() string {
+	if t == nil {
+		t = &GetUserTiny_User{}
+	}
+	return t.ID
+}
+func (t *GetUserTiny_User) GetName() string {
+	if t == nil {
+		t = &GetUserTiny_User{}
+	}
+	return t.Name
+}
+
 type AddGroupMember_CreateGroupMember_GroupMemberFragment_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -21433,6 +21708,17 @@ func (t *GetCatalog) GetCatalog() *CatalogFragment {
 	return t.Catalog
 }
 
+type GetCatalogTiny struct {
+	Catalog *GetCatalogTiny_Catalog "json:\"catalog,omitempty\" graphql:\"catalog\""
+}
+
+func (t *GetCatalogTiny) GetCatalog() *GetCatalogTiny_Catalog {
+	if t == nil {
+		t = &GetCatalogTiny{}
+	}
+	return t.Catalog
+}
+
 type UpsertCloudConnection struct {
 	UpsertCloudConnection *CloudConnectionFragment "json:\"upsertCloudConnection,omitempty\" graphql:\"upsertCloudConnection\""
 }
@@ -21719,6 +22005,17 @@ func (t *GetGlobalServiceDeployment) GetGlobalService() *GlobalServiceFragment {
 	return t.GlobalService
 }
 
+type GetGlobalServiceDeploymentByName struct {
+	GlobalService *GlobalServiceFragment "json:\"globalService,omitempty\" graphql:\"globalService\""
+}
+
+func (t *GetGlobalServiceDeploymentByName) GetGlobalService() *GlobalServiceFragment {
+	if t == nil {
+		t = &GetGlobalServiceDeploymentByName{}
+	}
+	return t.GlobalService
+}
+
 type CreateGlobalServiceDeployment struct {
 	CreateGlobalService *GlobalServiceFragment "json:\"createGlobalService,omitempty\" graphql:\"createGlobalService\""
 }
@@ -21917,6 +22214,17 @@ func (t *GetServiceDeployment) GetServiceDeployment() *ServiceDeploymentExtended
 	return t.ServiceDeployment
 }
 
+type GetServiceDeploymentTiny struct {
+	ServiceDeployment *GetServiceDeploymentTiny_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentTiny) GetServiceDeployment() *GetServiceDeploymentTiny_ServiceDeployment {
+	if t == nil {
+		t = &GetServiceDeploymentTiny{}
+	}
+	return t.ServiceDeployment
+}
+
 type GetServiceDeploymentComponents struct {
 	ServiceDeployment *GetServiceDeploymentComponents_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
 }
@@ -22012,6 +22320,17 @@ type GetServiceContext struct {
 func (t *GetServiceContext) GetServiceContext() *ServiceContextFragment {
 	if t == nil {
 		t = &GetServiceContext{}
+	}
+	return t.ServiceContext
+}
+
+type GetServiceContextTiny struct {
+	ServiceContext *GetServiceContextTiny_ServiceContext "json:\"serviceContext,omitempty\" graphql:\"serviceContext\""
+}
+
+func (t *GetServiceContextTiny) GetServiceContext() *GetServiceContextTiny_ServiceContext {
+	if t == nil {
+		t = &GetServiceContextTiny{}
 	}
 	return t.ServiceContext
 }
@@ -22199,6 +22518,17 @@ type GetFederatedCredential struct {
 func (t *GetFederatedCredential) GetFederatedCredential() *FederatedCredentialFragment {
 	if t == nil {
 		t = &GetFederatedCredential{}
+	}
+	return t.FederatedCredential
+}
+
+type GetFederatedCredentialTiny struct {
+	FederatedCredential *GetFederatedCredentialTiny_FederatedCredential "json:\"federatedCredential,omitempty\" graphql:\"federatedCredential\""
+}
+
+func (t *GetFederatedCredentialTiny) GetFederatedCredential() *GetFederatedCredentialTiny_FederatedCredential {
+	if t == nil {
+		t = &GetFederatedCredentialTiny{}
 	}
 	return t.FederatedCredential
 }
@@ -22401,6 +22731,17 @@ func (t *GetScmConnectionByName) GetScmConnection() *ScmConnectionFragment {
 	return t.ScmConnection
 }
 
+type GetScmConnectionTiny struct {
+	ScmConnection *GetScmConnectionTiny_ScmConnection "json:\"scmConnection,omitempty\" graphql:\"scmConnection\""
+}
+
+func (t *GetScmConnectionTiny) GetScmConnection() *GetScmConnectionTiny_ScmConnection {
+	if t == nil {
+		t = &GetScmConnectionTiny{}
+	}
+	return t.ScmConnection
+}
+
 type ListScmConnections struct {
 	ScmConnections *ListScmConnections_ScmConnections "json:\"scmConnections,omitempty\" graphql:\"scmConnections\""
 }
@@ -22463,6 +22804,17 @@ type GetPrAutomationByName struct {
 func (t *GetPrAutomationByName) GetPrAutomation() *PrAutomationFragment {
 	if t == nil {
 		t = &GetPrAutomationByName{}
+	}
+	return t.PrAutomation
+}
+
+type GetPrAutomationTiny struct {
+	PrAutomation *GetPrAutomationTiny_PrAutomation "json:\"prAutomation,omitempty\" graphql:\"prAutomation\""
+}
+
+func (t *GetPrAutomationTiny) GetPrAutomation() *GetPrAutomationTiny_PrAutomation {
+	if t == nil {
+		t = &GetPrAutomationTiny{}
 	}
 	return t.PrAutomation
 }
@@ -22617,6 +22969,17 @@ type GetHelmRepository struct {
 func (t *GetHelmRepository) GetHelmRepository() *HelmRepositoryFragment {
 	if t == nil {
 		t = &GetHelmRepository{}
+	}
+	return t.HelmRepository
+}
+
+type GetHelmRepositoryTiny struct {
+	HelmRepository *GetHelmRepositoryTiny_HelmRepository "json:\"helmRepository,omitempty\" graphql:\"helmRepository\""
+}
+
+func (t *GetHelmRepositoryTiny) GetHelmRepository() *GetHelmRepositoryTiny_HelmRepository {
+	if t == nil {
+		t = &GetHelmRepositoryTiny{}
 	}
 	return t.HelmRepository
 }
@@ -22918,6 +23281,17 @@ func (t *GetObservabilityProvider) GetObservabilityProvider() *ObservabilityProv
 	return t.ObservabilityProvider
 }
 
+type GetObservabilityProviderTiny struct {
+	ObservabilityProvider *GetObservabilityProviderTiny_ObservabilityProvider "json:\"observabilityProvider,omitempty\" graphql:\"observabilityProvider\""
+}
+
+func (t *GetObservabilityProviderTiny) GetObservabilityProvider() *GetObservabilityProviderTiny_ObservabilityProvider {
+	if t == nil {
+		t = &GetObservabilityProviderTiny{}
+	}
+	return t.ObservabilityProvider
+}
+
 type UpsertObservabilityProvider struct {
 	UpsertObservabilityProvider *ObservabilityProviderFragment "json:\"upsertObservabilityProvider,omitempty\" graphql:\"upsertObservabilityProvider\""
 }
@@ -22973,6 +23347,17 @@ func (t *GetObserver) GetObserver() *ObserverFragment {
 	return t.Observer
 }
 
+type GetObserverTiny struct {
+	Observer *GetObserverTiny_Observer "json:\"observer,omitempty\" graphql:\"observer\""
+}
+
+func (t *GetObserverTiny) GetObserver() *GetObserverTiny_Observer {
+	if t == nil {
+		t = &GetObserverTiny{}
+	}
+	return t.Observer
+}
+
 type UpsertPolicyConstraints struct {
 	UpsertPolicyConstraints *int64 "json:\"upsertPolicyConstraints,omitempty\" graphql:\"upsertPolicyConstraints\""
 }
@@ -23013,6 +23398,17 @@ type GetPersona struct {
 func (t *GetPersona) GetPersona() *PersonaFragment {
 	if t == nil {
 		t = &GetPersona{}
+	}
+	return t.Persona
+}
+
+type GetPersonaTiny struct {
+	Persona *GetPersonaTiny_Persona "json:\"persona,omitempty\" graphql:\"persona\""
+}
+
+func (t *GetPersonaTiny) GetPersona() *GetPersonaTiny_Persona {
+	if t == nil {
+		t = &GetPersonaTiny{}
 	}
 	return t.Persona
 }
@@ -23215,6 +23611,17 @@ func (t *GetProject) GetProject() *ProjectFragment {
 	return t.Project
 }
 
+type GetProjectTiny struct {
+	Project *GetProjectTiny_Project "json:\"project,omitempty\" graphql:\"project\""
+}
+
+func (t *GetProjectTiny) GetProject() *GetProjectTiny_Project {
+	if t == nil {
+		t = &GetProjectTiny{}
+	}
+	return t.Project
+}
+
 type CreateProject struct {
 	CreateProject *ProjectFragment "json:\"createProject,omitempty\" graphql:\"createProject\""
 }
@@ -23376,6 +23783,17 @@ type GetSentinel struct {
 func (t *GetSentinel) GetSentinel() *SentinelFragment {
 	if t == nil {
 		t = &GetSentinel{}
+	}
+	return t.Sentinel
+}
+
+type GetSentinelTiny struct {
+	Sentinel *GetSentinelTiny_Sentinel "json:\"sentinel,omitempty\" graphql:\"sentinel\""
+}
+
+func (t *GetSentinelTiny) GetSentinel() *GetSentinelTiny_Sentinel {
+	if t == nil {
+		t = &GetSentinelTiny{}
 	}
 	return t.Sentinel
 }
@@ -23721,6 +24139,17 @@ func (t *GetStackDefinition) GetStackDefinition() *StackDefinitionFragment {
 	return t.StackDefinition
 }
 
+type GetStackDefinitionTiny struct {
+	StackDefinition *GetStackDefinitionTiny_StackDefinition "json:\"stackDefinition,omitempty\" graphql:\"stackDefinition\""
+}
+
+func (t *GetStackDefinitionTiny) GetStackDefinition() *GetStackDefinitionTiny_StackDefinition {
+	if t == nil {
+		t = &GetStackDefinitionTiny{}
+	}
+	return t.StackDefinition
+}
+
 type ListStackDefinitions struct {
 	StackDefinitions *ListStackDefinitions_StackDefinitions "json:\"stackDefinitions,omitempty\" graphql:\"stackDefinitions\""
 }
@@ -23838,6 +24267,17 @@ type GetUser struct {
 func (t *GetUser) GetUser() *UserFragment {
 	if t == nil {
 		t = &GetUser{}
+	}
+	return t.User
+}
+
+type GetUserTiny struct {
+	User *GetUserTiny_User "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *GetUserTiny) GetUser() *GetUserTiny_User {
+	if t == nil {
+		t = &GetUserTiny{}
 	}
 	return t.User
 }
@@ -25872,6 +26312,32 @@ func (c *Client) GetCatalog(ctx context.Context, id *string, name *string, inter
 
 	var res GetCatalog
 	if err := c.Client.Post(ctx, "GetCatalog", GetCatalogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetCatalogTinyDocument = `query GetCatalogTiny ($id: ID, $name: String) {
+	catalog(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetCatalogTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalogTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetCatalogTiny
+	if err := c.Client.Post(ctx, "GetCatalogTiny", GetCatalogTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -29096,6 +29562,56 @@ func (c *Client) GetGlobalServiceDeployment(ctx context.Context, id string, inte
 	return &res, nil
 }
 
+const GetGlobalServiceDeploymentByNameDocument = `query GetGlobalServiceDeploymentByName ($name: String!) {
+	globalService(name: $name) {
+		... GlobalServiceFragment
+	}
+}
+fragment GlobalServiceFragment on GlobalService {
+	id
+	name
+	distro
+	provider {
+		id
+	}
+	service {
+		id
+	}
+	tags {
+		... ClusterTags
+	}
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetGlobalServiceDeploymentByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeploymentByName, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetGlobalServiceDeploymentByName
+	if err := c.Client.Post(ctx, "GetGlobalServiceDeploymentByName", GetGlobalServiceDeploymentByNameDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateGlobalServiceDeploymentDocument = `mutation CreateGlobalServiceDeployment ($serviceId: ID!, $attributes: GlobalServiceAttributes!) {
 	createGlobalService(serviceId: $serviceId, attributes: $attributes) {
 		... GlobalServiceFragment
@@ -31373,6 +31889,31 @@ func (c *Client) GetServiceDeployment(ctx context.Context, id string, intercepto
 	return &res, nil
 }
 
+const GetServiceDeploymentTinyDocument = `query GetServiceDeploymentTiny ($id: ID!) {
+	serviceDeployment(id: $id) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetServiceDeploymentTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetServiceDeploymentTiny
+	if err := c.Client.Post(ctx, "GetServiceDeploymentTiny", GetServiceDeploymentTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetServiceDeploymentComponentsDocument = `query GetServiceDeploymentComponents ($id: ID!) {
 	serviceDeployment(id: $id) {
 		id
@@ -32160,6 +32701,31 @@ func (c *Client) GetServiceContext(ctx context.Context, name string, interceptor
 
 	var res GetServiceContext
 	if err := c.Client.Post(ctx, "GetServiceContext", GetServiceContextDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceContextTinyDocument = `query GetServiceContextTiny ($name: String!) {
+	serviceContext(name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetServiceContextTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceContextTiny, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetServiceContextTiny
+	if err := c.Client.Post(ctx, "GetServiceContextTiny", GetServiceContextTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -33290,6 +33856,30 @@ func (c *Client) GetFederatedCredential(ctx context.Context, id string, intercep
 	return &res, nil
 }
 
+const GetFederatedCredentialTinyDocument = `query GetFederatedCredentialTiny ($id: ID!) {
+	federatedCredential(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) GetFederatedCredentialTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFederatedCredentialTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetFederatedCredentialTiny
+	if err := c.Client.Post(ctx, "GetFederatedCredentialTiny", GetFederatedCredentialTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateFederatedCredentialDocument = `mutation CreateFederatedCredential ($attributes: FederatedCredentialAttributes!) {
 	createFederatedCredential(attributes: $attributes) {
 		... FederatedCredentialFragment
@@ -34208,6 +34798,32 @@ func (c *Client) GetScmConnectionByName(ctx context.Context, name string, interc
 	return &res, nil
 }
 
+const GetScmConnectionTinyDocument = `query GetScmConnectionTiny ($id: ID, $name: String) {
+	scmConnection(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetScmConnectionTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnectionTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetScmConnectionTiny
+	if err := c.Client.Post(ctx, "GetScmConnectionTiny", GetScmConnectionTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListScmConnectionsDocument = `query ListScmConnections ($cursor: String, $before: String, $last: Int) {
 	scmConnections(after: $cursor, first: 100, before: $before, last: $last) {
 		edges {
@@ -34410,6 +35026,32 @@ func (c *Client) GetPrAutomationByName(ctx context.Context, name string, interce
 
 	var res GetPrAutomationByName
 	if err := c.Client.Post(ctx, "GetPrAutomationByName", GetPrAutomationByNameDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetPrAutomationTinyDocument = `query GetPrAutomationTiny ($id: ID, $name: String) {
+	prAutomation(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetPrAutomationTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPrAutomationTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetPrAutomationTiny
+	if err := c.Client.Post(ctx, "GetPrAutomationTiny", GetPrAutomationTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -34872,6 +35514,30 @@ func (c *Client) GetHelmRepository(ctx context.Context, url string, interceptors
 
 	var res GetHelmRepository
 	if err := c.Client.Post(ctx, "GetHelmRepository", GetHelmRepositoryDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetHelmRepositoryTinyDocument = `query GetHelmRepositoryTiny ($url: String!) {
+	helmRepository(url: $url) {
+		id
+	}
+}
+`
+
+func (c *Client) GetHelmRepositoryTiny(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepositoryTiny, error) {
+	vars := map[string]any{
+		"url": url,
+	}
+
+	var res GetHelmRepositoryTiny
+	if err := c.Client.Post(ctx, "GetHelmRepositoryTiny", GetHelmRepositoryTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -36449,6 +37115,32 @@ func (c *Client) GetObservabilityProvider(ctx context.Context, id *string, name 
 	return &res, nil
 }
 
+const GetObservabilityProviderTinyDocument = `query GetObservabilityProviderTiny ($id: ID, $name: String) {
+	observabilityProvider(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetObservabilityProviderTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProviderTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetObservabilityProviderTiny
+	if err := c.Client.Post(ctx, "GetObservabilityProviderTiny", GetObservabilityProviderTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpsertObservabilityProviderDocument = `mutation UpsertObservabilityProvider ($attributes: ObservabilityProviderAttributes!) {
 	upsertObservabilityProvider(attributes: $attributes) {
 		... ObservabilityProviderFragment
@@ -36881,6 +37573,32 @@ func (c *Client) GetObserver(ctx context.Context, id *string, name *string, inte
 	return &res, nil
 }
 
+const GetObserverTinyDocument = `query GetObserverTiny ($id: ID, $name: String) {
+	observer(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetObserverTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserverTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetObserverTiny
+	if err := c.Client.Post(ctx, "GetObserverTiny", GetObserverTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpsertPolicyConstraintsDocument = `mutation UpsertPolicyConstraints ($constraints: [PolicyConstraintAttributes!]) {
 	upsertPolicyConstraints(constraints: $constraints)
 }
@@ -37074,6 +37792,31 @@ func (c *Client) GetPersona(ctx context.Context, id string, interceptors ...clie
 
 	var res GetPersona
 	if err := c.Client.Post(ctx, "GetPersona", GetPersonaDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetPersonaTinyDocument = `query GetPersonaTiny ($id: ID!) {
+	persona(id: $id) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetPersonaTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetPersonaTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetPersonaTiny
+	if err := c.Client.Post(ctx, "GetPersonaTiny", GetPersonaTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -38018,6 +38761,32 @@ func (c *Client) GetProject(ctx context.Context, id *string, name *string, inter
 
 	var res GetProject
 	if err := c.Client.Post(ctx, "GetProject", GetProjectDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetProjectTinyDocument = `query GetProjectTiny ($id: ID, $name: String) {
+	project(id: $id, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetProjectTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetProjectTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetProjectTiny
+	if err := c.Client.Post(ctx, "GetProjectTiny", GetProjectTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -39169,6 +39938,31 @@ func (c *Client) GetSentinel(ctx context.Context, id string, interceptors ...cli
 
 	var res GetSentinel
 	if err := c.Client.Post(ctx, "GetSentinel", GetSentinelDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetSentinelTinyDocument = `query GetSentinelTiny ($id: ID!) {
+	sentinel(id: $id) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetSentinelTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetSentinelTiny
+	if err := c.Client.Post(ctx, "GetSentinelTiny", GetSentinelTinyDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -42875,6 +43669,31 @@ func (c *Client) GetStackDefinition(ctx context.Context, id string, interceptors
 	return &res, nil
 }
 
+const GetStackDefinitionTinyDocument = `query GetStackDefinitionTiny ($id: ID!) {
+	stackDefinition(id: $id) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetStackDefinitionTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackDefinitionTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetStackDefinitionTiny
+	if err := c.Client.Post(ctx, "GetStackDefinitionTiny", GetStackDefinitionTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListStackDefinitionsDocument = `query ListStackDefinitions ($after: String, $first: Int, $before: String, $last: Int) {
 	stackDefinitions(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -43287,6 +44106,31 @@ func (c *Client) GetUser(ctx context.Context, email string, interceptors ...clie
 	return &res, nil
 }
 
+const GetUserTinyDocument = `query GetUserTiny ($email: String!) {
+	user(email: $email) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetUserTiny(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUserTiny, error) {
+	vars := map[string]any{
+		"email": email,
+	}
+
+	var res GetUserTiny
+	if err := c.Client.Post(ctx, "GetUserTiny", GetUserTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateUserDocument = `mutation CreateUser ($attributes: UserAttributes!) {
 	createUser(attributes: $attributes) {
 		... UserFragment
@@ -43529,6 +44373,7 @@ var DocumentOperationNames = map[string]string{
 	UpsertCatalogDocument:                             "UpsertCatalog",
 	DeleteCatalogDocument:                             "DeleteCatalog",
 	GetCatalogDocument:                                "GetCatalog",
+	GetCatalogTinyDocument:                            "GetCatalogTiny",
 	UpsertCloudConnectionDocument:                     "UpsertCloudConnection",
 	DeleteCloudConnectionDocument:                     "DeleteCloudConnection",
 	GetCloudConnectionDocument:                        "GetCloudConnection",
@@ -43555,6 +44400,7 @@ var DocumentOperationNames = map[string]string{
 	MyClusterDocument:                                 "MyCluster",
 	UpsertVirtualClusterDocument:                      "UpsertVirtualCluster",
 	GetGlobalServiceDeploymentDocument:                "GetGlobalServiceDeployment",
+	GetGlobalServiceDeploymentByNameDocument:          "GetGlobalServiceDeploymentByName",
 	CreateGlobalServiceDeploymentDocument:             "CreateGlobalServiceDeployment",
 	CreateGlobalServiceDeploymentFromTemplateDocument: "CreateGlobalServiceDeploymentFromTemplate",
 	UpdateGlobalServiceDeploymentDocument:             "UpdateGlobalServiceDeployment",
@@ -43573,6 +44419,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateDeploymentSettingsDocument:                  "UpdateDeploymentSettings",
 	GetDeploymentSettingsDocument:                     "GetDeploymentSettings",
 	GetServiceDeploymentDocument:                      "GetServiceDeployment",
+	GetServiceDeploymentTinyDocument:                  "GetServiceDeploymentTiny",
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
@@ -43582,6 +44429,7 @@ var DocumentOperationNames = map[string]string{
 	PagedClusterServiceIdsDocument:                    "PagedClusterServiceIds",
 	ListServiceDeploymentByHandleDocument:             "ListServiceDeploymentByHandle",
 	GetServiceContextDocument:                         "GetServiceContext",
+	GetServiceContextTinyDocument:                     "GetServiceContextTiny",
 	SaveServiceContextDocument:                        "SaveServiceContext",
 	DeleteServiceContextDocument:                      "DeleteServiceContext",
 	CreateGlobalServiceDocument:                       "CreateGlobalService",
@@ -43599,6 +44447,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteClusterIsoImageDocument:                     "DeleteClusterIsoImage",
 	GetClusterIsoImageDocument:                        "GetClusterIsoImage",
 	GetFederatedCredentialDocument:                    "GetFederatedCredential",
+	GetFederatedCredentialTinyDocument:                "GetFederatedCredentialTiny",
 	CreateFederatedCredentialDocument:                 "CreateFederatedCredential",
 	DeleteFederatedCredentialDocument:                 "DeleteFederatedCredential",
 	UpdateFederatedCredentialDocument:                 "UpdateFederatedCredential",
@@ -43617,12 +44466,14 @@ var DocumentOperationNames = map[string]string{
 	GetGitRepositoryDocument:                          "GetGitRepository",
 	GetScmConnectionDocument:                          "GetScmConnection",
 	GetScmConnectionByNameDocument:                    "GetScmConnectionByName",
+	GetScmConnectionTinyDocument:                      "GetScmConnectionTiny",
 	ListScmConnectionsDocument:                        "ListScmConnections",
 	CreateScmConnectionDocument:                       "CreateScmConnection",
 	UpdateScmConnectionDocument:                       "UpdateScmConnection",
 	DeleteScmConnectionDocument:                       "DeleteScmConnection",
 	GetPrAutomationDocument:                           "GetPrAutomation",
 	GetPrAutomationByNameDocument:                     "GetPrAutomationByName",
+	GetPrAutomationTinyDocument:                       "GetPrAutomationTiny",
 	ListPrAutomationsDocument:                         "ListPrAutomations",
 	CreatePrAutomationDocument:                        "CreatePrAutomation",
 	UpdatePrAutomationDocument:                        "UpdatePrAutomation",
@@ -43637,6 +44488,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteGroupDocument:                               "DeleteGroup",
 	ListHelmRepositoriesDocument:                      "ListHelmRepositories",
 	GetHelmRepositoryDocument:                         "GetHelmRepository",
+	GetHelmRepositoryTinyDocument:                     "GetHelmRepositoryTiny",
 	UpsertHelmRepositoryDocument:                      "UpsertHelmRepository",
 	IngestClusterCostDocument:                         "IngestClusterCost",
 	GetMCPServersDocument:                             "GetMCPServers",
@@ -43664,15 +44516,18 @@ var DocumentOperationNames = map[string]string{
 	DeleteOIDCProviderDocument:                        "DeleteOIDCProvider",
 	ListObservabilityProvidersDocument:                "ListObservabilityProviders",
 	GetObservabilityProviderDocument:                  "GetObservabilityProvider",
+	GetObservabilityProviderTinyDocument:              "GetObservabilityProviderTiny",
 	UpsertObservabilityProviderDocument:               "UpsertObservabilityProvider",
 	DeleteObservabilityProviderDocument:               "DeleteObservabilityProvider",
 	UpsertObserverDocument:                            "UpsertObserver",
 	DeleteObserverDocument:                            "DeleteObserver",
 	GetObserverDocument:                               "GetObserver",
+	GetObserverTinyDocument:                           "GetObserverTiny",
 	UpsertPolicyConstraintsDocument:                   "UpsertPolicyConstraints",
 	ListPolicyConstraintsDocument:                     "ListPolicyConstraints",
 	ListViolationStatisticsDocument:                   "ListViolationStatistics",
 	GetPersonaDocument:                                "GetPersona",
+	GetPersonaTinyDocument:                            "GetPersonaTiny",
 	CreatePersonaDocument:                             "CreatePersona",
 	UpdatePersonaDocument:                             "UpdatePersona",
 	DeletePersonaDocument:                             "DeletePersona",
@@ -43691,6 +44546,7 @@ var DocumentOperationNames = map[string]string{
 	DeletePreviewEnvironmentTemplateDocument:          "DeletePreviewEnvironmentTemplate",
 	ListProjectsDocument:                              "ListProjects",
 	GetProjectDocument:                                "GetProject",
+	GetProjectTinyDocument:                            "GetProjectTiny",
 	CreateProjectDocument:                             "CreateProject",
 	UpdateProjectDocument:                             "UpdateProject",
 	DeleteProjectDocument:                             "DeleteProject",
@@ -43706,6 +44562,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateSentinelDocument:                            "UpdateSentinel",
 	DeleteSentinelDocument:                            "DeleteSentinel",
 	GetSentinelDocument:                               "GetSentinel",
+	GetSentinelTinyDocument:                           "GetSentinelTiny",
 	ServiceAccountsDocument:                           "ServiceAccounts",
 	CreateServiceAccountDocument:                      "CreateServiceAccount",
 	UpdateServiceAccountDocument:                      "UpdateServiceAccount",
@@ -43737,6 +44594,7 @@ var DocumentOperationNames = map[string]string{
 	ListStackRunsDocument:                             "ListStackRuns",
 	TriggerRunDocument:                                "TriggerRun",
 	GetStackDefinitionDocument:                        "GetStackDefinition",
+	GetStackDefinitionTinyDocument:                    "GetStackDefinitionTiny",
 	ListStackDefinitionsDocument:                      "ListStackDefinitions",
 	CreateStackDefinitionDocument:                     "CreateStackDefinition",
 	UpdateStackDefinitionDocument:                     "UpdateStackDefinition",
@@ -43748,6 +44606,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteAccessTokenDocument:                         "DeleteAccessToken",
 	SaveUpgradeInsightsDocument:                       "SaveUpgradeInsights",
 	GetUserDocument:                                   "GetUser",
+	GetUserTinyDocument:                               "GetUserTiny",
 	CreateUserDocument:                                "CreateUser",
 	UpdateUserDocument:                                "UpdateUser",
 	UpsertUserDocument:                                "UpsertUser",

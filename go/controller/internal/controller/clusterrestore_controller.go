@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,20 +57,14 @@ type ClusterRestoreReconciler struct {
 func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	// Read resource from Kubernetes cluster.
 	restore := &v1alpha1.ClusterRestore{}
 	if err := r.Get(ctx, req.NamespacedName, restore); err != nil {
-		logger.Error(err, "Unable to fetch restore")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	// Ensure that status updates will always be persisted when exiting this function.
-	scope, err := NewDefaultScope(ctx, r.Client, restore)
+	scope, err := common.NewDefaultScope(ctx, r.Client, restore)
 	if err != nil {
-		logger.Error(err, "Failed to create restore scope")
-		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -78,39 +73,43 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 	}()
 
+	utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
 	credentials.SyncCredentialsInfo(restore, restore.SetCondition, nc, err)
 	if err != nil {
-		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
-		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
-		return ctrl.Result{}, err
+		return common.HandleRequeue(nil, err, restore.SetCondition)
 	}
 
-	// Handle resource deletion both in Kubernetes cluster and in Console API.
+	// Handle resource deletion both in the Kubernetes cluster and in the Console.
 	if !restore.GetDeletionTimestamp().IsZero() {
-		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReasonDeleting, "")
-		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonDeleting, "")
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse,
+			v1alpha1.ReadyConditionReasonDeleting, "")
+		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse,
+			v1alpha1.SynchronizedConditionReasonDeleting, "")
 		return ctrl.Result{}, nil
 	}
 
-	// Sync resource with Console API.
+	// Sync resource with the Console.
 	apiRestore, result, err := r.sync(ctx, restore)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, restore.SetCondition)
+		return common.HandleRequeue(result, err, restore.SetCondition)
 	}
 
 	// Update resource status.
 	restore.Status.ID = &apiRestore.ID
 	restore.Status.Status = apiRestore.Status
 	if apiRestore.Status == console.RestoreStatusSuccessful {
-		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue,
+			v1alpha1.ReadyConditionReason, "")
 	} else {
-		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("Restore has %s status", apiRestore.Status))
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse,
+			v1alpha1.ReadyConditionReason, fmt.Sprintf("Restore has %s status", apiRestore.Status))
 	}
 	utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return restore.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, *ctrl.Result, error) {
@@ -135,7 +134,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 		}
 
 		if clusterID == nil {
-			return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)

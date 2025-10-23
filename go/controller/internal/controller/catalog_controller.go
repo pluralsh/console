@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
@@ -30,10 +31,8 @@ const (
 // CatalogReconciler reconciles a Catalog object
 type CatalogReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient consoleclient.ConsoleClient
+	Scheme        *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=catalogs,verbs=get;list;watch;create;update;patch;delete
@@ -42,73 +41,67 @@ type CatalogReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
+func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	catalog := new(v1alpha1.Catalog)
 	if err := r.Get(ctx, req.NamespacedName, catalog); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewDefaultScope(ctx, r.Client, catalog)
+	scope, err := common.NewDefaultScope(ctx, r.Client, catalog)
 	if err != nil {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
-		if err := scope.PatchObject(); err != nil && retErr == nil {
-			retErr = err
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	result := r.addOrRemoveFinalizer(ctx, catalog)
 	if result != nil {
-		return *result, retErr
+		return *result, reterr
 	}
 
-	// Check if resource already exists in the API and only sync the ID
+	// Check if the resource already exists in the API and only sync the ID.
 	exists, err := r.isAlreadyExists(ctx, catalog)
 	if err != nil {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 	if exists {
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExistingResource(ctx, catalog)
 	}
 
-	// Mark resource as managed by this operator.
+	// Mark the resource as managed by this operator.
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
-	// Sync Catalog CRD with the Console API
-	if err := r.ensure(catalog); err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
-	}
 
 	// Get Catalog SHA that can be saved back in the status to check for changes
 	changed, sha, err := catalog.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate catalog SHA")
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return catalog.Spec.Reconciliation.Requeue(), err
 	}
 	if changed {
-		project, res, err := GetProject(ctx, r.Client, r.Scheme, catalog)
+		project, res, err := common.Project(ctx, r.Client, r.Scheme, catalog)
 		if res != nil || err != nil {
-			return handleRequeue(res, err, catalog.SetCondition)
+			return common.HandleRequeue(res, err, catalog.SetCondition)
 		}
 
-		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalog.Attributes(project.Status.ID))
+		catalogAttributes, err := r.Attributes(catalog, project.Status.ID)
 		if err != nil {
-			logger.Error(err, "unable to create or update catalog")
-			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return common.HandleRequeue(nil, err, catalog.SetCondition)
+		}
+
+		apiCatalog, err := r.ConsoleClient.UpsertCatalog(ctx, catalogAttributes)
+		if err != nil {
+			return common.HandleRequeue(nil, err, catalog.SetCondition)
 		}
 		catalog.Status.ID = &apiCatalog.ID
 		catalog.Status.SHA = &sha
@@ -116,23 +109,63 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, retErr
+	return catalog.Spec.Reconciliation.Requeue(), reterr
+}
+
+func (r *CatalogReconciler) Attributes(catalog *v1alpha1.Catalog, projectID *string) (*console.CatalogAttributes, error) {
+	attrs := &console.CatalogAttributes{
+		Name:        catalog.CatalogName(),
+		Author:      catalog.Spec.Author,
+		Description: catalog.Spec.Description,
+		Category:    catalog.Spec.Category,
+		Icon:        catalog.Spec.Icon,
+		DarkIcon:    catalog.Spec.DarkIcon,
+		ProjectID:   projectID,
+	}
+
+	if len(catalog.Spec.Tags) > 0 {
+		attrs.Tags = make([]*console.TagAttributes, 0)
+		for k, v := range catalog.Spec.Tags {
+			attrs.Tags = append(attrs.Tags, &console.TagAttributes{Name: k, Value: v})
+		}
+	}
+
+	if catalog.Spec.Bindings != nil {
+		var err error
+
+		attrs.ReadBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Read)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.WriteBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
+
+		attrs.CreateBindings, err = common.BindingsAttributes(catalog.Spec.Bindings.Create)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return attrs, nil
 }
 
 func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog *v1alpha1.Catalog) (ctrl.Result, error) {
 	exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 	if !exists {
 		catalog.Status.ID = nil
 		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 	if err != nil {
-		return handleRequeue(nil, err, catalog.SetCondition)
+		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 
 	catalog.Status.ID = &apiCatalog.ID
@@ -140,7 +173,7 @@ func (r *CatalogReconciler) handleExistingResource(ctx context.Context, catalog 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return catalog.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alpha1.Catalog) (bool, error) {
@@ -177,12 +210,12 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 	if !catalog.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 		}
 
 		apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
 		if err != nil {
-			return lo.ToPtr(jitterRequeue(requeueDefault))
+			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove Pipeline from Console API if it exists.
@@ -191,41 +224,16 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(jitterRequeue(requeueDefault))
+				return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
 			}
 
 			// catalog deletion is synchronous so can just fall back to removing the finalizer and reconciling
 		}
+
 		// Stop reconciliation as the item is being deleted
 		controllerutil.RemoveFinalizer(catalog, CatalogProtectionFinalizerName)
 		return &ctrl.Result{}
 	}
-
-	return nil
-}
-
-func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
-	if catalog.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(catalog.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Write = bindings
-
-	bindings, err = ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	catalog.Spec.Bindings.Create = bindings
 
 	return nil
 }

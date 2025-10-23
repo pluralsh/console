@@ -4,8 +4,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -48,35 +46,6 @@ func (in *Catalog) CatalogName() string {
 
 func (in *Catalog) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
-}
-
-func (in *Catalog) Attributes(projectID *string) *console.CatalogAttributes {
-	attrs := &console.CatalogAttributes{
-		Name:        in.CatalogName(),
-		Author:      in.Spec.Author,
-		Description: in.Spec.Description,
-		Category:    in.Spec.Category,
-		Icon:        in.Spec.Icon,
-		DarkIcon:    in.Spec.DarkIcon,
-		ProjectID:   projectID,
-	}
-	if len(in.Spec.Tags) > 0 {
-		attrs.Tags = make([]*console.TagAttributes, 0)
-		for k, v := range in.Spec.Tags {
-			attrs.Tags = append(attrs.Tags, &console.TagAttributes{
-				Name:  k,
-				Value: v,
-			})
-		}
-	}
-
-	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
-		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
-		attrs.CreateBindings = PolicyBindings(in.Spec.Bindings.Create)
-	}
-
-	return attrs
 }
 
 func (in *Catalog) Diff(hasher Hasher) (changed bool, sha string, err error) {
@@ -152,6 +121,11 @@ type CatalogSpec struct {
 	// Bindings contain read and write policies of this Catalog.
 	// +kubebuilder:validation:Optional
 	Bindings *CatalogBindings `json:"bindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 // CatalogBindings defines the RBAC permissions for a catalog, controlling access to PR automations.

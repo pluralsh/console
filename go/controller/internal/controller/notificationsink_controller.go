@@ -20,10 +20,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,7 +51,6 @@ type NotificationSinkReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
-	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=notificationsinks,verbs=get;list;watch;create;update;patch;delete
@@ -60,89 +59,83 @@ type NotificationSinkReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	notificationSink := &v1alpha1.NotificationSink{}
-	if err := r.Get(ctx, req.NamespacedName, notificationSink); err != nil {
+	sink := &v1alpha1.NotificationSink{}
+	if err := r.Get(ctx, req.NamespacedName, sink); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, r.Client, notificationSink)
+	scope, err := common.NewDefaultScope(ctx, r.Client, sink)
 	if err != nil {
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
 
+	utils.MarkCondition(sink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	credentials.SyncCredentialsInfo(notificationSink, notificationSink.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(sink, sink.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
 		return ctrl.Result{}, err
 	}
 
-	if !notificationSink.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, notificationSink)
+	if !sink.GetDeletionTimestamp().IsZero() {
+		return ctrl.Result{}, r.handleDelete(ctx, sink)
 	}
 
-	ro, err := r.isReadOnly(ctx, notificationSink)
+	ro, err := r.isReadOnly(ctx, sink)
 	if err != nil {
-		if err != nil {
-			utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
-		}
+		utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if ro {
 		logger.V(9).Info("Notification Sink already exists in the API, running in read-only mode")
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExisting(ctx, notificationSink)
-	}
-
-	err = r.ensureNotificationSink(notificationSink)
-	if err != nil {
-		return handleRequeue(nil, err, notificationSink.SetCondition)
+		utils.MarkCondition(sink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		return r.handleExisting(ctx, sink)
 	}
 
 	// Mark resource as managed by this operator.
-	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	utils.MarkCondition(sink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	sha, err := utils.HashObject(notificationSink.Spec)
+	sha, err := utils.HashObject(sink.Spec)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, notificationSink)
+	exists, err := r.isAlreadyExists(ctx, sink)
 	if err != nil {
-		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if !exists || !notificationSink.Status.IsSHAEqual(sha) {
-		logger.Info("upsert notification sink", "name", notificationSink.NotificationName())
-		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, genNotificationSinkAttr(notificationSink))
+	if !exists || !sink.Status.IsSHAEqual(sha) {
+		attrs, err := genNotificationSinkAttr(sink)
 		if err != nil {
-			utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return common.HandleRequeue(nil, err, sink.SetCondition)
+		}
+
+		logger.Info("upsert notification sink", "name", sink.NotificationName())
+		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, *attrs)
+		if err != nil {
+			utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		notificationSink.Status.ID = lo.ToPtr(ns.ID)
-		notificationSink.Status.SHA = lo.ToPtr(sha)
-		controllerutil.AddFinalizer(notificationSink, NotificationSinkFinalizer)
+		sink.Status.ID = lo.ToPtr(ns.ID)
+		sink.Status.SHA = lo.ToPtr(sha)
+		controllerutil.AddFinalizer(sink, NotificationSinkFinalizer)
 	}
 
-	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(sink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
 }
@@ -155,7 +148,7 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 		if errors.IsNotFound(err) {
 			notificationSink.Status.ID = nil
 		}
-		return handleRequeue(nil, err, notificationSink.SetCondition)
+		return common.HandleRequeue(nil, err, notificationSink.SetCondition)
 	}
 
 	notificationSink.Spec.Type = existing.Type
@@ -187,7 +180,7 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return notificationSink.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *NotificationSinkReconciler) isReadOnly(ctx context.Context, notificationSink *v1alpha1.NotificationSink) (bool, error) {
@@ -259,17 +252,19 @@ func (r *NotificationSinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) console.NotificationSinkAttributes {
+func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) (*console.NotificationSinkAttributes, error) {
 	attr := console.NotificationSinkAttributes{
 		Name:          notificationSink.NotificationName(),
 		Type:          notificationSink.Spec.Type,
 		Configuration: console.SinkConfigurationAttributes{},
 	}
+
 	if notificationSink.Spec.Configuration.Slack != nil {
 		attr.Configuration.Slack = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Slack.URL,
 		}
 	}
+
 	if notificationSink.Spec.Configuration.Teams != nil {
 		attr.Configuration.Teams = &console.URLSinkAttributes{
 			URL: notificationSink.Spec.Configuration.Teams.URL,
@@ -284,23 +279,12 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 	}
 
 	if notificationSink.Spec.Type == console.SinkTypePlural {
-		attr.NotificationBindings = policyBindings(notificationSink.Spec.Bindings)
-	}
-	return attr
-}
+		var err error
 
-// ensureNotificationSink makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *NotificationSinkReconciler) ensureNotificationSink(notificationSink *v1alpha1.NotificationSink) error {
-	if notificationSink.Spec.Bindings == nil {
-		return nil
+		attr.NotificationBindings, err = common.BindingsAttributes(notificationSink.Spec.Bindings)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	bindings, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	notificationSink.Spec.Bindings = bindings
-
-	return nil
+	return &attr, nil
 }

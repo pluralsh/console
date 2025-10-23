@@ -22,10 +22,6 @@ func (c *client) UpsertCatalog(ctx context.Context, attributes *console.CatalogA
 }
 
 func (c *client) GetCatalog(ctx context.Context, id, name *string) (*console.CatalogFragment, error) {
-	if id != nil && name != nil {
-		return nil, fmt.Errorf("cannot specify both id and name")
-	}
-
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")
 	}
@@ -46,13 +42,34 @@ func (c *client) GetCatalog(ctx context.Context, id, name *string) (*console.Cat
 	return response.Catalog, err
 }
 
+func (c *client) GetCatalogTiny(ctx context.Context, id, name *string) (*console.GetCatalogTiny_Catalog, error) {
+	if id == nil && name == nil {
+		return nil, fmt.Errorf("no id or name specified")
+	}
+
+	resourceName := lo.If(id != nil, id).Else(name)
+	response, err := c.consoleClient.GetCatalogTiny(ctx, id, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+	if err == nil && (response == nil || response.Catalog == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.Catalog, err
+}
+
 func (c *client) DeleteCatalog(ctx context.Context, id string) error {
 	_, err := c.consoleClient.DeleteCatalog(ctx, id)
 	return err
 }
 
 func (c *client) IsCatalogExists(ctx context.Context, name string) (bool, error) {
-	catalog, err := c.GetCatalog(ctx, nil, &name)
+	catalog, err := c.GetCatalogTiny(ctx, nil, &name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -39,7 +41,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	internaltypes "github.com/pluralsh/console/go/controller/internal/types"
@@ -56,7 +57,6 @@ type InfrastructureStackReconciler struct {
 	client.Client
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
-	UserGroupCache   cache.UserGroupCache
 	CredentialsCache credentials.NamespaceCredentialsCache
 	StackQueue       workqueue.TypedRateLimitingInterface[ctrl.Request]
 }
@@ -89,19 +89,18 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, stack)
+	scope, err := common.NewDefaultScope(ctx, r.Client, stack)
 	if err != nil {
-		logger.Error(err, "failed to create stack")
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -118,22 +117,22 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 
 	clusterID, result, err := r.handleClusterRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
-	project, result, err := GetProject(ctx, r.Client, r.Scheme, stack)
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
 	if result != nil || err != nil {
-		return handleRequeue(result, err, stack.SetCondition)
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	metrics, result, err := r.handleObservableMetrics(ctx, stack)
@@ -159,7 +158,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	if !exists {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			return handleRequeue(nil, err, stack.SetCondition)
+			return common.HandleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -180,7 +179,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	} else {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
-			return handleRequeue(nil, err, stack.SetCondition)
+			return common.HandleRequeue(nil, err, stack.SetCondition)
 		}
 
 		sha, err := utils.HashObject(attr)
@@ -259,7 +258,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 			}
 			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return jitterRequeue(requeueDefault), nil
+				return stack.Spec.Reconciliation.Requeue(), nil
 			}
 			if existingNotificationSink != nil {
 				if stack.Spec.Detach {
@@ -273,7 +272,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return jitterRequeue(requeueDefault), nil
+				return stack.Spec.Reconciliation.Requeue(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
@@ -326,7 +325,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	}
 
 	if stack.Spec.Actor != nil {
-		userID, err := r.UserGroupCache.GetUserID(*stack.Spec.Actor)
+		userID, err := identity.Cache().GetUserID(*stack.Spec.Actor)
 		if err != nil {
 			return nil, err
 		}
@@ -399,18 +398,22 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		})
 	}
 
-	jobSpec, err := gateJobAttributes(stack.Spec.JobSpec)
+	jobSpec, err := common.GateJobAttributes(stack.Spec.JobSpec)
 	if err != nil {
 		return nil, err
 	}
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		if err := r.ensure(stack); err != nil {
+		attr.ReadBindings, err = common.BindingsAttributes(stack.Spec.Bindings.Read)
+		if err != nil {
 			return nil, err
 		}
-		attr.ReadBindings = policyBindings(stack.Spec.Bindings.Read)
-		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
+
+		attr.WriteBindings, err = common.BindingsAttributes(stack.Spec.Bindings.Write)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if id, ok := stack.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
@@ -495,7 +498,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	}
 
 	if !cluster.Status.HasID() {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("cluster is not ready")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("cluster is not ready")
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -511,11 +514,11 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	if !repository.Status.HasID() {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not ready")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		return "", lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("repository is not healthy")
+		return "", lo.ToPtr(common.Wait()), fmt.Errorf("repository is not healthy")
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -539,7 +542,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	}
 
 	if !stackDefinition.Status.HasID() {
-		return nil, lo.ToPtr(jitterRequeue(requeueWaitForResources)), fmt.Errorf("stack definition is not ready")
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("stack definition is not ready")
 	}
 
 	return stackDefinition.Status.ID, nil, nil
@@ -574,7 +577,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, lo.ToPtr(jitterRequeue(requeueDefault)), nil
+			return nil, lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{
@@ -584,26 +587,4 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 	}
 
 	return metrics, nil, nil
-}
-
-// ensure makes sure that user-friendly input such as userEmail/groupName in
-// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
-func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureStack) error {
-	if stack.Spec.Bindings == nil {
-		return nil
-	}
-
-	bindings, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Read = bindings
-
-	bindings, err = ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
-	if err != nil {
-		return err
-	}
-	stack.Spec.Bindings.Write = bindings
-
-	return nil
 }

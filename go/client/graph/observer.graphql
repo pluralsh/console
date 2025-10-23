@@ -16,6 +16,13 @@ query GetObserver($id: ID, $name: String) {
     }
 }
 
+query GetObserverTiny($id: ID, $name: String) {
+    observer(id: $id, name: $name) {
+        id
+        name
+    }
+}
+
 fragment ObserverFragment on Observer {
     id
     name

@@ -391,8 +391,8 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 	})
 })
 
-var _ = Describe("Waiting for Secret", Ordered, func() {
-	Context("When reconciling a resource", func() {
+var _ = Describe("waiting for Secret", Ordered, func() {
+	Context("when reconciling a resource", func() {
 		const (
 			scmName   = "scm-connection-wait"
 			scmType   = gqlclient.ScmTypeGithub

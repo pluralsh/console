@@ -27,6 +27,11 @@ type GitRepositorySpec struct {
 	// for the repository's authentication method.
 	// +kubebuilder:validation:Optional
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 type GitHealth string

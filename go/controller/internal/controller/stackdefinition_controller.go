@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/samber/lo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -47,21 +48,18 @@ func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	scope, err := NewDefaultScope(ctx, in.Client, stack)
+	scope, err := common.NewDefaultScope(ctx, in.Client, stack)
 	if err != nil {
-		logger.Error(err, "failed to create stack definition scope")
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
+
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := in.ConsoleClient.UseCredentials(req.Namespace, in.CredentialsCache)
@@ -106,7 +104,7 @@ func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, reterr
+	return stack.Spec.Reconciliation.Requeue(), reterr
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -144,7 +142,7 @@ func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, s
 
 			// If deletion process started requeue so that we can make sure stack definition
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(jitterRequeue(requeueDefault)), nil
+			return lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

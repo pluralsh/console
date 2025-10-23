@@ -1,4 +1,4 @@
-package controller_test
+package common_test
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/controller"
-	common "github.com/pluralsh/console/go/controller/internal/test/common"
+	"github.com/pluralsh/console/go/controller/internal/common"
+	testcommon "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,11 +37,9 @@ var _ = Describe("Get Project", Ordered, func() {
 
 		BeforeAll(func() {
 			By("creating the custom resource for the Kind Project")
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Project{
+			Expect(testcommon.MaybeCreate(k8sClient, &v1alpha1.Project{
 				ObjectMeta: metav1.ObjectMeta{Name: projectName, Namespace: namespace},
-				Spec: v1alpha1.ProjectSpec{
-					Name: projectName,
-				},
+				Spec:       v1alpha1.ProjectSpec{Name: projectName},
 			}, func(p *v1alpha1.Project) {
 				p.Status.ID = lo.ToPtr(projectID)
 			})).To(Succeed())
@@ -56,7 +54,7 @@ var _ = Describe("Get Project", Ordered, func() {
 		})
 
 		It("Should get Project for BootstrapToken", func() {
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -74,7 +72,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), catalog)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), catalog)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -93,7 +91,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), cluster)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -112,7 +110,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), flow)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), flow)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -131,7 +129,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), r)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), r)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -150,7 +148,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), r)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), r)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -169,7 +167,7 @@ var _ = Describe("Get Project", Ordered, func() {
 					},
 				},
 			}
-			project, _, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), r)
+			project, _, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), r)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(project).ToNot(BeNil())
 			Expect(project.Name).To(Equal(projectName))
@@ -189,21 +187,21 @@ var _ = Describe("Get Project", Ordered, func() {
 				},
 			}
 
-			project, result, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
+			project, result, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("projects.deployments.plural.sh \"not-existing\" not found"))
 			Expect(result).To(BeNil())
 			Expect(project).To(BeNil())
 		})
 
-		It("Should wait for BootstrapToken's Project", func() {
+		It("Should Wait for BootstrapToken's Project", func() {
 			resource := &v1alpha1.Project{}
 			err := k8sClient.Get(ctx, types.NamespacedName{Name: projectName, Namespace: namespace}, resource)
 			Expect(err).NotTo(HaveOccurred())
 			By("Cleanup the specific resource instance Project")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
-			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Project{
+			Expect(testcommon.MaybeCreate(k8sClient, &v1alpha1.Project{
 				ObjectMeta: metav1.ObjectMeta{Name: projectName, Namespace: namespace},
 				Spec: v1alpha1.ProjectSpec{
 					Name: projectName,
@@ -212,7 +210,7 @@ var _ = Describe("Get Project", Ordered, func() {
 				p.Status = v1alpha1.Status{}
 			})).To(Succeed())
 
-			project, result, err := controller.GetProject(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
+			project, result, err := common.Project(ctx, k8sClient, k8sClient.Scheme(), bootstrapToken)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("project is not ready"))
 			Expect(project).To(BeNil())

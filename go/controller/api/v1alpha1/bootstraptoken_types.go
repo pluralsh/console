@@ -54,6 +54,11 @@ type BootstrapTokenSpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Token secret is immutable"
 	// +kubebuilder:validation:Required
 	TokenSecretRef v1.SecretReference `json:"tokenSecretRef,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
 func (in *BootstrapToken) SetCondition(condition metav1.Condition) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,14 +51,12 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	if err := r.Get(ctx, req.NamespacedName, sa); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewDefaultScope(ctx, r.Client, sa)
+
+	scope, err := common.NewDefaultScope(ctx, r.Client, sa)
 	if err != nil {
-		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "failed to create scope")
 		return ctrl.Result{}, err
 	}
-
-	// Always patch object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
@@ -126,24 +125,24 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionTrue, v1alpha1.ReadyTokenConditionReason, "")
 	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return sa.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
-		return handleRequeue(nil, err, sa.SetCondition)
+		return common.HandleRequeue(nil, err, sa.SetCondition)
 	}
 
 	if !exists {
 		sa.Status.ID = nil
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return jitterRequeue(requeueWaitForResources), nil
+		return common.Wait(), nil
 	}
 
 	apiServiceAccount, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
-		return handleRequeue(nil, err, sa.SetCondition)
+		return common.HandleRequeue(nil, err, sa.SetCondition)
 	}
 
 	sa.Status.ID = &apiServiceAccount.ID
@@ -151,7 +150,7 @@ func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Cont
 	// utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	// utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return jitterRequeue(requeueDefault), nil
+	return sa.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1alpha1.ServiceAccount) (bool, error) {

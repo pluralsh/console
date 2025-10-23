@@ -46,14 +46,6 @@ func (in *ComplianceReportGenerator) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *ComplianceReportGenerator) Attributes() console.ComplianceReportGeneratorAttributes {
-	return console.ComplianceReportGeneratorAttributes{
-		Name:         in.ComplianceReportGeneratorName(),
-		Format:       in.Spec.Format,
-		ReadBindings: PolicyBindings(in.Spec.ReadBindings),
-	}
-}
-
 func (in *ComplianceReportGenerator) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Spec)
 	if err != nil {
@@ -77,4 +69,9 @@ type ComplianceReportGeneratorSpec struct {
 	// ReadBindings represent the download policy for this report.
 	// +kubebuilder:validation:Optional
 	ReadBindings []Binding `json:"readBindings,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
