@@ -28,6 +28,7 @@ import { SentinelRunSidecar } from '../SentinelSidecars'
 import { SentinelRunChecksTable } from './SentinelRunChecksTable'
 
 export type SentinelCheckWithResult = {
+  runId: string
   check: SentinelCheckFragment
   result: Nullable<SentinelRunResultFragment>
 }
@@ -48,6 +49,7 @@ export function SentinelRun() {
     const groupedResults = groupBy(run?.results, 'name')
     return (
       run?.sentinel?.checks?.filter(isNonNullable).map((check) => ({
+        runId: run.id,
         check,
         result: groupedResults[check.name]?.[0],
       })) ?? []

@@ -5,6 +5,7 @@ import {
   ChipSeverity,
   ErrorIcon,
   Flex,
+  GaugeIcon,
   GitHubLogoIcon,
   ListBoxItem,
   LogsIcon,
@@ -27,7 +28,7 @@ import {
   Body2P,
   CaptionP,
 } from 'components/utils/typography/Text.tsx'
-import { capitalize, groupBy, isEmpty } from 'lodash'
+import { groupBy, isEmpty } from 'lodash'
 import pluralize from 'pluralize'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -67,9 +68,16 @@ export const getSentinelCheckIcon = (type: SentinelCheckType) => {
           src={CHART_ICON_LIGHT}
         />
       )
+    case SentinelCheckType.IntegrationTest:
+      return <GaugeIcon />
     default:
       return <LogsIcon />
   }
+}
+const sentinelCheckTypeToLabel = {
+  [SentinelCheckType.Log]: 'Logs',
+  [SentinelCheckType.Kubernetes]: 'Kubernetes',
+  [SentinelCheckType.IntegrationTest]: 'Integration test',
 }
 
 const ColChecks = columnHelper.accessor((sentinel) => sentinel.checks, {
@@ -97,7 +105,9 @@ const ColChecks = columnHelper.accessor((sentinel) => sentinel.checks, {
                 align="center"
               >
                 {getSentinelCheckIcon(type as SentinelCheckType)}
-                <Body2P css={{ flex: 1 }}>{pluralize(capitalize(type))}</Body2P>
+                <Body2P css={{ flex: 1 }}>
+                  {sentinelCheckTypeToLabel[type as SentinelCheckType]}
+                </Body2P>
                 <Chip
                   fillLevel={3}
                   size="small"

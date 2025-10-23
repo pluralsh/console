@@ -45,6 +45,14 @@ fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
     name
     namespace
   }
+  integrationTest {
+    distro
+    format
+    tags
+    job {
+      ...JobGateSpec
+    }
+  }
 }
 
 fragment SentinelRunTiny on SentinelRun {
@@ -76,6 +84,19 @@ fragment SentinelRunResult on SentinelRunResult {
 fragment SentinelStatistic on SentinelStatistic {
   status
   count
+}
+
+fragment SentinelRunJobTiny on SentinelRunJob {
+  id
+  status
+  cluster {
+    ...ClusterMinimal
+  }
+  reference {
+    namespace
+    name
+  }
+  updatedAt
 }
 
 query Sentinels(
@@ -127,6 +148,28 @@ query SentinelRun($id: ID!) {
 query SentinelStatistics($q: String) {
   sentinelStatistics(q: $q) {
     ...SentinelStatistic
+  }
+}
+
+query SentinelRunJobs(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $status: SentinelRunJobStatus
+  $check: String
+) {
+  sentinelRun(id: $id) {
+    id
+    jobs(first: $first, after: $after, status: $status, check: $check) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...SentinelRunJobTiny
+        }
+      }
+    }
   }
 }
 
