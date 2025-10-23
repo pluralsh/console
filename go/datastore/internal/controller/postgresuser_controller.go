@@ -7,6 +7,7 @@ import (
 
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
+	"github.com/pluralsh/polly/containers"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,8 +67,9 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}()
 
 	if !user.DeletionTimestamp.IsZero() {
-		if err = r.handleDelete(ctx, user); err != nil {
-			return handleRequeuePostgres(nil, err, user.SetCondition)
+		result, err := r.handleDelete(ctx, user)
+		if err != nil || result != nil {
+			return handleRequeuePostgres(result, err, user.SetCondition)
 		}
 		return ctrl.Result{}, nil
 	}
@@ -158,31 +160,54 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	return jitterRequeue(requeueDefault), nil
 }
 
-func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.PostgresUser) error {
+func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha1.PostgresUser) (*ctrl.Result, error) {
 	credentials := new(v1alpha1.PostgresCredentials)
 	err := r.Get(ctx, types.NamespacedName{Name: user.Spec.CredentialsRef.Name, Namespace: user.Namespace}, credentials)
 
 	if err != nil || !meta.IsStatusConditionTrue(credentials.Status.Conditions, v1alpha1.ReadyConditionType.String()) {
 		if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.PasswordSecretKeyRef.Name, PostgresSecretProtectionFinalizerName); err != nil {
-			return err
+			return nil, err
 		}
 		controllerutil.RemoveFinalizer(user, PostgresUserProtectionFinalizerName)
-		return nil
+		return nil, nil
+	}
+
+	if user.Spec.Databases != nil && len(user.Spec.Databases) > 0 {
+		databaseList := containers.ToSet[string](user.Spec.Databases)
+
+		dbList := &v1alpha1.PostgresDatabaseList{}
+		if err := r.List(ctx, dbList, client.InNamespace(user.Namespace)); err != nil {
+			return nil, err
+		}
+		var deletingAny bool
+		for _, db := range dbList.Items {
+			if databaseList.Has(db.DatabaseName()) {
+				deletingAny = true
+				if db.DeletionTimestamp.IsZero() {
+					if err := r.Delete(ctx, &db); err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+		if deletingAny {
+			return &ctrl.Result{RequeueAfter: requeueWaitForResources}, nil
+		}
 	}
 
 	if err := r.PostgresClient.Init(ctx, r.Client, credentials); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := r.PostgresClient.DeleteUser(user.UserName()); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := deleteRefSecret(ctx, r.Client, user.Namespace, user.Spec.PasswordSecretKeyRef.Name, PostgresSecretProtectionFinalizerName); err != nil {
-		return err
+		return nil, err
 	}
 	controllerutil.RemoveFinalizer(user, PostgresUserProtectionFinalizerName)
-	return nil
+	return nil, nil
 }
 
 func (r *PostgresUserReconciler) addOrRemoveFinalizer(ctx context.Context, user *v1alpha1.PostgresUser, credentials *v1alpha1.PostgresCredentials) error {
