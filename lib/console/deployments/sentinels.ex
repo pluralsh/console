@@ -88,9 +88,9 @@ defmodule Console.Deployments.Sentinels do
     |> execute(extract: :run)
   end
 
-  @spec spawn_jobs(Sentinel.t, binary) :: {:ok, integer} | error
-  def spawn_jobs(%SentinelRun{id: id} = sentinel, check_name) do
-    with %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} <- Repo.preload(sentinel, :sentinel),
+  @spec spawn_jobs(SentinelRun.t, binary) :: {:ok, integer} | error
+  def spawn_jobs(%SentinelRun{id: id} = run, check_name) do
+    with %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} <- Repo.preload(run, [:sentinel]),
          %SentinelCheck{
            type: :integration_test,
            configuration: %SentinelCheck.CheckConfiguration{integration_test: test}

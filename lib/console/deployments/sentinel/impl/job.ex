@@ -15,7 +15,7 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
 
   @poll :timer.seconds(30)
 
-  def start(%SentinelRun{} = run, %SentinelCheck{} = check, pid) do
+  def start(%SentinelRun{} = run, %SentinelCheck{} = check, pid) when is_pid(pid) do
     GenServer.start(__MODULE__, {run, check, pid})
   end
 
