@@ -20,9 +20,9 @@ import {
   AI_SENTINELS_RUNS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from './aiRoutesConsts'
-import { AIAgentRuntimes } from 'components/ai/agent-runs/AIAgentRuntimes.tsx'
-import { AIAgentRuns } from '../components/ai/agent-runtimes/AIAgentRuns.tsx'
-import { AIAgentRun } from '../components/ai/agent-runtimes/AIAgentRun.tsx'
+import { AIAgentRuntimes } from 'components/ai/agent-runtimes/AIAgentRuntimes.tsx'
+import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
+import { AIAgentRun } from 'components/ai/agent-runs/AIAgentRun.tsx'
 
 export const aiRoutes = [
   <Route
