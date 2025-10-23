@@ -172,7 +172,7 @@ func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha
 		return nil, nil
 	}
 
-	if user.Spec.Databases != nil && len(user.Spec.Databases) > 0 {
+	if len(user.Spec.Databases) > 0 {
 		databaseList := containers.ToSet[string](user.Spec.Databases)
 
 		dbList := &v1alpha1.PostgresDatabaseList{}
