@@ -91,6 +91,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Sentinel do
   def run_job_filters(query, args) do
     Enum.reduce(args, query, fn
       {:check, check}, q when not is_nil(check) -> SentinelRunJob.for_check(q, check)
+      {:status, status}, q when not is_nil(status) -> SentinelRunJob.for_status(q, status)
       _, q -> q
     end)
   end

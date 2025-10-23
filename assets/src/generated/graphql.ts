@@ -10692,6 +10692,7 @@ export type SentinelRunJobsArgs = {
   check?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<SentinelRunJobStatus>;
 };
 
 export type SentinelRunConnection = {
