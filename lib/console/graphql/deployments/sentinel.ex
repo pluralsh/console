@@ -124,7 +124,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :results,          list_of(:sentinel_run_result), description: "the results of the run"
 
     connection field :jobs, node_type: :sentinel_run_job do
-      arg :check, :string
+      arg :check,  :string
+      arg :status, :sentinel_run_job_status
 
       resolve &Deployments.sentinel_run_jobs/3
     end

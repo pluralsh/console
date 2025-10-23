@@ -5,8 +5,12 @@ config :console, :initialize, true
 config :console, ConsoleWeb.Endpoint,
   http: [
     port: 4000,
-    http_options: [compress: true],
-    http_1_options: [max_header_length: 8192],
+    # http_options: [compress: true],
+    # http_1_options: [max_header_length: 8192],
+    compress: true,
+    protocol_options: [
+      max_header_value_length: 8192,
+    ]
   ],
   # force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   # cache_static_manifest: "priv/static/cache_manifest.json",
@@ -68,6 +72,7 @@ config :console, Console.Cron.Scheduler,
     {"15 * * * *",     {Console.Deployments.Cron, :prune_vuln_reports, []}},
     {"*/15 * * * *",   {Console.Deployments.Cron, :pr_governance, []}},
     {"15 3 * * *",     {Console.Deployments.Cron, :prune_dangling_templates, []}},
+    {"30 3 * * *",     {Console.Deployments.Cron, :prune_insight_components, []}},
     {"30 1 * * *",     {Console.Cron.Jobs, :prune_notifications, []}},
     {"45 1 * * *",     {Console.Cron.Jobs, :prune_audits, []}},
     {"0 2 * * *",      {Console.Deployments.Cron, :prune_alerts, []}},

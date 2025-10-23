@@ -45,6 +45,10 @@ defmodule Console.Schema.SentinelRunJob do
     from(s in query, where: s.check == ^check_name)
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
+  end
+
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
