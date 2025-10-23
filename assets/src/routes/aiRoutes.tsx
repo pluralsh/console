@@ -11,6 +11,7 @@ import {
   AI_AGENT_RUNS_ABS_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
   AI_AGENT_RUNS_REL_PATH,
+  AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_ABS_PATH,
@@ -19,8 +20,9 @@ import {
   AI_SENTINELS_RUNS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from './aiRoutesConsts'
-import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
-import { AIAgentRun } from 'components/ai/agent-runs/AIAgentRun.tsx'
+import { AIAgentRuntimes } from 'components/ai/agent-runs/AIAgentRuntimes.tsx'
+import { AIAgentRuns } from '../components/ai/agent-runtimes/AIAgentRuns.tsx'
+import { AIAgentRun } from '../components/ai/agent-runtimes/AIAgentRun.tsx'
 
 export const aiRoutes = [
   <Route
@@ -39,6 +41,10 @@ export const aiRoutes = [
     <Route
       path={AI_AGENT_SESSIONS_REL_PATH}
       element={<AIAgentSessions />}
+    />
+    <Route
+      path={AI_AGENT_RUNTIMES_REL_PATH}
+      element={<AIAgentRuntimes />}
     />
     <Route
       path={AI_AGENT_RUNS_REL_PATH}

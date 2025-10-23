@@ -5,6 +5,7 @@ export const AI_THREADS_REL_PATH = 'threads'
 export const AI_MCP_SERVERS_REL_PATH = 'mcp-servers'
 export const AI_SENTINELS_REL_PATH = 'sentinels'
 export const AI_SENTINELS_RUNS_REL_PATH = 'runs'
+export const AI_AGENT_RUNTIMES_REL_PATH = 'agent-runtimes'
 export const AI_AGENT_RUNS_REL_PATH = 'agent-runs'
 
 export const AI_AGENT_SESSIONS_ABS_PATH = `${AI_ABS_PATH}/${AI_AGENT_SESSIONS_REL_PATH}`
