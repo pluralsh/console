@@ -123,6 +123,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :sentinel,         :sentinel, resolve: dataloader(Deployments), description: "the sentinel that was run"
     field :results,          list_of(:sentinel_run_result), description: "the results of the run"
 
+    field :checks, list_of(:sentinel_check), description: "the checks that were run"
+
     connection field :jobs, node_type: :sentinel_run_job do
       arg :check,  :string
       arg :status, :sentinel_run_job_status
@@ -153,6 +155,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :format,        non_null(:sentinel_run_job_format), description: "the format of the job output"
     field :check,         :string, description: "the check that was run"
     field :output,        :string, description: "the output of the job"
+    field :completed_at,  :datetime, description: "the time the job completed"
 
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do

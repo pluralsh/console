@@ -14,6 +14,8 @@ defmodule Console.Schema.SentinelRunJob do
     field :status, Status, default: :pending
     field :format, Format, default: :junit
 
+    field :completed_at, :utc_datetime_usec
+
     field :output, :binary
 
     embeds_one :job, JobSpec, on_replace: :update
@@ -65,6 +67,7 @@ defmodule Console.Schema.SentinelRunJob do
     |> cast_embed(:job)
     |> cast_embed(:reference, with: &reference_changeset/2)
     |> validate_required(~w(check format status cluster_id sentinel_run_id)a)
+    |> SentinelRun.add_completed_at()
   end
 
   defp reference_changeset(model, attrs) do

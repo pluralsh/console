@@ -22,6 +22,8 @@ defmodule Console.Schema.SentinelRun do
       field :failed_count,     :integer, default: 0
     end
 
+    embeds_many :checks, Sentinel.SentinelCheck, on_replace: :delete
+
     belongs_to :sentinel, Sentinel
     has_many :jobs, SentinelRunJob, on_delete: :delete_all
 
@@ -51,6 +53,7 @@ defmodule Console.Schema.SentinelRun do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:results, with: &result_changeset/2)
+    |> cast_embed(:checks, with: &Sentinel.check_changeset/2)
     |> validate_required(~w(status)a)
     |> add_completed_at()
   end
@@ -61,8 +64,7 @@ defmodule Console.Schema.SentinelRun do
     |> validate_required(~w(name status)a)
   end
 
-
-  defp add_completed_at(cs) do
+  def add_completed_at(cs) do
     case get_change(cs, :status) do
       s when s in ~w(success failed)a -> put_change(cs, :completed_at, DateTime.utc_now())
       _ -> cs

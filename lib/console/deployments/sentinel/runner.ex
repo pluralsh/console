@@ -36,7 +36,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   def handle_continue(:boot, %State{run: run} = state) do
     run = Repo.preload(run, [sentinel: :repository])
     Logger.info "booting sentinel run #{run.id}"
-    with %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} <- run,
+    with %SentinelRun{checks: [_ | _] = checks} <- run,
          {:ok, rules} <- rule_files(run) do
       check_runners = Enum.reduce(checks, %{}, fn check, acc ->
         {:ok, pid} = start_check(check, run, rules)

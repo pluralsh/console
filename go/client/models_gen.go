@@ -6442,7 +6442,9 @@ type SentinelRun struct {
 	// the sentinel that was run
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
-	Results    []*SentinelRunResult      `json:"results,omitempty"`
+	Results []*SentinelRunResult `json:"results,omitempty"`
+	// the checks that were run
+	Checks     []*SentinelCheck          `json:"checks,omitempty"`
 	Jobs       *SentinelRunJobConnection `json:"jobs,omitempty"`
 	InsertedAt *string                   `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
@@ -6469,6 +6471,8 @@ type SentinelRunJob struct {
 	Check *string `json:"check,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// the time the job completed
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
 	// the job that was run

@@ -87,12 +87,15 @@ defmodule Console.Deployments.SentinelTest do
     test "project writers can run a sentinel" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
-      sentinel = insert(:sentinel, project: project)
+      sentinel = insert(:sentinel, project: project, checks: [
+        %{type: :log, name: "test", configuration: %{log: %{namespace: "test", duration: "1h", query: "error"}}}
+      ])
 
       {:ok, run} = Sentinels.run_sentinel(sentinel.id, user)
 
       assert run.sentinel_id == sentinel.id
       assert run.status == :pending
+      assert length(run.checks) == 1
 
       assert refetch(sentinel).last_run_at
     end
@@ -126,7 +129,7 @@ defmodule Console.Deployments.SentinelTest do
           }
         }]
       )
-      run = insert(:sentinel_run, sentinel: sentinel)
+      run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
       clusters = insert_list(3, :cluster, distro: :eks, tags: [%{name: "tier", value: "dev"}])
       insert_list(2, :cluster, distro: :aks, tags: [%{name: "tier", value: "dev"}])
       insert_list(2, :cluster, distro: :eks, tags: [%{name: "tier", value: "prod"}])

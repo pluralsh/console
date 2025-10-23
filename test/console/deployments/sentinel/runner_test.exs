@@ -47,7 +47,7 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
         {:ok, [%Console.AI.Tool{name: "sentinel_check", arguments: %{passing: true, reason: "lgtm"}}]}
       end)
 
-      run = insert(:sentinel_run, sentinel: sentinel)
+      run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
 
       {:ok, pid} = Runner.start(refetch(run))
 
@@ -89,7 +89,7 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
       )
 
       insert_list(2, :cluster, tags: [%{name: "tier", value: "dev"}])
-      run = insert(:sentinel_run, sentinel: sentinel)
+      run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
 
       {:ok, pid} = Runner.start(refetch(run))
 

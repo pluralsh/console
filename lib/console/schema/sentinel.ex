@@ -105,7 +105,7 @@ defmodule Console.Schema.Sentinel do
     |> validate_required([:name, :status])
   end
 
-  defp check_changeset(model, attrs) do
+  def check_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(type name rule_file)a)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
