@@ -12579,7 +12579,7 @@ export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status
 
 export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null } | null> | null };
 
-export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type AgentMessageFragment = { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null };
 
@@ -12609,14 +12609,14 @@ export type AgentRuntimesQueryVariables = Exact<{
 }>;
 
 
-export type AgentRuntimesQuery = { __typename?: 'RootQueryType', agentRuntimes?: { __typename?: 'AgentRuntimeConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRuntimeEdge', node?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+export type AgentRuntimesQuery = { __typename?: 'RootQueryType', agentRuntimes?: { __typename?: 'AgentRuntimeConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRuntimeEdge', node?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
 
 export type AgentRuntimeQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AgentRuntimeQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type AgentRuntimeQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateAgentRunMutationVariables = Exact<{
   runtimeId: Scalars['ID']['input'];
@@ -15890,6 +15890,30 @@ export const AgentRunFragmentDoc = gql`
 }
     ${AgentRunTinyFragmentDoc}
 ${AgentMessageFragmentDoc}`;
+export const ClusterMinimalFragmentDoc = gql`
+    fragment ClusterMinimal on Cluster {
+  id
+  name
+  handle
+  provider {
+    name
+    cloud
+  }
+  distro
+}
+    `;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  ...ClusterMinimal
+  self
+  upgradePlan {
+    compatibilities
+    deprecations
+    incompatibilities
+  }
+  virtual
+}
+    ${ClusterMinimalFragmentDoc}`;
 export const PolicyBindingFragmentDoc = gql`
     fragment PolicyBinding on PolicyBinding {
   id
@@ -15911,15 +15935,15 @@ export const AgentRuntimeFragmentDoc = gql`
   type
   aiProxy
   cluster {
-    id
-    name
+    ...ClusterTiny
   }
   default
   createBindings {
     ...PolicyBinding
   }
 }
-    ${PolicyBindingFragmentDoc}`;
+    ${ClusterTinyFragmentDoc}
+${PolicyBindingFragmentDoc}`;
 export const ChatThreadSettingsFragmentDoc = gql`
     fragment ChatThreadSettings on ChatThreadSettings {
   memory
@@ -15998,18 +16022,6 @@ export const AiInsightEvidenceFragmentDoc = gql`
 ${PullRequestEvidenceFragmentDoc}
 ${AlertEvidenceFragmentDoc}
 ${KnowledgeEvidenceFragmentDoc}`;
-export const ClusterMinimalFragmentDoc = gql`
-    fragment ClusterMinimal on Cluster {
-  id
-  name
-  handle
-  provider {
-    name
-    cloud
-  }
-  distro
-}
-    `;
 export const AiInsightContextFragmentDoc = gql`
     fragment AiInsightContext on AiInsight {
   evidence {
@@ -16216,18 +16228,6 @@ export const PageInfoFragmentDoc = gql`
   startCursor
 }
     `;
-export const ClusterTinyFragmentDoc = gql`
-    fragment ClusterTiny on Cluster {
-  ...ClusterMinimal
-  self
-  upgradePlan {
-    compatibilities
-    deprecations
-    incompatibilities
-  }
-  virtual
-}
-    ${ClusterMinimalFragmentDoc}`;
 export const ClusterBasicFragmentDoc = gql`
     fragment ClusterBasic on Cluster {
   ...ClusterTiny

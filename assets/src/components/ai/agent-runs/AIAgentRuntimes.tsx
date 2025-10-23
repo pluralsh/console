@@ -1,4 +1,4 @@
-import { Flex, Table } from '@pluralsh/design-system'
+import { Chip, Flex, Table } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -13,6 +13,8 @@ import { mapExistingNodes } from 'utils/graphql'
 
 import { AI_AGENT_RUNS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { useNavigate } from 'react-router-dom'
+
+import { ClusterNameAndIcon } from '../../cd/services/ServicesColumns.tsx'
 
 export function AIAgentRuntimes() {
   const navigate = useNavigate()
@@ -61,12 +63,35 @@ const columns = [
     id: 'name',
     header: 'Name',
   }),
-  columnHelper.accessor((runtime) => (runtime.default ? 'Default' : ''), {
+  columnHelper.accessor((runtime) => runtime.default, {
     id: 'default',
     header: 'Default',
+    cell: ({ getValue }) =>
+      getValue() ? (
+        <Chip
+          size="small"
+          severity="info"
+        >
+          Default
+        </Chip>
+      ) : undefined,
   }),
-  columnHelper.accessor((runtime) => (runtime.aiProxy ? 'Enabled' : ''), {
+  columnHelper.accessor((runtime) => runtime.aiProxy, {
     id: 'aiProxy',
     header: 'AI Proxy',
+    cell: ({ getValue }) =>
+      getValue() ? (
+        <Chip
+          size="small"
+          severity="info"
+        >
+          Enabled
+        </Chip>
+      ) : undefined,
+  }),
+  columnHelper.accessor((runtime) => runtime.cluster, {
+    id: 'cluster',
+    header: 'Cluster',
+    cell: ({ getValue }) => <ClusterNameAndIcon cluster={getValue()} />,
   }),
 ]
