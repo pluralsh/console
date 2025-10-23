@@ -13,11 +13,10 @@ const (
 )
 
 // Jitter adds a random jitter to the given duration.
-// This helps to avoid thundering herd problems when multiple resources
-// are reconciled at the same time.
-// The jitter is up to half of the given duration plus 30 seconds.
+// This helps to avoid thundering herd problems when multiple resources are reconciled at the same time.
+// The jitter is calculated as a random value between 50% and 150% of the given duration.
 func Jitter(t time.Duration) time.Duration {
-	return t + time.Duration(rand.Intn(int(t/2+(time.Second*30))))
+	return t/2 + time.Duration(rand.Intn(int(t)))
 }
 
 // Reconciliation parameters for a specific resource.
@@ -31,7 +30,9 @@ type Reconciliation struct {
 	// +kubebuilder:example:=false
 	DriftDetection *bool `json:"driftDetection,omitempty"`
 
-	// Interval for DriftDetection mechanism.
+	// Interval for the drift detection mechanism.
+	// It is subject to jitter to avoid the thundering herd problem,
+	// it is calculated as a random value between 50% and 150% of the given duration.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:default="30m"

@@ -3640,7 +3640,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `driftDetection` _boolean_ | DriftDetection enables drift detection for this resource.<br />It is destined to detect changes made to the related<br />resources that are not referenced with owner ref.<br />Use with Interval to set how often drift detection runs. | true | Optional: \{\} <br /> |
-| `interval` _string_ | Interval for DriftDetection mechanism. | 30m | Optional: \{\} <br />Type: string <br /> |
+| `interval` _string_ | Interval for the drift detection mechanism.<br />It is subject to jitter to avoid the thundering herd problem,<br />it is calculated as a random value between 50% and 150% of the given duration. | 30m | Optional: \{\} <br />Type: string <br /> |
 
 
 #### RegexReplacement

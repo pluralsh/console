@@ -118,7 +118,10 @@ spec:
                     type: boolean
                   interval:
                     default: 30m
-                    description: Interval for DriftDetection mechanism.
+                    description: |-
+                      Interval for the drift detection mechanism.
+                      It is subject to jitter to avoid the thundering herd problem,
+                      it is calculated as a random value between 50% and 150% of the given duration.
                     example: 5m30s
                     type: string
                 type: object
