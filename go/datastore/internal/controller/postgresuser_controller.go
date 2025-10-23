@@ -179,19 +179,10 @@ func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha
 		if err := r.List(ctx, dbList, client.InNamespace(user.Namespace)); err != nil {
 			return nil, err
 		}
-		var deletingAny bool
 		for _, db := range dbList.Items {
 			if databaseList.Has(db.DatabaseName()) {
-				deletingAny = true
-				if db.DeletionTimestamp.IsZero() {
-					if err := r.Delete(ctx, &db); err != nil {
-						return nil, err
-					}
-				}
+				return &ctrl.Result{RequeueAfter: requeueWaitForResources}, nil
 			}
-		}
-		if deletingAny {
-			return &ctrl.Result{RequeueAfter: requeueWaitForResources}, nil
 		}
 	}
 
