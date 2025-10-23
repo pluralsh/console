@@ -1,23 +1,21 @@
-import { Chip, Flex, Table } from '@pluralsh/design-system'
-import { createColumnHelper, Row } from '@tanstack/react-table'
+import {
+  Chip,
+  Flex,
+  IconFrame,
+  PeopleIcon,
+  Table,
+} from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  AgentRunFragment,
-  AgentRuntimeFragment,
-  useAgentRuntimesQuery,
-} from 'generated/graphql'
+import { AgentRuntimeFragment, useAgentRuntimesQuery } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
-
-import { AI_AGENT_RUNS_ABS_PATH } from 'routes/aiRoutesConsts'
-import { useNavigate } from 'react-router-dom'
-
 import { ClusterNameAndIcon } from '../../cd/services/ServicesColumns.tsx'
+import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal.tsx'
 
 export function AIAgentRuntimes() {
-  const navigate = useNavigate()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useAgentRuntimesQuery, keyPath: ['agentRuntimes'] },
@@ -47,10 +45,7 @@ export function AIAgentRuntimes() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'No runs found.' }}
-        onRowClick={(_e, { original }: Row<AgentRunFragment>) => {
-          if (original.id) navigate(`${AI_AGENT_RUNS_ABS_PATH}/${original.id}`)
-        }}
+        emptyStateProps={{ message: 'No runtimes found.' }}
       />
     </Flex>
   )
@@ -93,5 +88,33 @@ const columns = [
     id: 'cluster',
     header: 'Cluster',
     cell: ({ getValue }) => <ClusterNameAndIcon cluster={getValue()} />,
+  }),
+  columnHelper.accessor((runtime) => truncate(runtime.name, { length: 60 }), {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: function Cell({ row: { original } }) {
+      const [open, setOpen] = useState(false)
+
+      return (
+        <>
+          <IconFrame
+            clickable
+            icon={<PeopleIcon />}
+            onClick={() => setOpen(true)}
+            tooltip="Manage permissions"
+            type="floating"
+          />
+          <AIAgentRuntimePermissionsModal
+            id={original.id}
+            header={`${original.name} agent runtime permissions`}
+            name={original.name}
+            bindings={original.createBindings}
+            open={open}
+            onClose={() => setOpen(false)}
+          />
+        </>
+      )
+    },
   }),
 ]
