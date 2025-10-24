@@ -33,6 +33,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	kubernetestrace "github.com/DataDog/dd-trace-go/contrib/k8s.io/client-go/v2/kubernetes"
+	datadogtracer "github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
+	datadogprofiler "github.com/DataDog/dd-trace-go/v2/profiler"
+
 	deploymentsv1alpha "github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/cmd/args"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
@@ -58,15 +62,31 @@ func init() {
 
 func main() {
 	args.Init()
+	config := ctrl.GetConfigOrDie()
 	ctrl.SetLogger(setupLog)
 	ctx := ctrl.LoggerInto(ctrl.SetupSignalHandler(), setupLog)
+
+	if args.DatadogEnabled() {
+		err := args.InitDatadog()
+		if err != nil {
+			panic("unable to initialize datadog")
+		}
+
+		// Trace kubernetes client calls
+		config.WrapTransport = kubernetestrace.WrapRoundTripper
+
+		defer func() {
+			datadogtracer.Stop()
+			datadogprofiler.Stop()
+		}()
+	}
 
 	if args.Version() {
 		versionInfo()
 		return
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	mgr, err := ctrl.NewManager(config, ctrl.Options{
 		Scheme:                 scheme,
 		Logger:                 setupLog,
 		Metrics:                metricsserver.Options{BindAddress: args.MetricsBindAddress()},
