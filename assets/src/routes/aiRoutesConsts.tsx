@@ -10,6 +10,8 @@ export const AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH = 'output'
 export const AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH = 'job'
 export const AI_AGENT_RUNTIMES_REL_PATH = 'agent-runtimes'
 export const AI_AGENT_RUNS_REL_PATH = 'agent-runs'
+export const AI_AGENT_RUNS_ANALYSIS_REL_PATH = 'analysis'
+export const AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH = 'prs'
 
 export const AI_AGENT_SESSIONS_ABS_PATH = `${AI_ABS_PATH}/${AI_AGENT_SESSIONS_REL_PATH}`
 export const AI_AGENT_RUNS_ABS_PATH = `${AI_ABS_PATH}/${AI_AGENT_RUNS_REL_PATH}`

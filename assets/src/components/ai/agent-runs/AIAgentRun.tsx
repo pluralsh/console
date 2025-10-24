@@ -2,9 +2,12 @@ import {
   Checkbox,
   Chip,
   EmptyState,
-  Flex,
+  Markdown,
   Sidecar,
   SidecarItem,
+  SubTab,
+  Table,
+  TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -13,24 +16,46 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
+  AgentMessage,
+  AgentRun,
   AgentRunFragment,
   AgentRunMode,
+  ChatType,
+  PullRequestFragment,
   useAgentRunQuery,
 } from 'generated/graphql'
 import { capitalize, isEmpty, truncate } from 'lodash'
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { ReactElement, useMemo, useRef } from 'react'
 import {
+  Outlet,
+  useLocation,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
+import {
+  AI_AGENT_RUNS_ANALYSIS_REL_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
+  AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
 } from 'routes/aiRoutesConsts'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  ColActions,
+  ColInsertedAt,
+  ColStatus,
+  ColTitle,
+} from '../../self-service/pr/queue/PrQueueColumns.tsx'
+import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer.tsx'
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage.tsx'
+import { LinkTabWrap } from '../../utils/Tabs.tsx'
+import { VirtualList } from '../../utils/VirtualList.tsx'
 import { getAIBreadcrumbs } from '../AI'
 import { ChatMessage } from '../chatbot/ChatMessage'
-import { DetailsPageWithSidecarWrapper } from '../sentinels/sentinel/Sentinel'
 import { agentRunStatusToSeverity } from './AIAgentRuns'
 
 export function AIAgentRun() {
+  const theme = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID]
   const { data, error, loading } = useAgentRunQuery({
     variables: { id: id ?? '' },
@@ -40,7 +65,6 @@ export function AIAgentRun() {
   })
   const runLoading = !data && loading
   const run = data?.agentRun
-  const messages = run?.messages?.filter(isNonNullable)
 
   useSetBreadcrumbs(
     useMemo(
@@ -61,40 +85,30 @@ export function AIAgentRun() {
     )
 
   return (
-    <DetailsPageWithSidecarWrapper
-      header={
-        <>
-          <StackedText
-            loading={runLoading}
-            first={run?.prompt}
-            firstPartialType="subtitle1"
-            firstColor="text"
-            secondPartialType="body2"
-            secondColor="text-xlight"
-          />
-        </>
-      }
-      content={
-        <Flex
-          direction="column"
-          overflow="auto"
-          height="100%"
-          minHeight={0}
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
+      <ResponsiveLayoutContentContainer css={{ maxWidth: '100%' }}>
+        <AgentRunHeader
+          run={run}
+          loading={runLoading}
+        />
+        <div
+          css={{
+            overflow: 'hidden',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
-          {isEmpty(messages) ? (
-            <EmptyState message="No messages found" />
-          ) : (
-            messages?.map((message) => (
-              <ChatMessage
-                key={message.id}
-                {...message}
-              />
-            ))
-          )}
-        </Flex>
-      }
-      sidecar={<AgentRunSidecar run={run} />}
-    ></DetailsPageWithSidecarWrapper>
+          <Outlet
+            context={{
+              run,
+            }}
+          />
+        </div>
+      </ResponsiveLayoutContentContainer>
+      <AgentRunSidecar run={run} />
+    </ResponsiveLayoutPage>
   )
 }
 function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
@@ -104,6 +118,7 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
         <SidecarSkeleton />
       ) : (
         <Sidecar>
+          <SidecarItem heading="ID">{run.id}</SidecarItem>
           <SidecarItem heading="Status">
             <Chip
               size="small"
@@ -129,6 +144,7 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
             <SidecarItem heading="Todos">
               {run.todos?.filter(isNonNullable).map((todo) => (
                 <StackedText
+                  key={todo.title}
                   first={todo.title}
                   second={todo.description}
                   icon={
@@ -142,21 +158,178 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
               ))}
             </SidecarItem>
           )}
-          {run.mode === AgentRunMode.Analyze && run.analysis && (
-            <SidecarItem heading="Analysis">
-              <StackedText
-                first={run.analysis.summary}
-                second={run.analysis.analysis}
-              />
-              <ul>
-                {run.analysis.bullets
-                  ?.filter(isNonNullable)
-                  .map((bullet) => <li key={bullet}>{bullet}</li>)}
-              </ul>
-            </SidecarItem>
-          )}
         </Sidecar>
       )}
     </ResponsiveLayoutSidecarContainer>
+  )
+}
+
+function getDirectory() {
+  return [
+    { path: '', label: 'Progress' },
+    {
+      path: AI_AGENT_RUNS_ANALYSIS_REL_PATH,
+      label: 'Analysis',
+      condition: (s: AgentRun) => s?.mode === AgentRunMode.Analyze,
+    },
+    {
+      path: AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
+      label: 'Pull Requests',
+      condition: (s: AgentRun) => s?.mode === AgentRunMode.Write,
+    },
+  ]
+}
+
+function AgentRunHeader({ run, loading }): ReactElement {
+  const theme = useTheme()
+  const { pathname } = useLocation()
+  const tabStateRef = useRef<any>(null)
+  const directory = getDirectory()
+  const currentTab = useMemo(
+    () =>
+      directory.find((d) => d.path && pathname.includes(d.path)) ??
+      directory[0],
+    [directory, pathname]
+  )
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        marginBottom: theme.spacing.medium,
+      }}
+    >
+      <div
+        css={{
+          paddingBottom: theme.spacing.medium,
+          borderBottom: theme.borders.default,
+        }}
+      >
+        <StackedText
+          loading={loading}
+          first={run?.prompt}
+          firstPartialType="subtitle1"
+          firstColor="text"
+          secondPartialType="body2"
+          secondColor="text-xlight"
+        />
+      </div>
+      <TabList
+        scrollable
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: currentTab?.path,
+        }}
+      >
+        {directory
+          .filter((d) => d.condition?.(run) ?? true)
+          .map(({ label, path }) => (
+            <LinkTabWrap
+              subTab
+              key={path}
+              to={path}
+            >
+              <SubTab key={path}>{label}</SubTab>
+            </LinkTabWrap>
+          ))}
+      </TabList>
+    </div>
+  )
+}
+
+export function AgentRunMessages(): ReactElement {
+  const { run } = useOutletContext<{ run: AgentRun }>()
+  const messages = run?.messages?.filter(isNonNullable) ?? []
+
+  return isEmpty(messages) ? (
+    <EmptyState message="No messages found" />
+  ) : (
+    <VirtualList
+      data={messages as Array<AgentMessage>}
+      renderer={({ rowData }) => (
+        <div>
+          <ChatMessage
+            key={rowData.id}
+            content={
+              !!rowData?.metadata?.tool
+                ? rowData?.metadata?.tool?.output
+                : !!rowData?.metadata?.file
+                  ? rowData?.metadata?.file?.text
+                  : rowData.message
+            }
+            type={
+              !!rowData?.metadata?.tool
+                ? ChatType.Tool
+                : !!rowData?.metadata?.file
+                  ? ChatType.File
+                  : ChatType.Text
+            }
+            role={rowData.role}
+            highlightToolContent
+            attributes={{
+              file: { name: rowData?.metadata?.file?.name },
+              tool: { name: rowData?.metadata?.tool?.name },
+            }}
+          />
+        </div>
+      )}
+    />
+  )
+}
+
+export function AgentRunAnalysis(): ReactElement {
+  const theme = useTheme()
+  const { run } = useOutletContext<{ run: AgentRun }>()
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+        height: '100%',
+        overflow: 'auto',
+      }}
+    >
+      <div
+        css={{
+          paddingBottom: theme.spacing.large,
+          borderBottom: theme.borders.default,
+        }}
+      >
+        <h1>Summary</h1>
+        <Markdown
+          text={
+            run?.analysis?.summary.concat(
+              run?.analysis?.bullets?.join('\n- ') ?? ''
+            ) ?? ''
+          }
+        />
+      </div>
+      <div>
+        <h1>Analysis Breakdown</h1>
+        <Markdown text={run?.analysis?.analysis ?? ''} />
+      </div>
+    </div>
+  )
+}
+
+export function AgentRunPullRequests(): ReactElement {
+  const { run } = useOutletContext<{ run: AgentRun }>()
+
+  return (
+    <Table
+      fullHeightWrap
+      columns={[ColTitle, ColStatus, ColInsertedAt, ColActions]}
+      data={
+        (run?.pullRequests?.map((pr) => ({ node: pr })) ?? []) satisfies Array<{
+          node: Nullable<PullRequestFragment>
+        }>
+      }
+      virtualizeRows
+    />
   )
 }
