@@ -33,6 +33,14 @@ func DatadogHost() string {
 	return *argDatadogHost
 }
 
+func DatadogStatsdAddr() string {
+	return fmt.Sprintf("%s:8125", DatadogHost())
+}
+
+func DatadogAgentAddr() string {
+	return fmt.Sprintf("%s:8126", DatadogHost())
+}
+
 func DatadogEnv() string {
 	return *argDatadogEnv
 }
@@ -40,29 +48,26 @@ func DatadogEnv() string {
 func InitDatadog() error {
 	klog.Info("initializing datadog")
 
-	env := DatadogEnv()
 	service := "console-controller"
-	agentAddr := fmt.Sprintf("%s:%s", DatadogHost(), "8126")
-	dogstatsdAddr := fmt.Sprintf("%s:%s", DatadogHost(), "8125")
 
 	if err := tracer.Start(
 		tracer.WithLogStartup(false),
 		tracer.WithAppSecEnabled(false),
 		tracer.WithDebugMode(false),
 		tracer.WithRuntimeMetrics(),
-		tracer.WithDogstatsdAddr(dogstatsdAddr),
-		tracer.WithAgentAddr(agentAddr),
+		tracer.WithDogstatsdAddr(DatadogStatsdAddr()),
+		tracer.WithAgentAddr(DatadogAgentAddr()),
 		tracer.WithService(service),
-		tracer.WithEnv(env),
+		tracer.WithEnv(DatadogEnv()),
 	); err != nil {
 		return err
 	}
 
 	return profiler.Start(
 		profiler.WithService(service),
-		profiler.WithEnv(env),
+		profiler.WithEnv(DatadogEnv()),
 		profiler.WithTags(fmt.Sprintf("console_url:%s", ConsoleUrl())),
-		profiler.WithAgentAddr(agentAddr),
+		profiler.WithAgentAddr(DatadogAgentAddr()),
 		profiler.WithPeriod(30*time.Second),
 		profiler.CPUDuration(30*time.Second),
 		profiler.WithProfileTypes(profiler.CPUProfile, profiler.HeapProfile),
