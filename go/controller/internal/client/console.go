@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	ddtrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
+	"github.com/Yamashou/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/polly/http"
@@ -178,13 +178,13 @@ type ConsoleClient interface {
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {
-	httpClient := http.NewHttpClient(token)
+	interceptors := []clientv2.RequestInterceptor{console.PersistedQueryInterceptor}
 	if datadogEnabled {
-		httpClient = ddtrace.WrapClient(httpClient)
+		interceptors = append(interceptors, console.DatadogTracingInterceptor)
 	}
 
 	return &client{
-		consoleClient: console.NewClient(httpClient, url, nil, console.PersistedQueryInterceptor),
+		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, interceptors...),
 		url:           url,
 		ctx:           context.Background(),
 	}
