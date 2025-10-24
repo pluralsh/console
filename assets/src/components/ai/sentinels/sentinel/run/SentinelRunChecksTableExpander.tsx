@@ -109,7 +109,7 @@ function IntegrationTestExpander({
         fullHeightWrap
         rowBg="base"
         data={jobs}
-        loading={!result || (!data && loading)}
+        loading={!data && loading}
         columns={sentinelRunJobsCols}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
