@@ -9,7 +9,6 @@ import {
 import { Row } from '@tanstack/react-table'
 import { RawYaml } from 'components/component/ComponentRaw'
 import { GqlError } from 'components/utils/Alert'
-import { useFillMockArr } from 'components/utils/devHooks'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
@@ -86,11 +85,10 @@ function IntegrationTestExpander({
       { queryHook: useSentinelRunJobsQuery, keyPath: ['sentinelRun', 'jobs'] },
       { id: runId, check: checkName }
     )
-  const _jobs = useMemo(
+  const jobs = useMemo(
     () => mapExistingNodes(data?.sentinelRun?.jobs),
     [data?.sentinelRun?.jobs]
   )
-  const jobs = useFillMockArr(_jobs, 10)
 
   if (error) return <GqlError error={error} />
 
