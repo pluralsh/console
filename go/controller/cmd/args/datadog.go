@@ -18,7 +18,9 @@ const (
 )
 
 var (
-	argDatadog     = flag.Bool("datadog", utils.GetPluralEnvBool("DATADOG_ENABLED", defaultDatadog), "Enable datadog integration for detailed application profiling. By default it will push to http://datadog.monitoring.svc.cluster.local:8125")
+	argDatadog = flag.Bool("datadog", utils.GetPluralEnvBool("DATADOG_ENABLED", defaultDatadog),
+		"Enable datadog integration for detailed application profiling. "+
+			"By default it will push to http://datadog.monitoring.svc.cluster.local:8125")
 	argDatadogHost = flag.String("datadog-host", defaultDatadogHost, "The address of the Datadog server.")
 	argDatadogEnv  = flag.String("datadog-env", defaultDatadogEnv, "The environment of the Datadog server.")
 )
