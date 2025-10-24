@@ -20,7 +20,7 @@ import { ProjectsProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
-import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgent'
+import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
 import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
 import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'

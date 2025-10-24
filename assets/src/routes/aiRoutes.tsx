@@ -1,14 +1,28 @@
+import {
+  AgentRunAnalysis,
+  AgentRunMessages,
+  AgentRunPullRequests,
+  AIAgentRun,
+} from 'components/ai/agent-runs/AIAgentRun.tsx'
+import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
+import { AIAgentRuntimes } from 'components/ai/agent-runtimes/AIAgentRuntimes.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { McpServers } from 'components/ai/mcp/McpServers.tsx'
-import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
 import { SentinelRun } from 'components/ai/sentinels/sentinel/run/SentinelRun.tsx'
+import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
 import { Sentinels } from 'components/ai/sentinels/Sentinels.tsx'
 import { Navigate, Route } from 'react-router-dom'
-import { AIAgent } from '../components/ai/AIAgent.tsx'
+import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
-  AI_AGENT_REL_PATH,
+  AI_AGENT_RUNS_ABS_PATH,
+  AI_AGENT_RUNS_ANALYSIS_REL_PATH,
+  AI_AGENT_RUNS_PARAM_RUN_ID,
+  AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
+  AI_AGENT_RUNS_REL_PATH,
+  AI_AGENT_RUNTIMES_REL_PATH,
+  AI_AGENT_SESSIONS_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_ABS_PATH,
   AI_SENTINELS_REL_PATH,
@@ -27,13 +41,21 @@ export const aiRoutes = [
       element={
         <Navigate
           replace
-          to={AI_AGENT_REL_PATH}
+          to={AI_AGENT_SESSIONS_REL_PATH}
         />
       }
     />
     <Route
-      path={AI_AGENT_REL_PATH}
-      element={<AIAgent />}
+      path={AI_AGENT_SESSIONS_REL_PATH}
+      element={<AIAgentSessions />}
+    />
+    <Route
+      path={AI_AGENT_RUNTIMES_REL_PATH}
+      element={<AIAgentRuntimes />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_REL_PATH}
+      element={<AIAgentRuns />}
     />
     <Route
       path={AI_THREADS_REL_PATH}
@@ -48,6 +70,7 @@ export const aiRoutes = [
       element={<Sentinels />}
     />
   </Route>,
+  // other sentinel routes
   <Route
     path={`${AI_SENTINELS_ABS_PATH}/:id`}
     element={<Sentinel />}
@@ -56,4 +79,22 @@ export const aiRoutes = [
     path={`${AI_SENTINELS_ABS_PATH}/:id/${AI_SENTINELS_RUNS_REL_PATH}/:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`}
     element={<SentinelRun />}
   />,
+  // other agent routes
+  <Route
+    path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}
+    element={<AIAgentRun />}
+  >
+    <Route
+      index
+      element={<AgentRunMessages />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_ANALYSIS_REL_PATH}
+      element={<AgentRunAnalysis />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH}
+      element={<AgentRunPullRequests />}
+    />
+  </Route>,
 ]
