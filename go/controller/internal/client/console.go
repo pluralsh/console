@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	"github.com/Yamashou/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/polly/http"
@@ -176,9 +177,14 @@ type ConsoleClient interface {
 	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
 }
 
-func New(url, token string) ConsoleClient {
+func New(url, token string, datadogEnabled bool) ConsoleClient {
+	interceptors := []clientv2.RequestInterceptor{console.PersistedQueryInterceptor}
+	if datadogEnabled {
+		interceptors = append(interceptors, console.DatadogTracingInterceptor)
+	}
+
 	return &client{
-		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
+		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, interceptors...),
 		url:           url,
 		ctx:           context.Background(),
 	}

@@ -102,13 +102,13 @@ func ShardedReconcilers() ReconcilerList {
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string,
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string, datadogEnabled bool,
 	credentialsCache credentials.NamespaceCredentialsCache) ([]Controller, []Processor, error) {
 	controllers := make([]Controller, len(rl))
 	shardedReconcilersList := ShardedReconcilers()
 	shardedControllers := make([]Processor, 0, len(shardedReconcilersList))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, client.New(url, token), credentialsCache)
+		controller, err := r.ToController(mgr, client.New(url, token, datadogEnabled), credentialsCache)
 		if err != nil {
 			return nil, nil, err
 		}
