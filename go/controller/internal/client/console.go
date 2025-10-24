@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	ddtrace "github.com/DataDog/dd-trace-go/contrib/net/http/v2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/polly/http"
@@ -176,9 +177,14 @@ type ConsoleClient interface {
 	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
 }
 
-func New(url, token string) ConsoleClient {
+func New(url, token string, datadogEnabled bool) ConsoleClient {
+	httpClient := http.NewHttpClient(token)
+	if datadogEnabled {
+		httpClient = ddtrace.WrapClient(httpClient)
+	}
+
 	return &client{
-		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, console.PersistedQueryInterceptor),
+		consoleClient: console.NewClient(httpClient, url, nil, console.PersistedQueryInterceptor),
 		url:           url,
 		ctx:           context.Background(),
 	}

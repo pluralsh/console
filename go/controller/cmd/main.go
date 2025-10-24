@@ -115,7 +115,7 @@ func main() {
 	}
 
 	controllers, shardedControllers, err := args.Reconcilers().ToControllers(mgr, args.ConsoleUrl(),
-		args.ConsoleToken(), credentialsCache)
+		args.ConsoleToken(), args.DatadogEnabled(), credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

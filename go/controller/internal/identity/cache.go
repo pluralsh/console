@@ -18,7 +18,7 @@ func Cache() IdentityCache {
 		klog.V(log.LogLevelDefault).InfoS("initializing user group cache")
 
 		cache = &identityCache{
-			consoleClient: client.New(args.ConsoleUrl(), args.ConsoleToken()),
+			consoleClient: client.New(args.ConsoleUrl(), args.ConsoleToken(), args.DatadogEnabled()),
 			userMap:       cmap.New[string](),
 			groupMap:      cmap.New[string](),
 		}
