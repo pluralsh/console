@@ -1,4 +1,5 @@
 import {
+  Card,
   Checkbox,
   Chip,
   EmptyState,
@@ -241,11 +242,31 @@ function AgentRunHeader({ run, loading }): ReactElement {
 }
 
 export function AgentRunMessages(): ReactElement {
+  const theme = useTheme()
   const { run } = useOutletContext<{ run: AgentRun }>()
+  const error = run?.error ?? ''
   const messages = run?.messages?.filter(isNonNullable) ?? []
 
   return isEmpty(messages) ? (
-    <EmptyState message="No messages found" />
+    <Card
+      css={{
+        padding: theme.spacing.large,
+        textAlign: 'center',
+        border: theme.borders.default,
+        borderRadius: theme.borderRadiuses.large,
+      }}
+    >
+      {!!error ? (
+        <StackedText
+          first="There was an error during agent run"
+          firstPartialType="title2"
+          second={error}
+          secondPartialType="body1Bold"
+        />
+      ) : (
+        <EmptyState message="No messages found" />
+      )}
+    </Card>
   ) : (
     <VirtualList
       data={messages as Array<AgentMessage>}
