@@ -96,7 +96,8 @@ fragment SentinelRunJobTiny on SentinelRunJob {
     namespace
     name
   }
-  updatedAt
+  insertedAt
+  completedAt
 }
 
 query Sentinels(

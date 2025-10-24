@@ -12866,7 +12866,7 @@ export type SentinelRunResultFragment = { __typename?: 'SentinelRunResult', name
 
 export type SentinelStatisticFragment = { __typename?: 'SentinelStatistic', status: SentinelRunStatus, count: number };
 
-export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
+export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
 export type SentinelsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12919,7 +12919,7 @@ export type SentinelRunJobsQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunJobsQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, jobs?: { __typename?: 'SentinelRunJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunJobEdge', node?: { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null } | null> | null } | null } | null };
+export type SentinelRunJobsQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, jobs?: { __typename?: 'SentinelRunJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunJobEdge', node?: { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type RunSentinelMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16540,7 +16540,8 @@ export const SentinelRunJobTinyFragmentDoc = gql`
     namespace
     name
   }
-  updatedAt
+  insertedAt
+  completedAt
 }
     ${ClusterMinimalFragmentDoc}`;
 export const AlertResolutionFragmentDoc = gql`

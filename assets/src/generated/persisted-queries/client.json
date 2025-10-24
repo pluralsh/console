@@ -172,10 +172,10 @@
          "name": "SentinelStatistics",
          "body": "query SentinelStatistics($q: String) {\n  sentinelStatistics(q: $q) {\n    ...SentinelStatistic\n    __typename\n  }\n}\n\nfragment SentinelStatistic on SentinelStatistic {\n  status\n  count\n  __typename\n}"
       },
-      "sha256:44f6a81cf99f200dde11a2a11f312ac0dd6abf511ded00374ba8ab411ee8a81e": {
+      "sha256:3fc33fc28f0c35cd37f8df3d9c6865007686c7962d4151de2640e7c20a3adae0": {
          "type": "query",
          "name": "SentinelRunJobs",
-         "body": "query SentinelRunJobs($id: ID!, $first: Int = 100, $after: String, $status: SentinelRunJobStatus, $check: String) {\n  sentinelRun(id: $id) {\n    id\n    jobs(first: $first, after: $after, status: $status, check: $check) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...SentinelRunJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment SentinelRunJobTiny on SentinelRunJob {\n  id\n  status\n  cluster {\n    ...ClusterMinimal\n    __typename\n  }\n  reference {\n    namespace\n    name\n    __typename\n  }\n  updatedAt\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}"
+         "body": "query SentinelRunJobs($id: ID!, $first: Int = 100, $after: String, $status: SentinelRunJobStatus, $check: String) {\n  sentinelRun(id: $id) {\n    id\n    jobs(first: $first, after: $after, status: $status, check: $check) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...SentinelRunJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment SentinelRunJobTiny on SentinelRunJob {\n  id\n  status\n  cluster {\n    ...ClusterMinimal\n    __typename\n  }\n  reference {\n    namespace\n    name\n    __typename\n  }\n  insertedAt\n  completedAt\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}"
       },
       "sha256:d5e8a5e351a9bf652256ebde330c11eecd46f7b6eaf60fda5b43c7a4d4f89526": {
          "type": "mutation",

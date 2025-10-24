@@ -10,6 +10,7 @@ import {
   ListBoxItem,
   LogsIcon,
   PendingOutlineIcon,
+  Spinner,
   Toast,
   Tooltip,
   WrapWithIf,
@@ -288,6 +289,7 @@ export function SentinelStatusChip({
   showSeverity = false,
   filled = false,
   small = false,
+  spinner = false,
 }: {
   status: SentinelRunStatus
   lastRunAt?: Nullable<string>
@@ -296,6 +298,7 @@ export function SentinelStatusChip({
   showSeverity?: boolean
   filled?: boolean
   small?: boolean
+  spinner?: boolean
 }) {
   const { borders } = useTheme()
   const isPending = status === SentinelRunStatus.Pending
@@ -329,7 +332,7 @@ export function SentinelStatusChip({
           gap="xsmall"
           align="center"
         >
-          {(showIcon || isPending) && statusToIcon[status]}
+          {(showIcon || isPending) && statusToIcon(status, spinner)}
           {isPending ? (
             <CaptionP $color="icon-info">In progress</CaptionP>
           ) : (
@@ -360,16 +363,24 @@ export const sentinelsCols = [
   ColActions,
 ]
 
-const statusToIcon = {
-  [SentinelRunStatus.Success]: <CheckRoundedIcon size={12} />,
-  [SentinelRunStatus.Failed]: <ErrorIcon size={12} />,
-  [SentinelRunStatus.Pending]: (
-    <PendingOutlineIcon
-      color="icon-light"
-      size={12}
-    />
-  ),
+const statusToIcon = (status: SentinelRunStatus, spinner: boolean = false) => {
+  switch (status) {
+    case SentinelRunStatus.Success:
+      return <CheckRoundedIcon size={12} />
+    case SentinelRunStatus.Failed:
+      return <ErrorIcon size={12} />
+    case SentinelRunStatus.Pending:
+      return spinner ? (
+        <Spinner size={12} />
+      ) : (
+        <PendingOutlineIcon
+          color="icon-light"
+          size={12}
+        />
+      )
+  }
 }
+
 const statusToSeverity: Record<SentinelRunStatus, ChipSeverity> = {
   [SentinelRunStatus.Success]: 'success',
   [SentinelRunStatus.Failed]: 'danger',

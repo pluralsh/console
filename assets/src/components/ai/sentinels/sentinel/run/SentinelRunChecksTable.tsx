@@ -1,15 +1,26 @@
-import { CaretRightIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
+import {
+  CaretRightIcon,
+  Chip,
+  Flex,
+  IconFrame,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
-import { SentinelRunStatus } from 'generated/graphql'
+import { SentinelCheckType, SentinelRunStatus } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import {
   getSentinelCheckIcon,
   SentinelStatusChip,
 } from '../../SentinelsTableCols'
 import { SentinelCheckWithResult } from './SentinelRun'
-import { SentinelRunChecksTableExpander } from './SentinelRunChecksTableExpander'
+import {
+  getJobStatusCounts,
+  JobStatusFilterKey,
+  jobStatusToSeverity,
+  SentinelRunChecksTableExpander,
+} from './SentinelRunChecksTableExpander'
 
 export function SentinelRunChecksTable({
   tableData,
@@ -86,15 +97,36 @@ const runChecksCols = [
       )
     },
   }),
-  columnHelper.accessor(({ result }) => result?.status, {
+  columnHelper.accessor(({ check, result }) => ({ check, result }), {
     id: 'status',
     header: 'Status',
     cell: function Cell({ getValue }) {
+      const { check, result } = getValue()
+      if (check.type === SentinelCheckType.IntegrationTest) {
+        return (
+          <Flex gap="xxsmall">
+            {Object.entries(getJobStatusCounts(result)).map(
+              ([label, count]) => (
+                <Chip
+                  key={label}
+                  size="small"
+                  severity={jobStatusToSeverity(label as JobStatusFilterKey)}
+                >
+                  {count}
+                </Chip>
+              )
+            )}
+          </Flex>
+        )
+      }
       return (
-        <SentinelStatusChip
-          showSeverity
-          status={getValue() ?? SentinelRunStatus.Pending}
-        />
+        <div css={{ alignSelf: 'flex-end' }}>
+          <SentinelStatusChip
+            spinner
+            showSeverity
+            status={result?.status ?? SentinelRunStatus.Pending}
+          />
+        </div>
       )
     },
   }),

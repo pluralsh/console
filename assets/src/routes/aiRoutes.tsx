@@ -12,10 +12,12 @@ import {
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_ABS_PATH,
   AI_SENTINELS_REL_PATH,
+  AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID,
   AI_SENTINELS_RUNS_PARAM_RUN_ID,
   AI_SENTINELS_RUNS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from './aiRoutesConsts'
+import { SentinelRunJob } from 'components/ai/sentinels/sentinel/run/jobs/SentinelRunJob.tsx'
 
 export const aiRoutes = [
   <Route
@@ -55,5 +57,9 @@ export const aiRoutes = [
   <Route
     path={`${AI_SENTINELS_ABS_PATH}/:id/${AI_SENTINELS_RUNS_REL_PATH}/:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`}
     element={<SentinelRun />}
+  />,
+  <Route
+    path={`${AI_SENTINELS_ABS_PATH}/:id/${AI_SENTINELS_RUNS_REL_PATH}/:${AI_SENTINELS_RUNS_PARAM_RUN_ID}/jobs/:${AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID}`}
+    element={<SentinelRunJob />}
   />,
 ]
