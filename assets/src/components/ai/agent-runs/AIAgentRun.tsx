@@ -3,6 +3,7 @@ import {
   Checkbox,
   Chip,
   EmptyState,
+  Flex,
   Markdown,
   Sidecar,
   SidecarItem,
@@ -17,8 +18,6 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
-  AgentMessage,
-  AgentRun,
   AgentRunFragment,
   AgentRunMode,
   ChatType,
@@ -26,7 +25,7 @@ import {
   useAgentRunQuery,
 } from 'generated/graphql'
 import { capitalize, isEmpty, truncate } from 'lodash'
-import { ReactElement, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import {
   Outlet,
   useLocation,
@@ -171,17 +170,17 @@ function getDirectory() {
     {
       path: AI_AGENT_RUNS_ANALYSIS_REL_PATH,
       label: 'Analysis',
-      condition: (s: AgentRun) => s?.mode === AgentRunMode.Analyze,
+      condition: (s: AgentRunFragment) => s?.mode === AgentRunMode.Analyze,
     },
     {
       path: AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
       label: 'Pull Requests',
-      condition: (s: AgentRun) => s?.mode === AgentRunMode.Write,
+      condition: (s: AgentRunFragment) => s?.mode === AgentRunMode.Write,
     },
   ]
 }
 
-function AgentRunHeader({ run, loading }): ReactElement {
+function AgentRunHeader({ run, loading }) {
   const theme = useTheme()
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
@@ -194,29 +193,23 @@ function AgentRunHeader({ run, loading }): ReactElement {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.medium,
-        marginBottom: theme.spacing.medium,
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
+      marginBottom={theme.spacing.medium}
     >
-      <div
+      <StackedText
+        loading={loading}
+        first={run?.prompt}
+        firstPartialType="subtitle1"
+        firstColor="text"
+        secondPartialType="body2"
+        secondColor="text-xlight"
         css={{
           paddingBottom: theme.spacing.medium,
           borderBottom: theme.borders.default,
         }}
-      >
-        <StackedText
-          loading={loading}
-          first={run?.prompt}
-          firstPartialType="subtitle1"
-          firstColor="text"
-          secondPartialType="body2"
-          secondColor="text-xlight"
-        />
-      </div>
+      />
       <TabList
         scrollable
         stateRef={tabStateRef}
@@ -237,13 +230,13 @@ function AgentRunHeader({ run, loading }): ReactElement {
             </LinkTabWrap>
           ))}
       </TabList>
-    </div>
+    </Flex>
   )
 }
 
-export function AgentRunMessages(): ReactElement {
+export function AgentRunMessages() {
   const theme = useTheme()
-  const { run } = useOutletContext<{ run: AgentRun }>()
+  const { run } = useOutletContext<{ run: AgentRunFragment }>()
   const error = run?.error ?? ''
   const messages = run?.messages?.filter(isNonNullable) ?? []
 
@@ -269,7 +262,7 @@ export function AgentRunMessages(): ReactElement {
     </Card>
   ) : (
     <VirtualList
-      data={messages as Array<AgentMessage>}
+      data={messages}
       renderer={({ rowData }) => (
         <div>
           <ChatMessage
@@ -301,9 +294,9 @@ export function AgentRunMessages(): ReactElement {
   )
 }
 
-export function AgentRunAnalysis(): ReactElement {
+export function AgentRunAnalysis() {
   const theme = useTheme()
-  const { run } = useOutletContext<{ run: AgentRun }>()
+  const { run } = useOutletContext<{ run: AgentRunFragment }>()
 
   return (
     <div
@@ -338,8 +331,8 @@ export function AgentRunAnalysis(): ReactElement {
   )
 }
 
-export function AgentRunPullRequests(): ReactElement {
-  const { run } = useOutletContext<{ run: AgentRun }>()
+export function AgentRunPullRequests() {
+  const { run } = useOutletContext<{ run: AgentRunFragment }>()
 
   return (
     <Table
