@@ -10,12 +10,12 @@ import {
 } from 'generated/graphql'
 import { capitalize, truncate } from 'lodash'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AI_AGENT_RUNS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { CreateAgentRunButton } from './CreateAgentRun'
-import { isNonNullable } from 'utils/isNonNullable'
-import { AI_AGENT_RUNS_ABS_PATH } from 'routes/aiRoutesConsts'
-import { useNavigate } from 'react-router-dom'
 
 export function AIAgentRuns() {
   const navigate = useNavigate()
@@ -112,10 +112,21 @@ const runsTableCols = [
     id: 'pullRequests',
     header: 'Pull Requests',
     cell: ({ getValue }) => (
-      <Flex gap="xsmall">
+      <Flex
+        gap="xsmall"
+        direction="column"
+      >
         {getValue()
           ?.filter(isNonNullable)
-          .map((pr) => <Chip key={pr.id}>{pr.title}</Chip>) ?? []}
+          .map((pr) => (
+            <Chip
+              key={pr.id}
+              truncateWidth={300}
+              truncateEdge="end"
+            >
+              {pr.title}
+            </Chip>
+          )) ?? []}
       </Flex>
     ),
   }),
