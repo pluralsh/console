@@ -10670,6 +10670,8 @@ export type SentinelEdge = {
 
 export type SentinelRun = {
   __typename?: 'SentinelRun';
+  /** the checks that were run */
+  checks?: Maybe<Array<Maybe<SentinelCheck>>>;
   /** the time the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the id of the run */
@@ -10713,6 +10715,8 @@ export type SentinelRunJob = {
   check?: Maybe<Scalars['String']['output']>;
   /** the cluster that the job was run on */
   cluster?: Maybe<Cluster>;
+  /** the time the job completed */
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
   /** the id of the job */

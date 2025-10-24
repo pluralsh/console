@@ -83,15 +83,15 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> add_operation(:run, fn %{fetch: sentinel} ->
       %SentinelRun{sentinel_id: sentinel.id, status: :pending}
+      |> SentinelRun.changeset(%{checks: Console.mapify(sentinel.checks)})
       |> Repo.insert()
     end)
     |> execute(extract: :run)
   end
 
   @spec spawn_jobs(SentinelRun.t, binary) :: {:ok, integer} | error
-  def spawn_jobs(%SentinelRun{id: id} = run, check_name) do
-    with %SentinelRun{sentinel: %Sentinel{checks: [_ | _] = checks}} <- Repo.preload(run, [:sentinel]),
-         %SentinelCheck{
+  def spawn_jobs(%SentinelRun{id: id, checks: [_ | _] = checks}, check_name) do
+    with %SentinelCheck{
            type: :integration_test,
            configuration: %SentinelCheck.CheckConfiguration{integration_test: test}
          } <- Enum.find(checks, & &1.name == check_name) do

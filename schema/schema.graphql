@@ -1898,6 +1898,9 @@ type SentinelRun {
   "the results of the run"
   results: [SentinelRunResult]
 
+  "the checks that were run"
+  checks: [SentinelCheck]
+
   jobs(after: String, first: Int, before: String, last: Int, check: String, status: SentinelRunJobStatus): SentinelRunJobConnection
 
   insertedAt: DateTime
@@ -1948,6 +1951,9 @@ type SentinelRunJob {
 
   "the output of the job"
   output: String
+
+  "the time the job completed"
+  completedAt: DateTime
 
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
