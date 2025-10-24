@@ -4,6 +4,7 @@ fragment AgentRunTiny on AgentRun {
   mode
   prompt
   shared
+  error
   runtime {
     id
     name
