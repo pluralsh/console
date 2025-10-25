@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import durationPlugin from 'dayjs/plugin/duration'
 import isBetweenPlugin from 'dayjs/plugin/isBetween'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -52,6 +53,7 @@ export const DURATIONS = [
 // base plugins first
 dayjs.extend(customParseFormat)
 dayjs.extend(updateLocale)
+dayjs.extend(durationPlugin)
 
 // dependent plugins
 dayjs.extend(relativeTime)
@@ -117,6 +119,24 @@ export const isAfter = (
 export const fromNow = (date: DateParam) => {
   if (!date) return ''
   return dayjs(date).fromNow()
+}
+
+export const duration = (
+  startDate: DateParam,
+  endDate: DateParam,
+  format?: string
+) => {
+  const start = dayjs(startDate)
+  const end = dayjs(endDate)
+  if (!start.isValid() || !end.isValid()) return '0s'
+  const dur = dayjs.duration(end.diff(start))
+  const formatParts = [
+    ...(!!dur.days() ? ['D[d]'] : []),
+    ...(!!dur.hours() ? ['H[h]'] : []),
+    ...(!!dur.minutes() ? ['m[m]'] : []),
+    ...(!!dur.seconds() ? ['s[s]'] : []),
+  ]
+  return dur.format(format ?? formatParts.join(' '))
 }
 
 export const toDateOrUndef = (d: unknown) => {

@@ -187,7 +187,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     end
 
     field :sentinel_run_job, :sentinel_run_job do
-      middleware ClusterAuthenticated
+      middleware Authenticated, :cluster
       arg :id, non_null(:id)
 
       resolve &Deployments.sentinel_run_job/2

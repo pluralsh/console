@@ -9,6 +9,7 @@ import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
   SentinelCheckFragment,
+  SentinelFragment,
   SentinelRunResultFragment,
   SentinelRunStatus,
   useSentinelRunQuery,
@@ -19,6 +20,7 @@ import { Link, useParams } from 'react-router-dom'
 import {
   AI_SENTINELS_RUNS_PARAM_RUN_ID,
   getSentinelAbsPath,
+  getSentinelRunAbsPath,
 } from 'routes/aiRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { SentinelStatusChip } from '../../SentinelsTableCols'
@@ -28,9 +30,28 @@ import { SentinelRunSidecar } from '../SentinelSidecars'
 import { SentinelRunChecksTable } from './SentinelRunChecksTable'
 
 export type SentinelCheckWithResult = {
+  runId: string
   check: SentinelCheckFragment
   result: Nullable<SentinelRunResultFragment>
 }
+
+export const getSentinelRunBreadcrumbs = ({
+  sentinel,
+  runId,
+}: {
+  sentinel: Nullable<Pick<SentinelFragment, 'id' | 'name'>>
+  runId: Nullable<string>
+}) => [
+  ...getAIBreadcrumbs('sentinels'),
+  { label: sentinel?.name ?? '', url: getSentinelAbsPath(sentinel?.id ?? '') },
+  {
+    label: `run-${runId?.slice(0, 8) ?? ''}`,
+    url: getSentinelRunAbsPath({
+      sentinelId: sentinel?.id ?? '',
+      runId: runId ?? '',
+    }),
+  },
+]
 
 export function SentinelRun() {
   const id = useParams()[AI_SENTINELS_RUNS_PARAM_RUN_ID]
@@ -47,7 +68,8 @@ export function SentinelRun() {
   const tableData: SentinelCheckWithResult[] = useMemo(() => {
     const groupedResults = groupBy(run?.results, 'name')
     return (
-      run?.sentinel?.checks?.filter(isNonNullable).map((check) => ({
+      run?.checks?.filter(isNonNullable).map((check) => ({
+        runId: run.id,
         check,
         result: groupedResults[check.name]?.[0],
       })) ?? []
@@ -61,14 +83,8 @@ export function SentinelRun() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [
-        ...getAIBreadcrumbs('sentinels'),
-        {
-          label: run?.sentinel?.name ?? '',
-          url: getSentinelAbsPath(run?.sentinel?.id ?? ''),
-        },
-        { label: `run-${run?.id.slice(0, 8) ?? ''}` },
-      ],
+      () =>
+        getSentinelRunBreadcrumbs({ sentinel: run?.sentinel, runId: run?.id }),
       [run]
     )
   )

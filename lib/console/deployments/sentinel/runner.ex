@@ -66,7 +66,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   def handle_info({:update, pid, status}, %State{checks: checks, results: results} = state) do
-    case Map.get(checks, pid) do
+    case checks do
       %{^pid => %Sentinel.SentinelCheck{name: name}} ->
         results = Map.put(results, name, status)
         save_results(%{state | results: results, checks: checks})

@@ -100,7 +100,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     AgentRun,
     AgentPromptHistory,
     AgentPrompt,
-    AgentMessage
+    AgentMessage,
+    SentinelRun,
+    SentinelRunJob,
   }
 
   def query(Project, _), do: Project
@@ -185,6 +187,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(NodeStatistic, _), do: NodeStatistic
   def query(CloudConnection, _), do: CloudConnection
   def query(Sentinel, _), do: Sentinel
+  def query(SentinelRun, _), do: SentinelRun
+  def query(SentinelRunJob, _), do: SentinelRunJob
   def query(AgentRuntime, _), do: AgentRuntime
   def query(AgentRun, _), do: AgentRun
   def query(AgentPromptHistory, _), do: AgentPromptHistory

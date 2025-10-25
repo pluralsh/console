@@ -33,7 +33,7 @@ const columns = [
   ColActions,
 ]
 
-export default function RunJobPods() {
+export function RunJobPods() {
   const pods = useJobPods()
   const { clusterId } = useOutletContext() as { clusterId: string | undefined }
 

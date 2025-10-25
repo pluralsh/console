@@ -5,7 +5,6 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
 import { InlineA } from 'components/utils/typography/Text'
 import { formatLocalizedDateTime, fromNow } from '../../../../utils/datetime'
-import { SentinelStatusChip } from '../SentinelsTableCols'
 
 export function SentinelDetailsSidecar({
   sentinel,
@@ -57,16 +56,6 @@ export function SentinelRunSidecar({
         <SidecarSkeleton />
       ) : (
         <Sidecar>
-          {run.status && (
-            <SidecarItem heading="Overall status">
-              <SentinelStatusChip
-                small
-                filled
-                showSeverity
-                status={run.status}
-              />
-            </SidecarItem>
-          )}
           {run.insertedAt && (
             <SidecarItem heading="Started">
               {formatLocalizedDateTime(run.insertedAt)}

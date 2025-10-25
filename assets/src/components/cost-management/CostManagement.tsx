@@ -23,14 +23,8 @@ const breadcrumbs = [
 ]
 
 const directory = [
-  {
-    label: 'Chart view',
-    path: `${COST_MANAGEMENT_ABS_PATH}/${CM_CHART_VIEW_REL_PATH}`,
-  },
-  {
-    label: 'Table view',
-    path: `${COST_MANAGEMENT_ABS_PATH}/${CM_TABLE_VIEW_REL_PATH}`,
-  },
+  { label: 'Chart view', path: CM_CHART_VIEW_REL_PATH },
+  { label: 'Table view', path: CM_TABLE_VIEW_REL_PATH },
 ]
 
 export function CostManagement() {

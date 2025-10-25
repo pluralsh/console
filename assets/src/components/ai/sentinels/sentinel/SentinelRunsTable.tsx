@@ -28,6 +28,7 @@ export function SentinelRunsTable({ id }: { id: string }) {
     () => mapExistingNodes(data?.sentinel?.runs),
     [data?.sentinel?.runs]
   )
+  const numRuns = runs?.length ?? 0
 
   return (
     <Flex
@@ -37,7 +38,7 @@ export function SentinelRunsTable({ id }: { id: string }) {
     >
       <StackedText
         loading={runsLoading}
-        first="Historical runs"
+        first={`Historical runs (${numRuns > 99 ? '100+' : numRuns})`}
         firstPartialType="body2Bold"
         firstColor="text"
         second="Previous executions of this sentinel"

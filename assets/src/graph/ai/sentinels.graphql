@@ -45,6 +45,14 @@ fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
     name
     namespace
   }
+  integrationTest {
+    distro
+    format
+    tags
+    job {
+      ...JobGateSpec
+    }
+  }
 }
 
 fragment SentinelRunTiny on SentinelRun {
@@ -59,8 +67,16 @@ fragment SentinelRun on SentinelRun {
   results {
     ...SentinelRunResult
   }
+  checks {
+    ...SentinelCheck
+  }
   sentinel {
-    ...Sentinel
+    id
+    name
+    description
+    repository {
+      httpsPath
+    }
   }
 }
 
@@ -76,6 +92,33 @@ fragment SentinelRunResult on SentinelRunResult {
 fragment SentinelStatistic on SentinelStatistic {
   status
   count
+}
+
+fragment SentinelRunJobTiny on SentinelRunJob {
+  id
+  status
+  cluster {
+    ...ClusterMinimal
+  }
+  reference {
+    namespace
+    name
+  }
+  insertedAt
+  completedAt
+}
+
+fragment SentinelRunJob on SentinelRunJob {
+  ...SentinelRunJobTiny
+  format
+  output
+  sentinelRun {
+    id
+    sentinel {
+      id
+      name
+    }
+  }
 }
 
 query Sentinels(
@@ -127,6 +170,55 @@ query SentinelRun($id: ID!) {
 query SentinelStatistics($q: String) {
   sentinelStatistics(q: $q) {
     ...SentinelStatistic
+  }
+}
+
+query SentinelRunJobs(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $status: SentinelRunJobStatus
+  $check: String
+) {
+  sentinelRun(id: $id) {
+    id
+    jobs(first: $first, after: $after, status: $status, check: $check) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...SentinelRunJobTiny
+        }
+      }
+    }
+  }
+}
+
+query SentinelRunJob($id: ID!) {
+  sentinelRunJob(id: $id) {
+    ...SentinelRunJob
+  }
+}
+
+query SentinelRunJobK8sJob($id: ID!) {
+  sentinelRunJob(id: $id) {
+    id
+    job {
+      ...Job
+    }
+  }
+}
+
+query SentinelRunJobK8sJobLogs(
+  $id: ID!
+  $container: String!
+  $sinceSeconds: Int!
+) {
+  sentinelRunJob(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
   }
 }
 

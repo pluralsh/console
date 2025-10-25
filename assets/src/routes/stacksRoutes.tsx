@@ -1,31 +1,23 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import RunJob from 'components/stacks/run/job/RunJob'
-
-import RunJobLogs from 'components/stacks/run/job/RunJobLogs'
-
-import RunJobStatus from 'components/stacks/run/job/RunJobStatus'
-
-import RunJobPods from 'components/stacks/run/job/RunJobPods'
-
-import RunJobSpecs from 'components/stacks/run/job/RunJobSpecs'
+import { StackRunJob } from 'components/stacks/run/StackRunJob.tsx'
 
 import { StackPrs } from 'components/stacks/prs/StackPrs'
 import Violations from '../components/stacks/run/violations/Violations.tsx'
 
 import Stacks from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
-import StackRunProgress from '../components/stacks/run/progress/Progress'
 import StackRunOutput from '../components/stacks/run/output/Output'
-import StackRunRepository from '../components/stacks/run/repository/Repository'
 import StackRunPlan from '../components/stacks/run/plan/Plan'
+import StackRunProgress from '../components/stacks/run/progress/Progress'
+import StackRunRepository from '../components/stacks/run/repository/Repository'
 
 import StackRunState from '../components/stacks/run/state/State'
 
-import StackRuns from '../components/stacks/runs/StackRuns'
-import StackFiles from '../components/stacks/files/StackFiles'
 import StackEnvironment from '../components/stacks/environment/StackEnvironment'
+import StackFiles from '../components/stacks/files/StackFiles'
 import StackJob from '../components/stacks/job/StackJob'
+import StackRuns from '../components/stacks/runs/StackRuns'
 
 import StackOverview from '../components/stacks/overview/StackOverview'
 
@@ -33,6 +25,10 @@ import StackOutput from '../components/stacks/output/StackOutput'
 
 import StackState from '../components/stacks/state/StackState'
 
+import { StackInsights } from 'components/stacks/insights/StackInsights.tsx'
+import { StackRunInsights } from 'components/stacks/run/insights/StackRunInsights.tsx'
+import StackVariables from '../components/stacks/variables/StackVariables.tsx'
+import { jobRoutes } from './jobRoutes.tsx'
 import {
   STACKS_ABS_PATH,
   STACK_ENV_REL_PATH,
@@ -50,13 +46,10 @@ import {
   STACK_RUNS_REL_PATH,
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
+  STACK_RUNS_VIOLATIONS_REL_PATH,
   STACK_STATE_REL_PATH,
   STACK_VARS_REL_PATH,
-  STACK_RUNS_VIOLATIONS_REL_PATH,
 } from './stacksRoutesConsts'
-import StackVariables from '../components/stacks/variables/StackVariables.tsx'
-import { StackInsights } from 'components/stacks/insights/StackInsights.tsx'
-import { StackRunInsights } from 'components/stacks/run/insights/StackRunInsights.tsx'
 
 export const stacksRoutes = [
   <Route
@@ -144,33 +137,9 @@ export const stacksRoutes = [
     <Route
       key="run-jobs"
       path={STACK_RUNS_JOB_REL_PATH}
-      element={<RunJob />}
+      element={<StackRunJob />}
     >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to="logs"
-          />
-        }
-      />
-      <Route
-        path="logs"
-        element={<RunJobLogs />}
-      />
-      <Route
-        path="pods"
-        element={<RunJobPods />}
-      />
-      <Route
-        path="status"
-        element={<RunJobStatus />}
-      />
-      <Route
-        path="specs/:tab?"
-        element={<RunJobSpecs />}
-      />
+      {jobRoutes}
     </Route>
     <Route
       key="violations"

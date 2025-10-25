@@ -24,9 +24,9 @@ import { AIDisabledState } from './AIThreads'
 
 const directory: SubtabDirectory = [
   { label: 'Agent sessions', path: AI_AGENT_REL_PATH },
+  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
-  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
 ]
 
 export const getAIBreadcrumbs = (tab: string = '') => [

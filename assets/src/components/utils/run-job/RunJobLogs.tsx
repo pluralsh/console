@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
-import { useStackRunJobLogsQuery } from 'generated/graphql'
+import {
+  useSentinelRunJobK8sJobLogsQuery,
+  useStackRunJobLogsQuery,
+} from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -18,10 +21,14 @@ import {
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { useJobPods } from './RunJob'
+import { STACKS_PARAM_STACK } from 'routes/stacksRoutesConsts'
 
-export default function RunJobLogs() {
+export function RunJobLogs() {
   const theme = useTheme()
-  const id = useParams().runId!
+  const params = useParams()
+  const type = params[STACKS_PARAM_STACK] ? 'stack' : 'sentinel'
+  const id = (type === 'stack' ? params.runId : params.jobId) ?? ''
+
   const pods = useJobPods()
   const containers =
     useMemo(
@@ -42,25 +49,45 @@ export default function RunJobLogs() {
   )
 
   const {
-    data: currentData,
-    previousData,
-    error,
-    loading,
-    refetch,
+    data: stackCurData,
+    previousData: stackPrevData,
+    error: stackError,
+    loading: stackLoading,
+    refetch: stackRefetch,
   } = useStackRunJobLogsQuery({
+    skip: type !== 'stack',
     variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
     notifyOnNetworkStatusChange: true,
   })
-  const data = currentData || previousData
+
+  const {
+    data: sentinelCurData,
+    previousData: sentinelPrevData,
+    error: sentinelError,
+    loading: sentinelLoading,
+    refetch: sentinelRefetch,
+  } = useSentinelRunJobK8sJobLogsQuery({
+    skip: type !== 'sentinel',
+    variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    notifyOnNetworkStatusChange: true,
+  })
+  const stackData = stackCurData || stackPrevData
+  const sentinelData = sentinelCurData || sentinelPrevData
+
+  const loading = type === 'stack' ? stackLoading : sentinelLoading
+  const error = type === 'stack' ? stackError : sentinelError
+  const refetch = type === 'stack' ? stackRefetch : sentinelRefetch
 
   const logs = useMemo(
-    () => (data?.stackRun?.job?.logs || []).filter(isNonNullable),
-    [data?.stackRun?.job?.logs]
+    () =>
+      (type === 'stack'
+        ? stackData?.stackRun?.job?.logs || []
+        : sentinelData?.sentinelRunJob?.job?.logs || []
+      ).filter(isNonNullable),
+    [type, stackData, sentinelData]
   )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
+  if (error) return <GqlError error={error} />
 
   return (
     <ScrollablePage

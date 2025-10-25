@@ -1,8 +1,9 @@
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { McpServers } from 'components/ai/mcp/McpServers.tsx'
-import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
+import { SentinelRunJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJob.tsx'
 import { SentinelRun } from 'components/ai/sentinels/sentinel/run/SentinelRun.tsx'
+import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
 import { Sentinels } from 'components/ai/sentinels/Sentinels.tsx'
 import { Navigate, Route } from 'react-router-dom'
 import { AIAgent } from '../components/ai/AIAgent.tsx'
@@ -10,12 +11,20 @@ import {
   AI_ABS_PATH,
   AI_AGENT_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
-  AI_SENTINELS_ABS_PATH,
   AI_SENTINELS_REL_PATH,
+  AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
+  AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH,
+  AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID,
   AI_SENTINELS_RUNS_PARAM_RUN_ID,
-  AI_SENTINELS_RUNS_REL_PATH,
+  AI_SENTINELS_RUNS_PARAM_SENTINEL_ID,
   AI_THREADS_REL_PATH,
+  getSentinelAbsPath,
+  getSentinelRunAbsPath,
+  getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
+import { jobRoutes } from './jobRoutes.tsx'
+import { SentinelRunJobK8sJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobK8sJob.tsx'
+import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobOutput.tsx'
 
 export const aiRoutes = [
   <Route
@@ -49,11 +58,42 @@ export const aiRoutes = [
     />
   </Route>,
   <Route
-    path={`${AI_SENTINELS_ABS_PATH}/:id`}
+    path={getSentinelAbsPath(`:${AI_SENTINELS_RUNS_PARAM_SENTINEL_ID}`)}
     element={<Sentinel />}
   />,
   <Route
-    path={`${AI_SENTINELS_ABS_PATH}/:id/${AI_SENTINELS_RUNS_REL_PATH}/:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`}
+    path={getSentinelRunAbsPath({
+      sentinelId: `:${AI_SENTINELS_RUNS_PARAM_SENTINEL_ID}`,
+      runId: `:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`,
+    })}
     element={<SentinelRun />}
   />,
+  <Route
+    path={getSentinelRunJobAbsPath({
+      sentinelId: `:${AI_SENTINELS_RUNS_PARAM_SENTINEL_ID}`,
+      runId: `:${AI_SENTINELS_RUNS_PARAM_RUN_ID}`,
+      jobId: `:${AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID}`,
+    })}
+    element={<SentinelRunJob />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH}
+        />
+      }
+    />
+    <Route
+      path={AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH}
+      element={<SentinelRunJobOutput />}
+    />
+    <Route
+      path={AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH}
+      element={<SentinelRunJobK8sJob />}
+    >
+      {jobRoutes}
+    </Route>
+  </Route>,
 ]

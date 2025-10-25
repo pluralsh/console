@@ -6,31 +6,32 @@ import { SubTabs, SubtabDirectory } from 'components/utils/SubTabs'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import {
-  CATALOGS_ABS_PATH,
-  PR_AUTOMATIONS_ABS_PATH,
-  PR_OUTSTANDING_ABS_PATH,
-  PR_SCM_ABS_PATH,
+  CATALOGS_REL_PATH,
+  PR_AUTOMATIONS_REL_PATH,
+  PR_OUTSTANDING_REL_PATH,
+  PR_REL_PATH,
+  PR_SCM_REL_PATH,
   SELF_SERVICE_ABS_PATH,
 } from 'routes/selfServiceRoutesConsts'
 import styled from 'styled-components'
 
 const getDirectory = (prsEnabled: boolean): SubtabDirectory => [
   {
-    path: CATALOGS_ABS_PATH,
+    path: CATALOGS_REL_PATH,
     label: 'Service catalog',
   },
   {
-    path: PR_OUTSTANDING_ABS_PATH,
+    path: `${PR_REL_PATH}/${PR_OUTSTANDING_REL_PATH}`,
     label: 'Outstanding PRs',
     enabled: prsEnabled,
   },
   {
-    path: PR_AUTOMATIONS_ABS_PATH,
+    path: `${PR_REL_PATH}/${PR_AUTOMATIONS_REL_PATH}`,
     label: 'PR automations',
     enabled: prsEnabled,
   },
   {
-    path: PR_SCM_ABS_PATH,
+    path: `${PR_REL_PATH}/${PR_SCM_REL_PATH}`,
     label: 'SCM management',
     enabled: prsEnabled,
   },
