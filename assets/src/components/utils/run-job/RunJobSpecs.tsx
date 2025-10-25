@@ -1,8 +1,8 @@
 import { Card, SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { PropWideBold } from 'components/component/info/common'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -11,8 +11,6 @@ import { useLayoutEffect, useRef } from 'react'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { RawYaml } from 'components/component/ComponentRaw'
-
-import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import { useRunJob } from './RunJob'
 
@@ -24,11 +22,10 @@ const TABS = [
 export function RunJobSpecs() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { raw, spec } = useRunJob()
-  const { tab: tabName, jobId, stackId, runId } = useParams()
+  const { raw, spec, pathPrefix } = useRunJob()
+  const { tab: tabName, jobId } = useParams()
   const tabStateRef = useRef<any>(null)
   const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
-  const pathPrefix = `${getStackRunsAbsPath(stackId, runId)}/job/specs`
 
   useLayoutEffect(() => {
     if (!currentTab) navigate(`${pathPrefix}/specs`)
@@ -53,7 +50,7 @@ export function RunJobSpecs() {
               subTab
               key={path}
               textValue={label}
-              to={`${pathPrefix}/${path}`}
+              to={`${pathPrefix}/specs/${path}`}
             >
               <SubTab
                 key={path}

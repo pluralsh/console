@@ -40,6 +40,7 @@ export const useJobPods = () => {
 
 type OutletContextT = {
   refetch: () => void
+  pathPrefix: string
   status: Nullable<JobFragment['status']>
   metadata: Nullable<JobFragment['metadata']>
   raw: Nullable<JobFragment['raw']>
@@ -67,8 +68,8 @@ export function K8sRunJob({
 
   const outletContext: OutletContextT = useMemo(() => {
     const { status, metadata, raw, spec } = job ?? {}
-    return { refetch, status, metadata, raw, spec }
-  }, [job, refetch])
+    return { refetch, status, metadata, raw, spec, pathPrefix }
+  }, [job, pathPrefix, refetch])
 
   const name = job?.metadata.name
 
