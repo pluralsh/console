@@ -86,7 +86,7 @@ export function RunJobLogs() {
       ).filter(isNonNullable),
     [type, stackData, sentinelData]
   )
-  console.log(stackData, sentinelData, type, id)
+
   if (error) return <GqlError error={error} />
 
   return (

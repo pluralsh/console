@@ -109,6 +109,7 @@ export function SentinelRunJob() {
           direction="column"
           gap="medium"
           minHeight="0"
+          height="100%"
           maxWidth="100%"
         >
           <SubTabs directory={directory} />

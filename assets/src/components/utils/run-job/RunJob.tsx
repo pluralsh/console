@@ -104,7 +104,7 @@ export function K8sRunJob({
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutContentContainer css={{ maxWidth: 'unset' }}>
         <PodsContext value={pods}>
           {job ? (
             <Outlet context={outletContext} />
