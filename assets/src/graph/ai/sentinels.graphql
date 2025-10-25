@@ -74,6 +74,9 @@ fragment SentinelRun on SentinelRun {
     id
     name
     description
+    repository {
+      httpsPath
+    }
   }
 }
 
