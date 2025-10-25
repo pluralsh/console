@@ -202,6 +202,18 @@ query SentinelRunJobK8sJob($id: ID!) {
   }
 }
 
+query SentinelRunJobK8sJobLogs(
+  $id: ID!
+  $container: String!
+  $sinceSeconds: Int!
+) {
+  sentinelRunJob(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+
 mutation RunSentinel($id: ID!) {
   runSentinel(id: $id) {
     ...SentinelRunTiny

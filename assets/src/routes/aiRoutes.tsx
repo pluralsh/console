@@ -78,7 +78,12 @@ export const aiRoutes = [
   >
     <Route
       index
-      element={<SentinelRunJobOutput />}
+      element={
+        <Navigate
+          replace
+          to={AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH}
+        />
+      }
     />
     <Route
       path={AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH}

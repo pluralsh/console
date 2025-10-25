@@ -65,7 +65,7 @@ export function SentinelRunJob() {
   const ctx = useMemo(
     () => ({
       job: runJob,
-      pathPrefix: getSentinelRunJobAbsPath({ sentinelId, runId, jobId }),
+      pathPrefix: `${getSentinelRunJobAbsPath({ sentinelId, runId, jobId })}/${AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH}`,
     }),
     [runJob, sentinelId, runId, jobId]
   )
