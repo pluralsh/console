@@ -68,7 +68,7 @@ export function SentinelRun() {
   const tableData: SentinelCheckWithResult[] = useMemo(() => {
     const groupedResults = groupBy(run?.results, 'name')
     return (
-      run?.sentinel?.checks?.filter(isNonNullable).map((check) => ({
+      run?.checks?.filter(isNonNullable).map((check) => ({
         runId: run.id,
         check,
         result: groupedResults[check.name]?.[0],
