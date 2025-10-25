@@ -42,6 +42,7 @@ defmodule Console.Deployments.Policies.Rbac do
     CloudConnection,
     Sentinel,
     SentinelRun,
+    SentinelRunJob,
     AgentRuntime,
     AgentRun
   }
@@ -115,6 +116,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(sentinel, user, action, & &1.project)
   def evaluate(%SentinelRun{} = run, user, action),
     do: recurse(run, user, action, & &1.sentinel)
+  def evaluate(%SentinelRunJob{} = job, user, action),
+    do: recurse(job, user, action, & &1.sentinel_run)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -234,6 +237,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(sentinel, [project: @bindings])
   def preload(%SentinelRun{} = run),
     do: Repo.preload(run, [sentinel: [project: @bindings]])
+  def preload(%SentinelRunJob{} = job),
+    do: Repo.preload(job, [sentinel_run: [sentinel: [project: @bindings]]])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)
