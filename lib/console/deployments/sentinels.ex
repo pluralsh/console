@@ -138,7 +138,6 @@ defmodule Console.Deployments.Sentinels do
 
     BatchV1.read_namespaced_job!(ns, name)
     |> Kube.Utils.run()
-    |> IO.inspect(label: "job output")
   end
   def run_job(_), do: {:ok, nil}
 end

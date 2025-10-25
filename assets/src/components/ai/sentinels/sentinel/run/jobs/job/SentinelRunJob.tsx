@@ -16,6 +16,7 @@ import {
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH,
   AI_SENTINELS_RUNS_PARAM_RUN_ID,
+  AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID,
   getSentinelRunJobAbsPath,
 } from 'routes/aiRoutesConsts'
 import { getSentinelRunBreadcrumbs } from '../../SentinelRun'
