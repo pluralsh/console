@@ -7,7 +7,6 @@ import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
   SentinelRunJobFragment,
-  useSentinelRunIdAndNameQuery,
   useSentinelRunJobQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -15,7 +14,6 @@ import { Outlet, useParams } from 'react-router-dom'
 import {
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH,
-  AI_SENTINELS_RUNS_PARAM_RUN_ID,
   AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID,
   getSentinelRunJobAbsPath,
 } from 'routes/aiRoutesConsts'
@@ -45,7 +43,6 @@ const getSentinelRunJobBreadcrumbs = ({
 
 export function SentinelRunJob() {
   const params = useParams()
-  const runId = params[AI_SENTINELS_RUNS_PARAM_RUN_ID] ?? ''
   const jobId = params[AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID] ?? ''
 
   const { data, loading, error, refetch } = useSentinelRunJobQuery({
@@ -54,23 +51,17 @@ export function SentinelRunJob() {
     pollInterval: POLL_INTERVAL,
   })
   const runJob = data?.sentinelRunJob
-  const k8sJob = runJob?.job
+  const sentinel = runJob?.sentinelRun?.sentinel
+  const runId = runJob?.sentinelRun?.id ?? ''
+  const sentinelId = sentinel?.id ?? ''
 
-  const { data: runNameData } = useSentinelRunIdAndNameQuery({
-    variables: { id: runId },
-  })
-  const { sentinel } = runNameData?.sentinelRun ?? {}
   const ctx = useMemo(
     () => ({
       job: runJob,
       refetch,
-      pathPrefix: getSentinelRunJobAbsPath({
-        sentinelId: sentinel?.id ?? '',
-        runId,
-        jobId: runJob?.id ?? '',
-      }),
+      pathPrefix: getSentinelRunJobAbsPath({ sentinelId, runId, jobId }),
     }),
-    [runJob, refetch, runId, sentinel?.id]
+    [runJob, refetch, sentinelId, runId, jobId]
   )
   useSetBreadcrumbs(
     useMemo(
@@ -78,24 +69,26 @@ export function SentinelRunJob() {
         getSentinelRunJobBreadcrumbs({
           sentinel,
           runId,
-          jobName: k8sJob?.metadata?.name ?? '',
+          jobName: runJob?.reference?.name ?? '',
         }),
-      [sentinel, runId, k8sJob?.metadata?.name]
+      [sentinel, runId, runJob?.reference?.name]
     )
   )
   return (
     <SentinelDetailsPageWrapper
       header={
         <StackedText
-          loading={!runJob?.job && loading}
-          first={error ? 'Error' : (k8sJob?.metadata?.name ?? '')}
-          second={k8sJob?.metadata?.namespace ?? ''}
+          loading={!runJob && loading}
+          first={error ? 'Error' : (runJob?.reference?.name ?? '')}
+          second={runJob?.reference?.namespace ?? ''}
         />
       }
       content={
         <Flex
           direction="column"
           gap="medium"
+          minHeight="0"
+          maxWidth="100%"
         >
           <SubTabs directory={directory} />
           {runJob ? (

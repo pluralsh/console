@@ -104,8 +104,12 @@ fragment SentinelRunJob on SentinelRunJob {
   ...SentinelRunJobTiny
   format
   output
-  job {
-    ...Job
+  sentinelRun {
+    id
+    sentinel {
+      id
+      name
+    }
   }
 }
 
@@ -145,16 +149,6 @@ query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
           ...SentinelRunTiny
         }
       }
-    }
-  }
-}
-
-query SentinelRunIdAndName($id: ID!) {
-  sentinelRun(id: $id) {
-    id
-    sentinel {
-      id
-      name
     }
   }
 }

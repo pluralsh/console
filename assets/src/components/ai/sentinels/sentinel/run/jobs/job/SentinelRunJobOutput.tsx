@@ -1,10 +1,14 @@
+import { Code, EmptyState } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 import { SentinelRunJobOutletCtxT } from './SentinelRunJob'
-import { Code, EmptyState } from '@pluralsh/design-system'
 
 export function SentinelRunJobOutput() {
   const { job } = useOutletContext<SentinelRunJobOutletCtxT>()
   if (!job.output)
     return <EmptyState message="No output available yet for this job." />
-  return <Code language="auto">{job.output}</Code>
+  return (
+    <Code css={{ height: '100%', width: '100%', overflow: 'auto' }}>
+      {job.output}
+    </Code>
+  )
 }

@@ -12868,7 +12868,7 @@ export type SentinelStatisticFragment = { __typename?: 'SentinelStatistic', stat
 
 export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
-export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
+export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
 export type SentinelsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12897,13 +12897,6 @@ export type SentinelRunsQueryVariables = Exact<{
 
 
 export type SentinelRunsQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, runs?: { __typename?: 'SentinelRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunEdge', node?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null } | null } | null> | null } | null } | null };
-
-export type SentinelRunIdAndNameQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SentinelRunIdAndNameQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null };
 
 export type SentinelRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12935,7 +12928,7 @@ export type SentinelRunJobQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
+export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
 
 export type RunSentinelMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16560,166 +16553,20 @@ export const SentinelRunJobTinyFragmentDoc = gql`
   completedAt
 }
     ${ClusterMinimalFragmentDoc}`;
-export const MetadataFragmentDoc = gql`
-    fragment Metadata on Metadata {
-  uid
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-  creationTimestamp
-}
-    `;
-export const JobStatusFragmentDoc = gql`
-    fragment JobStatus on JobStatus {
-  active
-  completionTime
-  succeeded
-  failed
-  startTime
-}
-    `;
-export const ContainerStatusFragmentDoc = gql`
-    fragment ContainerStatus on ContainerStatus {
-  restartCount
-  ready
-  name
-  state {
-    running {
-      startedAt
-    }
-    terminated {
-      exitCode
-      message
-      reason
-    }
-    waiting {
-      message
-      reason
-    }
-  }
-}
-    `;
-export const ResourceSpecFragmentDoc = gql`
-    fragment ResourceSpec on ResourceSpec {
-  cpu
-  memory
-}
-    `;
-export const ResourcesFragmentDoc = gql`
-    fragment Resources on Resources {
-  limits {
-    ...ResourceSpec
-  }
-  requests {
-    ...ResourceSpec
-  }
-}
-    ${ResourceSpecFragmentDoc}`;
-export const ContainerFragmentDoc = gql`
-    fragment Container on Container {
-  name
-  image
-  ports {
-    containerPort
-    protocol
-  }
-  resources {
-    ...Resources
-  }
-}
-    ${ResourcesFragmentDoc}`;
-export const PodFragmentDoc = gql`
-    fragment Pod on Pod {
-  metadata {
-    ...Metadata
-  }
-  status {
-    phase
-    podIp
-    reason
-    containerStatuses {
-      ...ContainerStatus
-    }
-    initContainerStatuses {
-      ...ContainerStatus
-    }
-    conditions {
-      lastProbeTime
-      lastTransitionTime
-      message
-      reason
-      status
-      type
-    }
-  }
-  spec {
-    nodeName
-    serviceAccountName
-    containers {
-      ...Container
-    }
-    initContainers {
-      ...Container
-    }
-  }
-  raw
-}
-    ${MetadataFragmentDoc}
-${ContainerStatusFragmentDoc}
-${ContainerFragmentDoc}`;
-export const EventFragmentDoc = gql`
-    fragment Event on Event {
-  action
-  lastTimestamp
-  count
-  message
-  reason
-  type
-}
-    `;
-export const JobFragmentDoc = gql`
-    fragment Job on Job {
-  metadata {
-    ...Metadata
-  }
-  status {
-    ...JobStatus
-  }
-  spec {
-    backoffLimit
-    parallelism
-    activeDeadlineSeconds
-  }
-  pods {
-    ...Pod
-  }
-  raw
-  events {
-    ...Event
-  }
-}
-    ${MetadataFragmentDoc}
-${JobStatusFragmentDoc}
-${PodFragmentDoc}
-${EventFragmentDoc}`;
 export const SentinelRunJobFragmentDoc = gql`
     fragment SentinelRunJob on SentinelRunJob {
   ...SentinelRunJobTiny
   format
   output
-  job {
-    ...Job
+  sentinelRun {
+    id
+    sentinel {
+      id
+      name
+    }
   }
 }
-    ${SentinelRunJobTinyFragmentDoc}
-${JobFragmentDoc}`;
+    ${SentinelRunJobTinyFragmentDoc}`;
 export const AlertResolutionFragmentDoc = gql`
     fragment AlertResolution on AlertResolution {
   resolution
@@ -17110,6 +16957,22 @@ export const ClusterFragmentDoc = gql`
     ${ClustersRowFragmentDoc}
 ${ApiDeprecationFragmentDoc}
 ${NodePoolFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
+  uid
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+  creationTimestamp
+}
+    `;
 export const ClusterNodeFragmentDoc = gql`
     fragment ClusterNode on Node {
   metadata {
@@ -17949,6 +17812,95 @@ export const PipelineBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
+export const ContainerStatusFragmentDoc = gql`
+    fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+    `;
+export const ResourceSpecFragmentDoc = gql`
+    fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+    `;
+export const ResourcesFragmentDoc = gql`
+    fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+    ${ResourceSpecFragmentDoc}`;
+export const ContainerFragmentDoc = gql`
+    fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+    ${ResourcesFragmentDoc}`;
+export const PodFragmentDoc = gql`
+    fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
 export const PipelineGateJobFragmentDoc = gql`
     fragment PipelineGateJob on Job {
   events {
@@ -18742,6 +18694,16 @@ export const ArgoRolloutSpecFragmentDoc = gql`
   }
 }
     `;
+export const EventFragmentDoc = gql`
+    fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+    `;
 export const ArgoRolloutFragmentDoc = gql`
     fragment ArgoRollout on ArgoRollout {
   metadata {
@@ -18945,6 +18907,15 @@ ${CanarySpecFragmentDoc}
 ${DeploymentFragmentDoc}
 ${IngressFragmentDoc}
 ${EventFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
 export const CronJobJobFragmentDoc = gql`
     fragment CronJobJob on Job {
   metadata {
@@ -19016,6 +18987,31 @@ export const DaemonSetFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${DaemonSetStatusFragmentDoc}
 ${DaemonSetSpecFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+export const JobFragmentDoc = gql`
+    fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+  events {
+    ...Event
+  }
+}
+    ${MetadataFragmentDoc}
+${JobStatusFragmentDoc}
 ${PodFragmentDoc}
 ${EventFragmentDoc}`;
 export const NodeFragmentDoc = gql`
@@ -21286,50 +21282,6 @@ export type SentinelRunsQueryHookResult = ReturnType<typeof useSentinelRunsQuery
 export type SentinelRunsLazyQueryHookResult = ReturnType<typeof useSentinelRunsLazyQuery>;
 export type SentinelRunsSuspenseQueryHookResult = ReturnType<typeof useSentinelRunsSuspenseQuery>;
 export type SentinelRunsQueryResult = Apollo.QueryResult<SentinelRunsQuery, SentinelRunsQueryVariables>;
-export const SentinelRunIdAndNameDocument = gql`
-    query SentinelRunIdAndName($id: ID!) {
-  sentinelRun(id: $id) {
-    id
-    sentinel {
-      id
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useSentinelRunIdAndNameQuery__
- *
- * To run a query within a React component, call `useSentinelRunIdAndNameQuery` and pass it any options that fit your needs.
- * When your component renders, `useSentinelRunIdAndNameQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSentinelRunIdAndNameQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useSentinelRunIdAndNameQuery(baseOptions: Apollo.QueryHookOptions<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>(SentinelRunIdAndNameDocument, options);
-      }
-export function useSentinelRunIdAndNameLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>(SentinelRunIdAndNameDocument, options);
-        }
-export function useSentinelRunIdAndNameSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>(SentinelRunIdAndNameDocument, options);
-        }
-export type SentinelRunIdAndNameQueryHookResult = ReturnType<typeof useSentinelRunIdAndNameQuery>;
-export type SentinelRunIdAndNameLazyQueryHookResult = ReturnType<typeof useSentinelRunIdAndNameLazyQuery>;
-export type SentinelRunIdAndNameSuspenseQueryHookResult = ReturnType<typeof useSentinelRunIdAndNameSuspenseQuery>;
-export type SentinelRunIdAndNameQueryResult = Apollo.QueryResult<SentinelRunIdAndNameQuery, SentinelRunIdAndNameQueryVariables>;
 export const SentinelRunDocument = gql`
     query SentinelRun($id: ID!) {
   sentinelRun(id: $id) {
@@ -33580,7 +33532,6 @@ export const namedOperations = {
     Sentinels: 'Sentinels',
     Sentinel: 'Sentinel',
     SentinelRuns: 'SentinelRuns',
-    SentinelRunIdAndName: 'SentinelRunIdAndName',
     SentinelRun: 'SentinelRun',
     SentinelStatistics: 'SentinelStatistics',
     SentinelRunJobs: 'SentinelRunJobs',

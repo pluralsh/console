@@ -135,6 +135,7 @@ const HeaderSC = styled.div({
 const MainContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  width: '100%',
   gap: theme.spacing.large,
   flex: 1,
 }))
