@@ -193,6 +193,15 @@ query SentinelRunJob($id: ID!) {
   }
 }
 
+query SentinelRunJobK8sJob($id: ID!) {
+  sentinelRunJob(id: $id) {
+    id
+    job {
+      ...Job
+    }
+  }
+}
+
 mutation RunSentinel($id: ID!) {
   runSentinel(id: $id) {
     ...SentinelRunTiny

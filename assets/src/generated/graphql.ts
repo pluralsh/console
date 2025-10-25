@@ -12930,6 +12930,13 @@ export type SentinelRunJobQueryVariables = Exact<{
 
 export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
 
+export type SentinelRunJobK8sJobQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SentinelRunJobK8sJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', id: string, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null } | null };
+
 export type RunSentinelMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -21457,6 +21464,49 @@ export type SentinelRunJobQueryHookResult = ReturnType<typeof useSentinelRunJobQ
 export type SentinelRunJobLazyQueryHookResult = ReturnType<typeof useSentinelRunJobLazyQuery>;
 export type SentinelRunJobSuspenseQueryHookResult = ReturnType<typeof useSentinelRunJobSuspenseQuery>;
 export type SentinelRunJobQueryResult = Apollo.QueryResult<SentinelRunJobQuery, SentinelRunJobQueryVariables>;
+export const SentinelRunJobK8sJobDocument = gql`
+    query SentinelRunJobK8sJob($id: ID!) {
+  sentinelRunJob(id: $id) {
+    id
+    job {
+      ...Job
+    }
+  }
+}
+    ${JobFragmentDoc}`;
+
+/**
+ * __useSentinelRunJobK8sJobQuery__
+ *
+ * To run a query within a React component, call `useSentinelRunJobK8sJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSentinelRunJobK8sJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSentinelRunJobK8sJobQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSentinelRunJobK8sJobQuery(baseOptions: Apollo.QueryHookOptions<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>(SentinelRunJobK8sJobDocument, options);
+      }
+export function useSentinelRunJobK8sJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>(SentinelRunJobK8sJobDocument, options);
+        }
+export function useSentinelRunJobK8sJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>(SentinelRunJobK8sJobDocument, options);
+        }
+export type SentinelRunJobK8sJobQueryHookResult = ReturnType<typeof useSentinelRunJobK8sJobQuery>;
+export type SentinelRunJobK8sJobLazyQueryHookResult = ReturnType<typeof useSentinelRunJobK8sJobLazyQuery>;
+export type SentinelRunJobK8sJobSuspenseQueryHookResult = ReturnType<typeof useSentinelRunJobK8sJobSuspenseQuery>;
+export type SentinelRunJobK8sJobQueryResult = Apollo.QueryResult<SentinelRunJobK8sJobQuery, SentinelRunJobK8sJobQueryVariables>;
 export const RunSentinelDocument = gql`
     mutation RunSentinel($id: ID!) {
   runSentinel(id: $id) {
@@ -33536,6 +33586,7 @@ export const namedOperations = {
     SentinelStatistics: 'SentinelStatistics',
     SentinelRunJobs: 'SentinelRunJobs',
     SentinelRunJob: 'SentinelRunJob',
+    SentinelRunJobK8sJob: 'SentinelRunJobK8sJob',
     ClusterAlerts: 'ClusterAlerts',
     ServiceAlerts: 'ServiceAlerts',
     Audits: 'Audits',

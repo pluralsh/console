@@ -1,4 +1,10 @@
-import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  Flex,
+  IconFrame,
+  ReturnIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { SentinelDetailsPageWrapper } from 'components/ai/sentinels/sentinel/Sentinel'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
@@ -10,18 +16,18 @@ import {
   useSentinelRunJobQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Link, Outlet, useParams } from 'react-router-dom'
 import {
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID,
+  getSentinelRunAbsPath,
   getSentinelRunJobAbsPath,
 } from 'routes/aiRoutesConsts'
 import { getSentinelRunBreadcrumbs } from '../../SentinelRun'
 
 export type SentinelRunJobOutletCtxT = {
   job: SentinelRunJobFragment
-  refetch: () => void
   pathPrefix: string
 }
 
@@ -45,11 +51,12 @@ export function SentinelRunJob() {
   const params = useParams()
   const jobId = params[AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID] ?? ''
 
-  const { data, loading, error, refetch } = useSentinelRunJobQuery({
+  const { data, loading, error } = useSentinelRunJobQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+
   const runJob = data?.sentinelRunJob
   const sentinel = runJob?.sentinelRun?.sentinel
   const runId = runJob?.sentinelRun?.id ?? ''
@@ -58,10 +65,9 @@ export function SentinelRunJob() {
   const ctx = useMemo(
     () => ({
       job: runJob,
-      refetch,
       pathPrefix: getSentinelRunJobAbsPath({ sentinelId, runId, jobId }),
     }),
-    [runJob, refetch, sentinelId, runId, jobId]
+    [runJob, sentinelId, runId, jobId]
   )
   useSetBreadcrumbs(
     useMemo(
@@ -80,7 +86,22 @@ export function SentinelRunJob() {
         <StackedText
           loading={!runJob && loading}
           first={error ? 'Error' : (runJob?.reference?.name ?? '')}
+          firstPartialType="subtitle1"
+          firstColor="text"
           second={runJob?.reference?.namespace ?? ''}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          icon={
+            <IconFrame
+              clickable
+              as={Link}
+              to={getSentinelRunAbsPath({ sentinelId, runId })}
+              icon={<ReturnIcon />}
+              type="secondary"
+              size="large"
+              tooltip="Back to sentinel run"
+            />
+          }
         />
       }
       content={
