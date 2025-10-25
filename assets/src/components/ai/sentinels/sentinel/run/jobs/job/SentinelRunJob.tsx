@@ -43,10 +43,12 @@ const getSentinelRunJobBreadcrumbs = ({
 ]
 
 export function SentinelRunJob() {
-  const runId = useParams()[AI_SENTINELS_RUNS_PARAM_RUN_ID] ?? ''
+  const params = useParams()
+  const runId = params[AI_SENTINELS_RUNS_PARAM_RUN_ID] ?? ''
+  const jobId = params[AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID] ?? ''
 
   const { data, loading, error, refetch } = useSentinelRunJobQuery({
-    variables: { id: runId },
+    variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
