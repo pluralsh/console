@@ -17,7 +17,7 @@ export function SubTabs({ directory }: { directory: SubtabDirectory }) {
         .filter(({ enabled }) => (enabled === undefined ? true : enabled))
         .map(({ path, label }) => (
           <LinkTabWrap
-            active={route?.includes(path.replace('/', ''))}
+            active={route?.split('/')?.includes(path.split('/').pop() ?? '')}
             key={path}
             to={path}
           >

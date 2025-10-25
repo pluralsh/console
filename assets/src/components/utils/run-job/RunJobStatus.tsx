@@ -7,7 +7,7 @@ import { PropWideBold } from 'components/component/info/common'
 
 import { useRunJob } from './RunJob'
 
-export default function RunJobStatus() {
+export function RunJobStatus() {
   const theme = useTheme()
   const { status, metadata } = useRunJob()
 

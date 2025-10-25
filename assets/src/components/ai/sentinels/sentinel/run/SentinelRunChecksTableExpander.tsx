@@ -19,11 +19,14 @@ import { Subtitle2H1 } from 'components/utils/typography/Text'
 import {
   SentinelCheckType,
   SentinelRunJobStatus,
+  SentinelRunJobTinyFragment,
   SentinelRunResultFragment,
   useSentinelRunJobsQuery,
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AI_SENTINELS_RUNS_JOBS_REL_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy, mapExistingNodes } from 'utils/graphql'
 import { sentinelRunJobsCols } from './jobs/SentinelRunJobsCols'
@@ -31,7 +34,7 @@ import { SentinelCheckWithResult } from './SentinelRun'
 
 export type JobStatusFilterKey =
   | 'All'
-  | Exclude<SentinelRunJobStatus, 'RUNNING'>
+  | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
 
 export function SentinelRunChecksTableExpander({
   row,
@@ -90,7 +93,7 @@ function IntegrationTestExpander({
   checkName: string
   result: Nullable<SentinelRunResultFragment>
 }) {
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusFilterKey] =
     useState<JobStatusFilterKey>('All')
@@ -167,10 +170,9 @@ function IntegrationTestExpander({
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No jobs found.' }}
-        // TODO
-        // onRowClick={(_, row) =>
-        //   navigate(`${AI_SENTINELS_RUNS_JOBS_REL_PATH}/${row?.original?.id}`)
-        // }
+        onRowClick={(_, row: Row<SentinelRunJobTinyFragment>) =>
+          navigate(`${AI_SENTINELS_RUNS_JOBS_REL_PATH}/${row.original.id}`)
+        }
       />
     </Flex>
   )
@@ -200,7 +202,7 @@ export const getJobStatusCounts = (
     All: jobCount,
     [SentinelRunJobStatus.Success]: successfulCount,
     [SentinelRunJobStatus.Failed]: failedCount,
-    [SentinelRunJobStatus.Pending]: jobCount - successfulCount - failedCount,
+    [SentinelRunJobStatus.Running]: jobCount - successfulCount - failedCount,
   }
 }
 
@@ -212,7 +214,7 @@ export const jobStatusToSeverity = (
       return 'danger'
     case SentinelRunJobStatus.Success:
       return 'success'
-    case SentinelRunJobStatus.Pending:
+    case SentinelRunJobStatus.Running:
       return 'info'
     default:
       return 'neutral'

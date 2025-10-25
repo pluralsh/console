@@ -100,6 +100,15 @@ fragment SentinelRunJobTiny on SentinelRunJob {
   completedAt
 }
 
+fragment SentinelRunJob on SentinelRunJob {
+  ...SentinelRunJobTiny
+  format
+  output
+  job {
+    ...Job
+  }
+}
+
 query Sentinels(
   $first: Int = 100
   $after: String
@@ -140,6 +149,16 @@ query SentinelRuns($id: ID, $name: String, $first: Int = 100, $after: String) {
   }
 }
 
+query SentinelRunIdAndName($id: ID!) {
+  sentinelRun(id: $id) {
+    id
+    sentinel {
+      id
+      name
+    }
+  }
+}
+
 query SentinelRun($id: ID!) {
   sentinelRun(id: $id) {
     ...SentinelRun
@@ -171,6 +190,12 @@ query SentinelRunJobs(
         }
       }
     }
+  }
+}
+
+query SentinelRunJob($id: ID!) {
+  sentinelRunJob(id: $id) {
+    ...SentinelRunJob
   }
 }
 

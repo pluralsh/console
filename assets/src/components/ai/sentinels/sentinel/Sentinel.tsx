@@ -105,7 +105,7 @@ export function SentinelDetailsPageWrapper({
 }: {
   header: ReactNode
   content: ReactNode
-  sidecar: ReactNode
+  sidecar?: ReactNode
 }) {
   const { breakpoints } = useTheme()
   return (

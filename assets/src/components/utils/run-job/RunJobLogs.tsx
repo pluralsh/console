@@ -19,7 +19,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 import { useJobPods } from './RunJob'
 
-export default function RunJobLogs() {
+export function RunJobLogs() {
   const theme = useTheme()
   const id = useParams().runId!
   const pods = useJobPods()

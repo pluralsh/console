@@ -26,7 +26,7 @@ export const sentinelRunJobsCols = [
   ),
   columnHelper.accessor(
     (job) =>
-      isNullish(job.completedAt || job.insertedAt)
+      isNullish(job.completedAt) || isNullish(job.insertedAt)
         ? '---'
         : duration(job.insertedAt, job.completedAt),
     {

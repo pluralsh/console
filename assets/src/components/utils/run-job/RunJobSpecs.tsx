@@ -12,7 +12,7 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { RawYaml } from 'components/component/ComponentRaw'
 
-import { getStackRunsAbsPath } from '../../../../routes/stacksRoutesConsts'
+import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import { useRunJob } from './RunJob'
 
@@ -21,7 +21,7 @@ const TABS = [
   { path: 'raw', label: 'Raw' },
 ]
 
-export default function RunJobSpecs() {
+export function RunJobSpecs() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { raw, spec } = useRunJob()
