@@ -5,7 +5,7 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { SentinelDetailsPageWrapper } from 'components/ai/sentinels/sentinel/Sentinel'
+import { DetailsPageWithSidecarWrapper } from 'components/ai/sentinels/sentinel/Sentinel'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -81,7 +81,7 @@ export function SentinelRunJob() {
     )
   )
   return (
-    <SentinelDetailsPageWrapper
+    <DetailsPageWithSidecarWrapper
       header={
         <StackedText
           loading={!runJob && loading}
