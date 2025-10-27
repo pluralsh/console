@@ -16,6 +16,7 @@ defmodule Console.Buffers.Supervisor do
   def init(init_arg) do
     DynamicSupervisor.init(
       strategy: :one_for_one,
+      restart: :transient,
       extra_arguments: [init_arg]
     )
   end

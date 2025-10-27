@@ -13,7 +13,7 @@ defmodule Console.Deployments.Git.Supervisor do
   @impl true
   def init(_init_arg) do
     :ets.new(:git_cache, [:set, :public, :named_table, write_concurrency: true, read_concurrency: true])
-    DynamicSupervisor.init(strategy: :one_for_one)
+    DynamicSupervisor.init(strategy: :one_for_one, restart: :transient)
   end
 
   def register(pid, tid) do
