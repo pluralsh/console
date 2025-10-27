@@ -1,6 +1,6 @@
 import { Button } from '@pluralsh/design-system'
 
-import { useTheme } from 'styled-components'
+import isEmpty from 'lodash/isEmpty'
 import {
   FormEvent,
   useCallback,
@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import isEmpty from 'lodash/isEmpty'
+import { useTheme } from 'styled-components'
 
 import {
   HelmConfigAttributes,
@@ -22,10 +22,10 @@ import {
 
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { GqlError } from 'components/utils/Alert'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt from '../ModalAlt'
 
@@ -42,6 +42,8 @@ export function ServiceUpdateHelmValues({
   open: boolean
   onClose: Nullable<() => void>
 }) {
+  if (isEmpty(serviceDeployment.helm?.repository)) return null
+
   return (
     <ModalMountTransition open={open}>
       <ModalForm
@@ -54,7 +56,7 @@ export function ServiceUpdateHelmValues({
   )
 }
 
-export function ModalForm({
+function ModalForm({
   serviceDeployment,
   ...props
 }: {

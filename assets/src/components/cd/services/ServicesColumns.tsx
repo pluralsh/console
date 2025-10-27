@@ -47,6 +47,7 @@ import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
 import { ServicesResyncDeployment } from './ServicesResyncDeployment'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import { ServicesTableErrors } from './ServicesTableErrors'
+import { isEmpty } from 'lodash'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -332,7 +333,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               label="Permissions"
               textValue="Permissions"
             />
-            {serviceDeployment.helm && (
+            {!isEmpty(serviceDeployment.helm?.repository) && (
               <ListBoxItem
                 key={MenuItemKey.HelmValues}
                 leftContent={<ListIcon />}
