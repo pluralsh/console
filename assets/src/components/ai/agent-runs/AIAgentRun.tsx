@@ -1,5 +1,4 @@
 import {
-  Card,
   Checkbox,
   Chip,
   EmptyState,
@@ -235,20 +234,12 @@ function AgentRunHeader({ run, loading }) {
 }
 
 export function AgentRunMessages() {
-  const theme = useTheme()
   const { run } = useOutletContext<{ run: AgentRunFragment }>()
   const error = run?.error ?? ''
   const messages = run?.messages?.filter(isNonNullable) ?? []
 
   return isEmpty(messages) ? (
-    <Card
-      css={{
-        padding: theme.spacing.large,
-        textAlign: 'center',
-        border: theme.borders.default,
-        borderRadius: theme.borderRadiuses.large,
-      }}
-    >
+    <>
       {!!error ? (
         <StackedText
           first="There was an error during agent run"
@@ -259,7 +250,7 @@ export function AgentRunMessages() {
       ) : (
         <EmptyState message="No messages found" />
       )}
-    </Card>
+    </>
   ) : (
     <VirtualList
       data={messages}
@@ -308,25 +299,31 @@ export function AgentRunAnalysis() {
         overflow: 'auto',
       }}
     >
-      <div
-        css={{
-          paddingBottom: theme.spacing.large,
-          borderBottom: theme.borders.default,
-        }}
-      >
-        <h1>Summary</h1>
-        <Markdown
-          text={
-            run?.analysis?.summary.concat(
-              run?.analysis?.bullets?.join('\n- ') ?? ''
-            ) ?? ''
-          }
-        />
-      </div>
-      <div>
-        <h1>Analysis Breakdown</h1>
-        <Markdown text={run?.analysis?.analysis ?? ''} />
-      </div>
+      {!!run?.analysis?.analysis ? (
+        <>
+          <div
+            css={{
+              paddingBottom: theme.spacing.large,
+              borderBottom: theme.borders.default,
+            }}
+          >
+            <h1>Summary</h1>
+            <Markdown
+              text={
+                run?.analysis?.summary.concat(
+                  run?.analysis?.bullets?.join('\n- ') ?? ''
+                ) ?? ''
+              }
+            />
+          </div>
+          <div>
+            <h1>Analysis Breakdown</h1>
+            <Markdown text={run?.analysis?.analysis ?? ''} />
+          </div>
+        </>
+      ) : (
+        <EmptyState message="No analysis found" />
+      )}
     </div>
   )
 }
