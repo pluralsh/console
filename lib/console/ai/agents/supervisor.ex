@@ -6,11 +6,16 @@ defmodule Console.AI.Agents.Supervisor do
   end
 
   def start_child(module, session) do
-    DynamicSupervisor.start_child(__MODULE__, {module, session})
+    child = %{
+      id: session.id,
+      start: {module, :start_link, [session]},
+      restart: :temporary
+    }
+    DynamicSupervisor.start_child(__MODULE__, child)
   end
 
   @impl true
   def init(_init_arg) do
-    DynamicSupervisor.init(strategy: :one_for_one, restart: :transient)
+    DynamicSupervisor.init(strategy: :one_for_one, restart: :temporary)
   end
 end

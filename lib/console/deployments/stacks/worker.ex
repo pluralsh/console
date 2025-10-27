@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Stacks.Worker do
-  use GenServer, restart: :transient
+  use GenServer, restart: :temporary
   alias Console.Repo
   alias Console.Schema.StackRun
   alias Console.Deployments.{Stacks, Metrics.Provider}
@@ -46,7 +46,7 @@ defmodule Console.Deployments.Stacks.Worker do
   def handle_info(:move, %State{run: run} = state) do
     case Stacks.Discovery.local?(run) do
       true -> {:noreply, state}
-      false -> {:stop, {:shutdown, :moved}, state}
+      false -> {:stop, :normal, state}
     end
   end
 

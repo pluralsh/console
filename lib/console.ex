@@ -364,8 +364,8 @@ defmodule Console do
     do: {:error, {:rpc, r}}
   def handle_rpc({:exception, {:norproc, _}}), do: {:error, :rate_limited}
   def handle_rpc({:exception, reason, _}), do: {:error, {:rpc, reason}}
-  def handle_rpc({:erpc, {:exception, {:norproc, _}}}, _), do: {:error, :rate_limited}
-  def handle_rpc({:rpc, {:exception, {:norproc, _}}}, _), do: {:error, :rate_limited}
+  def handle_rpc({:erpc, {:exception, {:norproc, _}}}), do: {:error, :rate_limited}
+  def handle_rpc({:rpc,  {:exception, {:norproc, _}}}), do: {:error, :rate_limited}
   def handle_rpc({:erpc, reason}), do: {:error, {:rpc, reason}}
   def handle_rpc({:rpc, reason}), do: {:error, {:rpc, reason}}
   def handle_rpc(res), do: res

@@ -7,11 +7,16 @@ defmodule Console.AI.MCP.Supervisor do
   end
 
   def start_child(thread) do
-    DynamicSupervisor.start_child(__MODULE__, {Agent, thread})
+    child = %{
+      id: thread.id,
+      start: {Agent, :start_link, [thread]},
+      restart: :temporary
+    }
+    DynamicSupervisor.start_child(__MODULE__, child)
   end
 
   @impl true
   def init(_init_arg) do
-    DynamicSupervisor.init(strategy: :one_for_one, restart: :transient)
+    DynamicSupervisor.init(strategy: :one_for_one, restart: :temporary)
   end
 end

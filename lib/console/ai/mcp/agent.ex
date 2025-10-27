@@ -5,7 +5,7 @@ defmodule Console.AI.MCP.Agent do
   * caching and exposing supported tools via a clear interface
   * delivering tool calls to end servers
   """
-  use GenServer, restart: :transient
+  use GenServer, restart: :temporary
   alias Console.Repo
   alias Console.Schema.{ChatThread, McpServer, Flow}
   alias Console.AI.MCP.{State, ClientSupervisor, Tool}

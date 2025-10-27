@@ -45,7 +45,6 @@ defmodule Console.Application do
       Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
-      Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
       Console.Deployments.KubeVersions.Table,

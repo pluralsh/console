@@ -27,7 +27,7 @@ defmodule Console.Pipelines.Consumer do
       end
 
       def init(producer) do
-        children = [%{id: Runner, start: {Runner, :start_link, [__MODULE__]}, restart: :transient}]
+        children = [%{id: Runner, start: {Runner, :start_link, [__MODULE__]}, restart: :temporary}]
         opts = [strategy: :one_for_one, subscribe_to: [{producer, max_demand: unquote(demand)}]]
         ConsumerSupervisor.init(children, opts)
       end

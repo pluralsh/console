@@ -5,7 +5,7 @@ defmodule Console.Buffer.Base do
     lifespan = Keyword.get(opts, :lifespan, 60_000)
     state = Keyword.get(opts, :state, & &1)
     quote do
-      use GenServer, restart: :transient
+      use GenServer, restart: :temporary
       require Logger
 
       def start_link(arg, opts \\ []) do

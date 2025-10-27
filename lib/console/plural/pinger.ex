@@ -105,5 +105,5 @@ defmodule Console.Plural.Pinger do
     end
   end
 
-  def leader?(), do: HashRing.Managed.key_to_node(:cluster, :leader) == node()
+  def leader?(), do: Console.ClusterRing.node(:leader) == node()
 end

@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Helm.Agent do
-  use GenServer, restart: :transient
+  use GenServer, restart: :temporary
   alias Console.Repo
   alias Console.Deployments.Git
   alias Console.Deployments.Helm.{AgentCache, Discovery, Supervisor}
@@ -52,6 +52,7 @@ defmodule Console.Deployments.Helm.Agent do
   def init(url) do
     {:ok, repo} = Git.upsert_helm_repository(url)
     schedule_pull()
+    Logger.info "starting helm agent for #{url} on node #{node()}"
     :timer.send_interval(@poll, :move)
     send self(), :pull
     table = :ets.new(:helm_cache_data, [:set, :protected, read_concurrency: true])
@@ -106,7 +107,7 @@ defmodule Console.Deployments.Helm.Agent do
   def handle_info(:move, %State{repo: repo} = state) do
     case Discovery.local?(repo.url) do
       true -> {:noreply, state}
-      false -> {:stop, {:shutdown, :moved}, state}
+      false -> {:stop, :normal, state}
     end
   end
 

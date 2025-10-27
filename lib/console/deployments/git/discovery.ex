@@ -7,10 +7,11 @@ defmodule Console.Deployments.Git.Discovery do
   alias Console.Deployments.Git.{Agent, Supervisor}
   alias Console.Schema.{GitRepository, Service}
   alias Console.Deployments.Local.Server
+  require Logger
 
   @type error :: Console.error
 
-  def start(%GitRepository{} = git), do: start_and_run(git, fn pid -> {:ok, pid} end)
+  def start(%GitRepository{} = git), do: maybe_rpc(git, fn pid -> {:ok, pid} end)
 
   @spec fetch(Service.t) :: {:ok, SmartFile.t} | error
   def fetch(%Service{git: %Service.Git{}} = svc) do
@@ -71,10 +72,12 @@ defmodule Console.Deployments.Git.Discovery do
   def maybe_rpc(%GitRepository{} = repo, fun) when is_function(fun, 1) do
     me = node()
     try do
-      case agent_node(repo) do
-        ^me -> start_and_run(repo, fun)
-        n ->
-          :erpc.call(n, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
+      an = agent_node(repo)
+      Logger.info "agent node for #{repo.url} is #{an}, current node is #{me}"
+      case an == me do
+        true -> start_and_run(repo, fun)
+        false ->
+          :erpc.call(an, __MODULE__, :start_and_run, [repo, fun], :timer.seconds(30))
           |> Console.handle_rpc()
       end
     catch
