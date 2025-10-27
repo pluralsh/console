@@ -53,12 +53,11 @@ function MetadataCard({
   return (
     <Card
       css={{
-        '&&': {
-          padding: theme.spacing.large,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-        },
+        padding: theme.spacing.large,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+        overflow: 'auto',
       }}
     >
       <section>
@@ -154,7 +153,9 @@ export default function ClusterMetadata() {
     <Flex
       direction="column"
       gap="xlarge"
-      flex={1}
+      height="100%"
+      width="100%"
+      overflow="hidden"
     >
       <MetadataCard
         cluster={cluster}
