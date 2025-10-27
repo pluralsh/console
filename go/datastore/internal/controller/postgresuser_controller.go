@@ -8,7 +8,6 @@ import (
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"github.com/pluralsh/polly/containers"
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -147,8 +146,9 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 		for _, crdDB := range dbList.Items {
 			if crdDB.DatabaseName() == db {
-				if err := utils.TryAddControllerRef(ctx, r.Client, user, &crdDB, r.Scheme); err != nil {
-					logger.V(5).Error(err, "failed to add controller ref")
+				// We have to remove the controller ref from the database if exists.
+				if err := utils.TryRemoveControllerRef(ctx, r.Client, user, &crdDB, r.Scheme); err != nil {
+					logger.V(5).Error(err, "failed to remove controller ref")
 					return ctrl.Result{}, err
 				}
 			}
@@ -176,23 +176,14 @@ func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha
 	if len(user.Spec.Databases) > 0 {
 		databaseList := containers.ToSet[string](user.Spec.Databases)
 
-		var deletingAny bool
 		dbList := &v1alpha1.PostgresDatabaseList{}
 		if err := r.List(ctx, dbList, client.InNamespace(user.Namespace)); err != nil {
 			return nil, err
 		}
 		for _, db := range dbList.Items {
 			if databaseList.Has(db.DatabaseName()) {
-				deletingAny = true
-				if db.DeletionTimestamp.IsZero() {
-					if err := r.Delete(ctx, &db); err != nil {
-						return nil, err
-					}
-				}
+				return &ctrl.Result{RequeueAfter: requeueWaitForResources}, nil
 			}
-		}
-		if deletingAny {
-			return lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
 		}
 	}
 
@@ -227,6 +218,5 @@ func (r *PostgresUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.PostgresUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Owns(&v1alpha1.PostgresDatabase{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

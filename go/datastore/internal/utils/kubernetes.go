@@ -281,3 +281,30 @@ func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ct
 	})
 
 }
+
+func TryRemoveControllerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
+	key := ctrlruntimeclient.ObjectKeyFromObject(controlled)
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := client.Get(ctx, key, controlled); err != nil {
+			return err
+		}
+
+		if owner.GetDeletionTimestamp() != nil || controlled.GetDeletionTimestamp() != nil {
+			return nil
+		}
+
+		original := controlled.DeepCopyObject().(ctrlruntimeclient.Object)
+
+		err := controllerutil.RemoveControllerReference(owner, controlled, scheme)
+		if err != nil {
+			return err
+		}
+
+		if reflect.DeepEqual(original.GetOwnerReferences(), controlled.GetOwnerReferences()) {
+			return nil
+		}
+
+		return client.Patch(ctx, controlled, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
+	})
+}
