@@ -8,6 +8,7 @@ import (
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
 	"github.com/pluralsh/polly/containers"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -175,14 +176,23 @@ func (r *PostgresUserReconciler) handleDelete(ctx context.Context, user *v1alpha
 	if len(user.Spec.Databases) > 0 {
 		databaseList := containers.ToSet[string](user.Spec.Databases)
 
+		var deletingAny bool
 		dbList := &v1alpha1.PostgresDatabaseList{}
 		if err := r.List(ctx, dbList, client.InNamespace(user.Namespace)); err != nil {
 			return nil, err
 		}
 		for _, db := range dbList.Items {
 			if databaseList.Has(db.DatabaseName()) {
-				return &ctrl.Result{RequeueAfter: requeueWaitForResources}, nil
+				deletingAny = true
+				if db.DeletionTimestamp.IsZero() {
+					if err := r.Delete(ctx, &db); err != nil {
+						return nil, err
+					}
+				}
 			}
+		}
+		if deletingAny {
+			return lo.ToPtr(jitterRequeue(requeueWaitForResources)), nil
 		}
 	}
 
