@@ -385,7 +385,10 @@ defmodule Console.Deployments.Pipelines do
         nil -> %PipelinePromotion{stage_id: id}
         %PipelinePromotion{} = promo -> promo
       end
-      |> PipelinePromotion.changeset(add_revised(%{services: stabilize_promo(old ++ new, promo)}, legacy_diff?(stage, svcs, promo)))
+      |> PipelinePromotion.changeset(add_revised(
+        %{services: stabilize_promo(old ++ new, promo)},
+        legacy_diff?(stage, svcs, promo)
+      ))
       |> PipelinePromotion.changeset(%{context_id: stage.context_id})
       |> Repo.insert_or_update()
     end)
@@ -523,7 +526,7 @@ defmodule Console.Deployments.Pipelines do
   defp diff?(_, _, _), do: false
 
   defp legacy_diff?(_, [], _), do: false
-  defp legacy_diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
+  defp legacy_diff?(%PipelineStage{context_id: nil}, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
     by_id = extant(promo)
     Enum.any?(svcs, fn {%{sha: sha} = svc, %{id: r}} ->
       case by_id[svc.id] do
@@ -533,7 +536,7 @@ defmodule Console.Deployments.Pipelines do
       end
     end)
   end
-  defp legacy_diff?(_, _, _), do: true
+  defp legacy_diff?(%PipelineStage{context_id: id}, _, _), do: is_nil(id)
 
   defp gates_stale?(%PipelineStage{context: %{inserted_at: at}, from_edges: edges}) do
     Enum.flat_map(edges, & &1.gates)
