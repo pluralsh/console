@@ -146,8 +146,9 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 		for _, crdDB := range dbList.Items {
 			if crdDB.DatabaseName() == db {
-				if err := utils.TryAddControllerRef(ctx, r.Client, user, &crdDB, r.Scheme); err != nil {
-					logger.V(5).Error(err, "failed to add controller ref")
+				// We have to remove the controller ref from the database if exists.
+				if err := utils.TryRemoveControllerRef(ctx, r.Client, user, &crdDB, r.Scheme); err != nil {
+					logger.V(5).Error(err, "failed to remove controller ref")
 					return ctrl.Result{}, err
 				}
 			}
@@ -217,6 +218,5 @@ func (r *PostgresUserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.PostgresUser{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Owns(&v1alpha1.PostgresDatabase{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
