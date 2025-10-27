@@ -234,7 +234,7 @@ defmodule Console.Deployments.Git.Agent do
     case Git.Discovery.local?(git) do
       true -> {:noreply, state}
       false ->
-        Logger.info "git repository moved: #{git.url}"
+        Logger.info "git repository moved: #{git.url}, target node: #{Git.Discovery.agent_node(git)}, current node: #{node()}"
         {:stop, {:shutdown, :moved}, state}
     end
   end

@@ -363,6 +363,8 @@ defmodule Console do
   def handle_rpc(r) when r in ~w(exception badarg noconnection timeout system_limit notsup)a,
     do: {:error, {:rpc, r}}
   def handle_rpc({:exception, reason, _}), do: {:error, {:rpc, reason}}
+  def handle_rpc({:erpc, {:noproc, _}}), do: {:error, :rate_limited}
+  def handle_rpc({:rpc, {:noproc, _}}), do: {:error, :rate_limited}
   def handle_rpc({:erpc, reason}), do: {:error, {:rpc, reason}}
   def handle_rpc({:rpc, reason}), do: {:error, {:rpc, reason}}
   def handle_rpc(res), do: res
