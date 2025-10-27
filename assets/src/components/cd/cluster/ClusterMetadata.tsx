@@ -1,7 +1,6 @@
 import {
   Card,
   ChipList,
-  Code,
   Flex,
   IconFrame,
   SidecarItem,
@@ -11,7 +10,7 @@ import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 
-import { ClusterFragment } from 'generated/graphql'
+import { ClusterFragment, ClusterQueryHookResult } from 'generated/graphql'
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { TooltipTime } from 'components/utils/TooltipTime'
@@ -28,18 +27,35 @@ import {
   ClusterInfoFlyoverTab,
 } from '../clusters/info-flyover/ClusterInfoFlyover'
 import { useClusterContext } from './Cluster'
+import { ClusterMetadataEditor } from './ClusterMetadataEditor'
 import { NodePoolsSection } from './ClusterNodePools'
 
-export const MetadataPropSC = styled(SidecarItem)((_) => ({
-  margin: 0,
-}))
+export function ClusterMetadata() {
+  const { cluster, refetch } = useClusterContext()
+
+  return (
+    <Flex
+      direction="column"
+      gap="xlarge"
+      height="100%"
+      width="100%"
+      overflow="hidden"
+    >
+      <MetadataCard
+        cluster={cluster}
+        refetch={refetch}
+      />
+      <NodePoolsSection cluster={cluster} />
+    </Flex>
+  )
+}
 
 function MetadataCard({
   cluster,
   refetch,
 }: {
   cluster: ClusterFragment
-  refetch: Nullable<() => void>
+  refetch: ClusterQueryHookResult['refetch']
 }) {
   const theme = useTheme()
   const [flyoverOpen, setFlyoverOpen] = useState(false)
@@ -140,39 +156,15 @@ function MetadataCard({
         </section>
       )}
       {cluster.metadata && (
-        <Code language="json">{formatJson(cluster.metadata)}</Code>
+        <ClusterMetadataEditor
+          cluster={cluster}
+          refetch={refetch}
+        />
       )}
     </Card>
   )
 }
 
-export default function ClusterMetadata() {
-  const { cluster, refetch } = useClusterContext()
-
-  return (
-    <Flex
-      direction="column"
-      gap="xlarge"
-      height="100%"
-      width="100%"
-      overflow="hidden"
-    >
-      <MetadataCard
-        cluster={cluster}
-        refetch={refetch}
-      />
-      <NodePoolsSection cluster={cluster} />
-    </Flex>
-  )
-}
-
-function formatJson(jsonObject) {
-  try {
-    // Convert the object back into a formatted string
-    return JSON.stringify(jsonObject, null, 2)
-  } catch (e) {
-    console.error('Invalid JSON:', e)
-
-    return '' // Return empty string or error message if JSON is invalid
-  }
-}
+export const MetadataPropSC = styled(SidecarItem)((_) => ({
+  margin: 0,
+}))

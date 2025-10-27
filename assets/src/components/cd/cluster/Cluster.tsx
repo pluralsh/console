@@ -56,6 +56,7 @@ import { useTheme } from 'styled-components'
 import {
   ClusterFragment,
   ClusterMinimalFragment,
+  ClusterQueryHookResult,
   MakeOptional,
   useClusterQuery,
 } from '../../../generated/graphql'
@@ -388,7 +389,7 @@ export default function Cluster() {
 export type ClusterContextType = {
   cluster: ClusterFragment
   clusterLoading: boolean
-  refetch: () => void
+  refetch: ClusterQueryHookResult['refetch']
   refetchServices: () => void
   setRefetchServices: (refetch: () => void) => void
 }

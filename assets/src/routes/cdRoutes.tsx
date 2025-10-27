@@ -48,7 +48,7 @@ import ClusterInsights, {
   ClusterInsightsSummary,
 } from '../components/cd/cluster/ClusterInsights.tsx'
 import { ClusterInsightsComponents } from '../components/cd/cluster/ClusterInsightsComponents.tsx'
-import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
+import { ClusterMetadata } from '../components/cd/cluster/ClusterMetadata'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 
