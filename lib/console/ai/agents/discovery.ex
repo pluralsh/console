@@ -35,13 +35,8 @@ defmodule Console.AI.Agents.Discovery do
     end
   end
 
-  def worker_node(%AgentSession{id: id}), do: HashRing.key_to_node(ring(), id)
+  def worker_node(%AgentSession{id: id}), do: Console.ClusterRing.node(id)
 
   def local?(%AgentSession{} = session), do: worker_node(session) == node()
   def local?(_), do: true
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
 end

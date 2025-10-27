@@ -513,16 +513,13 @@ defmodule Console.Deployments.Pipelines do
   defp add_revised(attrs, _), do: attrs
 
   defp diff?(_, [], _), do: false
-
   defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
     when is_binary(id), do: false
-
   defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at}} = promos, _, %PipelinePromotion{} = next) do
     Repo.preload(next, [services: :revision], force: true)
     |> Map.get(:services)
     |> Enum.all?(&Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) && gates_stale?(promos)
   end
-
   defp diff?(_, _, _), do: false
 
   defp legacy_diff?(_, [], _), do: false

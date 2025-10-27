@@ -63,13 +63,5 @@ defmodule Console.AI.Graph.Indexer.Source do
 
   def local?(id), do: agent_node(id) == node()
 
-  defp agent_node(id) do
-    ring()
-    |> HashRing.key_to_node(id)
-  end
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
+  defp agent_node(id), do: Console.ClusterRing.node(id)
 end

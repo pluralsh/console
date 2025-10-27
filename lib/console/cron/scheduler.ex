@@ -28,5 +28,5 @@ defmodule Console.Cron.Scheduler do
 
   defp local?(%Job{} = job), do: job_node(job) == node()
 
-  defp job_node(%Job{job: job}), do: HashRing.Managed.key_to_node(:cluster, job)
+  defp job_node(%Job{job: job}), do: Console.ClusterRing.node(job)
 end

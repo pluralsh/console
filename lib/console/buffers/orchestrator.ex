@@ -12,7 +12,7 @@ defmodule Console.Buffer.Orchestrator do
     end
   end
 
-  def worker_node(id), do: HashRing.Managed.key_to_node(:cluster, id)
+  def worker_node(id), do: Console.ClusterRing.node(id)
 
   def local?(id), do: worker_node(id) == node()
 

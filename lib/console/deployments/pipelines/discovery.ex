@@ -32,7 +32,7 @@ defmodule Console.Deployments.Pipelines.Discovery do
 
   def worker_shard(id), do: HashRing.key_to_node(@shard_ring, id)
 
-  def worker_node(id), do: HashRing.Managed.key_to_node(:cluster, id)
+  def worker_node(id), do: Console.ClusterRing.node(id)
 
   def local?(id), do: worker_node(id) == node()
 

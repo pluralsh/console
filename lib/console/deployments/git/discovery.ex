@@ -91,18 +91,10 @@ defmodule Console.Deployments.Git.Discovery do
   end
   def start_and_run(_, _), do: {:error, "no git repository located"}
 
-  def agent_node(%GitRepository{id: id}) do
-    ring()
-    |> HashRing.key_to_node(id)
-  end
+  def agent_node(%GitRepository{id: id}), do: Console.ClusterRing.node(id)
 
   def local?(%GitRepository{} = repo), do: agent_node(repo) == node()
 
   def agents(), do: Agent.local_agents()
   def agent_states(), do: Enum.map(agents(), &Agent.info/1)
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
 end

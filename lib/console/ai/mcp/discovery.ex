@@ -36,7 +36,7 @@ defmodule Console.AI.MCP.Discovery do
     end
   end
 
-  def agent_node(%ChatThread{id: id}), do: HashRing.Managed.key_to_node(:cluster, id)
+  def agent_node(%ChatThread{id: id}), do: Console.ClusterRing.node(id)
 
   def local?(%ChatThread{} = thred), do: agent_node(thred) == node()
 end

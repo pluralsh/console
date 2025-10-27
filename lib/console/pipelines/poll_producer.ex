@@ -77,7 +77,7 @@ defmodule Console.Pipelines.PollProducer do
     {:noreply, events, %{state | buffer: buffer, demand: demand - length(events)}}
   end
 
-  defp worker_node(id), do: HashRing.Managed.key_to_node(:cluster, id)
+  defp worker_node(id), do: Console.ClusterRing.node(id)
 
   defp local?(%{id: id}), do: worker_node(id) == node()
 end
