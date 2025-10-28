@@ -78,29 +78,25 @@ defmodule Console.AI.Fixer do
   @doc """
   Generate a fix recommendation from an ai insight struct
   """
-  @spec pr(AiInsight.t, Provider.history) :: pr_resp
-  def pr(%AiInsight{service: svc, stack: stack, alert: alert} = insight, history)
+  @spec pr(binary | AiInsight.t, Provider.history, User.t) :: pr_resp
+  def pr(%AiInsight{service: svc, stack: stack, alert: alert} = insight, history, %User{} = user)
       when is_map(svc) or is_map(stack) or is_map(alert) do
     with {:ok, prompt} <- pr_prompt(insight, history) do
       ask(prompt, @tool)
       |> Provider.tool_call([Pr])
-      |> handle_tool_call(pluck(insight))
+      |> handle_tool_call(pluck(insight), user)
     end
   end
 
-  def pr(_, _), do: {:error, "ai fix recommendations not supported for this insight"}
-
-  @doc """
-  Spawns a pr given a fix recommendation
-  """
-  @spec pr(binary, Provider.history, User.t) :: pr_resp
-  def pr(id, history, %User{} = user) do
+  def pr(id, history, %User{} = user) when is_binary(id) do
     Console.AI.Tool.context(%{user: user})
     Repo.get!(AiInsight, id)
     |> Repo.preload([:service, :stack, :alert])
     |> allow(user, :read)
-    |> when_ok(&pr(&1, history))
+    |> when_ok(&pr(&1, history, user))
   end
+
+  def pr(_, _, _), do: {:error, "ai fix recommendations not supported for this insight"}
 
   @doc """
   Determines if a user has access to this insight, and generates a fix recommendation if so
@@ -113,14 +109,14 @@ defmodule Console.AI.Fixer do
     |> when_ok(&fix/1)
   end
 
-  def handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, additional) do
-    %PullRequest{}
+  def handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, additional, user) do
+    %PullRequest{author_id: user.id}
     |> PullRequest.changeset(Map.merge(pr_attrs, additional))
     |> Repo.insert()
   end
-  def handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _), do: {:error, err}
-  def handle_tool_call({:ok, msg}, _), do: {:error, msg}
-  def handle_tool_call(err, _), do: err
+  def handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _, _), do: {:error, err}
+  def handle_tool_call({:ok, msg}, _, _), do: {:error, msg}
+  def handle_tool_call(err, _, _), do: err
 
   defp ask(prompt, task \\ @prompt), do: prompt ++ [{:user, task}]
 

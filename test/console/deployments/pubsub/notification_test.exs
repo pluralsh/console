@@ -82,6 +82,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
 
       event = %PubSub.PullRequestCreated{item: pr}
       :ok = Notifications.handle_event(event)
+
+      assert Console.Schema.AppNotification.for_user(pr.author_id)
+             |> Console.Repo.exists?()
     end
   end
 
@@ -95,6 +98,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
 
       event = %PubSub.PullRequestUpdated{item: pr}
       :ok = Notifications.handle_event(event)
+
+      assert Console.Schema.AppNotification.for_user(pr.author_id)
+             |> Console.Repo.exists?()
     end
 
     test "it can handle an closed pr" do
@@ -106,6 +112,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
 
       event = %PubSub.PullRequestUpdated{item: pr}
       :ok = Notifications.handle_event(event)
+
+      assert Console.Schema.AppNotification.for_user(pr.author_id)
+             |> Console.Repo.exists?()
     end
   end
 

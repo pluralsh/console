@@ -3292,6 +3292,7 @@ _Appears in:_
 | `name` _string_ | Name specifies the display name for this automation in the Console API.<br />If not provided, defaults to the Kubernetes resource name. |  | Optional: \{\} <br /> |
 | `title` _string_ | Title defines the template for the pull request title. Can include variables<br />that will be replaced with user-provided configuration values. |  | Optional: \{\} <br /> |
 | `patch` _boolean_ | Patch determines whether to generate a patch for this PR instead of<br />creating a full pull request. |  | Optional: \{\} <br /> |
+| `branchPrefix` _string_ | BranchPrefix specifies a prefix to use for the branch name, will be appended with a random string for deduplication. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references a specific cluster that this PR operates on. |  | Optional: \{\} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef references the SCM connection to use for authentication when creating pull requests. |  | Required: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository resource this automation uses. |  | Optional: \{\} <br /> |
