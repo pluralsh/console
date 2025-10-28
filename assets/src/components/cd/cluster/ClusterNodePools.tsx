@@ -1,12 +1,12 @@
-import { useState } from 'react'
 import {
   Button,
   CheckRoundedIcon,
   IconFrame,
   Table,
 } from '@pluralsh/design-system'
-import isEmpty from 'lodash/isEmpty'
 import { createColumnHelper } from '@tanstack/react-table'
+import isEmpty from 'lodash/isEmpty'
+import { useState } from 'react'
 
 import { ClusterFragment, NodePool } from 'generated/graphql'
 
@@ -22,6 +22,7 @@ export function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
 
   return (
     <Table
+      fullHeightWrap
       data={cluster.nodePools || []}
       columns={columns}
     />
