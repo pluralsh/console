@@ -1,4 +1,3 @@
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   DeploymentSettingsFragment,
   useDeploymentSettingsQuery,
@@ -6,6 +5,8 @@ import {
 import { createContext, ReactNode, use, useMemo } from 'react'
 
 import { isValidURL } from '../../utils/url'
+
+const POLL_INTERVAL = 60 * 1000
 
 const DeploymentSettingsContext = createContext<{
   data: Nullable<DeploymentSettingsFragment>
