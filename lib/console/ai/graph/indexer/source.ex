@@ -56,7 +56,7 @@ defmodule Console.AI.Graph.Indexer.Source do
       type: t,
       id: id,
       links: links,
-      attributes: Jason.decode!(result),
+      attributes: JSON.decode!(result),
     }
     |> IndexableItem.with_doc()
   end

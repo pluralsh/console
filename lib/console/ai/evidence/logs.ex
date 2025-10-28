@@ -80,7 +80,7 @@ defmodule Console.AI.Evidence.Logs do
   defp keep_facet?("namespace" <> _), do: true
   defp keep_facet?(_), do: false
 
-  defp encode!(%Line{timestamp: ts, log: log}), do: Jason.encode!(%{timestamp: ts, log: log})
+  defp encode!(%Line{timestamp: ts, log: log}), do: JSON.encode!(%{timestamp: ts, log: log})
 
   defp use_logs?(_, true), do: true
   defp use_logs?(history, _) do
