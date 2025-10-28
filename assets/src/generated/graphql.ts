@@ -1,8 +1,7 @@
 /* eslint-disable */
 /* prettier-ignore */
-import * as Apollo from '@apollo/client'
-import { gql } from '@apollo/client'
-
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -395,6 +394,10 @@ export type AgentRun = {
   flow?: Maybe<Flow>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the programming language used in the agent run */
+  language?: Maybe<AgentRunLanguage>;
+  /** the version of the language to use, if you wish to specify */
+  languageVersion?: Maybe<Scalars['String']['output']>;
   /** the messages this agent run has generated during its run */
   messages?: Maybe<Array<Maybe<AgentMessage>>>;
   /** the mode of the agent run */
@@ -429,6 +432,10 @@ export type AgentRun = {
 export type AgentRunAttributes = {
   /** the flow this agent run is associated with */
   flowId?: InputMaybe<Scalars['ID']['input']>;
+  /** the programming language used in the agent run */
+  language?: InputMaybe<AgentRunLanguage>;
+  /** the version of the language to use, if you wish to specify */
+  languageVersion?: InputMaybe<Scalars['String']['input']>;
   /** the mode of the agent run */
   mode: AgentRunMode;
   /** the prompt to give to the agent */
@@ -448,6 +455,17 @@ export type AgentRunEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AgentRun>;
 };
+
+export enum AgentRunLanguage {
+  Cpp = 'CPP',
+  Csharp = 'CSHARP',
+  Go = 'GO',
+  Java = 'JAVA',
+  Javascript = 'JAVASCRIPT',
+  Php = 'PHP',
+  Python = 'PYTHON',
+  Ruby = 'RUBY'
+}
 
 export enum AgentRunMode {
   Analyze = 'ANALYZE',

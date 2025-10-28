@@ -329,6 +329,10 @@ type AgentRun struct {
 	Error *string `json:"error,omitempty"`
 	// whether this agent run is shared
 	Shared *bool `json:"shared,omitempty"`
+	// the programming language used in the agent run
+	Language *AgentRunLanguage `json:"language,omitempty"`
+	// the version of the language to use, if you wish to specify
+	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the analysis of the agent run
 	Analysis *AgentAnalysis `json:"analysis,omitempty"`
 	// the todos of the agent run
@@ -360,6 +364,10 @@ type AgentRunAttributes struct {
 	Repository string `json:"repository"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
+	// the programming language used in the agent run
+	Language *AgentRunLanguage `json:"language,omitempty"`
+	// the version of the language to use, if you wish to specify
+	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the flow this agent run is associated with
 	FlowID *string `json:"flowId,omitempty"`
 }
@@ -8075,6 +8083,59 @@ func (e *AgentMessageToolState) UnmarshalGQL(v any) error {
 }
 
 func (e AgentMessageToolState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AgentRunLanguage string
+
+const (
+	AgentRunLanguageJavascript AgentRunLanguage = "JAVASCRIPT"
+	AgentRunLanguagePython     AgentRunLanguage = "PYTHON"
+	AgentRunLanguageJava       AgentRunLanguage = "JAVA"
+	AgentRunLanguageCpp        AgentRunLanguage = "CPP"
+	AgentRunLanguageCsharp     AgentRunLanguage = "CSHARP"
+	AgentRunLanguageGo         AgentRunLanguage = "GO"
+	AgentRunLanguageRuby       AgentRunLanguage = "RUBY"
+	AgentRunLanguagePhp        AgentRunLanguage = "PHP"
+)
+
+var AllAgentRunLanguage = []AgentRunLanguage{
+	AgentRunLanguageJavascript,
+	AgentRunLanguagePython,
+	AgentRunLanguageJava,
+	AgentRunLanguageCpp,
+	AgentRunLanguageCsharp,
+	AgentRunLanguageGo,
+	AgentRunLanguageRuby,
+	AgentRunLanguagePhp,
+}
+
+func (e AgentRunLanguage) IsValid() bool {
+	switch e {
+	case AgentRunLanguageJavascript, AgentRunLanguagePython, AgentRunLanguageJava, AgentRunLanguageCpp, AgentRunLanguageCsharp, AgentRunLanguageGo, AgentRunLanguageRuby, AgentRunLanguagePhp:
+		return true
+	}
+	return false
+}
+
+func (e AgentRunLanguage) String() string {
+	return string(e)
+}
+
+func (e *AgentRunLanguage) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentRunLanguage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentRunLanguage", str)
+	}
+	return nil
+}
+
+func (e AgentRunLanguage) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
