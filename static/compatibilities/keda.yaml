@@ -3,6 +3,21 @@ git_url: https://github.com/kedacore/keda
 release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
 helm_repository_url: https://kedacore.github.io/charts
 versions:
+- version: 2.18.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  chart_version: 2.18.0
+- version: 2.17.0
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  chart_version: 2.17.0
+- version: 2.16.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  chart_version: 2.16.0
 - version: 2.15.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -12,12 +27,12 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  chart_version: 2.14.0
+  chart_version: 2.14.2
 - version: 2.13.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  chart_version: 2.13.0
+  chart_version: 2.13.1
 - version: 2.12.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -32,7 +47,7 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  chart_version: 2.10.0
+  chart_version: 2.10.1
 - version: 2.9.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -42,7 +57,7 @@ versions:
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  chart_version: 2.8.0
+  chart_version: 2.8.1
 - version: 2.7.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
