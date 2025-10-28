@@ -1,3 +1,8 @@
+fragment ServiceDependencyFragment on ServiceDependency {
+    id
+    name
+}
+
 fragment KustomizeFragment on Kustomize {
     path
     enableHelm

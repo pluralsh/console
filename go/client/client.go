@@ -1327,6 +1327,7 @@ type ServiceDeploymentForAgent struct {
 	Revision      *ServiceDeploymentForAgent_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
 	Imports       []*ServiceDeploymentForAgent_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
 	Renderers     []*RendererFragment                        "json:\"renderers,omitempty\" graphql:\"renderers\""
+	Dependencies  []*ServiceDependencyFragment               "json:\"dependencies,omitempty\" graphql:\"dependencies\""
 }
 
 func (t *ServiceDeploymentForAgent) GetID() string {
@@ -1442,6 +1443,12 @@ func (t *ServiceDeploymentForAgent) GetRenderers() []*RendererFragment {
 		t = &ServiceDeploymentForAgent{}
 	}
 	return t.Renderers
+}
+func (t *ServiceDeploymentForAgent) GetDependencies() []*ServiceDependencyFragment {
+	if t == nil {
+		t = &ServiceDeploymentForAgent{}
+	}
+	return t.Dependencies
 }
 
 type ClusterRegistrationFragment struct {
@@ -2039,6 +2046,24 @@ func (t *MCPServerFragment) GetConfirm() *bool {
 		t = &MCPServerFragment{}
 	}
 	return t.Confirm
+}
+
+type ServiceDependencyFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *ServiceDependencyFragment) GetID() string {
+	if t == nil {
+		t = &ServiceDependencyFragment{}
+	}
+	return t.ID
+}
+func (t *ServiceDependencyFragment) GetName() string {
+	if t == nil {
+		t = &ServiceDependencyFragment{}
+	}
+	return t.Name
 }
 
 type KustomizeFragment struct {
@@ -32021,6 +32046,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	renderers {
 		... RendererFragment
 	}
+	dependencies {
+		... ServiceDependencyFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -32044,6 +32072,10 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+}
+fragment ServiceDependencyFragment on ServiceDependency {
+	id
+	name
 }
 `
 
@@ -32520,6 +32552,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	renderers {
 		... RendererFragment
 	}
+	dependencies {
+		... ServiceDependencyFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -32543,6 +32578,10 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+}
+fragment ServiceDependencyFragment on ServiceDependency {
+	id
+	name
 }
 `
 
