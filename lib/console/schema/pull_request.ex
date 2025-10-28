@@ -8,7 +8,8 @@ defmodule Console.Schema.PullRequest do
     Flow,
     PrGovernance,
     AgentSession,
-    AgentRun
+    AgentRun,
+    User
   }
 
   defenum Status, open: 0, merged: 1, closed: 2
@@ -46,6 +47,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :governance, PrGovernance
     belongs_to :session,    AgentSession
     belongs_to :agent_run,  AgentRun
+    belongs_to :author,    User
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -104,6 +106,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.agent_id == ^agent_id)
   end
 
+  def for_author(query \\ __MODULE__, author_id) do
+    from(pr in query, where: pr.author_id == ^author_id)
+  end
+
   def pending_governance(query \\ __MODULE__) do
     from(pr in query, where: not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open)
   end
@@ -131,6 +137,7 @@ defmodule Console.Schema.PullRequest do
     stack_id
     service_id
     flow_id
+    author_id
     creator
     labels
     preview

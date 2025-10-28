@@ -207,17 +207,18 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn
-      {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
-      {:service_id, sid}, q -> PullRequest.for_service(q, sid)
+      {:cluster_id, cid}, q when is_binary(cid) -> PullRequest.for_cluster(q, cid)
+      {:service_id, sid}, q when is_binary(sid) -> PullRequest.for_service(q, sid)
       {:open, true}, q -> PullRequest.open(q)
+      {:author_id, aid}, q when is_binary(aid)-> PullRequest.for_author(q, aid)
       _, q -> q
     end)
   end
 
   defp pra_filters(query, args) do
     Enum.reduce(args, query, fn
-      {:catalog_id, cid}, q -> PrAutomation.for_catalog(q, cid)
-      {:project_id, cid}, q -> PrAutomation.for_project(q, cid)
+      {:catalog_id, cid}, q when is_binary(cid) -> PrAutomation.for_catalog(q, cid)
+      {:project_id, cid}, q when is_binary(cid) -> PrAutomation.for_project(q, cid)
       {:role, role}, q  when not is_nil(role) -> PrAutomation.for_role(q, role)
       _, q -> q
     end)

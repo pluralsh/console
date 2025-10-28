@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :message,       :string
     field :branch,        :string
     field :patch,         :boolean, description: "whether to generate a patch for this pr instead of a full pr"
+    field :branch_prefix, :string
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
@@ -516,6 +517,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :branch_prefix, :string, description: "a prefix to use for the branch name, will be appended with a random string for deduplication"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
@@ -666,6 +668,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :labels,  list_of(:string)
     field :patch,   :string, description: "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
 
+    field :author,  :user, description: "the user that spawned this pr, will also be associated with notifications w/in Plural",
+      resolve: dataloader(Deployments)
     field :flow,    :flow, description: "the flow this pr is meant to modify",
       resolve: dataloader(Deployments)
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
@@ -942,6 +946,7 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :service_id, :id
       arg :open,       :boolean
       arg :q,          :string
+      arg :author_id,  :id
 
       resolve &Deployments.list_pull_requests/2
     end

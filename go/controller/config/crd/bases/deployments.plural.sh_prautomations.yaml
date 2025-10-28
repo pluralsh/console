@@ -107,6 +107,10 @@ spec:
                   Branch specifies the base branch this PR will be created from. If not provided,
                   defaults to the repository's main branch (usually 'main' or 'master').
                 type: string
+              branchPrefix:
+                description: BranchPrefix specifies a prefix to use for the branch
+                  name, will be appended with a random string for deduplication.
+                type: string
               catalogRef:
                 description: |-
                   CatalogRef references the catalog this automation belongs to for

@@ -142,7 +142,7 @@ type RootQueryType {
   prGovernance(id: ID, name: String): PrGovernance
 
   pullRequests(
-    after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String
+    after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String, authorId: ID
   ): PullRequestConnection
 
   scmWebhook(id: ID, externalId: String): ScmWebhook
@@ -8352,6 +8352,8 @@ input PrAutomationAttributes {
   "whether to generate a patch for this pr instead of a full pr"
   patch: Boolean
 
+  branchPrefix: String
+
   updates: PrAutomationUpdateSpecAttributes
 
   creates: PrAutomationCreateSpecAttributes
@@ -8883,6 +8885,9 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a prefix to use for the branch name, will be appended with a random string for deduplication"
+  branchPrefix: String
+
   "an icon url to use for this catalog"
   icon: String
 
@@ -9095,6 +9100,9 @@ type PullRequest {
 
   "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
   patch: String
+
+  "the user that spawned this pr, will also be associated with notifications w\/in Plural"
+  author: User
 
   "the flow this pr is meant to modify"
   flow: Flow

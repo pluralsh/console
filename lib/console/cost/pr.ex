@@ -48,7 +48,7 @@ defmodule Console.Cost.Pr do
       prepend(prompt, {:user, @pr})
       |> append({:user, cost_prompt(rec)})
       |> Provider.tool_call([Pr])
-      |> Fixer.handle_tool_call(%{service_id: svc.id})
+      |> Fixer.handle_tool_call(%{service_id: svc.id}, user)
     end
   end
 

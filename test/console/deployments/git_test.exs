@@ -330,6 +330,7 @@ defmodule Console.Deployments.GitTest do
       assert pr.cluster_id == pra.cluster_id
       assert pr.url == "https://github.com/pr/url"
       assert pr.title == pra.title
+      assert pr.author_id == user.id
 
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end

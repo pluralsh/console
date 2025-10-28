@@ -7,6 +7,10 @@ defmodule Console.Deployments.PubSub.Notifications do
   alias Console.Schema.{NotificationRouter}
 
   def handle_event(event) do
+    with {event, user_id, ctx} <- Notifiable.individual(event) do
+      Notifications.deliver_individually(event, ctx, user_id)
+    end
+
     with {event, filters, ctx} <- Notifiable.message(event) do
       NotificationRouter.for_event(event)
       |> NotificationRouter.preloaded([:sinks, :filters])

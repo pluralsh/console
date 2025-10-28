@@ -5327,6 +5327,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// a prefix to use for the branch name, will be appended with a random string for deduplication
+	BranchPrefix *string `json:"branchPrefix,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog
@@ -5369,10 +5371,11 @@ type PrAutomationAttributes struct {
 	Message       *string `json:"message,omitempty"`
 	Branch        *string `json:"branch,omitempty"`
 	// whether to generate a patch for this pr instead of a full pr
-	Patch   *bool                             `json:"patch,omitempty"`
-	Updates *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
-	Creates *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
-	Deletes *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	Patch        *bool                             `json:"patch,omitempty"`
+	BranchPrefix *string                           `json:"branchPrefix,omitempty"`
+	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
+	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
+	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog
@@ -5807,6 +5810,8 @@ type PullRequest struct {
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`
+	// the user that spawned this pr, will also be associated with notifications w/in Plural
+	Author *User `json:"author,omitempty"`
 	// the flow this pr is meant to modify
 	Flow *Flow `json:"flow,omitempty"`
 	// the cluster this pr is meant to modify

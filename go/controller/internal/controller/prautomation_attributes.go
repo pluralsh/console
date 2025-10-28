@@ -59,6 +59,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		Title:         pra.Spec.Title,
 		Message:       pra.Spec.Message,
 		Branch:        pra.Spec.Branch,
+		BranchPrefix:  pra.Spec.BranchPrefix,
 		Icon:          pra.Spec.Icon,
 		DarkIcon:      pra.Spec.DarkIcon,
 		Updates:       pra.Spec.Updates.Attributes(),

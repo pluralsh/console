@@ -6,10 +6,14 @@ defprotocol Console.Deployments.PubSub.Notifiable do
   """
   @spec message(term) :: {binary, list, map} | :ok
   def message(event)
+
+  @spec individual(term) :: {binary, binary, map} | :ok
+  def individual(event)
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Any do
   def message(_), do: :ok
+  def individual(_), do: :ok
 end
 
 defmodule Console.Deployments.Notifications.Utils do
@@ -57,14 +61,17 @@ defmodule Console.Deployments.Notifications.Utils do
   def insight(_), do: "View in Plural to see the full insight"
 
   defp drop_nils(map), do: Enum.filter(map, &elem(&1, 1))
+
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.Schema.Pipeline do
   def message(_), do: :ok
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.Schema.Cluster do
   def message(_), do: :ok
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: [
@@ -76,6 +83,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: [
     {"service.update", Utils.filters(svc), %{service: svc, source: source(svc)}}
   end
 
+  def individual(_), do: :ok
+
   defp source(%{repository: %{url: url}, git: %{ref: ref, folder: folder}}), do: %{url: url, ref: "#{folder}@#{ref}"}
   defp source(%{helm: %{chart: c, version: v}}), do: %{url: c, ref: v}
   defp source(_), do: %{}
@@ -84,18 +93,26 @@ end
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PullRequestCreated do
   alias Console.Deployments.Notifications.Utils
 
-  def message(%{item: pr}) do
+  def message(%@for{item: pr}) do
     {"pr.create", Utils.filters(pr), %{pr: pr}}
   end
+
+  def individual(%@for{item: %{author_id: id} = pr}) when is_binary(id),
+    do: {"pr.create", id, %{pr: pr}}
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PullRequestUpdated do
   alias Console.Deployments.Notifications.Utils
 
-  def message(%{item: %{status: status} = pr}) when status in ~w(merged closed)a do
+  def message(%@for{item: %{status: status} = pr}) when status in ~w(merged closed)a do
     {"pr.close", Utils.filters(pr), %{pr: pr}}
   end
   def message(_), do: :ok
+
+  def individual(%@for{item: %{author_id: id} = pr}) when is_binary(id),
+    do: {"pr.close", id, %{pr: pr}}
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PipelineGateUpdated do
@@ -110,6 +127,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PipelineGateU
     end
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreated do
@@ -121,6 +140,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreat
     run = Console.Repo.preload(run, [:stack, :repository])
     {"stack.run", Utils.filters(run), %{stack_run: run}}
   end
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunUpdated do
@@ -135,6 +156,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunUpdat
     end)
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsight do
@@ -152,6 +175,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsigh
     end)
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight do
@@ -169,6 +194,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight 
     end)
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ClusterInsight do
@@ -185,6 +212,8 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ClusterInsigh
     end)
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertInsight do
@@ -202,10 +231,14 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertInsight 
     end)
   end
   def message(_), do: :ok
+
+  def individual(_), do: :ok
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated do
   alias Console.Deployments.Notifications.Utils
 
   def message(%{item: alert}), do: {"alert.fired", Utils.filters(alert), %{alert: alert}}
+
+  def individual(_), do: :ok
 end

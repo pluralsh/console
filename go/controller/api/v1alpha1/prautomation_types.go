@@ -143,6 +143,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Patch *bool `json:"patch,omitempty"`
 
+	// BranchPrefix specifies a prefix to use for the branch name, will be appended with a random string for deduplication.
+	// +kubebuilder:validation:Optional
+	BranchPrefix *string `json:"branchPrefix,omitempty"`
+
 	// ClusterRef references a specific cluster that this PR operates on.
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`

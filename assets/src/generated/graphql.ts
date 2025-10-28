@@ -6464,6 +6464,8 @@ export type PrAutomation = {
   __typename?: 'PrAutomation';
   /** link to an add-on name if this can update it */
   addon?: Maybe<Scalars['String']['output']>;
+  /** a prefix to use for the branch name, will be appended with a random string for deduplication */
+  branchPrefix?: Maybe<Scalars['String']['output']>;
   /** the catalog this pr automation belongs to */
   catalog?: Maybe<Catalog>;
   /** link to a cluster if this is to perform an upgrade */
@@ -6511,6 +6513,7 @@ export type PrAutomationAttributes = {
   /** link to an add-on name if this can update it */
   addon?: InputMaybe<Scalars['String']['input']>;
   branch?: InputMaybe<Scalars['String']['input']>;
+  branchPrefix?: InputMaybe<Scalars['String']['input']>;
   /** the catalog this automation will belong to */
   catalogId?: InputMaybe<Scalars['ID']['input']>;
   /** link to a cluster if this is to perform an upgrade */
@@ -7008,6 +7011,8 @@ export type ProviderCredentialAttributes = {
 /** A reference to a pull request for your kubernetes related IaC */
 export type PullRequest = {
   __typename?: 'PullRequest';
+  /** the user that spawned this pr, will also be associated with notifications w/in Plural */
+  author?: Maybe<User>;
   /** the cluster this pr is meant to modify */
   cluster?: Maybe<Cluster>;
   creator?: Maybe<Scalars['String']['output']>;
@@ -9916,6 +9921,7 @@ export type RootQueryTypeProjectsArgs = {
 
 export type RootQueryTypePullRequestsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
+  authorId?: InputMaybe<Scalars['ID']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

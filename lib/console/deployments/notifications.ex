@@ -163,6 +163,13 @@ defmodule Console.Deployments.Notifications do
     |> send_events()
   end
 
+  def deliver_individually(event, map, user_id) when is_binary(user_id) do
+    body = update_blob(:plural, event, map)
+    Enum.map([user_id], & %{text: body, user_id: &1, urgent: true, priority: :low})
+    |> create_notifications()
+    |> send_events()
+  end
+
   defp url_deliver(url, body) do
     HTTPoison.post(url, body, [
       {"content-type", "application/json"},
