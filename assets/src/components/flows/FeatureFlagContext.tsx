@@ -20,10 +20,12 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
+  Agent: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
+  Agent: false,
 }
 
 export const FeatureFlagContext = createContext<{
@@ -72,6 +74,8 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {curType === 'Edge' && <EdgeBodyContent />}
+        {curType === 'Agent' &&
+          'Enables UI for experimental AI agent features.'}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}

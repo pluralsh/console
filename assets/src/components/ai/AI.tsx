@@ -3,8 +3,9 @@ import {
   IconFrame,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
-import { useMemo } from 'react'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
+import { SubTabs } from 'components/utils/SubTabs'
+import { use, useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
@@ -24,13 +25,17 @@ import {
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { AIDisabledState } from './AIThreads'
 
-const directory: SubtabDirectory = [
+const getDirectory = (agentEnabled: boolean) => [
   { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
-  { label: 'Agent runtimes', path: AI_AGENT_RUNTIMES_REL_PATH },
-  { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
+  ...(agentEnabled
+    ? [
+        { label: 'Agent runtimes', path: AI_AGENT_RUNTIMES_REL_PATH },
+        { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
+      ]
+    : []),
 ]
 
 export const getAIBreadcrumbs = (tab: string = '') => [
@@ -42,6 +47,7 @@ export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
   const loading = useLoadingDeploymentSettings()
+  const agentEnabled = !!use(FeatureFlagContext).featureFlags.Agent
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
 
   if (loading) return <LoadingIndicator />
@@ -50,7 +56,7 @@ export function AI() {
     <WrapperSC>
       {aiEnabled && (
         <HeaderSC>
-          <SubTabs directory={directory} />
+          <SubTabs directory={getDirectory(agentEnabled)} />
           <IconFrame
             clickable
             icon={<GearTrainIcon />}
