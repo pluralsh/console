@@ -394,6 +394,7 @@ defmodule Console.Factory do
       title: "pr title",
       url: sequence(:pull_request, & "https://github.com/some/repo/#{&1}"),
       notifications_policy_id: Ecto.UUID.generate(),
+      author: build(:user)
     }
   end
 

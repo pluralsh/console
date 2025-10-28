@@ -355,7 +355,7 @@ defmodule Console.Deployments.Git do
       Logger.info "creating pr #{pr_attrs[:url]}"
       start_transaction()
       |> add_operation(:pr, fn _ ->
-        %PullRequest{}
+        %PullRequest{author_id: user.id}
         |> PullRequest.changeset(
           Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
           |> Map.merge(attrs)

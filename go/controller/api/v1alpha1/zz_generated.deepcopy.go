@@ -5900,6 +5900,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.BranchPrefix != nil {
+		in, out := &in.BranchPrefix, &out.BranchPrefix
+		*out = new(string)
+		**out = **in
+	}
 	if in.ClusterRef != nil {
 		in, out := &in.ClusterRef, &out.ClusterRef
 		*out = new(v1.ObjectReference)
