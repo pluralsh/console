@@ -14,17 +14,26 @@ import {
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
+import {
+  ChatSkeleton,
+  RectangleSkeleton,
+  SidecarSkeleton,
+} from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
+  AgentMessage,
   AgentRunFragment,
   AgentRunMode,
+  AgentRunStatus,
+  AiRole,
   ChatType,
   PullRequestFragment,
+  useAgentRunChatSubscription,
+  useAgentRunPodLogsQuery,
   useAgentRunQuery,
 } from 'generated/graphql'
 import { capitalize, isEmpty, truncate } from 'lodash'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Outlet,
   useLocation,
@@ -33,12 +42,16 @@ import {
 } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ANALYSIS_REL_PATH,
+  AI_AGENT_RUNS_LOGS_REL_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
   AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
 } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { VListHandle } from 'virtua'
+import { ContainerLogsTable } from '../../cd/cluster/pod/logs/ContainerLogs.tsx'
+import { SinceSecondsOptions } from '../../cd/cluster/pod/logs/Logs.tsx'
 import {
   ColActions,
   ColInsertedAt,
@@ -48,6 +61,7 @@ import {
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer.tsx'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
+import TypingIndicator from '../../utils/TypingIndicator.tsx'
 import { VirtualList } from '../../utils/VirtualList.tsx'
 import { getAIBreadcrumbs } from '../AI'
 import { ChatMessage } from '../chatbot/ChatMessage'
@@ -102,6 +116,7 @@ export function AIAgentRun() {
           <Outlet
             context={{
               run,
+              loading: runLoading,
             }}
           />
         </div>
@@ -176,6 +191,10 @@ function getDirectory() {
       label: 'Pull Requests',
       condition: (s: AgentRunFragment) => s?.mode === AgentRunMode.Write,
     },
+    {
+      path: AI_AGENT_RUNS_LOGS_REL_PATH,
+      label: 'Logs',
+    },
   ]
 }
 
@@ -209,79 +228,144 @@ function AgentRunHeader({ run, loading }) {
           borderBottom: theme.borders.default,
         }}
       />
-      <TabList
-        scrollable
-        stateRef={tabStateRef}
-        stateProps={{
-          orientation: 'horizontal',
-          selectedKey: currentTab?.path,
-        }}
-      >
-        {directory
-          .filter((d) => d.condition?.(run) ?? true)
-          .map(({ label, path }) => (
-            <LinkTabWrap
-              subTab
-              key={path}
-              to={path}
-            >
-              <SubTab key={path}>{label}</SubTab>
-            </LinkTabWrap>
-          ))}
-      </TabList>
+      {loading ? (
+        <RectangleSkeleton $height="large" />
+      ) : (
+        <TabList
+          scrollable
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: currentTab?.path,
+          }}
+        >
+          {directory
+            .filter((d) => d.condition?.(run) ?? true)
+            .map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                to={path}
+              >
+                <SubTab key={path}>{label}</SubTab>
+              </LinkTabWrap>
+            ))}
+        </TabList>
+      )}
     </Flex>
   )
 }
 
 export function AgentRunMessages() {
-  const { run } = useOutletContext<{ run: AgentRunFragment }>()
+  const theme = useTheme()
+  const scrollRef = useRef<VListHandle | null>({} as VListHandle)
+  const { run, loading } = useOutletContext<{
+    run: AgentRunFragment
+    loading: boolean
+  }>()
   const error = run?.error ?? ''
-  const messages = run?.messages?.filter(isNonNullable) ?? []
+  const [messages, setMessages] = useState<Array<AgentMessage>>(
+    (run?.messages as Array<AgentMessage>) ?? []
+  )
+  const showEmptyState = !error && !loading && isEmpty(messages)
+  const showRunningIndicator =
+    !error &&
+    !loading &&
+    (run?.status === AgentRunStatus.Running ||
+      run?.status === AgentRunStatus.Pending)
 
-  return isEmpty(messages) ? (
+  useAgentRunChatSubscription({
+    skip: run?.status !== AgentRunStatus.Running,
+    variables: { runId: run?.id },
+    onData: ({ data: { data } }) => {
+      setMessages(
+        (messages) =>
+          [...messages, data?.agentMessageDelta?.payload] as Array<AgentMessage>
+      )
+    },
+  })
+
+  useEffect(() => {
+    setMessages((run?.messages as Array<AgentMessage>) ?? [])
+  }, [run?.messages])
+
+  useEffect(() => {
+    scrollRef?.current?.scrollTo?.(scrollRef?.current?.scrollSize)
+  }, [scrollRef?.current?.scrollSize])
+
+  return (
     <>
-      {!!error ? (
+      {loading && <ChatSkeleton />}
+      {!!error && (
         <StackedText
           first="There was an error during agent run"
           firstPartialType="title2"
           second={error}
           secondPartialType="body1Bold"
         />
-      ) : (
-        <EmptyState message="No messages found" />
+      )}
+      {showEmptyState && (
+        <>
+          <ChatMessage
+            disableActions
+            role={AiRole.User}
+            content={run?.prompt}
+          />
+          {showRunningIndicator && (
+            <TypingIndicator
+              css={{
+                marginRight: theme.spacing.small,
+                justifyContent: 'flex-end',
+              }}
+            />
+          )}
+        </>
+      )}
+      {!showEmptyState && (
+        <VirtualList
+          data={messages}
+          listRef={scrollRef}
+          renderer={({ rowData }) => (
+            <div>
+              <ChatMessage
+                key={rowData.id}
+                disableActions
+                content={
+                  !!rowData?.metadata?.tool
+                    ? rowData?.metadata?.tool?.output
+                    : !!rowData?.metadata?.file
+                      ? rowData?.metadata?.file?.text
+                      : rowData.message
+                }
+                type={
+                  !!rowData?.metadata?.tool
+                    ? ChatType.Tool
+                    : !!rowData?.metadata?.file
+                      ? ChatType.File
+                      : ChatType.Text
+                }
+                role={rowData.role}
+                highlightToolContent
+                attributes={{
+                  file: { name: rowData?.metadata?.file?.name },
+                  tool: { name: rowData?.metadata?.tool?.name },
+                }}
+              />
+            </div>
+          )}
+          bottomContent={
+            showRunningIndicator && (
+              <TypingIndicator
+                css={{
+                  marginRight: theme.spacing.small,
+                  justifyContent: 'flex-end',
+                }}
+              />
+            )
+          }
+        />
       )}
     </>
-  ) : (
-    <VirtualList
-      data={messages}
-      renderer={({ rowData }) => (
-        <div>
-          <ChatMessage
-            key={rowData.id}
-            content={
-              !!rowData?.metadata?.tool
-                ? rowData?.metadata?.tool?.output
-                : !!rowData?.metadata?.file
-                  ? rowData?.metadata?.file?.text
-                  : rowData.message
-            }
-            type={
-              !!rowData?.metadata?.tool
-                ? ChatType.Tool
-                : !!rowData?.metadata?.file
-                  ? ChatType.File
-                  : ChatType.Text
-            }
-            role={rowData.role}
-            highlightToolContent
-            attributes={{
-              file: { name: rowData?.metadata?.file?.name },
-              tool: { name: rowData?.metadata?.tool?.name },
-            }}
-          />
-        </div>
-      )}
-    />
   )
 }
 
@@ -341,6 +425,32 @@ export function AgentRunPullRequests() {
         }>
       }
       virtualizeRows
+      emptyStateProps={{ message: 'No pull requests found' }}
+    />
+  )
+}
+
+export function AgentRunLogs() {
+  const { run } = useOutletContext<{ run: AgentRunFragment }>()
+  const agentRunDefaultContainer = 'default'
+  const sinceSeconds = SinceSecondsOptions.Week
+  const { data, loading, refetch } = useAgentRunPodLogsQuery({
+    skip: !run?.id,
+    variables: {
+      runId: run?.id,
+      container: agentRunDefaultContainer,
+      sinceSeconds: sinceSeconds,
+    },
+  })
+  const logs: Array<string> =
+    data?.agentRun?.pod?.logs?.filter(isNonNullable) ?? []
+
+  return (
+    <ContainerLogsTable
+      logs={logs}
+      loading={loading}
+      refetch={refetch}
+      container={agentRunDefaultContainer}
     />
   )
 }

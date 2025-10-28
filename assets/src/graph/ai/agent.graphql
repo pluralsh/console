@@ -94,6 +94,13 @@ fragment AgentMessageCost on AgentMessageCost {
   }
 }
 
+fragment AgentMessageDelta on AgentMessageDelta {
+  delta
+  payload {
+    ...AgentMessage
+  }
+}
+
 query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
   agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
     pageInfo {
@@ -141,5 +148,22 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
 mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
   upsertAgentRuntime(attributes: $attributes) {
     ...AgentRuntime
+  }
+}
+
+subscription AgentRunChat($runId: ID!) {
+  agentMessageDelta(runId: $runId) {
+    delta
+    payload {
+      ...AgentMessage
+    }
+  }
+}
+
+query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
+  agentRun(id: $runId) {
+    pod {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
   }
 }

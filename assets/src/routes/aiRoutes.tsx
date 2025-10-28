@@ -1,5 +1,6 @@
 import {
   AgentRunAnalysis,
+  AgentRunLogs,
   AgentRunMessages,
   AgentRunPullRequests,
   AIAgentRun,
@@ -9,6 +10,9 @@ import { AIAgentRuntimes } from 'components/ai/agent-runtimes/AIAgentRuntimes.ts
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { McpServers } from 'components/ai/mcp/McpServers.tsx'
+import { SentinelRunJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJob.tsx'
+import { SentinelRunJobK8sJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobK8sJob.tsx'
+import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobOutput.tsx'
 import { SentinelRun } from 'components/ai/sentinels/sentinel/run/SentinelRun.tsx'
 import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
 import { Sentinels } from 'components/ai/sentinels/Sentinels.tsx'
@@ -18,6 +22,7 @@ import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_ABS_PATH,
   AI_AGENT_RUNS_ANALYSIS_REL_PATH,
+  AI_AGENT_RUNS_LOGS_REL_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
   AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
@@ -35,9 +40,6 @@ import {
   getSentinelRunAbsPath,
   getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
-import { SentinelRunJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJob.tsx'
-import { SentinelRunJobK8sJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobK8sJob.tsx'
-import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobOutput.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
 
 export const aiRoutes = [
@@ -95,6 +97,10 @@ export const aiRoutes = [
     <Route
       path={AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH}
       element={<AgentRunPullRequests />}
+    />
+    <Route
+      path={AI_AGENT_RUNS_LOGS_REL_PATH}
+      element={<AgentRunLogs />}
     />
   </Route>,
   // other sentinel routes

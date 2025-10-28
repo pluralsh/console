@@ -12588,6 +12588,8 @@ export type AgentMessageMetadataFragment = { __typename?: 'AgentMessageMetadata'
 
 export type AgentMessageCostFragment = { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null };
 
+export type AgentMessageDeltaFragment = { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null };
+
 export type AgentRunsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -12633,6 +12635,22 @@ export type UpsertAgentRuntimeMutationVariables = Exact<{
 
 
 export type UpsertAgentRuntimeMutation = { __typename?: 'RootMutationType', upsertAgentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type AgentRunChatSubscriptionVariables = Exact<{
+  runId: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunChatSubscription = { __typename?: 'RootSubscriptionType', agentMessageDelta?: { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null } | null };
+
+export type AgentRunPodLogsQueryVariables = Exact<{
+  runId: Scalars['ID']['input'];
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type AgentRunPodLogsQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null } | null };
 
 export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
 
@@ -15958,6 +15976,14 @@ export const AgentRuntimeFragmentDoc = gql`
 }
     ${ClusterTinyFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const AgentMessageDeltaFragmentDoc = gql`
+    fragment AgentMessageDelta on AgentMessageDelta {
+  delta
+  payload {
+    ...AgentMessage
+  }
+}
+    ${AgentMessageFragmentDoc}`;
 export const ChatThreadSettingsFragmentDoc = gql`
     fragment ChatThreadSettings on ChatThreadSettings {
   memory
@@ -20415,6 +20441,83 @@ export function useUpsertAgentRuntimeMutation(baseOptions?: Apollo.MutationHookO
 export type UpsertAgentRuntimeMutationHookResult = ReturnType<typeof useUpsertAgentRuntimeMutation>;
 export type UpsertAgentRuntimeMutationResult = Apollo.MutationResult<UpsertAgentRuntimeMutation>;
 export type UpsertAgentRuntimeMutationOptions = Apollo.BaseMutationOptions<UpsertAgentRuntimeMutation, UpsertAgentRuntimeMutationVariables>;
+export const AgentRunChatDocument = gql`
+    subscription AgentRunChat($runId: ID!) {
+  agentMessageDelta(runId: $runId) {
+    delta
+    payload {
+      ...AgentMessage
+    }
+  }
+}
+    ${AgentMessageFragmentDoc}`;
+
+/**
+ * __useAgentRunChatSubscription__
+ *
+ * To run a query within a React component, call `useAgentRunChatSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunChatSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunChatSubscription({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *   },
+ * });
+ */
+export function useAgentRunChatSubscription(baseOptions: Apollo.SubscriptionHookOptions<AgentRunChatSubscription, AgentRunChatSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AgentRunChatSubscription, AgentRunChatSubscriptionVariables>(AgentRunChatDocument, options);
+      }
+export type AgentRunChatSubscriptionHookResult = ReturnType<typeof useAgentRunChatSubscription>;
+export type AgentRunChatSubscriptionResult = Apollo.SubscriptionResult<AgentRunChatSubscription>;
+export const AgentRunPodLogsDocument = gql`
+    query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
+  agentRun(id: $runId) {
+    pod {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+    `;
+
+/**
+ * __useAgentRunPodLogsQuery__
+ *
+ * To run a query within a React component, call `useAgentRunPodLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunPodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunPodLogsQuery({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function useAgentRunPodLogsQuery(baseOptions: Apollo.QueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+      }
+export function useAgentRunPodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+        }
+export function useAgentRunPodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+        }
+export type AgentRunPodLogsQueryHookResult = ReturnType<typeof useAgentRunPodLogsQuery>;
+export type AgentRunPodLogsLazyQueryHookResult = ReturnType<typeof useAgentRunPodLogsLazyQuery>;
+export type AgentRunPodLogsSuspenseQueryHookResult = ReturnType<typeof useAgentRunPodLogsSuspenseQuery>;
+export type AgentRunPodLogsQueryResult = Apollo.QueryResult<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>;
 export const ChatThreadsDocument = gql`
     query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
   chatThreads(first: $first, last: $last, after: $after, before: $before, q: $q) {
@@ -34046,6 +34149,7 @@ export const namedOperations = {
     AgentRun: 'AgentRun',
     AgentRuntimes: 'AgentRuntimes',
     AgentRuntime: 'AgentRuntime',
+    AgentRunPodLogs: 'AgentRunPodLogs',
     ChatThreads: 'ChatThreads',
     ChatAgentSession: 'ChatAgentSession',
     ChatThreadDetails: 'ChatThreadDetails',
@@ -34378,6 +34482,7 @@ export const namedOperations = {
     CreateInvite: 'CreateInvite'
   },
   Subscription: {
+    AgentRunChat: 'AgentRunChat',
     AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta'
   },
@@ -34388,6 +34493,7 @@ export const namedOperations = {
     AgentMessage: 'AgentMessage',
     AgentMessageMetadata: 'AgentMessageMetadata',
     AgentMessageCost: 'AgentMessageCost',
+    AgentMessageDelta: 'AgentMessageDelta',
     Chat: 'Chat',
     ChatThreadTiny: 'ChatThreadTiny',
     ChatThreadDetails: 'ChatThreadDetails',

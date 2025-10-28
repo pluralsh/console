@@ -32,6 +32,16 @@
          "name": "UpsertAgentRuntime",
          "body": "mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {\n  upsertAgentRuntime(attributes: $attributes) {\n    ...AgentRuntime\n    __typename\n  }\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    ...ClusterTiny\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment ClusterTiny on Cluster {\n  ...ClusterMinimal\n  self\n  upgradePlan {\n    compatibilities\n    deprecations\n    incompatibilities\n    __typename\n  }\n  virtual\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:4da26d84832699138cf066ce414c9fa68911a9fb97df625781f07f64b39dda1b": {
+         "type": "subscription",
+         "name": "AgentRunChat",
+         "body": "subscription AgentRunChat($runId: ID!) {\n  agentMessageDelta(runId: $runId) {\n    delta\n    payload {\n      ...AgentMessage\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:0bbdff23d5fb0e1033f64d6a4e002b470ceb2d17e81b3feda3eec84d78be6356": {
+         "type": "query",
+         "name": "AgentRunPodLogs",
+         "body": "query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {\n  agentRun(id: $runId) {\n    pod {\n      logs(container: $container, sinceSeconds: $sinceSeconds)\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:2d42fdb5ee1326b3b930fde636b9322bf409a2ab13f4861d8f8b38cbbc5bb294": {
          "type": "query",
          "name": "ChatThreads",
