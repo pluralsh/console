@@ -218,6 +218,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
     renderers {
         ...RendererFragment
     }
+    dependencies {
+        ...ServiceDependencyFragment
+    }
 }
 
 query GetServiceDeploymentForAgent($id: ID!) {
