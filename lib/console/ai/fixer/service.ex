@@ -138,6 +138,7 @@ defmodule Console.AI.Fixer.Service do
       {contents, multisource} = prune_multisource(contents, svc)
       Map.put(attrs, :git, %{
         details: "#{git_details(svc)}#{multisource}",
+        repo_url: repo.url,
         files: file_prompts(contents)
                |> Enum.map(fn %{file: p} = file ->
                   Map.put(file, :git_location, Path.join(path, p))
@@ -171,19 +172,28 @@ defmodule Console.AI.Fixer.Service do
       case Enum.sum_by(files, &byte_size(Jason.encode!(&1))) do
         size when size > too_large ->
           keep_files = ~w(values.yaml values.yaml.liquid)a ++ (if svc.helm.lua_file, do: [svc.helm.lua_file], else: [])
-          Map.put(attrs, :helm, %{
+          Map.put(attrs, :helm, helm_meta(%{
             details: "#{helm_details(svc)}\n\nThis is a large helm chart, and so we've truncated its contents to just the values file and other files related to values templating for documentation purposes",
             files: Enum.filter(contents, fn {k, _} -> k in keep_files end)
                    |> file_prompts()
-          })
+          }, svc))
         _ ->
-          Map.put(attrs, :helm, %{
+          Map.put(attrs, :helm, helm_meta(%{
             details: helm_details(svc),
             files: files
-          })
+          }, svc))
       end
     else
       _ -> attrs
     end
   end
+
+  defp helm_meta(attrs, %Service{helm: %Service.Helm{} = helm}) do
+    Map.merge(attrs, %{
+      helm_url: helm.url,
+      helm_chart: helm.chart,
+      helm_version: helm.version
+    })
+  end
+  defp helm_meta(attrs, _), do: attrs
 end

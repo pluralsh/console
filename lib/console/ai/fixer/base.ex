@@ -66,7 +66,7 @@ defmodule Console.AI.Fixer.Base do
 
   def prompt_size(prompt) do
     Enum.reduce(prompt, 0, fn
-      {_, %{} = m}, acc -> acc + byte_size(Jason.encode!(m))
+      {_, %{} = m}, acc -> acc + byte_size(JSON.encode!(m))
       {_, txt}, acc when is_binary(txt) -> acc + byte_size(txt)
     end)
   end
@@ -74,7 +74,7 @@ defmodule Console.AI.Fixer.Base do
   def maybe_encode(map) do
     case raw?() do
       true -> map
-      _ -> Jason.encode!(map)
+      _ -> JSON.encode!(map)
     end
   end
 
@@ -85,7 +85,7 @@ defmodule Console.AI.Fixer.Base do
       %AiInsightEvidence{pull_request: %AiInsightEvidence.PullRequest{} = pr} ->
         struct(File, Map.take(pr, ~w(url title repo sha filename contents patch)a))
       %AiInsightEvidence{logs: %AiInsightEvidence.Logs{} = logs} ->
-        logs = Enum.map(logs.lines, &Jason.encode!(%{timestamp: &1.timestamp, log: &1.log}))
+        logs = Enum.map(logs.lines, &JSON.encode!(%{timestamp: &1.timestamp, log: &1.log}))
         "The following application logs might also be relevant listed below in json format:\n #{Enum.join(logs, "\n")}"
       _ -> nil
     end)

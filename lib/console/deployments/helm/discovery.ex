@@ -34,12 +34,6 @@ defmodule Console.Deployments.Helm.Discovery do
   end
   def start_and_run(_, _), do: {:error, "no helm repository located"}
 
-  def worker_node(url), do: HashRing.key_to_node(ring(), url)
-
+  def worker_node(url), do: Console.ClusterRing.node(url)
   def local?(url), do: worker_node(url) == node()
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
 end

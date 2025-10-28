@@ -44,10 +44,5 @@ defmodule Console.AI.Worker do
     %{worker | monitor: ref}
   end
 
-  defp worker_node(id), do: HashRing.key_to_node(ring(), id)
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
+  defp worker_node(id), do: Console.ClusterRing.node(id)
 end

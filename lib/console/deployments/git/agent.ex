@@ -6,7 +6,7 @@ defmodule Console.Deployments.Git.Agent do
   We can then initiate a file stream out of this agent, which supports cross-node streams in case a repo tarball
   fetch is served on a separate node as this agent.
   """
-  use GenServer, restart: :transient
+  use GenServer, restart: :temporary
   import Console.Deployments.Git.Cmd
   import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Repo
@@ -108,6 +108,7 @@ defmodule Console.Deployments.Git.Agent do
   def init(repo) do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
+    Logger.info "starting git agent for #{repo.url} on node #{node()}"
     # :pg.join(__MODULE__, self())
     table = :ets.new(:git_cache_entries, [:set, :protected, read_concurrency: true])
     Supervisor.register(self(), table)
@@ -195,8 +196,7 @@ defmodule Console.Deployments.Git.Agent do
          {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), %{cache | git: git}} do
       {:noreply, %{state | git: git, cache: cache}}
     else
-      {:git, nil} ->
-        {:stop, {:shutdown, :normal}, state}
+      {:git, nil} -> {:stop, {:shutdown, :normal}, state}
       {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
         Logger.info "failed to clone #{url}, retrying in 30 seconds"
         Process.send_after(self(), :clone, :timer.seconds(30))
@@ -234,8 +234,8 @@ defmodule Console.Deployments.Git.Agent do
     case Git.Discovery.local?(git) do
       true -> {:noreply, state}
       false ->
-        Logger.info "git repository moved: #{git.url}"
-        {:stop, {:shutdown, :moved}, state}
+        Logger.info "git repository moved: #{git.url}, target node: #{Git.Discovery.agent_node(git)}, current node: #{node()}"
+        {:stop, :normal, state}
     end
   end
 

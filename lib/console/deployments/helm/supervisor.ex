@@ -7,13 +7,18 @@ defmodule Console.Deployments.Helm.Supervisor do
   end
 
   def start_child(url) do
-    DynamicSupervisor.start_child(__MODULE__, {Agent, url})
+    child = %{
+      id: url,
+      start: {Agent, :start_link, [url]},
+      restart: :temporary
+    }
+    DynamicSupervisor.start_child(__MODULE__, child)
   end
 
   @impl true
   def init(_init_arg) do
     :ets.new(:helm_cache, [:set, :public, :named_table, write_concurrency: true, read_concurrency: true])
-    DynamicSupervisor.init(strategy: :one_for_one)
+    DynamicSupervisor.init(strategy: :one_for_one, restart: :temporary)
   end
 
   def register(pid, tid) do

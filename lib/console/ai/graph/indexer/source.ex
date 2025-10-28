@@ -56,20 +56,12 @@ defmodule Console.AI.Graph.Indexer.Source do
       type: t,
       id: id,
       links: links,
-      attributes: Jason.decode!(result),
+      attributes: JSON.decode!(result),
     }
     |> IndexableItem.with_doc()
   end
 
   def local?(id), do: agent_node(id) == node()
 
-  defp agent_node(id) do
-    ring()
-    |> HashRing.key_to_node(id)
-  end
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
+  defp agent_node(id), do: Console.ClusterRing.node(id)
 end

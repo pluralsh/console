@@ -13,6 +13,7 @@ defmodule Console.AI.Graph.IndexableItem do
     attributes: map()
   }
 
+  @derive JSON.Encoder
   @derive Jason.Encoder
   defstruct [:id, :type, :links, :document, :attributes, :provider]
 
@@ -39,7 +40,7 @@ defmodule Console.AI.Graph.IndexableItem do
   defp maybe_yaml(val) do
     case Utils.yaml_encode(val) do
       {:ok, yaml} -> "```yaml\n#{yaml}\n```"
-      {:error, _} -> "```json\n#{Jason.encode!(val)}\n```"
+      {:error, _} -> "```json\n#{JSON.encode!(val)}\n```"
     end
   end
 end

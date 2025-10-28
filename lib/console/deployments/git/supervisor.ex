@@ -7,13 +7,18 @@ defmodule Console.Deployments.Git.Supervisor do
   end
 
   def start_child(repository) do
-    DynamicSupervisor.start_child(__MODULE__, {Agent, repository})
+    child = %{
+      id: repository.id,
+      start: {Agent, :start_link, [repository]},
+      restart: :temporary
+    }
+    DynamicSupervisor.start_child(__MODULE__, child)
   end
 
   @impl true
   def init(_init_arg) do
     :ets.new(:git_cache, [:set, :public, :named_table, write_concurrency: true, read_concurrency: true])
-    DynamicSupervisor.init(strategy: :one_for_one)
+    DynamicSupervisor.init(strategy: :one_for_one, restart: :temporary)
   end
 
   def register(pid, tid) do

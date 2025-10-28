@@ -34,7 +34,7 @@ defmodule Console.AI.Evidence.Base do
   def interpolate(str, first, last), do: "#{first}#{str}#{last}"
 
   def json_blob(json) when is_binary(json), do: "```json\n#{json}\n```"
-  def json_blob(json), do: "```json\n#{Jason.encode!(json)}\n```"
+  def json_blob(json), do: "```json\n#{JSON.encode!(json)}\n```"
 
   def prepend(list, l) when is_list(l), do: l ++ list
   def prepend(list, msg) when is_binary(msg), do: prepend(list, {:user, msg})
@@ -58,7 +58,7 @@ defmodule Console.AI.Evidence.Base do
 
   defp event_msg(event) do
     Map.take(event, ~w(type message reason count last_timestamp)a)
-    |> Jason.encode!()
+    |> JSON.encode!()
     |> json_blob()
   end
 
@@ -106,10 +106,18 @@ defmodule Console.AI.Evidence.Base do
     end
   end
 
-  def encode(%{__struct__: model, metadata: _} = k8s),
-    do: model.encode(k8s) |> trim_managed() |> Jason.encode!()
-  def encode(%{__struct__: _} = db),
-    do: Console.mapify(db) |> trim_managed() |> Jason.encode!()
+  def encode(%{__struct__: model, metadata: _} = k8s) do
+    model.encode(k8s)
+    |> trim_managed()
+    |> Jason.encode!()
+  end
+
+  def encode(%{__struct__: _} = db) do
+    Console.mapify(db)
+    |> trim_managed()
+    |> Jason.encode!()
+  end
+
   def encode(%{} = map), do: Jason.encode!(trim_managed(map))
 
   def meaning(:stale), do: "the resource is waiting to complete provisioning"
@@ -181,6 +189,7 @@ defmodule Console.AI.Evidence.Base do
   def ns(ns) when is_binary(ns), do: " in namespace #{ns}"
   def ns(_), do: ""
 
+  defp trim_managed({:ok, res}), do: trim_managed(res)
   defp trim_managed(%{metadata: %{managed_fields: _}} = res),
     do: put_in(res.metadata.managed_fields, [])
   defp trim_managed(%{"metadata" => %{"managedFields" => _}} = res),

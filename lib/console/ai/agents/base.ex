@@ -9,7 +9,7 @@ defmodule Console.AI.Agents.Base do
 
   defmacro __using__(_) do
     quote do
-      use GenServer, restart: :transient
+      use GenServer, restart: :temporary
       import Console.AI.Agents.Base
       alias Console.Schema.AgentSession
       alias Console.AI.Stream
