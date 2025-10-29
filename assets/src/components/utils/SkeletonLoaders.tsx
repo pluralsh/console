@@ -208,3 +208,42 @@ export function SidecarSkeleton({ num = 6 }: { num?: number }) {
     </Sidecar>
   )
 }
+
+export function ChatSkeleton({ numMessages = 5 }: { numMessages?: number }) {
+  const { spacing } = useTheme()
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.large,
+        padding: spacing.medium,
+      }}
+    >
+      {Array.from({ length: numMessages }).map((_, index) => {
+        const isUserMessage = index % 5 === 0
+
+        return (
+          <div
+            key={index}
+            css={{
+              display: 'flex',
+              width: '100%',
+              justifyContent: isUserMessage ? 'flex-end' : 'flex-start',
+            }}
+          >
+            <RectangleSkeleton
+              $height="large"
+              $width="60%"
+              css={{
+                display: 'flex',
+                justifyContent: isUserMessage ? 'flex-end' : 'flex-start',
+              }}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+}

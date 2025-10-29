@@ -8,7 +8,7 @@ import { useUnreadAppNotificationsQuery } from '../../generated/graphql'
 import { NotificationsLauncherButton } from './NotificationsLauncherButton'
 import { NotificationsPanel } from './NotificationsPanel'
 
-const POLL_INTERVAL = 5 * 1000
+const POLL_INTERVAL = 60 * 1000
 
 export default function NotificationsLauncher() {
   const theme = useTheme()

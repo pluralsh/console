@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   ecto_enum :agent_run_status, AgentRun.Status
   ecto_enum :agent_run_mode, AgentRun.Mode
   ecto_enum :agent_message_tool_state, Console.Schema.AgentMessage.ToolState
+  ecto_enum :agent_run_language, AgentRun.Language
 
 
   input_object :agent_runtime_attributes do
@@ -24,10 +25,12 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_run_attributes do
-    field :prompt,     non_null(:string), description: "the prompt to give to the agent"
-    field :repository, non_null(:string), description: "the repository the agent will be working in"
-    field :mode,       non_null(:agent_run_mode), description: "the mode of the agent run"
-    field :flow_id,    :id, description: "the flow this agent run is associated with"
+    field :prompt,           non_null(:string), description: "the prompt to give to the agent"
+    field :repository,       non_null(:string), description: "the repository the agent will be working in"
+    field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
+    field :language,         :agent_run_language, description: "the programming language used in the agent run"
+    field :language_version, :string, description: "the version of the language to use, if you wish to specify"
+    field :flow_id,          :id, description: "the flow this agent run is associated with"
   end
 
   input_object :agent_run_status_attributes do
@@ -119,15 +122,17 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_run do
-    field :id,            non_null(:id)
-    field :prompt,        non_null(:string), description: "the prompt this agent was given"
-    field :repository,    non_null(:string), description: "the repository the agent will be working in"
-    field :branch,        :string, description: "the branch this agent run is operating on (if not set, use default branch on clone)"
-    field :status,        non_null(:agent_run_status), description: "the status of this agent run"
-    field :mode,          non_null(:agent_run_mode), description: "the mode of the agent run"
-    field :pod_reference, :agent_pod_reference, description: "the kubernetes pod this agent is running on"
-    field :error,         :string, description: "the error reason of the agent run"
-    field :shared,        :boolean, description: "whether this agent run is shared"
+    field :id,               non_null(:id)
+    field :prompt,           non_null(:string), description: "the prompt this agent was given"
+    field :repository,       non_null(:string), description: "the repository the agent will be working in"
+    field :branch,           :string, description: "the branch this agent run is operating on (if not set, use default branch on clone)"
+    field :status,           non_null(:agent_run_status), description: "the status of this agent run"
+    field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
+    field :pod_reference,    :agent_pod_reference, description: "the kubernetes pod this agent is running on"
+    field :error,            :string, description: "the error reason of the agent run"
+    field :shared,           :boolean, description: "whether this agent run is shared"
+    field :language,         :agent_run_language, description: "the programming language used in the agent run"
+    field :language_version, :string, description: "the version of the language to use, if you wish to specify"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
     field :todos,    list_of(:agent_todo), description: "the todos of the agent run"

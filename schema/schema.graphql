@@ -1231,6 +1231,18 @@ enum AgentMessageToolState {
   ERROR
 }
 
+enum AgentRunLanguage {
+  JAVASCRIPT
+  PYTHON
+  JAVA
+  CPP
+  CSHARP
+  GO
+  RUBY
+  PHP
+  TERRAFORM
+}
+
 input AgentRuntimeAttributes {
   "the name of this runtime"
   name: String!
@@ -1265,6 +1277,12 @@ input AgentRunAttributes {
 
   "the mode of the agent run"
   mode: AgentRunMode!
+
+  "the programming language used in the agent run"
+  language: AgentRunLanguage
+
+  "the version of the language to use, if you wish to specify"
+  languageVersion: String
 
   "the flow this agent run is associated with"
   flowId: ID
@@ -1452,6 +1470,12 @@ type AgentRun {
 
   "whether this agent run is shared"
   shared: Boolean
+
+  "the programming language used in the agent run"
+  language: AgentRunLanguage
+
+  "the version of the language to use, if you wish to specify"
+  languageVersion: String
 
   "the analysis of the agent run"
   analysis: AgentAnalysis

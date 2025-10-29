@@ -26,6 +26,7 @@ import {
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
 import { SidebarContext } from 'components/layout/Sidebar.tsx'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -129,10 +130,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     loading: currentThreadLoading,
     error: threadError,
   } = useChatThreadDetailsQuery({
-    skip: !currentThreadId,
+    skip: !currentThreadId || !open,
     variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 10_000,
+    pollInterval: POLL_INTERVAL,
   })
   // should handle cases of stale thread id being persisted
   useEffect(() => {

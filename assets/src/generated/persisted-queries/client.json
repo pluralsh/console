@@ -2,6 +2,46 @@
    "format": "apollo-persisted-query-manifest",
    "version": 1,
    "operations": {
+      "sha256:bd1bad9298502df7e94f5f8c8ffd3f07a0a5d42b781ab1fb7cb7cc1f0768f64a": {
+         "type": "query",
+         "name": "AgentRuns",
+         "body": "query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {\n  agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...AgentRunTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    id\n    creator\n    insertedAt\n    status\n    title\n    updatedAt\n    url\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:e108219a603e28f3f735cf8811099d8bfa50a0e53e64dc2f548b9cfd24d3b19a": {
+         "type": "query",
+         "name": "AgentRun",
+         "body": "query AgentRun($id: ID!) {\n  agentRun(id: $id) {\n    ...AgentRun\n    __typename\n  }\n}\n\nfragment AgentRun on AgentRun {\n  ...AgentRunTiny\n  messages {\n    ...AgentMessage\n    __typename\n  }\n  todos {\n    title\n    description\n    done\n    __typename\n  }\n  analysis {\n    summary\n    analysis\n    bullets\n    __typename\n  }\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    id\n    creator\n    insertedAt\n    status\n    title\n    updatedAt\n    url\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:1e3d1a189391140f3a632ec43e1ffd813aa9a413af209501bfde812f7c328940": {
+         "type": "query",
+         "name": "AgentRuntimes",
+         "body": "query AgentRuntimes($after: String, $first: Int = 100) {\n  agentRuntimes(after: $after, first: $first) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...AgentRuntime\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    ...ClusterTiny\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment ClusterTiny on Cluster {\n  ...ClusterMinimal\n  self\n  upgradePlan {\n    compatibilities\n    deprecations\n    incompatibilities\n    __typename\n  }\n  virtual\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:dca06f780a9f5907079254880eafbe6b79cc464a17035a9391729a857cf47a40": {
+         "type": "query",
+         "name": "AgentRuntime",
+         "body": "query AgentRuntime($id: ID!) {\n  agentRuntime(id: $id) {\n    ...AgentRuntime\n    __typename\n  }\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    ...ClusterTiny\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment ClusterTiny on Cluster {\n  ...ClusterMinimal\n  self\n  upgradePlan {\n    compatibilities\n    deprecations\n    incompatibilities\n    __typename\n  }\n  virtual\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:a277e4b62b0e0d799793bbb0784ec2515591f4e5803550fef98094fe46bb7445": {
+         "type": "mutation",
+         "name": "CreateAgentRun",
+         "body": "mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {\n  createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {\n    ...AgentRun\n    __typename\n  }\n}\n\nfragment AgentRun on AgentRun {\n  ...AgentRunTiny\n  messages {\n    ...AgentMessage\n    __typename\n  }\n  todos {\n    title\n    description\n    done\n    __typename\n  }\n  analysis {\n    summary\n    analysis\n    bullets\n    __typename\n  }\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    id\n    creator\n    insertedAt\n    status\n    title\n    updatedAt\n    url\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:b411f7b4699e0fe182eb77f9cb87870dd7933e0aa5f20643ed35edd123d01586": {
+         "type": "mutation",
+         "name": "UpsertAgentRuntime",
+         "body": "mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {\n  upsertAgentRuntime(attributes: $attributes) {\n    ...AgentRuntime\n    __typename\n  }\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    ...ClusterTiny\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment ClusterTiny on Cluster {\n  ...ClusterMinimal\n  self\n  upgradePlan {\n    compatibilities\n    deprecations\n    incompatibilities\n    __typename\n  }\n  virtual\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:4da26d84832699138cf066ce414c9fa68911a9fb97df625781f07f64b39dda1b": {
+         "type": "subscription",
+         "name": "AgentRunChat",
+         "body": "subscription AgentRunChat($runId: ID!) {\n  agentMessageDelta(runId: $runId) {\n    delta\n    payload {\n      ...AgentMessage\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:0bbdff23d5fb0e1033f64d6a4e002b470ceb2d17e81b3feda3eec84d78be6356": {
+         "type": "query",
+         "name": "AgentRunPodLogs",
+         "body": "query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {\n  agentRun(id: $runId) {\n    pod {\n      logs(container: $container, sinceSeconds: $sinceSeconds)\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:2d42fdb5ee1326b3b930fde636b9322bf409a2ab13f4861d8f8b38cbbc5bb294": {
          "type": "query",
          "name": "ChatThreads",

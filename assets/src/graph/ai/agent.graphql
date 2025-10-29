@@ -1,0 +1,169 @@
+fragment AgentRunTiny on AgentRun {
+  id
+  status
+  mode
+  prompt
+  shared
+  error
+  runtime {
+    id
+    name
+  }
+  repository
+  branch
+  pullRequests {
+    id
+    creator
+    insertedAt
+    status
+    title
+    updatedAt
+    url
+  }
+}
+
+fragment AgentRun on AgentRun {
+  ...AgentRunTiny
+  messages {
+    ...AgentMessage
+  }
+  todos {
+    title
+    description
+    done
+  }
+  analysis {
+    summary
+    analysis
+    bullets
+  }
+}
+
+fragment AgentRuntime on AgentRuntime {
+  id
+  name
+  type
+  aiProxy
+  cluster {
+    ...ClusterTiny
+  }
+  default
+  createBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment AgentMessage on AgentMessage {
+  id
+  seq
+  role
+  message
+  cost {
+    ...AgentMessageCost
+  }
+  metadata {
+    ...AgentMessageMetadata
+  }
+}
+
+fragment AgentMessageMetadata on AgentMessageMetadata {
+  reasoning {
+    text
+    start
+    end
+  }
+  file {
+    name
+    text
+    start
+    end
+  }
+  tool {
+    name
+    state
+    output
+  }
+}
+
+fragment AgentMessageCost on AgentMessageCost {
+  total
+  tokens {
+    input
+    output
+    reasoning
+  }
+}
+
+fragment AgentMessageDelta on AgentMessageDelta {
+  delta
+  payload {
+    ...AgentMessage
+  }
+}
+
+query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
+  agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRunTiny
+      }
+    }
+  }
+}
+
+query AgentRun($id: ID!) {
+  agentRun(id: $id) {
+    ...AgentRun
+  }
+}
+
+query AgentRuntimes($after: String, $first: Int = 100) {
+  agentRuntimes(after: $after, first: $first) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRuntime
+      }
+    }
+  }
+}
+
+query AgentRuntime($id: ID!) {
+  agentRuntime(id: $id) {
+    ...AgentRuntime
+  }
+}
+
+mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
+  createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
+    ...AgentRun
+  }
+}
+
+mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
+  upsertAgentRuntime(attributes: $attributes) {
+    ...AgentRuntime
+  }
+}
+
+subscription AgentRunChat($runId: ID!) {
+  agentMessageDelta(runId: $runId) {
+    delta
+    payload {
+      ...AgentMessage
+    }
+  }
+}
+
+query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
+  agentRun(id: $runId) {
+    pod {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}

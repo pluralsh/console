@@ -14,7 +14,7 @@ import {
 import { capitalize } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AI_AGENT_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
+import { AI_AGENT_SESSIONS_ABS_PATH } from 'routes/aiRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { AgentSessionType } from '../../../generated/graphql.ts'
 import { TRUNCATE } from '../../utils/truncate.ts'
@@ -98,7 +98,7 @@ export function AgentSelect() {
               borderBottom: selectedAgent ? theme.borders.input : undefined,
             }}
             onClick={() => {
-              navigate(AI_AGENT_ABS_PATH)
+              navigate(AI_AGENT_SESSIONS_ABS_PATH)
               setOpen(false)
             }}
             rightContent={<ArrowRightIcon />}
