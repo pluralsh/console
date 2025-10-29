@@ -15,7 +15,7 @@ defmodule Console.Schema.AgentRun do
 
   defenum Status,   pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Mode,     analyze: 0, write: 1
-  defenum Language, javascript: 0, python: 1, java: 2, cpp: 3, csharp: 4, go: 5, ruby: 6, php: 7
+  defenum Language, javascript: 0, python: 1, java: 2, cpp: 3, csharp: 4, go: 5, ruby: 6, php: 7, terraform: 8
 
   schema "agent_runs" do
     field :status,           Status

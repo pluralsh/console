@@ -464,7 +464,8 @@ export enum AgentRunLanguage {
   Javascript = 'JAVASCRIPT',
   Php = 'PHP',
   Python = 'PYTHON',
-  Ruby = 'RUBY'
+  Ruby = 'RUBY',
+  Terraform = 'TERRAFORM'
 }
 
 export enum AgentRunMode {

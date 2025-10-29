@@ -1240,6 +1240,7 @@ enum AgentRunLanguage {
   GO
   RUBY
   PHP
+  TERRAFORM
 }
 
 input AgentRuntimeAttributes {

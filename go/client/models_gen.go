@@ -8097,6 +8097,7 @@ const (
 	AgentRunLanguageGo         AgentRunLanguage = "GO"
 	AgentRunLanguageRuby       AgentRunLanguage = "RUBY"
 	AgentRunLanguagePhp        AgentRunLanguage = "PHP"
+	AgentRunLanguageTerraform  AgentRunLanguage = "TERRAFORM"
 )
 
 var AllAgentRunLanguage = []AgentRunLanguage{
@@ -8108,11 +8109,12 @@ var AllAgentRunLanguage = []AgentRunLanguage{
 	AgentRunLanguageGo,
 	AgentRunLanguageRuby,
 	AgentRunLanguagePhp,
+	AgentRunLanguageTerraform,
 }
 
 func (e AgentRunLanguage) IsValid() bool {
 	switch e {
-	case AgentRunLanguageJavascript, AgentRunLanguagePython, AgentRunLanguageJava, AgentRunLanguageCpp, AgentRunLanguageCsharp, AgentRunLanguageGo, AgentRunLanguageRuby, AgentRunLanguagePhp:
+	case AgentRunLanguageJavascript, AgentRunLanguagePython, AgentRunLanguageJava, AgentRunLanguageCpp, AgentRunLanguageCsharp, AgentRunLanguageGo, AgentRunLanguageRuby, AgentRunLanguagePhp, AgentRunLanguageTerraform:
 		return true
 	}
 	return false
