@@ -3308,9 +3308,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:5.28.0":
-  version: 5.28.0
-  resolution: "@pluralsh/design-system@npm:5.28.0"
+"@pluralsh/design-system@npm:5.29.0":
+  version: 5.29.0
+  resolution: "@pluralsh/design-system@npm:5.29.0"
   dependencies:
     "@emotion/react": 11.11.1
     "@emotion/styled": 11.11.0
@@ -3355,7 +3355,7 @@ __metadata:
     react-dom: ">=19.1.1"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.15"
-  checksum: 8478fb178ad8a207cc79d342940bdf559e58bbfa96ce702066bdc9e69decc20c360c6b57086d7dec1505586714d5ee77ca6d98e7ffa073494b00f511ce22d010
+  checksum: 9c15de2b1a6b08e8870ee7f4ae2cc8c7a5462a242c6a3c8e4d34f9df5bf5492862cfa54bd8dcf3217c6533c1706494cad84ba62a7b966ae689ccdefb018445ae
   languageName: node
   linkType: hard
 
@@ -6724,6 +6724,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:*":
+  version: 19.2.2
+  resolution: "@types/react@npm:19.2.2"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: 7eb2d316dd5a6c02acb416524b50bae932c38d055d26e0f561ca23c009c686d16a2b22fcbb941eecbe2ecb167f119e29b9d0142d9d056dd381352c43413b60da
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:19.1.9":
   version: 19.1.9
   resolution: "@types/react@npm:19.1.9"
@@ -8775,7 +8784,7 @@ __metadata:
     "@nivo/radial-bar": 0.99.0
     "@nivo/tooltip": 0.99.0
     "@nivo/treemap": 0.99.0
-    "@pluralsh/design-system": 5.28.0
+    "@pluralsh/design-system": 5.29.0
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
     "@react-spring/web": 10.0.3
@@ -8873,7 +8882,7 @@ __metadata:
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
     uuid: 9.0.1
-    virtua: 0.41.5
+    virtua: 0.46.4
     vite: 5.4.11
     vite-bundle-visualizer: 1.2.1
     vite-plugin-rewrite-all: 1.0.2
@@ -18292,9 +18301,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"virtua@npm:0.41.5":
-  version: 0.41.5
-  resolution: "virtua@npm:0.41.5"
+"virtua@npm:0.46.4":
+  version: 0.46.4
+  resolution: "virtua@npm:0.46.4"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
@@ -18312,7 +18321,7 @@ __metadata:
       optional: true
     vue:
       optional: true
-  checksum: 4bc311b69d18f1d21f2738b17022f2f6dab4d22139bb1048ae7e1baa78edbf141461fd1e6a7c2a72c51501cc36de6765a33747e628122bf5da7708e7502fcbe5
+  checksum: c1bc6364348a7c9090413b6dbcd9dad0c941e3d7c8aeb4c6dd22528d130fe2d7aeec02d7e4a0960e0b30ff4d6cbbd22d4cd369acf891a958e8a22f33f9acb6f5
   languageName: node
   linkType: hard
 

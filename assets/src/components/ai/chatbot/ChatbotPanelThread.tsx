@@ -161,7 +161,6 @@ export function ChatbotPanelThread({
         styles={{ padding: theme.spacing.xlarge }}
       />
     )
-
   return (
     <Flex
       direction="column"
@@ -225,6 +224,7 @@ export function ChatbotPanelThread({
                     return (
                       <ChatMessage
                         key={i}
+                        isStreaming
                         disableActions
                         role={role ?? AiRole.Assistant}
                         type={!!tool ? ChatType.Tool : ChatType.Text}

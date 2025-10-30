@@ -1,6 +1,9 @@
 import {
+  Button,
+  Flex,
   GearTrainIcon,
   IconFrame,
+  Modal,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
@@ -23,7 +26,10 @@ import {
   useLoadingDeploymentSettings,
 } from '../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../utils/LoadingIndicator'
-import { AIDisabledState } from './AIThreads'
+import { AI_PROVIDER_ABS_PATH, AIDisabledState } from './AIThreads'
+import usePersistedState from 'components/hooks/usePersistedState'
+
+const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
 const getDirectory = (agentEnabled: boolean) => [
   { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
@@ -46,6 +52,10 @@ export const getAIBreadcrumbs = (tab: string = '') => [
 export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
+  const [showEnableAIDialog, setShowEnableAIDialog] = usePersistedState(
+    DISMISSED_AI_ENABLED_DIALOG_KEY,
+    !aiEnabled
+  )
   const loading = useLoadingDeploymentSettings()
   const agentEnabled = !!use(FeatureFlagContext).featureFlags.Agent
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
@@ -54,20 +64,41 @@ export function AI() {
 
   return (
     <WrapperSC>
-      {aiEnabled && (
-        <HeaderSC>
-          <SubTabs directory={getDirectory(agentEnabled)} />
-          <IconFrame
-            clickable
-            icon={<GearTrainIcon />}
-            as={Link}
-            to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
-            tooltip="AI Settings"
-            type="floating"
-          />
-        </HeaderSC>
-      )}
-      {aiEnabled ? <Outlet /> : <AIDisabledState />}
+      <HeaderSC>
+        <SubTabs directory={getDirectory(agentEnabled)} />
+        <IconFrame
+          clickable
+          icon={<GearTrainIcon />}
+          as={Link}
+          to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
+          tooltip="AI Settings"
+          type="floating"
+        />
+      </HeaderSC>
+      <Outlet />
+      <Modal
+        open={showEnableAIDialog}
+        header="Enable Plural AI"
+        size="large"
+        actions={
+          <Flex gap="medium">
+            <Button
+              secondary
+              onClick={() => setShowEnableAIDialog(false)}
+            >
+              Dismiss
+            </Button>
+            <Button
+              as={Link}
+              to={AI_PROVIDER_ABS_PATH}
+            >
+              Go to settings
+            </Button>
+          </Flex>
+        }
+      >
+        <AIDisabledState showCta={false} />
+      </Modal>
     </WrapperSC>
   )
 }
