@@ -35,7 +35,8 @@
     "fix:format": "prettier --write --no-error-on-unmatched-pattern ./src",
     "fix:js": "eslint ./src --fix",
     "prepublishOnly": "npm run build",
-    "firebase:start": "yarn build:storybook && npx firebase emulators:start"
+    "firebase:start": "yarn build:storybook && npx firebase emulators:start",
+    "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -132,6 +133,7 @@
     "typescript": "5.8.2",
     "typescript-eslint": "8.24.0",
     "vite": "5.4.8",
+    "vite-bundle-visualizer": "1.2.1",
     "vite-plugin-dts": "4.3.0",
     "vitest": "2.1.9"
   },

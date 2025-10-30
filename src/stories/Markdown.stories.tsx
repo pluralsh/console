@@ -70,6 +70,16 @@ const num2 = 24;
 console.info(sum(num1, num2));
 \`\`\`
 
+\`\`\`mermaid
+flowchart TD
+    A[User] -->|Creates| B(Kubernetes Manifest)
+    B --> C{Kubernetes Cluster}
+    C -->|Schedules Pod| D[Node]
+    D --> E[Pod Running]
+    E --> F[User Accesses App]
+
+\`\`\`
+
 ###### Links
 https://google.com  
 [Absolute url](https://google.com)  

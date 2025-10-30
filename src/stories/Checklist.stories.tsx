@@ -6,7 +6,6 @@ import { ChecklistItem } from '../components/ChecklistItem'
 import DownloadIcon from '../components/icons/DownloadIcon'
 import GitHubLogoIcon from '../components/icons/GitHubLogoIcon'
 import MarketIcon from '../components/icons/MarketIcon'
-import SourcererIcon from '../components/icons/SourcererIcon'
 import TerminalIcon from '../components/icons/TerminalIcon'
 
 export default {
@@ -110,15 +109,11 @@ function Template() {
               paddingHorizontal="large"
               gap="medium"
             >
-              <SourcererIcon />
               <Flex
                 gap="xxsmall"
                 direction="column"
               >
                 <Span subtitle1>Congratulations!</Span>
-                <Span body2>
-                  You're well on your way to becoming an open-sourcerer.
-                </Span>
               </Flex>
             </Flex>
             <Div

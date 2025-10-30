@@ -1,4 +1,4 @@
-import { Div, Flex } from 'honorable'
+import { Div } from 'honorable'
 import {
   type ComponentProps,
   type PropsWithChildren,
@@ -18,6 +18,7 @@ import useResizeObserver from '../hooks/useResizeObserver'
 
 import Card, { type CardProps } from './Card'
 import Highlight from './Highlight'
+import { downloadMermaidSvg, Mermaid, MermaidRefHandle } from './Mermaid'
 import { ListBoxItem } from './ListBoxItem'
 import { Select } from './Select'
 import SubTab from './SubTab'
@@ -34,6 +35,9 @@ import CopyIcon from './icons/CopyIcon'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import FileIcon from './icons/FileIcon'
 import Button from './Button'
+import { DownloadIcon } from '../icons'
+import IconFrame from './IconFrame'
+import Flex from './Flex'
 
 type CodeProps = Omit<CardProps, 'children'> & {
   children?: string
@@ -43,6 +47,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   tabs?: CodeTabData[]
   title?: ReactNode
   onSelectedTabChange?: (key: string) => void
+  isStreaming?: boolean // currently just used to block mermaid from rendering mid-stream, but might have other uses later on
 }
 
 type TabInterfaceT = 'tabs' | 'dropdown'
@@ -132,6 +137,15 @@ const CopyButton = styled(CopyButtonBase)<{ $verticallyCenter: boolean }>(
     boxShadow: theme.boxShadows.slight,
   })
 )
+
+const MermaidButtonsSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  right: theme.spacing.medium,
+  top: theme.spacing.medium,
+  gap: theme.spacing.xsmall,
+  display: 'flex',
+  alignItems: 'center',
+}))
 
 type CodeTabData = {
   key: string
@@ -297,8 +311,16 @@ const CodeSelect = styled(CodeSelectUnstyled)<{ $isDisabled?: boolean }>(
 function CodeContent({
   children,
   hasSetHeight,
+  language,
+  isStreaming = false,
   ...props
-}: ComponentProps<typeof Highlight> & { hasSetHeight: boolean }) {
+}: ComponentProps<typeof Highlight> & {
+  hasSetHeight: boolean
+  isStreaming?: boolean
+}) {
+  const { spacing, borderRadiuses } = useTheme()
+  const mermaidRef = useRef<MermaidRefHandle>(null)
+  const [mermaidError, setMermaidError] = useState<Nullable<Error>>(null)
   const [copied, setCopied] = useState(false)
   const codeString = children?.trim() || ''
   const multiLine = !!codeString.match(/\r?\n/) || hasSetHeight
@@ -313,38 +335,80 @@ function CodeContent({
   useEffect(() => {
     if (copied) {
       const timeout = setTimeout(() => setCopied(false), 1000)
-
       return () => clearTimeout(timeout)
     }
   }, [copied])
 
-  if (typeof children !== 'string') {
+  if (typeof children !== 'string')
     throw new Error('Code component expects a string as its children')
-  }
+
+  const isMermaidDownloadable =
+    language === 'mermaid' && !isStreaming && !mermaidError
 
   return (
-    <Div
-      height="100%"
-      overflow="auto"
-      alignItems="center"
+    <div
+      css={{
+        height: '100%',
+        overflow: 'auto',
+        alignItems: 'center',
+      }}
     >
-      <CopyButton
-        copied={copied}
-        handleCopy={handleCopy}
-        $verticallyCenter={!multiLine}
-      />
-      <Div
-        paddingHorizontal="medium"
-        paddingVertical={multiLine ? 'medium' : 'small'}
+      {isMermaidDownloadable ? (
+        <MermaidButtonsSC>
+          <IconFrame
+            clickable
+            onClick={handleCopy}
+            icon={copied ? <CheckIcon /> : <CopyIcon />}
+            type="floating"
+            tooltip="Copy Mermaid code"
+          />
+          <IconFrame
+            clickable
+            onClick={() => {
+              const { svgStr } = mermaidRef.current
+              if (!svgStr) return
+              downloadMermaidSvg(svgStr)
+            }}
+            icon={<DownloadIcon />}
+            type="floating"
+            tooltip="Download as PNG"
+          />
+        </MermaidButtonsSC>
+      ) : (
+        <CopyButton
+          copied={copied}
+          handleCopy={handleCopy}
+          $verticallyCenter={!multiLine}
+        />
+      )}
+      <div
+        css={{
+          ...(isMermaidDownloadable ? { backgroundColor: 'white' } : {}),
+          padding: `${multiLine ? spacing.medium : spacing.small}px ${
+            spacing.medium
+          }px`,
+          borderBottomLeftRadius: borderRadiuses.large,
+          borderBottomRightRadius: borderRadiuses.large,
+        }}
       >
-        <Highlight
-          key={codeString}
-          {...props}
-        >
-          {codeString}
-        </Highlight>
-      </Div>
-    </Div>
+        {isMermaidDownloadable ? (
+          <Mermaid
+            ref={mermaidRef}
+            setError={setMermaidError}
+          >
+            {codeString}
+          </Mermaid>
+        ) : (
+          <Highlight
+            key={codeString}
+            language={language}
+            {...props}
+          >
+            {codeString}
+          </Highlight>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -357,6 +421,7 @@ function CodeUnstyled({
   tabs,
   title,
   onSelectedTabChange,
+  isStreaming = false,
   ...props
 }: CodeProps) {
   const parentFillLevel = useFillLevel()
@@ -381,9 +446,7 @@ function CodeUnstyled({
       selectedKey: selectedTabKey,
       onSelectionChange: (key: string) => {
         setSelectedTabKey(key)
-        if (typeof onSelectedTabChange === 'function') {
-          onSelectedTabChange(key)
-        }
+        if (typeof onSelectedTabChange === 'function') onSelectedTabChange(key)
       },
     }),
     [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs]
@@ -449,6 +512,7 @@ function CodeUnstyled({
                 language={tab.language}
                 showLineNumbers={showLineNumbers}
                 hasSetHeight={hasSetHeight}
+                isStreaming={isStreaming}
               >
                 {tab.content}
               </CodeContent>
@@ -464,6 +528,7 @@ function CodeUnstyled({
               language={language}
               showLineNumbers={showLineNumbers}
               hasSetHeight={hasSetHeight}
+              isStreaming={isStreaming}
             >
               {children}
             </CodeContent>
@@ -479,12 +544,12 @@ function CodeUnstyled({
 }
 
 const Code = styled(CodeUnstyled)((_) => ({
-  [`${CopyButton}`]: {
+  [`${CopyButton}, ${MermaidButtonsSC}`]: {
     opacity: 0,
     pointerEvents: 'none',
     transition: 'opacity 0.2s ease',
   },
-  [`&:hover ${CopyButton}`]: {
+  [`&:hover ${CopyButton}, &:hover ${MermaidButtonsSC}`]: {
     opacity: 1,
     pointerEvents: 'auto',
     transition: 'opacity 0.2s ease',

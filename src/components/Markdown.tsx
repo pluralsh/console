@@ -15,6 +15,7 @@ type MarkdownProps = {
   text: string
   gitUrl?: string
   mainBranch?: string
+  isStreaming?: boolean
 } & ReactMarkdownOptions
 
 function getLastStringChild(children: any, depth = 0): any {
@@ -31,7 +32,13 @@ function getLastStringChild(children: any, depth = 0): any {
   return lastChild
 }
 
-function MarkdownPreformatted({ children }: { children?: ReactNode }) {
+function MarkdownPreformatted({
+  children,
+  isStreaming,
+}: {
+  children?: ReactNode
+  isStreaming?: boolean
+}) {
   const theme = useTheme()
   let lang
 
@@ -44,6 +51,7 @@ function MarkdownPreformatted({ children }: { children?: ReactNode }) {
 
   return (
     <MultilineCode
+      isStreaming={isStreaming}
       css={{
         marginTop: theme.spacing.xxsmall,
         'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
@@ -300,7 +308,13 @@ function MarkdownLink({
   )
 }
 
-function Markdown({ text, gitUrl, mainBranch, ...props }: MarkdownProps) {
+function Markdown({
+  text,
+  gitUrl,
+  mainBranch,
+  isStreaming = false,
+  ...props
+}: MarkdownProps) {
   return useMemo(
     () => (
       <ReactMarkdown
@@ -336,7 +350,12 @@ function Markdown({ text, gitUrl, mainBranch, ...props }: MarkdownProps) {
           ),
           span: (props) => <MdSpan {...props} />,
           code: (props) => <InlineCode {...props} />,
-          pre: ({ node: _, ...props }) => <MarkdownPreformatted {...props} />,
+          pre: ({ node: _, ...props }) => (
+            <MarkdownPreformatted
+              {...props}
+              isStreaming={isStreaming}
+            />
+          ),
           hr: (props) => <MdHr {...props} />,
           th: (props) => <MdTh {...props} />,
           td: (props) => <MdTd {...props} />,
@@ -347,7 +366,7 @@ function Markdown({ text, gitUrl, mainBranch, ...props }: MarkdownProps) {
         {text}
       </ReactMarkdown>
     ),
-    [props, gitUrl, mainBranch, text]
+    [props, text, gitUrl, mainBranch, isStreaming]
   )
 }
 

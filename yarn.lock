@@ -2869,6 +2869,7 @@ __metadata:
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
     vite: 5.4.8
+    vite-bundle-visualizer: 1.2.1
     vite-plugin-dts: 4.3.0
     vitest: 2.1.9
   peerDependencies:
@@ -11445,6 +11446,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"import-from-esm@npm:^1.3.3":
+  version: 1.3.4
+  resolution: "import-from-esm@npm:1.3.4"
+  dependencies:
+    debug: ^4.3.4
+    import-meta-resolve: ^4.0.0
+  checksum: a0a2f44199fc8b1cfc37d05bdb71262353aa188f2d0dada715c04453a72fdd851c4d8a3cf4a2e06a0f8e5e672b3f229097eaac679328d95405763370ef5eb296
+  languageName: node
+  linkType: hard
+
 "import-lazy@npm:^2.1.0":
   version: 2.1.0
   resolution: "import-lazy@npm:2.1.0"
@@ -11456,6 +11467,13 @@ __metadata:
   version: 4.0.0
   resolution: "import-lazy@npm:4.0.0"
   checksum: 22f5e51702134aef78890156738454f620e5fe7044b204ebc057c614888a1dd6fdf2ede0fdcca44d5c173fd64f65c985f19a51775b06967ef58cc3d26898df07
+  languageName: node
+  linkType: hard
+
+"import-meta-resolve@npm:^4.0.0":
+  version: 4.2.0
+  resolution: "import-meta-resolve@npm:4.2.0"
+  checksum: fe5ca3258f22dc3dd4e2f2e8f6b54324c1cf0261216c7d9aae801b2eadf664bbd61e26cfb907a1238761285a3e9c8c23403321d52ca0e579c341b8d90c97fa52
   languageName: node
   linkType: hard
 
@@ -14499,7 +14517,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:^8.0.4":
+"open@npm:^8.0.4, open@npm:^8.4.0":
   version: 8.4.2
   resolution: "open@npm:8.4.2"
   dependencies:
@@ -16226,6 +16244,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup-plugin-visualizer@npm:^5.11.0":
+  version: 5.14.0
+  resolution: "rollup-plugin-visualizer@npm:5.14.0"
+  dependencies:
+    open: ^8.4.0
+    picomatch: ^4.0.2
+    source-map: ^0.7.4
+    yargs: ^17.5.1
+  peerDependencies:
+    rolldown: 1.x
+    rollup: 2.x || 3.x || 4.x
+  peerDependenciesMeta:
+    rolldown:
+      optional: true
+    rollup:
+      optional: true
+  bin:
+    rollup-plugin-visualizer: dist/bin/cli.js
+  checksum: 8ef5b05c91bd74bc1bb536609dd0ef2f1995066ec623393d192d638c209620fd2318c902d185ae648873d0a2788131cbaec11595c91322f0c2661ef6a1cc7e42
+  languageName: node
+  linkType: hard
+
 "rollup@npm:^4.20.0":
   version: 4.52.4
   resolution: "rollup@npm:4.52.4"
@@ -16834,6 +16874,13 @@ __metadata:
   version: 0.6.1
   resolution: "source-map@npm:0.6.1"
   checksum: 59ce8640cf3f3124f64ac289012c2b8bd377c238e316fb323ea22fbfe83da07d81e000071d7242cad7a23cd91c7de98e4df8830ec3f133cb6133a5f6e9f67bc2
+  languageName: node
+  linkType: hard
+
+"source-map@npm:^0.7.4":
+  version: 0.7.6
+  resolution: "source-map@npm:0.7.6"
+  checksum: 932f4a2390aa7100e91357d88cc272de984ad29139ac09eedfde8cc78d46da35f389065d0c5343c5d71d054a6ebd4939a8c0f2c98d5df64fe97bb8a730596c2d
   languageName: node
   linkType: hard
 
@@ -18481,6 +18528,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vite-bundle-visualizer@npm:1.2.1":
+  version: 1.2.1
+  resolution: "vite-bundle-visualizer@npm:1.2.1"
+  dependencies:
+    cac: ^6.7.14
+    import-from-esm: ^1.3.3
+    rollup-plugin-visualizer: ^5.11.0
+    tmp: ^0.2.1
+  bin:
+    vite-bundle-visualizer: bin.js
+  checksum: 5a4764a60d44d46c82e978cd8c3229d6b4b1b26e17c167ac45df4b0b5f4e8c5cca0cc332a5cc2bf483dadb291dc4933e5ec44853a9d740ce639bb16d90443360
+  languageName: node
+  linkType: hard
+
 "vite-node@npm:2.1.9":
   version: 2.1.9
   resolution: "vite-node@npm:2.1.9"
@@ -19110,7 +19171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.7.2":
+"yargs@npm:^17.5.1, yargs@npm:^17.7.2":
   version: 17.7.2
   resolution: "yargs@npm:17.7.2"
   dependencies:
