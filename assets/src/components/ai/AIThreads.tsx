@@ -11,7 +11,7 @@ import {
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
 import { createColumnHelper } from '@tanstack/react-table'
@@ -21,6 +21,8 @@ import { CSSProperties, useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { AITableEntry, sortThreadsOrPins } from './AITableEntry.tsx'
+
+export const AI_PROVIDER_ABS_PATH = `${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`
 
 const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
@@ -114,9 +116,13 @@ export function EmptyStateCompact({
   )
 }
 
-export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
-  const navigate = useNavigate()
-
+export function AIDisabledState({
+  cssProps,
+  showCta = true,
+}: {
+  cssProps?: CSSProperties
+  showCta?: boolean
+}) {
   return (
     <EmptyStateCompact
       cssProps={{ justifyContent: 'start', ...cssProps }}
@@ -130,12 +136,15 @@ export function AIDisabledState({ cssProps }: { cssProps?: CSSProperties }) {
       message="Plural AI features are disabled"
       description="Leverage Plural's unique real-time telemetry to automate diagnostics, receive precise fix recommendations, and keep your team informed with instant insights across all clusters."
     >
-      <Button
-        startIcon={<GearTrainIcon />}
-        onClick={() => navigate(`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`)}
-      >
-        Go to settings
-      </Button>
+      {showCta && (
+        <Button
+          as={Link}
+          startIcon={<GearTrainIcon />}
+          to={AI_PROVIDER_ABS_PATH}
+        >
+          Go to settings
+        </Button>
+      )}
     </EmptyStateCompact>
   )
 }
