@@ -102,6 +102,12 @@ export function Confirm({
             <Input
               value={confirmationInput}
               onChange={(e) => setConfirmationInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && isConfirmationValid) {
+                  e.preventDefault()
+                  submit()
+                }
+              }}
               placeholder={confirmationText}
               css={{
                 color: theme.colors.text,
