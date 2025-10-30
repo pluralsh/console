@@ -149,6 +149,14 @@ fragment PodList on pod_PodList {
       cpuRequests
       memoryLimits
       memoryRequests
+      gpuLimits {
+        quantity
+        type
+      }
+      gpuRequests {
+        quantity
+        type
+      }
     }
   }
 }
