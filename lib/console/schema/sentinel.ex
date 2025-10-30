@@ -56,7 +56,7 @@ defmodule Console.Schema.Sentinel do
         embeds_one :integration_test, IntegrationTestConfiguration, on_replace: :update do
           embeds_one :job, JobSpec, on_replace: :update
 
-          embeds_one :goteststum, GoTestSum, on_replace: :update do
+          embeds_one :gotestsum, GoTestSum, on_replace: :update do
             field :p,        :string
             field :parallel, :string
           end
