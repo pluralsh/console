@@ -16,9 +16,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+)
+
+const (
+	ClusterFinalizer = "deployments.plural.sh/cluster-protection"
 )
 
 // ClusterReconciler reconciles a Cluster object.
@@ -63,6 +68,12 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}()
 
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
+	// Deletion of this resource is no longer managed with the finalizer.
+	// Remove the previously assigned finalizer if it exists.
+	if controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
+		controllerutil.RemoveFinalizer(cluster, ClusterFinalizer)
+	}
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)

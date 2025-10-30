@@ -96,7 +96,6 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(router.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-	logger.Info("upsert notification router", "name", router.NotificationName())
 	attr, res, err := r.genNotificationRouterAttr(ctx, router)
 	if res != nil || err != nil {
 		return common.HandleRequeue(res, err, router.SetCondition)
