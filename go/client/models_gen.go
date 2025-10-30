@@ -6364,6 +6364,20 @@ type SentinelCheckConfigurationAttributes struct {
 	IntegrationTest *SentinelCheckIntegrationTestConfigurationAttributes `json:"integrationTest,omitempty"`
 }
 
+type SentinelCheckGotestsumAttributes struct {
+	// the value of the p flag for gotestsum
+	P *string `json:"p,omitempty"`
+	// the value of the parallel flag for gotestsum
+	Parallel *string `json:"parallel,omitempty"`
+}
+
+type SentinelCheckGotestsumConfiguration struct {
+	// the value of the p flag for gotestsum
+	P *string `json:"p,omitempty"`
+	// the value of the parallel flag for gotestsum
+	Parallel *string `json:"parallel,omitempty"`
+}
+
 type SentinelCheckIntegrationTestConfiguration struct {
 	// the job to run for this check
 	Job *JobGateSpec `json:"job,omitempty"`
@@ -6373,6 +6387,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Tags map[string]any `json:"tags,omitempty"`
 	// the format of the job
 	Format SentinelRunJobFormat `json:"format"`
+	// the gotestsum configuration to use for this check
+	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -6384,6 +6400,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Tags *string `json:"tags,omitempty"`
 	// the format of the job output
 	Format SentinelRunJobFormat `json:"format"`
+	// the gotestsum configuration to use for this check
+	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {

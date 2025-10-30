@@ -72,6 +72,18 @@ spec:
                               - PLAINTEXT
                               - JUNIT
                               type: string
+                            gotestsum:
+                              description: the configuration for the gotestsum test
+                                runner for this check
+                              properties:
+                                p:
+                                  description: the value of the p flag for gotestsum
+                                  type: string
+                                parallel:
+                                  description: the value of the parallel flag for
+                                    gotestsum
+                                  type: string
+                              type: object
                             jobSpec:
                               description: the job to run for this check
                               properties:

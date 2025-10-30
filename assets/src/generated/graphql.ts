@@ -10610,12 +10610,29 @@ export type SentinelCheckConfigurationAttributes = {
   log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
 };
 
+export type SentinelCheckGotestsumAttributes = {
+  /** the value of the p flag for gotestsum */
+  p?: InputMaybe<Scalars['String']['input']>;
+  /** the value of the parallel flag for gotestsum */
+  parallel?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SentinelCheckGotestsumConfiguration = {
+  __typename?: 'SentinelCheckGotestsumConfiguration';
+  /** the value of the p flag for gotestsum */
+  p?: Maybe<Scalars['String']['output']>;
+  /** the value of the parallel flag for gotestsum */
+  parallel?: Maybe<Scalars['String']['output']>;
+};
+
 export type SentinelCheckIntegrationTestConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestConfiguration';
   /** the distro to run the check on */
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
   format: SentinelRunJobFormat;
+  /** the gotestsum configuration to use for this check */
+  gotestsum?: Maybe<SentinelCheckGotestsumConfiguration>;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
   /** the cluster tags to select where to run this job */
@@ -10627,6 +10644,8 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the gotestsum configuration to use for this check */
+  gotestsum?: InputMaybe<SentinelCheckGotestsumAttributes>;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
   /** the cluster tags to select where to run this job */

@@ -1788,6 +1788,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the format of the job output"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumAttributes
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -1799,6 +1802,14 @@ input SentinelRunJobUpdateAttributes {
 
   "the output of the job"
   output: String
+}
+
+input SentinelCheckGotestsumAttributes {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type Sentinel {
@@ -1911,6 +1922,17 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "the format of the job"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumConfiguration
+}
+
+type SentinelCheckGotestsumConfiguration {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type SentinelRun {
