@@ -66,6 +66,7 @@ import { VirtualList } from '../../utils/VirtualList.tsx'
 import { getAIBreadcrumbs } from '../AI'
 import { ChatMessage } from '../chatbot/ChatMessage'
 import { agentRunStatusToSeverity } from './AIAgentRuns'
+import { PODS_REL_PATH } from 'routes/cdRoutesConsts.tsx'
 
 export function AIAgentRun() {
   const theme = useTheme()
@@ -113,12 +114,7 @@ export function AIAgentRun() {
             flexDirection: 'column',
           }}
         >
-          <Outlet
-            context={{
-              run,
-              loading: runLoading,
-            }}
-          />
+          <Outlet context={{ run, loading: runLoading }} />
         </div>
       </ResponsiveLayoutContentContainer>
       <AgentRunSidecar run={run} />
@@ -178,35 +174,44 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
   )
 }
 
-function getDirectory() {
+function getDirectory(run: Nullable<AgentRunFragment>) {
   return [
-    { path: '', label: 'Progress' },
+    { path: 'progress', label: 'Progress' },
     {
       path: AI_AGENT_RUNS_ANALYSIS_REL_PATH,
       label: 'Analysis',
-      condition: (s: AgentRunFragment) => s?.mode === AgentRunMode.Analyze,
+      condition: (s: Nullable<AgentRunFragment>) =>
+        s?.mode === AgentRunMode.Analyze,
     },
     {
       path: AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
       label: 'Pull Requests',
-      condition: (s: AgentRunFragment) => s?.mode === AgentRunMode.Write,
+      condition: (s: Nullable<AgentRunFragment>) =>
+        s?.mode === AgentRunMode.Write,
     },
+    { path: AI_AGENT_RUNS_LOGS_REL_PATH, label: 'Logs' },
     {
-      path: AI_AGENT_RUNS_LOGS_REL_PATH,
-      label: 'Logs',
+      path: `${PODS_REL_PATH}/${run?.podReference?.namespace}/${run?.podReference?.name}`,
+      label: 'Pod',
+      condition: (s: Nullable<AgentRunFragment>) => !!s?.podReference,
     },
   ]
 }
 
-function AgentRunHeader({ run, loading }) {
+function AgentRunHeader({
+  run,
+  loading,
+}: {
+  run: Nullable<AgentRunFragment>
+  loading: boolean
+}) {
   const theme = useTheme()
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
-  const directory = getDirectory()
+  const directory = getDirectory(run)
+
   const currentTab = useMemo(
-    () =>
-      directory.find((d) => d.path && pathname.includes(d.path)) ??
-      directory[0],
+    () => directory.find((d) => d.path && pathname.includes(d.path)),
     [directory, pathname]
   )
 

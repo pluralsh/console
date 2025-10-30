@@ -49,13 +49,20 @@ export default function Pod() {
     clusterId: clusterIdParam,
     serviceId,
     flowId,
+    runId,
     name = '',
     namespace = '',
   } = useParams()
-  const type = flowId ? 'flow' : serviceId ? 'service' : 'cluster'
+  const type = flowId
+    ? 'flow'
+    : serviceId
+      ? 'service'
+      : runId
+        ? 'agent-run'
+        : 'cluster'
   const tab =
     useMatch(
-      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, name, namespace })}/:tab`
+      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, agentRunId: runId, name, namespace })}/:tab`
     )?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
@@ -127,9 +134,9 @@ export default function Pod() {
     variables: {
       name,
       namespace,
-      ...(serviceId ? { serviceId } : { clusterId }),
+      ...(serviceId ? { serviceId } : clusterId ? { clusterId } : {}),
     },
-    skip: !name || !namespace || !(serviceId || clusterId),
+    skip: !name || !namespace,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

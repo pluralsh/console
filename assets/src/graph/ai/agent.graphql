@@ -37,6 +37,10 @@ fragment AgentRun on AgentRun {
     analysis
     bullets
   }
+  podReference {
+    name
+    namespace
+  }
 }
 
 fragment AgentRuntime on AgentRuntime {
