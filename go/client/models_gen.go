@@ -377,6 +377,11 @@ type AgentRunConnection struct {
 	Edges    []*AgentRunEdge `json:"edges,omitempty"`
 }
 
+type AgentRunDelta struct {
+	Delta   *Delta    `json:"delta,omitempty"`
+	Payload *AgentRun `json:"payload,omitempty"`
+}
+
 type AgentRunEdge struct {
 	Node   *AgentRun `json:"node,omitempty"`
 	Cursor *string   `json:"cursor,omitempty"`

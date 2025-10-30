@@ -450,6 +450,12 @@ export type AgentRunConnection = {
   pageInfo: PageInfo;
 };
 
+export type AgentRunDelta = {
+  __typename?: 'AgentRunDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<AgentRun>;
+};
+
 export type AgentRunEdge = {
   __typename?: 'AgentRunEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -9027,7 +9033,8 @@ export type RootQueryTypeAgentRunsArgs = {
 
 
 export type RootQueryTypeAgentRuntimeArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -10240,6 +10247,7 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
   agentMessageDelta?: Maybe<AgentMessageDelta>;
+  agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
@@ -10250,6 +10258,11 @@ export type RootSubscriptionType = {
 
 export type RootSubscriptionTypeAgentMessageDeltaArgs = {
   runId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeAgentRunDeltaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

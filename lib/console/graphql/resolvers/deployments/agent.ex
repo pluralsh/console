@@ -12,10 +12,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     |> paginate(args)
   end
 
+  def agent_runtime(%{name: name}, %{context: %{cluster: cluster}}) when is_binary(name) do
+    Agents.get_agent_runtime_by_name!(cluster.id, name)
+    |> allow(cluster, :read)
+  end
+
   def agent_runtime(%{id: id}, ctx) do
     Agents.get_agent_runtime!(id)
     |> allow(actor(ctx), :create)
   end
+
+  def agent_runtime(_, _), do: {:error, "Must specify either name or id"}
 
   def agent_run(%{id: id}, ctx) do
     Agents.get_agent_run!(id)

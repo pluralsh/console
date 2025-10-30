@@ -17,8 +17,6 @@ type RootQueryType {
 
   loginInfo(redirect: String): LoginInfo
 
-  me: User
-
   invite(id: String!): Invite
 
   groups(after: String, first: Int, before: String, last: Int, q: String): GroupConnection
@@ -44,6 +42,8 @@ type RootQueryType {
   refreshTokens(after: String, first: Int, before: String, last: Int): RefreshTokenConnection
 
   refresh(token: String!): User
+
+  me: User
 
   dashboards(repo: String!): [Dashboard]
 
@@ -443,7 +443,7 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
-  agentRuntime(id: ID!): AgentRuntime
+  agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
 
@@ -1144,6 +1144,8 @@ type RootSubscriptionType {
   ): AiDelta
 
   agentMessageDelta(runId: ID!): AgentMessageDelta
+
+  agentRunDelta(id: ID!): AgentRunDelta
 }
 
 type OauthResponse {
@@ -1661,6 +1663,11 @@ type AgentRunConnection {
 type AgentMessageDelta {
   delta: Delta
   payload: AgentMessage
+}
+
+type AgentRunDelta {
+  delta: Delta
+  payload: AgentRun
 }
 
 enum SentinelCheckType {
