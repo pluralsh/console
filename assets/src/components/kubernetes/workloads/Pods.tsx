@@ -155,7 +155,7 @@ const colGPU = columnHelper.accessor((row) => row?.allocatedResources, {
       </div>
     ),
   },
-  cell: ({ getValue }) => {
+  cell: function Cell({ getValue }) {
     const theme = useTheme()
     const allocatedResources = getValue()
     const types: Set<string> = new Set(
