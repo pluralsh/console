@@ -124,6 +124,16 @@ query AgentRun($id: ID!) {
   }
 }
 
+query AgentRunPod($id: ID!) {
+  agentRun(id: $id) {
+    id
+    prompt
+    pod {
+      ...Pod
+    }
+  }
+}
+
 query AgentRuntimes($after: String, $first: Int = 100) {
   agentRuntimes(after: $after, first: $first) {
     pageInfo {

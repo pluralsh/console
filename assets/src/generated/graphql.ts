@@ -12625,6 +12625,13 @@ export type AgentRunQueryVariables = Exact<{
 
 export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
 
+export type AgentRunPodQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunPodQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, prompt: string, pod?: { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null } | null };
+
 export type AgentRuntimesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20308,6 +20315,50 @@ export type AgentRunQueryHookResult = ReturnType<typeof useAgentRunQuery>;
 export type AgentRunLazyQueryHookResult = ReturnType<typeof useAgentRunLazyQuery>;
 export type AgentRunSuspenseQueryHookResult = ReturnType<typeof useAgentRunSuspenseQuery>;
 export type AgentRunQueryResult = Apollo.QueryResult<AgentRunQuery, AgentRunQueryVariables>;
+export const AgentRunPodDocument = gql`
+    query AgentRunPod($id: ID!) {
+  agentRun(id: $id) {
+    id
+    prompt
+    pod {
+      ...Pod
+    }
+  }
+}
+    ${PodFragmentDoc}`;
+
+/**
+ * __useAgentRunPodQuery__
+ *
+ * To run a query within a React component, call `useAgentRunPodQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunPodQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunPodQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAgentRunPodQuery(baseOptions: Apollo.QueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+      }
+export function useAgentRunPodLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+        }
+export function useAgentRunPodSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+        }
+export type AgentRunPodQueryHookResult = ReturnType<typeof useAgentRunPodQuery>;
+export type AgentRunPodLazyQueryHookResult = ReturnType<typeof useAgentRunPodLazyQuery>;
+export type AgentRunPodSuspenseQueryHookResult = ReturnType<typeof useAgentRunPodSuspenseQuery>;
+export type AgentRunPodQueryResult = Apollo.QueryResult<AgentRunPodQuery, AgentRunPodQueryVariables>;
 export const AgentRuntimesDocument = gql`
     query AgentRuntimes($after: String, $first: Int = 100) {
   agentRuntimes(after: $after, first: $first) {
@@ -34170,6 +34221,7 @@ export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
     AgentRun: 'AgentRun',
+    AgentRunPod: 'AgentRunPod',
     AgentRuntimes: 'AgentRuntimes',
     AgentRuntime: 'AgentRuntime',
     AgentRunPodLogs: 'AgentRunPodLogs',
