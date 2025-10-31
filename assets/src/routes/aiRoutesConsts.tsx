@@ -10,6 +10,7 @@ export const AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH = 'output'
 export const AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH = 'job'
 export const AI_AGENT_RUNTIMES_REL_PATH = 'agent-runtimes'
 export const AI_AGENT_RUNS_REL_PATH = 'agent-runs'
+export const AI_AGENT_RUNS_PROGRESS_REL_PATH = 'progress'
 export const AI_AGENT_RUNS_ANALYSIS_REL_PATH = 'analysis'
 export const AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH = 'prs'
 export const AI_AGENT_RUNS_LOGS_REL_PATH = 'logs'
@@ -45,3 +46,9 @@ export const getSentinelRunJobAbsPath = ({
   jobId: string
 }) =>
   `${getSentinelRunAbsPath({ sentinelId, runId })}/${AI_SENTINELS_RUNS_JOBS_REL_PATH}/${jobId}`
+
+export const getAgentRunAbsPath = ({
+  agentRunId,
+}: {
+  agentRunId: Nullable<string>
+}) => `${AI_AGENT_RUNS_ABS_PATH}/${agentRunId ?? ''}`

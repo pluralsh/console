@@ -21,6 +21,7 @@ import { GqlError } from 'components/utils/Alert'
 import { getServiceDetailsBreadcrumbs } from 'components/cd/services/service/ServiceDetails.tsx'
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow.tsx'
 import {
+  useAgentRunPodQuery,
   useClusterQuery,
   useFlowQuery,
   usePodQuery,
@@ -32,6 +33,7 @@ import LogsLegend from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { getAgentRunBreadcrumbs } from 'components/ai/agent-runs/AIAgentRun.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -49,13 +51,20 @@ export default function Pod() {
     clusterId: clusterIdParam,
     serviceId,
     flowId,
+    runId,
     name = '',
     namespace = '',
   } = useParams()
-  const type = flowId ? 'flow' : serviceId ? 'service' : 'cluster'
+  const type = flowId
+    ? 'flow'
+    : serviceId
+      ? 'service'
+      : runId
+        ? 'agent-run'
+        : 'cluster'
   const tab =
     useMatch(
-      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, name, namespace })}/:tab`
+      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, agentRunId: runId, name, namespace })}/:tab`
     )?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
@@ -74,6 +83,10 @@ export default function Pod() {
     variables: { id: flowId ?? '' },
     skip: !flowId,
   })
+  const { data: agentRunData } = useAgentRunPodQuery({
+    variables: { id: runId ?? '' },
+    skip: !runId,
+  })
 
   useSetBreadcrumbs(
     useMemo(
@@ -88,10 +101,16 @@ export default function Pod() {
                 cluster: clusterData?.cluster,
                 tab: 'pods',
               })
-            : getClusterBreadcrumbs({
-                cluster: clusterData?.cluster || { id: clusterId ?? '' },
-                tab: 'pods',
-              })),
+            : type === 'agent-run'
+              ? getAgentRunBreadcrumbs(
+                  runId ?? '',
+                  agentRunData?.agentRun?.prompt ?? '',
+                  'pod'
+                )
+              : getClusterBreadcrumbs({
+                  cluster: clusterData?.cluster || { id: clusterId ?? '' },
+                  tab: 'pods',
+                })),
         ...(name && namespace
           ? [
               {
@@ -110,12 +129,14 @@ export default function Pod() {
           : []),
       ],
       [
+        agentRunData?.agentRun?.prompt,
         clusterData?.cluster,
         clusterId,
         flowData?.flow?.name,
         flowId,
         name,
         namespace,
+        runId,
         serviceData?.serviceDeployment,
         serviceId,
         tab,
@@ -127,14 +148,14 @@ export default function Pod() {
     variables: {
       name,
       namespace,
-      ...(serviceId ? { serviceId } : { clusterId }),
+      ...(serviceId ? { serviceId } : clusterId ? { clusterId } : {}),
     },
     skip: !name || !namespace || !(serviceId || clusterId),
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  const pod = data?.pod
+  const pod = type === 'agent-run' ? agentRunData?.agentRun?.pod : data?.pod
 
   if (error) return <GqlError error={error} />
   if (!pod && loading) return <LoadingIndicator />
