@@ -68,12 +68,25 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	// the job to run for this check
 	Job *JobSpec `json:"jobSpec,omitempty"`
 
+	// the configuration for the gotestsum test runner for this check
+	//+kubebuilder:validation:Optional
+	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
+
 	// the distro to run the check on
 	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// the cluster tags to select where to run this job
 	Tags map[string]string `json:"tags,omitempty"`
+}
+
+type SentinelCheckGotestsumConfiguration struct {
+	// the value of the p flag for gotestsum
+	//+kubebuilder:validation:Optional
+	P *string `json:"p,omitempty"`
+	// the value of the parallel flag for gotestsum
+	//+kubebuilder:validation:Optional
+	Parallel *string `json:"parallel,omitempty"`
 }
 
 type SentinelCheckLogConfiguration struct {

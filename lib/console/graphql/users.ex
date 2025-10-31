@@ -356,6 +356,14 @@ defmodule Console.GraphQl.Users do
 
   delta :notification
 
+  object :public_user_queries do
+    field :me, :user do
+      middleware Authenticated
+
+      resolve fn _, %{context: %{current_user: user}} -> {:ok, user} end
+    end
+  end
+
   object :user_queries do
     field :user, :user do
       middleware Authenticated
@@ -389,12 +397,6 @@ defmodule Console.GraphQl.Users do
       arg :redirect, :string
 
       resolve &User.login_info/2
-    end
-
-    field :me, :user do
-      middleware Authenticated
-
-      resolve fn _, %{context: %{current_user: user}} -> {:ok, user} end
     end
 
     field :invite, :invite do

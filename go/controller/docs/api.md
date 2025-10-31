@@ -3819,6 +3819,23 @@ _Appears in:_
 | `integrationTest` _[SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)_ | the integration test configuration to use for this check |  |  |
 
 
+#### SentinelCheckGotestsumConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `p` _string_ | the value of the p flag for gotestsum |  | Optional: \{\} <br /> |
+| `parallel` _string_ | the value of the parallel flag for gotestsum |  | Optional: \{\} <br /> |
+
+
 #### SentinelCheckIntegrationTestConfiguration
 
 
@@ -3834,6 +3851,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br />Required: \{\} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 

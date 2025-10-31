@@ -129,6 +129,10 @@ fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
     distro
     tags
+    gotestsum {
+        p
+        parallel
+    }
     job {
         ...JobSpecFragment
     }

@@ -80,6 +80,7 @@ defmodule Console.Schema.AgentRun do
   end
 
   @valid ~w(status language language_version shared prompt repository runtime_id user_id flow_id session_id mode branch error)a
+  @regex ~r/^https:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9._-]+)+\.git$/
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -88,6 +89,7 @@ defmodule Console.Schema.AgentRun do
     |> foreign_key_constraint(:runtime_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:flow_id)
+    |> validate_format(:repository, @regex, message: "must be a valid https git clone URL (e.g. https://github.com/pluralsh/plural.git)")
     |> cast_embed(:pod_reference)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)

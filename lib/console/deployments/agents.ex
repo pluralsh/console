@@ -30,6 +30,9 @@ defmodule Console.Deployments.Agents do
   def get_agent_runtime(cluster_id, name),
     do: Repo.get_by(AgentRuntime, cluster_id: cluster_id, name: name)
 
+  def get_agent_runtime!(cluster_id, name),
+    do: Repo.get_by!(AgentRuntime, cluster_id: cluster_id, name: name)
+
   def get_agent_run!(id), do: Repo.get!(AgentRun, id)
 
   @doc """
@@ -234,6 +237,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
   @doc """
@@ -251,6 +255,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
   @doc """

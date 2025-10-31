@@ -71,7 +71,7 @@ defmodule Console.Schema.ChatThread do
   def nonagent(query \\ __MODULE__) do
     from(t in query,
       left_join: s in assoc(t, :session),
-        where: is_nil(s.id) or s.type not in ^[:terraform, :kubernetes]
+        where: is_nil(s.id) or is_nil(s.type) or s.type not in ^[:terraform, :kubernetes]
     )
   end
 

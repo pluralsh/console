@@ -17,8 +17,6 @@ type RootQueryType {
 
   loginInfo(redirect: String): LoginInfo
 
-  me: User
-
   invite(id: String!): Invite
 
   groups(after: String, first: Int, before: String, last: Int, q: String): GroupConnection
@@ -44,6 +42,8 @@ type RootQueryType {
   refreshTokens(after: String, first: Int, before: String, last: Int): RefreshTokenConnection
 
   refresh(token: String!): User
+
+  me: User
 
   dashboards(repo: String!): [Dashboard]
 
@@ -443,7 +443,7 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
-  agentRuntime(id: ID!): AgentRuntime
+  agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
 
@@ -1144,6 +1144,8 @@ type RootSubscriptionType {
   ): AiDelta
 
   agentMessageDelta(runId: ID!): AgentMessageDelta
+
+  agentRunDelta(id: ID!): AgentRunDelta
 }
 
 type OauthResponse {
@@ -1663,6 +1665,11 @@ type AgentMessageDelta {
   payload: AgentMessage
 }
 
+type AgentRunDelta {
+  delta: Delta
+  payload: AgentRun
+}
+
 enum SentinelCheckType {
   LOG
   KUBERNETES
@@ -1781,6 +1788,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the format of the job output"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumAttributes
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -1792,6 +1802,14 @@ input SentinelRunJobUpdateAttributes {
 
   "the output of the job"
   output: String
+}
+
+input SentinelCheckGotestsumAttributes {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type Sentinel {
@@ -1904,6 +1922,17 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "the format of the job"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumConfiguration
+}
+
+type SentinelCheckGotestsumConfiguration {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type SentinelRun {
