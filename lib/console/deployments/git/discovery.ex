@@ -73,7 +73,6 @@ defmodule Console.Deployments.Git.Discovery do
     me = node()
     try do
       an = agent_node(repo)
-      Logger.info "agent node for #{repo.url} is #{an}, current node is #{me}"
       case an == me do
         true -> start_and_run(repo, fun)
         false ->
