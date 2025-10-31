@@ -107,7 +107,7 @@ defmodule Console.AI.Fixer.Parent do
     """
     The global service defines new services using the service template with json spec below:\n
 
-    #{JSON.encode!(Console.mapify(template))}
+    #{Jason.encode!(Console.mapify(template))}
     """
   end
 
