@@ -34,6 +34,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     |> paginate(args)
   end
 
+  def agent_repository(%AgentRun{} = run, _, %{context: %{cluster: %{id: _}}}),
+    do: {:ok, Agents.repository_url(run)}
+  def agent_repository(%AgentRun{repository: repo}, _, _), do: {:ok, repo}
+
   def agent_scm_credentials(%AgentRun{} = run, _, %{context: %{cluster: cluster}}),
     do: Agents.scm_creds(run, cluster)
   def agent_scm_credentials(_, _, _),
