@@ -3473,6 +3473,55 @@ type HTTPProxyConfiguration struct {
 	URL string `json:"url"`
 }
 
+// A representation of an AI generated deep investigation of your infrastructure
+type InfraResearch struct {
+	ID string `json:"id"`
+	// the prompt used to create this research
+	Prompt *string `json:"prompt,omitempty"`
+	// the diagram of the infrastructure
+	Diagram *string `json:"diagram,omitempty"`
+	// the status of this research
+	Status *InfraResearchStatus `json:"status,omitempty"`
+	// the analysis of the infrastructure
+	Analysis *InfraResearchAnalysis `json:"analysis,omitempty"`
+	// the associations of this research
+	Associations []*InfraResearchAssociation `json:"associations,omitempty"`
+	// autonomous chat threads depicting the ai doing the research
+	Threads    []*ChatThread `json:"threads,omitempty"`
+	User       *User         `json:"user,omitempty"`
+	InsertedAt *string       `json:"insertedAt,omitempty"`
+	UpdatedAt  *string       `json:"updatedAt,omitempty"`
+}
+
+// Additional analysis attached to this research result
+type InfraResearchAnalysis struct {
+	// a summary of the analysis
+	Summary *string `json:"summary,omitempty"`
+	// any notes from the analysis, indicating unsolved questions
+	Notes []*string `json:"notes,omitempty"`
+}
+
+// Associations with services/stacks and a research
+type InfraResearchAssociation struct {
+	Service *ServiceDeployment   `json:"service,omitempty"`
+	Stack   *InfrastructureStack `json:"stack,omitempty"`
+}
+
+// attributes to create a deep research of your infrastructure
+type InfraResearchAttributes struct {
+	Prompt *string `json:"prompt,omitempty"`
+}
+
+type InfraResearchConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*InfraResearchEdge `json:"edges,omitempty"`
+}
+
+type InfraResearchEdge struct {
+	Node   *InfraResearch `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
 type InfrastructureStack struct {
 	ID *string `json:"id,omitempty"`
 	// the name of the stack
@@ -8306,6 +8355,7 @@ const (
 	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 	AgentSessionTypeChat         AgentSessionType = "CHAT"
+	AgentSessionTypeResearch     AgentSessionType = "RESEARCH"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -8315,11 +8365,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeSearch,
 	AgentSessionTypeManifests,
 	AgentSessionTypeChat,
+	AgentSessionTypeResearch,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch:
 		return true
 	}
 	return false
@@ -9496,6 +9547,49 @@ func (e *HelmAuthProvider) UnmarshalGQL(v any) error {
 }
 
 func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type InfraResearchStatus string
+
+const (
+	InfraResearchStatusPending   InfraResearchStatus = "PENDING"
+	InfraResearchStatusRunning   InfraResearchStatus = "RUNNING"
+	InfraResearchStatusCompleted InfraResearchStatus = "COMPLETED"
+)
+
+var AllInfraResearchStatus = []InfraResearchStatus{
+	InfraResearchStatusPending,
+	InfraResearchStatusRunning,
+	InfraResearchStatusCompleted,
+}
+
+func (e InfraResearchStatus) IsValid() bool {
+	switch e {
+	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted:
+		return true
+	}
+	return false
+}
+
+func (e InfraResearchStatus) String() string {
+	return string(e)
+}
+
+func (e *InfraResearchStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InfraResearchStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InfraResearchStatus", str)
+	}
+	return nil
+}
+
+func (e InfraResearchStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

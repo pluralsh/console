@@ -518,6 +518,10 @@ type RootQueryType {
 
   mcpToken: String
 
+  infraResearches(after: String, first: Int, before: String, last: Int): InfraResearchConnection
+
+  infraResearch(id: ID!): InfraResearch
+
   oidcLogin(challenge: String!): OidcStepResponse
 
   oidcConsent(challenge: String!): OidcStepResponse
@@ -1115,6 +1119,9 @@ type RootMutationType {
 
   "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
   createAgentSession(attributes: AgentSessionAttributes!): ChatThread
+
+  "Creates a new infrastructure research based on a prompt"
+  createInfraResearch(attributes: InfraResearchAttributes!): InfraResearch
 
   acceptLogin(challenge: String!): OauthResponse
 
@@ -9430,6 +9437,13 @@ enum AgentSessionType {
   SEARCH
   MANIFESTS
   CHAT
+  RESEARCH
+}
+
+enum InfraResearchStatus {
+  PENDING
+  RUNNING
+  COMPLETED
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -9512,6 +9526,11 @@ input AgentSessionAttributes {
 input ChatThreadSettingsAttributes {
   "controls whether this thread uses knowledge graph-basedmemory"
   memory: Boolean
+}
+
+"attributes to create a deep research of your infrastructure"
+input InfraResearchAttributes {
+  prompt: String
 }
 
 type Chat {
@@ -9779,6 +9798,50 @@ type ClusterInsightComponent {
   resource: KubernetesUnstructured
 }
 
+"A representation of an AI generated deep investigation of your infrastructure"
+type InfraResearch {
+  id: ID!
+
+  "the prompt used to create this research"
+  prompt: String
+
+  "the diagram of the infrastructure"
+  diagram: String
+
+  "the status of this research"
+  status: InfraResearchStatus
+
+  "the analysis of the infrastructure"
+  analysis: InfraResearchAnalysis
+
+  "the associations of this research"
+  associations: [InfraResearchAssociation]
+
+  "autonomous chat threads depicting the ai doing the research"
+  threads: [ChatThread]
+
+  user: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"Associations with services\/stacks and a research"
+type InfraResearchAssociation {
+  service: ServiceDeployment
+  stack: InfrastructureStack
+}
+
+"Additional analysis attached to this research result"
+type InfraResearchAnalysis {
+  "a summary of the analysis"
+  summary: String
+
+  "any notes from the analysis, indicating unsolved questions"
+  notes: [String]
+}
+
 type ToolDelta {
   id: ID
   name: String
@@ -9811,6 +9874,11 @@ type AiPinConnection {
 type AgentSessionConnection {
   pageInfo: PageInfo!
   edges: [AgentSessionEdge]
+}
+
+type InfraResearchConnection {
+  pageInfo: PageInfo!
+  edges: [InfraResearchEdge]
 }
 
 type Account {
@@ -11232,6 +11300,11 @@ type PodEdge {
 
 type AuditEdge {
   node: Audit
+  cursor: String
+}
+
+type InfraResearchEdge {
+  node: InfraResearch
   cursor: String
 }
 

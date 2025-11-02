@@ -1,6 +1,13 @@
 defmodule Console.Schema.ChatThread do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, Chat, AiInsight, Flow, AgentSession}
+  alias Console.Schema.{
+    User,
+    Chat,
+    AiInsight,
+    Flow,
+    AgentSession,
+    InfraResearch
+  }
 
   @max_threads 50
 
@@ -17,9 +24,10 @@ defmodule Console.Schema.ChatThread do
       field :memory, :boolean, default: true
     end
 
-    belongs_to :user, User
-    belongs_to :insight, AiInsight
-    belongs_to :flow, Flow
+    belongs_to :user,     User
+    belongs_to :insight,  AiInsight
+    belongs_to :flow,     Flow
+    belongs_to :research, InfraResearch
 
     has_one :session, AgentSession,
       on_replace: :update,
@@ -68,10 +76,12 @@ defmodule Console.Schema.ChatThread do
     )
   end
 
+  @agent_types ~w(terraform kubernetes research)a
+
   def nonagent(query \\ __MODULE__) do
     from(t in query,
       left_join: s in assoc(t, :session),
-        where: is_nil(s.id) or is_nil(s.type) or s.type not in ^[:terraform, :kubernetes]
+        where: is_nil(s.id) or is_nil(s.type) or s.type not in ^@agent_types
     )
   end
 
@@ -95,7 +105,7 @@ defmodule Console.Schema.ChatThread do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(summary last_message_at summarized default user_id flow_id insight_id)a
+  @valid ~w(summary last_message_at summarized default user_id flow_id insight_id research_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -105,6 +115,7 @@ defmodule Console.Schema.ChatThread do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:insight_id)
     |> foreign_key_constraint(:flow_id)
+    |> foreign_key_constraint(:research_id)
     |> unique_constraint(:user_id, name: :chat_threads_user_id_uniq_index)
     |> validate_required([:user_id])
   end

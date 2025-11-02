@@ -16,7 +16,9 @@ defmodule Console.AI.Chat.System do
   @kubernetes_code_agent Console.priv_file!("prompts/kubernetes_agent.md")
   @kubernetes_code_pr_agent Console.priv_file!("prompts/kubernetes_pr.md")
   @insight_chat Console.priv_file!("prompts/insight_chat.md")
+  @research Console.priv_file!("prompts/research.md")
 
+  def prompt(%ChatThread{research_id: id}) when is_binary(id), do: @research
   def prompt(%ChatThread{insight: %AiInsight{text: t}}),
     do: "#{@insight_chat}\n\nThis is the insight you will be working on: #{t}"
   def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p, service_id: id}}) when is_binary(id), do: "#{@kubernetes_code_pr_agent}\n\nThis is your task: #{p}"
