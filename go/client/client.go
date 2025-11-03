@@ -10,6 +10,7 @@ import (
 
 type ConsoleClient interface {
 	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
+	GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
 	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
@@ -21503,6 +21504,17 @@ func (t *GetAgentRuntime) GetAgentRuntime() *AgentRuntimeFragment {
 	return t.AgentRuntime
 }
 
+type GetAgentRuntimeByName struct {
+	AgentRuntime *AgentRuntimeFragment "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *GetAgentRuntimeByName) GetAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &GetAgentRuntimeByName{}
+	}
+	return t.AgentRuntime
+}
+
 type UpsertAgentRuntime struct {
 	UpsertAgentRuntime *AgentRuntimeFragment "json:\"upsertAgentRuntime,omitempty\" graphql:\"upsertAgentRuntime\""
 }
@@ -24578,6 +24590,77 @@ func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ..
 
 	var res GetAgentRuntime
 	if err := c.Client.Post(ctx, "GetAgentRuntime", GetAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!) {
+	agentRuntime(name: $name) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetAgentRuntimeByName
+	if err := c.Client.Post(ctx, "GetAgentRuntimeByName", GetAgentRuntimeByNameDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -44524,6 +44607,7 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 
 var DocumentOperationNames = map[string]string{
 	GetAgentRuntimeDocument:                           "GetAgentRuntime",
+	GetAgentRuntimeByNameDocument:                     "GetAgentRuntimeByName",
 	UpsertAgentRuntimeDocument:                        "UpsertAgentRuntime",
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",

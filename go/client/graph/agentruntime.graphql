@@ -4,6 +4,12 @@ query GetAgentRuntime($id: ID!) {
     }
 }
 
+query GetAgentRuntimeByName($name: String!) {
+    agentRuntime(name: $name) {
+        ...AgentRuntimeFragment
+    }
+}
+
 mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
     upsertAgentRuntime(attributes: $attributes) {
         ...AgentRuntimeFragment
