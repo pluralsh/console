@@ -6,9 +6,9 @@ fragment InfraResearch on InfraResearch {
   analysis {
     ...InfraResearchAnalysis
   }
-  threads {
-    ...ChatThreadTiny
-  }
+  #   threads {
+  #     ...ChatThreadTiny
+  #   }
   insertedAt
   updatedAt
 }
