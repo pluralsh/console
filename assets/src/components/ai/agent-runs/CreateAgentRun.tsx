@@ -128,7 +128,7 @@ function CreateAgentRunModal({
   )
 }
 
-const PromptInputSC = styled(EditableDiv)(({ theme }) => ({
+export const PromptInputSC = styled(EditableDiv)(({ theme }) => ({
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,

@@ -12956,6 +12956,34 @@ export type AiChatStreamSubscriptionVariables = Exact<{
 
 export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, message?: number | null, role?: AiRole | null, content: string, tool?: { __typename?: 'ToolDelta', id?: string | null, name?: string | null } | null } | null };
 
+export type InfraResearchFragment = { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null };
+
+export type InfraResearchAnalysisFragment = { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null };
+
+export type InfraResearchQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type InfraResearchQuery = { __typename?: 'RootQueryType', infraResearch?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null } | null };
+
+export type InfraResearchesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type InfraResearchesQuery = { __typename?: 'RootQueryType', infraResearches?: { __typename?: 'InfraResearchConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfraResearchEdge', node?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null } | null } | null> | null } | null };
+
+export type CreateInfraResearchMutationVariables = Exact<{
+  attributes: InfraResearchAttributes;
+}>;
+
+
+export type CreateInfraResearchMutation = { __typename?: 'RootMutationType', createInfraResearch?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null } | null };
+
 export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null };
 
 export type AiInsightSummaryFragment = { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null };
@@ -16658,6 +16686,25 @@ export const AiDeltaFragmentDoc = gql`
   }
 }
     `;
+export const InfraResearchAnalysisFragmentDoc = gql`
+    fragment InfraResearchAnalysis on InfraResearchAnalysis {
+  notes
+  summary
+}
+    `;
+export const InfraResearchFragmentDoc = gql`
+    fragment InfraResearch on InfraResearch {
+  id
+  prompt
+  status
+  diagram
+  analysis {
+    ...InfraResearchAnalysis
+  }
+  insertedAt
+  updatedAt
+}
+    ${InfraResearchAnalysisFragmentDoc}`;
 export const ClusterInsightComponentFragmentDoc = gql`
     fragment ClusterInsightComponent on ClusterInsightComponent {
   id
@@ -21404,6 +21451,130 @@ export function useAiChatStreamSubscription(baseOptions?: Apollo.SubscriptionHoo
       }
 export type AiChatStreamSubscriptionHookResult = ReturnType<typeof useAiChatStreamSubscription>;
 export type AiChatStreamSubscriptionResult = Apollo.SubscriptionResult<AiChatStreamSubscription>;
+export const InfraResearchDocument = gql`
+    query InfraResearch($id: ID!) {
+  infraResearch(id: $id) {
+    ...InfraResearch
+  }
+}
+    ${InfraResearchFragmentDoc}`;
+
+/**
+ * __useInfraResearchQuery__
+ *
+ * To run a query within a React component, call `useInfraResearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInfraResearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInfraResearchQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useInfraResearchQuery(baseOptions: Apollo.QueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+      }
+export function useInfraResearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+        }
+export function useInfraResearchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+        }
+export type InfraResearchQueryHookResult = ReturnType<typeof useInfraResearchQuery>;
+export type InfraResearchLazyQueryHookResult = ReturnType<typeof useInfraResearchLazyQuery>;
+export type InfraResearchSuspenseQueryHookResult = ReturnType<typeof useInfraResearchSuspenseQuery>;
+export type InfraResearchQueryResult = Apollo.QueryResult<InfraResearchQuery, InfraResearchQueryVariables>;
+export const InfraResearchesDocument = gql`
+    query InfraResearches($first: Int = 100, $last: Int, $after: String, $before: String) {
+  infraResearches(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...InfraResearch
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${InfraResearchFragmentDoc}`;
+
+/**
+ * __useInfraResearchesQuery__
+ *
+ * To run a query within a React component, call `useInfraResearchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInfraResearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInfraResearchesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useInfraResearchesQuery(baseOptions?: Apollo.QueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+      }
+export function useInfraResearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+        }
+export function useInfraResearchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+        }
+export type InfraResearchesQueryHookResult = ReturnType<typeof useInfraResearchesQuery>;
+export type InfraResearchesLazyQueryHookResult = ReturnType<typeof useInfraResearchesLazyQuery>;
+export type InfraResearchesSuspenseQueryHookResult = ReturnType<typeof useInfraResearchesSuspenseQuery>;
+export type InfraResearchesQueryResult = Apollo.QueryResult<InfraResearchesQuery, InfraResearchesQueryVariables>;
+export const CreateInfraResearchDocument = gql`
+    mutation CreateInfraResearch($attributes: InfraResearchAttributes!) {
+  createInfraResearch(attributes: $attributes) {
+    ...InfraResearch
+  }
+}
+    ${InfraResearchFragmentDoc}`;
+export type CreateInfraResearchMutationFn = Apollo.MutationFunction<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>;
+
+/**
+ * __useCreateInfraResearchMutation__
+ *
+ * To run a mutation, you first call `useCreateInfraResearchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateInfraResearchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createInfraResearchMutation, { data, loading, error }] = useCreateInfraResearchMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateInfraResearchMutation(baseOptions?: Apollo.MutationHookOptions<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>(CreateInfraResearchDocument, options);
+      }
+export type CreateInfraResearchMutationHookResult = ReturnType<typeof useCreateInfraResearchMutation>;
+export type CreateInfraResearchMutationResult = Apollo.MutationResult<CreateInfraResearchMutation>;
+export type CreateInfraResearchMutationOptions = Apollo.BaseMutationOptions<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>;
 export const AiInsightDocument = gql`
     query AiInsight($id: ID!) {
   aiInsight(id: $id) {
@@ -34346,6 +34517,8 @@ export const namedOperations = {
     ChatThreadMessages: 'ChatThreadMessages',
     AgentSessions: 'AgentSessions',
     CloudConnections: 'CloudConnections',
+    InfraResearch: 'InfraResearch',
+    InfraResearches: 'InfraResearches',
     AiInsight: 'AiInsight',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
@@ -34545,6 +34718,7 @@ export const namedOperations = {
     CloneChatThread: 'CloneChatThread',
     AddChatContext: 'AddChatContext',
     CreateAgentSession: 'CreateAgentSession',
+    CreateInfraResearch: 'CreateInfraResearch',
     AiFixPr: 'AiFixPr',
     RefreshInsight: 'RefreshInsight',
     UpsertMcpServer: 'UpsertMcpServer',
@@ -34694,6 +34868,8 @@ export const namedOperations = {
     ServiceDeploymentChat: 'ServiceDeploymentChat',
     StackChat: 'StackChat',
     AiDelta: 'AiDelta',
+    InfraResearch: 'InfraResearch',
+    InfraResearchAnalysis: 'InfraResearchAnalysis',
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
     AiInsightContext: 'AiInsightContext',
