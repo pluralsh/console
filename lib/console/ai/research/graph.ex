@@ -20,7 +20,7 @@ defmodule Console.AI.Research.Graph do
   def new(), do: store(%__MODULE__{})
 
   def encode!(), do: JSON.encode!(graph_data())
-  def encode(), do: JSON.encode(graph_data())
+  def encode(), do: Jason.encode(graph_data())
 
   defp graph_data() do
     g = fetch()

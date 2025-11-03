@@ -42,7 +42,7 @@ defmodule Console.AI.Research.Agent do
   def handle_continue(:boot, %State{research: research, user: user} = state) do
     Graph.new()
     update_research(research, %{status: :running})
-    {:ok, thread} = create_thread(research)
+    {:ok, thread} = create_thread(research, "Initial infrastructure research for #{research.prompt}")
     {thread, session} = setup_context(thread.session)
 
     Stream.topic(:thread, thread.id, thread.user)
@@ -58,7 +58,7 @@ defmodule Console.AI.Research.Agent do
   end
 
   def handle_cast(:booted, %State{research: research, user: user, threads: threads} = state) do
-    {:ok, thread} = create_thread(research)
+    {:ok, thread} = create_thread(research, "Probing for any additional data to figure out the infrastructure for #{research.prompt}")
     {thread, session} = setup_context(thread.session)
 
     Stream.topic(:thread, thread.id, thread.user)
@@ -128,9 +128,10 @@ defmodule Console.AI.Research.Agent do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp create_thread(%InfraResearch{user: %User{} = user} = research) do
+  defp create_thread(%InfraResearch{user: %User{} = user} = research, summary) do
     Chat.create_thread(%{
       research_id: research.id,
+      summary: summary,
       session: %{type: :research}
     }, user)
   end
