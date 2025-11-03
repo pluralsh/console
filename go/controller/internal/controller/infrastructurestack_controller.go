@@ -269,7 +269,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 				} else {
 					if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
 						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-						return common.Wait(), err
+						return ctrl.Result{}, err
 					}
 				}
 				return common.Wait(), nil
