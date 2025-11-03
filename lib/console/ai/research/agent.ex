@@ -29,6 +29,10 @@ defmodule Console.AI.Research.Agent do
 
   def start_link([%InfraResearch{} = research]), do: start_link(research)
   def start_link(%InfraResearch{} = research) do
+    GenServer.start_link(__MODULE__, {research, nil}, name: via(research))
+  end
+
+  def start_monitored(%InfraResearch{} = research) do
     GenServer.start_link(__MODULE__, {research, self()}, name: via(research))
   end
 
@@ -115,7 +119,9 @@ defmodule Console.AI.Research.Agent do
       end
     end
 
-    send(state.caller, :done)
+    if is_pid(state.caller) do
+      send(state.caller, :done)
+    end
     {:noreply, state}
   end
 
