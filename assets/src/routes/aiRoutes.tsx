@@ -29,6 +29,9 @@ import {
   AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
+  AI_INFRA_RESEARCH_ABS_PATH,
+  AI_INFRA_RESEARCH_PARAM_ID,
+  AI_INFRA_RESEARCH_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
@@ -43,6 +46,8 @@ import {
 } from './aiRoutesConsts'
 import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
+import { InfraResearches } from 'components/ai/infra-research/InfraResearches.tsx'
+import { InfraResearch } from 'components/ai/infra-research/InfraResearch.tsx'
 
 export const aiRoutes = [
   <Route
@@ -82,7 +87,15 @@ export const aiRoutes = [
       path={AI_SENTINELS_REL_PATH}
       element={<Sentinels />}
     />
+    <Route
+      path={AI_INFRA_RESEARCH_REL_PATH}
+      element={<InfraResearches />}
+    />
   </Route>,
+  <Route
+    path={`${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}`}
+    element={<InfraResearch />}
+  />,
   // other agent routes
   <Route
     path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}
