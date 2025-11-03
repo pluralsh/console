@@ -661,6 +661,7 @@ export enum AgentSessionType {
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',
+  Research = 'RESEARCH',
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
@@ -4259,6 +4260,66 @@ export type HttpProxyConfiguration = {
   url: Scalars['String']['output'];
 };
 
+/** A representation of an AI generated deep investigation of your infrastructure */
+export type InfraResearch = {
+  __typename?: 'InfraResearch';
+  /** the analysis of the infrastructure */
+  analysis?: Maybe<InfraResearchAnalysis>;
+  /** the associations of this research */
+  associations?: Maybe<Array<Maybe<InfraResearchAssociation>>>;
+  /** the diagram of the infrastructure */
+  diagram?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt used to create this research */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** the status of this research */
+  status?: Maybe<InfraResearchStatus>;
+  /** autonomous chat threads depicting the ai doing the research */
+  threads?: Maybe<Array<Maybe<ChatThread>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** Additional analysis attached to this research result */
+export type InfraResearchAnalysis = {
+  __typename?: 'InfraResearchAnalysis';
+  /** any notes from the analysis, indicating unsolved questions */
+  notes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of the analysis */
+  summary?: Maybe<Scalars['String']['output']>;
+};
+
+/** Associations with services/stacks and a research */
+export type InfraResearchAssociation = {
+  __typename?: 'InfraResearchAssociation';
+  service?: Maybe<ServiceDeployment>;
+  stack?: Maybe<InfrastructureStack>;
+};
+
+/** attributes to create a deep research of your infrastructure */
+export type InfraResearchAttributes = {
+  prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type InfraResearchConnection = {
+  __typename?: 'InfraResearchConnection';
+  edges?: Maybe<Array<Maybe<InfraResearchEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type InfraResearchEdge = {
+  __typename?: 'InfraResearchEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<InfraResearch>;
+};
+
+export enum InfraResearchStatus {
+  Completed = 'COMPLETED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
 export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
   /** the actor of this stack (defaults to root console user) */
@@ -7387,6 +7448,8 @@ export type RootMutationType = {
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
+  /** Creates a new infrastructure research based on a prompt */
+  createInfraResearch?: Maybe<InfraResearch>;
   createInvite?: Maybe<Invite>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
@@ -7812,6 +7875,11 @@ export type RootMutationTypeCreateGroupArgs = {
 export type RootMutationTypeCreateGroupMemberArgs = {
   groupId: Scalars['ID']['input'];
   userId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateInfraResearchArgs = {
+  attributes: InfraResearchAttributes;
 };
 
 
@@ -8889,6 +8957,8 @@ export type RootQueryType = {
   groups?: Maybe<GroupConnection>;
   helmRepositories?: Maybe<HelmRepositoryConnection>;
   helmRepository?: Maybe<HelmRepository>;
+  infraResearch?: Maybe<InfraResearch>;
+  infraResearches?: Maybe<InfraResearchConnection>;
   infrastructureStack?: Maybe<InfrastructureStack>;
   infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
@@ -9521,6 +9591,19 @@ export type RootQueryTypeHelmRepositoriesArgs = {
 
 export type RootQueryTypeHelmRepositoryArgs = {
   url: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeInfraResearchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeInfraResearchesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

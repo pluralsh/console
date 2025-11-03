@@ -88,6 +88,13 @@ defmodule Console.AI.Tool do
     end
   end
 
+  def insight() do
+    case Process.get(@ctx) do
+      %Context{insight: %AiInsight{} = insight} -> insight
+      _ -> nil
+    end
+  end
+
   def validate(tool, input) do
     struct(tool, %{})
     |> tool.changeset(input)

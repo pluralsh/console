@@ -3,8 +3,8 @@ defmodule Console.GraphQl.Resolvers.AI do
   import Console.GraphQl.Resolvers.Deployments.Base, only: [maybe_search: 3]
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
-  alias Console.AI.{Service, Provider, Fixer}
-  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession}
+  alias Console.AI.{Service, Provider, Fixer, Research}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, InfraResearchAssociation}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
@@ -13,6 +13,8 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(AiPin, _), do: AiPin
   def query(AiInsightEvidence, _), do: AiInsightEvidence
   def query(AgentSession, _), do: AgentSession
+  def query(InfraResearch, _), do: InfraResearch
+  def query(InfraResearchAssociation, _), do: InfraResearchAssociation
   def query(_, _), do: AiInsight
 
   def resolve_insight(%{id: id}, %{context: %{current_user: user}}),
@@ -22,6 +24,8 @@ defmodule Console.GraphQl.Resolvers.AI do
     args = Enum.filter([user_id: user.id] ++ Map.to_list(args), fn {_, v} -> not is_nil(v) end)
     {:ok, Console.Repo.get_by!(AiPin, args)}
   end
+
+  def resolve_research(%{id: id}, _), do: {:ok, Research.get!(id)}
 
   def pins(args, %{context: %{current_user: user}}) do
     AiPin.for_user(user.id)
@@ -64,6 +68,11 @@ defmodule Console.GraphQl.Resolvers.AI do
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
     |> Chat.ordered(chat_order(args))
+    |> paginate(args)
+  end
+
+  def list_researches(args, _) do
+    InfraResearch.ordered()
     |> paginate(args)
   end
 
@@ -178,9 +187,13 @@ defmodule Console.GraphQl.Resolvers.AI do
   def create_agent_session(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: ChatSvc.create_agent_session(attrs, user)
 
+  def create_research(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Research.create_research(attrs, user)
+
   def raw_resource(%{version: v, kind: k, name: n, group: g} = comp, _, _) do
     %{cluster: cluster} = comp = Console.Repo.preload(comp, [:cluster])
-    Clusters.control_plane(cluster) |> Kube.Utils.save_kubeconfig()
+    Clusters.control_plane(cluster)
+    |> Kube.Utils.save_kubeconfig()
 
     kind = Kubernetes.get_kind(cluster, g, v, k)
     path = Kube.Client.Base.path(g, v, kind, comp.namespace, n)

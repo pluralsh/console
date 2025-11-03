@@ -1089,6 +1089,13 @@ defmodule Console.Factory do
     }
   end
 
+  def infra_research_factory do
+    %Schema.InfraResearch{
+      prompt: "Give me a diagram of the grafana deployment",
+      user: build(:user)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

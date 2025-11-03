@@ -70,11 +70,22 @@ defmodule Console.AI.Chat.Tools do
 
   @cluster_tools [Agent.Discovery, Agent.ApiSpec]
 
+  @insight_tools [Agent.Coding.GenericPr, Agent.InsightFiles]
+
+  @research_tools [
+    Agent.FinishInvestigation,
+    Agent.ReadGraph,
+    Agent.UpdateGraph,
+    Agent.ServiceComponent,
+    Agent.Stack
+  ]
+
   def tools(%ChatThread{} = t) do
     memory_tools(t)
     |> Enum.concat(flow_tools(t))
     |> Enum.concat(agent_tools(t))
     |> Enum.concat(cluster_tools(t))
+    |> Enum.concat(insight_tools(t))
     |> Enum.uniq()
   end
 
@@ -84,6 +95,9 @@ defmodule Console.AI.Chat.Tools do
       false -> []
     end
   end
+
+
+  defp agent_tools(%ChatThread{research_id: id}) when is_binary(id), do: @research_tools
 
   defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
 
@@ -112,6 +126,9 @@ defmodule Console.AI.Chat.Tools do
   defp agent_tools(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests_tools
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_pre_tools
   defp agent_tools(_), do: []
+
+  defp insight_tools(%ChatThread{insight_id: id}) when is_binary(id), do: @insight_tools
+  defp insight_tools(_), do: []
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []

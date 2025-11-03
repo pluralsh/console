@@ -391,4 +391,41 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
       assert Enum.any?(tools, & &1["tool"]["name"] == "echo")
     end
   end
+
+  describe "infraResearch" do
+    test "it can list a users infra researches" do
+      user = insert(:user)
+      research = insert(:infra_research, user: user)
+
+      {:ok, %{data: %{"infraResearch" => found}}} = run_query("""
+        query Research($id: ID!) {
+          infraResearch(id: $id) {
+            id
+            prompt
+          }
+        }
+      """, %{"id" => research.id}, %{current_user: user})
+
+      assert found["id"] == research.id
+      assert found["prompt"] == research.prompt
+    end
+  end
+
+  describe "infraResearches" do
+    test "it can list a users infra researches" do
+      user = insert(:user)
+      researches = insert_list(3, :infra_research, user: user)
+
+      {:ok, %{data: %{"infraResearches" => found}}} = run_query("""
+        query {
+          infraResearches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(researches)
+    end
+  end
 end

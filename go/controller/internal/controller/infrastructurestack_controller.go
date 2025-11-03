@@ -251,16 +251,16 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
 		if stack.Status.GetID() != "" {
-			existingNotificationSink, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+			existingStack, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
 				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
+			if existingStack != nil && existingStack.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return stack.Spec.Reconciliation.Requeue(), nil
+				return common.Wait(), nil
 			}
-			if existingNotificationSink != nil {
+			if existingStack != nil {
 				if stack.Spec.Detach {
 					if err := r.ConsoleClient.DetachStack(ctx, *stack.Status.ID); err != nil {
 						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -272,7 +272,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return stack.Spec.Reconciliation.Requeue(), nil
+				return common.Wait(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
