@@ -73,7 +73,6 @@ defmodule Console.AI.Chat.Tools do
   @insight_tools [Agent.Coding.GenericPr, Agent.InsightFiles]
 
   @research_tools [
-    Agent.FinishInvestigation,
     Agent.ReadGraph,
     Agent.UpdateGraph,
     Agent.ServiceComponent,

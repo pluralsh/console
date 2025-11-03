@@ -25,6 +25,8 @@ defmodule Console.AI.Research.Agent do
 
   def enqueue(pid, task), do: GenServer.cast(pid, task)
 
+  def boot(_pid), do: :ok
+
   def start_link([%InfraResearch{} = research]), do: start_link(research)
   def start_link(%InfraResearch{} = research) do
     GenServer.start_link(__MODULE__, {research, self()}, name: via(research))
