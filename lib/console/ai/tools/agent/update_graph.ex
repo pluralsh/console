@@ -52,6 +52,6 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
     with {:ok, json} <- Console.mapify(model) |> Jason.encode(),
          {:ok, graph} <- Poison.decode(json, as: Graph.spec()),
          _ <- Graph.update(graph),
-      do: {:ok, "Updated graph with the provided details"}
+      do: Graph.encode()
   end
 end

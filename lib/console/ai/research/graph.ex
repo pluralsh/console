@@ -19,16 +19,18 @@ defmodule Console.AI.Research.Graph do
 
   def new(), do: store(%__MODULE__{})
 
-  def encode!() do
-    g = fetch()
+  def encode!(), do: JSON.encode!(graph_data())
+  def encode(), do: JSON.encode(graph_data())
 
-    JSON.encode!(%{
+  defp graph_data() do
+    g = fetch()
+    %{
       vertices: Map.values(g.vertices),
       edges: Map.values(g.edges),
       notes: g.notes,
       service_ids: Enum.uniq(g.service_ids),
       stack_ids: Enum.uniq(g.stack_ids)
-    })
+    }
   end
 
   def update(%__MODULE__{vertices: vertices, edges: edges, notes: notes} = graph) do
