@@ -34,7 +34,9 @@ defmodule Console.AI.Research.Graph do
   end
 
   def update(%__MODULE__{vertices: vertices, edges: edges, notes: notes} = graph) do
+    IO.inspect(graph, label: "update graph")
     fetch()
+    |> IO.inspect(label: "base graph")
     |> add_edges(edges)
     |> add_vertices(vertices)
     |> then(fn g -> put_in(g.notes, g.notes ++ notes) end)

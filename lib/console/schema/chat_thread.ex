@@ -76,7 +76,8 @@ defmodule Console.Schema.ChatThread do
     )
   end
 
-  @agent_types ~w(terraform kubernetes research)a
+  # @agent_types ~w(terraform kubernetes research)a
+  @agent_types ~w(terraform kubernetes)a
 
   def nonagent(query \\ __MODULE__) do
     from(t in query,
