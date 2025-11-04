@@ -200,7 +200,7 @@ export const downloadMermaidSvg = (svgStr: string) => {
 }
 
 // simple djb2 hash to get id from mermaid string
-const getMermaidId = (str: string) => {
+export const getMermaidId = (str: string) => {
   let hash = 5381
   for (let i = 0; i < str.length; i++)
     hash = (hash << 5) + hash + str.charCodeAt(i)

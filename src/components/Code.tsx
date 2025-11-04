@@ -313,15 +313,26 @@ function CodeContent({
   hasSetHeight,
   language,
   isStreaming = false,
+  setMermaidError: setMermaidErrorProp,
   ...props
 }: ComponentProps<typeof Highlight> & {
   hasSetHeight: boolean
   isStreaming?: boolean
+  setMermaidError?: (error: Nullable<Error>) => void
 }) {
   const { spacing, borderRadiuses } = useTheme()
   const mermaidRef = useRef<MermaidRefHandle>(null)
-  const [mermaidError, setMermaidError] = useState<Nullable<Error>>(null)
   const [copied, setCopied] = useState(false)
+
+  const [mermaidError, setMermaidErrorState] = useState<Nullable<Error>>(null)
+  const setMermaidError = useCallback(
+    (error: Nullable<Error>) => {
+      setMermaidErrorState(error)
+      setMermaidErrorProp?.(error)
+    },
+    [setMermaidErrorProp]
+  )
+
   const codeString = children?.trim() || ''
   const multiLine = !!codeString.match(/\r?\n/) || hasSetHeight
   const handleCopy = useCallback(
