@@ -395,9 +395,8 @@ function CodeContent({
           <Mermaid
             ref={mermaidRef}
             setError={setMermaidError}
-          >
-            {codeString}
-          </Mermaid>
+            diagram={codeString}
+          />
         ) : (
           <Highlight
             key={codeString}

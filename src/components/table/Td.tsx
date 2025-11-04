@@ -16,6 +16,7 @@ export const Td = styled.td<{
   $highlight?: boolean
   $truncateColumn: boolean
   $center?: boolean
+  $rowsHaveLinks?: boolean
 }>(
   ({
     theme,
@@ -27,6 +28,7 @@ export const Td = styled.td<{
     $highlight: highlight,
     $truncateColumn: truncateColumn = false,
     $center: center,
+    $rowsHaveLinks: rowsHaveLinks,
   }) => ({
     ...theme.partials.text.body2LooseLineHeight,
     display: 'flex',
@@ -68,6 +70,12 @@ export const Td = styled.td<{
           },
         }
       : {}),
+    ...(rowsHaveLinks && {
+      zIndex: 1,
+      // disable pointer events for children besides interactive elements so row links can capture most clicks
+      pointerEvents: 'none',
+      '& button, & a, & input, & select, & textarea': { pointerEvents: 'auto' },
+    }),
   })
 )
 
@@ -99,3 +107,14 @@ export const TdBasic = styled.td({
   padding: 0,
   overflow: 'hidden',
 })
+
+export function TdGhostLink({ width, href }: { width: number; href: string }) {
+  return (
+    <td style={{ position: 'relative', width: 0 }}>
+      <a
+        style={{ width, position: 'absolute', inset: '0 0 0 auto', zIndex: 0 }}
+        href={href}
+      />
+    </td>
+  )
+}

@@ -19,7 +19,12 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { InfoOutlineIcon, Tooltip, WrapWithIf } from '../../index'
+import {
+  InfoOutlineIcon,
+  Tooltip,
+  useResizeObserver,
+  WrapWithIf,
+} from '../../index'
 import Button from '../Button'
 import EmptyState from '../EmptyState'
 import CaretUpIcon from '../icons/CaretUpIcon'
@@ -44,15 +49,17 @@ import {
   TableProps,
 } from './tableUtils'
 import { Tbody } from './Tbody'
-import { Td, TdBasic, TdExpand, TdLoading } from './Td'
+import { Td, TdBasic, TdExpand, TdGhostLink, TdLoading } from './Td'
 import { Th } from './Th'
 import { Thead } from './Thead'
 import { Tr } from './Tr'
 
+const GHOST_LINK_ID = 'ghost-link'
+
 function Table({
   ref: forwardedRef,
   data,
-  columns,
+  columns: columnsProp,
   loading = false,
   loadingSkeletonRows = 10,
   hideHeader = false,
@@ -74,6 +81,7 @@ function Table({
   reactTableOptions,
   highlightedRowId,
   onRowClick,
+  getRowLink,
   emptyStateProps,
   hasNextPage,
   isFetchingNextPage,
@@ -84,9 +92,17 @@ function Table({
 }: TableProps) {
   const theme = useTheme()
   const tableContainerRef = useRef<HTMLDivElement>(undefined)
+
+  const [tableWidth, setTableWidth] = useState(0)
+  useResizeObserver(tableContainerRef, (entry) => setTableWidth(entry.width))
+
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
   const [expanded, setExpanded] = useState({})
+
+  const columns = useMemo(() => {
+    return [...columnsProp, ...(!!getRowLink ? [{ id: GHOST_LINK_ID }] : [])]
+  }, [columnsProp, getRowLink])
 
   const table = useReactTable({
     data,
@@ -245,50 +261,54 @@ function Table({
                   key={headerGroup.id}
                   $fillLevel={fillLevel}
                 >
-                  {headerGroup.headers.map((header) => (
-                    <Th
-                      key={header.id}
-                      $fillLevel={fillLevel}
-                      $hideHeader={hideHeader}
-                      $stickyColumn={stickyColumn}
-                      $highlight={header.column.columnDef?.meta?.highlight}
-                      {...(header.column.getCanSort()
-                        ? {
-                            $cursor:
-                              header.column.getIsSorted() === 'asc'
-                                ? 's-resize'
-                                : header.column.getIsSorted() === 'desc'
-                                ? 'ns-resize'
-                                : 'n-resize',
-                            onClick: header.column.getToggleSortingHandler(),
-                          }
-                        : {})}
-                    >
-                      <div className="thOuterWrap">
-                        <div className="thSortIndicatorWrap">
-                          <div>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
+                  {headerGroup.headers.map((header) =>
+                    header.column.id.includes(GHOST_LINK_ID) ? (
+                      <th key={header.id} />
+                    ) : (
+                      <Th
+                        key={header.id}
+                        $fillLevel={fillLevel}
+                        $hideHeader={hideHeader}
+                        $stickyColumn={stickyColumn}
+                        $highlight={header.column.columnDef?.meta?.highlight}
+                        {...(header.column.getCanSort()
+                          ? {
+                              $cursor:
+                                header.column.getIsSorted() === 'asc'
+                                  ? 's-resize'
+                                  : header.column.getIsSorted() === 'desc'
+                                  ? 'ns-resize'
+                                  : 'n-resize',
+                              onClick: header.column.getToggleSortingHandler(),
+                            }
+                          : {})}
+                      >
+                        <div className="thOuterWrap">
+                          <div className="thSortIndicatorWrap">
+                            <div>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </div>
+                            {header.column.columnDef.meta?.tooltip && (
+                              <Tooltip
+                                label={header.column.columnDef.meta.tooltip}
+                                {...header.column.columnDef.meta.tooltipProps}
+                              >
+                                <InfoOutlineIcon />
+                              </Tooltip>
+                            )}
+                            <SortIndicator
+                              direction={header.column.getIsSorted()}
+                            />
                           </div>
-                          {header.column.columnDef.meta?.tooltip && (
-                            <Tooltip
-                              label={header.column.columnDef.meta.tooltip}
-                              {...header.column.columnDef.meta.tooltipProps}
-                            >
-                              <InfoOutlineIcon />
-                            </Tooltip>
-                          )}
-                          <SortIndicator
-                            direction={header.column.getIsSorted()}
-                          />
                         </div>
-                      </div>
-                    </Th>
-                  ))}
+                      </Th>
+                    )
+                  )}
                 </Tr>
               ))}
             </Thead>
@@ -358,7 +378,7 @@ function Table({
                           $highlighted={tableRow?.id === highlightedRowId}
                           $selectable={tableRow?.getCanSelect() ?? false}
                           $selected={tableRow?.getIsSelected() ?? false}
-                          $clickable={!!onRowClick}
+                          $clickable={!!onRowClick || !!getRowLink}
                         >
                           {isNil(tableRow) && isLoaderRow ? (
                             <TdLoading
@@ -376,28 +396,37 @@ function Table({
                               <Spinner color={theme.colors['text-xlight']} />
                             </TdLoading>
                           ) : (
-                            tableRow?.getVisibleCells().map((cell) => (
-                              <Td
-                                key={cell.id}
-                                $fillLevel={fillLevel}
-                                $firstRow={i === 0}
-                                $padCells={padCells}
-                                $loose={loose}
-                                $stickyColumn={stickyColumn}
-                                $highlight={
-                                  cell.column?.columnDef?.meta?.highlight
-                                }
-                                $truncateColumn={
-                                  cell.column?.columnDef?.meta?.truncate
-                                }
-                                $center={cell.column?.columnDef?.meta?.center}
-                              >
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </Td>
-                            ))
+                            tableRow?.getVisibleCells().map((cell) =>
+                              cell.id.includes(GHOST_LINK_ID) ? (
+                                <TdGhostLink
+                                  key={cell.id}
+                                  width={tableWidth}
+                                  href={getRowLink?.(tableRow)}
+                                />
+                              ) : (
+                                <Td
+                                  key={cell.id}
+                                  $fillLevel={fillLevel}
+                                  $firstRow={i === 0}
+                                  $padCells={padCells}
+                                  $loose={loose}
+                                  $stickyColumn={stickyColumn}
+                                  $highlight={
+                                    cell.column?.columnDef?.meta?.highlight
+                                  }
+                                  $truncateColumn={
+                                    cell.column?.columnDef?.meta?.truncate
+                                  }
+                                  $center={cell.column?.columnDef?.meta?.center}
+                                  $rowsHaveLinks={!!getRowLink}
+                                >
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                  )}
+                                </Td>
+                              )
+                            )
                           )}
                         </Tr>
                         {tableRow?.getIsExpanded() && (
@@ -454,7 +483,7 @@ function Table({
             small
             floating
             width={140}
-            css={{ position: 'absolute', right: 24, bottom: 24 }}
+            css={{ position: 'absolute', right: 24, bottom: 24, zIndex: 1 }}
             endIcon={<CaretUpIcon />}
             onClick={() =>
               tableContainerRef?.current?.scrollTo({

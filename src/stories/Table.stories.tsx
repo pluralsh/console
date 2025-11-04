@@ -516,3 +516,42 @@ Selectable.args = {
   data: repeatedData,
   columns: expandingColumns,
 }
+
+export const LinkableRows = Template.bind({})
+
+LinkableRows.args = {
+  fillLevel: 0,
+  rowBg: 'base',
+  width: '900px',
+  height: '400px',
+  data: repeatedData,
+  columns: [
+    ...columns.slice(0, 2),
+    columnHelper.display({
+      id: 'actions',
+      header: () => <span>Actions</span>,
+      cell: ({ row }) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            alert(`Action clicked for: ${row.original.function}`)
+          }}
+          style={{
+            padding: '4px 12px',
+            cursor: 'pointer',
+            background: '#1a1d24',
+            border: '1px solid #3d4149',
+            borderRadius: '4px',
+            color: '#babbbd',
+          }}
+        >
+          Action
+        </button>
+      ),
+    }),
+    ...columns.slice(2),
+  ],
+  onRowClick: (e: MouseEvent, row: Row<any>) => console.log(row?.original),
+  getRowLink: (row: Row<Method>) =>
+    `https://example.com/function/${row.original.function}`,
+}

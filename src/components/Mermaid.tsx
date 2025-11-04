@@ -23,12 +23,12 @@ export type MermaidRefHandle = {
 
 export function Mermaid({
   ref,
-  children,
+  diagram,
   setError: setErrorProp,
   ...props
 }: Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
-  children: string
-  ref: Ref<MermaidRefHandle>
+  diagram: string
+  ref?: Ref<MermaidRefHandle>
   setError?: (error: Nullable<Error>) => void
 }) {
   const [svgStr, setSvgStr] = useState<Nullable<string>>()
@@ -46,7 +46,7 @@ export function Mermaid({
   useImperativeHandle(ref, () => ({ svgStr }))
 
   useLayoutEffect(() => {
-    const id = getMermaidId(children)
+    const id = getMermaidId(diagram)
     const cached = cachedRenders[id]
     if (cached) {
       setIsLoading(false)
@@ -61,7 +61,7 @@ export function Mermaid({
       try {
         setIsLoading(true)
         setError(null)
-        setSvgStr(await renderMermaid(children))
+        setSvgStr(await renderMermaid(diagram))
         setIsLoading(false)
       } catch (caughtErr) {
         let err = caughtErr
@@ -81,15 +81,15 @@ export function Mermaid({
     checkAndRender()
 
     return () => clearTimeout(pollTimeout)
-  }, [children, setError, svgStr])
+  }, [diagram, setError, svgStr])
 
   if (error)
     return (
       <Highlight
-        key={children}
+        key={diagram}
         language="mermaid"
       >
-        {children}
+        {diagram}
       </Highlight>
     )
 
