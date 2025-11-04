@@ -8,6 +8,7 @@ import type {
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
+  ReactElement,
   type CSSProperties,
   type MouseEvent,
   type RefObject,
@@ -46,7 +47,7 @@ export type TableBaseProps = {
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
-  getRowLink?: (row: Row<unknown>) => Nullable<string>
+  getRowLink?: (row: Row<unknown>) => Nullable<string | ReactElement>
   emptyStateProps?: EmptyStateProps
   hasNextPage?: boolean
   fetchNextPage?: () => void

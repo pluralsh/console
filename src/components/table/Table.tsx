@@ -401,7 +401,7 @@ function Table({
                                 <TdGhostLink
                                   key={cell.id}
                                   width={tableWidth}
-                                  href={getRowLink?.(tableRow)}
+                                  link={getRowLink?.(tableRow)}
                                 />
                               ) : (
                                 <Td

@@ -285,7 +285,7 @@ function SelectableTemplate(args: any) {
     <Table
       {...args}
       onRowClick={(_, row) => {
-        setSelectedId(row.original.id)
+        setSelectedId(row.original.id?.toString() ?? '')
       }}
       reactTableOptions={{
         state: { rowSelection: { [selectedId]: true } },

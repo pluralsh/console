@@ -1,9 +1,13 @@
 // styling here mostly just for the overlay and animations
 import * as Dialog from '@radix-ui/react-dialog'
 import { FocusScope } from '@radix-ui/react-focus-scope'
-import { type ComponentPropsWithRef, type ReactNode } from 'react'
+import {
+  CSSProperties,
+  type ComponentPropsWithRef,
+  type ReactNode,
+} from 'react'
 import { VisuallyHidden } from 'react-aria'
-import styled, { type CSSObject, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import WrapWithIf from './WrapWithIf'
 
@@ -12,7 +16,7 @@ const ANIMATION_SPEED = '150ms'
 export type ModalWrapperProps = {
   open: boolean
   onOpenChange?: (open: boolean) => void
-  overlayStyles?: CSSObject
+  overlayStyles?: CSSProperties
   children?: ReactNode
 } & ComponentPropsWithRef<typeof Dialog.Content>
 

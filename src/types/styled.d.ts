@@ -8,6 +8,9 @@ declare module 'react' {
   interface Attributes {
     css?: CSSProp | undefined
   }
+  interface CSSProperties {
+    [key: `--${string}`]: Nullable<string | number>
+  }
 }
 
 type StyledTheme = typeof styledTheme

@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 
+import { ReactElement } from 'react'
 import {
   tableFillLevelToBorder,
   tableFillLevelToHeaderBorder,
@@ -108,13 +109,26 @@ export const TdBasic = styled.td({
   overflow: 'hidden',
 })
 
-export function TdGhostLink({ width, href }: { width: number; href: string }) {
+export function TdGhostLink({
+  width,
+  link,
+}: {
+  width: number
+  link: Nullable<string | ReactElement>
+}) {
   return (
-    <td style={{ position: 'relative', width: 0 }}>
-      <a
-        style={{ width, position: 'absolute', inset: '0 0 0 auto', zIndex: 0 }}
-        href={href}
-      />
-    </td>
+    <TdGhostLinkSC style={{ ['--ghost-link-width']: `${width}px` }}>
+      {typeof link === 'string' ? <a href={link} /> : link}
+    </TdGhostLinkSC>
   )
 }
+const TdGhostLinkSC = styled.td(() => ({
+  position: 'relative',
+  width: 0,
+  '& > *': {
+    position: 'absolute',
+    inset: '0 0 0 auto',
+    zIndex: 0,
+    width: 'var(--ghost-link-width)',
+  },
+}))
