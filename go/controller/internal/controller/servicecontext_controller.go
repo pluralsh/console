@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -15,7 +15,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -69,16 +68,11 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return *result, reterr
 	}
 
-	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, serviceContext)
-	if err != nil {
-		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-	if exists {
-		logger.V(9).Info("serviceContext already exists in the API, running in read-only mode")
-		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExisting(serviceContext)
+	exists, err := r.handleExisting(serviceContext)
+	if !exists && err == nil && !serviceContext.DriftDetect() {
+		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		return serviceContext.Spec.Reconciliation.Requeue(), err
 	}
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
@@ -108,7 +102,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return serviceContext.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1alpha1.Project) (*console.ServiceContextFragment, error) {
@@ -125,21 +119,16 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
 }
 
-func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (reconcile.Result, error) {
-	exists, err := r.ConsoleClient.IsServiceContextExists(sc.GetName())
-	if err != nil {
-		return common.HandleRequeue(nil, err, sc.SetCondition)
-	}
-
-	if !exists {
-		sc.Status.ID = nil
+func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (bool, error) {
+	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.ConsoleName())
+	if err != nil || apiServiceContext == nil {
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return common.Wait(), nil
-	}
-
-	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.GetName())
-	if err != nil {
-		return common.HandleRequeue(nil, err, sc.SetCondition)
+		utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+		if internalerror.IsNotFound(err) || err == nil {
+			sc.Status.ID = nil
+			return false, nil
+		}
+		return false, err
 	}
 
 	sc.Status.ID = &apiServiceContext.ID
@@ -147,28 +136,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return sc.Spec.Reconciliation.Requeue(), nil
-}
-
-func (r *ServiceContextReconciler) isAlreadyExists(ctx context.Context, serviceContext *v1alpha1.ServiceContext) (bool, error) {
-	if serviceContext.Status.HasReadonlyCondition() {
-		return serviceContext.Status.IsReadonly(), nil
-	}
-
-	_, err := r.ConsoleClient.GetServiceContext(serviceContext.GetName())
-	if errors.IsNotFound(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-
-	if !serviceContext.Status.HasID() {
-		log.FromContext(ctx).Info(fmt.Sprintf("ServiceContext with %s name already exists in the API, running in read-only mode", serviceContext.GetName()))
-		return true, nil
-	}
-
-	return false, nil
+	return true, nil
 }
 
 func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1.ServiceContext) *ctrl.Result {
