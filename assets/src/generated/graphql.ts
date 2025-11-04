@@ -7538,6 +7538,8 @@ export type RootMutationType = {
   detachStack?: Maybe<InfrastructureStack>;
   dismissOnboarding?: Maybe<DeploymentSettings>;
   enableDeployments?: Maybe<DeploymentSettings>;
+  /** Fixes a broken mermaid diagram in an existing research */
+  fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
   /** Chat mutation that can also execute MCP servers in line with the overall completion */
@@ -8295,6 +8297,12 @@ export type RootMutationTypeDetachServiceDeploymentArgs = {
 
 
 export type RootMutationTypeDetachStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeFixResearchDiagramArgs = {
+  error: Scalars['String']['input'];
   id: Scalars['ID']['input'];
 };
 

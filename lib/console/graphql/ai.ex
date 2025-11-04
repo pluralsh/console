@@ -602,6 +602,15 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.create_research/2
     end
+
+    @desc "Fixes a broken mermaid diagram in an existing research"
+    field :fix_research_diagram, :infra_research do
+      middleware Authenticated
+      arg :id,    non_null(:id)
+      arg :error, non_null(:string), description: "mermaid compilation error"
+
+      resolve &AI.fix_research_diagram/2
+    end
   end
 
   object :ai_subscriptions do

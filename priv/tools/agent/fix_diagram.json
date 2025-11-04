@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "diagram": {
+            "type": "string",
+            "description": "The fixed diagram in mermaid format"
+        }
+    },
+    "required": ["diagram"]
+}
