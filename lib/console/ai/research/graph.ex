@@ -1,14 +1,18 @@
 defmodule Console.AI.Research.Graph do
   defmodule Vertex do
     @derive JSON.Encoder
+    @derive Jason.Encoder
     defstruct [:identifier, :type, :description, annotations: %{}]
   end
 
   defmodule Edge do
     @derive JSON.Encoder
+    @derive Jason.Encoder
     defstruct [:from, :to, :type, :description]
   end
 
+  @derive JSON.Encoder
+  @derive Jason.Encoder
   defstruct [vertices: %{}, edges: %{}, notes: [], service_ids: [], stack_ids: []]
 
   def spec() do
@@ -34,9 +38,7 @@ defmodule Console.AI.Research.Graph do
   end
 
   def update(%__MODULE__{vertices: vertices, edges: edges, notes: notes} = graph) do
-    IO.inspect(graph, label: "update graph")
     fetch()
-    |> IO.inspect(label: "base graph")
     |> add_edges(edges)
     |> add_vertices(vertices)
     |> then(fn g -> put_in(g.notes, g.notes ++ notes) end)
