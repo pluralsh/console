@@ -8,8 +8,9 @@ import {
   Modal,
   PlusIcon,
   Table,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { createColumnHelper, Row } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
@@ -23,12 +24,16 @@ import {
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { PromptInputSC } from '../agent-runs/CreateAgentRun'
+import { getAIBreadcrumbs } from '../AI'
+
+export const getInfraResearchesBreadcrumbs = () =>
+  getAIBreadcrumbs(AI_INFRA_RESEARCH_REL_PATH)
 
 export function InfraResearches() {
-  const navigate = useNavigate()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
@@ -41,10 +46,13 @@ export function InfraResearches() {
     [data?.infraResearches]
   )
 
+  useSetBreadcrumbs(useMemo(() => getInfraResearchesBreadcrumbs(), []))
+
   return (
     <Flex
       direction="column"
       gap="xsmall"
+      overflow="hidden"
     >
       <StretchedFlex>
         <Subtitle1H1> Infra research</Subtitle1H1>
@@ -70,9 +78,9 @@ export function InfraResearches() {
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{ message: 'No infra research runs found.' }}
-          onRowClick={(_e, { original }: Row<InfraResearchFragment>) => {
-            if (original.id) navigate(original.id)
-          }}
+          getRowLink={({ original }) =>
+            `${AI_INFRA_RESEARCH_REL_PATH}/${(original as InfraResearchFragment).id}`
+          }
         />
       )}
       <Modal
@@ -177,13 +185,15 @@ const columns = [
     header: 'Created At',
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
-  columnHelper.display({
+  columnHelper.accessor(({ id }) => id, {
     id: 'actions',
-
-    cell: () => {
+    header: '',
+    cell: ({ getValue }) => {
       return (
         <IconFrame
           clickable
+          as={Link}
+          to={`${AI_INFRA_RESEARCH_REL_PATH}/${getValue()}`}
           tooltip="View details"
           icon={<CaretRightIcon />}
         />
