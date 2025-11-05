@@ -8,6 +8,8 @@ export const AI_MCP_SERVERS_REL_PATH = 'mcp-servers'
 
 export const AI_INFRA_RESEARCH_REL_PATH = 'infra-research'
 export const AI_INFRA_RESEARCH_ABS_PATH = `${AI_ABS_PATH}/${AI_INFRA_RESEARCH_REL_PATH}`
+export const AI_INFRA_RESEARCH_DIAGRAM_REL_PATH = 'diagram'
+export const AI_INFRA_RESEARCH_ANALYSIS_REL_PATH = 'analysis'
 
 export const AI_SENTINELS_REL_PATH = 'sentinels'
 export const AI_SENTINELS_RUNS_REL_PATH = 'runs'

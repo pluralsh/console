@@ -2,6 +2,7 @@ import {
   Button,
   CaretRightIcon,
   Chip,
+  ChipProps,
   Flex,
   FormField,
   IconFrame,
@@ -166,19 +167,7 @@ const columns = [
   columnHelper.accessor('status', {
     id: 'status',
     header: 'Status',
-    cell: ({ getValue }) => {
-      const status = getValue()
-      if (!status) return null
-      return (
-        <Chip
-          severity={
-            status === InfraResearchStatus.Completed ? 'success' : 'info'
-          }
-        >
-          {capitalize(status)}
-        </Chip>
-      )
-    },
+    cell: ({ getValue }) => <InfraResearchStatusChip status={getValue()} />,
   }),
   columnHelper.accessor('insertedAt', {
     id: 'createdAt',
@@ -201,3 +190,20 @@ const columns = [
     },
   }),
 ]
+
+export function InfraResearchStatusChip({
+  status,
+  ...props
+}: {
+  status: Nullable<InfraResearchStatus>
+} & ChipProps) {
+  if (!status) return null
+  return (
+    <Chip
+      {...props}
+      severity={status === InfraResearchStatus.Completed ? 'success' : 'info'}
+    >
+      {capitalize(status)}
+    </Chip>
+  )
+}

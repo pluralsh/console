@@ -47,3 +47,9 @@ mutation CreateInfraResearch($attributes: InfraResearchAttributes!) {
     ...InfraResearch
   }
 }
+
+mutation FixResearchDiagram($id: ID!, $error: String!) {
+  fixResearchDiagram(id: $id, error: $error) {
+    ...InfraResearch
+  }
+}

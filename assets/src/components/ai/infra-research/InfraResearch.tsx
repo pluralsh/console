@@ -1,54 +1,122 @@
-import { Mermaid, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Flex,
+  SubTab,
+  TabList,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { useInfraResearchQuery } from 'generated/graphql'
-import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { LinkTabWrap } from 'components/utils/Tabs'
+import { InfraResearchFragment, useInfraResearchQuery } from 'generated/graphql'
+import { truncate } from 'lodash'
+import { useMemo, useRef } from 'react'
+import { Outlet, useMatch } from 'react-router-dom'
 import {
   AI_INFRA_RESEARCH_ABS_PATH,
+  AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
+  AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
 } from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
-import { getInfraResearchesBreadcrumbs } from './InfraResearches'
-import { truncate } from 'lodash'
+import {
+  getInfraResearchesBreadcrumbs,
+  InfraResearchStatusChip,
+} from './InfraResearches'
+import { InfraResearchSidecar } from './InfraResearchSidecar'
+
+const directory = [
+  { path: AI_INFRA_RESEARCH_DIAGRAM_REL_PATH, label: 'Diagram' },
+  { path: AI_INFRA_RESEARCH_ANALYSIS_REL_PATH, label: 'Analysis' },
+]
+
+function getBreadcrumbs(
+  infraResearch: Nullable<InfraResearchFragment>,
+  tab: string
+) {
+  return [
+    ...getInfraResearchesBreadcrumbs(),
+    {
+      label: truncate(infraResearch?.prompt ?? '', { length: 30 }),
+      url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}`,
+    },
+    {
+      label: directory.find((d) => d.path === tab)?.label ?? '',
+      url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}/${tab}`,
+    },
+  ]
+}
+
+export type InfraResearchContextType = {
+  infraResearch: Nullable<InfraResearchFragment>
+}
 
 export function InfraResearch() {
-  const id = useParams()[AI_INFRA_RESEARCH_PARAM_ID] ?? ''
+  const { researchId = '', tab = '' } =
+    useMatch(
+      `${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}/:tab?/*`
+    )?.params ?? {}
+  const tabStateRef = useRef<any>(null)
 
-  const { data } = useInfraResearchQuery({
-    variables: { id },
+  const { data, loading, error } = useInfraResearchQuery({
+    variables: { id: researchId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
+  const infraResearch = data?.infraResearch
   useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...getInfraResearchesBreadcrumbs(),
-        {
-          label: truncate(data?.infraResearch?.prompt ?? '', { length: 30 }),
-          href: `${AI_INFRA_RESEARCH_ABS_PATH}/${id}`,
-        },
-      ],
-      [data?.infraResearch?.prompt, id]
-    )
+    useMemo(() => getBreadcrumbs(infraResearch, tab), [infraResearch, tab])
   )
 
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
+      />
+    )
+
   return (
-    <WrapperSC>
-      {data?.infraResearch?.diagram && (
-        <>
-          <Subtitle1H1>Diagram</Subtitle1H1>
-          <Mermaid diagram={data?.infraResearch?.diagram} />
-        </>
-      )}
-    </WrapperSC>
+    <MainContentSC>
+      <Flex
+        direction="column"
+        gap="medium"
+        flex={1}
+      >
+        <StretchedFlex>
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{ selectedKey: tab }}
+          >
+            {directory.map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                to={path}
+              >
+                <SubTab key={path}>{label}</SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+          <InfraResearchStatusChip status={infraResearch?.status} />
+        </StretchedFlex>
+        {!data && loading ? (
+          <LoadingIndicator />
+        ) : (
+          <Outlet context={{ infraResearch }} />
+        )}
+      </Flex>
+      <InfraResearchSidecar infraResearch={infraResearch} />
+    </MainContentSC>
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const MainContentSC = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
   padding: theme.spacing.large,
+  maxWidth: theme.breakpoints.desktopLarge,
+  alignSelf: 'center',
+  width: '100%',
 }))
