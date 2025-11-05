@@ -311,8 +311,11 @@ defmodule Console.GraphQl.AI do
 
   @desc "Associations with services/stacks and a research"
   object :infra_research_association do
+    field :id,      non_null(:id)
     field :service, :service_deployment, resolve: dataloader(Deployments)
     field :stack,   :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   @desc "Additional analysis attached to this research result"

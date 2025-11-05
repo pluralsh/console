@@ -9837,8 +9837,11 @@ type InfraResearch {
 
 "Associations with services\/stacks and a research"
 type InfraResearchAssociation {
+  id: ID!
   service: ServiceDeployment
   stack: InfrastructureStack
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 "Additional analysis attached to this research result"

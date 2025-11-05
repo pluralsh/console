@@ -4,7 +4,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
   alias Console.AI.{Service, Provider, Fixer, Research}
-  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, InfraResearchAssociation}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, ResearchAssociation}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
@@ -14,7 +14,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(AiInsightEvidence, _), do: AiInsightEvidence
   def query(AgentSession, _), do: AgentSession
   def query(InfraResearch, _), do: InfraResearch
-  def query(InfraResearchAssociation, _), do: InfraResearchAssociation
+  def query(ResearchAssociation, _), do: ResearchAssociation
   def query(_, _), do: AiInsight
 
   def resolve_insight(%{id: id}, %{context: %{current_user: user}}),

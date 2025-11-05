@@ -4293,8 +4293,11 @@ export type InfraResearchAnalysis = {
 /** Associations with services/stacks and a research */
 export type InfraResearchAssociation = {
   __typename?: 'InfraResearchAssociation';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
   service?: Maybe<ServiceDeployment>;
   stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 /** attributes to create a deep research of your infrastructure */

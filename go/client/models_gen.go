@@ -3503,8 +3503,11 @@ type InfraResearchAnalysis struct {
 
 // Associations with services/stacks and a research
 type InfraResearchAssociation struct {
-	Service *ServiceDeployment   `json:"service,omitempty"`
-	Stack   *InfrastructureStack `json:"stack,omitempty"`
+	ID         string               `json:"id"`
+	Service    *ServiceDeployment   `json:"service,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
 }
 
 // attributes to create a deep research of your infrastructure
