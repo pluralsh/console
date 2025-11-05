@@ -29,6 +29,12 @@ Data that can be ignored:
 * intermediate cloud resources (like vpc route tables or ec2 launch configurations)
 * kubernetes configmaps/secrets
 
+Datatypes that are often useful to diagram:
+* compute-bearing kubernetes objects (deployment/statefulset/daemonset)
+* cloud networking (including vpc/subnets/firewalls)
+* cloud datastores (and their network configuration)
+* kubernetes clusters (and their network configuration)
+
 Best practices indicate containerized workloads run on kubernetes and anything storage and stateful is generally delegated to the cloud itself, unless the state is not business critical.
 
 Mermaid format guidelines:
