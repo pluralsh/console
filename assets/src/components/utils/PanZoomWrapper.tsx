@@ -1,11 +1,15 @@
 import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
   useRef,
   useState,
-  type MouseEvent,
   type ReactNode,
   type WheelEvent,
 } from 'react'
 import styled from 'styled-components'
+
+type Position = { x: number; y: number }
 
 export function PanZoomWrapper({
   children,
@@ -19,9 +23,9 @@ export function PanZoomWrapper({
   zoomSpeed?: number
 }) {
   const [scale, setScale] = useState(1)
-  const [{ x, y }, setPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
+  const [{ x, y }, setPosition] = useState<Position>({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+  const { isDragging, handleMouseDown } = useGlobalPan(setPosition)
 
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
     if (!containerRef.current) return
@@ -43,22 +47,11 @@ export function PanZoomWrapper({
     })
   }
 
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) =>
-    isDragging &&
-    setPosition(({ x, y }) => ({ x: x + e.movementX, y: y + e.movementY }))
-
-  const handleMouseDown = () => setIsDragging(true)
-  const handleMouseUp = () => setIsDragging(false)
-  const handleMouseLeave = () => setIsDragging(false)
-
   return (
     <ContainerSC
       ref={containerRef}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       style={{
         '--pan-x': `${x}px`,
         '--pan-y': `${y}px`,
@@ -82,8 +75,31 @@ const ContainerSC = styled.div(() => ({
     zIndex: 0,
     transform: 'translate(var(--pan-x), var(--pan-y)) scale(var(--zoom-scale))',
     transformOrigin: '0 0',
-    transition: 'transform 0.05s ease-out',
   },
   [`& :has(svg[id^="mermaid-"])`]: { height: '100%', overflow: 'hidden' },
   [`& :has(> button)`]: { height: 'auto', zIndex: 1 },
 }))
+
+function useGlobalPan(setPosition: Dispatch<SetStateAction<Position>>) {
+  const [isDragging, setIsDragging] = useState(false)
+  const handleMouseDown = () => setIsDragging(true)
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) =>
+      setPosition(({ x, y }) => ({ x: x + e.movementX, y: y + e.movementY }))
+
+    const handleMouseUp = () => setIsDragging(false)
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, setPosition])
+
+  return { isDragging, handleMouseDown }
+}

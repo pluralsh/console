@@ -72,6 +72,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   height: '100%',
+  minHeight: 0,
 }))
 
 // need to fix this in the ds so errors don't get cleared away after first render
