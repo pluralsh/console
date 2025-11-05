@@ -759,6 +759,8 @@ defmodule Console.Deployments.StacksTest do
       pr = insert(:pull_request, stack: stack)
       insert(:stack_run, stack: stack, status: :successful, pull_request: pr, dry_run: true)
       :timer.sleep(1)
+      insert(:stack_run, stack: stack, status: :queued)
+      :timer.sleep(1)
       run = insert(:stack_run, stack: stack, status: :queued, pull_request: pr, dry_run: true)
 
       {:ok, dequeued} = Stacks.dequeue(pr)

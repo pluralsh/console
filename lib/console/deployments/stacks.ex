@@ -812,7 +812,10 @@ defmodule Console.Deployments.Stacks do
   end
 
   defp filter(%Stack{id: id}), do: StackRun.for_stack(id)
-  defp filter(%PullRequest{stack_id: sid}), do: StackRun.for_stack(sid)
+  defp filter(%PullRequest{stack_id: sid, id: id}) do
+    StackRun.for_stack(sid)
+    |> StackRun.for_pr(id)
+  end
 
   @doc """
   Checks to see if a stack run can be dequeued (all runs before it have terminated), and marks
