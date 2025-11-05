@@ -135,4 +135,5 @@ const MainContentSC = styled.div(({ theme }) => ({
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
   width: '100%',
+  height: '100%',
 }))

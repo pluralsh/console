@@ -3,6 +3,7 @@ import {
   Code,
   EmptyState,
   MagicWandIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -12,6 +13,7 @@ import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { InfraResearchContextType } from './InfraResearch'
+import { PanZoomWrapper } from '../../utils/PanZoomWrapper'
 
 export function InfraResearchDiagram() {
   const { infraResearch } = useOutletContext<InfraResearchContextType>()
@@ -46,18 +48,22 @@ export function InfraResearchDiagram() {
       {fixError && <GqlError error={fixError} />}
       {parseError && <GqlError error={parseError} />}
       {diagram && (
-        <Code
-          key={diagram}
-          showHeader={false}
-          language="mermaid"
-          setMermaidError={(error) => {
-            parseErrorCache[diagram] = error
-            setParseError(error)
-          }}
-          css={{ overflow: 'clip' }}
+        <WrapWithIf
+          condition={!parseError}
+          wrapper={<PanZoomWrapper />}
         >
-          {diagram}
-        </Code>
+          <Code
+            key={diagram}
+            showHeader={false}
+            language="mermaid"
+            setMermaidError={(error) => {
+              parseErrorCache[diagram] = error
+              setParseError(error)
+            }}
+          >
+            {diagram}
+          </Code>
+        </WrapWithIf>
       )}
     </WrapperSC>
   )
@@ -67,6 +73,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  height: '100%',
 }))
 
 // need to fix this in the ds so errors don't get cleared away after first render
