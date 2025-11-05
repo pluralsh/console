@@ -18,4 +18,6 @@ defmodule Console.AI.Tools.Agent.FixDiagram do
     |> cast(attrs, @valid)
     |> validate_required(@valid)
   end
+
+  def implement(model), do: {:ok, model}
 end
