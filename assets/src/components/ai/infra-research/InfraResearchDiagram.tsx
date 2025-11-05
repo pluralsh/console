@@ -47,6 +47,7 @@ export function InfraResearchDiagram() {
       {parseError && <GqlError error={parseError} />}
       {diagram && (
         <Code
+          key={diagram}
           showHeader={false}
           language="mermaid"
           setMermaidError={(error) => {
