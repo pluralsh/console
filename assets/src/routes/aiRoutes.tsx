@@ -52,6 +52,7 @@ import { InfraResearches } from 'components/ai/infra-research/InfraResearches.ts
 import { InfraResearch } from 'components/ai/infra-research/InfraResearch.tsx'
 import { InfraResearchAnalysis } from 'components/ai/infra-research/InfraResearchAnalysis.tsx'
 import { InfraResearchDiagram } from 'components/ai/infra-research/InfraResearchDiagram.tsx'
+import { InfraResearchThreads } from 'components/ai/infra-research/InfraResearchThreads.tsx'
 
 export const aiRoutes = [
   <Route
@@ -116,6 +117,10 @@ export const aiRoutes = [
     <Route
       path={AI_INFRA_RESEARCH_ANALYSIS_REL_PATH}
       element={<InfraResearchAnalysis />}
+    />
+    <Route
+      path={AI_THREADS_REL_PATH}
+      element={<InfraResearchThreads />}
     />
   </Route>,
   // other agent routes

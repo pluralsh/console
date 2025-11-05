@@ -79,9 +79,9 @@ export function InfraResearches() {
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{ message: 'No infra research runs found.' }}
-          getRowLink={({ original }) =>
-            `${AI_INFRA_RESEARCH_REL_PATH}/${(original as InfraResearchFragment).id}`
-          }
+          getRowLink={({ original }) => (
+            <Link to={`${(original as InfraResearchFragment).id}`} />
+          )}
         />
       )}
       <Modal

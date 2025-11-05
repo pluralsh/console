@@ -9,6 +9,12 @@ fragment InfraResearch on InfraResearch {
   threads {
     ...ChatThreadTiny
   }
+  associations {
+    ...InfraResearchAssociation
+  }
+  user {
+    id
+  }
   insertedAt
   updatedAt
 }
@@ -16,6 +22,16 @@ fragment InfraResearch on InfraResearch {
 fragment InfraResearchAnalysis on InfraResearchAnalysis {
   notes
   summary
+}
+
+fragment InfraResearchAssociation on InfraResearchAssociation {
+  id
+  stack {
+    ...StackMinimal
+  }
+  service {
+    ...ServiceDeploymentTiny
+  }
 }
 
 query InfraResearch($id: ID!) {

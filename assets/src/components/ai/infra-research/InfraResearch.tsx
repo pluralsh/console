@@ -18,6 +18,7 @@ import {
   AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
   AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
+  AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
 import {
@@ -25,10 +26,13 @@ import {
   InfraResearchStatusChip,
 } from './InfraResearches'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { useLogin } from 'components/contexts'
 
 const directory = [
   { path: AI_INFRA_RESEARCH_DIAGRAM_REL_PATH, label: 'Diagram' },
   { path: AI_INFRA_RESEARCH_ANALYSIS_REL_PATH, label: 'Analysis' },
+  { path: AI_THREADS_REL_PATH, label: 'Threads' },
 ]
 
 function getBreadcrumbs(
@@ -42,7 +46,7 @@ function getBreadcrumbs(
       url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}`,
     },
     {
-      label: directory.find((d) => d.path === tab)?.label ?? '',
+      label: directory.find((d) => d.path === tab)?.path ?? '',
       url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}/${tab}`,
     },
   ]
@@ -53,6 +57,7 @@ export type InfraResearchContextType = {
 }
 
 export function InfraResearch() {
+  const { me } = useLogin()
   const { researchId = '', tab = '' } =
     useMatch(
       `${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}/:tab?/*`
@@ -64,8 +69,8 @@ export function InfraResearch() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-
   const infraResearch = data?.infraResearch
+
   useSetBreadcrumbs(
     useMemo(() => getBreadcrumbs(infraResearch, tab), [infraResearch, tab])
   )
@@ -90,15 +95,21 @@ export function InfraResearch() {
             stateRef={tabStateRef}
             stateProps={{ selectedKey: tab }}
           >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                to={path}
-              >
-                <SubTab key={path}>{label}</SubTab>
-              </LinkTabWrap>
-            ))}
+            {directory
+              .filter(({ path }) =>
+                infraResearch?.user && me?.id === infraResearch.user.id
+                  ? true
+                  : path !== AI_THREADS_REL_PATH
+              )
+              .map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
+                  key={path}
+                  to={path}
+                >
+                  <SubTab key={path}>{label}</SubTab>
+                </LinkTabWrap>
+              ))}
           </TabList>
           <InfraResearchStatusChip status={infraResearch?.status} />
         </StretchedFlex>
@@ -108,7 +119,12 @@ export function InfraResearch() {
           <Outlet context={{ infraResearch }} />
         )}
       </Flex>
-      <InfraResearchSidecar infraResearch={infraResearch} />
+      <ResponsiveLayoutSidecarContainer css={{ width: 300 }}>
+        <InfraResearchSidecar
+          infraResearch={infraResearch}
+          loading={loading}
+        />
+      </ResponsiveLayoutSidecarContainer>
     </MainContentSC>
   )
 }
