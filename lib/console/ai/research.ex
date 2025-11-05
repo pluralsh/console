@@ -7,6 +7,12 @@ defmodule Console.AI.Research do
   @preface """
   You're an experienced user of mermaid.js diagram format being asked to fix some slightly incorrect mermaid code.  Do your best to
   correct any parse errors discovered.
+
+  Also here are some additional Mermaid format guidelines:
+  * Avoid labels/node names with parenthesis, brackets or braces, unless surrrounded with quotes.  These can cause syntax errors
+    - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
+  * Do not include newline or `\n` characters in node names, they cannot be rendered properly.  Stick to just normal whitespace separators instead.
+  * Make different node types different colors to improve differentiation.
   """
 
   @type error :: Console.error
