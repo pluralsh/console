@@ -36,3 +36,4 @@ Mermaid format guidelines:
   - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
 * Do not include newline or `\n` characters in node names, they cannot be rendered properly.  Stick to just normal whitespace separators instead.
 * Make different node types different colors to improve differentiation.
+* Ensure the heirarchical ownership of the infrastructure is preserved in the diagram (eg network contains kubernetes cluster and database which contains kubernetes workloads)
