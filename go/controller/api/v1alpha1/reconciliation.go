@@ -56,3 +56,12 @@ func (r *Reconciliation) Requeue() ctrl.Result {
 
 	return ctrl.Result{RequeueAfter: Jitter(interval)}
 }
+
+func (r *Reconciliation) DriftDetect() bool {
+	if r == nil {
+		return true
+	}
+
+	drift := r.DriftDetection
+	return drift != nil && *drift
+}
