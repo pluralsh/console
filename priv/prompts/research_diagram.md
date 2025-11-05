@@ -43,3 +43,4 @@ Mermaid format guidelines:
 * Do not include newline or `\n` characters in node names, they cannot be rendered properly.  Stick to just normal whitespace separators instead.
 * Make different node types different colors to improve differentiation.
 * Ensure the heirarchical ownership of the infrastructure is preserved in the diagram (eg network contains kubernetes cluster and database which contains kubernetes workloads)
+* Use accurate labelling related to the infrastructure being diagrammed (eg make sure names match kubernetes or cloud infra names on the diagram)
