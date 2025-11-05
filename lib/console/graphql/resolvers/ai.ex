@@ -190,6 +190,12 @@ defmodule Console.GraphQl.Resolvers.AI do
   def create_research(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Research.create_research(attrs, user)
 
+  def update_research(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Research.update_research(attrs, id, user)
+
+  def delete_research(%{id: id}, %{context: %{current_user: user}}),
+    do: Research.delete_research(id, user)
+
   def fix_research_diagram(%{id: id, error: error}, %{context: %{current_user: user}}),
     do: Research.fix_diagram(error, id, user)
 

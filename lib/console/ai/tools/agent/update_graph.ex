@@ -39,7 +39,7 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
   defp edge_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(from to type description)a)
-    |> validate_required(~w(from to type)a)
+    |> validate_required(~w(from to)a)
   end
 
   @json_schema Console.priv_file!("tools/agent/update_graph.json") |> Jason.decode!()

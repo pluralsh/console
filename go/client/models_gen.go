@@ -3525,6 +3525,11 @@ type InfraResearchEdge struct {
 	Cursor *string        `json:"cursor,omitempty"`
 }
 
+// attributes to update a deep research of your infrastructure
+type InfraResearchUpdateAttributes struct {
+	Diagram *string `json:"diagram,omitempty"`
+}
+
 type InfrastructureStack struct {
 	ID *string `json:"id,omitempty"`
 	// the name of the stack
@@ -9559,17 +9564,19 @@ const (
 	InfraResearchStatusPending   InfraResearchStatus = "PENDING"
 	InfraResearchStatusRunning   InfraResearchStatus = "RUNNING"
 	InfraResearchStatusCompleted InfraResearchStatus = "COMPLETED"
+	InfraResearchStatusFailed    InfraResearchStatus = "FAILED"
 )
 
 var AllInfraResearchStatus = []InfraResearchStatus{
 	InfraResearchStatusPending,
 	InfraResearchStatusRunning,
 	InfraResearchStatusCompleted,
+	InfraResearchStatusFailed,
 }
 
 func (e InfraResearchStatus) IsValid() bool {
 	switch e {
-	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted:
+	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted, InfraResearchStatusFailed:
 		return true
 	}
 	return false

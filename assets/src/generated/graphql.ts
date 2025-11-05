@@ -4319,9 +4319,15 @@ export type InfraResearchEdge = {
 
 export enum InfraResearchStatus {
   Completed = 'COMPLETED',
+  Failed = 'FAILED',
   Pending = 'PENDING',
   Running = 'RUNNING'
 }
+
+/** attributes to update a deep research of your infrastructure */
+export type InfraResearchUpdateAttributes = {
+  diagram?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type InfrastructureStack = {
   __typename?: 'InfrastructureStack';
@@ -7500,6 +7506,8 @@ export type RootMutationType = {
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
+  /** Deletes an existing infrastructure research */
+  deleteInfraResearch?: Maybe<InfraResearch>;
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
@@ -7622,6 +7630,8 @@ export type RootMutationType = {
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
+  /** Updates an existing infrastructure research based on a prompt */
+  updateInfraResearch?: Maybe<InfraResearch>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
@@ -8116,6 +8126,11 @@ export type RootMutationTypeDeleteGroupArgs = {
 export type RootMutationTypeDeleteGroupMemberArgs = {
   groupId: Scalars['ID']['input'];
   userId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteInfraResearchArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -8637,6 +8652,12 @@ export type RootMutationTypeUpdateGlobalServiceArgs = {
 export type RootMutationTypeUpdateGroupArgs = {
   attributes: GroupAttributes;
   groupId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateInfraResearchArgs = {
+  attributes: InfraResearchUpdateAttributes;
+  id: Scalars['ID']['input'];
 };
 
 

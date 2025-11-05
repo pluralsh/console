@@ -2,7 +2,7 @@ defmodule Console.Schema.InfraResearch do
   use Console.Schema.Base
   alias Console.Schema.{User, ChatThread, ResearchAssociation}
 
-  defenum Status, pending: 0, running: 1, completed: 2
+  defenum Status, pending: 0, running: 1, completed: 2, failed: 3
 
   schema "infra_research" do
     field :status,   Status, default: :pending

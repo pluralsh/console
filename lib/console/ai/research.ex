@@ -33,6 +33,31 @@ defmodule Console.AI.Research do
   end
 
   @doc """
+  Updates an existing research task for the given user.
+  Only the creator of the research can update it.
+  """
+  @spec update_research(map, InfraResearch.t | binary, User.t) :: research_resp
+  def update_research(attrs, id, %User{id: id}) when is_binary(id),
+    do: update_research(attrs, get!(id), %User{id: id})
+  def update_research(attrs, %InfraResearch{user_id: id} = research, %User{id: id}) when is_binary(id) do
+    InfraResearch.changeset(research, attrs)
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def update_research(_, _, _), do: {:error, "only the creator of this research can update it"}
+
+  @doc """
+  Deletes an existing research task for the given user.
+  Only the creator of the research can delete it.
+  """
+  @spec delete_research(InfraResearch.t | binary, User.t) :: research_resp
+  def delete_research(id, %User{id: id}) when is_binary(id),
+    do: delete_research(get!(id), %User{id: id})
+  def delete_research(%InfraResearch{user_id: id} = research, %User{id: id}),
+    do: Repo.delete(research)
+  def delete_research(_, _), do: {:error, "only the creator of this research can delete it"}
+
+  @doc """
   Makes an ai tool call to correct formatting on an existing research diagram
   """
   @spec fix_diagram(binary, InfraResearch.t | binary, User.t) :: research_resp
@@ -49,6 +74,7 @@ defmodule Console.AI.Research do
   end
   def fix_diagram(error, id, %User{} = user) when is_binary(id), do: fix_diagram(error, get!(id), user)
   def fix_diagram(_, _, _), do: {:error, "only the creator of this research can fix diagrams"}
+
 
   defp notify({:ok, %InfraResearch{} = build}, :create),
     do: handle_notify(PubSub.InfraResearchCreated, build)

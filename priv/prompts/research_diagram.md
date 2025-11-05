@@ -22,7 +22,8 @@ Guidelines for searching for infrastructure:
     b. webserver workloads
     c. loadbalancing and internal traffice configuration (via Ingress and Service resources)
     d. secondary databases like caches (can also be found via `stack_search` too)
-
+3. It is possible the needed infrastructure is in multiple services or stacks, you run two or three searches for each to exhaustively check all possible locations, and don't exclusively search for stacks related to kubernetes itself, as it could be elsewhere.
+4. The cluster associated with a specific framework or compute-based resource is most definitively found by associating with kubernetes data in a `service_search` then a stack search.
 Data that can be ignored:
 
 * kubernetes rbac information
@@ -41,6 +42,6 @@ Mermaid format guidelines:
 * Avoid labels/node names with parenthesis, brackets or braces, unless surrrounded with quotes.  These can cause syntax errors
   - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
 * Do not include newline or `\n` characters in node names, they cannot be rendered properly.  Stick to just normal whitespace separators instead.
-* Make different node types different colors to improve differentiation.
+* Make different node types different colors and descriptive shapes to improve differentiation.
 * Ensure the heirarchical ownership of the infrastructure is preserved in the diagram (eg network contains kubernetes cluster and database which contains kubernetes workloads)
 * Use accurate labelling related to the infrastructure being diagrammed (eg make sure names match kubernetes or cloud infra names on the diagram)

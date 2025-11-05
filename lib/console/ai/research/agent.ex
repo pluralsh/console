@@ -40,6 +40,7 @@ defmodule Console.AI.Research.Agent do
 
   def init({research, caller}) do
     Logger.info("Starting infra research #{research.id}")
+    Process.flag(:trap_exit, true)
     Process.send_after(self(), :die, :timer.minutes(60))
     research = Repo.preload(research, [:user])
     {:ok, %State{caller: caller, research: research, user: research.user}, {:continue, :boot}}
@@ -135,6 +136,11 @@ defmodule Console.AI.Research.Agent do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  def terminate(_, %State{research: %InfraResearch{status: s} = research}) when s != :completed do
+    update_research(research, %{status: :failed})
+  end
+  def terminate(_, _), do: :ok
 
   defp create_thread(%InfraResearch{user: %User{} = user} = research, summary) do
     Chat.create_thread(%{

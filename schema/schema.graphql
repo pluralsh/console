@@ -1123,6 +1123,12 @@ type RootMutationType {
   "Creates a new infrastructure research based on a prompt"
   createInfraResearch(attributes: InfraResearchAttributes!): InfraResearch
 
+  "Updates an existing infrastructure research based on a prompt"
+  updateInfraResearch(id: ID!, attributes: InfraResearchUpdateAttributes!): InfraResearch
+
+  "Deletes an existing infrastructure research"
+  deleteInfraResearch(id: ID!): InfraResearch
+
   "Fixes a broken mermaid diagram in an existing research"
   fixResearchDiagram(
     id: ID!
@@ -9452,6 +9458,7 @@ enum InfraResearchStatus {
   PENDING
   RUNNING
   COMPLETED
+  FAILED
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -9539,6 +9546,11 @@ input ChatThreadSettingsAttributes {
 "attributes to create a deep research of your infrastructure"
 input InfraResearchAttributes {
   prompt: String
+}
+
+"attributes to update a deep research of your infrastructure"
+input InfraResearchUpdateAttributes {
+  diagram: String
 }
 
 type Chat {
