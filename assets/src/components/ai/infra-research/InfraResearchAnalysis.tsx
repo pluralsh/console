@@ -1,6 +1,5 @@
 import { Card, EmptyState, Flex, Markdown } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
 import { useOutletContext } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -15,7 +14,6 @@ export function InfraResearchAnalysis() {
 
   return (
     <WrapperSC>
-      <Subtitle1H1>Analysis</Subtitle1H1>
       {analysis.summary && (
         <Flex
           direction="column"

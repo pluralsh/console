@@ -7,13 +7,12 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFixResearchDiagramMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
-import { InfraResearchContextType } from './InfraResearch'
 import { PanZoomWrapper } from '../../utils/PanZoomWrapper'
+import { InfraResearchContextType } from './InfraResearch'
 
 export function InfraResearchDiagram() {
   const { infraResearch } = useOutletContext<InfraResearchContextType>()
@@ -30,7 +29,6 @@ export function InfraResearchDiagram() {
   return (
     <WrapperSC>
       <StretchedFlex>
-        <Subtitle1H1>Diagram</Subtitle1H1>
         {parseError && (
           <Button
             loading={fixLoading}
