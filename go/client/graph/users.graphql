@@ -11,6 +11,14 @@ query GetUserTiny($email: String!) {
     }
 }
 
+query Me {
+    me {
+        id
+        email
+        name
+    }
+}
+
 mutation CreateUser($attributes: UserAttributes!) {
     createUser(attributes: $attributes) {
         ...UserFragment
