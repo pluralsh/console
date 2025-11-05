@@ -34,3 +34,5 @@ Best practices indicate containerized workloads run on kubernetes and anything s
 Mermaid format guidelines:
 * Avoid labels/node names with parenthesis, brackets or braces, unless surrrounded with quotes.  These can cause syntax errors
   - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
+* Do not include newline or `\n` characters in node names, they cannot be rendered properly.  Stick to just normal whitespace separators instead.
+* Make different node types different colors to improve differentiation.
