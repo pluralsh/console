@@ -52,7 +52,15 @@ migrator:
 console:
   additionalContainers: ~
   containerSecurityContext: ~
-  securityContext: ~
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
 
 # secrets is used to configure environment variables for the console, in secrets.yaml
 secrets:
