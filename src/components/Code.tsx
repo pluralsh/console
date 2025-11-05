@@ -48,6 +48,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   title?: ReactNode
   onSelectedTabChange?: (key: string) => void
   isStreaming?: boolean // currently just used to block mermaid from rendering mid-stream, but might have other uses later on
+  setMermaidError?: (error: Nullable<Error>) => void
 }
 
 type TabInterfaceT = 'tabs' | 'dropdown'
@@ -432,6 +433,7 @@ function CodeUnstyled({
   title,
   onSelectedTabChange,
   isStreaming = false,
+  setMermaidError,
   ...props
 }: CodeProps) {
   const parentFillLevel = useFillLevel()
@@ -523,6 +525,7 @@ function CodeUnstyled({
                 showLineNumbers={showLineNumbers}
                 hasSetHeight={hasSetHeight}
                 isStreaming={isStreaming}
+                setMermaidError={setMermaidError}
               >
                 {tab.content}
               </CodeContent>
@@ -539,6 +542,7 @@ function CodeUnstyled({
               showLineNumbers={showLineNumbers}
               hasSetHeight={hasSetHeight}
               isStreaming={isStreaming}
+              setMermaidError={setMermaidError}
             >
               {children}
             </CodeContent>
