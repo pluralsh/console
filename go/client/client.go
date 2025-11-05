@@ -278,6 +278,7 @@ type ConsoleClient interface {
 	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, addons []*CloudAddonAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	GetUserTiny(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUserTiny, error)
+	Me(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*Me, error)
 	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
 	UpsertUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUser, error)
@@ -21449,6 +21450,31 @@ func (t *GetUserTiny_User) GetName() string {
 	return t.Name
 }
 
+type Me_Me struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Email string "json:\"email\" graphql:\"email\""
+	Name  string "json:\"name\" graphql:\"name\""
+}
+
+func (t *Me_Me) GetID() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.ID
+}
+func (t *Me_Me) GetEmail() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.Email
+}
+func (t *Me_Me) GetName() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.Name
+}
+
 type AddGroupMember_CreateGroupMember_GroupMemberFragment_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -24450,6 +24476,17 @@ func (t *GetUserTiny) GetUser() *GetUserTiny_User {
 		t = &GetUserTiny{}
 	}
 	return t.User
+}
+
+type Me struct {
+	Me *Me_Me "json:\"me,omitempty\" graphql:\"me\""
+}
+
+func (t *Me) GetMe() *Me_Me {
+	if t == nil {
+		t = &Me{}
+	}
+	return t.Me
 }
 
 type CreateUser struct {
@@ -44398,6 +44435,30 @@ func (c *Client) GetUserTiny(ctx context.Context, email string, interceptors ...
 	return &res, nil
 }
 
+const MeDocument = `query Me {
+	me {
+		id
+		email
+		name
+	}
+}
+`
+
+func (c *Client) Me(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*Me, error) {
+	vars := map[string]any{}
+
+	var res Me
+	if err := c.Client.Post(ctx, "Me", MeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateUserDocument = `mutation CreateUser ($attributes: UserAttributes!) {
 	createUser(attributes: $attributes) {
 		... UserFragment
@@ -44875,6 +44936,7 @@ var DocumentOperationNames = map[string]string{
 	SaveUpgradeInsightsDocument:                       "SaveUpgradeInsights",
 	GetUserDocument:                                   "GetUser",
 	GetUserTinyDocument:                               "GetUserTiny",
+	MeDocument:                                        "Me",
 	CreateUserDocument:                                "CreateUser",
 	UpdateUserDocument:                                "UpdateUser",
 	UpsertUserDocument:                                "UpsertUser",
