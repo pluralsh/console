@@ -6905,6 +6905,15 @@
   publisher: upbound
 - name: uptycs_uptycs-collector
   versions:
+  - version: v1.1.7-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.1.2-eksbuild.1
     compatibilities:
     - '1.31'
@@ -6928,6 +6937,15 @@
   publisher: Uptycs
 - name: uptycs_uptycs-runtime-sensor
   versions:
+  - version: v1.0.4-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.0.1-eksbuild.1
     compatibilities:
     - '1.31'
