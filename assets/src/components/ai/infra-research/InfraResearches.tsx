@@ -182,7 +182,7 @@ const columns = [
         <IconFrame
           clickable
           as={Link}
-          to={`${AI_INFRA_RESEARCH_REL_PATH}/${getValue()}`}
+          to={getValue()}
           tooltip="View details"
           icon={<CaretRightIcon />}
         />

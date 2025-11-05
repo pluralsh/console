@@ -9,8 +9,8 @@ import {
 import { ServiceStatusChip } from 'components/cd/services/ServiceStatusChip'
 import StackStatusChip from 'components/stacks/common/StackStatusChip'
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
-import { CaptionP } from 'components/utils/typography/Text'
-import { InfraResearchFragment } from 'generated/graphql'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { InfraResearchFragment, InfraResearchStatus } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { Fragment } from 'react/jsx-runtime'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
@@ -20,6 +20,7 @@ import {
   ActionItemHeaderSC,
   ActionItemSC,
 } from '../chatbot/actions-panel/ChatbotActionsPanel'
+import { isEmpty } from 'lodash'
 
 export function InfraResearchSidecar({
   infraResearch,
@@ -30,8 +31,17 @@ export function InfraResearchSidecar({
 }) {
   if (!infraResearch?.associations) return loading ? <SidecarSkeleton /> : null
 
+  if (
+    isEmpty(infraResearch.associations) &&
+    infraResearch.status === InfraResearchStatus.Completed
+  )
+    return null
+
   return (
     <Sidecar css={{ padding: 0 }}>
+      <ActionItemSC>
+        <Body2BoldP>Associated resources</Body2BoldP>
+      </ActionItemSC>
       {infraResearch.associations
         .filter(isNonNullable)
         .map(({ id, stack, service }) => (
