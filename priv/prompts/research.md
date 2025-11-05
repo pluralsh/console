@@ -36,6 +36,7 @@ Guidelines for searching for infrastructure:
     b. webserver workloads
     c. loadbalancing and internal traffice configuration (via Ingress and Service resources)
     d. secondary databases like caches (can also be found via `stack_search` too)
+3. It is possible the needed infrastructure is in multiple services or stacks, you run two or three searches for each to exhaustively check all possible locations, and don't exclusively search for stacks related to kubernetes itself, as it could be elsewhere.
 
 Data that can be ignored:
 
