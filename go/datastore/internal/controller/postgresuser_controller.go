@@ -149,7 +149,7 @@ func (r *PostgresUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 				// We have to remove the controller ref from the database if exists.
 				if err := utils.TryRemoveControllerRef(ctx, r.Client, user, &crdDB, r.Scheme); err != nil {
 					logger.V(5).Error(err, "failed to remove controller ref")
-					return ctrl.Result{}, err
+					// return ctrl.Result{}, err
 				}
 			}
 		}

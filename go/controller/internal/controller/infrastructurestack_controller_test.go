@@ -263,6 +263,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:        k8sClient,
@@ -286,6 +287,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 		It("should successfully reconcile and update previously created stack", func() {
 			test := struct {
 				returnCreateStack *gqlclient.InfrastructureStackFragment
+				returnResource    *gqlclient.InfrastructureStackIDFragment
 				expectedStatus    v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
@@ -309,6 +311,9 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
+				},
+				returnResource: &gqlclient.InfrastructureStackIDFragment{
+					ID: lo.ToPtr(id),
 				},
 				returnCreateStack: &gqlclient.InfrastructureStackFragment{
 					ID: lo.ToPtr(id),
@@ -349,8 +354,8 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(nil, nil)
-			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(test.returnResource, nil)
+			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
 			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
 				Status: gqlclient.StackStatusSuccessful,
 			}, nil)

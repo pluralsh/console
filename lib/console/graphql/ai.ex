@@ -72,6 +72,11 @@ defmodule Console.GraphQl.AI do
     field :prompt, :string
   end
 
+  @desc "attributes to update a deep research of your infrastructure"
+  input_object :infra_research_update_attributes do
+    field :diagram, :string
+  end
+
   object :chat do
     field :id,           non_null(:id)
     field :type,         non_null(:chat_type)
@@ -311,8 +316,11 @@ defmodule Console.GraphQl.AI do
 
   @desc "Associations with services/stacks and a research"
   object :infra_research_association do
+    field :id,      non_null(:id)
     field :service, :service_deployment, resolve: dataloader(Deployments)
     field :stack,   :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   @desc "Additional analysis attached to this research result"
@@ -601,6 +609,32 @@ defmodule Console.GraphQl.AI do
       arg :attributes, non_null(:infra_research_attributes)
 
       resolve &AI.create_research/2
+    end
+
+    @desc "Updates an existing infrastructure research based on a prompt"
+    field :update_infra_research, :infra_research do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:infra_research_update_attributes)
+
+      resolve &AI.update_research/2
+    end
+
+    @desc "Deletes an existing infrastructure research"
+    field :delete_infra_research, :infra_research do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.delete_research/2
+    end
+
+    @desc "Fixes a broken mermaid diagram in an existing research"
+    field :fix_research_diagram, :infra_research do
+      middleware Authenticated
+      arg :id,    non_null(:id)
+      arg :error, non_null(:string), description: "mermaid compilation error"
+
+      resolve &AI.fix_research_diagram/2
     end
   end
 

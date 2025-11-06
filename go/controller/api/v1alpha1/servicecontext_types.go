@@ -92,6 +92,15 @@ func (s *ServiceContext) Diff(hasher Hasher) (changed bool, sha string, err erro
 	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
+func (s *ServiceContext) DriftDetect() bool {
+	// default to true
+	if s.Spec.Reconciliation != nil && s.Spec.Reconciliation.DriftDetection != nil {
+		return *s.Spec.Reconciliation.DriftDetection
+	}
+
+	return true
+}
+
 func init() {
 	SchemeBuilder.Register(&ServiceContext{}, &ServiceContextList{})
 }

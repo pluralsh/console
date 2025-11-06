@@ -777,7 +777,7 @@ defmodule Console.Deployments.Services do
   defp latest_vsn(%Service{sha: nil, revision_id: rid}, %{revision_id: rid}), do: true
   defp latest_vsn(_, %{sha: sha, revision_id: rid}) when is_binary(sha) and is_binary(rid), do: false
   defp latest_vsn(%Service{revision_id: rid}, %{revision_id: rid}), do: true
-  defp latest_vsn(_, %{revision_id: rid}) when is_binary(rid), do: false
+  defp latest_vsn(_, %{revision_id: rid}) when is_binary(rid) and byte_size(rid) > 0, do: false
   defp latest_vsn(_, _), do: true
 
   def stabilize_deps(%{dependencies: deps} = attrs, %Service{dependencies: old_deps}) when is_list(old_deps) do

@@ -10,11 +10,6 @@ import { Key } from '@react-types/shared'
 
 import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
 
-import {
-  SinceSecondsOptions,
-  SinceSecondsSelectOptions,
-} from 'components/cd/cluster/pod/logs/Logs'
-
 import { GqlError } from 'components/utils/Alert'
 
 import { reverse } from 'lodash'
@@ -29,13 +24,13 @@ import {
 
 import { useTheme } from 'styled-components'
 import {
-  Common_Event as EventT,
   Common_EventList as EventListT,
-  Pod_PodDetail as PodT,
+  Common_Event as EventT,
   PodEventsDocument,
   PodEventsQuery,
   PodEventsQueryVariables,
   PodQueryVariables,
+  Pod_PodDetail as PodT,
   usePodLogsQuery,
   usePodQuery,
 } from '../../../generated/graphql-kubernetes'
@@ -263,9 +258,6 @@ export function PodLogs(): ReactElement<any> {
     },
     fetchPolicy: 'no-cache',
   })
-  const [sinceSeconds, setSinceSeconds] = useState<Nullable<Key>>(
-    SinceSecondsOptions.HalfHour
-  )
 
   if (error)
     return (
@@ -303,21 +295,6 @@ export function PodLogs(): ReactElement<any> {
               <ListBoxItem
                 key={c}
                 label={c}
-              />
-            ))}
-          </Select>
-        </FormField>
-
-        <FormField label="Logs since">
-          <Select
-            selectedKey={`${sinceSeconds}`}
-            onSelectionChange={(key) => setSinceSeconds(key)}
-          >
-            {SinceSecondsSelectOptions.map((opts) => (
-              <ListBoxItem
-                key={`${opts.key}`}
-                label={opts.label}
-                selected={opts.key === sinceSeconds}
               />
             ))}
           </Select>

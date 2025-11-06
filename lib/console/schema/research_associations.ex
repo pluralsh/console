@@ -1,4 +1,4 @@
-defmodule Console.Schema.ResearchAssociations do
+defmodule Console.Schema.ResearchAssociation do
   use Console.Schema.Base
   alias Console.Schema.{InfraResearch, Stack, Service}
 

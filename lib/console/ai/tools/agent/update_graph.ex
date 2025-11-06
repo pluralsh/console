@@ -32,14 +32,14 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(id type description)a)
-    |> validate_required(~w(id type description)a)
+    |> cast(attrs, ~w(identifier type description)a)
+    |> validate_required(~w(identifier type description)a)
   end
 
   defp edge_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(from to type description)a)
-    |> validate_required(~w(from to type description)a)
+    |> validate_required(~w(from to)a)
   end
 
   @json_schema Console.priv_file!("tools/agent/update_graph.json") |> Jason.decode!()
@@ -52,6 +52,6 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
     with {:ok, json} <- Console.mapify(model) |> Jason.encode(),
          {:ok, graph} <- Poison.decode(json, as: Graph.spec()),
          _ <- Graph.update(graph),
-      do: {:ok, "Updated graph with the provided details"}
+      do: Graph.encode()
   end
 end

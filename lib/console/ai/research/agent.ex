@@ -25,8 +25,14 @@ defmodule Console.AI.Research.Agent do
 
   def enqueue(pid, task), do: GenServer.cast(pid, task)
 
+  def boot(_pid), do: :ok
+
   def start_link([%InfraResearch{} = research]), do: start_link(research)
   def start_link(%InfraResearch{} = research) do
+    GenServer.start_link(__MODULE__, {research, nil}, name: via(research))
+  end
+
+  def start_monitored(%InfraResearch{} = research) do
     GenServer.start_link(__MODULE__, {research, self()}, name: via(research))
   end
 
@@ -34,6 +40,7 @@ defmodule Console.AI.Research.Agent do
 
   def init({research, caller}) do
     Logger.info("Starting infra research #{research.id}")
+    Process.flag(:trap_exit, true)
     Process.send_after(self(), :die, :timer.minutes(60))
     research = Repo.preload(research, [:user])
     {:ok, %State{caller: caller, research: research, user: research.user}, {:continue, :boot}}
@@ -42,7 +49,7 @@ defmodule Console.AI.Research.Agent do
   def handle_continue(:boot, %State{research: research, user: user} = state) do
     Graph.new()
     update_research(research, %{status: :running})
-    {:ok, thread} = create_thread(research)
+    {:ok, thread} = create_thread(research, "Initial infrastructure research for #{research.prompt}")
     {thread, session} = setup_context(thread.session)
 
     Stream.topic(:thread, thread.id, thread.user)
@@ -58,7 +65,7 @@ defmodule Console.AI.Research.Agent do
   end
 
   def handle_cast(:booted, %State{research: research, user: user, threads: threads} = state) do
-    {:ok, thread} = create_thread(research)
+    {:ok, thread} = create_thread(research, "Probing for any additional data to figure out the infrastructure for #{research.prompt}")
     {thread, session} = setup_context(thread.session)
 
     Stream.topic(:thread, thread.id, thread.user)
@@ -101,20 +108,24 @@ defmodule Console.AI.Research.Agent do
       """}
     ]
 
-    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface) do
-      update_research(research, %{
-        status: :completed,
-        analysis: %{summary: result.summary, notes: result.notes},
-        diagram: result.diagram
-      })
-      |> case do
-        {:error, error} -> Logger.error("Error updating research #{research.id}: #{inspect(error)}")
-        {:ok, _} -> Logger.info("Research #{research.id} updated with analysis")
-      end
+    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface),
+         {:ok, research} <- update_research(research, %{
+                              status: :completed,
+                              analysis: %{summary: result.summary, notes: result.notes},
+                              diagram: result.diagram
+                          }) do
+        {:noreply, %{state | research: research}}
+    else
+      err ->
+        Logger.error("Error updating research #{research.id}: #{inspect(err)}")
+        {:noreply, state}
     end
-
-    send(state.caller, :done)
-    {:noreply, state}
+    |> then(fn res ->
+      if is_pid(state.caller) do
+        send(state.caller, :done)
+      end
+      res
+    end)
   end
 
   def handle_cast(_, state), do: {:noreply, state}
@@ -128,9 +139,15 @@ defmodule Console.AI.Research.Agent do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp create_thread(%InfraResearch{user: %User{} = user} = research) do
+  def terminate(_, %State{research: %InfraResearch{status: s} = research}) when s != :completed do
+    update_research(research, %{status: :failed})
+  end
+  def terminate(_, _), do: :ok
+
+  defp create_thread(%InfraResearch{user: %User{} = user} = research, summary) do
     Chat.create_thread(%{
       research_id: research.id,
+      summary: summary,
       session: %{type: :research}
     }, user)
   end

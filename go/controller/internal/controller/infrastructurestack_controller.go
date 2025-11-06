@@ -149,13 +149,13 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	}
 
 	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, stack)
+	existing, err := r.stackExists(ctx, stack)
 	if err != nil {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	if !exists {
+	if existing == nil {
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			return common.HandleRequeue(nil, err, stack.SetCondition)
@@ -199,7 +199,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		}
 	}
 
-	if err := r.setReadyCondition(ctx, stack, exists); err != nil {
+	if err := r.setReadyCondition(ctx, stack, existing != nil); err != nil {
 		return ctrl.Result{}, err
 	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
@@ -208,16 +208,17 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 }
 
 func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists bool) error {
-	if exists {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-		status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
-		if err != nil {
-			return err
-		}
-		if status.Status == console.StackStatusSuccessful {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	if !exists {
+		return nil
+	}
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
+	if err != nil {
+		return err
+	}
+	if status.Status == console.StackStatusSuccessful {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-		}
 	}
 	return nil
 }
@@ -231,20 +232,20 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Complete(r)
 }
 
-func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, stack *v1alpha1.InfrastructureStack) (bool, error) {
-	if !stack.Status.HasID() {
-		return false, nil
-	}
-
-	_, err := r.ConsoleClient.GetStackById(ctx, stack.Status.GetID())
+func (r *InfrastructureStackReconciler) stackExists(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*console.InfrastructureStackIDFragment, error) {
+	stackFragment, err := r.ConsoleClient.GetStackById(ctx, stack.Status.GetID())
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return false, nil
+			return nil, nil
 		}
-		return false, err
+		return nil, err
 	}
 
-	return true, nil
+	if stackFragment != nil && stackFragment.ID != nil && stack.Status.GetID() != *stackFragment.ID {
+		stack.Status.ID = stackFragment.ID
+	}
+
+	return stackFragment, nil
 }
 
 func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) (ctrl.Result, error) {

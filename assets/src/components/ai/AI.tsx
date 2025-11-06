@@ -15,6 +15,7 @@ import {
   AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
+  AI_INFRA_RESEARCH_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_THREADS_REL_PATH,
@@ -35,6 +36,7 @@ const getDirectory = (agentEnabled: boolean) => [
   { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
+  { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
   { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
   ...(agentEnabled
     ? [

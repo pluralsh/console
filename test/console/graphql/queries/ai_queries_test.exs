@@ -396,18 +396,29 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
     test "it can list a users infra researches" do
       user = insert(:user)
       research = insert(:infra_research, user: user)
+      assoc1 = insert(:research_association, research: research, stack: insert(:stack))
+      assoc2 = insert(:research_association, research: research, service: insert(:service))
 
       {:ok, %{data: %{"infraResearch" => found}}} = run_query("""
         query Research($id: ID!) {
           infraResearch(id: $id) {
             id
             prompt
+            associations {
+              id
+              stack { id }
+              service { id }
+            }
           }
         }
       """, %{"id" => research.id}, %{current_user: user})
 
       assert found["id"] == research.id
       assert found["prompt"] == research.prompt
+
+      found_assocs = Map.new(found["associations"], & {&1["id"], &1})
+      assert found_assocs[assoc1.id]["stack"]["id"] == assoc1.stack_id
+      assert found_assocs[assoc2.id]["service"]["id"] == assoc2.service_id
     end
   end
 

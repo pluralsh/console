@@ -136,7 +136,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		}
 		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
 		if err != nil {
-			return ctrl.Result{}, err
+			return common.HandleRequeue(nil, err, globalService.SetCondition)
 		}
 
 		if st.Name == nil {

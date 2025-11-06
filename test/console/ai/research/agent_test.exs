@@ -18,7 +18,7 @@ defmodule Console.AI.Research.AgentTest do
         }}
       end)
 
-      {:ok, _} = Agent.start_link(research)
+      {:ok, _} = Agent.start_monitored(research)
 
       assert_receive :done, :timer.seconds(10)
 

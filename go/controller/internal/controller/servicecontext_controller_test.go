@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -18,6 +17,7 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/controller"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
@@ -98,8 +98,7 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, name))
-			fakeConsoleClient.On("IsServiceContextExists", mock.Anything).Return(false, nil)
+			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
 			fakeConsoleClient.On("SaveServiceContext", mock.Anything, mock.Anything).Return(test.fragment, nil)
 
 			nr := &controller.ServiceContextReconciler{
@@ -121,21 +120,21 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should successfully reconcile readonly the resource", func() {
-			By("Create readonly resource")
+		It("should successfully reconcile existing contexts", func() {
+			By("Create existing resource")
 			test := struct {
 				fragment       *gqlclient.ServiceContextFragment
 				expectedStatus v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: nil,
+					SHA: lo.ToPtr("Z5PGHG2MVCGI7PUAFZC7PQ5KRNEPBBBJCZA7KBFHUQYAOXBMI4KA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
-							Status:  metav1.ConditionTrue,
+							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),
-							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+							Message: "",
 						},
 						{
 							Type:    v1alpha1.ReadyConditionType.String(),
@@ -163,9 +162,8 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, nil).Once()
-			fakeConsoleClient.On("IsServiceContextExists", mock.Anything).Return(true, nil)
 			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(test.fragment, nil).Once()
+			fakeConsoleClient.On("SaveServiceContext", mock.Anything, mock.Anything).Return(test.fragment, nil).Once()
 
 			nr := &controller.ServiceContextReconciler{
 				Client:        k8sClient,

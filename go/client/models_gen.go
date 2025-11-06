@@ -3503,8 +3503,11 @@ type InfraResearchAnalysis struct {
 
 // Associations with services/stacks and a research
 type InfraResearchAssociation struct {
-	Service *ServiceDeployment   `json:"service,omitempty"`
-	Stack   *InfrastructureStack `json:"stack,omitempty"`
+	ID         string               `json:"id"`
+	Service    *ServiceDeployment   `json:"service,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
 }
 
 // attributes to create a deep research of your infrastructure
@@ -3520,6 +3523,11 @@ type InfraResearchConnection struct {
 type InfraResearchEdge struct {
 	Node   *InfraResearch `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+// attributes to update a deep research of your infrastructure
+type InfraResearchUpdateAttributes struct {
+	Diagram *string `json:"diagram,omitempty"`
 }
 
 type InfrastructureStack struct {
@@ -9556,17 +9564,19 @@ const (
 	InfraResearchStatusPending   InfraResearchStatus = "PENDING"
 	InfraResearchStatusRunning   InfraResearchStatus = "RUNNING"
 	InfraResearchStatusCompleted InfraResearchStatus = "COMPLETED"
+	InfraResearchStatusFailed    InfraResearchStatus = "FAILED"
 )
 
 var AllInfraResearchStatus = []InfraResearchStatus{
 	InfraResearchStatusPending,
 	InfraResearchStatusRunning,
 	InfraResearchStatusCompleted,
+	InfraResearchStatusFailed,
 }
 
 func (e InfraResearchStatus) IsValid() bool {
 	switch e {
-	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted:
+	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted, InfraResearchStatusFailed:
 		return true
 	}
 	return false

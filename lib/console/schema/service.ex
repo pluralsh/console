@@ -217,7 +217,7 @@ defmodule Console.Schema.Service do
     has_many :vulns,            ServiceVuln
     has_many :imports,          ServiceImport, on_replace: :delete
     has_many :errors,           ServiceError, on_replace: :delete
-    has_many :components,       ServiceComponent, on_replace: :delete
+    has_many :components,       ServiceComponent, on_replace: :delete_if_exists
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
     has_many :configuration, through: [:revision, :configuration]
     has_many :preview_templates,       PreviewEnvironmentTemplate, foreign_key: :reference_service_id
