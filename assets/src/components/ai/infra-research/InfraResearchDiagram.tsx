@@ -45,7 +45,6 @@ export function InfraResearchDiagram() {
     ? {
         href: `${AI_INFRA_RESEARCH_ABS_PATH}/${createData?.createInfraResearch?.id}`,
         as: 'a' as const,
-        target: '_blank',
         endIcon: <LinkoutIcon />,
       }
     : {}

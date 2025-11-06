@@ -191,6 +191,17 @@ const columns = [
   }),
 ]
 
+function statusSeverity(status: InfraResearchStatus) {
+  switch (status) {
+    case InfraResearchStatus.Completed:
+      return 'success'
+    case InfraResearchStatus.Failed:
+      return 'danger'
+    default:
+      return 'info'
+  }
+}
+
 export function InfraResearchStatusChip({
   status,
   ...props
@@ -201,7 +212,7 @@ export function InfraResearchStatusChip({
   return (
     <Chip
       {...props}
-      severity={status === InfraResearchStatus.Completed ? 'success' : 'info'}
+      severity={statusSeverity(status)}
     >
       {capitalize(status)}
     </Chip>

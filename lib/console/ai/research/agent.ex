@@ -108,22 +108,24 @@ defmodule Console.AI.Research.Agent do
       """}
     ]
 
-    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface) do
-      update_research(research, %{
-        status: :completed,
-        analysis: %{summary: result.summary, notes: result.notes},
-        diagram: result.diagram
-      })
-      |> case do
-        {:error, error} -> Logger.error("Error updating research #{research.id}: #{inspect(error)}")
-        {:ok, _} -> Logger.info("Research #{research.id} updated with analysis")
+    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface),
+         {:ok, research} <- update_research(research, %{
+                              status: :completed,
+                              analysis: %{summary: result.summary, notes: result.notes},
+                              diagram: result.diagram
+                          }) do
+        {:noreply, %{state | research: research}}
+    else
+      err ->
+        Logger.error("Error updating research #{research.id}: #{inspect(err)}")
+        {:noreply, state}
+    end
+    |> then(fn res ->
+      if is_pid(state.caller) do
+        send(state.caller, :done)
       end
-    end
-
-    if is_pid(state.caller) do
-      send(state.caller, :done)
-    end
-    {:noreply, state}
+      res
+    end)
   end
 
   def handle_cast(_, state), do: {:noreply, state}
