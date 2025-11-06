@@ -5,14 +5,16 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useLogin } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   InfraResearchFragment,
-  useInfraResearchQuery,
   InfraResearchStatus,
+  useInfraResearchQuery,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { useMemo, useRef } from 'react'
@@ -23,6 +25,7 @@ import {
   AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
   AI_THREADS_REL_PATH,
+  getInfraResearchAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
 import {
@@ -30,21 +33,11 @@ import {
   InfraResearchStatusChip,
 } from './InfraResearches'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { useLogin } from 'components/contexts'
 
 const directory = [
-  {
-    path: AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
-    label: 'Diagram',
-    completed: true,
-  },
-  {
-    path: AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
-    label: 'Analysis',
-    completed: true,
-  },
-  { path: AI_THREADS_REL_PATH, label: 'Threads', completed: false },
+  { path: AI_INFRA_RESEARCH_DIAGRAM_REL_PATH, label: 'Diagram' },
+  { path: AI_INFRA_RESEARCH_ANALYSIS_REL_PATH, label: 'Analysis' },
+  { path: AI_THREADS_REL_PATH, label: 'Threads' },
 ]
 
 function getBreadcrumbs(
@@ -55,11 +48,14 @@ function getBreadcrumbs(
     ...getInfraResearchesBreadcrumbs(),
     {
       label: truncate(infraResearch?.prompt ?? '', { length: 30 }),
-      url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}`,
+      url: getInfraResearchAbsPath({
+        infraResearchId: infraResearch?.id,
+        tab: getInfraResearchDefaultTab(infraResearch?.status),
+      }),
     },
     {
       label: directory.find((d) => d.path === tab)?.path ?? '',
-      url: `${AI_INFRA_RESEARCH_ABS_PATH}/${infraResearch?.id}/${tab}`,
+      url: getInfraResearchAbsPath({ infraResearchId: infraResearch?.id, tab }),
     },
   ]
 }
@@ -101,6 +97,7 @@ export function InfraResearch() {
         direction="column"
         gap="medium"
         flex={1}
+        minWidth={0}
       >
         <StretchedFlex>
           <TabList
@@ -112,11 +109,6 @@ export function InfraResearch() {
                 infraResearch?.user && me?.id === infraResearch.user.id
                   ? true
                   : path !== AI_THREADS_REL_PATH
-              )
-              .filter(
-                ({ completed }) =>
-                  !completed ||
-                  infraResearch?.status === InfraResearchStatus.Completed
               )
               .map(({ label, path }) => (
                 <LinkTabWrap
@@ -155,3 +147,10 @@ const MainContentSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
 }))
+
+export const getInfraResearchDefaultTab = (
+  status: Nullable<InfraResearchStatus>
+) =>
+  status === InfraResearchStatus.Completed
+    ? AI_INFRA_RESEARCH_DIAGRAM_REL_PATH
+    : AI_THREADS_REL_PATH

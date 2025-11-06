@@ -30,6 +30,7 @@ import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { PromptInputSC } from '../agent-runs/CreateAgentRun'
 import { getAIBreadcrumbs } from '../AI'
+import { getInfraResearchDefaultTab } from './InfraResearch'
 
 export const getInfraResearchesBreadcrumbs = () =>
   getAIBreadcrumbs(AI_INFRA_RESEARCH_REL_PATH)
@@ -56,7 +57,7 @@ export function InfraResearches() {
       overflow="hidden"
     >
       <StretchedFlex>
-        <Subtitle1H1> Infra research</Subtitle1H1>
+        <Subtitle1H1>Infra research</Subtitle1H1>
         <Button
           startIcon={<PlusIcon />}
           alignSelf="flex-end"
@@ -79,9 +80,10 @@ export function InfraResearches() {
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{ message: 'No infra research runs found.' }}
-          getRowLink={({ original }) => (
-            <Link to={`${(original as InfraResearchFragment).id}`} />
-          )}
+          getRowLink={({ original }) => {
+            const { id, status } = original as InfraResearchFragment
+            return <Link to={`${id}/${getInfraResearchDefaultTab(status)}`} />
+          }}
         />
       )}
       <Modal

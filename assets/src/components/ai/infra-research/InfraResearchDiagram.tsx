@@ -1,24 +1,27 @@
 import {
   Button,
-  ButtonProps,
   Code,
   EmptyState,
+  Flex,
   LinkoutIcon,
   MagicWandIcon,
+  Tooltip,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import {
   useCreateInfraResearchMutation,
   useFixResearchDiagramMutation,
 } from 'generated/graphql'
 import { useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
+import {
+  AI_THREADS_REL_PATH,
+  getInfraResearchAbsPath,
+} from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
 import { PanZoomWrapper } from '../../utils/PanZoomWrapper'
 import { InfraResearchContextType } from './InfraResearch'
-import { AI_INFRA_RESEARCH_ABS_PATH } from 'routes/aiRoutesConsts'
 
 export function InfraResearchDiagram() {
   const { infraResearch } = useOutletContext<InfraResearchContextType>()
@@ -34,34 +37,43 @@ export function InfraResearchDiagram() {
     createInfraResearch,
     { data: createData, loading: createLoading, error: createError },
   ] = useCreateInfraResearchMutation({
-    variables: {
-      attributes: {
-        prompt: infraResearch?.prompt || '',
-      },
-    },
+    variables: { attributes: { prompt: infraResearch?.prompt || '' } },
   })
-
-  const newButtonAttrs: ButtonProps = createData
-    ? {
-        href: `${AI_INFRA_RESEARCH_ABS_PATH}/${createData?.createInfraResearch?.id}`,
-        as: 'a' as const,
-        endIcon: <LinkoutIcon />,
-      }
-    : {}
 
   if (!diagram) return <EmptyState message="No diagram found." />
 
   return (
     <WrapperSC>
-      <StretchedFlex>
-        <Button
-          secondary
-          loading={createLoading}
-          onClick={() => createInfraResearch()}
-          {...newButtonAttrs}
+      <Flex
+        gap="small"
+        justify="flex-end"
+      >
+        <WrapWithIf
+          wrapper={
+            <Tooltip
+              placement="top"
+              label="Kick off a new research run with the same prompt"
+            />
+          }
+          condition={!createData}
         >
-          {createData ? 'Go to new research' : 'Try again'}
-        </Button>
+          <Button
+            secondary
+            loading={createLoading}
+            {...(createData
+              ? {
+                  to: getInfraResearchAbsPath({
+                    infraResearchId: createData?.createInfraResearch?.id,
+                    tab: AI_THREADS_REL_PATH,
+                  }),
+                  as: Link,
+                  endIcon: <LinkoutIcon />,
+                }
+              : { onClick: () => createInfraResearch() })}
+          >
+            {createData ? 'Go to new research' : 'Try again'}
+          </Button>
+        </WrapWithIf>
         {parseError && (
           <Button
             loading={fixLoading}
@@ -75,7 +87,7 @@ export function InfraResearchDiagram() {
             Fix parse errors
           </Button>
         )}
-      </StretchedFlex>
+      </Flex>
       {fixError && <GqlError error={fixError} />}
       {parseError && <GqlError error={parseError} />}
       {createError && <GqlError error={createError} />}
@@ -92,6 +104,7 @@ export function InfraResearchDiagram() {
               parseErrorCache[diagram] = error
               setParseError(error)
             }}
+            css={{ minHeight: 0 }}
           >
             {diagram}
           </Code>
