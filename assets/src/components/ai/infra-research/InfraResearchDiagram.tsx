@@ -20,7 +20,6 @@ import {
   getInfraResearchAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
-import { PanZoomWrapper } from '../../utils/PanZoomWrapper'
 import { InfraResearchContextType } from './InfraResearch'
 
 export function InfraResearchDiagram() {
@@ -92,23 +91,18 @@ export function InfraResearchDiagram() {
       {parseError && <GqlError error={parseError} />}
       {createError && <GqlError error={createError} />}
       {diagram && (
-        <WrapWithIf
-          condition={!parseError}
-          wrapper={<PanZoomWrapper />}
+        <Code
+          key={diagram}
+          showHeader={false}
+          language="mermaid"
+          setMermaidError={(error) => {
+            parseErrorCache[diagram] = error
+            setParseError(error)
+          }}
+          css={{ minHeight: 0, overflow: 'hidden', height: '100%' }}
         >
-          <Code
-            key={diagram}
-            showHeader={false}
-            language="mermaid"
-            setMermaidError={(error) => {
-              parseErrorCache[diagram] = error
-              setParseError(error)
-            }}
-            css={{ minHeight: 0 }}
-          >
-            {diagram}
-          </Code>
-        </WrapWithIf>
+          {diagram}
+        </Code>
       )}
     </WrapperSC>
   )
