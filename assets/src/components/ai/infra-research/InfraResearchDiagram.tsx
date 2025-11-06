@@ -1,18 +1,24 @@
 import {
   Button,
+  ButtonProps,
   Code,
   EmptyState,
+  LinkoutIcon,
   MagicWandIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { useFixResearchDiagramMutation } from 'generated/graphql'
+import {
+  useCreateInfraResearchMutation,
+  useFixResearchDiagramMutation,
+} from 'generated/graphql'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { PanZoomWrapper } from '../../utils/PanZoomWrapper'
 import { InfraResearchContextType } from './InfraResearch'
+import { AI_INFRA_RESEARCH_ABS_PATH } from 'routes/aiRoutesConsts'
 
 export function InfraResearchDiagram() {
   const { infraResearch } = useOutletContext<InfraResearchContextType>()
@@ -24,11 +30,39 @@ export function InfraResearchDiagram() {
   const [fixResearchDiagram, { loading: fixLoading, error: fixError }] =
     useFixResearchDiagramMutation()
 
+  const [
+    createInfraResearch,
+    { data: createData, loading: createLoading, error: createError },
+  ] = useCreateInfraResearchMutation({
+    variables: {
+      attributes: {
+        prompt: infraResearch?.prompt || '',
+      },
+    },
+  })
+
+  const newButtonAttrs: ButtonProps = createData
+    ? {
+        href: `${AI_INFRA_RESEARCH_ABS_PATH}/${createData?.createInfraResearch?.id}`,
+        as: 'a' as const,
+        target: '_blank',
+        endIcon: <LinkoutIcon />,
+      }
+    : {}
+
   if (!diagram) return <EmptyState message="No diagram found." />
 
   return (
     <WrapperSC>
       <StretchedFlex>
+        <Button
+          secondary
+          loading={createLoading}
+          onClick={() => createInfraResearch()}
+          {...newButtonAttrs}
+        >
+          {createData ? 'Go to new research' : 'Try again'}
+        </Button>
         {parseError && (
           <Button
             loading={fixLoading}
@@ -45,6 +79,7 @@ export function InfraResearchDiagram() {
       </StretchedFlex>
       {fixError && <GqlError error={fixError} />}
       {parseError && <GqlError error={parseError} />}
+      {createError && <GqlError error={createError} />}
       {diagram && (
         <WrapWithIf
           condition={!parseError}
