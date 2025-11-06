@@ -42,6 +42,7 @@ Mermaid format guidelines:
 * Avoid labels/node names with parenthesis, brackets or braces, unless surrrounded with quotes.  These can cause syntax errors
   - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
 * **Do not include newline or `\n` characters in node names, they cannot be rendered properly. Use <br> tags instead as mermaid can format them properly**
+* Styling should always be applied via mermaid classes, not inline on specific graph nodes or edges
 * Make different node types different colors and descriptive shapes to improve differentiation.
 * Ensure the heirarchical ownership of the infrastructure is preserved in the diagram (eg network contains kubernetes cluster and database which contains kubernetes workloads)
 * Use accurate labelling related to the infrastructure being diagrammed (eg make sure names match kubernetes or cloud infra names on the diagram)
