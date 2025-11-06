@@ -1,10 +1,9 @@
-import { Div } from 'honorable'
 import {
   type ComponentProps,
+  createContext,
   type PropsWithChildren,
   type ReactNode,
   type RefObject,
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -16,10 +15,12 @@ import styled, { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 
+import Button from './Button'
 import Card, { type CardProps } from './Card'
+import Flex from './Flex'
 import Highlight from './Highlight'
-import { downloadMermaidSvg, Mermaid, MermaidRefHandle } from './Mermaid'
 import { ListBoxItem } from './ListBoxItem'
+import { Mermaid, MermaidRefHandle } from './Mermaid'
 import { Select } from './Select'
 import SubTab from './SubTab'
 import { TabList, type TabListStateProps } from './TabList'
@@ -34,10 +35,6 @@ import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import FileIcon from './icons/FileIcon'
-import Button from './Button'
-import { DownloadIcon } from '../icons'
-import IconFrame from './IconFrame'
-import Flex from './Flex'
 
 type CodeProps = Omit<CardProps, 'children'> & {
   children?: string
@@ -138,15 +135,6 @@ const CopyButton = styled(CopyButtonBase)<{ $verticallyCenter: boolean }>(
     boxShadow: theme.boxShadows.slight,
   })
 )
-
-const MermaidButtonsSC = styled.div(({ theme }) => ({
-  position: 'absolute',
-  right: theme.spacing.medium,
-  top: theme.spacing.medium,
-  gap: theme.spacing.xsmall,
-  display: 'flex',
-  alignItems: 'center',
-}))
 
 type CodeTabData = {
   key: string
@@ -321,10 +309,7 @@ function CodeContent({
   isStreaming?: boolean
   setMermaidError?: (error: Nullable<Error>) => void
 }) {
-  const { spacing, borderRadiuses } = useTheme()
   const mermaidRef = useRef<MermaidRefHandle>(null)
-  const [copied, setCopied] = useState(false)
-
   const [mermaidError, setMermaidErrorState] = useState<Nullable<Error>>(null)
   const setMermaidError = useCallback(
     (error: Nullable<Error>) => {
@@ -336,92 +321,61 @@ function CodeContent({
 
   const codeString = children?.trim() || ''
   const multiLine = !!codeString.match(/\r?\n/) || hasSetHeight
-  const handleCopy = useCallback(
-    () =>
-      window.navigator.clipboard
-        .writeText(codeString)
-        .then(() => setCopied(true)),
-    [codeString]
-  )
 
-  useEffect(() => {
-    if (copied) {
-      const timeout = setTimeout(() => setCopied(false), 1000)
-      return () => clearTimeout(timeout)
-    }
-  }, [copied])
+  const { copied, handleCopy } = useCopyText(codeString)
 
   if (typeof children !== 'string')
     throw new Error('Code component expects a string as its children')
 
-  const isMermaidDownloadable =
-    language === 'mermaid' && !isStreaming && !mermaidError
+  const validMermaid = language === 'mermaid' && !isStreaming && !mermaidError
 
   return (
-    <div
-      css={{
-        height: '100%',
-        overflow: 'auto',
-        alignItems: 'center',
-      }}
-    >
-      {isMermaidDownloadable ? (
-        <MermaidButtonsSC>
-          <IconFrame
-            clickable
-            onClick={handleCopy}
-            icon={copied ? <CheckIcon /> : <CopyIcon />}
-            type="floating"
-            tooltip="Copy Mermaid code"
-          />
-          <IconFrame
-            clickable
-            onClick={() => {
-              const { svgStr } = mermaidRef.current
-              if (!svgStr) return
-              downloadMermaidSvg(svgStr)
-            }}
-            icon={<DownloadIcon />}
-            type="floating"
-            tooltip="Download as PNG"
-          />
-        </MermaidButtonsSC>
-      ) : (
-        <CopyButton
-          copied={copied}
-          handleCopy={handleCopy}
-          $verticallyCenter={!multiLine}
-        />
-      )}
-      <div
-        css={{
-          ...(isMermaidDownloadable ? { backgroundColor: 'white' } : {}),
-          padding: `${multiLine ? spacing.medium : spacing.small}px ${
-            spacing.medium
-          }px`,
-          borderBottomLeftRadius: borderRadiuses.large,
-          borderBottomRightRadius: borderRadiuses.large,
-        }}
+    <div css={{ position: 'relative', overflow: 'hidden', height: '100%' }}>
+      <CodeContentSC
+        $validMermaid={validMermaid}
+        $multiLine={multiLine}
       >
-        {isMermaidDownloadable ? (
+        {validMermaid ? (
           <Mermaid
             ref={mermaidRef}
             setError={setMermaidError}
             diagram={codeString}
           />
         ) : (
-          <Highlight
-            key={codeString}
-            language={language}
-            {...props}
-          >
-            {codeString}
-          </Highlight>
+          <>
+            <CopyButton
+              copied={copied}
+              handleCopy={handleCopy}
+              $verticallyCenter={!multiLine}
+            />
+            <Highlight
+              key={codeString}
+              language={language}
+              {...props}
+            >
+              {codeString}
+            </Highlight>
+          </>
         )}
-      </div>
+      </CodeContentSC>
     </div>
   )
 }
+
+const CodeContentSC = styled.div<{
+  $validMermaid: boolean
+  $multiLine: boolean
+}>(({ theme, $validMermaid, $multiLine }) => ({
+  height: '100%',
+  overflow: 'auto',
+  alignItems: 'center',
+  padding: `${$multiLine ? theme.spacing.medium : theme.spacing.small}px ${
+    theme.spacing.medium
+  }px`,
+  borderBottomLeftRadius: theme.borderRadiuses.large,
+  borderBottomRightRadius: theme.borderRadiuses.large,
+  ...($validMermaid ? { backgroundColor: 'white', padding: 0 } : {}),
+}))
 
 function CodeUnstyled({
   ref,
@@ -512,13 +466,7 @@ function CodeUnstyled({
               tabKey={tab.key}
               mode="multipanel"
               stateRef={tabStateRef}
-              as={
-                <Div
-                  position="relative"
-                  height="100%"
-                  overflow="hidden"
-                />
-              }
+              css={{ height: '100%', overflow: 'hidden' }}
             >
               <CodeContent
                 language={tab.language}
@@ -532,21 +480,15 @@ function CodeUnstyled({
             </TabPanel>
           ))
         ) : (
-          <Div
-            position="relative"
-            height="100%"
-            overflow="hidden"
+          <CodeContent
+            language={language}
+            showLineNumbers={showLineNumbers}
+            hasSetHeight={hasSetHeight}
+            isStreaming={isStreaming}
+            setMermaidError={setMermaidError}
           >
-            <CodeContent
-              language={language}
-              showLineNumbers={showLineNumbers}
-              hasSetHeight={hasSetHeight}
-              isStreaming={isStreaming}
-              setMermaidError={setMermaidError}
-            >
-              {children}
-            </CodeContent>
-          </Div>
+            {children}
+          </CodeContent>
         )}
       </Flex>
     </Card>
@@ -558,17 +500,33 @@ function CodeUnstyled({
 }
 
 const Code = styled(CodeUnstyled)((_) => ({
-  [`${CopyButton}, ${MermaidButtonsSC}`]: {
+  [`${CopyButton}`]: {
     opacity: 0,
     pointerEvents: 'none',
     transition: 'opacity 0.2s ease',
   },
-  [`&:hover ${CopyButton}, &:hover ${MermaidButtonsSC}`]: {
+  [`&:hover ${CopyButton}`]: {
     opacity: 1,
     pointerEvents: 'auto',
     transition: 'opacity 0.2s ease',
   },
 }))
+
+export function useCopyText(text: string) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = useCallback(
+    () =>
+      window.navigator.clipboard.writeText(text).then(() => setCopied(true)),
+    [text]
+  )
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => setCopied(false), 1000)
+      return () => clearTimeout(timeout)
+    }
+  }, [copied])
+  return { copied, handleCopy }
+}
 
 export default Code
 export type { CodeProps }

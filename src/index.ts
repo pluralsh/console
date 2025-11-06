@@ -76,16 +76,17 @@ export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
 export { default as Markdown } from './components/Markdown'
 export {
-  Mermaid,
-  type MermaidRefHandle,
   downloadMermaidSvg,
   getMermaidId,
+  Mermaid,
+  type MermaidRefHandle,
 } from './components/Mermaid'
 export { default as Modal } from './components/Modal'
 export { ModalWrapper } from './components/ModalWrapper'
 export { default as PageCard } from './components/PageCard'
 export type { PageCardProps } from './components/PageCard'
 export { default as PageTitle } from './components/PageTitle'
+export { PanZoomWrapper } from './components/PanZoomWrapper'
 export { default as ProgressBar } from './components/ProgressBar'
 export { default as Prop } from './components/Prop'
 export { default as PropsContainer } from './components/PropsContainer'
@@ -143,6 +144,7 @@ export { useIsFocused } from './hooks/useIsFocused'
 export { default as usePrevious } from './hooks/usePrevious'
 export { default as useResizeObserver } from './hooks/useResizeObserver'
 export { default as useUnmount } from './hooks/useUnmount'
+export { useCopyText } from './components/Code'
 
 // Contexts
 export {

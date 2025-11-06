@@ -6,8 +6,17 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import {
+  CheckIcon,
+  CopyIcon,
+  DownloadIcon,
+  IconFrame,
+  ReloadIcon,
+  styledTheme,
+} from '..'
+import { useCopyText } from './Code'
 import Highlight from './Highlight'
+import { PanZoomWrapper } from './PanZoomWrapper'
 
 const MERMAID_CDN_URL =
   'https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.min.js'
@@ -26,7 +35,7 @@ export function Mermaid({
   diagram,
   setError: setErrorProp,
   ...props
-}: Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+}: Omit<ComponentPropsWithoutRef<typeof PanZoomWrapper>, 'children'> & {
   diagram: string
   ref?: Ref<MermaidRefHandle>
   setError?: (error: Nullable<Error>) => void
@@ -34,6 +43,8 @@ export function Mermaid({
   const [svgStr, setSvgStr] = useState<Nullable<string>>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setErrorState] = useState<Nullable<Error>>(null)
+  const [panZoomKey, setPanZoomKey] = useState(0) // increment to force panzoom wrapper to reset
+  const { copied, handleCopy } = useCopyText(diagram)
 
   const setError = useCallback(
     (error: Nullable<Error>) => {
@@ -99,32 +110,51 @@ export function Mermaid({
         async
         src={MERMAID_CDN_URL}
       />
-      <MermaidContainerSC {...props}>
-        {isLoading && <div>Loading diagram...</div>}
-        {svgStr && (
-          <div
-            dangerouslySetInnerHTML={{ __html: svgStr }}
-            style={{
-              display: isLoading ? 'none' : 'block',
-              width: '100%',
-              textAlign: 'center',
-            }}
-          />
+      <PanZoomWrapper
+        key={panZoomKey}
+        actionButtons={
+          <>
+            <IconFrame
+              clickable
+              onClick={() => setPanZoomKey((key) => key + 1)}
+              icon={<ReloadIcon />}
+              type="floating"
+              tooltip="Reset view to original size"
+            />
+            <IconFrame
+              clickable
+              onClick={handleCopy}
+              icon={copied ? <CheckIcon /> : <CopyIcon />}
+              type="floating"
+              tooltip="Copy Mermaid code"
+            />
+            <IconFrame
+              clickable
+              onClick={() => svgStr && downloadMermaidSvg(svgStr)}
+              icon={<DownloadIcon />}
+              type="floating"
+              tooltip="Download as PNG"
+            />
+          </>
+        }
+        {...props}
+      >
+        {isLoading ? (
+          <div css={{ color: styledTheme.colors.grey[950] }}>
+            Loading diagram...
+          </div>
+        ) : (
+          svgStr && (
+            <div
+              dangerouslySetInnerHTML={{ __html: svgStr }}
+              style={{ textAlign: 'center' }}
+            />
+          )
         )}
-      </MermaidContainerSC>
+      </PanZoomWrapper>
     </>
   )
 }
-
-const MermaidContainerSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: theme.spacing.medium,
-  overflow: 'auto',
-  width: '100%',
-  height: '100%',
-}))
 
 let initialized = false
 const getOrInitializeMermaid = () => {
