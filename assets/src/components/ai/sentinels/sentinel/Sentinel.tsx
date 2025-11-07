@@ -14,8 +14,7 @@ import { Link, useParams } from 'react-router-dom'
 import { AI_SENTINELS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI'
-import { SentinelChecksAccordion } from './SentinelChecksAccordion'
-import { SentinelRunsTable } from './SentinelRunsTable'
+import { SentinelRunsTables } from './SentinelRunsTable'
 import { SentinelDetailsSidecar } from './SentinelSidecars'
 import { SentinelRunDialog } from '../SentinelsTableCols'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -84,15 +83,7 @@ export function Sentinel() {
           />
         </>
       }
-      content={
-        <>
-          <SentinelChecksAccordion
-            sentinel={sentinel}
-            loading={sentinelLoading}
-          />
-          {id && <SentinelRunsTable id={id} />}
-        </>
-      }
+      content={id && <SentinelRunsTables id={id} />}
       sidecar={<SentinelDetailsSidecar sentinel={sentinel} />}
     />
   )
