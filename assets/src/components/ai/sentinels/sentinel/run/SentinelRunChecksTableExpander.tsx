@@ -25,7 +25,7 @@ import {
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AI_SENTINELS_RUNS_JOBS_REL_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy, mapExistingNodes } from 'utils/graphql'
@@ -93,7 +93,6 @@ function IntegrationTestExpander({
   checkName: string
   result: Nullable<SentinelRunResultFragment>
 }) {
-  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusFilterKey] =
     useState<JobStatusFilterKey>('All')
@@ -170,9 +169,11 @@ function IntegrationTestExpander({
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No jobs found.' }}
-        onRowClick={(_, row: Row<SentinelRunJobTinyFragment>) =>
-          navigate(`${AI_SENTINELS_RUNS_JOBS_REL_PATH}/${row.original.id}`)
-        }
+        getRowLink={({ original }) => (
+          <Link
+            to={`${AI_SENTINELS_RUNS_JOBS_REL_PATH}/${(original as SentinelRunJobTinyFragment).id}`}
+          />
+        )}
       />
     </Flex>
   )

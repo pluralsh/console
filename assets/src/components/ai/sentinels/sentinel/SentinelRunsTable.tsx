@@ -1,5 +1,5 @@
 import { CaretRightIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
-import { createColumnHelper, Row } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -10,14 +10,13 @@ import {
   useSentinelRunsQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AI_SENTINELS_RUNS_REL_PATH } from 'routes/aiRoutesConsts'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { SentinelStatusChip } from '../SentinelsTableCols'
 
 export function SentinelRunsTable({ id }: { id: string }) {
-  const navigate = useNavigate()
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useSentinelRunsQuery, keyPath: ['sentinel', 'runs'] },
@@ -60,10 +59,11 @@ export function SentinelRunsTable({ id }: { id: string }) {
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
-          onRowClick={(_e, { original }: Row<SentinelRunFragment>) => {
-            if (original.id)
-              navigate(`${AI_SENTINELS_RUNS_REL_PATH}/${original.id}`)
-          }}
+          getRowLink={({ original }) => (
+            <Link
+              to={`${AI_SENTINELS_RUNS_REL_PATH}/${(original as SentinelRunFragment).id}`}
+            />
+          )}
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{ message: 'No runs found.' }}
         />
