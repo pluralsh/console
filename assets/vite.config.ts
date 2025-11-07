@@ -56,10 +56,11 @@ export default defineConfig({
       output: {
         manualChunks(id: string) {
           if (id.includes('/src/generated')) return 'generated'
+          if (id.includes('mermaid')) return 'mermaid'
+          if (id.includes('elkjs')) return 'elk'
           if (id.includes('@pluralsh/design-system')) return 'design-system'
           if (id.includes('lodash')) return 'lodash'
           if (id.includes('apollo')) return 'apollo'
-          if (id.includes('elkjs')) return 'elkjs'
         },
       },
     },
