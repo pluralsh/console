@@ -29,6 +29,8 @@ import {
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { AI_PROVIDER_ABS_PATH, AIDisabledState } from './AIThreads'
 import usePersistedState from 'components/hooks/usePersistedState'
+import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
@@ -67,15 +69,18 @@ export function AI() {
   return (
     <WrapperSC>
       <HeaderSC>
+        <StretchedFlex gap="medium">
+          <Subtitle1H1>Plural AI</Subtitle1H1>
+          <IconFrame
+            clickable
+            icon={<GearTrainIcon />}
+            as={Link}
+            to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
+            tooltip="AI Settings"
+            type="floating"
+          />
+        </StretchedFlex>
         <SubTabs directory={getDirectory(agentEnabled)} />
-        <IconFrame
-          clickable
-          icon={<GearTrainIcon />}
-          as={Link}
-          to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
-          tooltip="AI Settings"
-          type="floating"
-        />
       </HeaderSC>
       <Outlet />
       <Modal
@@ -108,7 +113,7 @@ export function AI() {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xlarge,
+  gap: theme.spacing.large,
   padding: theme.spacing.large,
   overflow: 'hidden',
   height: '100%',
@@ -119,7 +124,6 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  flexDirection: 'column',
   gap: theme.spacing.medium,
 }))
