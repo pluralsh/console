@@ -17,16 +17,20 @@ export function PanZoomWrapper({
   maxZoom = 5,
   zoomSpeed = 0.0025,
   actionButtons,
+  initialScale = 1,
+  initialPosition = { x: 0, y: 0 },
   ...props
 }: {
   children?: ReactNode
   minZoom?: number
   maxZoom?: number
   zoomSpeed?: number
+  initialScale?: number
+  initialPosition?: Position
   actionButtons?: ReactNode
 } & ComponentPropsWithRef<'div'>) {
-  const [scale, setScale] = useState(1)
-  const [{ x, y }, setPosition] = useState<Position>({ x: 0, y: 0 })
+  const [scale, setScale] = useState(initialScale)
+  const [{ x, y }, setPosition] = useState<Position>(initialPosition)
   const containerRef = useRef<HTMLDivElement>(null)
   const { isDragging, handleMouseDown } = useGlobalPan(setPosition)
 

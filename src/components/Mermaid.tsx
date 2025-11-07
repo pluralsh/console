@@ -6,8 +6,6 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
-import mermaid from 'mermaid'
-import elkLayouts from './mermaid-elk/layouts'
 import {
   CheckIcon,
   CopyIcon,
@@ -20,20 +18,27 @@ import { useCopyText } from './Code'
 import Highlight from './Highlight'
 import { PanZoomWrapper } from './PanZoomWrapper'
 
-// Initialize mermaid once at module load
-let initialized = false
-const initializeMermaid = () => {
-  if (initialized) return
-  mermaid.initialize({ startOnLoad: false })
+type MermaidAPI = typeof import('mermaid').default
+let loadedMermaid: MermaidAPI | null = null
 
-  // Register ELK layout with mermaid
+const initializeMermaid = async (): Promise<MermaidAPI> => {
+  if (loadedMermaid) return loadedMermaid
+
+  const { default: mermaid } = await import('mermaid')
+  const elkLayouts = (await import('@mermaid-js/layout-elk')).default
+  mermaid.initialize({
+    startOnLoad: false,
+    flowchart: { defaultRenderer: 'elk' },
+  })
+  loadedMermaid = mermaid
+
   try {
     mermaid.registerLayoutLoaders(elkLayouts)
   } catch (err) {
     console.error('Failed to register ELK layout with mermaid:', err)
   }
 
-  initialized = true
+  return mermaid
 }
 
 // helps prevent flickering (and potentially expensive recalculations) in virutalized lists
@@ -80,25 +85,22 @@ export function Mermaid({
       return
     }
 
-    let isCancelled = false
-
+    // need to keep track of this since we're dealing with async ops, helps avoid race condition
+    let isMounted = true
     const renderDiagram = async () => {
       try {
         setIsLoading(true)
         setError(null)
-
-        // Initialize mermaid if not already done
-        initializeMermaid()
-
+        // initialize mermaid if not already done
+        const mermaid = await initializeMermaid()
         const { svg } = await mermaid.render(id, diagram)
-        cachedRenders[id] = svg
+        if (!isMounted) return
 
-        if (!isCancelled) {
-          setSvgStr(svg)
-          setIsLoading(false)
-        }
+        cachedRenders[id] = svg
+        setSvgStr(svg)
+        setIsLoading(false)
       } catch (caughtErr) {
-        if (isCancelled) return
+        if (!isMounted) return
         const err =
           caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
         console.error('Error parsing Mermaid (rendering plaintext):', err)
@@ -107,11 +109,10 @@ export function Mermaid({
         cachedRenders[id] = err
       }
     }
-
     renderDiagram()
 
     return () => {
-      isCancelled = true
+      isMounted = false
     }
   }, [diagram, setError])
 

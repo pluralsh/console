@@ -22,6 +22,11 @@ export default defineConfig({
         'honorable-theme-default',
         'react-transition-group',
       ],
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('elkjs')) return 'elkjs'
+        },
+      },
     },
   },
   plugins: [

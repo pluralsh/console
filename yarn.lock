@@ -22,7 +22,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antfu/install-pkg@npm:^1.0.0":
+"@antfu/install-pkg@npm:^1.1.0":
   version: 1.1.0
   resolution: "@antfu/install-pkg@npm:1.1.0"
   dependencies:
@@ -32,10 +32,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antfu/utils@npm:^8.1.0":
-  version: 8.1.1
-  resolution: "@antfu/utils@npm:8.1.1"
-  checksum: 42ded916c4ff7f45a2f462eb020c801d24f2eee830cba4dbeef5a8bb774b6af22238f0c3efdbcb068296eb948aa13bdc32169186e261c99aae13c12360c02580
+"@antfu/utils@npm:^9.2.0":
+  version: 9.3.0
+  resolution: "@antfu/utils@npm:9.3.0"
+  checksum: 7893a291971f8bf3ffd0d428077fdea3129ba849baf66b9d2f397b9d36f0554dbc12fa484ce8891d747107efe1bc9de29a24309f2194ea685fc0c69e133400d9
   languageName: node
   linkType: hard
 
@@ -1444,7 +1444,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@braintree/sanitize-url@npm:^7.0.1":
+"@braintree/sanitize-url@npm:^7.1.1":
   version: 7.1.1
   resolution: "@braintree/sanitize-url@npm:7.1.1"
   checksum: bdfb6add95e97c5a611597197cd8385c6592d340a688bfbb176a1799bde64b9ffa1e723a7bac908d61fdecfccf4301332cdebaa4a1650c2616b5269084d9c8e4
@@ -2394,19 +2394,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/utils@npm:^2.1.32":
-  version: 2.3.0
-  resolution: "@iconify/utils@npm:2.3.0"
+"@iconify/utils@npm:^3.0.1":
+  version: 3.0.2
+  resolution: "@iconify/utils@npm:3.0.2"
   dependencies:
-    "@antfu/install-pkg": ^1.0.0
-    "@antfu/utils": ^8.1.0
+    "@antfu/install-pkg": ^1.1.0
+    "@antfu/utils": ^9.2.0
     "@iconify/types": ^2.0.0
-    debug: ^4.4.0
-    globals: ^15.14.0
+    debug: ^4.4.1
+    globals: ^15.15.0
     kolorist: ^1.8.0
-    local-pkg: ^1.0.0
+    local-pkg: ^1.1.1
     mlly: ^1.7.4
-  checksum: b723397c09bdfd116c907db714fd1cd65119283e06d008502d9389593b14520c7084474b2e0b0bae2d46eabc3be2146ab02fba81c9ad199a33b6f1394e23890c
+  checksum: a71af73cdc198a4aafedb784d2283af2792c1c929f79ae115700b4b4fab74a545b817eff7ae701c90dcc2e4b14ea3c2300d84173149e74a544b0bb5a238cd7b8
   languageName: node
   linkType: hard
 
@@ -2704,12 +2704,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mermaid-js/parser@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@mermaid-js/parser@npm:0.3.0"
+"@mermaid-js/layout-elk@npm:0.2.0":
+  version: 0.2.0
+  resolution: "@mermaid-js/layout-elk@npm:0.2.0"
   dependencies:
-    langium: 3.0.0
-  checksum: 7c92d69b74a1aaa3d2352c9a21a913cb4dd8f4212b22130359ef98ced4509fdb709ac9942dc78d3c2f75360f27a2917fbdb1ef2c7ac0057078d935666a1afe1d
+    d3: ^7.9.0
+    elkjs: ^0.9.3
+  peerDependencies:
+    mermaid: ^11.0.2
+  checksum: 1a1ca0ebe32367de883341f2f10484086aacff498f57a3366aec8fcea1749bea66ea574021223de69ac065a7c914c6cd56f385c48c0a7d25c11a71571903ee6d
+  languageName: node
+  linkType: hard
+
+"@mermaid-js/parser@npm:^0.6.3":
+  version: 0.6.3
+  resolution: "@mermaid-js/parser@npm:0.6.3"
+  dependencies:
+    langium: 3.3.1
+  checksum: 6a3df5e694c6af793571c60265f5f1d25f39f3bb09f87fa91fa135ee36c2a01ec000ca34abdc801cf2baff4c5dbcaf41af38d710374eb5f678add626cc96f7ab
   languageName: node
   linkType: hard
 
@@ -2887,6 +2899,7 @@ __metadata:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
     "@markdoc/markdoc": 0.4.0
+    "@mermaid-js/layout-elk": 0.2.0
     "@monaco-editor/react": 4.7.0
     "@pluralsh/eslint-config-typescript": 2.5.147
     "@radix-ui/react-accordion": 1.2.0
@@ -2921,7 +2934,6 @@ __metadata:
     chroma-js: 2.4.2
     classnames: 2.3.2
     conventional-changelog-conventionalcommits: 6.1.0
-    d3: 7.9.0
     dayjs: 1.11.13
     elkjs: 0.11.0
     eslint: 9.20.0
@@ -2945,7 +2957,7 @@ __metadata:
     jsdom: 23.0.1
     lint-staged: 15.2.0
     lodash-es: 4.17.21
-    mermaid: 11.4.1
+    mermaid: 11.12.1
     monaco-editor: 0.52.2
     npm-run-all: 4.1.5
     prettier: 3.0.3
@@ -8846,7 +8858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:^3.29.2":
+"cytoscape@npm:^3.29.3":
   version: 3.33.1
   resolution: "cytoscape@npm:3.33.1"
   checksum: 4ebb9551ecb868fc6e831f523933bf96bd107d09b984d6d44db45adfd0a0f82f3383d7d0d5bc2053267ab2e8da47ce5ea280159643e818a4f2534affee248db8
@@ -9168,7 +9180,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d3@npm:7.9.0, d3@npm:^7.9.0":
+"d3@npm:^7.9.0":
   version: 7.9.0
   resolution: "d3@npm:7.9.0"
   dependencies:
@@ -9206,13 +9218,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dagre-d3-es@npm:7.0.11":
-  version: 7.0.11
-  resolution: "dagre-d3-es@npm:7.0.11"
+"dagre-d3-es@npm:7.0.13":
+  version: 7.0.13
+  resolution: "dagre-d3-es@npm:7.0.13"
   dependencies:
     d3: ^7.9.0
     lodash-es: ^4.17.21
-  checksum: 933b0a54d3d5f64d440dba8c6433385e6879bf433d03032b2884f1af6826e0f437e2e3da61f7441e74a445d68d9710020cc12242ce79f169289a5dd7054bab21
+  checksum: 4a6e5aeb8d4a643c19241b58b8507a7e8aadae8c470ecb9b0133b3af0d6244356cb2cda643fe2f4ef5f872800eb873d7287977b4c5965962396b1757afb0b5de
   languageName: node
   linkType: hard
 
@@ -9289,7 +9301,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.10":
+"dayjs@npm:^1.11.18":
   version: 1.11.19
   resolution: "dayjs@npm:1.11.19"
   checksum: dfafcca2c67cc6e542fd880d77f1d91667efd323edc28f0487b470b184a11cc97696163ed5be1142ea2a031045b27a0d0555e72f60a63275e0e0401ac24bea5d
@@ -9583,7 +9595,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.1":
+"dompurify@npm:^3.2.5":
   version: 3.3.0
   resolution: "dompurify@npm:3.3.0"
   dependencies:
@@ -11678,7 +11690,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^15.14.0":
+"globals@npm:^15.15.0":
   version: 15.15.0
   resolution: "globals@npm:15.15.0"
   checksum: a2a92199a112db00562a2f85eeef2a7e3943e171f7f7d9b17dfa9231e35fd612588f3c199d1509ab1757273467e413b08c80424cf6e399e96acdaf93deb3ee88
@@ -13559,7 +13571,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"katex@npm:^0.16.9":
+"katex@npm:^0.16.22":
   version: 0.16.25
   resolution: "katex@npm:0.16.25"
   dependencies:
@@ -13609,16 +13621,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"langium@npm:3.0.0":
-  version: 3.0.0
-  resolution: "langium@npm:3.0.0"
+"langium@npm:3.3.1":
+  version: 3.3.1
+  resolution: "langium@npm:3.3.1"
   dependencies:
     chevrotain: ~11.0.3
     chevrotain-allstar: ~0.3.0
     vscode-languageserver: ~9.0.1
     vscode-languageserver-textdocument: ~1.0.11
     vscode-uri: ~3.0.8
-  checksum: fc184dcef5cc83eaaf93e7d892c74ac74ff441f820378ceba29e4d1245bf82a0b1808a97d628f065f085046b85ed88df8c5cce3a5fc380efa4bad84fe6c2c88e
+  checksum: b5fcf1cd8d9e8fd9f79425afae5926546f57a30506be20cf7638880a01b2b04ccfe1cd5cae599a7733ad4d38af0bf2ed9bd9e1a95cc5f3de1725628fa7883446
   languageName: node
   linkType: hard
 
@@ -13790,7 +13802,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"local-pkg@npm:^1.0.0":
+"local-pkg@npm:^1.1.1":
   version: 1.1.2
   resolution: "local-pkg@npm:1.1.2"
   dependencies:
@@ -14170,12 +14182,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^13.0.2":
-  version: 13.0.3
-  resolution: "marked@npm:13.0.3"
+"marked@npm:^16.2.1":
+  version: 16.4.2
+  resolution: "marked@npm:16.4.2"
   bin:
     marked: bin/marked.js
-  checksum: 1e35459ccf26a2a4ba086d9acd5ade00736dd24bacc817b202a3ba7d219e1b252fee91fca41b07de5bc6cfe3442edebe4f0efb18975978d65043050feb116425
+  checksum: 8749bc6228ff59eb63f82c7310750336eb85c42c2b37d0d24f86807cf9e7b441bf8a20ed1bbcadfcd7a2db41d1b6069642286d4403815b90c2ce5be6aa00124c
   languageName: node
   linkType: hard
 
@@ -14454,31 +14466,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mermaid@npm:11.4.1":
-  version: 11.4.1
-  resolution: "mermaid@npm:11.4.1"
+"mermaid@npm:11.12.1":
+  version: 11.12.1
+  resolution: "mermaid@npm:11.12.1"
   dependencies:
-    "@braintree/sanitize-url": ^7.0.1
-    "@iconify/utils": ^2.1.32
-    "@mermaid-js/parser": ^0.3.0
+    "@braintree/sanitize-url": ^7.1.1
+    "@iconify/utils": ^3.0.1
+    "@mermaid-js/parser": ^0.6.3
     "@types/d3": ^7.4.3
-    cytoscape: ^3.29.2
+    cytoscape: ^3.29.3
     cytoscape-cose-bilkent: ^4.1.0
     cytoscape-fcose: ^2.2.0
     d3: ^7.9.0
     d3-sankey: ^0.12.3
-    dagre-d3-es: 7.0.11
-    dayjs: ^1.11.10
-    dompurify: ^3.2.1
-    katex: ^0.16.9
+    dagre-d3-es: 7.0.13
+    dayjs: ^1.11.18
+    dompurify: ^3.2.5
+    katex: ^0.16.22
     khroma: ^2.1.0
     lodash-es: ^4.17.21
-    marked: ^13.0.2
+    marked: ^16.2.1
     roughjs: ^4.6.6
-    stylis: ^4.3.1
+    stylis: ^4.3.6
     ts-dedent: ^2.2.0
-    uuid: ^9.0.1
-  checksum: ede145a0638264936a70800adead21b6538cccad8ad82ff200fa640ce6c70c666e6154c74fc87b293fb968c591b355ad5666f2be7994758d72877be88c5f1059
+    uuid: ^11.1.0
+  checksum: db20ce808562e040c311c810f40c0fdcfe566ebc80df5b1cd47699bcd5d00369e0b3884269e024b1e479eb4ab292cc855efa6850211d4c4de3bb704a810eb2fd
   languageName: node
   linkType: hard
 
@@ -18469,7 +18481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stylis@npm:^4.3.0, stylis@npm:^4.3.1":
+"stylis@npm:^4.3.0, stylis@npm:^4.3.6":
   version: 4.3.6
   resolution: "stylis@npm:4.3.6"
   checksum: 4f56a087caace85b34c3a163cf9d662f58f42dc865b2447af5c3ee3588eebaffe90875fe294578cce26f172ff527cad2b01433f6e1ae156400ec38c37c79fd61
@@ -19523,6 +19535,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 840f19758543c4631e58a29439e51b5b669d5f34b4dd2700b6a1d15c5708c7a6e0c3e2c8c4a2eae761a3a7caa7e9884d00c86c02622ba91137bd3deade6b4b4a
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^3.3.2":
   version: 3.4.0
   resolution: "uuid@npm:3.4.0"
@@ -19538,15 +19559,6 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "uuid@npm:9.0.1"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 39931f6da74e307f51c0fb463dc2462807531dc80760a9bff1e35af4316131b4fc3203d16da60ae33f07fdca5b56f3f1dd662da0c99fea9aaeab2004780cc5f4
   languageName: node
   linkType: hard
 
