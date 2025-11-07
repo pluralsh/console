@@ -1,5 +1,8 @@
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
 import {
+  AiSparkleFilledIcon,
+  Button,
+  ButtonProps,
   Card,
   Chip,
   ChipSeverity,
@@ -36,16 +39,24 @@ export type JobStatusFilterKey =
   | 'All'
   | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
 
+enum ExpanderTab {
+  Reason = 'reason',
+  CheckDefinition = 'checkDefinition',
+}
+
 export function SentinelRunChecksTableExpander({
   row,
 }: {
   row: Row<SentinelCheckWithResult>
 }) {
-  const { spacing } = useTheme()
+  const { spacing, partials } = useTheme()
   const { check, result, runId } = row.original
+  const [tab, setTab] = useState<ExpanderTab>(
+    result?.reason ? ExpanderTab.Reason : ExpanderTab.CheckDefinition
+  )
   if (check.type === SentinelCheckType.IntegrationTest)
     return (
-      <WrapperSC $bgColor="fill-two">
+      <WrapperSC>
         <IntegrationTestExpander
           runId={runId}
           checkName={check.name}
@@ -56,30 +67,34 @@ export function SentinelRunChecksTableExpander({
   return (
     <WrapperSC>
       {result?.reason && (
+        <SegmentedControlCardSC>
+          <SegmentedControlBtn
+            active={tab === ExpanderTab.Reason}
+            onClick={() => setTab(ExpanderTab.Reason)}
+          >
+            <Flex gap="xsmall">
+              <AiSparkleFilledIcon size={12} />
+              AI Reason
+            </Flex>
+          </SegmentedControlBtn>
+          <SegmentedControlBtn
+            active={tab === ExpanderTab.CheckDefinition}
+            onClick={() => setTab(ExpanderTab.CheckDefinition)}
+          >
+            Check Definition
+          </SegmentedControlBtn>
+        </SegmentedControlCardSC>
+      )}
+      {result?.reason && tab === ExpanderTab.Reason && (
         <Card
-          fillLevel={1}
-          header={{
-            content: 'reason',
-            outerProps: { style: { minHeight: 'fit-content' } },
-          }}
-          css={{ padding: spacing.medium }}
+          css={{ padding: spacing.medium, '& *': { ...partials.text.code } }}
         >
           <Markdown text={result.reason} />
         </Card>
       )}
-      <Card
-        fillLevel={1}
-        header={{
-          content: 'check definition',
-          outerProps: { style: { minHeight: 'fit-content' } },
-        }}
-      >
-        <RawYaml
-          showHeader={false}
-          css={{ border: 'none', background: 'transparent' }}
-          raw={deepOmitFalsy(check)}
-        />
-      </Card>
+      {tab === ExpanderTab.CheckDefinition && (
+        <RawYaml raw={deepOmitFalsy(check)} />
+      )}
     </WrapperSC>
   )
 }
@@ -186,12 +201,37 @@ const WrapperSC = styled.div<{ $bgColor?: SemanticColorKey }>(
     height: '100%',
     maxHeight: 500,
     overflow: 'auto',
-    gap: theme.spacing.large,
-    padding: `${theme.spacing.large}px ${theme.spacing.medium}px`,
+    gap: theme.spacing.medium,
+    padding: `${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.large}px`,
     background: theme.colors[$bgColor],
     borderTop: theme.borders['fill-one'],
   })
 )
+
+// should break this out into DS if we use it again
+const SegmentedControlCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xxsmall,
+  padding: theme.spacing.xxsmall,
+  background: 'transparent',
+  width: 'fit-content',
+}))
+function SegmentedControlBtn({
+  active,
+  ...props
+}: { active: boolean } & ButtonProps) {
+  const { spacing } = useTheme()
+  return (
+    <Button
+      small
+      css={{ padding: `0 ${spacing.xsmall}px`, minHeight: 24 }}
+      style={{ ...(active && { pointerEvents: 'none', cursor: 'default' }) }}
+      floating={active}
+      tertiary={!active}
+      {...props}
+    />
+  )
+}
 
 export const getJobStatusCounts = (
   result: Nullable<SentinelRunResultFragment>
