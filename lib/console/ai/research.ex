@@ -21,6 +21,19 @@ defmodule Console.AI.Research do
   @spec get!(binary) :: InfraResearch.t
   def get!(id), do: Repo.get!(InfraResearch, id)
 
+  @spec get(binary) :: InfraResearch.t | nil
+  def get(id), do: Repo.get(InfraResearch, id)
+
+  @doc """
+  Ensures a user has access to a research
+  Only the creator of the research can access it, or if the research is published.
+  """
+  @spec authorized(binary | InfraResearch.t, User.t) :: research_resp
+  def authorized(id, %User{} = user) when is_binary(id), do: authorized(get!(id), user)
+  def authorized(%InfraResearch{published: true} = research, _), do: {:ok, research}
+  def authorized(%InfraResearch{user_id: id} = research, %User{id: id}), do: {:ok, research}
+  def authorized(_, _), do: {:error, "only the creator of this research can access it"}
+
   @doc """
   Creates a new research task for the given user.
   """

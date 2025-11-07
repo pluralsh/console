@@ -4273,6 +4273,8 @@ export type InfraResearch = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the prompt used to create this research */
   prompt?: Maybe<Scalars['String']['output']>;
+  /** whether this research is published */
+  published?: Maybe<Scalars['Boolean']['output']>;
   /** the status of this research */
   status?: Maybe<InfraResearchStatus>;
   /** autonomous chat threads depicting the ai doing the research */
@@ -4327,6 +4329,8 @@ export enum InfraResearchStatus {
 /** attributes to update a deep research of your infrastructure */
 export type InfraResearchUpdateAttributes = {
   diagram?: InputMaybe<Scalars['String']['input']>;
+  /** whether to publish this research */
+  published?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type InfrastructureStack = {

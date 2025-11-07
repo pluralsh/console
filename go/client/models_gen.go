@@ -3480,6 +3480,8 @@ type InfraResearch struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// the diagram of the infrastructure
 	Diagram *string `json:"diagram,omitempty"`
+	// whether this research is published
+	Published *bool `json:"published,omitempty"`
 	// the status of this research
 	Status *InfraResearchStatus `json:"status,omitempty"`
 	// the analysis of the infrastructure
@@ -3528,6 +3530,8 @@ type InfraResearchEdge struct {
 // attributes to update a deep research of your infrastructure
 type InfraResearchUpdateAttributes struct {
 	Diagram *string `json:"diagram,omitempty"`
+	// whether to publish this research
+	Published *bool `json:"published,omitempty"`
 }
 
 type InfrastructureStack struct {

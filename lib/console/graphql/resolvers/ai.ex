@@ -25,7 +25,7 @@ defmodule Console.GraphQl.Resolvers.AI do
     {:ok, Console.Repo.get_by!(AiPin, args)}
   end
 
-  def resolve_research(%{id: id}, _), do: {:ok, Research.get!(id)}
+  def resolve_research(%{id: id}, %{context: %{current_user: user}}), do: Research.authorized(id, user)
 
   def pins(args, %{context: %{current_user: user}}) do
     AiPin.for_user(user.id)
@@ -71,8 +71,9 @@ defmodule Console.GraphQl.Resolvers.AI do
     |> paginate(args)
   end
 
-  def list_researches(args, _) do
+  def list_researches(args, %{context: %{current_user: user}}) do
     InfraResearch.ordered()
+    |> InfraResearch.for_user(user.id)
     |> paginate(args)
   end
 

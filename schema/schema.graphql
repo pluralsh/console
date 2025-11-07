@@ -9551,6 +9551,9 @@ input InfraResearchAttributes {
 "attributes to update a deep research of your infrastructure"
 input InfraResearchUpdateAttributes {
   diagram: String
+
+  "whether to publish this research"
+  published: Boolean
 }
 
 type Chat {
@@ -9827,6 +9830,9 @@ type InfraResearch {
 
   "the diagram of the infrastructure"
   diagram: String
+
+  "whether this research is published"
+  published: Boolean
 
   "the status of this research"
   status: InfraResearchStatus
