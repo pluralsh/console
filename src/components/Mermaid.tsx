@@ -6,6 +6,8 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
+import mermaid from 'mermaid'
+import elkLayouts from './mermaid-elk/layouts'
 import {
   CheckIcon,
   CopyIcon,
@@ -18,9 +20,21 @@ import { useCopyText } from './Code'
 import Highlight from './Highlight'
 import { PanZoomWrapper } from './PanZoomWrapper'
 
-const MERMAID_CDN_URL =
-  'https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.min.js'
-const NOT_LOADED_ERROR = 'Mermaid not loaded'
+// Initialize mermaid once at module load
+let initialized = false
+const initializeMermaid = () => {
+  if (initialized) return
+  mermaid.initialize({ startOnLoad: false })
+
+  // Register ELK layout with mermaid
+  try {
+    mermaid.registerLayoutLoaders(elkLayouts)
+  } catch (err) {
+    console.error('Failed to register ELK layout with mermaid:', err)
+  }
+
+  initialized = true
+}
 
 // helps prevent flickering (and potentially expensive recalculations) in virutalized lists
 // need to do this outside of React lifecycle memoization (useMemo etc) so it can persist across component mounts/unmounts
@@ -65,34 +79,41 @@ export function Mermaid({
       setError(cached instanceof Error ? cached : null)
       return
     }
-    let numRetries = 0
-    let pollTimeout: NodeJS.Timeout | null = null
-    // poll for when window.mermaid becomes available
-    const checkAndRender = async () => {
+
+    let isCancelled = false
+
+    const renderDiagram = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        setSvgStr(await renderMermaid(diagram))
-        setIsLoading(false)
-      } catch (caughtErr) {
-        let err = caughtErr
-        if (!(caughtErr instanceof Error)) err = new Error(caughtErr)
-        // if not loaded yet, wait and retry
-        if (err.message.includes(NOT_LOADED_ERROR) && numRetries < 50) {
-          pollTimeout = setTimeout(checkAndRender, 150)
-          numRetries++
-        } else {
-          console.error('Error parsing Mermaid (rendering plaintext):', err)
-          setError(err)
+
+        // Initialize mermaid if not already done
+        initializeMermaid()
+
+        const { svg } = await mermaid.render(id, diagram)
+        cachedRenders[id] = svg
+
+        if (!isCancelled) {
+          setSvgStr(svg)
           setIsLoading(false)
-          cachedRenders[id] = err
         }
+      } catch (caughtErr) {
+        if (isCancelled) return
+        const err =
+          caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
+        console.error('Error parsing Mermaid (rendering plaintext):', err)
+        setError(err)
+        setIsLoading(false)
+        cachedRenders[id] = err
       }
     }
-    checkAndRender()
 
-    return () => clearTimeout(pollTimeout)
-  }, [diagram, setError, svgStr])
+    renderDiagram()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [diagram, setError])
 
   if (error)
     return (
@@ -105,74 +126,49 @@ export function Mermaid({
     )
 
   return (
-    <>
-      <script
-        async
-        src={MERMAID_CDN_URL}
-      />
-      <PanZoomWrapper
-        key={panZoomKey}
-        actionButtons={
-          <>
-            <IconFrame
-              clickable
-              onClick={() => setPanZoomKey((key) => key + 1)}
-              icon={<ReloadIcon />}
-              type="floating"
-              tooltip="Reset view to original size"
-            />
-            <IconFrame
-              clickable
-              onClick={handleCopy}
-              icon={copied ? <CheckIcon /> : <CopyIcon />}
-              type="floating"
-              tooltip="Copy Mermaid code"
-            />
-            <IconFrame
-              clickable
-              onClick={() => svgStr && downloadMermaidSvg(svgStr)}
-              icon={<DownloadIcon />}
-              type="floating"
-              tooltip="Download as PNG"
-            />
-          </>
-        }
-        {...props}
-      >
-        {isLoading ? (
-          <div css={{ color: styledTheme.colors.grey[950] }}>
-            Loading diagram...
-          </div>
-        ) : (
-          svgStr && (
-            <div
-              dangerouslySetInnerHTML={{ __html: svgStr }}
-              style={{ textAlign: 'center' }}
-            />
-          )
-        )}
-      </PanZoomWrapper>
-    </>
+    <PanZoomWrapper
+      key={panZoomKey}
+      actionButtons={
+        <>
+          <IconFrame
+            clickable
+            onClick={() => setPanZoomKey((key) => key + 1)}
+            icon={<ReloadIcon />}
+            type="floating"
+            tooltip="Reset view to original size"
+          />
+          <IconFrame
+            clickable
+            onClick={handleCopy}
+            icon={copied ? <CheckIcon /> : <CopyIcon />}
+            type="floating"
+            tooltip="Copy Mermaid code"
+          />
+          <IconFrame
+            clickable
+            onClick={() => svgStr && downloadMermaidSvg(svgStr)}
+            icon={<DownloadIcon />}
+            type="floating"
+            tooltip="Download as PNG"
+          />
+        </>
+      }
+      {...props}
+    >
+      {isLoading ? (
+        <div css={{ color: styledTheme.colors.grey[950] }}>
+          Loading diagram...
+        </div>
+      ) : (
+        svgStr && (
+          <div
+            dangerouslySetInnerHTML={{ __html: svgStr }}
+            style={{ textAlign: 'center' }}
+          />
+        )
+      )}
+    </PanZoomWrapper>
   )
-}
-
-let initialized = false
-const getOrInitializeMermaid = () => {
-  if (!window.mermaid) return null
-  if (!initialized) {
-    window.mermaid.initialize({ startOnLoad: false })
-    initialized = true
-  }
-  return window.mermaid
-}
-
-const renderMermaid = async (code: string) => {
-  const mermaid = getOrInitializeMermaid()
-  if (!mermaid) throw new Error(NOT_LOADED_ERROR)
-  const id = getMermaidId(code)
-  const { svg } = await mermaid.render(id, code)
-  cachedRenders[id] = svg
-  return svg
 }
 
 export const downloadMermaidSvg = (svgStr: string) => {

@@ -7,6 +7,8 @@ export * from './icons'
 // PluralLogos
 export * from './plural-logos'
 
+export { default as ELK } from 'elkjs/lib/elk.bundled.js'
+
 // Components
 export {
   default as Accordion,

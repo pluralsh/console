@@ -42,10 +42,8 @@ jobs:
       with:
         node-version: ${{ steps.engines.outputs.nodeVersion }}
         registry-url: 'https://registry.npmjs.org'
-    - name: 'Install Dependencies'
-      run: yarn install --immutable
-    - name: 'Clean & Build'
-      run: yarn clean && yarn build
+    - name: 'Install Dependencies and Clean'
+      run: yarn install --immutable && yarn clean
     - name: Semantic Release
       uses: cycjimmy/semantic-release-action@v3
       env:
