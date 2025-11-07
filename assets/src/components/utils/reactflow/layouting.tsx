@@ -1,3 +1,4 @@
+import { ELK } from '@pluralsh/design-system'
 import {
   Edge,
   useNodesInitialized,
@@ -12,8 +13,6 @@ import type {
   LayoutOptions,
 } from 'elkjs'
 import { useEffect } from 'react'
-
-import ELK from 'elkjs/lib/elk.bundled.js'
 
 const elkInstance = new ELK()
 
