@@ -74,7 +74,8 @@ defmodule Console.GraphQl.AI do
 
   @desc "attributes to update a deep research of your infrastructure"
   input_object :infra_research_update_attributes do
-    field :diagram, :string
+    field :diagram,   :string
+    field :published, :boolean, description: "whether to publish this research"
   end
 
   object :chat do
@@ -301,6 +302,7 @@ defmodule Console.GraphQl.AI do
     field :id,           non_null(:id)
     field :prompt,       :string, description: "the prompt used to create this research"
     field :diagram,      :string, description: "the diagram of the infrastructure"
+    field :published,    :boolean, description: "whether this research is published"
     field :status,       :infra_research_status, description: "the status of this research"
     field :analysis,     :infra_research_analysis, description: "the analysis of the infrastructure"
     field :associations, list_of(:infra_research_association),

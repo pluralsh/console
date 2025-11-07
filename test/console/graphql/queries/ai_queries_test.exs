@@ -393,7 +393,7 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
   end
 
   describe "infraResearch" do
-    test "it can list a users infra researches" do
+    test "it can list a users infra research" do
       user = insert(:user)
       research = insert(:infra_research, user: user)
       assoc1 = insert(:research_association, research: research, stack: insert(:stack))
@@ -419,6 +419,25 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
       found_assocs = Map.new(found["associations"], & {&1["id"], &1})
       assert found_assocs[assoc1.id]["stack"]["id"] == assoc1.stack_id
       assert found_assocs[assoc2.id]["service"]["id"] == assoc2.service_id
+    end
+
+    test "you cannot read others researches" do
+      user = insert(:user)
+      research = insert(:infra_research)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Research($id: ID!) {
+          infraResearch(id: $id) {
+            id
+            prompt
+            associations {
+              id
+              stack { id }
+              service { id }
+            }
+          }
+        }
+      """, %{"id" => research.id}, %{current_user: user})
     end
   end
 
