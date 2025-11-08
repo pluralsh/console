@@ -51,8 +51,7 @@ migrator:
 # console is used to configure any additional containers to add to the console. Standard kubernetes container configuration
 console:
   additionalContainers: ~
-  containerSecurityContext: ~
-  securityContext:
+  containerSecurityContext:
     capabilities:
       drop:
         - ALL
@@ -61,6 +60,7 @@ console:
     readOnlyRootFilesystem: true
     seccompProfile:
       type: RuntimeDefault
+  securityContext: ~
 
 # secrets is used to configure environment variables for the console, in secrets.yaml
 secrets:
