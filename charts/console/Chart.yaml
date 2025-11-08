@@ -2,8 +2,8 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.11.50
-version: 0.3.125
+appVersion: 0.11.51
+version: 0.3.126
 dependencies:
   - name: kas
     version: 0.3.0
