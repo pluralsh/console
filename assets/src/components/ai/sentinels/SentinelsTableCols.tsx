@@ -182,7 +182,7 @@ const ColLastRun = columnHelper.accessor((sentinel) => sentinel.lastRunAt, {
 
 const ColStatus = columnHelper.accessor((sentinel) => sentinel.status, {
   id: 'status',
-  header: 'Status',
+  header: 'Run status',
   enableSorting: true,
   cell: function Cell({ getValue, row: { original } }) {
     const status = getValue()
@@ -290,6 +290,7 @@ export function SentinelStatusChip({
   filled = false,
   small = false,
   spinner = false,
+  clickable = false,
 }: {
   status: SentinelRunStatus
   lastRunAt?: Nullable<string>
@@ -299,6 +300,7 @@ export function SentinelStatusChip({
   filled?: boolean
   small?: boolean
   spinner?: boolean
+  clickable?: boolean
 }) {
   const { borders } = useTheme()
   const isPending = status === SentinelRunStatus.Pending
@@ -325,8 +327,10 @@ export function SentinelStatusChip({
           border: isPending ? 'none' : borders.default,
           ...((!filled || isPending) && { background: 'none' }),
           ...(numErrors && { height: 32 }),
+          'td &': { pointerEvents: 'auto' }, // so getRowLink doesn't interfere with tooltip
         }}
         size={small ? 'small' : 'medium'}
+        clickable={clickable}
       >
         <Flex
           gap="xsmall"

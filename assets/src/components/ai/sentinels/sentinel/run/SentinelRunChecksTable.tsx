@@ -1,15 +1,16 @@
 import {
-  CaretRightIcon,
   Chip,
+  DropdownArrowIcon,
   Flex,
   IconFrame,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import { SentinelCheckType, SentinelRunStatus } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useTheme } from 'styled-components'
 import {
   getSentinelCheckIcon,
   SentinelStatusChip,
@@ -36,7 +37,7 @@ export function SentinelRunChecksTable({
       overflow="hidden"
     >
       <StackedText
-        first="Run checks"
+        first={`Run checks (${tableData.length})`}
         firstPartialType="body2Bold"
         firstColor="text"
         second="Results of individual checks on this run"
@@ -74,7 +75,9 @@ const runChecksCols = [
       return (
         <IconFrame
           icon={
-            <CaretRightIcon style={{ rotate: isExpanded ? '90deg' : '0deg' }} />
+            <DropdownArrowIcon
+              style={{ rotate: isExpanded ? '0deg' : '-90deg' }}
+            />
           }
           tooltip={isExpanded ? 'Collapse details' : 'View details'}
         />
@@ -85,14 +88,20 @@ const runChecksCols = [
     id: 'name',
     meta: { gridTemplate: '1fr' },
     cell: function Cell({ getValue }) {
+      const { spacing } = useTheme()
       const { name, type } = getValue()
       return (
-        <Flex align="center">
+        <Flex
+          align="center"
+          gap="xsmall"
+          marginLeft={spacing.medium}
+        >
           <IconFrame
-            size="large"
+            type="secondary"
+            size="small"
             icon={getSentinelCheckIcon(type)}
           />
-          <Body2P $color="text">{name}</Body2P>
+          <Body2BoldP $color="text">{name}</Body2BoldP>
         </Flex>
       )
     },
