@@ -56,7 +56,7 @@ console:
       drop:
         - ALL
     allowPrivilegeEscalation: false
-    runAsNonRoot: true
+    runAsNonRoot: false
     readOnlyRootFilesystem: true
     seccompProfile:
       type: RuntimeDefault
