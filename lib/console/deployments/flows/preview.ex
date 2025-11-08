@@ -52,7 +52,7 @@ defmodule Console.Deployments.Flows.Preview do
 
   def sync_service(%Service{deleted_at: nil} = svc) do
     case Repo.preload(svc, [:preview_instance, :preview_templates]) do
-      %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} ->
+      %Service{preview_instance: %PreviewEnvironmentInstance{status: %{comment_id: cid}} = inst} when is_binary(cid) ->
         post_comment(inst)
       %Service{preview_templates: [_ | _], id: id, updated_at: updated_at} ->
         if fresh?(updated_at) do
