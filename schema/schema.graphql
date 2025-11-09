@@ -159,6 +159,8 @@ type RootQueryType {
 
   catalogs(after: String, first: Int, before: String, last: Int, projectId: ID): CatalogConnection
 
+  catalogSearch(q: String!): [CatalogSearchResult]
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -9361,6 +9363,41 @@ type Catalog {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type CatalogSearchResult {
+  catalog: CatalogSearchItem
+  prAutomation: PrAutomationSearchItem
+}
+
+type PrAutomationSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the description for this pr automation"
+  description: String
+
+  "an icon url to use for this pr automation"
+  icon: String
+
+  "a darkmode icon url to use for this pr automation"
+  darkIcon: String
+}
+
+type CatalogSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the documentation for this pr automation"
+  documentation: String
+
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
 }
 
 "A governance controller is a mechanism to enforce a set of rules on a set of PRs"

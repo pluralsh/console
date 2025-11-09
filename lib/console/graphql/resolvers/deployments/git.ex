@@ -190,6 +190,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)
 
+  def catalog_search(%{q: q}, _),
+    do: Git.catalog_search(q)
+
   def upsert_catalog(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.upsert_catalog(attrs, user)
 

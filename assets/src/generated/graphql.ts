@@ -1493,6 +1493,24 @@ export type CatalogEdge = {
   node?: Maybe<Catalog>;
 };
 
+export type CatalogSearchItem = {
+  __typename?: 'CatalogSearchItem';
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the documentation for this pr automation */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this catalog */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type CatalogSearchResult = {
+  __typename?: 'CatalogSearchResult';
+  catalog?: Maybe<CatalogSearchItem>;
+  prAutomation?: Maybe<PrAutomationSearchItem>;
+};
+
 export type Certificate = {
   __typename?: 'Certificate';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -6677,6 +6695,18 @@ export type PrAutomationEdge = {
   node?: Maybe<PrAutomation>;
 };
 
+export type PrAutomationSearchItem = {
+  __typename?: 'PrAutomationSearchItem';
+  /** a darkmode icon url to use for this pr automation */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the description for this pr automation */
+  description?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this pr automation */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
 /** templates to apply in this pr */
 export type PrAutomationTemplateAttributes = {
   condition?: InputMaybe<Scalars['String']['input']>;
@@ -8921,6 +8951,7 @@ export type RootQueryType = {
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
+  catalogSearch?: Maybe<Array<Maybe<CatalogSearchResult>>>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
   /** gets an individual chat thread, with the ability to sideload chats on top */
@@ -9233,6 +9264,11 @@ export type RootQueryTypeCanaryArgs = {
 export type RootQueryTypeCatalogArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeCatalogSearchArgs = {
+  q: Scalars['String']['input'];
 };
 
 

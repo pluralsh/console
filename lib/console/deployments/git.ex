@@ -8,6 +8,7 @@ defmodule Console.Deployments.Git do
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
   alias Console.Deployments.Pr.Governance.Provider, as: GovernanceProvider
+  alias Console.AI.VectorStore
   alias Console.Schema.{
     GitRepository,
     User,
@@ -310,6 +311,7 @@ defmodule Console.Deployments.Git do
     |> PrAutomation.changeset(Settings.add_project_id(attrs))
     |> allow(user, :create)
     |> when_ok(:insert)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -323,6 +325,7 @@ defmodule Console.Deployments.Git do
     |> when_ok(&PrAutomation.changeset(&1, attrs))
     |> when_ok(&allow(&1, user, :write))
     |> when_ok(:update)
+    |> notify(:update, user)
   end
 
   @doc """
@@ -333,6 +336,7 @@ defmodule Console.Deployments.Git do
     get_pr_automation!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @doc """
@@ -520,6 +524,17 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Executes a semantic search for a catalog or pr automation
+  """
+  @spec catalog_search(binary, keyword) :: {:ok, [VectorStore.Response.t]} | Console.error
+  def catalog_search(q, opts \\ []) do
+    opts = Keyword.put(opts, :filters, [datatype: {:raw, [:catalog, :pr_automation]}])
+    case VectorStore.enabled?() do
+      true -> VectorStore.fetch(q, opts)
+      false -> {:error, "Vector store is not enabled, cannot query"}
+    end
+  end
+  @doc """
   Upserts a new catalog instance, requires at least project write permissions
   """
   @spec upsert_catalog(map, User.t) :: catalog_resp
@@ -531,6 +546,7 @@ defmodule Console.Deployments.Git do
     |> allow(user, :write)
     |> when_ok(&Catalog.changeset(&1, attrs))
     |> when_ok(&Repo.insert_or_update/1)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -541,6 +557,7 @@ defmodule Console.Deployments.Git do
     get_catalog!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @doc """
@@ -690,6 +707,19 @@ defmodule Console.Deployments.Git do
     |> Console.Repo.update()
     |> notify(:update)
   end
+
+  defp notify({:ok, %PrAutomation{} = pr}, :create, user),
+    do: handle_notify(PubSub.PrAutomationCreated, pr, actor: user)
+  defp notify({:ok, %PrAutomation{} = pr}, :update, user),
+    do: handle_notify(PubSub.PrAutomationUpdated, pr, actor: user)
+  defp notify({:ok, %PrAutomation{} = pr}, :delete, user),
+    do: handle_notify(PubSub.PrAutomationDeleted, pr, actor: user)
+  defp notify({:ok, %Catalog{} = catalog}, :create, user),
+    do: handle_notify(PubSub.CatalogCreated, catalog, actor: user)
+  defp notify({:ok, %Catalog{} = catalog}, :update, user),
+    do: handle_notify(PubSub.CatalogUpdated, catalog, actor: user)
+  defp notify({:ok, %Catalog{} = catalog}, :delete, user),
+    do: handle_notify(PubSub.CatalogDeleted, catalog, actor: user)
 
   defp notify({:ok, %GitRepository{} = git}, :create, user),
     do: handle_notify(PubSub.GitRepositoryCreated, git, actor: user)
