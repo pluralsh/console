@@ -137,7 +137,7 @@ defmodule Console.AI.Cron do
       |> PrAutomation.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
     )
-    |> Stream.map(&PubSub.Vector.Bulk.insert/1)
+    |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
     |> Stream.run()
   end
 
