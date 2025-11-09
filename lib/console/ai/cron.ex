@@ -13,7 +13,9 @@ defmodule Console.AI.Cron do
     ChatThread,
     McpServerAudit,
     AgentRun,
-    SentinelRun
+    SentinelRun,
+    PrAutomation,
+    Catalog
   }
 
   require Logger
@@ -124,6 +126,19 @@ defmodule Console.AI.Cron do
         expiry: Timex.now() |> Timex.shift(hours: -10)
       )
     end
+  end
+
+  def vector_index() do
+    Catalog
+    |> Catalog.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Stream.concat(
+      PrAutomation
+      |> PrAutomation.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+    )
+    |> Stream.map(&PubSub.Vector.Bulk.insert/1)
+    |> Stream.run()
   end
 
   defp batch_insight(event, chunk) do

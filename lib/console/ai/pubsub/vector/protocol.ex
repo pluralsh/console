@@ -142,7 +142,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.CatalogCreated, Con
   alias Console.AI.PubSub.Vector.Indexable
 
   def resource(%@for{item: %Catalog{} = catalog}) do
-    %Indexable{data: Catalog.Mini.new(catalog), filters: [catalog_id: catalog.id], force: true}
+    %Indexable{data: Catalog.Mini.new(catalog), filters: [catalog_id: catalog.id]}
   end
   def resource(_), do: :ok
 end
