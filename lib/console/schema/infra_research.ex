@@ -14,6 +14,22 @@ defmodule Console.Schema.InfraResearch do
     embeds_one :analysis, Analysis, on_replace: :update do
       field :summary, :string
       field :notes,   {:array, :string}
+
+      embeds_one :graph, Graph, on_replace: :update do
+        embeds_many :vertices, Vertex, on_replace: :delete do
+          field :identifier,  :string
+          field :type,        :string
+          field :description, :string
+          field :annotations, :map
+        end
+
+        embeds_many :edges, Edge, on_replace: :delete do
+          field :from,        :string
+          field :to,          :string
+          field :type,        :string
+          field :description, :string
+        end
+      end
     end
 
     belongs_to :user, User
@@ -48,5 +64,25 @@ defmodule Console.Schema.InfraResearch do
     model
     |> cast(attrs, ~w(summary notes)a)
     |> validate_required([:summary])
+    |> cast_embed(:graph, with: &graph_changeset/2)
+  end
+
+  defp graph_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:vertices, with: &vertex_changeset/2)
+    |> cast_embed(:edges, with: &edge_changeset/2)
+  end
+
+  defp vertex_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(identifier type description annotations)a)
+    |> validate_required([:identifier, :type, :description])
+  end
+
+  defp edge_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(from to type description)a)
+    |> validate_required([:from, :to])
   end
 end

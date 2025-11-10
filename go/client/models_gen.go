@@ -3517,6 +3517,8 @@ type InfraResearchAnalysis struct {
 	Summary *string `json:"summary,omitempty"`
 	// any notes from the analysis, indicating unsolved questions
 	Notes []*string `json:"notes,omitempty"`
+	// a knowledge graph of the infrastructure
+	Graph *InfraResearchGraph `json:"graph,omitempty"`
 }
 
 // Associations with services/stacks and a research
@@ -3541,6 +3543,27 @@ type InfraResearchConnection struct {
 type InfraResearchEdge struct {
 	Node   *InfraResearch `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type InfraResearchGraph struct {
+	// the vertices of the graph
+	Vertices []*InfraResearchGraphVertex `json:"vertices,omitempty"`
+	// the edges of the graph
+	Edges []*InfraResearchGraphEdge `json:"edges,omitempty"`
+}
+
+type InfraResearchGraphEdge struct {
+	From        string  `json:"from"`
+	To          string  `json:"to"`
+	Type        *string `json:"type,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type InfraResearchGraphVertex struct {
+	Identifier  string         `json:"identifier"`
+	Type        string         `json:"type"`
+	Description *string        `json:"description,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 // attributes to update a deep research of your infrastructure

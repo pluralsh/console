@@ -126,7 +126,9 @@ defmodule Console.Deployments.Flows.Preview do
     %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,
     %PullRequest{} = pr
   ) do
+    svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings, :imports])
     with {:ok, attrs} <- build_attributes(pr, tpl),
+         true <- Services.changed?(svc, attrs),
          {:ok, svc} <- Services.update_service(attrs, svc.id, bot()),
          _ <- notify({:ok, %{inst | service: svc}}, :update),
       do: {:ok, svc}

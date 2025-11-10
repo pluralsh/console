@@ -9906,6 +9906,31 @@ type InfraResearchAnalysis {
 
   "any notes from the analysis, indicating unsolved questions"
   notes: [String]
+
+  "a knowledge graph of the infrastructure"
+  graph: InfraResearchGraph
+}
+
+type InfraResearchGraph {
+  "the vertices of the graph"
+  vertices: [InfraResearchGraphVertex]
+
+  "the edges of the graph"
+  edges: [InfraResearchGraphEdge]
+}
+
+type InfraResearchGraphVertex {
+  identifier: String!
+  type: String!
+  description: String
+  annotations: Map
+}
+
+type InfraResearchGraphEdge {
+  from: String!
+  to: String!
+  type: String
+  description: String
 }
 
 type ToolDelta {

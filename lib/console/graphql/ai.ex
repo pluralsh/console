@@ -329,6 +329,26 @@ defmodule Console.GraphQl.AI do
   object :infra_research_analysis do
     field :summary, :string, description: "a summary of the analysis"
     field :notes,   list_of(:string), description: "any notes from the analysis, indicating unsolved questions"
+    field :graph,   :infra_research_graph, description: "a knowledge graph of the infrastructure"
+  end
+
+  object :infra_research_graph do
+    field :vertices, list_of(:infra_research_graph_vertex), description: "the vertices of the graph"
+    field :edges,    list_of(:infra_research_graph_edge), description: "the edges of the graph"
+  end
+
+  object :infra_research_graph_vertex do
+    field :identifier,  non_null(:string)
+    field :type,        non_null(:string)
+    field :description, :string
+    field :annotations, :map
+  end
+
+  object :infra_research_graph_edge do
+    field :from,        non_null(:string)
+    field :to,          non_null(:string)
+    field :type,        :string
+    field :description, :string
   end
 
   object :tool_delta do

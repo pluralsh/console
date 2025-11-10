@@ -4304,6 +4304,8 @@ export type InfraResearch = {
 /** Additional analysis attached to this research result */
 export type InfraResearchAnalysis = {
   __typename?: 'InfraResearchAnalysis';
+  /** a knowledge graph of the infrastructure */
+  graph?: Maybe<InfraResearchGraph>;
   /** any notes from the analysis, indicating unsolved questions */
   notes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** a summary of the analysis */
@@ -4335,6 +4337,30 @@ export type InfraResearchEdge = {
   __typename?: 'InfraResearchEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<InfraResearch>;
+};
+
+export type InfraResearchGraph = {
+  __typename?: 'InfraResearchGraph';
+  /** the edges of the graph */
+  edges?: Maybe<Array<Maybe<InfraResearchGraphEdge>>>;
+  /** the vertices of the graph */
+  vertices?: Maybe<Array<Maybe<InfraResearchGraphVertex>>>;
+};
+
+export type InfraResearchGraphEdge = {
+  __typename?: 'InfraResearchGraphEdge';
+  description?: Maybe<Scalars['String']['output']>;
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type InfraResearchGraphVertex = {
+  __typename?: 'InfraResearchGraphVertex';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  identifier: Scalars['String']['output'];
+  type: Scalars['String']['output'];
 };
 
 export enum InfraResearchStatus {
