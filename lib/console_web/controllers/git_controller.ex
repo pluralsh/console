@@ -1,7 +1,7 @@
 defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
   alias Console.SmartFile
-  alias Console.Deployments.{Services, Stacks}
+  alias Console.Deployments.{Services, Stacks, Sentinels}
   alias Console.Schema.{Cluster, Service}
   alias Console.Deployments.Local.Server, as: FileServer
   require Logger
@@ -43,6 +43,16 @@ defmodule ConsoleWeb.GitController do
         Stacks.add_errors(run, [%{source: "git", message: stringify(err)}])
         send_resp(conn, 402, stringify(err))
       _err -> send_resp(conn, 403, "Forbidden")
+    end
+  end
+
+  def sentinel_tarball(conn, %{"id" => job_id}) do
+    with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
+         {:ok, job} <- Sentinels.authorized_job(job_id, cluster),
+         {:ok, f} <- Sentinels.tarstream(job) do
+      chunk_send_tar(conn, f)
+    else
+      _ -> send_resp(conn, 403, "Forbidden")
     end
   end
 

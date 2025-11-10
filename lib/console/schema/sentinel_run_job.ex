@@ -2,6 +2,8 @@ defmodule Console.Schema.SentinelRunJob do
   use Console.Schema.Base
   alias Console.Schema.{
     Cluster,
+    Service,
+    GitRepository,
     SentinelRun,
     Gates.JobSpec
   }
@@ -25,6 +27,9 @@ defmodule Console.Schema.SentinelRunJob do
       field :name,      :string
     end
 
+    embeds_one :git, Service.Git, on_replace: :update
+
+    belongs_to :repository, GitRepository
     belongs_to :cluster, Cluster
     belongs_to :sentinel_run, SentinelRun
 
@@ -59,12 +64,13 @@ defmodule Console.Schema.SentinelRunJob do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
-  @valid ~w(check format status cluster_id output sentinel_run_id)a
+  @valid ~w(check format status cluster_id output sentinel_run_id repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:job)
+    |> cast_embed(:git)
     |> cast_embed(:reference, with: &reference_changeset/2)
     |> validate_required(~w(check format status cluster_id sentinel_run_id)a)
     |> SentinelRun.add_completed_at()

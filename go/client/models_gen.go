@@ -6490,6 +6490,10 @@ type SentinelCheckGotestsumConfiguration struct {
 }
 
 type SentinelCheckIntegrationTestConfiguration struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRef `json:"git,omitempty"`
 	// the job to run for this check
 	Job *JobGateSpec `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6503,6 +6507,10 @@ type SentinelCheckIntegrationTestConfiguration struct {
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// the job to run for this check
 	Job *GateJobAttributes `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6620,12 +6628,18 @@ type SentinelRunJob struct {
 	Output *string `json:"output,omitempty"`
 	// the time the job completed
 	CompletedAt *string `json:"completedAt,omitempty"`
+	// the git repository to use for this job
+	Git *GitRef `json:"git,omitempty"`
+	// whether this job uses test code defined in git
+	UsesGit *bool `json:"usesGit,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
 	// the job that was run
 	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
 	// the reference to the job that was run
 	Reference *JobReference `json:"reference,omitempty"`
+	// the git repository to use for this job
+	Repository *GitRepository `json:"repository,omitempty"`
 	// the cluster that the job was run on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the run that the job was run on

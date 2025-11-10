@@ -10812,10 +10812,14 @@ export type SentinelCheckIntegrationTestConfiguration = {
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: Maybe<GitRef>;
   /** the gotestsum configuration to use for this check */
   gotestsum?: Maybe<SentinelCheckGotestsumConfiguration>;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
+  /** the repository to use for this check */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
   /** the cluster tags to select where to run this job */
   tags?: Maybe<Scalars['Map']['output']>;
 };
@@ -10825,10 +10829,14 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: InputMaybe<GitRefAttributes>;
   /** the gotestsum configuration to use for this check */
   gotestsum?: InputMaybe<SentinelCheckGotestsumAttributes>;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
+  /** the repository to use for this check */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to select where to run this job */
   tags?: InputMaybe<Scalars['Json']['input']>;
 };
@@ -10958,6 +10966,8 @@ export type SentinelRunJob = {
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this job */
+  git?: Maybe<GitRef>;
   /** the id of the job */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -10969,11 +10979,15 @@ export type SentinelRunJob = {
   output?: Maybe<Scalars['String']['output']>;
   /** the reference to the job that was run */
   reference?: Maybe<JobReference>;
+  /** the git repository to use for this job */
+  repository?: Maybe<GitRepository>;
   /** the run that the job was run on */
   sentinelRun?: Maybe<SentinelRun>;
   /** the status of the job */
   status: SentinelRunJobStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether this job uses test code defined in git */
+  usesGit?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SentinelRunJobConnection = {

@@ -48,6 +48,10 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   input_object :sentinel_check_integration_test_configuration_attributes do
+    field :repository_id, :id, description: "the repository to use for this check"
+    field :git,           :git_ref_attributes, description: "the git repository to use for this check"
+
+
     field :job,       :gate_job_attributes, description: "the job to run for this check"
     field :distro,    :cluster_distro, description: "the distro to run the check on"
     field :tags,      :json, description: "the cluster tags to select where to run this job"
@@ -116,11 +120,13 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   object :sentinel_check_integration_test_configuration do
-    field :job,       :job_gate_spec, description: "the job to run for this check"
-    field :distro,    :cluster_distro, description: "the distro to run the check on"
-    field :tags,      :map, description: "the cluster tags to select where to run this job"
-    field :format,    non_null(:sentinel_run_job_format), description: "the format of the job"
-    field :gotestsum, :sentinel_check_gotestsum_configuration, description: "the gotestsum configuration to use for this check"
+    field :repository_id, :id, description: "the repository to use for this check"
+    field :git,           :git_ref, description: "the git repository to use for this check"
+    field :job,           :job_gate_spec, description: "the job to run for this check"
+    field :distro,        :cluster_distro, description: "the distro to run the check on"
+    field :tags,          :map, description: "the cluster tags to select where to run this job"
+    field :format,        non_null(:sentinel_run_job_format), description: "the format of the job"
+    field :gotestsum,     :sentinel_check_gotestsum_configuration, description: "the gotestsum configuration to use for this check"
   end
 
   object :sentinel_check_gotestsum_configuration do
@@ -168,6 +174,12 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :check,         :string, description: "the check that was run"
     field :output,        :string, description: "the output of the job"
     field :completed_at,  :datetime, description: "the time the job completed"
+    field :git,           :git_ref, description: "the git repository to use for this job"
+    field :uses_git,      :boolean, description: "whether this job uses test code defined in git", resolve: fn
+      %Console.Schema.SentinelRunJob{git: %{ref: r}, repository_id: id}, _, _
+        when is_binary(r) and is_binary(id) -> {:ok, true}
+      _, _, _ -> {:ok, false}
+    end
 
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do
@@ -181,6 +193,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :reference,     :job_reference, description: "the reference to the job that was run"
 
+    field :repository,    :git_repository, resolve: dataloader(Deployments), description: "the git repository to use for this job"
     field :cluster,       :cluster, resolve: dataloader(Deployments), description: "the cluster that the job was run on"
     field :sentinel_run,  :sentinel_run, resolve: dataloader(Deployments), description: "the run that the job was run on"
 

@@ -61,6 +61,9 @@ defmodule Console.Schema.Sentinel do
             field :parallel, :string
           end
 
+          embeds_one :git, Service.Git, on_replace: :update
+          field :repository_id, :binary_id
+
           field :format, SentinelRunJob.Format, default: :junit
           field :tags,   :map
           field :distro, Cluster.Distro
@@ -145,8 +148,9 @@ defmodule Console.Schema.Sentinel do
 
   defp integration_test_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(tags distro format)a)
+    |> cast(attrs, ~w(tags distro format repository_id)a)
     |> cast_embed(:job)
+    |> cast_embed(:git)
     |> cast_embed(:gotestsum, with: &gotestsum_changeset/2)
     |> validate_required(~w(format)a)
   end

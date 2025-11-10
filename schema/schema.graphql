@@ -1800,6 +1800,12 @@ input SentinelCheckKubernetesConfigurationAttributes {
 }
 
 input SentinelCheckIntegrationTestConfigurationAttributes {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRefAttributes
+
   "the job to run for this check"
   job: GateJobAttributes
 
@@ -1934,6 +1940,12 @@ type SentinelCheckKubernetesConfiguration {
 }
 
 type SentinelCheckIntegrationTestConfiguration {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRef
+
   "the job to run for this check"
   job: JobGateSpec
 
@@ -2031,6 +2043,12 @@ type SentinelRunJob {
   "the time the job completed"
   completedAt: DateTime
 
+  "the git repository to use for this job"
+  git: GitRef
+
+  "whether this job uses test code defined in git"
+  usesGit: Boolean
+
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
 
@@ -2039,6 +2057,9 @@ type SentinelRunJob {
 
   "the reference to the job that was run"
   reference: JobReference
+
+  "the git repository to use for this job"
+  repository: GitRepository
 
   "the cluster that the job was run on"
   cluster: Cluster
