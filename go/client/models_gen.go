@@ -1190,6 +1190,22 @@ type CatalogEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
+type CatalogSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the documentation for this pr automation
+	Documentation *string `json:"documentation,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string `json:"darkIcon,omitempty"`
+}
+
+type CatalogSearchResult struct {
+	Catalog      *CatalogSearchItem      `json:"catalog,omitempty"`
+	PrAutomation *PrAutomationSearchItem `json:"prAutomation,omitempty"`
+}
+
 type Certificate struct {
 	Metadata Metadata          `json:"metadata"`
 	Status   CertificateStatus `json:"status"`
@@ -3501,6 +3517,8 @@ type InfraResearchAnalysis struct {
 	Summary *string `json:"summary,omitempty"`
 	// any notes from the analysis, indicating unsolved questions
 	Notes []*string `json:"notes,omitempty"`
+	// a knowledge graph of the infrastructure
+	Graph *InfraResearchGraph `json:"graph,omitempty"`
 }
 
 // Associations with services/stacks and a research
@@ -3525,6 +3543,27 @@ type InfraResearchConnection struct {
 type InfraResearchEdge struct {
 	Node   *InfraResearch `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type InfraResearchGraph struct {
+	// the vertices of the graph
+	Vertices []*InfraResearchGraphVertex `json:"vertices,omitempty"`
+	// the edges of the graph
+	Edges []*InfraResearchGraphEdge `json:"edges,omitempty"`
+}
+
+type InfraResearchGraphEdge struct {
+	From        string  `json:"from"`
+	To          string  `json:"to"`
+	Type        *string `json:"type,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type InfraResearchGraphVertex struct {
+	Identifier  string         `json:"identifier"`
+	Type        string         `json:"type"`
+	Description *string        `json:"description,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 // attributes to update a deep research of your infrastructure
@@ -5501,6 +5540,17 @@ type PrAutomationEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type PrAutomationSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the description for this pr automation
+	Description *string `json:"description,omitempty"`
+	// an icon url to use for this pr automation
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this pr automation
+	DarkIcon *string `json:"darkIcon,omitempty"`
+}
+
 // templates to apply in this pr
 type PrAutomationTemplateAttributes struct {
 	Source      string  `json:"source"`
@@ -6440,6 +6490,10 @@ type SentinelCheckGotestsumConfiguration struct {
 }
 
 type SentinelCheckIntegrationTestConfiguration struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRef `json:"git,omitempty"`
 	// the job to run for this check
 	Job *JobGateSpec `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6453,6 +6507,10 @@ type SentinelCheckIntegrationTestConfiguration struct {
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// the job to run for this check
 	Job *GateJobAttributes `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6570,12 +6628,18 @@ type SentinelRunJob struct {
 	Output *string `json:"output,omitempty"`
 	// the time the job completed
 	CompletedAt *string `json:"completedAt,omitempty"`
+	// the git repository to use for this job
+	Git *GitRef `json:"git,omitempty"`
+	// whether this job uses test code defined in git
+	UsesGit *bool `json:"usesGit,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
 	// the job that was run
 	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
 	// the reference to the job that was run
 	Reference *JobReference `json:"reference,omitempty"`
+	// the git repository to use for this job
+	Repository *GitRepository `json:"repository,omitempty"`
 	// the cluster that the job was run on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the run that the job was run on

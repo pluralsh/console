@@ -6,6 +6,7 @@ defmodule Console.AI.CronTest do
   alias Console.PubSub
   alias Console.Deployments.Clusters
   alias Kazan.Apis.Core.V1, as: CoreV1
+  alias ElasticsearchUtils, as: ES
   alias Console.AI.Cron
 
   setup :set_mimic_global
@@ -487,6 +488,36 @@ defmodule Console.AI.CronTest do
       assert pr.pull_request.patch == "some patch"
 
       assert_receive {:event, %PubSub.AlertInsight{item: {%{id: ^id}, _}}}
+    end
+  end
+
+  describe "#vector_index/0" do
+    test "it will properly index all pr automations and catalogs" do
+      insert_list(3, :pr_automation)
+      insert_list(3, :catalog)
+
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      expect(Console.AI.OpenAI, :embeddings, 6, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      Console.AI.VectorStore.init()
+
+      Cron.vector_index()
+
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
     end
   end
 end

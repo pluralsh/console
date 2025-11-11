@@ -228,3 +228,39 @@ defmodule Console.Schema.PrAutomation do
     |> validate_required([:name, :documentation])
   end
 end
+
+defmodule Console.Schema.PrAutomation.Mini do
+  alias Console.Schema.PrAutomation
+
+  @derive Jason.Encoder
+  @derive JSON.Encoder
+  defstruct [:id, :name, :documentation, :title, :message, :branch, :branch_prefix, :icon, :dark_icon]
+
+  def new(%PrAutomation{} = pr) do
+    %__MODULE__{
+      id: pr.id,
+      name: pr.name,
+      documentation: pr.documentation,
+      title: pr.title,
+      message: pr.message,
+      branch: pr.branch,
+      branch_prefix: pr.branch_prefix,
+      icon: pr.icon,
+      dark_icon: pr.dark_icon
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      name: attrs["name"],
+      documentation: attrs["documentation"],
+      title: attrs["title"],
+      message: attrs["message"],
+      branch: attrs["branch"],
+      branch_prefix: attrs["branch_prefix"],
+      icon: attrs["icon"],
+      dark_icon: attrs["dark_icon"]
+    }
+  end
+end

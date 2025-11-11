@@ -159,6 +159,8 @@ type RootQueryType {
 
   catalogs(after: String, first: Int, before: String, last: Int, projectId: ID): CatalogConnection
 
+  catalogSearch(q: String!): [CatalogSearchResult]
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -1798,6 +1800,12 @@ input SentinelCheckKubernetesConfigurationAttributes {
 }
 
 input SentinelCheckIntegrationTestConfigurationAttributes {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRefAttributes
+
   "the job to run for this check"
   job: GateJobAttributes
 
@@ -1932,6 +1940,12 @@ type SentinelCheckKubernetesConfiguration {
 }
 
 type SentinelCheckIntegrationTestConfiguration {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRef
+
   "the job to run for this check"
   job: JobGateSpec
 
@@ -2029,6 +2043,12 @@ type SentinelRunJob {
   "the time the job completed"
   completedAt: DateTime
 
+  "the git repository to use for this job"
+  git: GitRef
+
+  "whether this job uses test code defined in git"
+  usesGit: Boolean
+
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
 
@@ -2037,6 +2057,9 @@ type SentinelRunJob {
 
   "the reference to the job that was run"
   reference: JobReference
+
+  "the git repository to use for this job"
+  repository: GitRepository
 
   "the cluster that the job was run on"
   cluster: Cluster
@@ -9363,6 +9386,41 @@ type Catalog {
   updatedAt: DateTime
 }
 
+type CatalogSearchResult {
+  catalog: CatalogSearchItem
+  prAutomation: PrAutomationSearchItem
+}
+
+type PrAutomationSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the description for this pr automation"
+  description: String
+
+  "an icon url to use for this pr automation"
+  icon: String
+
+  "a darkmode icon url to use for this pr automation"
+  darkIcon: String
+}
+
+type CatalogSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the documentation for this pr automation"
+  documentation: String
+
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
+}
+
 "A governance controller is a mechanism to enforce a set of rules on a set of PRs"
 type PrGovernance {
   id: ID!
@@ -9869,6 +9927,31 @@ type InfraResearchAnalysis {
 
   "any notes from the analysis, indicating unsolved questions"
   notes: [String]
+
+  "a knowledge graph of the infrastructure"
+  graph: InfraResearchGraph
+}
+
+type InfraResearchGraph {
+  "the vertices of the graph"
+  vertices: [InfraResearchGraphVertex]
+
+  "the edges of the graph"
+  edges: [InfraResearchGraphEdge]
+}
+
+type InfraResearchGraphVertex {
+  identifier: String!
+  type: String!
+  description: String
+  annotations: Map
+}
+
+type InfraResearchGraphEdge {
+  from: String!
+  to: String!
+  type: String
+  description: String
 }
 
 type ToolDelta {

@@ -462,4 +462,60 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       assert c > 0
     end
   end
+
+  describe "PrAutomationCreated" do
+    test "it can vector index pr automations" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      Console.AI.VectorStore.init()
+
+      pr = insert(:pr_automation)
+      event = %PubSub.PrAutomationCreated{item: pr}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+  end
+
+  describe "CatalogCreated" do
+    test "it can vector index catalogs" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      Console.AI.VectorStore.init()
+
+      catalog = insert(:catalog)
+      event = %PubSub.CatalogCreated{item: catalog}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+  end
 end

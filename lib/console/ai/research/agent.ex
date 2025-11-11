@@ -111,7 +111,11 @@ defmodule Console.AI.Research.Agent do
     with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface),
          {:ok, research} <- update_research(research, %{
                               status: :completed,
-                              analysis: %{summary: result.summary, notes: result.notes},
+                              analysis: %{
+                                summary: result.summary,
+                                notes: result.notes,
+                                graph: Console.mapify(Graph.fetch())
+                              },
                               diagram: result.diagram
                           }) do
         {:noreply, %{state | research: research}}

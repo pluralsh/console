@@ -193,6 +193,22 @@ defmodule ConsoleWeb.GitControllerTest do
     end
   end
 
+  describe "#sentinel_tarball/2" do
+    test "it will download sentinel git content for valid deploy tokens", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      run = insert(:sentinel_run_job,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        sentinel_run: insert(:sentinel_run)
+      )
+
+      conn
+      |> add_auth_headers(run.cluster)
+      |> get("/ext/v1/git/sentinels/tarballs", %{id: run.id})
+      |> response(200)
+    end
+  end
+
   describe "#proceed" do
     test "if a service has been marked it will 200", %{conn: conn} do
       svc = insert(:service, promotion: :proceed)

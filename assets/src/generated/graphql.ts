@@ -1493,6 +1493,24 @@ export type CatalogEdge = {
   node?: Maybe<Catalog>;
 };
 
+export type CatalogSearchItem = {
+  __typename?: 'CatalogSearchItem';
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the documentation for this pr automation */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this catalog */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type CatalogSearchResult = {
+  __typename?: 'CatalogSearchResult';
+  catalog?: Maybe<CatalogSearchItem>;
+  prAutomation?: Maybe<PrAutomationSearchItem>;
+};
+
 export type Certificate = {
   __typename?: 'Certificate';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -4286,6 +4304,8 @@ export type InfraResearch = {
 /** Additional analysis attached to this research result */
 export type InfraResearchAnalysis = {
   __typename?: 'InfraResearchAnalysis';
+  /** a knowledge graph of the infrastructure */
+  graph?: Maybe<InfraResearchGraph>;
   /** any notes from the analysis, indicating unsolved questions */
   notes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** a summary of the analysis */
@@ -4317,6 +4337,30 @@ export type InfraResearchEdge = {
   __typename?: 'InfraResearchEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<InfraResearch>;
+};
+
+export type InfraResearchGraph = {
+  __typename?: 'InfraResearchGraph';
+  /** the edges of the graph */
+  edges?: Maybe<Array<Maybe<InfraResearchGraphEdge>>>;
+  /** the vertices of the graph */
+  vertices?: Maybe<Array<Maybe<InfraResearchGraphVertex>>>;
+};
+
+export type InfraResearchGraphEdge = {
+  __typename?: 'InfraResearchGraphEdge';
+  description?: Maybe<Scalars['String']['output']>;
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type InfraResearchGraphVertex = {
+  __typename?: 'InfraResearchGraphVertex';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  identifier: Scalars['String']['output'];
+  type: Scalars['String']['output'];
 };
 
 export enum InfraResearchStatus {
@@ -6677,6 +6721,18 @@ export type PrAutomationEdge = {
   node?: Maybe<PrAutomation>;
 };
 
+export type PrAutomationSearchItem = {
+  __typename?: 'PrAutomationSearchItem';
+  /** a darkmode icon url to use for this pr automation */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the description for this pr automation */
+  description?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this pr automation */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
 /** templates to apply in this pr */
 export type PrAutomationTemplateAttributes = {
   condition?: InputMaybe<Scalars['String']['input']>;
@@ -8921,6 +8977,7 @@ export type RootQueryType = {
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
+  catalogSearch?: Maybe<Array<Maybe<CatalogSearchResult>>>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
   /** gets an individual chat thread, with the ability to sideload chats on top */
@@ -9233,6 +9290,11 @@ export type RootQueryTypeCanaryArgs = {
 export type RootQueryTypeCatalogArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeCatalogSearchArgs = {
+  q: Scalars['String']['input'];
 };
 
 
@@ -10750,10 +10812,14 @@ export type SentinelCheckIntegrationTestConfiguration = {
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: Maybe<GitRef>;
   /** the gotestsum configuration to use for this check */
   gotestsum?: Maybe<SentinelCheckGotestsumConfiguration>;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
+  /** the repository to use for this check */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
   /** the cluster tags to select where to run this job */
   tags?: Maybe<Scalars['Map']['output']>;
 };
@@ -10763,10 +10829,14 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: InputMaybe<GitRefAttributes>;
   /** the gotestsum configuration to use for this check */
   gotestsum?: InputMaybe<SentinelCheckGotestsumAttributes>;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
+  /** the repository to use for this check */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to select where to run this job */
   tags?: InputMaybe<Scalars['Json']['input']>;
 };
@@ -10896,6 +10966,8 @@ export type SentinelRunJob = {
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this job */
+  git?: Maybe<GitRef>;
   /** the id of the job */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -10907,11 +10979,15 @@ export type SentinelRunJob = {
   output?: Maybe<Scalars['String']['output']>;
   /** the reference to the job that was run */
   reference?: Maybe<JobReference>;
+  /** the git repository to use for this job */
+  repository?: Maybe<GitRepository>;
   /** the run that the job was run on */
   sentinelRun?: Maybe<SentinelRun>;
   /** the status of the job */
   status: SentinelRunJobStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether this job uses test code defined in git */
+  usesGit?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SentinelRunJobConnection = {

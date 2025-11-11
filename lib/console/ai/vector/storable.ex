@@ -183,3 +183,46 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.ServiceComponent.Mini do
 
   def prompt(%@for{}), do: ""
 end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.PrAutomation.Mini do
+  alias Console.AI.Utils
+
+  def id(%@for{id: id}), do: id
+
+  def content(%@for{} = mini) do
+    """
+    A Plural PR Autmoation to serve as an infrastructure provisioning golden path.  Its specification is below:
+
+    Name: #{mini.name}
+    Documentation: #{mini.documentation}
+    Pull Request Title: #{mini.title}
+    Pull Request Commit Message: #{mini.message}
+    Pull Request Branch: #{mini.branch}
+    Pull Request Branch Prefix: #{mini.branch_prefix}
+    """
+  end
+
+  def datatype(_), do: "pr_automation"
+
+  def prompt(%@for{}), do: ""
+end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.Catalog.Mini do
+  alias Console.AI.Utils
+
+  def id(%@for{id: id}), do: id
+
+  def content(%@for{} = mini) do
+    """
+    A Plural Catalog to serve as a collection of PR Automations.  Its specification is below:
+
+    Name: #{mini.name}
+    Description: #{mini.description}
+    Category: #{mini.category}
+    """
+  end
+
+  def datatype(_), do: "catalog"
+
+  def prompt(%@for{}), do: ""
+end
