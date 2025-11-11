@@ -1,84 +1,89 @@
-# scrapers/cert_manager.py
-
 from bs4 import BeautifulSoup
 from collections import OrderedDict
+from packaging.version import Version
 from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
     get_chart_versions,
     validate_semver,
-    expand_kube_versions,
 )
 
 app_name = "karpenter"
 compatibility_url = "https://karpenter.sh/preview/upgrading/compatibility/"
 
 
-def parse_page(content):
+def find_compatibility_table(content):
     soup = BeautifulSoup(content, "html.parser")
-    sections = soup.find_all("h2")
-    for section in sections:
-        if section.text == "Compatibility Matrix":
-            return section.find_next("table")
-    return sections
+
+    header = soup.find(id="compatibility-matrix")
+    if header:
+        table = header.find_next("table")
+        if table:
+            return table
+
+    for h2 in soup.find_all("h2"):
+        if "Compatibility Matrix" in h2.get_text(strip=True):
+            table = h2.find_next("table")
+            if table:
+                return table
+
+    return None
 
 
-def find_target_tables(sections):
-    target_tables = []
-    table = []
+def parse_table(table):
+    rows = table.find_all("tr")
+    if len(rows) < 2:
+        return {}
 
-    for section in sections:
-        for text in section.stripped_strings:
-            lines = [line.strip() for line in text.split("\n") if line.strip()]
+    kube_headers = [c.get_text(strip=True).lstrip("v") for c in rows[0].find_all(["th", "td"])][1:]
+    requirements = [c.get_text(strip=True) for c in rows[1].find_all(["th", "td"])][1:]
 
-            # If "KUBERNETES" or "karpenter" is found, start a new table
-            if lines and (lines[0] in ["KUBERNETES", "karpenter"]):
-                if (
-                    table
-                ):  # If there's an existing table, add it to target_tables
-                    target_tables.append(table)
-                table = lines  # Start a new table
-            else:
-                # Add the lines to the current table
-                table.extend(lines)
+    min_map = {}
+    for kube, required in zip(kube_headers, requirements):
+        normalized = required.replace(">=", "").replace("v", "").strip()
+        semver = validate_semver(normalized)
+        if semver:
+            min_map[kube] = str(semver)
 
-    # Add the last table if it exists
-    if table:
-        target_tables.append(table)
-
-    return target_tables
+    return min_map
 
 
-def extract_table_data(target_tables, chart_versions):
-    if len(target_tables) < 2:
-        print_error("Insufficient data in target tables.")
-        return []
+def build_rows_from_table(table, chart_versions):
+    min_map = parse_table(table)
+    if not min_map:
+        return {}
 
-    k8s_versions = target_tables[0][1:]  # Starting from the second element
-    kar_versions = target_tables[1][1:]  # Starting from the second element
+    version_sets = {}
+    versions = sorted({v for v in min_map.values()}, key=lambda s: validate_semver(s))
 
-    rows = []
-    for k8s_ver, kar_ver in zip(k8s_versions, kar_versions):
-        expanded_k8s_ver = expand_kube_versions("1.19", k8s_ver)
-        kar_ver = kar_ver.split(" ")[1].strip()
-        kar_ver = validate_semver(kar_ver)
+    for ver in versions:
+        ver_sem = validate_semver(ver)
+        if not ver_sem:
+            continue
 
-        if kar_ver:
-            ver = str(kar_ver)
-            chart_version = chart_versions.get(ver)
-            if not chart_version:
-                continue
-            version_info = OrderedDict(
-                {
-                    "version": ver,
-                    "kube": expanded_k8s_ver,
-                    "chart_version": chart_version,
-                    "requirements": [],
-                    "incompatibilities": [],
-                }
-            )
-            rows.append(version_info)
+        kube_versions = []
+        for kube, required in min_map.items():
+            req_sem = validate_semver(required)
+            if req_sem and req_sem <= ver_sem:
+                kube_versions.append(kube)
+
+        if kube_versions:
+            version_sets.setdefault(ver, set()).update(kube_versions)
+
+    rows = {}
+    for ver, kube_set in version_sets.items():
+        chart_version = chart_versions.get(ver)
+        kube_sorted = sorted(kube_set, key=lambda k: Version(k), reverse=True)
+        rows[ver] = OrderedDict(
+            {
+                "version": ver,
+                "kube": kube_sorted,
+                **({"chart_version": chart_version} if chart_version else {}),
+                "requirements": [],
+                "incompatibilities": [],
+            }
+        )
 
     return rows
 
@@ -89,14 +94,18 @@ def scrape():
     if not page_content:
         return
 
-    sections = parse_page(page_content)
-    target_tables = find_target_tables(sections)
-    if target_tables.__len__() >= 1:
-        chart_versions = get_chart_versions(app_name)
-        rows = extract_table_data(target_tables, chart_versions)
-        update_compatibility_info(
-            f"../../static/compatibilities/{app_name}.yaml", rows
-        )
-    else:
-        print_error("No compatibility information found.")
+    chart_versions = get_chart_versions(app_name)
 
+    table = find_compatibility_table(page_content)
+    if table is None:
+        print_error("No compatibility information found.")
+        return
+
+    page_rows = build_rows_from_table(table, chart_versions)
+    if not page_rows:
+        print_error("No compatibility information found.")
+        return
+
+    update_compatibility_info(
+        f"../../static/compatibilities/{app_name}.yaml", list(page_rows.values())
+    )
