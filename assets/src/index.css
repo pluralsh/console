@@ -12,6 +12,10 @@ body {
   overflow: auto hidden;
 }
 
+* {
+  overscroll-behavior: none;
+}
+
 #root {
   align-items: stretch;
   display: flex;

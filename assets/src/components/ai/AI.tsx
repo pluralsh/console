@@ -7,6 +7,8 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
+import usePersistedState from 'components/hooks/usePersistedState'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
 import { use, useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
@@ -28,9 +30,6 @@ import {
 } from '../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { AI_PROVIDER_ABS_PATH, AIDisabledState } from './AIThreads'
-import usePersistedState from 'components/hooks/usePersistedState'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
@@ -70,7 +69,7 @@ export function AI() {
     <WrapperSC>
       <HeaderSC>
         <StretchedFlex gap="medium">
-          <Subtitle1H1>Plural AI</Subtitle1H1>
+          <SubTabs directory={getDirectory(agentEnabled)} />
           <IconFrame
             clickable
             icon={<GearTrainIcon />}
@@ -80,7 +79,6 @@ export function AI() {
             type="floating"
           />
         </StretchedFlex>
-        <SubTabs directory={getDirectory(agentEnabled)} />
       </HeaderSC>
       <Outlet />
       <Modal
