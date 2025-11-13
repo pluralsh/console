@@ -12,9 +12,11 @@ body {
   overflow: auto hidden;
 }
 
-* {
+/* TODO: apply this more selectively to improve tablet support */
+
+/* * {
   overscroll-behavior: none;
-}
+} */
 
 #root {
   align-items: stretch;
