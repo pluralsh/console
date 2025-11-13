@@ -96,12 +96,12 @@ const columns = [
 export default function PodInfo() {
   const { spacing } = useTheme()
   const { clusterId, serviceId } = useParams()
-  const { pod } = useOutletContext() as { pod: Pod }
-  const containers = pod.spec.containers || []
-  const initContainers = pod.spec.initContainers || []
-  const containerStatuses = statusesToRecord(pod.status?.containerStatuses)
+  const { pod } = useOutletContext() as { pod: Nullable<Pod> }
+  const containers = pod?.spec?.containers || []
+  const initContainers = pod?.spec?.initContainers || []
+  const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)
   const initContainerStatuses = statusesToRecord(
-    pod.status?.initContainerStatuses
+    pod?.status?.initContainerStatuses
   )
   const conditions = pod?.status?.conditions || []
 
@@ -124,8 +124,8 @@ export default function PodInfo() {
             initContainerStatuses={initContainerStatuses}
             clusterId={clusterId}
             serviceId={serviceId}
-            namespace={pod.metadata.namespace || ''}
-            podName={pod.metadata.name}
+            namespace={pod?.metadata?.namespace ?? ''}
+            podName={pod?.metadata?.name ?? ''}
             columns={columns}
             rowLink={false}
           />

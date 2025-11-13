@@ -236,12 +236,12 @@ export function PodContainers(): ReactElement<any> {
 
 export function PodLogs(): ReactElement<any> {
   const { name, namespace, clusterId } = useParams()
-  const pod = useOutletContext() as PodT
+  const pod = useOutletContext() as Nullable<PodT>
   const theme = useTheme()
   const containers: Array<string> = useMemo(
     () => [
-      ...(pod.initContainers?.map((c) => c!.name!) ?? []),
-      ...(pod.containers?.map((c) => c!.name!) ?? []),
+      ...(pod?.initContainers?.map((c) => c!.name!) ?? []),
+      ...(pod?.containers?.map((c) => c!.name!) ?? []),
     ],
     [pod]
   )

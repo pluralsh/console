@@ -21,6 +21,10 @@ body {
   interpolate-size: allow-keywords; /* as of Jun 2025 this isn't supported in Safari or Firefox, but can add a nice progressive enhancement for Chrome users */
 }
 
+[id*='mermaid']:not(#root [id*='mermaid']) {
+  opacity: 0;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
