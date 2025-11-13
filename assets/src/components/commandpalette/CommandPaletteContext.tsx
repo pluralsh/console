@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useMemo, useState } from 'react'
 
 export enum CommandPaletteTab {
-  History = 'Chat history',
+  Threads = 'Chat threads',
   Commands = 'Commands',
 }
 
