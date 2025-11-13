@@ -31,6 +31,7 @@ defmodule Console.Schema.PrAutomation do
     field :icon,             :string
     field :dark_icon,        :string
     field :branch_prefix,    :string
+    field :labels,           {:array, :string}
 
     embeds_one :creates, CreateSpec, on_replace: :update do
       embeds_one :git, Service.Git, on_replace: :update
@@ -140,7 +141,26 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id icon dark_icon role patch branch_prefix identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id governance_id)a
+  @valid ~w(name
+            project_id
+            icon
+            dark_icon
+            role
+            patch
+            branch_prefix
+            identifier
+            message
+            title
+            branch
+            documentation
+            addon
+            catalog_id
+            repository_id
+            cluster_id
+            service_id
+            connection_id
+            labels
+            governance_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

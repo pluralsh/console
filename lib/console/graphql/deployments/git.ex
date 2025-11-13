@@ -144,6 +144,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
+    field :labels,        list_of(:string), description: "labels to apply to created prs"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
@@ -517,6 +518,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :labels,        list_of(:string), description: "labels to apply to the created prs"
     field :branch_prefix, :string, description: "a prefix to use for the branch name, will be appended with a random string for deduplication"
 
     field :icon,      :string, description: "an icon url to use for this catalog"

@@ -5440,6 +5440,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// labels to apply to the created prs
+	Labels []*string `json:"labels,omitempty"`
 	// a prefix to use for the branch name, will be appended with a random string for deduplication
 	BranchPrefix *string `json:"branchPrefix,omitempty"`
 	// an icon url to use for this catalog
@@ -5489,6 +5491,8 @@ type PrAutomationAttributes struct {
 	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// labels to apply to created prs
+	Labels []*string `json:"labels,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog

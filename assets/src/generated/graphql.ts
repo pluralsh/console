@@ -6632,6 +6632,8 @@ export type PrAutomation = {
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: Maybe<Scalars['String']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** labels to apply to the created prs */
+  labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6679,6 +6681,8 @@ export type PrAutomationAttributes = {
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
+  /** labels to apply to created prs */
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
