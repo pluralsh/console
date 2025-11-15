@@ -72,10 +72,8 @@ export function ChatInput({
   const [addChatContext, { loading: contextLoading, error: contextError }] =
     useAddChatContextMutation({
       awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails'],
-      onCompleted: () => {
-        setContextBtnClicked(true)
-      },
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
+      onCompleted: () => setContextBtnClicked(true),
     })
 
   const contentEditableRef = useRef<HTMLDivElement>(null)
