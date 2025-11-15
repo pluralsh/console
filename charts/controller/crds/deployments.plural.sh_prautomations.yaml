@@ -435,6 +435,11 @@ spec:
                   Identifier specifies the target repository in the format "organization/repository-name"
                   for GitHub, or equivalent formats for other SCM providers.
                 type: string
+              labels:
+                description: Labels to apply to all created PRs from this pr automation
+                items:
+                  type: string
+                type: array
               message:
                 description: |-
                   Message defines the commit message template that will be used in the generated PR.

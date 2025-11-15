@@ -19,7 +19,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def create(pr, branch, ctx) do
+  def create(pr, branch, ctx, _labels \\ []) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
       id = URI.encode(pr.identifier)

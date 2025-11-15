@@ -73,6 +73,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		ProjectID:     projectID,
 		CatalogID:     catalogID,
 		Patch:         pra.Spec.Patch,
+		Labels:        pra.Spec.Labels,
 		Confirmation:  pra.Spec.Confirmation.Attributes(),
 		Secrets:       pra.Spec.Secrets.Attributes(),
 		Configuration: algorithms.Map(pra.Spec.Configuration,

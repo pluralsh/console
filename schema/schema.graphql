@@ -8457,6 +8457,9 @@ input PrAutomationAttributes {
 
   deletes: PrAutomationDeleteSpecAttributes
 
+  "labels to apply to created prs"
+  labels: [String]
+
   "an icon url to use for this catalog"
   icon: String
 
@@ -8981,6 +8984,9 @@ type PrAutomation {
   creates: PrCreateSpec
 
   deletes: PrDeleteSpec
+
+  "labels to apply to the created prs"
+  labels: [String]
 
   "a prefix to use for the branch name, will be appended with a random string for deduplication"
   branchPrefix: String
