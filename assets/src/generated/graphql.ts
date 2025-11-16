@@ -3724,6 +3724,7 @@ export type GateStatusAttributes = {
 export enum GateType {
   Approval = 'APPROVAL',
   Job = 'JOB',
+  Sentinel = 'SENTINEL',
   Window = 'WINDOW'
 }
 
@@ -6232,6 +6233,10 @@ export type PipelineGate = {
   job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
+  /** the sentinel this gate will execute */
+  sentinel?: Maybe<Sentinel>;
+  /** the run that the sentinel executed last */
+  sentinelRun?: Maybe<SentinelRun>;
   /** more detailed specification for complex gates */
   spec?: Maybe<GateSpec>;
   /** the current state of this gate */
@@ -6251,6 +6256,8 @@ export type PipelineGateAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
+  /** the id of the sentinel this gate will execute */
+  sentinelId?: InputMaybe<Scalars['ID']['input']>;
   /** a specification for more complex gate types */
   spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */

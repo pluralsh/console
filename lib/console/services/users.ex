@@ -96,6 +96,9 @@ defmodule Console.Services.Users do
   @spec get_bot!(binary) :: User.t
   def get_bot!(name), do: Repo.get_by!(User, bot_name: name)
 
+  @spec admin_bot() :: User.t
+  def admin_bot(), do: %{get_bot!("console") | roles: %{admin: true}}
+
   @spec get_invite(binary) :: Invite.t | nil
   def get_invite(secure_id), do: Repo.get_by(Invite, secure_id: secure_id)
 

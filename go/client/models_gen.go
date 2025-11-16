@@ -5111,6 +5111,10 @@ type PipelineGate struct {
 	Status *GateStatus `json:"status,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
+	// the sentinel this gate will execute
+	Sentinel *Sentinel `json:"sentinel,omitempty"`
+	// the run that the sentinel executed last
+	SentinelRun *SentinelRun `json:"sentinelRun,omitempty"`
 	// the edge this gate lives on
 	Edge *PipelineStageEdge `json:"edge,omitempty"`
 	// the cluster this gate can run on
@@ -5133,6 +5137,8 @@ type PipelineGateAttributes struct {
 	ClusterID *string `json:"clusterId,omitempty"`
 	// a specification for more complex gate types
 	Spec *GateSpecAttributes `json:"spec,omitempty"`
+	// the id of the sentinel this gate will execute
+	SentinelID *string `json:"sentinelId,omitempty"`
 }
 
 type PipelineGateConnection struct {
@@ -9462,17 +9468,19 @@ const (
 	GateTypeApproval GateType = "APPROVAL"
 	GateTypeWindow   GateType = "WINDOW"
 	GateTypeJob      GateType = "JOB"
+	GateTypeSentinel GateType = "SENTINEL"
 )
 
 var AllGateType = []GateType{
 	GateTypeApproval,
 	GateTypeWindow,
 	GateTypeJob,
+	GateTypeSentinel,
 }
 
 func (e GateType) IsValid() bool {
 	switch e {
-	case GateTypeApproval, GateTypeWindow, GateTypeJob:
+	case GateTypeApproval, GateTypeWindow, GateTypeJob, GateTypeSentinel:
 		return true
 	}
 	return false

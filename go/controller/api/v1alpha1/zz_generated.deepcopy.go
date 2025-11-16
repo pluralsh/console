@@ -5308,6 +5308,11 @@ func (in *PipelineGate) DeepCopyInto(out *PipelineGate) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.SentinelRef != nil {
+		in, out := &in.SentinelRef, &out.SentinelRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
 		*out = new(GateSpec)
