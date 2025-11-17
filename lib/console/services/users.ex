@@ -394,8 +394,23 @@ defmodule Console.Services.Users do
         end
       end)
     end)
+    |> maybe_remove_members(groups)
   end
   defp hydrate_groups(transaction, _), do: transaction
+
+  defp maybe_remove_members(transaction, [_ | _] = groups) do
+    case Console.conf(:oidc_sync) do
+      :full ->
+        add_operation(transaction, :wipe_groups, fn %{user: user} ->
+          GroupMember.for_user(user.id)
+          |> GroupMember.without_names(groups)
+          |> Repo.delete_all()
+          |> ok()
+        end)
+      _ -> transaction
+    end
+  end
+  defp maybe_remove_members(transaction, _), do: transaction
 
   @spec create_role(map) :: role_resp
   def create_role(attrs) do
