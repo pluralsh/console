@@ -12753,6 +12753,7 @@ export type VulnerabilityAttributes = {
   pkgPath?: InputMaybe<Scalars['String']['input']>;
   primaryLink?: InputMaybe<Scalars['String']['input']>;
   publishedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   resource?: InputMaybe<Scalars['String']['input']>;
   score?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<VulnSeverity>;

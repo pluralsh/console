@@ -8118,6 +8118,7 @@ type VulnerabilityAttributes struct {
 	InstalledVersion *string               `json:"installedVersion,omitempty"`
 	Severity         *VulnSeverity         `json:"severity,omitempty"`
 	Score            *float64              `json:"score,omitempty"`
+	RepositoryURL    *string               `json:"repositoryUrl,omitempty"`
 	Title            *string               `json:"title,omitempty"`
 	Description      *string               `json:"description,omitempty"`
 	CvssSource       *string               `json:"cvssSource,omitempty"`

@@ -4543,6 +4543,7 @@ input VulnerabilityAttributes {
   installedVersion: String
   severity: VulnSeverity
   score: Float
+  repositoryUrl: String
   title: String
   description: String
   cvssSource: String
