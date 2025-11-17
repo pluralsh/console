@@ -5308,6 +5308,11 @@ func (in *PipelineGate) DeepCopyInto(out *PipelineGate) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.SentinelRef != nil {
+		in, out := &in.SentinelRef, &out.SentinelRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
 		*out = new(GateSpec)
@@ -5972,6 +5977,17 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		in, out := &in.Reconciliation, &out.Reconciliation
 		*out = new(Reconciliation)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
 	}
 }
 

@@ -5111,6 +5111,10 @@ type PipelineGate struct {
 	Status *GateStatus `json:"status,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
+	// the sentinel this gate will execute
+	Sentinel *Sentinel `json:"sentinel,omitempty"`
+	// the run that the sentinel executed last
+	SentinelRun *SentinelRun `json:"sentinelRun,omitempty"`
 	// the edge this gate lives on
 	Edge *PipelineStageEdge `json:"edge,omitempty"`
 	// the cluster this gate can run on
@@ -5133,6 +5137,8 @@ type PipelineGateAttributes struct {
 	ClusterID *string `json:"clusterId,omitempty"`
 	// a specification for more complex gate types
 	Spec *GateSpecAttributes `json:"spec,omitempty"`
+	// the id of the sentinel this gate will execute
+	SentinelID *string `json:"sentinelId,omitempty"`
 }
 
 type PipelineGateConnection struct {
@@ -5440,6 +5446,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// labels to apply to the created prs
+	Labels []*string `json:"labels,omitempty"`
 	// a prefix to use for the branch name, will be appended with a random string for deduplication
 	BranchPrefix *string `json:"branchPrefix,omitempty"`
 	// an icon url to use for this catalog
@@ -5489,6 +5497,8 @@ type PrAutomationAttributes struct {
 	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// labels to apply to created prs
+	Labels []*string `json:"labels,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog
@@ -8108,6 +8118,7 @@ type VulnerabilityAttributes struct {
 	InstalledVersion *string               `json:"installedVersion,omitempty"`
 	Severity         *VulnSeverity         `json:"severity,omitempty"`
 	Score            *float64              `json:"score,omitempty"`
+	RepositoryURL    *string               `json:"repositoryUrl,omitempty"`
 	Title            *string               `json:"title,omitempty"`
 	Description      *string               `json:"description,omitempty"`
 	CvssSource       *string               `json:"cvssSource,omitempty"`
@@ -9458,17 +9469,19 @@ const (
 	GateTypeApproval GateType = "APPROVAL"
 	GateTypeWindow   GateType = "WINDOW"
 	GateTypeJob      GateType = "JOB"
+	GateTypeSentinel GateType = "SENTINEL"
 )
 
 var AllGateType = []GateType{
 	GateTypeApproval,
 	GateTypeWindow,
 	GateTypeJob,
+	GateTypeSentinel,
 }
 
 func (e GateType) IsValid() bool {
 	switch e {
-	case GateTypeApproval, GateTypeWindow, GateTypeJob:
+	case GateTypeApproval, GateTypeWindow, GateTypeJob, GateTypeSentinel:
 		return true
 	}
 	return false

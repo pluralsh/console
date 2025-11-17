@@ -4543,6 +4543,7 @@ input VulnerabilityAttributes {
   installedVersion: String
   severity: VulnSeverity
   score: Float
+  repositoryUrl: String
   title: String
   description: String
   cvssSource: String
@@ -5126,6 +5127,7 @@ enum GateType {
   APPROVAL
   WINDOW
   JOB
+  SENTINEL
 }
 
 "the top level input object for creating\/deleting pipelines"
@@ -5178,6 +5180,9 @@ input PipelineGateAttributes {
 
   "a specification for more complex gate types"
   spec: GateSpecAttributes
+
+  "the id of the sentinel this gate will execute"
+  sentinelId: ID
 }
 
 "attributes needed to create a new pipeline context"
@@ -5422,6 +5427,12 @@ type PipelineGate {
 
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
+
+  "the sentinel this gate will execute"
+  sentinel: Sentinel
+
+  "the run that the sentinel executed last"
+  sentinelRun: SentinelRun
 
   "the edge this gate lives on"
   edge: PipelineStageEdge
@@ -8457,6 +8468,9 @@ input PrAutomationAttributes {
 
   deletes: PrAutomationDeleteSpecAttributes
 
+  "labels to apply to created prs"
+  labels: [String]
+
   "an icon url to use for this catalog"
   icon: String
 
@@ -8981,6 +8995,9 @@ type PrAutomation {
   creates: PrCreateSpec
 
   deletes: PrDeleteSpec
+
+  "labels to apply to the created prs"
+  labels: [String]
 
   "a prefix to use for the branch name, will be appended with a random string for deduplication"
   branchPrefix: String

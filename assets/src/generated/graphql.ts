@@ -3724,6 +3724,7 @@ export type GateStatusAttributes = {
 export enum GateType {
   Approval = 'APPROVAL',
   Job = 'JOB',
+  Sentinel = 'SENTINEL',
   Window = 'WINDOW'
 }
 
@@ -6232,6 +6233,10 @@ export type PipelineGate = {
   job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
+  /** the sentinel this gate will execute */
+  sentinel?: Maybe<Sentinel>;
+  /** the run that the sentinel executed last */
+  sentinelRun?: Maybe<SentinelRun>;
   /** more detailed specification for complex gates */
   spec?: Maybe<GateSpec>;
   /** the current state of this gate */
@@ -6251,6 +6256,8 @@ export type PipelineGateAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
+  /** the id of the sentinel this gate will execute */
+  sentinelId?: InputMaybe<Scalars['ID']['input']>;
   /** a specification for more complex gate types */
   spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */
@@ -6632,6 +6639,8 @@ export type PrAutomation = {
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: Maybe<Scalars['String']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** labels to apply to the created prs */
+  labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6679,6 +6688,8 @@ export type PrAutomationAttributes = {
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
+  /** labels to apply to created prs */
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
@@ -12742,6 +12753,7 @@ export type VulnerabilityAttributes = {
   pkgPath?: InputMaybe<Scalars['String']['input']>;
   primaryLink?: InputMaybe<Scalars['String']['input']>;
   publishedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   resource?: InputMaybe<Scalars['String']['input']>;
   score?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<VulnSeverity>;

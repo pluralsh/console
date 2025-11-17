@@ -1,8 +1,8 @@
 defmodule Console.Schema.PipelineGate do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec}
+  alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec, Sentinel, SentinelRun}
 
-  defenum Type, approval: 0, window: 1, job: 2
+  defenum Type, approval: 0, window: 1, job: 2, sentinel: 3
   defenum State, pending: 0, open: 1, closed: 2, running: 3
 
   schema "pipeline_gates" do
@@ -21,9 +21,11 @@ defmodule Console.Schema.PipelineGate do
       end
     end
 
-    belongs_to :cluster,  Cluster
-    belongs_to :edge,     PipelineEdge
-    belongs_to :approver, User
+    belongs_to :cluster,      Cluster
+    belongs_to :sentinel,     Sentinel
+    belongs_to :sentinel_run, SentinelRun
+    belongs_to :edge,         PipelineEdge
+    belongs_to :approver,     User
 
     timestamps()
   end
@@ -50,6 +52,14 @@ defmodule Console.Schema.PipelineGate do
     from(g in query, where: g.type == :job)
   end
 
+  def for_sentinel(query \\ __MODULE__, sentinel_id) do
+    from(g in query, where: g.sentinel_id == ^sentinel_id)
+  end
+
+  def for_sentinel_run(query \\ __MODULE__, sentinel_run_id) do
+    from(g in query, where: g.sentinel_run_id == ^sentinel_run_id)
+  end
+
   def pending(query \\ __MODULE__) do
     from(g in query, where: g.state == :pending)
   end
@@ -66,7 +76,7 @@ defmodule Console.Schema.PipelineGate do
   def valid_transition?(nil, _), do: true
   def valid_transition?(_, _), do: false
 
-  @valid ~w(name state type edge_id cluster_id approver_id)a
+  @valid ~w(name state type edge_id cluster_id approver_id sentinel_id sentinel_run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

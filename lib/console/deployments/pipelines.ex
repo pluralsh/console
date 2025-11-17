@@ -5,7 +5,7 @@ defmodule Console.Deployments.Pipelines do
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters, Git, Settings}
+  alias Console.Deployments.{Services, Clusters, Git, Settings, Sentinels}
   alias Console.Services.Users
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
@@ -23,7 +23,8 @@ defmodule Console.Deployments.Pipelines do
     User,
     Revision,
     Service,
-    Cluster
+    Cluster,
+    SentinelRun
   }
 
   @cache Console.conf(:cache_adapter)
@@ -162,7 +163,7 @@ defmodule Console.Deployments.Pipelines do
   end
 
   def apply_pipeline_context(%PipelineStage{} = stage) do
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    bot = Users.admin_bot()
     %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
     Enum.filter(stage.services, & &1.criteria && &1.criteria.pr_automation_id)
     |> Enum.reduce(start_transaction(), fn svc, xact ->
@@ -453,6 +454,38 @@ defmodule Console.Deployments.Pipelines do
       |> Enum.map(fn {_, stage} -> stage end)
     end, :finish)
   end
+
+  @doc """
+  Runs an associated sentinel for a gate and records the run id
+  """
+  @spec run_sentinel(PipelineGate.t) :: gate_resp
+  def run_sentinel(%PipelineGate{sentinel_id: id} = gate) when is_binary(id) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      Sentinels.run_sentinel(id, Users.admin_bot())
+    end)
+    |> add_operation(:update, fn %{run: run} ->
+      PipelineGate.changeset(gate, %{sentinel_run_id: run.id})
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+  end
+  def run_sentinel(_, _), do: {:error, "this gate has no sentinel"}
+
+  @spec broadcast_gate(SentinelRun.t) :: gate_resp | :ok
+  def broadcast_gate(%SentinelRun{status: status} = run) when status in ~w(success failed)a do
+    with %SentinelRun{gate: %PipelineGate{} = gate} <- Repo.preload(run, :gate) do
+      PipelineGate.changeset(gate, %{state: run_to_gate_status(status)})
+      |> Repo.update()
+      |> notify(:update)
+    else
+      _ -> :ok
+    end
+  end
+  def broadcast_gate(_), do: :ok
+
+  defp run_to_gate_status(:success), do: :open
+  defp run_to_gate_status(:failed), do: :closed
 
   defp entry_stages(%Pipeline{stages: stages, edges: edges}) when is_list(stages) and is_list(edges) do
     destinations = MapSet.new(edges, & &1.to_id)

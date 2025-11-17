@@ -96,6 +96,8 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> execute(extract: :run)
   end
+
+
   @doc """
   Fetches a file handle to the tarball for a stack run
   """

@@ -3,14 +3,15 @@ import Config
 config :console, :initialize, true
 
 config :console, ConsoleWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   http: [
     port: 4000,
-    # http_options: [compress: true],
-    # http_1_options: [max_header_length: 8192],
-    compress: true,
-    protocol_options: [
-      max_header_value_length: 8192,
-    ]
+    http_options: [compress: true],
+    http_1_options: [max_header_length: 8192],
+    # compress: true,
+    # protocol_options: [
+    #   max_header_value_length: 8192,
+    # ]
   ],
   # force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   # cache_static_manifest: "priv/static/cache_manifest.json",
