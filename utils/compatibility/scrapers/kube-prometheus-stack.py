@@ -1,73 +1,130 @@
-from bs4 import BeautifulSoup
+import yaml
 from collections import OrderedDict
+from pathlib import Path
+
 from utils import (
-    print_error,
+    current_kube_version,
+    expand_kube_versions,
     fetch_page,
-    update_compatibility_info,
-    get_chart_versions,
+    print_error,
+    print_warning,
+    print_success,
+    read_yaml,
     validate_semver,
+    write_yaml,
 )
 
 app_name = "kube-prometheus-stack"
-compatibility_url = "https://github.com/prometheus-operator/kube-prometheus"
+MIN_VERSION = validate_semver("54.0.0")
+OUTPUT_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "static"
+    / "compatibilities"
+    / f"{app_name}.yaml"
+)
+HELM_INDEX_URL = "https://prometheus-community.github.io/helm-charts/index.yaml"
 
 
-def parse_page(content):
-    soup = BeautifulSoup(content, "html.parser")
-    sections = soup.find_all("h2")
-    return sections
+def fetch_chart_index():
+    content = fetch_page(HELM_INDEX_URL)
+    if not content:
+        return None
+    try:
+        return yaml.safe_load(content)
+    except yaml.YAMLError as exc:
+        print_error(f"Failed to parse helm index: {exc}")
+        return None
 
 
-def find_target_tables(sections):
-    target_tables = []
-    for section in sections:
-        if section.get_text(strip=True) in [
-            "Header Title",
-        ]:
-            table = section.find_next("table")
-            if table:
-                target_tables.append(table)
-    return target_tables
+def kube_range_to_list(kube_version: str) -> list[str]:
+    if not kube_version:
+        return []
+
+    parts = kube_version.replace(" ", "").split(",")
+    min_version_str = None
+    for part in parts:
+        for token in part.replace(">=", "").split("<"):
+            sem = validate_semver(token.lstrip("v").replace("-0", ""))
+            if sem:
+                min_version_str = f"{sem.major}.{sem.minor}"
+                break
+        if min_version_str:
+            break
+
+    if not min_version_str:
+        return []
+
+    current = current_kube_version()
+    if not current:
+        return []
+
+    return expand_kube_versions(min_version_str, current)
 
 
-def extract_table_data(target_tables, chart_versions):
-    rows = []
-    for row in target_tables[0].find_all("tr")[1:]:  # Skip the header row
-        columns = row.find_all("td")
-        app_version = validate_semver(columns[0].text)
-        kube_versions = columns[2].get_text(strip=True).split(", ")
-        if app_version:
-            ver = str(app_version)
-            chart_version = chart_versions.get(ver)
-            if not chart_version:
-                continue
-            version_info = OrderedDict(
+def build_rows():
+    index = fetch_chart_index()
+    if not index:
+        return []
+
+    entries = index.get("entries", {}).get(app_name, [])
+    if not entries:
+        print_error("No chart entries found in helm index.")
+        return []
+
+    rows: list[OrderedDict[str, object]] = []
+    for chart in entries:
+        chart_version = chart.get("version", "").lstrip("v")
+        if not chart_version:
+            continue
+
+        kube_versions = kube_range_to_list(chart.get("kubeVersion", ""))
+        if not kube_versions:
+            continue
+
+        semver = validate_semver(chart_version)
+        if not semver or (MIN_VERSION and semver < MIN_VERSION):
+            continue
+
+        rows.append(
+            OrderedDict(
                 [
-                    ("version", ver),
+                    ("version", str(semver)),
                     ("kube", kube_versions),
-                    ("chart_version", chart_version),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
             )
-            rows.append(version_info)
-    return rows
+        )
+
+    # Keep only the newest entry per major.minor to avoid huge tables with identical kube ranges
+    rows.sort(key=lambda r: validate_semver(r["version"]), reverse=True)
+    deduped: list[OrderedDict[str, object]] = []
+    seen = set()
+    for row in rows:
+        ver = validate_semver(row["version"])
+        if MIN_VERSION and ver < MIN_VERSION:
+            break
+        key = ver.major
+        if key in seen:
+            continue
+        seen.add(key)
+        row["kube"] = sorted(row["kube"], key=lambda v: validate_semver(v), reverse=True)
+        deduped.append(row)
+
+    if not deduped:
+        print_warning("Parsed chart index but no usable compatibility rows found.")
+    return deduped
 
 
 def scrape():
-
-    page_content = fetch_page(compatibility_url)
-    if not page_content:
+    rows = build_rows()
+    if not rows:
+        print_error("No compatibility rows parsed.")
         return
 
-    sections = parse_page(page_content)
-    target_tables = find_target_tables(sections)
-    if target_tables.__len__() >= 1:
-        chart_versions = get_chart_versions(app_name)
-        rows = extract_table_data(target_tables, chart_versions)
-        update_compatibility_info(
-            f"../../static/compatibilities/{app_name}.yaml", rows
-        )
+    existing = read_yaml(OUTPUT_PATH) or {}
+    existing["versions"] = rows
+    if not write_yaml(OUTPUT_PATH, existing):
+        print_error("Failed to write compatibility info for kube-prometheus-stack.")
     else:
-        print_error("No compatibility information found.")
-
+        print_success("Updated compatibility table from kube-prometheus-stack helm index.")
