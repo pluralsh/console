@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "ES2021", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDirs": ["src", ".storybook"],
+    "moduleResolution": "node",
+    "strict": false, // TODO: change to true once errors are fixed
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*", ".storybook/**/*", "eslint.config.mjs"]
+}

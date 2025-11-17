@@ -19,9 +19,7 @@ export default [
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
 
       globals: {
@@ -35,11 +33,7 @@ export default [
       'react-compiler': reactCompiler,
     },
 
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
+    settings: { react: { version: 'detect' } },
 
     rules: {
       ...reactHooksPlugin.configs.recommended.rules,
