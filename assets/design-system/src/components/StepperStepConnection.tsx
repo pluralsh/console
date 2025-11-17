@@ -17,8 +17,8 @@ const StepperStepConnectionSC = styled.div<{
   marginTop: $vertical
     ? theme.spacing.small
     : $compact
-    ? 0
-    : ($circleSize || DEFAULT_CIRCLE_SIZE) / 2,
+      ? 0
+      : ($circleSize || DEFAULT_CIRCLE_SIZE) / 2,
   marginBottom: $vertical ? theme.spacing.small : 'none',
   marginLeft: $vertical ? theme.spacing.large : 'none',
   '.stepConnectionInner': {

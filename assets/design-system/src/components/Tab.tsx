@@ -50,8 +50,8 @@ function Tab({
               active
                 ? 'border-primary'
                 : activeSecondary
-                ? 'border-fill-two'
-                : 'border'
+                  ? 'border-fill-two'
+                  : 'border'
             }`
           : null
       }
@@ -81,8 +81,8 @@ function Tab({
                 active
                   ? theme.colors['border-primary']
                   : activeSecondary
-                  ? theme.colors['border-fill-two']
-                  : 'transparent'
+                    ? theme.colors['border-fill-two']
+                    : 'transparent'
               }`
             : null
         }

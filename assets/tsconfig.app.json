@@ -9,8 +9,8 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "paths": {
-      "@pluralsh/design-system": ["../design-system/src"],
-      "@pluralsh/design-system/*": ["../design-system/src/*"]
+      "@pluralsh/design-system": ["design-system/dist"],
+      "@pluralsh/design-system/*": ["design-system/dist/*"]
     },
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,

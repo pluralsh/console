@@ -132,13 +132,13 @@ const LayerWrapper = styled.div<{
   alignItems: $position.startsWith('top')
     ? 'start'
     : $position.startsWith('bottom')
-    ? 'end'
-    : 'center',
+      ? 'end'
+      : 'center',
   justifyContent: $position.endsWith('left')
     ? 'start'
     : $position.endsWith('right')
-    ? 'end'
-    : 'center',
+      ? 'end'
+      : 'center',
   top: 0,
   left: 0,
   right: 0,
@@ -254,12 +254,12 @@ function Layer({
       transitionDirection = position.startsWith('top')
         ? 'down'
         : position.startsWith('bottom')
-        ? 'up'
-        : position.endsWith('left')
-        ? 'right'
-        : position.endsWith('right')
-        ? 'left'
-        : DEFAULT_DIRECTION
+          ? 'up'
+          : position.endsWith('left')
+            ? 'right'
+            : position.endsWith('right')
+              ? 'left'
+              : DEFAULT_DIRECTION
     }
   } else if (animation.startsWith('slide')) {
     transitionType = 'slide'

@@ -74,12 +74,12 @@ const SwitchToggleSC = styled.div<SwitchStyleProps>(
       $disabled && $checked
         ? theme.colors['action-primary-disabled']
         : $disabled
-        ? theme.colors['border-disabled']
-        : $focused
-        ? theme.colors['border-outline-focused']
-        : $checked
-        ? 'transparent'
-        : theme.colors['border-input'],
+          ? theme.colors['border-disabled']
+          : $focused
+            ? theme.colors['border-outline-focused']
+            : $checked
+              ? 'transparent'
+              : theme.colors['border-input'],
     transition: 'all 0.15s ease',
   })
 )
@@ -91,8 +91,8 @@ const SwitchHandleSC = styled.div<SwitchStyleProps>(
         ? theme.colors['action-link-active-disabled']
         : theme.colors['action-link-inactive-disabled']
       : $checked
-      ? theme.colors['action-link-active']
-      : theme.colors['action-link-inactive'],
+        ? theme.colors['action-link-active']
+        : theme.colors['action-link-inactive'],
     position: 'absolute',
     width: 16,
     height: 16,

@@ -172,8 +172,8 @@ const SwitchToggleSC = styled.div<SwitchStyleProps>(
     outlineColor: $disabled
       ? theme.colors['border-disabled']
       : $focused
-      ? theme.colors['border-outline-focused']
-      : theme.colors['border-input'],
+        ? theme.colors['border-outline-focused']
+        : theme.colors['border-input'],
     transition: 'all 0.15s ease',
   })
 )

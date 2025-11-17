@@ -119,15 +119,15 @@ function Input({
           paddingLeft: prefix
             ? 'xsmall'
             : titleContent
-            ? startIcon
-              ? 'xsmall'
-              : 'small'
-            : 'medium',
+              ? startIcon
+                ? 'xsmall'
+                : 'small'
+              : 'medium',
           paddingRight: suffix
             ? 'xsmall'
             : showClearButton || endIcon
-            ? 'xsmall'
-            : 'medium',
+              ? 'xsmall'
+              : 'medium',
         },
       ],
       StartIcon: [
@@ -153,8 +153,8 @@ function Input({
   const size = (props as any).large
     ? 'large'
     : (props as any).small
-    ? 'small'
-    : 'medium'
+      ? 'small'
+      : 'medium'
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
   const hasEndIcon = (showClearButton && props.value) || endIcon || suffix

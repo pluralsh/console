@@ -214,8 +214,8 @@ function MyCustomTab2({ selectedKey, ...props }: any) {
           selectedKey === 'bears'
             ? 'action-primary'
             : selectedKey === 'tigers'
-            ? 'icon-danger'
-            : 'fill-two'
+              ? 'icon-danger'
+              : 'fill-two'
         }
       >
         Com&shy;plete&shy;ly custom bears
@@ -253,10 +253,10 @@ function TemplateComplex() {
                 selectedKey === 'lions'
                   ? 'border.primary'
                   : selectedKey === 'tigers'
-                  ? 'border-warning'
-                  : selectedKey === 'bears'
-                  ? 'border-success'
-                  : 'border-danger'
+                    ? 'border-warning'
+                    : selectedKey === 'bears'
+                      ? 'border-success'
+                      : 'border-danger'
               }
             />
           }

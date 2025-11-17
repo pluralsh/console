@@ -49,8 +49,8 @@ const SubTabBase = styled.button<{
     color: disabled
       ? theme.colors['text-disabled']
       : active
-      ? theme.colors.text
-      : theme.colors['text-xlight'],
+        ? theme.colors.text
+        : theme.colors['text-xlight'],
     backgroundColor: active
       ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
       : 'transparent',

@@ -199,7 +199,6 @@ export {
 } from './markdoc/MarkdocContext'
 export type { MarkdocContextValue } from './markdoc/MarkdocContext'
 export * as markdocNodes from './markdoc/nodes'
-export { getSchema as getRuntimeSchema } from './markdoc/runtimeSchema'
 export * as markdocTags from './markdoc/tags'
 export {
   default as collectHeadings,

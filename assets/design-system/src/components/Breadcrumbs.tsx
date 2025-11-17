@@ -166,8 +166,8 @@ function CrumbSelect({
           const textValue = crumb.textValue
             ? crumb.textValue
             : typeof crumb.label === 'string'
-            ? crumb.label
-            : null
+              ? crumb.label
+              : null
 
           return (
             <ListBoxItem

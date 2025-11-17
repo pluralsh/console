@@ -102,8 +102,8 @@ function Template({
           {noContent
             ? undefined
             : size === 'compact'
-            ? compactContent
-            : fullContent}
+              ? compactContent
+              : fullContent}
         </Callout>
       ))}
     </Wrapper>

@@ -73,8 +73,8 @@ export function getGridTemplateCols(
         columnDef.meta?.gridTemplate
           ? columnDef.meta?.gridTemplate
           : columnDef.meta?.truncate
-          ? 'minmax(100px, 1fr)'
-          : 'auto',
+            ? 'minmax(100px, 1fr)'
+            : 'auto',
       ],
       [] as string[]
     )

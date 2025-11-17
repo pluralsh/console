@@ -189,8 +189,8 @@ const EndIcon = styled(BaseIcon)<{
   paddingRight: $hasEndContent
     ? theme.spacing.small
     : $hasDropdownButton
-    ? 0
-    : theme.spacing.medium,
+      ? 0
+      : theme.spacing.medium,
   paddingLeft: $hasEndContent ? theme.spacing.xsmall : theme.spacing.medium,
 }))
 

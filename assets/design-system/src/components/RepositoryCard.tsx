@@ -243,8 +243,8 @@ const HeaderSC = styled.h1<{
       ? { ...theme.partials.text.title2 }
       : { ...theme.partials.text.subtitle1 }
     : $size === 'large'
-    ? { ...theme.partials.text.title1 }
-    : { ...theme.partials.text.title2 }),
+      ? { ...theme.partials.text.title1 }
+      : { ...theme.partials.text.title2 }),
 }))
 
 const SubheaderSC = styled.h3<{

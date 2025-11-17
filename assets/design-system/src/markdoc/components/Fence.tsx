@@ -18,8 +18,8 @@ export function toCodeString({
     ? typeof children === 'string'
       ? children
       : Array.isArray(children)
-      ? children.join('')
-      : ''
+        ? children.join('')
+        : ''
     : content || ''
 }
 

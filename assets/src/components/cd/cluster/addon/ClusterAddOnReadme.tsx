@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
 
-import MarkdocComponent from '../../../utils/MarkdocContent'
+import { Markdown } from '@pluralsh/design-system'
 import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
 import { ClusterAddOnOutletContextT } from '../ClusterAddon.tsx'
 
@@ -9,7 +9,7 @@ export default function ClusterAddOnReadme() {
 
   return (
     <ScrollablePage>
-      <MarkdocComponent raw={addOn?.addon?.readme || 'No readme found'} />
+      <Markdown text={addOn?.addon?.readme || 'No readme found'} />
     </ScrollablePage>
   )
 }

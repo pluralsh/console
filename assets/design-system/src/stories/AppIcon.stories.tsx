@@ -49,8 +49,8 @@ function Template({ onFillLevel, icon, ...args }: any) {
     icon === 'Airflow'
       ? { url: '/logos/airflow-logo.svg' }
       : icon === 'Airbyte'
-      ? { url: '/logos/airbyte-logo.svg' }
-      : { icon: <PluralLogoMark /> }
+        ? { url: '/logos/airbyte-logo.svg' }
+        : { icon: <PluralLogoMark /> }
 
   return (
     <Flex

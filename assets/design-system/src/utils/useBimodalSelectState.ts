@@ -158,10 +158,10 @@ function useBimodalSelectState<T extends object>({
         : Array.from(listState.selectionManager.selectedKeys),
     defaultValue:
       selectionMode === 'single'
-        ? props.defaultSelectedKey ?? null
+        ? (props.defaultSelectedKey ?? null)
         : props.selectedKeys
-        ? Array.from(props.selectedKeys)
-        : [],
+          ? Array.from(props.selectedKeys)
+          : [],
     setValue: (newValue) => {
       if (selectionMode === 'single') setSelectedKey(newValue as Key)
       else

@@ -53,8 +53,8 @@ function Toast({
     closeTimeoutProp === 'none' || +closeTimeoutProp <= 0
       ? 'none'
       : typeof closeTimeoutProp === 'number' && !Number.isNaN(closeTimeoutProp)
-      ? closeTimeoutProp
-      : defaults.closeTimeout
+        ? closeTimeoutProp
+        : defaults.closeTimeout
 
   useEffect(() => {
     setOpen(show)

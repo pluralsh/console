@@ -214,8 +214,8 @@ function Callout({
               (expandable && expanded) || !expandable
                 ? 'auto'
                 : size === 'compact'
-                ? theme.spacing.xsmall
-                : theme.spacing.medium
+                  ? theme.spacing.xsmall
+                  : theme.spacing.medium
             }
           >
             <div className="children">{children}</div>

@@ -18,8 +18,8 @@ function generateID(
         typeof child === 'string'
           ? child
           : Array.isArray(child?.children)
-          ? generateID(child.children)
-          : ''
+            ? generateID(child.children)
+            : ''
       )
       .join(' ')
   )

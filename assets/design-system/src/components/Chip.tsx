@@ -87,7 +87,7 @@ const ChipCardSC = styled(Card)<{
 }) => {
   const textColor = $inactive
     ? theme.colors['text-xlight']
-    : theme.colors[severityToColor[$severity]] ?? theme.colors.text
+    : (theme.colors[severityToColor[$severity]] ?? theme.colors.text)
 
   return {
     '&&': {
@@ -96,12 +96,12 @@ const ChipCardSC = styled(Card)<{
         $size === 'large' && $condensed
           ? 6
           : $size === 'small'
-          ? $condensed
-            ? 6
-            : theme.spacing.xsmall
-          : $condensed
-          ? theme.spacing.xsmall
-          : theme.spacing.small
+            ? $condensed
+              ? 6
+              : theme.spacing.xsmall
+            : $condensed
+              ? theme.spacing.xsmall
+              : theme.spacing.small
       }px`,
       alignItems: 'center',
       display: 'inline-flex',

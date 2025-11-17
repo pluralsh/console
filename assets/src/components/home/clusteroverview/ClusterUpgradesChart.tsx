@@ -72,12 +72,14 @@ export function ClusterUpgradesChart({
     >
       <ResponsiveRadialBar
         colors={(item) =>
-          chroma(item.data.color).alpha(
-            selectedFilter === UpgradeChartFilter.All ||
-              item.data.x === selectedFilter
-              ? 1
-              : 0.6
-          )
+          chroma(item.data.color)
+            .alpha(
+              selectedFilter === UpgradeChartFilter.All ||
+                item.data.x === selectedFilter
+                ? 1
+                : 0.6
+            )
+            .hex()
         }
         endAngle={360}
         cornerRadius={3}

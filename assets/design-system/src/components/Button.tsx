@@ -98,12 +98,12 @@ const Button = memo(
     const buttonType = secondary
       ? 'secondary'
       : tertiary
-      ? 'tertiary'
-      : destructive
-      ? 'destructive'
-      : floating
-      ? 'floating'
-      : 'primary'
+        ? 'tertiary'
+        : destructive
+          ? 'destructive'
+          : floating
+            ? 'floating'
+            : 'primary'
 
     useEffect(() => {
       if (!buttonRef.current) return

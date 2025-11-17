@@ -73,10 +73,10 @@ export const tableCellColor = (
   highlighted
     ? tableFillLevelToHighlightedCellBg[fillLevel]
     : selected
-    ? tableFillLevelToSelectedCellBg[fillLevel]
-    : raised || (selectable && !selected)
-    ? tableFillLevelToRaisedCellBg[fillLevel]
-    : tableFillLevelToCellBg[fillLevel]
+      ? tableFillLevelToSelectedCellBg[fillLevel]
+      : raised || (selectable && !selected)
+        ? tableFillLevelToRaisedCellBg[fillLevel]
+        : tableFillLevelToCellBg[fillLevel]
 
 export const tableCellHoverColor = (
   fillLevel: TableFillLevel,

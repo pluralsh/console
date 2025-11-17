@@ -56,8 +56,8 @@ export function useFloatingDropdown({
                 ? `${rects.reference.width}px`
                 : minWidth
               : typeof minWidth === 'number'
-              ? `${minWidth}px`
-              : null
+                ? `${minWidth}px`
+                : null
           const maxH =
             typeof maxHeight === 'string' && maxHeight
               ? maxHeight
@@ -69,8 +69,8 @@ export function useFloatingDropdown({
             typeof minHeight === 'string' && minHeight
               ? minHeight
               : typeof minHeight === 'number'
-              ? `${minHeight}px`
-              : null
+                ? `${minHeight}px`
+                : null
 
           Object.assign(elements.floating.style, {
             maxWidth: maxW,

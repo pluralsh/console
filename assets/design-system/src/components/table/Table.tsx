@@ -277,8 +277,8 @@ function Table({
                                 header.column.getIsSorted() === 'asc'
                                   ? 's-resize'
                                   : header.column.getIsSorted() === 'desc'
-                                  ? 'ns-resize'
-                                  : 'n-resize',
+                                    ? 'ns-resize'
+                                    : 'n-resize',
                               onClick: header.column.getToggleSortingHandler(),
                             }
                           : {})}
@@ -356,8 +356,8 @@ function Table({
                     const tableRow: Row<unknown> | null = isRow(maybeRow)
                       ? maybeRow
                       : isLoaderRow
-                      ? null
-                      : tableRows[maybeRow.index]
+                        ? null
+                        : tableRows[maybeRow.index]
                     const virtualRow = !isRow(maybeRow) ? maybeRow : null
                     const key =
                       virtualRow?.key ?? tableRow?.id ?? maybeRow.index

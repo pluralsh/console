@@ -119,8 +119,8 @@ const IconFrameSC = styled.div<{
   backgroundColor: $background
     ? theme.colors[$background]
     : $selected
-    ? typeToSelectedBG(theme)[$type]
-    : typeToBG(theme)[$type],
+      ? typeToSelectedBG(theme)[$type]
+      : typeToBG(theme)[$type],
   border: typeToBorder(theme)[$type],
   borderRadius: theme.borderRadiuses.medium,
   '&:focus,&:focus-visible': { outline: 'none' },

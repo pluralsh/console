@@ -8,7 +8,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default [
-  { ignores: ['src/archive/*', 'src/generated/**/*'] },
+  { ignores: ['src/archive/*', 'src/generated/**/*', 'design-system/**'] },
   ...tseslint.configs.recommendedTypeChecked,
   react.configs.flat.recommended,
   react.configs.flat['jsx-runtime'],
