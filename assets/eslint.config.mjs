@@ -8,7 +8,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default [
-  { ignores: ['src/archive/*', 'src/generated/**/*'] },
+  { ignores: ['src/archive/*', 'src/generated/**/*', 'design-system/**'] },
   ...tseslint.configs.recommendedTypeChecked,
   react.configs.flat.recommended,
   react.configs.flat['jsx-runtime'],
@@ -19,9 +19,7 @@ export default [
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
 
       globals: {
@@ -35,11 +33,7 @@ export default [
       'react-compiler': reactCompiler,
     },
 
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
+    settings: { react: { version: 'detect' } },
 
     rules: {
       ...reactHooksPlugin.configs.recommended.rules,

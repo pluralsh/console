@@ -517,7 +517,7 @@ function ServiceComponentRaw({
       <CodeEditor
         language="yaml"
         value={current}
-        options={{ lineNumbers: false, minimap: { enabled: false } }}
+        options={{ lineNumbers: 'off', minimap: { enabled: false } }}
       />
     </div>
   )

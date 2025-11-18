@@ -71,7 +71,7 @@ export function ClusterMetadataEditor({
         language="json"
         height={440}
         fillLevel={1}
-        options={{ lineNumbers: false, minimap: { enabled: false } }}
+        options={{ lineNumbers: 'off', minimap: { enabled: false } }}
       />
       <Toast
         show={showSuccessToast}
