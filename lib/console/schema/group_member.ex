@@ -13,6 +13,13 @@ defmodule Console.Schema.GroupMember do
     from(m in query, where: m.group_id == ^group_id)
   end
 
+  def without_names(query \\ __MODULE__, names) do
+    from(m in query,
+      join: g in assoc(m, :group),
+      where: g.name not in ^names
+    )
+  end
+
   def for_user(query \\ __MODULE__, user_id) do
     from(m in query, where: m.user_id == ^user_id)
   end
