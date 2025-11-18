@@ -153,6 +153,7 @@ type ConsoleClient interface {
 	DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error)
 	UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
+	GetGroupTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroupTiny, error)
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
 	DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error)
@@ -1963,6 +1964,38 @@ func (t *PrGovernanceFragment) GetName() string {
 	return t.Name
 }
 
+type GroupFragment struct {
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        string  "json:\"name\" graphql:\"name\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Global      *bool   "json:\"global,omitempty\" graphql:\"global\""
+}
+
+func (t *GroupFragment) GetID() string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.ID
+}
+func (t *GroupFragment) GetName() string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Name
+}
+func (t *GroupFragment) GetDescription() *string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Description
+}
+func (t *GroupFragment) GetGlobal() *bool {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Global
+}
+
 type HelmRepositoryFragment struct {
 	ID         string            "json:\"id\" graphql:\"id\""
 	InsertedAt *string           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
@@ -2669,38 +2702,6 @@ func (t *UserFragment) GetEmail() string {
 		t = &UserFragment{}
 	}
 	return t.Email
-}
-
-type GroupFragment struct {
-	ID          string  "json:\"id\" graphql:\"id\""
-	Name        string  "json:\"name\" graphql:\"name\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Global      *bool   "json:\"global,omitempty\" graphql:\"global\""
-}
-
-func (t *GroupFragment) GetID() string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.ID
-}
-func (t *GroupFragment) GetName() string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Name
-}
-func (t *GroupFragment) GetDescription() *string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Description
-}
-func (t *GroupFragment) GetGlobal() *bool {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Global
 }
 
 type GroupMemberFragment struct {
@@ -17452,6 +17453,24 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 	return t.Edges
 }
 
+type GetGroupTiny_Group struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetGroupTiny_Group) GetID() string {
+	if t == nil {
+		t = &GetGroupTiny_Group{}
+	}
+	return t.ID
+}
+func (t *GetGroupTiny_Group) GetName() string {
+	if t == nil {
+		t = &GetGroupTiny_Group{}
+	}
+	return t.Name
+}
+
 type ListHelmRepositories_HelmRepositories_Edges struct {
 	Node *HelmRepositoryFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -22939,6 +22958,17 @@ type GetGroup struct {
 func (t *GetGroup) GetGroup() *GroupFragment {
 	if t == nil {
 		t = &GetGroup{}
+	}
+	return t.Group
+}
+
+type GetGroupTiny struct {
+	Group *GetGroupTiny_Group "json:\"group,omitempty\" graphql:\"group\""
+}
+
+func (t *GetGroupTiny) GetGroup() *GetGroupTiny_Group {
+	if t == nil {
+		t = &GetGroupTiny{}
 	}
 	return t.Group
 }
@@ -35394,6 +35424,31 @@ func (c *Client) GetGroup(ctx context.Context, name string, interceptors ...clie
 	return &res, nil
 }
 
+const GetGroupTinyDocument = `query GetGroupTiny ($name: String!) {
+	group(name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetGroupTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroupTiny, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetGroupTiny
+	if err := c.Client.Post(ctx, "GetGroupTiny", GetGroupTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateGroupDocument = `mutation CreateGroup ($attributtes: GroupAttributes!) {
 	createGroup(attributes: $attributtes) {
 		... GroupFragment
@@ -44522,6 +44577,7 @@ var DocumentOperationNames = map[string]string{
 	DeletePrGovernanceDocument:                        "DeletePrGovernance",
 	UpsertPrGovernanceDocument:                        "UpsertPrGovernance",
 	GetGroupDocument:                                  "GetGroup",
+	GetGroupTinyDocument:                              "GetGroupTiny",
 	CreateGroupDocument:                               "CreateGroup",
 	UpdateGroupDocument:                               "UpdateGroup",
 	DeleteGroupDocument:                               "DeleteGroup",
