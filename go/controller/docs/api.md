@@ -24,6 +24,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
+- [Group](#group)
 - [HelmRepository](#helmrepository)
 - [InfrastructureStack](#infrastructurestack)
 - [MCPServer](#mcpserver)
@@ -1631,6 +1632,43 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled controls whether the graph store is enabled or not. | false | Optional: \{\} <br /> |
 | `store` _[VectorStore](#vectorstore)_ | Store is the type of the graph store to use. |  | Enum: [ELASTIC] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the graph store. |  | Optional: \{\} <br /> |
+
+
+#### Group
+
+
+
+Group represents a group of users within the system, managed via the Console API.
+It includes specifications for the group's name and description.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Group` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[GroupSpec](#groupspec)_ | Spec defines the desired state of the Group. |  |  |
+
+
+#### GroupSpec
+
+
+
+GroupSpec defines the desired state of Group.
+
+
+
+_Appears in:_
+- [Group](#group)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name specifies the name for this Group.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
+| `description` _string_ | Description provides a detailed explanation of this Group's purpose. |  | Optional: \{\} <br /> |
+| `global` _boolean_ | Global indicates whether all users in the system are automatically added to this group. | false | Optional: \{\} <br /> |
 
 
 #### HTTPConnection
