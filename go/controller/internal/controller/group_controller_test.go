@@ -71,7 +71,7 @@ var _ = Describe("Group Controller", Ordered, func() {
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.NamespacedCredentialsReason.String(),
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
 							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
