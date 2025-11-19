@@ -83,7 +83,7 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 	}
 	if exists {
 		utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return in.handleExistingGroup(ctx, group)
+		return in.handleExistingGroup(group)
 	}
 
 	// Mark the resource as managed by this operator.
@@ -133,7 +133,7 @@ func (in *GroupReconciler) isAlreadyExists(ctx context.Context, group *v1alpha1.
 	return false, nil
 }
 
-func (in *GroupReconciler) handleExistingGroup(ctx context.Context, group *v1alpha1.Group) (ctrl.Result, error) {
+func (in *GroupReconciler) handleExistingGroup(group *v1alpha1.Group) (ctrl.Result, error) {
 	exists, err := in.ConsoleClient.IsGroupExists(group.ConsoleName())
 	if err != nil {
 		return common.HandleRequeue(nil, err, group.SetCondition)
@@ -160,7 +160,7 @@ func (in *GroupReconciler) handleExistingGroup(ctx context.Context, group *v1alp
 
 func (in *GroupReconciler) sync(ctx context.Context, group *v1alpha1.Group, changed bool) (*console.GroupFragment, error) {
 	logger := log.FromContext(ctx)
-	exists, err := in.ConsoleClient.IsGroupExists(group.Status.GetID())
+	exists, err := in.ConsoleClient.IsGroupExists(group.GroupName())
 	if err != nil {
 		return nil, err
 	}
@@ -168,12 +168,12 @@ func (in *GroupReconciler) sync(ctx context.Context, group *v1alpha1.Group, chan
 	// Update only if the group has changed.
 	if changed && exists {
 		logger.Info(fmt.Sprintf("updating group %s", group.ConsoleName()))
-		return in.ConsoleClient.UpdateGroup(ctx, group.Status.GetID(), group.Attributes())
+		return in.ConsoleClient.UpdateGroup(ctx, group.GroupName(), group.Attributes())
 	}
 
 	// Read the group from Console API if it already exists.
 	if exists {
-		return in.ConsoleClient.GetGroup(group.Status.GetID())
+		return in.ConsoleClient.GetGroup(group.GroupName())
 	}
 
 	logger.Info(fmt.Sprintf("%s group does not exist, creating it", group.ConsoleName()))

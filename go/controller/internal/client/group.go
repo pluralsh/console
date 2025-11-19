@@ -40,12 +40,12 @@ func (c *client) GetGroupTiny(name string) (*console.GetGroupTiny_Group, error) 
 	return response.Group, nil
 }
 
-func (c *client) IsGroupExists(id string) (bool, error) {
-	if id == "" {
+func (c *client) IsGroupExists(name string) (bool, error) {
+	if name == "" {
 		return false, nil
 	}
 
-	group, err := c.GetGroupTiny(id)
+	group, err := c.GetGroupTiny(name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
