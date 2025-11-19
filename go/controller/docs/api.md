@@ -1669,6 +1669,7 @@ _Appears in:_
 | `name` _string_ | Name specifies the name for this Group.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
 | `description` _string_ | Description provides a detailed explanation of this Group's purpose. |  | Optional: \{\} <br /> |
 | `global` _boolean_ | Global indicates whether all users in the system are automatically added to this group. | false | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### HTTPConnection
@@ -3651,6 +3652,7 @@ _Appears in:_
 - [GeneratedSecretSpec](#generatedsecretspec)
 - [GitRepositorySpec](#gitrepositoryspec)
 - [GlobalServiceSpec](#globalservicespec)
+- [GroupSpec](#groupspec)
 - [HelmRepositorySpec](#helmrepositoryspec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [MCPServerSpec](#mcpserverspec)

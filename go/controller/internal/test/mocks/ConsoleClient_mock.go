@@ -494,6 +494,65 @@ func (_c *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call) RunAndReturn(r
 	return _c
 }
 
+// CreateGroup provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) CreateGroup(ctx context.Context, attr client.GroupAttributes) (*client.GroupFragment, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateGroup")
+	}
+
+	var r0 *client.GroupFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.GroupAttributes) (*client.GroupFragment, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.GroupAttributes) *client.GroupFragment); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GroupFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.GroupAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateGroup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateGroup'
+type ConsoleClientMock_CreateGroup_Call struct {
+	*mock.Call
+}
+
+// CreateGroup is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr client.GroupAttributes
+func (_e *ConsoleClientMock_Expecter) CreateGroup(ctx interface{}, attr interface{}) *ConsoleClientMock_CreateGroup_Call {
+	return &ConsoleClientMock_CreateGroup_Call{Call: _e.mock.On("CreateGroup", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_CreateGroup_Call) Run(run func(ctx context.Context, attr client.GroupAttributes)) *ConsoleClientMock_CreateGroup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.GroupAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGroup_Call) Return(_a0 *client.GroupFragment, _a1 error) *ConsoleClientMock_CreateGroup_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGroup_Call) RunAndReturn(run func(context.Context, client.GroupAttributes) (*client.GroupFragment, error)) *ConsoleClientMock_CreateGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateNamespace provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateNamespace(ctx context.Context, attributes client.ManagedNamespaceAttributes) (*client.ManagedNamespaceFragment, error) {
 	ret := _m.Called(ctx, attributes)
@@ -1829,6 +1888,53 @@ func (_c *ConsoleClientMock_DeleteGlobalService_Call) Return(_a0 error) *Console
 }
 
 func (_c *ConsoleClientMock_DeleteGlobalService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteGroup provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteGroup(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteGroup")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteGroup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteGroup'
+type ConsoleClientMock_DeleteGroup_Call struct {
+	*mock.Call
+}
+
+// DeleteGroup is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteGroup(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteGroup_Call {
+	return &ConsoleClientMock_DeleteGroup_Call{Call: _e.mock.On("DeleteGroup", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteGroup_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteGroup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGroup_Call) Return(_a0 error) *ConsoleClientMock_DeleteGroup_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGroup_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteGroup_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3742,6 +3848,64 @@ func (_c *ConsoleClientMock_GetGroup_Call) Return(_a0 *client.GroupFragment, _a1
 }
 
 func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*client.GroupFragment, error)) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetGroupTiny provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetGroupTiny(name string) (*client.GetGroupTiny_Group, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGroupTiny")
+	}
+
+	var r0 *client.GetGroupTiny_Group
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*client.GetGroupTiny_Group, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *client.GetGroupTiny_Group); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GetGroupTiny_Group)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGroupTiny_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGroupTiny'
+type ConsoleClientMock_GetGroupTiny_Call struct {
+	*mock.Call
+}
+
+// GetGroupTiny is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetGroupTiny(name interface{}) *ConsoleClientMock_GetGroupTiny_Call {
+	return &ConsoleClientMock_GetGroupTiny_Call{Call: _e.mock.On("GetGroupTiny", name)}
+}
+
+func (_c *ConsoleClientMock_GetGroupTiny_Call) Run(run func(name string)) *ConsoleClientMock_GetGroupTiny_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupTiny_Call) Return(_a0 *client.GetGroupTiny_Group, _a1 error) *ConsoleClientMock_GetGroupTiny_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupTiny_Call) RunAndReturn(run func(string) (*client.GetGroupTiny_Group, error)) *ConsoleClientMock_GetGroupTiny_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5962,6 +6126,62 @@ func (_c *ConsoleClientMock_IsFederatedCredentialExists_Call) RunAndReturn(run f
 	return _c
 }
 
+// IsGroupExists provides a mock function with given fields: id
+func (_m *ConsoleClientMock) IsGroupExists(id string) (bool, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsGroupExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (bool, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsGroupExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsGroupExists'
+type ConsoleClientMock_IsGroupExists_Call struct {
+	*mock.Call
+}
+
+// IsGroupExists is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsGroupExists(id interface{}) *ConsoleClientMock_IsGroupExists_Call {
+	return &ConsoleClientMock_IsGroupExists_Call{Call: _e.mock.On("IsGroupExists", id)}
+}
+
+func (_c *ConsoleClientMock_IsGroupExists_Call) Run(run func(id string)) *ConsoleClientMock_IsGroupExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsGroupExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsGroupExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsGroupExists_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsGroupExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsHelmRepositoryExists provides a mock function with given fields: ctx, url
 func (_m *ConsoleClientMock) IsHelmRepositoryExists(ctx context.Context, url string) (bool, error) {
 	ret := _m.Called(ctx, url)
@@ -7507,6 +7727,66 @@ func (_c *ConsoleClientMock_UpdateGlobalService_Call) Return(_a0 *client.GlobalS
 }
 
 func (_c *ConsoleClientMock_UpdateGlobalService_Call) RunAndReturn(run func(string, client.GlobalServiceAttributes) (*client.GlobalServiceFragment, error)) *ConsoleClientMock_UpdateGlobalService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateGroup provides a mock function with given fields: ctx, id, attr
+func (_m *ConsoleClientMock) UpdateGroup(ctx context.Context, id string, attr client.GroupAttributes) (*client.GroupFragment, error) {
+	ret := _m.Called(ctx, id, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateGroup")
+	}
+
+	var r0 *client.GroupFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.GroupAttributes) (*client.GroupFragment, error)); ok {
+		return rf(ctx, id, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.GroupAttributes) *client.GroupFragment); ok {
+		r0 = rf(ctx, id, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GroupFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.GroupAttributes) error); ok {
+		r1 = rf(ctx, id, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateGroup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateGroup'
+type ConsoleClientMock_UpdateGroup_Call struct {
+	*mock.Call
+}
+
+// UpdateGroup is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attr client.GroupAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateGroup(ctx interface{}, id interface{}, attr interface{}) *ConsoleClientMock_UpdateGroup_Call {
+	return &ConsoleClientMock_UpdateGroup_Call{Call: _e.mock.On("UpdateGroup", ctx, id, attr)}
+}
+
+func (_c *ConsoleClientMock_UpdateGroup_Call) Run(run func(ctx context.Context, id string, attr client.GroupAttributes)) *ConsoleClientMock_UpdateGroup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.GroupAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateGroup_Call) Return(_a0 *client.GroupFragment, _a1 error) *ConsoleClientMock_UpdateGroup_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateGroup_Call) RunAndReturn(run func(context.Context, string, client.GroupAttributes) (*client.GroupFragment, error)) *ConsoleClientMock_UpdateGroup_Call {
 	_c.Call.Return(run)
 	return _c
 }
