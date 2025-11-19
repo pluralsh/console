@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -91,6 +92,14 @@ func (in *Group) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
+func (in *Group) Attributes() console.GroupAttributes {
+	return console.GroupAttributes{
+		Name:        in.GroupName(),
+		Description: in.Spec.Description,
+		Global:      in.Spec.Global,
+	}
+}
+
 // GroupSpec defines the desired state of Group.
 type GroupSpec struct {
 	// Name specifies the name for this Group.
@@ -106,4 +115,9 @@ type GroupSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	Global *bool `json:"global,omitempty"`
+
+	// Reconciliation settings for this resource.
+	// Controls drift detection and reconciliation intervals.
+	// +kubebuilder:validation:Optional
+	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
