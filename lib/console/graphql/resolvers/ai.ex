@@ -3,8 +3,8 @@ defmodule Console.GraphQl.Resolvers.AI do
   import Console.GraphQl.Resolvers.Deployments.Base, only: [maybe_search: 3]
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
-  alias Console.AI.{Service, Provider, Fixer}
-  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession}
+  alias Console.AI.{Service, Provider, Fixer, Research}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, ResearchAssociation}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
@@ -13,6 +13,8 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(AiPin, _), do: AiPin
   def query(AiInsightEvidence, _), do: AiInsightEvidence
   def query(AgentSession, _), do: AgentSession
+  def query(InfraResearch, _), do: InfraResearch
+  def query(ResearchAssociation, _), do: ResearchAssociation
   def query(_, _), do: AiInsight
 
   def resolve_insight(%{id: id}, %{context: %{current_user: user}}),
@@ -22,6 +24,8 @@ defmodule Console.GraphQl.Resolvers.AI do
     args = Enum.filter([user_id: user.id] ++ Map.to_list(args), fn {_, v} -> not is_nil(v) end)
     {:ok, Console.Repo.get_by!(AiPin, args)}
   end
+
+  def resolve_research(%{id: id}, %{context: %{current_user: user}}), do: Research.authorized(id, user)
 
   def pins(args, %{context: %{current_user: user}}) do
     AiPin.for_user(user.id)
@@ -64,6 +68,12 @@ defmodule Console.GraphQl.Resolvers.AI do
   def list_chats(%ChatThread{id: tid}, args, _) do
     Chat.for_thread(tid)
     |> Chat.ordered(chat_order(args))
+    |> paginate(args)
+  end
+
+  def list_researches(args, %{context: %{current_user: user}}) do
+    InfraResearch.ordered()
+    |> InfraResearch.for_user(user.id)
     |> paginate(args)
   end
 
@@ -178,9 +188,22 @@ defmodule Console.GraphQl.Resolvers.AI do
   def create_agent_session(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: ChatSvc.create_agent_session(attrs, user)
 
+  def create_research(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Research.create_research(attrs, user)
+
+  def update_research(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Research.update_research(attrs, id, user)
+
+  def delete_research(%{id: id}, %{context: %{current_user: user}}),
+    do: Research.delete_research(id, user)
+
+  def fix_research_diagram(%{id: id, error: error}, %{context: %{current_user: user}}),
+    do: Research.fix_diagram(error, id, user)
+
   def raw_resource(%{version: v, kind: k, name: n, group: g} = comp, _, _) do
     %{cluster: cluster} = comp = Console.Repo.preload(comp, [:cluster])
-    Clusters.control_plane(cluster) |> Kube.Utils.save_kubeconfig()
+    Clusters.control_plane(cluster)
+    |> Kube.Utils.save_kubeconfig()
 
     kind = Kubernetes.get_kind(cluster, g, v, k)
     path = Kube.Client.Base.path(g, v, kind, comp.namespace, n)

@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Agents do
   use Console.Services.Base
   import Console.Deployments.Policies
-  import Console.Deployments.Pr.Git, only: [backfill_token: 1]
+  import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Pr.Dispatcher, Git}
   alias Console.AI.Tool
@@ -29,6 +29,9 @@ defmodule Console.Deployments.Agents do
 
   def get_agent_runtime(cluster_id, name),
     do: Repo.get_by(AgentRuntime, cluster_id: cluster_id, name: name)
+
+  def get_agent_runtime!(cluster_id, name),
+    do: Repo.get_by!(AgentRuntime, cluster_id: cluster_id, name: name)
 
   def get_agent_run!(id), do: Repo.get!(AgentRun, id)
 
@@ -234,6 +237,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
   @doc """
@@ -251,6 +255,7 @@ defmodule Console.Deployments.Agents do
       |> Repo.update()
     end)
     |> execute(extract: :update)
+    |> notify(:update)
   end
 
   @doc """
@@ -283,6 +288,17 @@ defmodule Console.Deployments.Agents do
     else
       nil -> {:error, "no scm connection found"}
       err -> err
+    end
+  end
+
+  @doc """
+  Converts the repository URL to a http URL
+  """
+  @spec repository_url(AgentRun.t) :: binary
+  def repository_url(%AgentRun{repository: repo_url}) do
+    case Tool.scm_connection() do
+      %ScmConnection{} = conn -> to_http(conn, repo_url)
+      _ -> repo_url
     end
   end
 

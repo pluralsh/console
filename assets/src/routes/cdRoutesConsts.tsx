@@ -1,3 +1,4 @@
+import { getAgentRunAbsPath } from './aiRoutesConsts'
 import { FLOW_ABS_PATH, getFlowDetailsPath } from './flowRoutesConsts'
 
 function encodeSlashes(str: string) {
@@ -178,14 +179,16 @@ export function getPodDetailsPath({
   clusterId,
   serviceId,
   flowId,
+  agentRunId,
   name,
   namespace,
   isRelative = false,
 }: {
-  type: 'cluster' | 'service' | 'flow'
+  type: 'cluster' | 'service' | 'flow' | 'agent-run'
   clusterId?: Nullable<string>
   serviceId?: Nullable<string>
   flowId?: Nullable<string>
+  agentRunId?: Nullable<string>
   name?: Nullable<string>
   namespace?: Nullable<string>
   isRelative?: boolean
@@ -208,6 +211,9 @@ export function getPodDetailsPath({
         flowId,
         isRelative,
       })
+      break
+    case 'agent-run':
+      path = getAgentRunAbsPath({ agentRunId })
       break
   }
 

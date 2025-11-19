@@ -70,6 +70,19 @@ defmodule Console.Deployments.Services do
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
   @doc """
+  Determines if a proposed update will result in a change to the given service
+  """
+  @spec changed?(Service.t, map) :: boolean
+  def changed?(%Service{} = svc, updates) do
+    Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings, :imports])
+    |> Service.changeset(updates)
+    |> case do
+      %Ecto.Changeset{changes: %{} = changes} when map_size(changes) > 0 -> true
+      _ -> false
+    end
+  end
+
+  @doc """
   Pushes a request to the relevant agent to gather manifests for a service
   """
   @spec request_manifests(binary, User.t) :: service_resp
@@ -777,7 +790,7 @@ defmodule Console.Deployments.Services do
   defp latest_vsn(%Service{sha: nil, revision_id: rid}, %{revision_id: rid}), do: true
   defp latest_vsn(_, %{sha: sha, revision_id: rid}) when is_binary(sha) and is_binary(rid), do: false
   defp latest_vsn(%Service{revision_id: rid}, %{revision_id: rid}), do: true
-  defp latest_vsn(_, %{revision_id: rid}) when is_binary(rid), do: false
+  defp latest_vsn(_, %{revision_id: rid}) when is_binary(rid) and byte_size(rid) > 0, do: false
   defp latest_vsn(_, _), do: true
 
   def stabilize_deps(%{dependencies: deps} = attrs, %Service{dependencies: old_deps}) when is_list(old_deps) do

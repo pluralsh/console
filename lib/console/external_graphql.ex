@@ -107,6 +107,7 @@ defmodule Console.ExternalGraphQl do
       resolve &Deployments.settings/2
     end
 
+    import_fields :public_user_queries
     import_fields :public_service_queries
     import_fields :public_cluster_queries
     import_fields :public_pipeline_queries

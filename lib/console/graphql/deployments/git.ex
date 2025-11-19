@@ -144,6 +144,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
+    field :labels,        list_of(:string), description: "labels to apply to created prs"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
@@ -517,6 +518,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :labels,        list_of(:string), description: "labels to apply to the created prs"
     field :branch_prefix, :string, description: "a prefix to use for the branch name, will be appended with a random string for deduplication"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
@@ -826,6 +828,27 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  object :catalog_search_result do
+    field :catalog,       :catalog_search_item
+    field :pr_automation, :pr_automation_search_item
+  end
+
+  object :pr_automation_search_item do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string)
+    field :description, :string, description: "the description for this pr automation"
+    field :icon,        :string, description: "an icon url to use for this pr automation"
+    field :dark_icon,   :string, description: "a darkmode icon url to use for this pr automation"
+  end
+
+  object :catalog_search_item do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string)
+    field :documentation, :string, description: "the documentation for this pr automation"
+    field :icon,          :string, description: "an icon url to use for this catalog"
+    field :dark_icon,     :string, description: "a darkmode icon url to use for this catalog"
+  end
+
   @desc "A governance controller is a mechanism to enforce a set of rules on a set of PRs"
   object :pr_governance do
     field :id,            non_null(:id)
@@ -999,6 +1022,13 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :project_id, :id
 
       resolve &Deployments.list_catalogs/2
+    end
+
+    field :catalog_search, list_of(:catalog_search_result) do
+      middleware Authenticated
+      arg :q, non_null(:string)
+
+      resolve &Deployments.catalog_search/2
     end
   end
 

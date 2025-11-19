@@ -9,6 +9,14 @@ defimpl Console.AI.PubSub.Agent.Actionable, for: Any do
   def act(_), do: :ok
 end
 
+defimpl Console.AI.PubSub.Agent.Actionable, for: Console.PubSub.InfraResearchCreated do
+  alias Console.AI.Research.Agent
+  alias Console.AI.Agents.Discovery
+
+  def act(%@for{item: research}), do: Discovery.boot(Agent, research)
+  def act(_), do: :ok
+end
+
 defimpl Console.AI.PubSub.Agent.Actionable, for: Console.PubSub.AgentSessionCreated do
   alias Console.Schema.{ChatThread, AgentSession}
   alias Console.AI.Agents.{Discovery, Terraform, Kubernetes}

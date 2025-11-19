@@ -25,7 +25,7 @@ import {
 import { isNonNullable } from 'utils/isNonNullable'
 import { SentinelStatusChip } from '../../SentinelsTableCols'
 import { DetailsPageWithSidecarWrapper } from '../Sentinel'
-import { getRunNameFromId } from '../SentinelRunsTable'
+import { getRunNameFromId } from '../SentinelRunsTables'
 import { SentinelRunSidecar } from '../SentinelSidecars'
 import { SentinelRunChecksTable } from './SentinelRunChecksTable'
 

@@ -377,6 +377,11 @@ type AgentRunConnection struct {
 	Edges    []*AgentRunEdge `json:"edges,omitempty"`
 }
 
+type AgentRunDelta struct {
+	Delta   *Delta    `json:"delta,omitempty"`
+	Payload *AgentRun `json:"payload,omitempty"`
+}
+
 type AgentRunEdge struct {
 	Node   *AgentRun `json:"node,omitempty"`
 	Cursor *string   `json:"cursor,omitempty"`
@@ -1183,6 +1188,22 @@ type CatalogConnection struct {
 type CatalogEdge struct {
 	Node   *Catalog `json:"node,omitempty"`
 	Cursor *string  `json:"cursor,omitempty"`
+}
+
+type CatalogSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the documentation for this pr automation
+	Documentation *string `json:"documentation,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string `json:"darkIcon,omitempty"`
+}
+
+type CatalogSearchResult struct {
+	Catalog      *CatalogSearchItem      `json:"catalog,omitempty"`
+	PrAutomation *PrAutomationSearchItem `json:"prAutomation,omitempty"`
 }
 
 type Certificate struct {
@@ -3468,6 +3489,90 @@ type HTTPProxyConfiguration struct {
 	URL string `json:"url"`
 }
 
+// A representation of an AI generated deep investigation of your infrastructure
+type InfraResearch struct {
+	ID string `json:"id"`
+	// the prompt used to create this research
+	Prompt *string `json:"prompt,omitempty"`
+	// the diagram of the infrastructure
+	Diagram *string `json:"diagram,omitempty"`
+	// whether this research is published
+	Published *bool `json:"published,omitempty"`
+	// the status of this research
+	Status *InfraResearchStatus `json:"status,omitempty"`
+	// the analysis of the infrastructure
+	Analysis *InfraResearchAnalysis `json:"analysis,omitempty"`
+	// the associations of this research
+	Associations []*InfraResearchAssociation `json:"associations,omitempty"`
+	// autonomous chat threads depicting the ai doing the research
+	Threads    []*ChatThread `json:"threads,omitempty"`
+	User       *User         `json:"user,omitempty"`
+	InsertedAt *string       `json:"insertedAt,omitempty"`
+	UpdatedAt  *string       `json:"updatedAt,omitempty"`
+}
+
+// Additional analysis attached to this research result
+type InfraResearchAnalysis struct {
+	// a summary of the analysis
+	Summary *string `json:"summary,omitempty"`
+	// any notes from the analysis, indicating unsolved questions
+	Notes []*string `json:"notes,omitempty"`
+	// a knowledge graph of the infrastructure
+	Graph *InfraResearchGraph `json:"graph,omitempty"`
+}
+
+// Associations with services/stacks and a research
+type InfraResearchAssociation struct {
+	ID         string               `json:"id"`
+	Service    *ServiceDeployment   `json:"service,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+// attributes to create a deep research of your infrastructure
+type InfraResearchAttributes struct {
+	Prompt *string `json:"prompt,omitempty"`
+}
+
+type InfraResearchConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*InfraResearchEdge `json:"edges,omitempty"`
+}
+
+type InfraResearchEdge struct {
+	Node   *InfraResearch `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type InfraResearchGraph struct {
+	// the vertices of the graph
+	Vertices []*InfraResearchGraphVertex `json:"vertices,omitempty"`
+	// the edges of the graph
+	Edges []*InfraResearchGraphEdge `json:"edges,omitempty"`
+}
+
+type InfraResearchGraphEdge struct {
+	From        string  `json:"from"`
+	To          string  `json:"to"`
+	Type        *string `json:"type,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type InfraResearchGraphVertex struct {
+	Identifier  string         `json:"identifier"`
+	Type        string         `json:"type"`
+	Description *string        `json:"description,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
+}
+
+// attributes to update a deep research of your infrastructure
+type InfraResearchUpdateAttributes struct {
+	Diagram *string `json:"diagram,omitempty"`
+	// whether to publish this research
+	Published *bool `json:"published,omitempty"`
+}
+
 type InfrastructureStack struct {
 	ID *string `json:"id,omitempty"`
 	// the name of the stack
@@ -5006,6 +5111,10 @@ type PipelineGate struct {
 	Status *GateStatus `json:"status,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
+	// the sentinel this gate will execute
+	Sentinel *Sentinel `json:"sentinel,omitempty"`
+	// the run that the sentinel executed last
+	SentinelRun *SentinelRun `json:"sentinelRun,omitempty"`
 	// the edge this gate lives on
 	Edge *PipelineStageEdge `json:"edge,omitempty"`
 	// the cluster this gate can run on
@@ -5028,6 +5137,8 @@ type PipelineGateAttributes struct {
 	ClusterID *string `json:"clusterId,omitempty"`
 	// a specification for more complex gate types
 	Spec *GateSpecAttributes `json:"spec,omitempty"`
+	// the id of the sentinel this gate will execute
+	SentinelID *string `json:"sentinelId,omitempty"`
 }
 
 type PipelineGateConnection struct {
@@ -5335,6 +5446,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// labels to apply to the created prs
+	Labels []*string `json:"labels,omitempty"`
 	// a prefix to use for the branch name, will be appended with a random string for deduplication
 	BranchPrefix *string `json:"branchPrefix,omitempty"`
 	// an icon url to use for this catalog
@@ -5384,6 +5497,8 @@ type PrAutomationAttributes struct {
 	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// labels to apply to created prs
+	Labels []*string `json:"labels,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog
@@ -5433,6 +5548,17 @@ type PrAutomationDeleteSpecAttributes struct {
 type PrAutomationEdge struct {
 	Node   *PrAutomation `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type PrAutomationSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the description for this pr automation
+	Description *string `json:"description,omitempty"`
+	// an icon url to use for this pr automation
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this pr automation
+	DarkIcon *string `json:"darkIcon,omitempty"`
 }
 
 // templates to apply in this pr
@@ -6359,7 +6485,25 @@ type SentinelCheckConfigurationAttributes struct {
 	IntegrationTest *SentinelCheckIntegrationTestConfigurationAttributes `json:"integrationTest,omitempty"`
 }
 
+type SentinelCheckGotestsumAttributes struct {
+	// the value of the p flag for gotestsum
+	P *string `json:"p,omitempty"`
+	// the value of the parallel flag for gotestsum
+	Parallel *string `json:"parallel,omitempty"`
+}
+
+type SentinelCheckGotestsumConfiguration struct {
+	// the value of the p flag for gotestsum
+	P *string `json:"p,omitempty"`
+	// the value of the parallel flag for gotestsum
+	Parallel *string `json:"parallel,omitempty"`
+}
+
 type SentinelCheckIntegrationTestConfiguration struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRef `json:"git,omitempty"`
 	// the job to run for this check
 	Job *JobGateSpec `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6368,9 +6512,15 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Tags map[string]any `json:"tags,omitempty"`
 	// the format of the job
 	Format SentinelRunJobFormat `json:"format"`
+	// the gotestsum configuration to use for this check
+	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
+	// the repository to use for this check
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the git repository to use for this check
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// the job to run for this check
 	Job *GateJobAttributes `json:"job,omitempty"`
 	// the distro to run the check on
@@ -6379,6 +6529,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Tags *string `json:"tags,omitempty"`
 	// the format of the job output
 	Format SentinelRunJobFormat `json:"format"`
+	// the gotestsum configuration to use for this check
+	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {
@@ -6486,12 +6638,18 @@ type SentinelRunJob struct {
 	Output *string `json:"output,omitempty"`
 	// the time the job completed
 	CompletedAt *string `json:"completedAt,omitempty"`
+	// the git repository to use for this job
+	Git *GitRef `json:"git,omitempty"`
+	// whether this job uses test code defined in git
+	UsesGit *bool `json:"usesGit,omitempty"`
 	// the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)
 	Job *Job `json:"job,omitempty"`
 	// the job that was run
 	JobSpec *JobGateSpec `json:"jobSpec,omitempty"`
 	// the reference to the job that was run
 	Reference *JobReference `json:"reference,omitempty"`
+	// the git repository to use for this job
+	Repository *GitRepository `json:"repository,omitempty"`
 	// the cluster that the job was run on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the run that the job was run on
@@ -7960,6 +8118,7 @@ type VulnerabilityAttributes struct {
 	InstalledVersion *string               `json:"installedVersion,omitempty"`
 	Severity         *VulnSeverity         `json:"severity,omitempty"`
 	Score            *float64              `json:"score,omitempty"`
+	RepositoryURL    *string               `json:"repositoryUrl,omitempty"`
 	Title            *string               `json:"title,omitempty"`
 	Description      *string               `json:"description,omitempty"`
 	CvssSource       *string               `json:"cvssSource,omitempty"`
@@ -8283,6 +8442,7 @@ const (
 	AgentSessionTypeSearch       AgentSessionType = "SEARCH"
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 	AgentSessionTypeChat         AgentSessionType = "CHAT"
+	AgentSessionTypeResearch     AgentSessionType = "RESEARCH"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -8292,11 +8452,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeSearch,
 	AgentSessionTypeManifests,
 	AgentSessionTypeChat,
+	AgentSessionTypeResearch,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch:
 		return true
 	}
 	return false
@@ -9308,17 +9469,19 @@ const (
 	GateTypeApproval GateType = "APPROVAL"
 	GateTypeWindow   GateType = "WINDOW"
 	GateTypeJob      GateType = "JOB"
+	GateTypeSentinel GateType = "SENTINEL"
 )
 
 var AllGateType = []GateType{
 	GateTypeApproval,
 	GateTypeWindow,
 	GateTypeJob,
+	GateTypeSentinel,
 }
 
 func (e GateType) IsValid() bool {
 	switch e {
-	case GateTypeApproval, GateTypeWindow, GateTypeJob:
+	case GateTypeApproval, GateTypeWindow, GateTypeJob, GateTypeSentinel:
 		return true
 	}
 	return false
@@ -9473,6 +9636,51 @@ func (e *HelmAuthProvider) UnmarshalGQL(v any) error {
 }
 
 func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type InfraResearchStatus string
+
+const (
+	InfraResearchStatusPending   InfraResearchStatus = "PENDING"
+	InfraResearchStatusRunning   InfraResearchStatus = "RUNNING"
+	InfraResearchStatusCompleted InfraResearchStatus = "COMPLETED"
+	InfraResearchStatusFailed    InfraResearchStatus = "FAILED"
+)
+
+var AllInfraResearchStatus = []InfraResearchStatus{
+	InfraResearchStatusPending,
+	InfraResearchStatusRunning,
+	InfraResearchStatusCompleted,
+	InfraResearchStatusFailed,
+}
+
+func (e InfraResearchStatus) IsValid() bool {
+	switch e {
+	case InfraResearchStatusPending, InfraResearchStatusRunning, InfraResearchStatusCompleted, InfraResearchStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e InfraResearchStatus) String() string {
+	return string(e)
+}
+
+func (e *InfraResearchStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InfraResearchStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InfraResearchStatus", str)
+	}
+	return nil
+}
+
+func (e InfraResearchStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

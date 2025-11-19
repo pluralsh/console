@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	client "github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type KnownError string
@@ -21,6 +22,17 @@ const (
 	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
 	ErrDeleteRepository                  = "could not delete repository"
 )
+
+func NewNotFound() error {
+	errors := gqlerror.List{
+		{
+			Message: ErrorNotFound.String(),
+		},
+	}
+	return &client.ErrorResponse{
+		GqlErrors: &errors,
+	}
+}
 
 type wrappedErrorResponse struct {
 	err *client.ErrorResponse

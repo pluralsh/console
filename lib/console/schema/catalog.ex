@@ -80,3 +80,33 @@ defmodule Console.Schema.Catalog do
     |> cast_assoc(:create_bindings)
   end
 end
+
+defmodule Console.Schema.Catalog.Mini do
+  alias Console.Schema.Catalog
+
+  @derive Jason.Encoder
+  @derive JSON.Encoder
+  defstruct [:id, :name, :description, :category, :icon, :dark_icon]
+
+  def new(%Catalog{} = catalog) do
+    %__MODULE__{
+      id: catalog.id,
+      name: catalog.name,
+      description: catalog.description,
+      category: catalog.category,
+      icon: catalog.icon,
+      dark_icon: catalog.dark_icon
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      name: attrs["name"],
+      description: attrs["description"],
+      category: attrs["category"],
+      icon: attrs["icon"],
+      dark_icon: attrs["dark_icon"]
+    }
+  end
+end

@@ -12,6 +12,12 @@ body {
   overflow: auto hidden;
 }
 
+/* TODO: apply this more selectively to improve tablet support */
+
+/* * {
+  overscroll-behavior: none;
+} */
+
 #root {
   align-items: stretch;
   display: flex;
@@ -19,6 +25,10 @@ body {
   flex-grow: 1;
   /* stylelint-disable-next-line property-no-unknown */
   interpolate-size: allow-keywords; /* as of Jun 2025 this isn't supported in Safari or Firefox, but can add a nice progressive enhancement for Chrome users */
+}
+
+[id*='mermaid']:not(#root [id*='mermaid']) {
+  opacity: 0;
 }
 
 code {

@@ -12,10 +12,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     |> paginate(args)
   end
 
+  def agent_runtime(%{name: name}, %{context: %{cluster: cluster}}) when is_binary(name) do
+    Agents.get_agent_runtime!(cluster.id, name)
+    |> allow(cluster, :read)
+  end
+
   def agent_runtime(%{id: id}, ctx) do
     Agents.get_agent_runtime!(id)
     |> allow(actor(ctx), :create)
   end
+
+  def agent_runtime(_, _), do: {:error, "Must specify either name or id"}
 
   def agent_run(%{id: id}, ctx) do
     Agents.get_agent_run!(id)
@@ -26,6 +33,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     AgentRun.for_session(id)
     |> paginate(args)
   end
+
+  def agent_repository(%AgentRun{} = run, _, %{context: %{cluster: %{id: _}}}),
+    do: {:ok, Agents.repository_url(run)}
+  def agent_repository(%AgentRun{repository: repo}, _, _), do: {:ok, repo}
 
   def agent_scm_credentials(%AgentRun{} = run, _, %{context: %{cluster: cluster}}),
     do: Agents.scm_creds(run, cluster)

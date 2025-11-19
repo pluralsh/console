@@ -13,6 +13,7 @@ COPY assets/package.json ./package.json
 COPY assets/yarn.lock ./yarn.lock
 COPY assets/.yarn ./.yarn
 COPY assets/.yarnrc.yml ./.yarnrc.yml
+COPY assets/design-system/package.json ./design-system/package.json
 
 RUN yarn install
 
@@ -74,7 +75,7 @@ RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.19
+ENV CLI_VERSION=v0.12.21
 
 COPY AGENT_VERSION AGENT_VERSION
 

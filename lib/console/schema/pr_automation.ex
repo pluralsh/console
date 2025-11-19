@@ -31,6 +31,7 @@ defmodule Console.Schema.PrAutomation do
     field :icon,             :string
     field :dark_icon,        :string
     field :branch_prefix,    :string
+    field :labels,           {:array, :string}
 
     embeds_one :creates, CreateSpec, on_replace: :update do
       embeds_one :git, Service.Git, on_replace: :update
@@ -140,7 +141,26 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id icon dark_icon role patch branch_prefix identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id governance_id)a
+  @valid ~w(name
+            project_id
+            icon
+            dark_icon
+            role
+            patch
+            branch_prefix
+            identifier
+            message
+            title
+            branch
+            documentation
+            addon
+            catalog_id
+            repository_id
+            cluster_id
+            service_id
+            connection_id
+            labels
+            governance_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -226,5 +246,41 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, [:name, :documentation, :autogenerate])
     |> validate_required([:name, :documentation])
+  end
+end
+
+defmodule Console.Schema.PrAutomation.Mini do
+  alias Console.Schema.PrAutomation
+
+  @derive Jason.Encoder
+  @derive JSON.Encoder
+  defstruct [:id, :name, :documentation, :title, :message, :branch, :branch_prefix, :icon, :dark_icon]
+
+  def new(%PrAutomation{} = pr) do
+    %__MODULE__{
+      id: pr.id,
+      name: pr.name,
+      documentation: pr.documentation,
+      title: pr.title,
+      message: pr.message,
+      branch: pr.branch,
+      branch_prefix: pr.branch_prefix,
+      icon: pr.icon,
+      dark_icon: pr.dark_icon
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      name: attrs["name"],
+      documentation: attrs["documentation"],
+      title: attrs["title"],
+      message: attrs["message"],
+      branch: attrs["branch"],
+      branch_prefix: attrs["branch_prefix"],
+      icon: attrs["icon"],
+      dark_icon: attrs["dark_icon"]
+    }
   end
 end

@@ -450,6 +450,12 @@ export type AgentRunConnection = {
   pageInfo: PageInfo;
 };
 
+export type AgentRunDelta = {
+  __typename?: 'AgentRunDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<AgentRun>;
+};
+
 export type AgentRunEdge = {
   __typename?: 'AgentRunEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -655,6 +661,7 @@ export enum AgentSessionType {
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',
+  Research = 'RESEARCH',
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
@@ -1484,6 +1491,24 @@ export type CatalogEdge = {
   __typename?: 'CatalogEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Catalog>;
+};
+
+export type CatalogSearchItem = {
+  __typename?: 'CatalogSearchItem';
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the documentation for this pr automation */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this catalog */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type CatalogSearchResult = {
+  __typename?: 'CatalogSearchResult';
+  catalog?: Maybe<CatalogSearchItem>;
+  prAutomation?: Maybe<PrAutomationSearchItem>;
 };
 
 export type Certificate = {
@@ -3699,6 +3724,7 @@ export type GateStatusAttributes = {
 export enum GateType {
   Approval = 'APPROVAL',
   Job = 'JOB',
+  Sentinel = 'SENTINEL',
   Window = 'WINDOW'
 }
 
@@ -4251,6 +4277,105 @@ export type HttpProxyAttributes = {
 export type HttpProxyConfiguration = {
   __typename?: 'HttpProxyConfiguration';
   url: Scalars['String']['output'];
+};
+
+/** A representation of an AI generated deep investigation of your infrastructure */
+export type InfraResearch = {
+  __typename?: 'InfraResearch';
+  /** the analysis of the infrastructure */
+  analysis?: Maybe<InfraResearchAnalysis>;
+  /** the associations of this research */
+  associations?: Maybe<Array<Maybe<InfraResearchAssociation>>>;
+  /** the diagram of the infrastructure */
+  diagram?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt used to create this research */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** whether this research is published */
+  published?: Maybe<Scalars['Boolean']['output']>;
+  /** the status of this research */
+  status?: Maybe<InfraResearchStatus>;
+  /** autonomous chat threads depicting the ai doing the research */
+  threads?: Maybe<Array<Maybe<ChatThread>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** Additional analysis attached to this research result */
+export type InfraResearchAnalysis = {
+  __typename?: 'InfraResearchAnalysis';
+  /** a knowledge graph of the infrastructure */
+  graph?: Maybe<InfraResearchGraph>;
+  /** any notes from the analysis, indicating unsolved questions */
+  notes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of the analysis */
+  summary?: Maybe<Scalars['String']['output']>;
+};
+
+/** Associations with services/stacks and a research */
+export type InfraResearchAssociation = {
+  __typename?: 'InfraResearchAssociation';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  service?: Maybe<ServiceDeployment>;
+  stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** attributes to create a deep research of your infrastructure */
+export type InfraResearchAttributes = {
+  prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type InfraResearchConnection = {
+  __typename?: 'InfraResearchConnection';
+  edges?: Maybe<Array<Maybe<InfraResearchEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type InfraResearchEdge = {
+  __typename?: 'InfraResearchEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<InfraResearch>;
+};
+
+export type InfraResearchGraph = {
+  __typename?: 'InfraResearchGraph';
+  /** the edges of the graph */
+  edges?: Maybe<Array<Maybe<InfraResearchGraphEdge>>>;
+  /** the vertices of the graph */
+  vertices?: Maybe<Array<Maybe<InfraResearchGraphVertex>>>;
+};
+
+export type InfraResearchGraphEdge = {
+  __typename?: 'InfraResearchGraphEdge';
+  description?: Maybe<Scalars['String']['output']>;
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type InfraResearchGraphVertex = {
+  __typename?: 'InfraResearchGraphVertex';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  identifier: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export enum InfraResearchStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
+/** attributes to update a deep research of your infrastructure */
+export type InfraResearchUpdateAttributes = {
+  diagram?: InputMaybe<Scalars['String']['input']>;
+  /** whether to publish this research */
+  published?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type InfrastructureStack = {
@@ -6108,6 +6233,10 @@ export type PipelineGate = {
   job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
+  /** the sentinel this gate will execute */
+  sentinel?: Maybe<Sentinel>;
+  /** the run that the sentinel executed last */
+  sentinelRun?: Maybe<SentinelRun>;
   /** more detailed specification for complex gates */
   spec?: Maybe<GateSpec>;
   /** the current state of this gate */
@@ -6127,6 +6256,8 @@ export type PipelineGateAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
+  /** the id of the sentinel this gate will execute */
+  sentinelId?: InputMaybe<Scalars['ID']['input']>;
   /** a specification for more complex gate types */
   spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */
@@ -6508,6 +6639,8 @@ export type PrAutomation = {
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: Maybe<Scalars['String']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** labels to apply to the created prs */
+  labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6555,6 +6688,8 @@ export type PrAutomationAttributes = {
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
+  /** labels to apply to created prs */
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
@@ -6595,6 +6730,18 @@ export type PrAutomationEdge = {
   __typename?: 'PrAutomationEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PrAutomation>;
+};
+
+export type PrAutomationSearchItem = {
+  __typename?: 'PrAutomationSearchItem';
+  /** a darkmode icon url to use for this pr automation */
+  darkIcon?: Maybe<Scalars['String']['output']>;
+  /** the description for this pr automation */
+  description?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this pr automation */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
 };
 
 /** templates to apply in this pr */
@@ -7381,6 +7528,8 @@ export type RootMutationType = {
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
+  /** Creates a new infrastructure research based on a prompt */
+  createInfraResearch?: Maybe<InfraResearch>;
   createInvite?: Maybe<Invite>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
@@ -7428,6 +7577,8 @@ export type RootMutationType = {
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
+  /** Deletes an existing infrastructure research */
+  deleteInfraResearch?: Maybe<InfraResearch>;
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
@@ -7469,6 +7620,8 @@ export type RootMutationType = {
   detachStack?: Maybe<InfrastructureStack>;
   dismissOnboarding?: Maybe<DeploymentSettings>;
   enableDeployments?: Maybe<DeploymentSettings>;
+  /** Fixes a broken mermaid diagram in an existing research */
+  fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
   /** Chat mutation that can also execute MCP servers in line with the overall completion */
@@ -7548,6 +7701,8 @@ export type RootMutationType = {
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
+  /** Updates an existing infrastructure research based on a prompt */
+  updateInfraResearch?: Maybe<InfraResearch>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
@@ -7809,6 +7964,11 @@ export type RootMutationTypeCreateGroupMemberArgs = {
 };
 
 
+export type RootMutationTypeCreateInfraResearchArgs = {
+  attributes: InfraResearchAttributes;
+};
+
+
 export type RootMutationTypeCreateInviteArgs = {
   attributes: InviteAttributes;
 };
@@ -8040,6 +8200,11 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 };
 
 
+export type RootMutationTypeDeleteInfraResearchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -8221,6 +8386,12 @@ export type RootMutationTypeDetachServiceDeploymentArgs = {
 
 
 export type RootMutationTypeDetachStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeFixResearchDiagramArgs = {
+  error: Scalars['String']['input'];
   id: Scalars['ID']['input'];
 };
 
@@ -8555,6 +8726,12 @@ export type RootMutationTypeUpdateGroupArgs = {
 };
 
 
+export type RootMutationTypeUpdateInfraResearchArgs = {
+  attributes: InfraResearchUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateManagedNamespaceArgs = {
   attributes: ManagedNamespaceAttributes;
   id: Scalars['ID']['input'];
@@ -8811,6 +8988,7 @@ export type RootQueryType = {
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
+  catalogSearch?: Maybe<Array<Maybe<CatalogSearchResult>>>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
   /** gets an individual chat thread, with the ability to sideload chats on top */
@@ -8883,6 +9061,8 @@ export type RootQueryType = {
   groups?: Maybe<GroupConnection>;
   helmRepositories?: Maybe<HelmRepositoryConnection>;
   helmRepository?: Maybe<HelmRepository>;
+  infraResearch?: Maybe<InfraResearch>;
+  infraResearches?: Maybe<InfraResearchConnection>;
   infrastructureStack?: Maybe<InfrastructureStack>;
   infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
@@ -9027,7 +9207,8 @@ export type RootQueryTypeAgentRunsArgs = {
 
 
 export type RootQueryTypeAgentRuntimeArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -9120,6 +9301,11 @@ export type RootQueryTypeCanaryArgs = {
 export type RootQueryTypeCatalogArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeCatalogSearchArgs = {
+  q: Scalars['String']['input'];
 };
 
 
@@ -9514,6 +9700,19 @@ export type RootQueryTypeHelmRepositoriesArgs = {
 
 export type RootQueryTypeHelmRepositoryArgs = {
   url: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeInfraResearchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeInfraResearchesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -10240,6 +10439,7 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
   agentMessageDelta?: Maybe<AgentMessageDelta>;
+  agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
@@ -10250,6 +10450,11 @@ export type RootSubscriptionType = {
 
 export type RootSubscriptionTypeAgentMessageDeltaArgs = {
   runId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeAgentRunDeltaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -10597,14 +10802,35 @@ export type SentinelCheckConfigurationAttributes = {
   log?: InputMaybe<SentinelCheckLogConfigurationAttributes>;
 };
 
+export type SentinelCheckGotestsumAttributes = {
+  /** the value of the p flag for gotestsum */
+  p?: InputMaybe<Scalars['String']['input']>;
+  /** the value of the parallel flag for gotestsum */
+  parallel?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SentinelCheckGotestsumConfiguration = {
+  __typename?: 'SentinelCheckGotestsumConfiguration';
+  /** the value of the p flag for gotestsum */
+  p?: Maybe<Scalars['String']['output']>;
+  /** the value of the parallel flag for gotestsum */
+  parallel?: Maybe<Scalars['String']['output']>;
+};
+
 export type SentinelCheckIntegrationTestConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestConfiguration';
   /** the distro to run the check on */
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: Maybe<GitRef>;
+  /** the gotestsum configuration to use for this check */
+  gotestsum?: Maybe<SentinelCheckGotestsumConfiguration>;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
+  /** the repository to use for this check */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
   /** the cluster tags to select where to run this job */
   tags?: Maybe<Scalars['Map']['output']>;
 };
@@ -10614,8 +10840,14 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this check */
+  git?: InputMaybe<GitRefAttributes>;
+  /** the gotestsum configuration to use for this check */
+  gotestsum?: InputMaybe<SentinelCheckGotestsumAttributes>;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
+  /** the repository to use for this check */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to select where to run this job */
   tags?: InputMaybe<Scalars['Json']['input']>;
 };
@@ -10745,6 +10977,8 @@ export type SentinelRunJob = {
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
+  /** the git repository to use for this job */
+  git?: Maybe<GitRef>;
   /** the id of the job */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -10756,11 +10990,15 @@ export type SentinelRunJob = {
   output?: Maybe<Scalars['String']['output']>;
   /** the reference to the job that was run */
   reference?: Maybe<JobReference>;
+  /** the git repository to use for this job */
+  repository?: Maybe<GitRepository>;
   /** the run that the job was run on */
   sentinelRun?: Maybe<SentinelRun>;
   /** the status of the job */
   status: SentinelRunJobStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether this job uses test code defined in git */
+  usesGit?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SentinelRunJobConnection = {
@@ -12515,6 +12753,7 @@ export type VulnerabilityAttributes = {
   pkgPath?: InputMaybe<Scalars['String']['input']>;
   primaryLink?: InputMaybe<Scalars['String']['input']>;
   publishedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   resource?: InputMaybe<Scalars['String']['input']>;
   score?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<VulnSeverity>;
@@ -12597,7 +12836,7 @@ export type YamlOverlayAttributes = {
 
 export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
 
-export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
+export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -12623,7 +12862,14 @@ export type AgentRunQueryVariables = Exact<{
 }>;
 
 
-export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
+export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
+
+export type AgentRunPodQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunPodQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, prompt: string, pod?: { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null } | null };
 
 export type AgentRuntimesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -12646,7 +12892,7 @@ export type CreateAgentRunMutationVariables = Exact<{
 }>;
 
 
-export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
+export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
 
 export type UpsertAgentRuntimeMutationVariables = Exact<{
   attributes: AgentRuntimeAttributes;
@@ -12833,6 +13079,44 @@ export type AiChatStreamSubscriptionVariables = Exact<{
 
 
 export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, message?: number | null, role?: AiRole | null, content: string, tool?: { __typename?: 'ToolDelta', id?: string | null, name?: string | null } | null } | null };
+
+export type InfraResearchFragment = { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null, threads?: Array<{ __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null, associations?: Array<{ __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, user?: { __typename?: 'User', id: string } | null };
+
+export type InfraResearchAnalysisFragment = { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null };
+
+export type InfraResearchAssociationFragment = { __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
+
+export type InfraResearchQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type InfraResearchQuery = { __typename?: 'RootQueryType', infraResearch?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null, threads?: Array<{ __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null, associations?: Array<{ __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, user?: { __typename?: 'User', id: string } | null } | null };
+
+export type InfraResearchesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type InfraResearchesQuery = { __typename?: 'RootQueryType', infraResearches?: { __typename?: 'InfraResearchConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfraResearchEdge', node?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null, threads?: Array<{ __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null, associations?: Array<{ __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, user?: { __typename?: 'User', id: string } | null } | null } | null> | null } | null };
+
+export type CreateInfraResearchMutationVariables = Exact<{
+  attributes: InfraResearchAttributes;
+}>;
+
+
+export type CreateInfraResearchMutation = { __typename?: 'RootMutationType', createInfraResearch?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null, threads?: Array<{ __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null, associations?: Array<{ __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, user?: { __typename?: 'User', id: string } | null } | null };
+
+export type FixResearchDiagramMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  error: Scalars['String']['input'];
+}>;
+
+
+export type FixResearchDiagramMutation = { __typename?: 'RootMutationType', fixResearchDiagram?: { __typename?: 'InfraResearch', id: string, prompt?: string | null, status?: InfraResearchStatus | null, diagram?: string | null, insertedAt?: string | null, updatedAt?: string | null, analysis?: { __typename?: 'InfraResearchAnalysis', notes?: Array<string | null> | null, summary?: string | null } | null, threads?: Array<{ __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null, associations?: Array<{ __typename?: 'InfraResearchAssociation', id: string, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, user?: { __typename?: 'User', id: string } | null } | null };
 
 export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null };
 
@@ -15938,6 +16222,10 @@ export const AgentRunFragmentDoc = gql`
     analysis
     bullets
   }
+  podReference {
+    name
+    namespace
+  }
 }
     ${AgentRunTinyFragmentDoc}
 ${AgentMessageFragmentDoc}`;
@@ -16532,6 +16820,59 @@ export const AiDeltaFragmentDoc = gql`
   }
 }
     `;
+export const InfraResearchAnalysisFragmentDoc = gql`
+    fragment InfraResearchAnalysis on InfraResearchAnalysis {
+  notes
+  summary
+}
+    `;
+export const StackMinimalFragmentDoc = gql`
+    fragment StackMinimal on InfrastructureStack {
+  id
+  name
+  type
+  status
+  insertedAt
+  updatedAt
+  deletedAt
+}
+    `;
+export const InfraResearchAssociationFragmentDoc = gql`
+    fragment InfraResearchAssociation on InfraResearchAssociation {
+  id
+  stack {
+    ...StackMinimal
+  }
+  service {
+    ...ServiceDeploymentTiny
+  }
+}
+    ${StackMinimalFragmentDoc}
+${ServiceDeploymentTinyFragmentDoc}`;
+export const InfraResearchFragmentDoc = gql`
+    fragment InfraResearch on InfraResearch {
+  id
+  prompt
+  status
+  diagram
+  analysis {
+    ...InfraResearchAnalysis
+  }
+  threads {
+    ...ChatThreadTiny
+  }
+  associations {
+    ...InfraResearchAssociation
+  }
+  user {
+    id
+  }
+  insertedAt
+  updatedAt
+}
+    ${InfraResearchAnalysisFragmentDoc}
+${ChatThreadTinyFragmentDoc}
+${InfraResearchAssociationFragmentDoc}`;
 export const ClusterInsightComponentFragmentDoc = gql`
     fragment ClusterInsightComponent on ClusterInsightComponent {
   id
@@ -19308,17 +19649,6 @@ export const ServiceDependencyFragmentDoc = gql`
   updatedAt
 }
     `;
-export const StackMinimalFragmentDoc = gql`
-    fragment StackMinimal on InfrastructureStack {
-  id
-  name
-  type
-  status
-  insertedAt
-  updatedAt
-  deletedAt
-}
-    `;
 export const ClusterScalingRecommendationFragmentDoc = gql`
     fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
   id
@@ -20304,6 +20634,50 @@ export type AgentRunQueryHookResult = ReturnType<typeof useAgentRunQuery>;
 export type AgentRunLazyQueryHookResult = ReturnType<typeof useAgentRunLazyQuery>;
 export type AgentRunSuspenseQueryHookResult = ReturnType<typeof useAgentRunSuspenseQuery>;
 export type AgentRunQueryResult = Apollo.QueryResult<AgentRunQuery, AgentRunQueryVariables>;
+export const AgentRunPodDocument = gql`
+    query AgentRunPod($id: ID!) {
+  agentRun(id: $id) {
+    id
+    prompt
+    pod {
+      ...Pod
+    }
+  }
+}
+    ${PodFragmentDoc}`;
+
+/**
+ * __useAgentRunPodQuery__
+ *
+ * To run a query within a React component, call `useAgentRunPodQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunPodQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunPodQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAgentRunPodQuery(baseOptions: Apollo.QueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+      }
+export function useAgentRunPodLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+        }
+export function useAgentRunPodSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunPodQuery, AgentRunPodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunPodQuery, AgentRunPodQueryVariables>(AgentRunPodDocument, options);
+        }
+export type AgentRunPodQueryHookResult = ReturnType<typeof useAgentRunPodQuery>;
+export type AgentRunPodLazyQueryHookResult = ReturnType<typeof useAgentRunPodLazyQuery>;
+export type AgentRunPodSuspenseQueryHookResult = ReturnType<typeof useAgentRunPodSuspenseQuery>;
+export type AgentRunPodQueryResult = Apollo.QueryResult<AgentRunPodQuery, AgentRunPodQueryVariables>;
 export const AgentRuntimesDocument = gql`
     query AgentRuntimes($after: String, $first: Int = 100) {
   agentRuntimes(after: $after, first: $first) {
@@ -21234,6 +21608,164 @@ export function useAiChatStreamSubscription(baseOptions?: Apollo.SubscriptionHoo
       }
 export type AiChatStreamSubscriptionHookResult = ReturnType<typeof useAiChatStreamSubscription>;
 export type AiChatStreamSubscriptionResult = Apollo.SubscriptionResult<AiChatStreamSubscription>;
+export const InfraResearchDocument = gql`
+    query InfraResearch($id: ID!) {
+  infraResearch(id: $id) {
+    ...InfraResearch
+  }
+}
+    ${InfraResearchFragmentDoc}`;
+
+/**
+ * __useInfraResearchQuery__
+ *
+ * To run a query within a React component, call `useInfraResearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInfraResearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInfraResearchQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useInfraResearchQuery(baseOptions: Apollo.QueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+      }
+export function useInfraResearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+        }
+export function useInfraResearchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InfraResearchQuery, InfraResearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InfraResearchQuery, InfraResearchQueryVariables>(InfraResearchDocument, options);
+        }
+export type InfraResearchQueryHookResult = ReturnType<typeof useInfraResearchQuery>;
+export type InfraResearchLazyQueryHookResult = ReturnType<typeof useInfraResearchLazyQuery>;
+export type InfraResearchSuspenseQueryHookResult = ReturnType<typeof useInfraResearchSuspenseQuery>;
+export type InfraResearchQueryResult = Apollo.QueryResult<InfraResearchQuery, InfraResearchQueryVariables>;
+export const InfraResearchesDocument = gql`
+    query InfraResearches($first: Int = 100, $last: Int, $after: String, $before: String) {
+  infraResearches(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...InfraResearch
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${InfraResearchFragmentDoc}`;
+
+/**
+ * __useInfraResearchesQuery__
+ *
+ * To run a query within a React component, call `useInfraResearchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInfraResearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInfraResearchesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useInfraResearchesQuery(baseOptions?: Apollo.QueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+      }
+export function useInfraResearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+        }
+export function useInfraResearchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InfraResearchesQuery, InfraResearchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<InfraResearchesQuery, InfraResearchesQueryVariables>(InfraResearchesDocument, options);
+        }
+export type InfraResearchesQueryHookResult = ReturnType<typeof useInfraResearchesQuery>;
+export type InfraResearchesLazyQueryHookResult = ReturnType<typeof useInfraResearchesLazyQuery>;
+export type InfraResearchesSuspenseQueryHookResult = ReturnType<typeof useInfraResearchesSuspenseQuery>;
+export type InfraResearchesQueryResult = Apollo.QueryResult<InfraResearchesQuery, InfraResearchesQueryVariables>;
+export const CreateInfraResearchDocument = gql`
+    mutation CreateInfraResearch($attributes: InfraResearchAttributes!) {
+  createInfraResearch(attributes: $attributes) {
+    ...InfraResearch
+  }
+}
+    ${InfraResearchFragmentDoc}`;
+export type CreateInfraResearchMutationFn = Apollo.MutationFunction<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>;
+
+/**
+ * __useCreateInfraResearchMutation__
+ *
+ * To run a mutation, you first call `useCreateInfraResearchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateInfraResearchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createInfraResearchMutation, { data, loading, error }] = useCreateInfraResearchMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateInfraResearchMutation(baseOptions?: Apollo.MutationHookOptions<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>(CreateInfraResearchDocument, options);
+      }
+export type CreateInfraResearchMutationHookResult = ReturnType<typeof useCreateInfraResearchMutation>;
+export type CreateInfraResearchMutationResult = Apollo.MutationResult<CreateInfraResearchMutation>;
+export type CreateInfraResearchMutationOptions = Apollo.BaseMutationOptions<CreateInfraResearchMutation, CreateInfraResearchMutationVariables>;
+export const FixResearchDiagramDocument = gql`
+    mutation FixResearchDiagram($id: ID!, $error: String!) {
+  fixResearchDiagram(id: $id, error: $error) {
+    ...InfraResearch
+  }
+}
+    ${InfraResearchFragmentDoc}`;
+export type FixResearchDiagramMutationFn = Apollo.MutationFunction<FixResearchDiagramMutation, FixResearchDiagramMutationVariables>;
+
+/**
+ * __useFixResearchDiagramMutation__
+ *
+ * To run a mutation, you first call `useFixResearchDiagramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFixResearchDiagramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [fixResearchDiagramMutation, { data, loading, error }] = useFixResearchDiagramMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      error: // value for 'error'
+ *   },
+ * });
+ */
+export function useFixResearchDiagramMutation(baseOptions?: Apollo.MutationHookOptions<FixResearchDiagramMutation, FixResearchDiagramMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FixResearchDiagramMutation, FixResearchDiagramMutationVariables>(FixResearchDiagramDocument, options);
+      }
+export type FixResearchDiagramMutationHookResult = ReturnType<typeof useFixResearchDiagramMutation>;
+export type FixResearchDiagramMutationResult = Apollo.MutationResult<FixResearchDiagramMutation>;
+export type FixResearchDiagramMutationOptions = Apollo.BaseMutationOptions<FixResearchDiagramMutation, FixResearchDiagramMutationVariables>;
 export const AiInsightDocument = gql`
     query AiInsight($id: ID!) {
   aiInsight(id: $id) {
@@ -34166,6 +34698,7 @@ export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
     AgentRun: 'AgentRun',
+    AgentRunPod: 'AgentRunPod',
     AgentRuntimes: 'AgentRuntimes',
     AgentRuntime: 'AgentRuntime',
     AgentRunPodLogs: 'AgentRunPodLogs',
@@ -34175,6 +34708,8 @@ export const namedOperations = {
     ChatThreadMessages: 'ChatThreadMessages',
     AgentSessions: 'AgentSessions',
     CloudConnections: 'CloudConnections',
+    InfraResearch: 'InfraResearch',
+    InfraResearches: 'InfraResearches',
     AiInsight: 'AiInsight',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
@@ -34374,6 +34909,8 @@ export const namedOperations = {
     CloneChatThread: 'CloneChatThread',
     AddChatContext: 'AddChatContext',
     CreateAgentSession: 'CreateAgentSession',
+    CreateInfraResearch: 'CreateInfraResearch',
+    FixResearchDiagram: 'FixResearchDiagram',
     AiFixPr: 'AiFixPr',
     RefreshInsight: 'RefreshInsight',
     UpsertMcpServer: 'UpsertMcpServer',
@@ -34523,6 +35060,9 @@ export const namedOperations = {
     ServiceDeploymentChat: 'ServiceDeploymentChat',
     StackChat: 'StackChat',
     AiDelta: 'AiDelta',
+    InfraResearch: 'InfraResearch',
+    InfraResearchAnalysis: 'InfraResearchAnalysis',
+    InfraResearchAssociation: 'InfraResearchAssociation',
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
     AiInsightContext: 'AiInsightContext',

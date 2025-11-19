@@ -19,6 +19,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -129,13 +130,15 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 }
 
 func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (pra *console.PrAutomationFragment, sha string, result *ctrl.Result, err error) {
-	exists, err := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
-	if err != nil {
+	pra, err = in.ConsoleClient.GetPrAutomationByName(ctx, prAutomation.ConsoleName())
+	if err != nil && !errors.IsNotFound(err) {
 		return pra, sha, nil, err
 	}
 
-	if exists && !prAutomation.Status.HasID() {
+	if pra != nil && !prAutomation.Status.HasID() && !prAutomation.Spec.Reconciliation.DriftDetect() {
 		return pra, sha, nil, err
+	} else if pra != nil {
+		prAutomation.Status.ID = lo.ToPtr(pra.ID)
 	}
 
 	attributes, result, err := in.Attributes(ctx, prAutomation)
@@ -150,14 +153,13 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	}
 
 	// Update only if PrAutomation has changed
-	if prAutomation.Status.SHA != nil && *prAutomation.Status.SHA != sha && exists {
+	if prAutomation.Status.HasID() && prAutomation.Status.SHA != nil && *prAutomation.Status.SHA != sha {
 		pra, err = in.ConsoleClient.UpdatePrAutomation(ctx, prAutomation.Status.GetID(), *attributes)
 		return pra, sha, nil, err
 	}
 
 	// Read the PrAutomation from Console API if it already exists
-	if exists {
-		pra, err = in.ConsoleClient.GetPrAutomation(ctx, prAutomation.Status.GetID())
+	if pra != nil {
 		return pra, sha, nil, err
 	}
 

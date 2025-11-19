@@ -3014,8 +3014,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this gate. |  | Required: \{\} <br />Type: string <br /> |
-| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB] <br />Required: \{\} <br /> |
+| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion).<br />- SENTINEL (runs a Plural Sentinel before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB SENTINEL] <br />Required: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef specifies the target cluster where this gate will execute. |  | Optional: \{\} <br /> |
+| `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef specifies the sentinel to execute for the SENTINEL gate. |  | Optional: \{\} <br /> |
 | `spec` _[GateSpec](#gatespec)_ | Spec contains detailed configuration for complex gate types like JOB gates. |  | Optional: \{\} <br /> |
 
 
@@ -3346,6 +3347,7 @@ _Appears in:_
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
 
 #### PrAutomationTemplate
@@ -3859,6 +3861,23 @@ _Appears in:_
 | `integrationTest` _[SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)_ | the integration test configuration to use for this check |  |  |
 
 
+#### SentinelCheckGotestsumConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `p` _string_ | the value of the p flag for gotestsum |  | Optional: \{\} <br /> |
+| `parallel` _string_ | the value of the parallel flag for gotestsum |  | Optional: \{\} <br /> |
+
+
 #### SentinelCheckIntegrationTestConfiguration
 
 
@@ -3874,6 +3893,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br />Required: \{\} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 

@@ -116,3 +116,44 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
   end
   def resource(_), do: :ok
 end
+
+defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PrAutomationCreated, Console.PubSub.PrAutomationUpdated] do
+  alias Console.Schema.PrAutomation
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %PrAutomation{} = pr}) do
+    %Indexable{data: PrAutomation.Mini.new(pr), filters: [pr_automation_id: pr.id]}
+  end
+  def resource(_), do: :ok
+end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.PrAutomationDeleted do
+  alias Console.Schema.PrAutomation
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %PrAutomation{} = pr}) do
+    %Indexable{delete: true, filters: [pr_automation_id: pr.id]}
+  end
+  def resource(_), do: :ok
+end
+
+defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.CatalogCreated, Console.PubSub.CatalogUpdated] do
+  alias Console.Schema.Catalog
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %Catalog{} = catalog}) do
+    %Indexable{data: Catalog.Mini.new(catalog), filters: [catalog_id: catalog.id]}
+  end
+  def resource(_), do: :ok
+end
+
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.CatalogDeleted do
+  alias Console.Schema.Catalog
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %Catalog{} = catalog}) do
+    %Indexable{delete: true, filters: [catalog_id: catalog.id]}
+  end
+  def resource(_), do: :ok
+end

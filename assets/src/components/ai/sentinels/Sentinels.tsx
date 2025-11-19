@@ -8,12 +8,12 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
-import { Row } from '@tanstack/react-table'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { capitalize } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import {
   SentinelFragment,
@@ -26,12 +26,10 @@ import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { sentinelsCols } from './SentinelsTableCols.tsx'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 
 type StatusFilterKey = 'All' | SentinelRunStatus
 
 export function Sentinels() {
-  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const [filterString, setFilterString] = useState('')
   const [statusFilterKey, setStatusFilterKey] = useState<StatusFilterKey>('All')
@@ -72,7 +70,7 @@ export function Sentinels() {
         first="Registered sentinels"
         firstPartialType="body2Bold"
         firstColor="text"
-        second="AI-powered sentinel monitoring for your Kubernetes clusters."
+        second="AI-powered integration testing for your Kubernetes clusters."
         secondPartialType="body2"
         secondColor="text-light"
       />
@@ -119,9 +117,9 @@ export function Sentinels() {
         loading={!data && loading}
         data={sentinels}
         columns={sentinelsCols}
-        onRowClick={(_e, { original }: Row<SentinelFragment>) => {
-          if (original.id) navigate(original.id)
-        }}
+        getRowLink={({ original }) => (
+          <Link to={`${(original as SentinelFragment).id}`} />
+        )}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}

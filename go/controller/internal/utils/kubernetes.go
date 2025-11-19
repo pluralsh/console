@@ -155,6 +155,15 @@ func GetCluster(ctx context.Context, client ctrlruntimeclient.Client, ref *corev
 	return cluster, nil
 }
 
+func GetSentinel(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.Sentinel, error) {
+	sentinel := &v1alpha1.Sentinel{}
+	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, sentinel); err != nil {
+		return nil, err
+	}
+
+	return sentinel, nil
+}
+
 func GetServiceDeployment(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.ServiceDeployment, error) {
 	service := &v1alpha1.ServiceDeployment{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, service); err != nil {

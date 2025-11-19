@@ -16,6 +16,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   Create a pull request for the given SCM, and return the title + url of the pr if successful
   """
   @callback create(pr :: PrAutomation.t, branch :: binary, context :: map) :: pr_resp
+  @callback create(pr :: PrAutomation.t, branch :: binary, context :: map, labels :: [binary]) :: pr_resp
 
   @doc """
   Creates a webhook using the credentials in this connection
@@ -70,7 +71,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   defp handle_create(%PrAutomation{} = pr, conn, branch, ctx) do
     impl = dispatcher(conn)
     with {:ok, _} <- push(conn, branch),
-      do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
+      do: impl.create(%{pr | branch: conn.branch}, branch, ctx, pr.labels || [])
   end
 
   def pr(%ScmConnection{} = conn, title, body, url, base, head) do

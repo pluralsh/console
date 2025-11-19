@@ -220,6 +220,13 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					Format: check.Configuration.IntegrationTest.Format,
 				}
 
+				if check.Configuration.IntegrationTest.Gotestsum != nil {
+					configuration.IntegrationTest.Gotestsum = &console.SentinelCheckGotestsumAttributes{
+						P:        check.Configuration.IntegrationTest.Gotestsum.P,
+						Parallel: check.Configuration.IntegrationTest.Gotestsum.Parallel,
+					}
+				}
+
 				if check.Configuration.IntegrationTest.Job != nil {
 					jobSpec, err := common.GateJobAttributes(check.Configuration.IntegrationTest.Job)
 					if err != nil {

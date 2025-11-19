@@ -57,7 +57,7 @@ export function ChatbotThreadMoreMenu() {
         break
       case MenuItemKey.History:
         closeMenu()
-        setCmdkOpen(true, CommandPaletteTab.History)
+        setCmdkOpen(true, CommandPaletteTab.Threads)
         break
       default:
         blockClose.current = false

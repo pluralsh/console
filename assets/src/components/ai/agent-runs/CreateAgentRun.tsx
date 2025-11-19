@@ -8,12 +8,14 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   AgentRunAttributes,
   AgentRunMode,
   useCreateAgentRunMutation,
 } from 'generated/graphql'
 import { FormEvent, useState } from 'react'
+import styled from 'styled-components'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 
 export function CreateAgentRunButton() {
@@ -50,8 +52,8 @@ function CreateAgentRunModal({
 
   const allowSubmit = !!runtimeId && !!form.prompt && !!form.repository
 
-  const onSubmit = (e: FormEvent<HTMLDivElement>) => {
-    e.preventDefault()
+  const onSubmit = (e?: FormEvent<HTMLDivElement>) => {
+    e?.preventDefault()
     if (allowSubmit)
       mutation({ variables: { runtimeId: runtimeId, attributes: form } })
   }
@@ -93,13 +95,7 @@ function CreateAgentRunModal({
             placeholder="Select a runtime"
           />
         </FormField>
-        <FormField label="Prompt">
-          <Input
-            value={form.prompt}
-            onChange={(e) => setForm({ ...form, prompt: e.target.value })}
-          />
-        </FormField>
-        <FormField label="Repository">
+        <FormField label="Repository URL">
           <Input
             value={form.repository}
             onChange={(e) => setForm({ ...form, repository: e.target.value })}
@@ -120,7 +116,25 @@ function CreateAgentRunModal({
             ))}
           </Select>
         </FormField>
+        <FormField label="Prompt">
+          <PromptInputSC
+            initialValue={form.prompt}
+            setValue={(value) => setForm({ ...form, prompt: value })}
+            placeholder="Enter a prompt"
+          />
+        </FormField>
       </Flex>
     </Modal>
   )
 }
+
+export const PromptInputSC = styled(EditableDiv)(({ theme }) => ({
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  backgroundColor: theme.colors['fill-two'],
+  '&:focus': {
+    border: theme.borders['outline-focused'],
+    backgroundColor: theme.colors['fill-two'],
+  },
+}))

@@ -1,7 +1,7 @@
-import { sentryVitePlugin } from '@sentry/vite-plugin'
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
@@ -25,11 +25,13 @@ export default defineConfig({
     }),
     tsconfigPaths({ loose: true }),
     pluginRewriteAll(), // Fix 404 error for urls with dots in their path
-    sentryVitePlugin({
-      org: 'plural-labs',
-      project: 'console-frontend',
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-    }),
+    // this was very memory intensive (from source maps) and ultimately not that useful
+    // could consider reenabling in the future if we rework DS bundling/publishing
+    // sentryVitePlugin({
+    //   org: 'plural-labs',
+    //   project: 'console-frontend',
+    //   authToken: process.env.SENTRY_AUTH_TOKEN,
+    // }),
   ],
   server: {
     port: 3000,
@@ -51,26 +53,21 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         manualChunks(id: string) {
           if (id.includes('/src/generated')) return 'generated'
-          if (id.includes('@pluralsh/design-system')) return 'design-system'
+          if (id.includes('elkjs')) return 'elkjs'
           if (id.includes('lodash')) return 'lodash'
           if (id.includes('apollo')) return 'apollo'
-          if (id.includes('elkjs')) return 'elkjs'
+          if (id.includes('design-system/src')) return 'design-system'
         },
       },
     },
   },
   resolve: {
-    preserveSymlinks: true,
-    dedupe: [
-      'styled-components',
-      'react',
-      'react-dom',
-      'react-transition-group',
-    ],
+    alias: {
+      '@pluralsh/design-system': resolve(__dirname, './design-system/src'),
+    },
   },
 })

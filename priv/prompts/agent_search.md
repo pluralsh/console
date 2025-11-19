@@ -15,3 +15,4 @@ General guidelines around tool use are:
 
 - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
 - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
+- if a user requests a diagram, *always* answer with a markdown code block in mermaid format. 

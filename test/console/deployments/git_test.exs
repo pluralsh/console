@@ -252,6 +252,8 @@ defmodule Console.Deployments.GitTest do
       assert pr.connection_id == conn.id
       assert pr.repository_id == git.id
       assert pr.message == "pr message"
+
+      assert_receive {:event, %PubSub.PrAutomationCreated{item: ^pr}}
     end
 
     test "nonadmins cannot create" do
@@ -273,6 +275,8 @@ defmodule Console.Deployments.GitTest do
 
       assert up.id == pr.id
       assert up.name == "new name"
+
+      assert_receive {:event, %PubSub.PrAutomationUpdated{item: ^up}}
     end
 
     test "nonadmins cannot update" do
@@ -290,6 +294,8 @@ defmodule Console.Deployments.GitTest do
 
       assert del.id == pr.id
       refute refetch(del)
+
+      assert_receive {:event, %PubSub.PrAutomationDeleted{item: ^del}}
     end
 
     test "nonadmins cannot delete" do
@@ -709,6 +715,8 @@ defmodule Console.Deployments.GitTest do
       assert catalog.name == "catalog"
       assert catalog.author == "Plural"
       assert catalog.project_id == Settings.default_project!().id
+
+      assert_receive {:event, %PubSub.CatalogCreated{item: ^catalog}}
     end
 
     test "it can update an existing catalog record" do
@@ -755,6 +763,8 @@ defmodule Console.Deployments.GitTest do
 
       assert deleted.id == cat.id
       refute refetch(cat)
+
+      assert_receive {:event, %PubSub.CatalogDeleted{item: ^deleted}}
     end
 
     test "randos cannot delete" do

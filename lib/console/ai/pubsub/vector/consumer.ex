@@ -15,25 +15,25 @@ defmodule Console.AI.PubSub.Vector.Consumer do
     end
   end
 
-  defp insert(l) when is_list(l), do: Enum.each(l, &insert(&1))
-  defp insert(%Indexable{data: resources} = indexable) when is_list(resources) do
+  def insert(l) when is_list(l), do: Enum.each(l, &insert(&1))
+  def insert(%Indexable{data: resources} = indexable) when is_list(resources) do
     Console.throttle(resources, count: 10, pause: 200)
     |> Enum.each(&insert(%{indexable | data: &1}))
   end
 
-  defp insert(%Indexable{delete: true, force: true, filters: fs}), do: VectorStore.delete(filters: fs)
-  defp insert(%Indexable{delete: true, filters: fs}) do
+  def insert(%Indexable{delete: true, force: true, filters: fs}), do: VectorStore.delete(filters: fs)
+  def insert(%Indexable{delete: true, filters: fs}) do
     Console.debounce({:vectorizer, :erlang.phash2({fs, :delete})}, fn ->
       VectorStore.delete(filters: fs)
     end)
   end
 
-  defp insert(%Indexable{data: res, filters: fs, force: true}), do: VectorStore.insert(res, filters: fs)
-  defp insert(%Indexable{data: res, filters: fs}) do
+  def insert(%Indexable{data: res, filters: fs, force: true}), do: VectorStore.insert(res, filters: fs)
+  def insert(%Indexable{data: res, filters: fs}) do
     Console.debounce({:vectorizer, :erlang.phash2({res, fs})}, fn ->
       VectorStore.insert(res, filters: fs)
     end)
   end
 
-  defp insert(pass), do: pass
+  def insert(pass), do: pass
 end

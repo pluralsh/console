@@ -3,7 +3,13 @@ import { Callout, SemanticSpacingKey } from '@pluralsh/design-system'
 import { HTMLAttributes } from 'react'
 import { useTheme } from 'styled-components'
 
-export type GqlErrorType = boolean | string | ApolloError | null | undefined
+export type GqlErrorType =
+  | boolean
+  | string
+  | ApolloError
+  | null
+  | undefined
+  | Error
 
 export function GqlError({
   header,
@@ -28,7 +34,8 @@ export function GqlError({
         ? error
         : typeof error === 'boolean'
           ? ''
-          : error?.graphQLErrors?.[0]?.message ||
+          : (error instanceof ApolloError &&
+              error.graphQLErrors?.[0]?.message) ||
             error?.message ||
             'Error: check logs for more details'}
     </Callout>

@@ -119,6 +119,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       |> Repo.update()
     end)
     |> execute(extract: :run)
+    |> notify(:update)
   end
 
   defp rule_files(%SentinelRun{sentinel: %Sentinel{repository: %GitRepository{} = repo, git: git}}) do
@@ -147,4 +148,8 @@ defmodule Console.Deployments.Sentinel.Runner do
     do: Impl.Log.start(check, self(), rules)
   defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, _, rules),
     do: Impl.Kubernetes.start(check, self(), rules)
+
+  defp notify({:ok, %SentinelRun{} = run}, :update),
+    do: handle_notify(Console.PubSub.SentinelRunUpdated, run)
+  defp notify(pass, _), do: pass
 end

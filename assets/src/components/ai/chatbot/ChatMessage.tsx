@@ -49,6 +49,7 @@ export function ChatMessage({
   highlightToolContent,
   updatedAt,
   session,
+  isStreaming = false,
   ...props
 }: {
   id?: string
@@ -67,6 +68,7 @@ export function ChatMessage({
   highlightToolContent?: boolean
   updatedAt?: Nullable<string>
   session?: Nullable<AgentSessionFragment>
+  isStreaming?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
 
@@ -97,6 +99,7 @@ export function ChatMessage({
         highlightToolContent={highlightToolContent}
         prAutomation={prAutomation}
         session={session}
+        isStreaming={isStreaming}
       />
       {type !== ChatType.File && (
         <ChatMessageActions

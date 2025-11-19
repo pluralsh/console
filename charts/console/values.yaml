@@ -48,10 +48,32 @@ migrator:
   containerSecurityContext: ~
   tolerations: ~
 
-# console is used to configure any additional containers to add to the console. Standard kubernetes container configuration
+# console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  config:
+    # refreshTokenExpiry is used to configure the refresh token expiry time.  Use a duration string like ``7d``, ``1h`` etc to set the expiry,.
+    refreshTokenExpiry: 7d
+    # oidcSync is used to configure whether oidc group claims full sync or not in the db.  Use ``full`` to enable full sync.
+    oidcSync: upsert
+    # defaultProjectName is used to configure the default project name.
+    defaultProjectName: ~
+    # serviceAccountDomain is used to configure the service account domain.
+    serviceAccountDomain: ~
+    # deployOperatorUrl is used to configure the default deploy-operator git repository url, uses https://github.com/pluralsh/deployment-operator.git if not set.
+    deployOperatorUrl: ~  
+    # artifactsUrl is used to configure the default artifacts url, uses https://github.com/pluralsh/scaffolds.git if not set.
+    artifactsUrl: ~
+
   additionalContainers: ~
-  containerSecurityContext: ~
+  containerSecurityContext:
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: false
+    runAsNonRoot: false
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
   securityContext: ~
 
 # secrets is used to configure environment variables for the console, in secrets.yaml
@@ -583,7 +605,6 @@ dashboard:
     role: auth
     image:
       repository: docker.io/kubernetesui/dashboard-auth
-      tag: 1.2.4
     scaling:
       replicas: 1
       revisionHistoryLimit: 10
@@ -624,7 +645,6 @@ dashboard:
     role: web
     image:
       repository: docker.io/kubernetesui/dashboard-web
-      tag: 1.6.2
     scaling:
       replicas: 1
       revisionHistoryLimit: 10
@@ -686,7 +706,6 @@ dashboard:
     role: metrics-scraper
     image:
       repository: docker.io/kubernetesui/dashboard-metrics-scraper
-      tag: 1.2.2
     scaling:
       replicas: 1
       revisionHistoryLimit: 10

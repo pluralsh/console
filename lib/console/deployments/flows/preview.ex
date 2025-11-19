@@ -52,7 +52,7 @@ defmodule Console.Deployments.Flows.Preview do
 
   def sync_service(%Service{deleted_at: nil} = svc) do
     case Repo.preload(svc, [:preview_instance, :preview_templates]) do
-      %Service{preview_instance: %PreviewEnvironmentInstance{} = inst} ->
+      %Service{preview_instance: %PreviewEnvironmentInstance{status: %{comment_id: cid}} = inst} when is_binary(cid) ->
         post_comment(inst)
       %Service{preview_templates: [_ | _], id: id, updated_at: updated_at} ->
         if fresh?(updated_at) do
@@ -126,7 +126,9 @@ defmodule Console.Deployments.Flows.Preview do
     %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,
     %PullRequest{} = pr
   ) do
+    svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings, :imports])
     with {:ok, attrs} <- build_attributes(pr, tpl),
+         true <- Services.changed?(svc, attrs),
          {:ok, svc} <- Services.update_service(attrs, svc.id, bot()),
          _ <- notify({:ok, %{inst | service: svc}}, :update),
       do: {:ok, svc}

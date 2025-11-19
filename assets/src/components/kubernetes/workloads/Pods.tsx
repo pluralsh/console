@@ -1,7 +1,9 @@
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
+import { groupBy } from 'lodash'
 import { useMemo } from 'react'
+import { useTheme } from 'styled-components'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
@@ -16,6 +18,7 @@ import {
   getWorkloadsAbsPath,
   PODS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
+import { isNonNullable } from '../../../utils/isNonNullable.ts'
 
 import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
@@ -141,6 +144,63 @@ const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
   },
 })
 
+const colGPU = columnHelper.accessor((row) => row?.allocatedResources, {
+  id: 'gpu',
+  header: 'GPU',
+  meta: {
+    tooltip: (
+      <div style={{ width: 370 }}>
+        {`Allocated GPUs displayed in "requests / limits" format. Values are added
+        up from all containers that have them specified by the user.`}
+      </div>
+    ),
+  },
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const allocatedResources = getValue()
+    const types: Set<string> = new Set(
+      allocatedResources?.gpuRequests
+        ?.map((gpu) => gpu?.type)
+        .concat(allocatedResources?.gpuLimits?.map((gpu) => gpu?.type))
+        .filter(isNonNullable)
+    )
+
+    const requestsByType = groupBy(
+      allocatedResources?.gpuRequests,
+      (gpu) => gpu?.type
+    )
+
+    const limitsByType = groupBy(
+      allocatedResources?.gpuLimits,
+      (gpu) => gpu?.type
+    )
+
+    return types.size > 0 ? (
+      <Flex
+        gap="xsmall"
+        direction="column"
+      >
+        {types.values().map((type) => (
+          <UsageText>
+            <span>
+              {requestsByType[type]?.length ?? '-'} /{' '}
+              {limitsByType[type]?.length ?? '-'}
+            </span>
+            <Chip
+              size="small"
+              style={{ marginLeft: theme.spacing.small }}
+            >
+              {type}
+            </Chip>
+          </UsageText>
+        ))}
+      </Flex>
+    ) : (
+      '- / -'
+    )
+  },
+})
+
 export function usePodsColumns(): Array<object> {
   const { colName, colNamespace, colCreationTimestamp, colAction } =
     useDefaultColumns(columnHelper)
@@ -154,6 +214,7 @@ export function usePodsColumns(): Array<object> {
       colRestarts,
       colCpu,
       colMemory,
+      colGPU,
       colContainers,
       colCreationTimestamp,
       colAction,

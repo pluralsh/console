@@ -17,8 +17,6 @@ type RootQueryType {
 
   loginInfo(redirect: String): LoginInfo
 
-  me: User
-
   invite(id: String!): Invite
 
   groups(after: String, first: Int, before: String, last: Int, q: String): GroupConnection
@@ -44,6 +42,8 @@ type RootQueryType {
   refreshTokens(after: String, first: Int, before: String, last: Int): RefreshTokenConnection
 
   refresh(token: String!): User
+
+  me: User
 
   dashboards(repo: String!): [Dashboard]
 
@@ -158,6 +158,8 @@ type RootQueryType {
   catalog(id: ID, name: String): Catalog
 
   catalogs(after: String, first: Int, before: String, last: Int, projectId: ID): CatalogConnection
+
+  catalogSearch(q: String!): [CatalogSearchResult]
 
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
@@ -443,7 +445,7 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
-  agentRuntime(id: ID!): AgentRuntime
+  agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
 
@@ -517,6 +519,10 @@ type RootQueryType {
   aiPin(insightId: ID, threadId: ID): AiPin
 
   mcpToken: String
+
+  infraResearches(after: String, first: Int, before: String, last: Int): InfraResearchConnection
+
+  infraResearch(id: ID!): InfraResearch
 
   oidcLogin(challenge: String!): OidcStepResponse
 
@@ -1116,6 +1122,23 @@ type RootMutationType {
   "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
   createAgentSession(attributes: AgentSessionAttributes!): ChatThread
 
+  "Creates a new infrastructure research based on a prompt"
+  createInfraResearch(attributes: InfraResearchAttributes!): InfraResearch
+
+  "Updates an existing infrastructure research based on a prompt"
+  updateInfraResearch(id: ID!, attributes: InfraResearchUpdateAttributes!): InfraResearch
+
+  "Deletes an existing infrastructure research"
+  deleteInfraResearch(id: ID!): InfraResearch
+
+  "Fixes a broken mermaid diagram in an existing research"
+  fixResearchDiagram(
+    id: ID!
+
+    "mermaid compilation error"
+    error: String!
+  ): InfraResearch
+
   acceptLogin(challenge: String!): OauthResponse
 
   oauthConsent(challenge: String!, scopes: [String]): OauthResponse
@@ -1144,6 +1167,8 @@ type RootSubscriptionType {
   ): AiDelta
 
   agentMessageDelta(runId: ID!): AgentMessageDelta
+
+  agentRunDelta(id: ID!): AgentRunDelta
 }
 
 type OauthResponse {
@@ -1663,6 +1688,11 @@ type AgentMessageDelta {
   payload: AgentMessage
 }
 
+type AgentRunDelta {
+  delta: Delta
+  payload: AgentRun
+}
+
 enum SentinelCheckType {
   LOG
   KUBERNETES
@@ -1770,6 +1800,12 @@ input SentinelCheckKubernetesConfigurationAttributes {
 }
 
 input SentinelCheckIntegrationTestConfigurationAttributes {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRefAttributes
+
   "the job to run for this check"
   job: GateJobAttributes
 
@@ -1781,6 +1817,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the format of the job output"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumAttributes
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -1792,6 +1831,14 @@ input SentinelRunJobUpdateAttributes {
 
   "the output of the job"
   output: String
+}
+
+input SentinelCheckGotestsumAttributes {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type Sentinel {
@@ -1893,6 +1940,12 @@ type SentinelCheckKubernetesConfiguration {
 }
 
 type SentinelCheckIntegrationTestConfiguration {
+  "the repository to use for this check"
+  repositoryId: ID
+
+  "the git repository to use for this check"
+  git: GitRef
+
   "the job to run for this check"
   job: JobGateSpec
 
@@ -1904,6 +1957,17 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "the format of the job"
   format: SentinelRunJobFormat!
+
+  "the gotestsum configuration to use for this check"
+  gotestsum: SentinelCheckGotestsumConfiguration
+}
+
+type SentinelCheckGotestsumConfiguration {
+  "the value of the p flag for gotestsum"
+  p: String
+
+  "the value of the parallel flag for gotestsum"
+  parallel: String
 }
 
 type SentinelRun {
@@ -1979,6 +2043,12 @@ type SentinelRunJob {
   "the time the job completed"
   completedAt: DateTime
 
+  "the git repository to use for this job"
+  git: GitRef
+
+  "whether this job uses test code defined in git"
+  usesGit: Boolean
+
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
 
@@ -1987,6 +2057,9 @@ type SentinelRunJob {
 
   "the reference to the job that was run"
   reference: JobReference
+
+  "the git repository to use for this job"
+  repository: GitRepository
 
   "the cluster that the job was run on"
   cluster: Cluster
@@ -4470,6 +4543,7 @@ input VulnerabilityAttributes {
   installedVersion: String
   severity: VulnSeverity
   score: Float
+  repositoryUrl: String
   title: String
   description: String
   cvssSource: String
@@ -5053,6 +5127,7 @@ enum GateType {
   APPROVAL
   WINDOW
   JOB
+  SENTINEL
 }
 
 "the top level input object for creating\/deleting pipelines"
@@ -5105,6 +5180,9 @@ input PipelineGateAttributes {
 
   "a specification for more complex gate types"
   spec: GateSpecAttributes
+
+  "the id of the sentinel this gate will execute"
+  sentinelId: ID
 }
 
 "attributes needed to create a new pipeline context"
@@ -5349,6 +5427,12 @@ type PipelineGate {
 
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
+
+  "the sentinel this gate will execute"
+  sentinel: Sentinel
+
+  "the run that the sentinel executed last"
+  sentinelRun: SentinelRun
 
   "the edge this gate lives on"
   edge: PipelineStageEdge
@@ -8384,6 +8468,9 @@ input PrAutomationAttributes {
 
   deletes: PrAutomationDeleteSpecAttributes
 
+  "labels to apply to created prs"
+  labels: [String]
+
   "an icon url to use for this catalog"
   icon: String
 
@@ -8909,6 +8996,9 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "labels to apply to the created prs"
+  labels: [String]
+
   "a prefix to use for the branch name, will be appended with a random string for deduplication"
   branchPrefix: String
 
@@ -9313,6 +9403,41 @@ type Catalog {
   updatedAt: DateTime
 }
 
+type CatalogSearchResult {
+  catalog: CatalogSearchItem
+  prAutomation: PrAutomationSearchItem
+}
+
+type PrAutomationSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the description for this pr automation"
+  description: String
+
+  "an icon url to use for this pr automation"
+  icon: String
+
+  "a darkmode icon url to use for this pr automation"
+  darkIcon: String
+}
+
+type CatalogSearchItem {
+  id: ID!
+
+  name: String!
+
+  "the documentation for this pr automation"
+  documentation: String
+
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
+}
+
 "A governance controller is a mechanism to enforce a set of rules on a set of PRs"
 type PrGovernance {
   id: ID!
@@ -9401,6 +9526,14 @@ enum AgentSessionType {
   SEARCH
   MANIFESTS
   CHAT
+  RESEARCH
+}
+
+enum InfraResearchStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
 }
 
 "A role to pass to an LLM, modeled after OpenAI's chat api roles"
@@ -9483,6 +9616,19 @@ input AgentSessionAttributes {
 input ChatThreadSettingsAttributes {
   "controls whether this thread uses knowledge graph-basedmemory"
   memory: Boolean
+}
+
+"attributes to create a deep research of your infrastructure"
+input InfraResearchAttributes {
+  prompt: String
+}
+
+"attributes to update a deep research of your infrastructure"
+input InfraResearchUpdateAttributes {
+  diagram: String
+
+  "whether to publish this research"
+  published: Boolean
 }
 
 type Chat {
@@ -9750,6 +9896,81 @@ type ClusterInsightComponent {
   resource: KubernetesUnstructured
 }
 
+"A representation of an AI generated deep investigation of your infrastructure"
+type InfraResearch {
+  id: ID!
+
+  "the prompt used to create this research"
+  prompt: String
+
+  "the diagram of the infrastructure"
+  diagram: String
+
+  "whether this research is published"
+  published: Boolean
+
+  "the status of this research"
+  status: InfraResearchStatus
+
+  "the analysis of the infrastructure"
+  analysis: InfraResearchAnalysis
+
+  "the associations of this research"
+  associations: [InfraResearchAssociation]
+
+  "autonomous chat threads depicting the ai doing the research"
+  threads: [ChatThread]
+
+  user: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"Associations with services\/stacks and a research"
+type InfraResearchAssociation {
+  id: ID!
+  service: ServiceDeployment
+  stack: InfrastructureStack
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"Additional analysis attached to this research result"
+type InfraResearchAnalysis {
+  "a summary of the analysis"
+  summary: String
+
+  "any notes from the analysis, indicating unsolved questions"
+  notes: [String]
+
+  "a knowledge graph of the infrastructure"
+  graph: InfraResearchGraph
+}
+
+type InfraResearchGraph {
+  "the vertices of the graph"
+  vertices: [InfraResearchGraphVertex]
+
+  "the edges of the graph"
+  edges: [InfraResearchGraphEdge]
+}
+
+type InfraResearchGraphVertex {
+  identifier: String!
+  type: String!
+  description: String
+  annotations: Map
+}
+
+type InfraResearchGraphEdge {
+  from: String!
+  to: String!
+  type: String
+  description: String
+}
+
 type ToolDelta {
   id: ID
   name: String
@@ -9782,6 +10003,11 @@ type AiPinConnection {
 type AgentSessionConnection {
   pageInfo: PageInfo!
   edges: [AgentSessionEdge]
+}
+
+type InfraResearchConnection {
+  pageInfo: PageInfo!
+  edges: [InfraResearchEdge]
 }
 
 type Account {
@@ -11203,6 +11429,11 @@ type PodEdge {
 
 type AuditEdge {
   node: Audit
+  cursor: String
+}
+
+type InfraResearchEdge {
+  node: InfraResearch
   cursor: String
 }
 

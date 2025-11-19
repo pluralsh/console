@@ -95,8 +95,8 @@ export function ChatbotHeader() {
             clickable
             icon={<HistoryIcon />}
             type="tertiary"
-            tooltip="View chat history"
-            onClick={() => setCmdkOpen(true, CommandPaletteTab.History)}
+            tooltip="View chat threads"
+            onClick={() => setCmdkOpen(true, CommandPaletteTab.Threads)}
           />
           <ChatbotThreadMoreMenu />
           <IconFrame

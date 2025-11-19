@@ -5,8 +5,9 @@ import { Pod } from 'generated/graphql'
 
 import { useTheme } from 'styled-components'
 
-export function PodMetadata({ pod }: { pod: Pod }) {
+export function PodMetadata({ pod }: { pod: Nullable<Pod> }) {
   const theme = useTheme()
+  if (!pod) return null
   const { labels, annotations } = pod.metadata
 
   return (

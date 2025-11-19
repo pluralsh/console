@@ -9,10 +9,10 @@ dependencies:
     repository: https://pluralsh.github.io/module-library
     condition: test-base.enabled
   - name: controller
-    version: 0.0.153
+    version: 0.0.155
     repository: file://../../../charts/controller
   - name: kubernetes-dashboard
-    version: 7.13.0
+    version: 7.14.0
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled

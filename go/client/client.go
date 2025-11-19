@@ -10,6 +10,7 @@ import (
 
 type ConsoleClient interface {
 	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
+	GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
 	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
@@ -278,6 +279,7 @@ type ConsoleClient interface {
 	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, addons []*CloudAddonAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	GetUserTiny(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUserTiny, error)
+	Me(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*Me, error)
 	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
 	UpsertUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUser, error)
@@ -4774,9 +4776,10 @@ func (t *SentinelCheckConfigurationFragment) GetIntegrationTest() *SentinelCheck
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment struct {
-	Distro *ClusterDistro   "json:\"distro,omitempty\" graphql:\"distro\""
-	Tags   map[string]any   "json:\"tags,omitempty\" graphql:\"tags\""
-	Job    *JobSpecFragment "json:\"job,omitempty\" graphql:\"job\""
+	Distro    *ClusterDistro                                               "json:\"distro,omitempty\" graphql:\"distro\""
+	Tags      map[string]any                                               "json:\"tags,omitempty\" graphql:\"tags\""
+	Gotestsum *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum "json:\"gotestsum,omitempty\" graphql:\"gotestsum\""
+	Job       *JobSpecFragment                                             "json:\"job,omitempty\" graphql:\"job\""
 }
 
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetDistro() *ClusterDistro {
@@ -4790,6 +4793,12 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment) GetTags() map[string
 		t = &SentinelCheckIntegrationTestConfigurationFragment{}
 	}
 	return t.Tags
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment) GetGotestsum() *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment{}
+	}
+	return t.Gotestsum
 }
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetJob() *JobSpecFragment {
 	if t == nil {
@@ -8804,6 +8813,24 @@ func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelChe
 	return t.Value
 }
 
+type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
+}
+
 type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -8856,6 +8883,24 @@ func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_
 		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
 	}
 	return t.Value
+}
+
+type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
 }
 
 type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -8912,6 +8957,24 @@ func (t *SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFra
 	return t.Value
 }
 
+type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
+}
+
 type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -8946,6 +9009,24 @@ func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegra
 		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -18998,6 +19079,24 @@ func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 	return t.Value
 }
 
+type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
+}
+
 type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -19050,6 +19149,24 @@ func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
 	}
 	return t.Value
+}
+
+type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
 }
 
 type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19115,6 +19232,24 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
 	}
 	return t.Value
+}
+
+type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
 }
 
 type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -21334,6 +21469,31 @@ func (t *GetUserTiny_User) GetName() string {
 	return t.Name
 }
 
+type Me_Me struct {
+	ID    string "json:\"id\" graphql:\"id\""
+	Email string "json:\"email\" graphql:\"email\""
+	Name  string "json:\"name\" graphql:\"name\""
+}
+
+func (t *Me_Me) GetID() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.ID
+}
+func (t *Me_Me) GetEmail() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.Email
+}
+func (t *Me_Me) GetName() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.Name
+}
+
 type AddGroupMember_CreateGroupMember_GroupMemberFragment_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -21385,6 +21545,17 @@ type GetAgentRuntime struct {
 func (t *GetAgentRuntime) GetAgentRuntime() *AgentRuntimeFragment {
 	if t == nil {
 		t = &GetAgentRuntime{}
+	}
+	return t.AgentRuntime
+}
+
+type GetAgentRuntimeByName struct {
+	AgentRuntime *AgentRuntimeFragment "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
+}
+
+func (t *GetAgentRuntimeByName) GetAgentRuntime() *AgentRuntimeFragment {
+	if t == nil {
+		t = &GetAgentRuntimeByName{}
 	}
 	return t.AgentRuntime
 }
@@ -24337,6 +24508,17 @@ func (t *GetUserTiny) GetUser() *GetUserTiny_User {
 	return t.User
 }
 
+type Me struct {
+	Me *Me_Me "json:\"me,omitempty\" graphql:\"me\""
+}
+
+func (t *Me) GetMe() *Me_Me {
+	if t == nil {
+		t = &Me{}
+	}
+	return t.Me
+}
+
 type CreateUser struct {
 	CreateUser *UserFragment "json:\"createUser,omitempty\" graphql:\"createUser\""
 }
@@ -24475,6 +24657,77 @@ func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ..
 
 	var res GetAgentRuntime
 	if err := c.Client.Post(ctx, "GetAgentRuntime", GetAgentRuntimeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!) {
+	agentRuntime(name: $name) {
+		... AgentRuntimeFragment
+	}
+}
+fragment AgentRuntimeFragment on AgentRuntime {
+	id
+	name
+	type
+	aiProxy
+	cluster {
+		... TinyClusterFragment
+	}
+	createBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	deletedAt
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetAgentRuntimeByName
+	if err := c.Client.Post(ctx, "GetAgentRuntimeByName", GetAgentRuntimeByNameDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -39679,6 +39932,10 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	gotestsum {
+		p
+		parallel
+	}
 	job {
 		... JobSpecFragment
 	}
@@ -39818,6 +40075,10 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	gotestsum {
+		p
+		parallel
+	}
 	job {
 		... JobSpecFragment
 	}
@@ -39982,6 +40243,10 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	gotestsum {
+		p
+		parallel
+	}
 	job {
 		... JobSpecFragment
 	}
@@ -44225,6 +44490,30 @@ func (c *Client) GetUserTiny(ctx context.Context, email string, interceptors ...
 	return &res, nil
 }
 
+const MeDocument = `query Me {
+	me {
+		id
+		email
+		name
+	}
+}
+`
+
+func (c *Client) Me(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*Me, error) {
+	vars := map[string]any{}
+
+	var res Me
+	if err := c.Client.Post(ctx, "Me", MeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateUserDocument = `mutation CreateUser ($attributes: UserAttributes!) {
 	createUser(attributes: $attributes) {
 		... UserFragment
@@ -44434,6 +44723,7 @@ func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*V
 
 var DocumentOperationNames = map[string]string{
 	GetAgentRuntimeDocument:                           "GetAgentRuntime",
+	GetAgentRuntimeByNameDocument:                     "GetAgentRuntimeByName",
 	UpsertAgentRuntimeDocument:                        "UpsertAgentRuntime",
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
@@ -44702,6 +44992,7 @@ var DocumentOperationNames = map[string]string{
 	SaveUpgradeInsightsDocument:                       "SaveUpgradeInsights",
 	GetUserDocument:                                   "GetUser",
 	GetUserTinyDocument:                               "GetUserTiny",
+	MeDocument:                                        "Me",
 	CreateUserDocument:                                "CreateUser",
 	UpdateUserDocument:                                "UpdateUser",
 	UpsertUserDocument:                                "UpsertUser",

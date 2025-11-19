@@ -1,0 +1,71 @@
+fragment InfraResearch on InfraResearch {
+  id
+  prompt
+  status
+  diagram
+  analysis {
+    ...InfraResearchAnalysis
+  }
+  threads {
+    ...ChatThreadTiny
+  }
+  associations {
+    ...InfraResearchAssociation
+  }
+  user {
+    id
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment InfraResearchAnalysis on InfraResearchAnalysis {
+  notes
+  summary
+}
+
+fragment InfraResearchAssociation on InfraResearchAssociation {
+  id
+  stack {
+    ...StackMinimal
+  }
+  service {
+    ...ServiceDeploymentTiny
+  }
+}
+
+query InfraResearch($id: ID!) {
+  infraResearch(id: $id) {
+    ...InfraResearch
+  }
+}
+
+query InfraResearches(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  infraResearches(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...InfraResearch
+      }
+    }
+  }
+}
+
+mutation CreateInfraResearch($attributes: InfraResearchAttributes!) {
+  createInfraResearch(attributes: $attributes) {
+    ...InfraResearch
+  }
+}
+
+mutation FixResearchDiagram($id: ID!, $error: String!) {
+  fixResearchDiagram(id: $id, error: $error) {
+    ...InfraResearch
+  }
+}

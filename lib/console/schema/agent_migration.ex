@@ -22,7 +22,8 @@ defmodule Console.Schema.AgentMigration do
 
   def expired(query \\ __MODULE__) do
     expiry = Timex.now() |> Timex.shift(days: -1)
-    from(am in query, where: am.completed and am.inserted_at < ^expiry)
+    very_old = Timex.now() |> Timex.shift(days: -7)
+    from(am in query, where: (am.completed and am.inserted_at < ^expiry) or (am.inserted_at < ^very_old))
   end
 
   def incomplete(query \\ __MODULE__), do: from(am in query, where: not am.completed)

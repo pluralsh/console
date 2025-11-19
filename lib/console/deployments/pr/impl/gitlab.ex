@@ -18,7 +18,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def create(%PrAutomation{} = pr, branch, ctx) do
+  def create(%PrAutomation{} = pr, branch, ctx, _labels \\ []) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
       post(conn, "/api/v4/projects/#{uri_encode(pr.identifier)}/merge_requests", %{

@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "properties": {
+        "summary": {
+            "type": "string",
+            "description": "An at most three paragraph summary of the investigation, in markdown format."
+        },
+        "diagram": {
+            "type": "string",
+            "description": "An architecture diagram of the system, in mermaid format."
+        },
+        "notes": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "A note of things that are still unclear, at most two sentences"
+            }
+        }
+    },
+    "required": ["summary", "diagram"]
+}

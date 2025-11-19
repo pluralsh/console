@@ -5,12 +5,14 @@ defmodule Console.Deployments.Sentinels do
     User,
     Sentinel,
     Cluster,
+    GitRepository,
     SentinelRun,
     SentinelRunJob,
     Sentinel.SentinelCheck
   }
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Deployments.{Settings, Clusters}
+  alias Console.Deployments.Git.Discovery
 
   @type error :: Console.error
   @type sentinel_resp :: {:ok, Sentinel.t} | error
@@ -28,6 +30,12 @@ defmodule Console.Deployments.Sentinels do
 
   def get_sentinel_by_name(name), do: Repo.get_by(Sentinel, name: name)
   def get_sentinel_by_name!(name), do: Repo.get_by!(Sentinel, name: name)
+
+  @spec authorized_job(binary, Cluster.t) :: sentinel_run_job_resp
+  def authorized_job(id, %Cluster{} = cluster) do
+    get_sentinel_run_job!(id)
+    |> allow(cluster, :read)
+  end
 
   @doc """
   Creates a new sentinel, with inferred project id if necessary
@@ -89,6 +97,19 @@ defmodule Console.Deployments.Sentinels do
     |> execute(extract: :run)
   end
 
+
+  @doc """
+  Fetches a file handle to the tarball for a stack run
+  """
+  @spec tarstream(SentinelRunJob.t) :: {:ok, File.t} | error
+  def tarstream(%SentinelRunJob{} = run) do
+    case Repo.preload(run, [:repository]) do
+      %{repository: %GitRepository{} = repo, git: git} ->
+        Discovery.fetch(repo, git)
+      _ -> {:error, "could not resolve repository for run"}
+    end
+  end
+
   @spec spawn_jobs(SentinelRun.t, binary) :: {:ok, integer} | error
   def spawn_jobs(%SentinelRun{id: id, checks: [_ | _] = checks}, check_name) do
     with %SentinelCheck{
@@ -107,6 +128,8 @@ defmodule Console.Deployments.Sentinels do
           format: test.format,
           status: :pending,
           job: test.job,
+          git: test.git,
+          repository_id: test.repository_id,
         }) end)
 
         {count, _} = Repo.insert_all(SentinelRunJob, attrs)

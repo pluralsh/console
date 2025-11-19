@@ -57,6 +57,7 @@ type ChatMessageContentProps = {
   serverName?: Nullable<string>
   highlightToolContent?: boolean
   session?: Nullable<AgentSessionFragment>
+  isStreaming?: boolean
 }
 
 export function ChatMessageContent({
@@ -74,6 +75,7 @@ export function ChatMessageContent({
   serverName,
   highlightToolContent = true,
   session,
+  isStreaming = false,
 }: ChatMessageContentProps) {
   switch (type) {
     case ChatType.File:
@@ -120,7 +122,10 @@ export function ChatMessageContent({
     default:
       return (
         <DefaultWrapperSC $role={role ?? AiRole.User}>
-          <Markdown text={content ?? ''} />
+          <Markdown
+            text={content ?? ''}
+            isStreaming={isStreaming}
+          />
         </DefaultWrapperSC>
       )
   }

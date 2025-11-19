@@ -67,6 +67,7 @@ defmodule ConsoleWeb.Router do
         get "/digests", GitController, :digest
         get "/git/tarballs", GitController, :tarball
         get "/git/stacks/tarballs", GitController, :stack_tarball
+        get "/git/sentinels/tarballs", GitController, :sentinel_tarball
 
         post "/webhooks/:type/:id", WebhookController, :scm
 
@@ -92,6 +93,7 @@ defmodule ConsoleWeb.Router do
       get "/compliance/report/:name", ComplianceController, :report
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
+      get "/git/sentinels/tarballs", GitController, :sentinel_tarball
     end
 
     forward "/gql", Absinthe.Plug,

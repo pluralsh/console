@@ -37,6 +37,10 @@ fragment AgentRun on AgentRun {
     analysis
     bullets
   }
+  podReference {
+    name
+    namespace
+  }
 }
 
 fragment AgentRuntime on AgentRuntime {
@@ -117,6 +121,16 @@ query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
 query AgentRun($id: ID!) {
   agentRun(id: $id) {
     ...AgentRun
+  }
+}
+
+query AgentRunPod($id: ID!) {
+  agentRun(id: $id) {
+    id
+    prompt
+    pod {
+      ...Pod
+    }
   }
 }
 

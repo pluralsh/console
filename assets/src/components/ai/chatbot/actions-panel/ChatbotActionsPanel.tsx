@@ -296,7 +296,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   minHeight: CHATBOT_HEADER_HEIGHT,
 }))
 
-const ActionItemSC = styled.div(({ theme }) => ({
+export const ActionItemSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,

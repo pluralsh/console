@@ -211,6 +211,10 @@ type PrAutomationSpec struct {
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+
+	// Labels to apply to all created PRs from this pr automation
+	// +kubebuilder:validation:Optional
+	Labels []*string `json:"labels,omitempty"`
 }
 
 // PrAutomationDeleteConfiguration specifies files and folders to delete as part of the PR operation.

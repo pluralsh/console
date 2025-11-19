@@ -1,0 +1,78 @@
+{
+    "type": "object",
+    "properties": {
+        "vertices": {
+            "type": "array",
+            "description": "The vertices to add to the graph.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "description": "A unique identifier of the vertex, can be any string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of infrastructure resource represented by this vertex."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A description of the vertex."
+                    }
+                }
+            },
+            "required": ["id", "type", "description"]
+        },
+        "edges": {
+            "type": "array",
+            "description": "The edges to add to the graph.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "description": "The source vertex identifier."
+                    },
+                    "to": {
+                        "type": "string",
+                        "description": "The destination vertex identifier."
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of edge."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A description of the relationship represented by this edge."
+                    }
+                }
+            },
+            "required": ["from", "to", "type"]
+        },
+        "notes": {
+            "type": "array",
+            "description": "Notes to add to this graph to serve as memory for things still in progress",
+            "items": {
+                "type": "string",
+                "description": "A note to add to the graph."
+            }
+        },
+        "service_ids": {
+            "type": "array",
+            "description": "The service ids to add to the graph.  These should be valid UUIDv4 ids. Add to this list if you added a resource associated with the service with that ID.",
+            "items": {
+                "type": "string",
+                "description": "The id of the service."
+            }
+        },
+        "stack_ids": {
+            "type": "array",
+            "description": "The stack ids to add to the graph.  These should be valid UUIDv4 ids.  Add to this list if you added a resource associated with the stack with that ID.",
+            "items": {
+                "type": "string",
+                "description": "The id of the stack."
+            }
+        }
+    },
+    "required": ["vertices", "edges", "notes", "service_ids", "stack_ids"]
+}

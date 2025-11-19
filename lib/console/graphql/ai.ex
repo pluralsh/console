@@ -7,6 +7,7 @@ defmodule Console.GraphQl.AI do
   ecto_enum :chat_type, Console.Schema.Chat.Type
   ecto_enum :evidence_type, Console.Schema.AiInsightEvidence.Type
   ecto_enum :agent_session_type, Console.Schema.AgentSession.Type
+  ecto_enum :infra_research_status, Console.Schema.InfraResearch.Status
 
   @desc "A role to pass to an LLM, modeled after OpenAI's chat api roles"
   enum :ai_role do
@@ -64,6 +65,17 @@ defmodule Console.GraphQl.AI do
   @desc "the settings for an AI chat thread"
   input_object :chat_thread_settings_attributes do
     field :memory, :boolean, description: "controls whether this thread uses knowledge graph-basedmemory"
+  end
+
+  @desc "attributes to create a deep research of your infrastructure"
+  input_object :infra_research_attributes do
+    field :prompt, :string
+  end
+
+  @desc "attributes to update a deep research of your infrastructure"
+  input_object :infra_research_update_attributes do
+    field :diagram,   :string
+    field :published, :boolean, description: "whether to publish this research"
   end
 
   object :chat do
@@ -285,6 +297,60 @@ defmodule Console.GraphQl.AI do
     end
   end
 
+  @desc "A representation of an AI generated deep investigation of your infrastructure"
+  object :infra_research do
+    field :id,           non_null(:id)
+    field :prompt,       :string, description: "the prompt used to create this research"
+    field :diagram,      :string, description: "the diagram of the infrastructure"
+    field :published,    :boolean, description: "whether this research is published"
+    field :status,       :infra_research_status, description: "the status of this research"
+    field :analysis,     :infra_research_analysis, description: "the analysis of the infrastructure"
+    field :associations, list_of(:infra_research_association),
+      resolve: dataloader(AI),
+      description: "the associations of this research"
+    field :threads, list_of(:chat_thread),
+      resolve: dataloader(AI),
+      description: "autonomous chat threads depicting the ai doing the research"
+    field :user, :user, resolve: dataloader(User)
+
+    timestamps()
+  end
+
+  @desc "Associations with services/stacks and a research"
+  object :infra_research_association do
+    field :id,      non_null(:id)
+    field :service, :service_deployment, resolve: dataloader(Deployments)
+    field :stack,   :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "Additional analysis attached to this research result"
+  object :infra_research_analysis do
+    field :summary, :string, description: "a summary of the analysis"
+    field :notes,   list_of(:string), description: "any notes from the analysis, indicating unsolved questions"
+    field :graph,   :infra_research_graph, description: "a knowledge graph of the infrastructure"
+  end
+
+  object :infra_research_graph do
+    field :vertices, list_of(:infra_research_graph_vertex), description: "the vertices of the graph"
+    field :edges,    list_of(:infra_research_graph_edge), description: "the edges of the graph"
+  end
+
+  object :infra_research_graph_vertex do
+    field :identifier,  non_null(:string)
+    field :type,        non_null(:string)
+    field :description, :string
+    field :annotations, :map
+  end
+
+  object :infra_research_graph_edge do
+    field :from,        non_null(:string)
+    field :to,          non_null(:string)
+    field :type,        :string
+    field :description, :string
+  end
+
   object :tool_delta do
     field :id,        :id
     field :name,      :string
@@ -303,6 +369,7 @@ defmodule Console.GraphQl.AI do
   connection node_type: :chat_thread
   connection node_type: :ai_pin
   connection node_type: :agent_session
+  connection node_type: :infra_research
 
   object :ai_queries do
     field :ai_insight, :ai_insight do
@@ -387,6 +454,19 @@ defmodule Console.GraphQl.AI do
       middleware Authenticated
 
       resolve &AI.mcp_token/2
+    end
+
+    connection field :infra_researches, node_type: :infra_research do
+      middleware Authenticated
+
+      resolve &AI.list_researches/2
+    end
+
+    field :infra_research, :infra_research do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.resolve_research/2
     end
   end
 
@@ -543,6 +623,40 @@ defmodule Console.GraphQl.AI do
       arg :attributes, non_null(:agent_session_attributes)
 
       resolve &AI.create_agent_session/2
+    end
+
+    @desc "Creates a new infrastructure research based on a prompt"
+    field :create_infra_research, :infra_research do
+      middleware Authenticated
+      arg :attributes, non_null(:infra_research_attributes)
+
+      resolve &AI.create_research/2
+    end
+
+    @desc "Updates an existing infrastructure research based on a prompt"
+    field :update_infra_research, :infra_research do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:infra_research_update_attributes)
+
+      resolve &AI.update_research/2
+    end
+
+    @desc "Deletes an existing infrastructure research"
+    field :delete_infra_research, :infra_research do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.delete_research/2
+    end
+
+    @desc "Fixes a broken mermaid diagram in an existing research"
+    field :fix_research_diagram, :infra_research do
+      middleware Authenticated
+      arg :id,    non_null(:id)
+      arg :error, non_null(:string), description: "mermaid compilation error"
+
+      resolve &AI.fix_research_diagram/2
     end
   end
 

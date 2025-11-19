@@ -71,8 +71,8 @@ export default function CommandPalette() {
     () =>
       [
         {
-          path: CommandPaletteTab.History,
-          label: CommandPaletteTab.History,
+          path: CommandPaletteTab.Threads,
+          label: CommandPaletteTab.Threads,
           enabled: aiEnabled ?? false,
         },
         {
@@ -92,7 +92,7 @@ export default function CommandPalette() {
         e.currentTarget.scrollHeight - 100
       if (
         isNearBottom &&
-        tab === CommandPaletteTab.History &&
+        tab === CommandPaletteTab.Threads &&
         pageInfo?.hasNextPage
       ) {
         fetchNextPage()
@@ -111,7 +111,7 @@ export default function CommandPalette() {
           onHistoryValueChange={setHistoryValue}
           onCmdKClose={onCmdKClose}
           numItems={
-            tab === CommandPaletteTab.History ? history.length : commands.length
+            tab === CommandPaletteTab.Threads ? history.length : commands.length
           }
         />
         {directory.length > 1 && (
@@ -125,7 +125,7 @@ export default function CommandPalette() {
         )}
       </div>
       <Command.List onScroll={onScroll}>
-        {tab === CommandPaletteTab.History && (
+        {tab === CommandPaletteTab.Threads && (
           <CommandPaletteHistory
             history={history}
             loading={loading}
@@ -300,7 +300,7 @@ function CommandAdvancedInput({
     [numItems]
   )
 
-  return curTab === CommandPaletteTab.History ? (
+  return curTab === CommandPaletteTab.Threads ? (
     <ChatInput
       stateless
       enableExamplePrompts={false}

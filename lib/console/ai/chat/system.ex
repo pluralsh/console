@@ -2,7 +2,7 @@ defmodule Console.AI.Chat.System do
   @moduledoc """
   System prompt for the AI chat
   """
-  alias Console.Schema.{ChatThread, AgentSession}
+  alias Console.Schema.{ChatThread, AgentSession, AiInsight}
 
   @chat Console.priv_file!("prompts/chat.md")
   @agent_pre Console.priv_file!("prompts/agent_pre.md")
@@ -15,7 +15,12 @@ defmodule Console.AI.Chat.System do
   @code_commit Console.priv_file!("prompts/terraform_commit.md")
   @kubernetes_code_agent Console.priv_file!("prompts/kubernetes_agent.md")
   @kubernetes_code_pr_agent Console.priv_file!("prompts/kubernetes_pr.md")
+  @insight_chat Console.priv_file!("prompts/insight_chat.md")
+  @research Console.priv_file!("prompts/research.md")
 
+  def prompt(%ChatThread{research_id: id}) when is_binary(id), do: @research
+  def prompt(%ChatThread{insight: %AiInsight{text: t}}),
+    do: "#{@insight_chat}\n\nThis is the insight you will be working on: #{t}"
   def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p, service_id: id}}) when is_binary(id), do: "#{@kubernetes_code_pr_agent}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{type: :kubernetes, prompt: p}}) when is_binary(p), do: "#{@kubernetes_code_agent}\n\nThis is your task: #{p}"
   def prompt(%ChatThread{session: %AgentSession{type: :terraform, prompt: p, service_id: id, pull_request_id: pr_id}})

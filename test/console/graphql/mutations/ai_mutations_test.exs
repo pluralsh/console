@@ -276,4 +276,21 @@ defmodule Console.GraphQl.AIMutationsTest do
       """, %{"id" => insight.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "createInfraResearch" do
+    test "it can create a infra research" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"createInfraResearch" => research}}} = run_query("""
+        mutation Create($attributes: InfraResearchAttributes!) {
+          createInfraResearch(attributes: $attributes) { id prompt }
+        }
+      """, %{"attributes" => %{
+        "prompt" => "Give me a diagram of the grafana deployment"
+      }}, %{current_user: user})
+
+      assert research["id"]
+      assert research["prompt"] == "Give me a diagram of the grafana deployment"
+    end
+  end
 end

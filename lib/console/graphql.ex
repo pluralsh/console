@@ -62,6 +62,7 @@ defmodule Console.GraphQl do
   query do
     import_fields :configuration_queries
     import_fields :user_queries
+    import_fields :public_user_queries
     import_fields :observability_queries
     import_fields :kubernetes_queries
     import_fields :audit_queries

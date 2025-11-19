@@ -24,10 +24,16 @@ import {
   AI_AGENT_RUNS_ANALYSIS_REL_PATH,
   AI_AGENT_RUNS_LOGS_REL_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
+  AI_AGENT_RUNS_PROGRESS_REL_PATH,
   AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
+  AI_INFRA_RESEARCH_ABS_PATH,
+  AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
+  AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
+  AI_INFRA_RESEARCH_PARAM_ID,
+  AI_INFRA_RESEARCH_REL_PATH,
   AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
@@ -40,7 +46,13 @@ import {
   getSentinelRunAbsPath,
   getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
+import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
+import { InfraResearches } from 'components/ai/infra-research/InfraResearches.tsx'
+import { InfraResearch } from 'components/ai/infra-research/InfraResearch.tsx'
+import { InfraResearchAnalysis } from 'components/ai/infra-research/InfraResearchAnalysis.tsx'
+import { InfraResearchDiagram } from 'components/ai/infra-research/InfraResearchDiagram.tsx'
+import { InfraResearchThreads } from 'components/ai/infra-research/InfraResearchThreads.tsx'
 
 export const aiRoutes = [
   <Route
@@ -80,6 +92,36 @@ export const aiRoutes = [
       path={AI_SENTINELS_REL_PATH}
       element={<Sentinels />}
     />
+    <Route
+      path={AI_INFRA_RESEARCH_REL_PATH}
+      element={<InfraResearches />}
+    />
+  </Route>,
+  <Route
+    path={`${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}`}
+    element={<InfraResearch />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={AI_INFRA_RESEARCH_DIAGRAM_REL_PATH}
+        />
+      }
+    />
+    <Route
+      path={AI_INFRA_RESEARCH_DIAGRAM_REL_PATH}
+      element={<InfraResearchDiagram />}
+    />
+    <Route
+      path={AI_INFRA_RESEARCH_ANALYSIS_REL_PATH}
+      element={<InfraResearchAnalysis />}
+    />
+    <Route
+      path={AI_THREADS_REL_PATH}
+      element={<InfraResearchThreads />}
+    />
   </Route>,
   // other agent routes
   <Route
@@ -88,6 +130,15 @@ export const aiRoutes = [
   >
     <Route
       index
+      element={
+        <Navigate
+          replace
+          to={AI_AGENT_RUNS_PROGRESS_REL_PATH}
+        />
+      }
+    />
+    <Route
+      path={AI_AGENT_RUNS_PROGRESS_REL_PATH}
       element={<AgentRunMessages />}
     />
     <Route
@@ -102,6 +153,7 @@ export const aiRoutes = [
       path={AI_AGENT_RUNS_LOGS_REL_PATH}
       element={<AgentRunLogs />}
     />
+    {getPodDetailsRoutes('agent-run')}
   </Route>,
   // other sentinel routes
   <Route
