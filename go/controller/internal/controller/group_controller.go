@@ -6,7 +6,6 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -84,7 +83,7 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 	}
 	if exists {
 		utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return in.handleExistingProject(ctx, group)
+		return in.handleExistingGroup(ctx, group)
 	}
 
 	// Get group SHA that can be saved back in the status to check for changes
@@ -131,7 +130,7 @@ func (in *GroupReconciler) isAlreadyExists(ctx context.Context, group *v1alpha1.
 	return false, nil
 }
 
-func (in *GroupReconciler) handleExistingProject(ctx context.Context, group *v1alpha1.Group) (ctrl.Result, error) {
+func (in *GroupReconciler) handleExistingGroup(ctx context.Context, group *v1alpha1.Group) (ctrl.Result, error) {
 	exists, err := in.ConsoleClient.IsGroupExists(group.ConsoleName())
 	if err != nil {
 		return common.HandleRequeue(nil, err, group.SetCondition)
@@ -143,12 +142,12 @@ func (in *GroupReconciler) handleExistingProject(ctx context.Context, group *v1a
 		return common.Wait(), nil
 	}
 
-	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(group.ConsoleName()))
+	apiGroup, err := in.ConsoleClient.GetGroup(group.ConsoleName())
 	if err != nil {
 		return common.HandleRequeue(nil, err, group.SetCondition)
 	}
 
-	group.Status.ID = &apiProject.ID
+	group.Status.ID = &apiGroup.ID
 
 	utils.MarkCondition(group.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(group.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
