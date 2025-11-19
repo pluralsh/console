@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -23,17 +24,17 @@ import (
 var _ = Describe("Group Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			groupName = "test"
-			namespace = "default"
-			id        = "123"
+			groupName         = "test"
+			readonlyGroupName = "readonly-test"
+			readonlyGroupId   = "readonly-test-id"
+			namespace         = "default"
+			id                = "123"
 		)
 
 		ctx := context.Background()
 
-		typeNamespacedName := types.NamespacedName{
-			Name:      groupName,
-			Namespace: namespace,
-		}
+		typeNamespacedName := types.NamespacedName{Name: groupName, Namespace: namespace}
+		readonlyTypeNamespacedName := types.NamespacedName{Name: readonlyGroupName, Namespace: namespace}
 
 		BeforeAll(func() {
 			By("creating the custom group resource")
@@ -48,6 +49,19 @@ var _ = Describe("Group Controller", Ordered, func() {
 				},
 			}
 			Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
+
+			By("creating the custom group resource")
+			readonlyResource := &v1alpha1.Group{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      readonlyGroupName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.GroupSpec{
+					Name:        lo.ToPtr(readonlyGroupName),
+					Description: lo.ToPtr("Test readonly group"),
+				},
+			}
+			Expect(common.MaybeCreate(k8sClient, readonlyResource, nil)).To(Succeed())
 		})
 
 		AfterAll(func() {
@@ -152,6 +166,55 @@ var _ = Describe("Group Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 
 			Expect(err.Error()).To(Equal("groups.deployments.plural.sh \"test\" not found"))
+		})
+
+		It("should successfully reconcile readonly group", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("IsGroupExists", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("GetGroup", mock.Anything, mock.Anything, mock.Anything).Return(
+				&gqlclient.GroupFragment{ID: readonlyGroupId}, nil)
+
+			controllerReconciler := &controller.GroupReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: readonlyTypeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			group := &v1alpha1.Group{}
+			err = k8sClient.Get(ctx, readonlyTypeNamespacedName, group)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(group.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
+				ID: lo.ToPtr(readonlyGroupId),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
+						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.SynchronizedConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
+					},
+				},
+			})))
 		})
 
 	})
