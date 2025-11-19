@@ -86,6 +86,9 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 		return in.handleExistingGroup(ctx, group)
 	}
 
+	// Mark the resource as managed by this operator.
+	utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+
 	// Get group SHA that can be saved back in the status to check for changes
 	changed, sha, err := group.Diff(utils.HashObject)
 	if err != nil {
