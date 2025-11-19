@@ -21,18 +21,3 @@ func (c *client) GetUser(email string) (*console.UserFragment, error) {
 
 	return response.User, nil
 }
-
-func (c *client) GetGroup(name string) (*console.GroupFragment, error) {
-	response, err := c.consoleClient.GetGroup(c.ctx, name)
-	if internalerror.IsNotFound(err) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
-	}
-	if err == nil && (response == nil || response.Group == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
-	}
-	if response == nil {
-		return nil, err
-	}
-
-	return response.Group, nil
-}

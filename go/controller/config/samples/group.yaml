@@ -1,0 +1,23 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Group
+metadata:
+  name: test
+spec:
+  name: Test
+  description: Test group
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Group
+metadata:
+  name: global
+spec:
+  name: Global
+  description: Global test group
+  global: true
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Group
+metadata:
+  name: readonly
+spec:
+  name: developers

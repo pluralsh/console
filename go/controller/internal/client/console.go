@@ -50,6 +50,11 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) (bool, error)
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
+	GetGroupTiny(name string) (*console.GetGroupTiny_Group, error)
+	IsGroupExists(id string) (bool, error)
+	CreateGroup(ctx context.Context, attr console.GroupAttributes) (*console.GroupFragment, error)
+	UpdateGroup(ctx context.Context, id string, attr console.GroupAttributes) (*console.GroupFragment, error)
+	DeleteGroup(ctx context.Context, id string) error
 	GetServiceAccount(ctx context.Context, email string) (*console.UserFragment, error)
 	CreateServiceAccount(ctx context.Context, attributes console.ServiceAccountAttributes) (*console.UserFragment, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes console.ServiceAccountAttributes) (*console.UserFragment, error)
