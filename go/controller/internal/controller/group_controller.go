@@ -6,13 +6,14 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -75,6 +76,17 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 		return ctrl.Result{}, err
 	}
 
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := in.isAlreadyExists(ctx, group)
+	if err != nil {
+		utils.MarkCondition(group.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if exists {
+		utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		return in.handleExistingProject(ctx, group)
+	}
+
 	// Get group SHA that can be saved back in the status to check for changes
 	changed, sha, err := group.Diff(utils.HashObject)
 	if err != nil {
@@ -94,6 +106,52 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 
 	utils.MarkCondition(group.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(group.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+
+	return group.Spec.Reconciliation.Requeue(), nil
+}
+
+func (in *GroupReconciler) isAlreadyExists(ctx context.Context, group *v1alpha1.Group) (bool, error) {
+	if group.Status.HasReadonlyCondition() {
+		return group.Status.IsReadonly(), nil
+	}
+
+	_, err := in.ConsoleClient.GetGroup(group.ConsoleName())
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	if !group.Status.HasID() {
+		log.FromContext(ctx).Info("group already exists in the API, running in read-only mode")
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (in *GroupReconciler) handleExistingProject(ctx context.Context, group *v1alpha1.Group) (ctrl.Result, error) {
+	exists, err := in.ConsoleClient.IsGroupExists(group.ConsoleName())
+	if err != nil {
+		return common.HandleRequeue(nil, err, group.SetCondition)
+	}
+
+	if !exists {
+		group.Status.ID = nil
+		utils.MarkCondition(group.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		return common.Wait(), nil
+	}
+
+	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(group.ConsoleName()))
+	if err != nil {
+		return common.HandleRequeue(nil, err, group.SetCondition)
+	}
+
+	group.Status.ID = &apiProject.ID
+
+	utils.MarkCondition(group.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(group.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return group.Spec.Reconciliation.Requeue(), nil
 }
@@ -122,7 +180,7 @@ func (in *GroupReconciler) sync(ctx context.Context, group *v1alpha1.Group, chan
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (in *GroupReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	mgr.GetLogger().Info("Starting reconciler", "reconciler", "group_reconciler")
+	mgr.GetLogger().Info("starting reconciler", "reconciler", "group_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.FlowList))).
