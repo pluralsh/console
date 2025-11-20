@@ -78,6 +78,13 @@ type SentinelCheckIntegrationTestConfiguration struct {
 
 	// the cluster tags to select where to run this job
 	Tags map[string]string `json:"tags,omitempty"`
+
+	// RepositoryRef references a Git repository to use for this integration test.
+	// +kubebuilder:validation:Optional
+	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
+
+	// The git location to use for this integration test.
+	Git *GitRef `json:"git,omitempty"`
 }
 
 type SentinelCheckGotestsumConfiguration struct {
