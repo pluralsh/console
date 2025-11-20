@@ -96,6 +96,7 @@ spec:
                 - GKE
                 - RKE
                 - K3S
+                - OPENSHIFT
                 type: string
               interval:
                 description: |-
