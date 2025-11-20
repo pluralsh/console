@@ -1510,6 +1510,7 @@ _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
@@ -3896,6 +3897,8 @@ _Appears in:_
 | `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
