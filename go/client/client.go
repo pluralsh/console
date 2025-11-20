@@ -4584,6 +4584,7 @@ type SentinelRunJobFragment struct {
 	ID          string                            "json:\"id\" graphql:\"id\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
+	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
 	SentinelRun *SentinelRunFragment              "json:\"sentinelRun,omitempty\" graphql:\"sentinelRun\""
@@ -4607,6 +4608,12 @@ func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Format
+}
+func (t *SentinelRunJobFragment) GetUsesGit() *bool {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.UsesGit
 }
 func (t *SentinelRunJobFragment) GetJobSpec() *JobSpecFragment {
 	if t == nil {
@@ -39569,6 +39576,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -39658,6 +39666,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -39775,6 +39784,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
