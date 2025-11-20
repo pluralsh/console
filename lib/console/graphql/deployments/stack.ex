@@ -84,6 +84,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :crontab,      non_null(:string), description: "the crontab to use for spawning stack runs"
     field :auto_approve, :boolean, description: "whether you want to auto approve any changes spawned by the cron worker"
     field :overrides,    :stack_overrides_attributes, description: "configuration overrides for the cron run"
+    field :track_ref,    :string, description: "whether to track the stack's ref exactly on cron runs versus the last detected commit"
   end
 
   input_object :policy_engine_attributes do
@@ -268,6 +269,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :crontab, non_null(:string), description: "the crontab used to independently spawn runs for this stack"
     field :auto_approve, :boolean, description: "whether you want any cron-derived runs to automatically approve changes"
     field :overrides,    :stack_overrides, description: "configuration overrides for the cron run"
+    field :track_ref,    :string, description: "whether to track the stack's ref exactly on cron runs versus the last detected commit"
   end
 
   @desc "grab-bag of state configuration urls for supported tools"

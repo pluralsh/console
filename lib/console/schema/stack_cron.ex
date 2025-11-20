@@ -5,6 +5,7 @@ defmodule Console.Schema.StackCron do
   schema "stack_crons" do
     field :crontab,      :string
     field :auto_approve, :boolean
+    field :track_ref,    :string
     field :next_run_at,  :utc_datetime_usec
     field :last_run_at,  :utc_datetime_usec
 
@@ -25,7 +26,7 @@ defmodule Console.Schema.StackCron do
     from(c in query, order_by: ^order)
   end
 
-  @valid ~w(crontab last_run_at auto_approve stack_id)a
+  @valid ~w(crontab last_run_at auto_approve stack_id track_ref)a
 
   def changeset(model, attrs \\ %{}) do
     model
