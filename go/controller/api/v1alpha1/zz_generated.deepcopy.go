@@ -8088,7 +8088,7 @@ func (in *StackCron) DeepCopyInto(out *StackCron) {
 	}
 	if in.TrackRef != nil {
 		in, out := &in.TrackRef, &out.TrackRef
-		*out = new(string)
+		*out = new(bool)
 		**out = **in
 	}
 }

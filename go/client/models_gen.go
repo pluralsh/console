@@ -7284,7 +7284,7 @@ type StackCron struct {
 	// configuration overrides for the cron run
 	Overrides *StackOverrides `json:"overrides,omitempty"`
 	// whether to track the stack's ref exactly on cron runs versus the last detected commit
-	TrackRef *string `json:"trackRef,omitempty"`
+	TrackRef *bool `json:"trackRef,omitempty"`
 }
 
 type StackCronAttributes struct {
@@ -7295,7 +7295,7 @@ type StackCronAttributes struct {
 	// configuration overrides for the cron run
 	Overrides *StackOverridesAttributes `json:"overrides,omitempty"`
 	// whether to track the stack's ref exactly on cron runs versus the last detected commit
-	TrackRef *string `json:"trackRef,omitempty"`
+	TrackRef *bool `json:"trackRef,omitempty"`
 }
 
 type StackDefinition struct {

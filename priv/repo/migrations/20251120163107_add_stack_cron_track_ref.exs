@@ -3,7 +3,7 @@ defmodule Console.Repo.Migrations.AddStackCronTrackRef do
 
   def change do
     alter table(:stack_crons) do
-      add :track_ref, :string
+      add :track_ref, :boolean, default: false
     end
   end
 end

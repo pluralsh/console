@@ -5,7 +5,7 @@ defmodule Console.Schema.StackCron do
   schema "stack_crons" do
     field :crontab,      :string
     field :auto_approve, :boolean
-    field :track_ref,    :string
+    field :track_ref,    :boolean
     field :next_run_at,  :utc_datetime_usec
     field :last_run_at,  :utc_datetime_usec
 

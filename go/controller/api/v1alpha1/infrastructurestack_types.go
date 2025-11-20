@@ -288,7 +288,7 @@ type StackCron struct {
 
 	// Whether to track the stack's ref exactly on cron runs versus the last detected commit. This can theoretically cause drift between code if referenced via symlinks.
 	// +kubebuilder:validation:Optional
-	TrackRef *string `json:"trackRef,omitempty"`
+	TrackRef *bool `json:"trackRef,omitempty"`
 }
 
 type StackOverrides struct {

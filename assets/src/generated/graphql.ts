@@ -11765,7 +11765,7 @@ export type StackCron = {
   /** configuration overrides for the cron run */
   overrides?: Maybe<StackOverrides>;
   /** whether to track the stack's ref exactly on cron runs versus the last detected commit */
-  trackRef?: Maybe<Scalars['String']['output']>;
+  trackRef?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type StackCronAttributes = {
@@ -11776,7 +11776,7 @@ export type StackCronAttributes = {
   /** configuration overrides for the cron run */
   overrides?: InputMaybe<StackOverridesAttributes>;
   /** whether to track the stack's ref exactly on cron runs versus the last detected commit */
-  trackRef?: InputMaybe<Scalars['String']['input']>;
+  trackRef?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type StackDefinition = {

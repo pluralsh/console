@@ -638,7 +638,7 @@ defmodule Console.Deployments.Stacks do
     %{stack: stack} = Repo.preload(cron, [stack: @poll_preloads])
     start_transaction()
     |> add_operation(:run, fn _ ->
-      ref = Console.coalesce(track_ref, stack.sha)
+      ref = (if track_ref, do: stack.git.ref, else: stack.sha)
       create_run(stack, ref, maybe_merge_overrides(%{
         message: "cron run for #{stack.name}",
         approval: stack.approval || approve
