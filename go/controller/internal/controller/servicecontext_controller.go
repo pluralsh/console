@@ -6,7 +6,6 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
-	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -68,8 +67,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return *result, reterr
 	}
 
-	exists, err := r.handleExisting(serviceContext)
-	if !exists && err == nil && !serviceContext.DriftDetect() {
+	if !r.handleExisting(serviceContext) && !serviceContext.DriftDetect() {
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return serviceContext.Spec.Reconciliation.Requeue(), err
@@ -119,16 +117,13 @@ func (r *ServiceContextReconciler) sync(sc *v1alpha1.ServiceContext, project *v1
 	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
 }
 
-func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (bool, error) {
-	apiServiceContext, err := r.ConsoleClient.GetServiceContext(sc.ConsoleName())
-	if err != nil || apiServiceContext == nil {
+func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) bool {
+	apiServiceContext, _ := r.ConsoleClient.GetServiceContext(sc.ConsoleName())
+	if apiServiceContext == nil {
 		utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
 		utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-		if internalerror.IsNotFound(err) || err == nil {
-			sc.Status.ID = nil
-			return false, nil
-		}
-		return false, err
+		sc.Status.ID = nil
+		return false
 	}
 
 	sc.Status.ID = &apiServiceContext.ID
@@ -136,7 +131,7 @@ func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) (
 	utils.MarkCondition(sc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return true, nil
+	return true
 }
 
 func (r *ServiceContextReconciler) addOrRemoveFinalizer(serviceContext *v1alpha1.ServiceContext) *ctrl.Result {

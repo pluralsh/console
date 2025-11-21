@@ -19,8 +19,8 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 // PrAutomationReconciler reconciles a v1alpha1.PrAutomation object.
