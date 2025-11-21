@@ -158,6 +158,8 @@ fragment AgentRunBaseFragment on AgentRun {
   prompt
   repository
   mode
+  language
+  languageVersion
   todos {
     ...AgentTodoFragment
   }

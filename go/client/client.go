@@ -448,11 +448,13 @@ func (t *PluralCredsFragment) GetURL() *string {
 }
 
 type AgentRunBaseFragment struct {
-	ID         string               "json:\"id\" graphql:\"id\""
-	Prompt     string               "json:\"prompt\" graphql:\"prompt\""
-	Repository string               "json:\"repository\" graphql:\"repository\""
-	Mode       AgentRunMode         "json:\"mode\" graphql:\"mode\""
-	Todos      []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+	ID              string               "json:\"id\" graphql:\"id\""
+	Prompt          string               "json:\"prompt\" graphql:\"prompt\""
+	Repository      string               "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode         "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage    "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string              "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
 }
 
 func (t *AgentRunBaseFragment) GetID() string {
@@ -479,6 +481,18 @@ func (t *AgentRunBaseFragment) GetMode() *AgentRunMode {
 	}
 	return &t.Mode
 }
+func (t *AgentRunBaseFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunBaseFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.LanguageVersion
+}
 func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
 		t = &AgentRunBaseFragment{}
@@ -487,21 +501,23 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 }
 
 type AgentRunFragment struct {
-	ID           string                     "json:\"id\" graphql:\"id\""
-	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
-	Repository   string                     "json:\"repository\" graphql:\"repository\""
-	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
-	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
-	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
-	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
-	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
-	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
-	User         *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
-	Flow         *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
-	PullRequests []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	ID              string                     "json:\"id\" graphql:\"id\""
+	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                     "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
+	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -527,6 +543,18 @@ func (t *AgentRunFragment) GetMode() *AgentRunMode {
 		t = &AgentRunFragment{}
 	}
 	return &t.Mode
+}
+func (t *AgentRunFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.LanguageVersion
 }
 func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
@@ -24969,6 +24997,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25117,6 +25147,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25274,6 +25306,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25447,6 +25481,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25589,6 +25625,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25699,6 +25737,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25738,6 +25778,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
