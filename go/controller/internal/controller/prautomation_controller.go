@@ -134,6 +134,7 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	if err != nil && !errors.IsNotFound(err) {
 		return pra, sha, nil, err
 	}
+	log.FromContext(ctx).Info("pra", "pra", pra.Name)
 
 	if pra != nil && !prAutomation.Status.HasID() && !prAutomation.Spec.Reconciliation.DriftDetect() {
 		return pra, sha, nil, err
@@ -141,6 +142,7 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 		prAutomation.Status.ID = lo.ToPtr(pra.ID)
 	}
 
+	log.FromContext(ctx).Info("attributes", "pra", pra.Name)
 	attributes, result, err := in.Attributes(ctx, prAutomation)
 	if result != nil || err != nil {
 		return pra, sha, result, err
