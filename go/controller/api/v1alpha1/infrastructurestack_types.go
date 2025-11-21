@@ -285,6 +285,10 @@ type StackCron struct {
 	// Overrides for the cron triggered stack run configuration.
 	// +kubebuilder:validation:Optional
 	Overrides *StackOverrides `json:"overrides,omitempty"`
+
+	// Whether to track the stack's ref exactly on cron runs versus the last detected commit. This can theoretically cause drift between code if referenced via symlinks.
+	// +kubebuilder:validation:Optional
+	TrackRef *bool `json:"trackRef,omitempty"`
 }
 
 type StackOverrides struct {

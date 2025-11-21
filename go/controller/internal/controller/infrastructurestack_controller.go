@@ -338,6 +338,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			Crontab:     stack.Spec.Cron.Crontab,
 			AutoApprove: stack.Spec.Cron.AutoApprove,
 			Overrides:   r.stackOverridesAttributes(stack.Spec.Cron.Overrides),
+			TrackRef:    stack.Spec.Cron.TrackRef,
 		}
 	}
 

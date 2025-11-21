@@ -4400,6 +4400,7 @@ _Appears in:_
 | `crontab` _string_ | The crontab on which to spawn stack runs. |  |  |
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs. |  | Optional: \{\} <br /> |
 | `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration. |  | Optional: \{\} <br /> |
+| `trackRef` _boolean_ | Whether to track the stack's ref exactly on cron runs versus the last detected commit. This can theoretically cause drift between code if referenced via symlinks. |  | Optional: \{\} <br /> |
 
 
 #### StackDefinition
