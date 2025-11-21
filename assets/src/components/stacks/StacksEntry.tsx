@@ -17,7 +17,7 @@ import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import StackStatusChip from './common/StackStatusChip'
 import { StackTypeIcon } from './common/StackTypeIcon'
 
-export default function StackEntry({
+export function StackEntry({
   stack,
   active,
   first,

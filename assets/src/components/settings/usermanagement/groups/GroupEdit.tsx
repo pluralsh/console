@@ -116,6 +116,7 @@ function EditGroupMembersModal({
       <Flex
         flexDirection="column"
         gap="large"
+        minHeight={0}
       >
         {errorMsg}
         <GroupMembers
