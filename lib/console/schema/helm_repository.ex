@@ -18,6 +18,10 @@ defmodule Console.Schema.HelmRepository do
     timestamps()
   end
 
+  def without_urls(query \\ __MODULE__, urls) when is_list(urls) do
+    from(h in query, where: h.url not in ^urls)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :url]) do
     from(h in query, order_by: ^order)
   end
