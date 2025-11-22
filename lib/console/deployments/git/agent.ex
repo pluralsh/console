@@ -21,7 +21,7 @@ defmodule Console.Deployments.Git.Agent do
   @limit 50
   @limit_interval :timer.seconds(1)
 
-  defmodule State, do: defstruct [:git, :cache, :last_pull]
+  defmodule State, do: defstruct [:git, :cache, :last_pull, :url]
 
   def registry(), do: __MODULE__
 
@@ -118,7 +118,7 @@ defmodule Console.Deployments.Git.Agent do
     send self(), :clone
     :telemetry.execute(metric_scope(:git_agent), %{count: 1}, %{url: repo.url})
 
-    {:ok, %State{git: repo, cache: cache}}
+    {:ok, %State{git: repo, cache: cache, url: repo.url}}
   end
 
   def handle_call({:open, f}, _, %State{} = state), do: {:reply, File.open(f), state}
@@ -189,14 +189,17 @@ defmodule Console.Deployments.Git.Agent do
     {:reply, :ok, state}
   end
 
-  def handle_info(:clone, %State{git: git, cache: cache} = state) do
-    with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
+  def handle_info(:clone, %State{git: %{url: url} = git, cache: cache, url: url} = state) do
+    with {:git, %GitRepository{url: ^url} = git} <- {:git, refresh(git)},
          resp <- clone(git),
          cache <- Cache.refresh(cache),
          {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), %{cache | git: git}} do
       {:noreply, %{state | git: git, cache: cache}}
     else
       {:git, nil} -> {:stop, {:shutdown, :normal}, state}
+      {:git, repo} ->
+        Logger.info "git repository url changed: #{url}, current node: #{node()}"
+        {:stop, {:shutdown, :normal}, %{state | git: repo}}
       {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
         Logger.info "failed to clone #{url}, retrying in 30 seconds"
         Process.send_after(self(), :clone, :timer.seconds(30))
@@ -207,9 +210,9 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
-  def handle_info(:pull, %State{git: git, cache: cache} = state) do
+  def handle_info(:pull, %State{git: git, cache: cache, url: url} = state) do
     try do
-      with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
+      with {:git, %GitRepository{url: ^url} = git} <- {:git, refresh(git)},
            {:pullable, {true, _}} <- {:pullable, {should_pull?(state), git}},
            res <- fetch(git),
            {:ok, git} <- save_status(res, git),
@@ -217,6 +220,9 @@ defmodule Console.Deployments.Git.Agent do
         {:noreply, %State{git: git, cache: %{cache | git: git}, last_pull: Timex.now()}}
       else
         {:git, nil} -> {:stop, {:shutdown, :normal}, state}
+        {:git, repo} ->
+          Logger.info "git repository url changed: #{url}, current node: #{node()}"
+          {:stop, {:shutdown, :normal}, %{state | git: repo}}
         {:pullable, {_, git}} -> {:noreply, %{state | git: git, cache: %{cache | git: git}}}
         err ->
           Logger.info "unknown failure: #{inspect(err)}"
