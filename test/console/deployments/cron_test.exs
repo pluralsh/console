@@ -312,4 +312,17 @@ defmodule Console.Deployments.CronTest do
       for t <- del, do: refute refetch(t)
     end
   end
+
+  describe "#prune_helm_repositories/0" do
+    test "it will prune dangling helm repositories" do
+      repo = insert(:helm_repository, url: "https://pluralsh.github.io/console")
+      repo2 = insert(:helm_repository, url: "https://pluralsh.github.io/console2")
+      insert(:service, helm: %{url: "https://pluralsh.github.io/console"})
+      insert(:service, helm: %{url: "https://pluralsh.github.io/console"})
+      {1, _} = Cron.prune_helm_repositories()
+
+      assert refetch(repo)
+      refute refetch(repo2)
+    end
+  end
 end
