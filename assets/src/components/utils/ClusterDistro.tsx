@@ -10,8 +10,7 @@ import {
 import { ClusterDistro } from 'generated/graphql'
 
 import { getProviderIconUrl } from './Provider'
-import { fillLevelToBorderColor } from './List'
-import { fillLevelToBackground } from './FillLevelDiv'
+import { fillLevelToBackground, fillLevelToBorderColor } from './FillLevelDiv'
 
 const DISTRO_ICON_PATH = '/cluster-distros' as const
 

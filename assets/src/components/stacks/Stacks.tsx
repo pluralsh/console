@@ -70,8 +70,8 @@ import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 
+import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { MoreMenu } from '../utils/MoreMenu'
-import { StandardScroller } from '../utils/SmoothScroller'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
 import StackStatusChip from './common/StackStatusChip.tsx'
@@ -81,7 +81,7 @@ import { StackDeletedEmptyState } from './StackDeletedEmptyState'
 import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
-import StackEntry from './StacksEntry'
+import { StackEntry } from './StacksEntry'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -140,7 +140,6 @@ export default function Stacks() {
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const [listRef, setListRef] = useState<any>(null)
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
   const [showRestoreToast, setShowRestoreToast] = useState(false)
 
@@ -157,20 +156,24 @@ export default function Stacks() {
     [selectedTagKeys]
   )
 
-  const { data, loading, error, refetch, pageInfo, fetchNextPage } =
-    useFetchPaginatedData(
-      {
-        queryHook: useStacksQuery,
-        keyPath: ['infrastructureStacks'],
-      },
-      {
-        q: debouncedSearchString,
-        projectId,
-        ...(!isEmpty(searchTags)
-          ? { tagQuery: { op: tagOp, tags: searchTags } }
-          : {}),
-      }
-    )
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    { queryHook: useStacksQuery, keyPath: ['infrastructureStacks'] },
+    {
+      q: debouncedSearchString,
+      projectId,
+      ...(!isEmpty(searchTags)
+        ? { tagQuery: { op: tagOp, tags: searchTags } }
+        : {}),
+    }
+  )
 
   const stacks = useMemo(
     () => mapExistingNodes(data?.infrastructureStacks),
@@ -329,26 +332,19 @@ export default function Stacks() {
           />
         )}
         <div css={{ marginTop: theme.spacing.medium, flex: 1 }}>
-          <StandardScroller
-            listRef={listRef}
-            setListRef={setListRef}
-            items={stacks}
-            loading={loading}
-            placeholder={() => (
-              <div css={{ height: 52, borderBottom: theme.borders.default }} />
-            )}
+          <VirtualList
+            data={stacks}
+            onVirtualSliceChange={setVirtualSlice}
             hasNextPage={pageInfo?.hasNextPage}
-            mapper={(stack, { prev }) => (
+            isLoadingNextPage={loading}
+            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
+            renderer={({ rowData, index }) => (
               <StackEntry
-                stack={stack}
-                active={stack.id === stackId}
-                first={isEmpty(prev)}
+                stack={rowData}
+                active={rowData.id === stackId}
+                first={index === 0}
               />
             )}
-            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-            refreshKey={undefined}
-            setLoader={undefined}
-            handleScroll={undefined}
           />
           {isEmpty(stacks) &&
             !(isEmpty(debouncedSearchString) && isEmpty(searchTags)) && (

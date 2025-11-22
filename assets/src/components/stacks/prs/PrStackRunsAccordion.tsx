@@ -3,7 +3,6 @@ import {
   AccordionItem,
   ArrowTopRightIcon,
   DropdownArrowIcon,
-  EmptyState,
   IconFrame,
   ReloadIcon,
   Toast,
@@ -11,20 +10,14 @@ import {
 import {
   PullRequestFragment,
   useKickStackPullRequestMutation,
-  useStackRunsQuery,
 } from 'generated/graphql'
 import { Link, useParams } from 'react-router-dom'
 
-import { isEmpty } from 'lodash'
-
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 
-import { StackRunsScroller } from '../runs/StackRunsScroller'
-
-// can't really make this dynamic with the current scroller component
-const ACCORDION_TABLE_HEIGHT = '300px'
+import { StackRunsTable } from '../runs/StackRunsTable'
 
 export function PrStackRunsAccordion({
   pr,
@@ -35,15 +28,7 @@ export function PrStackRunsAccordion({
   isOpen: boolean
   toggleOpen: (open: boolean) => void
 }) {
-  const theme = useTheme()
   const { stackId = '' } = useParams()
-
-  const queryResult = useStackRunsQuery({
-    variables: { id: stackId, pullRequestId: pr.id },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: 5_000,
-    skip: !isOpen,
-  })
 
   return (
     <Accordion
@@ -64,25 +49,10 @@ export function PrStackRunsAccordion({
           />
         }
       >
-        {queryResult.data ? (
-          !isEmpty(queryResult.data.infrastructureStack?.runs) ? (
-            <ScrollerWrapperSC>
-              <StackRunsScroller
-                entryStyles={{
-                  paddingLeft: `${theme.spacing.xxxlarge}px`,
-                  background: theme.colors['fill-two'],
-                  borderBottom: theme.borders['fill-two'],
-                  '&:hover': {
-                    backgroundColor: theme.colors['fill-two-hover'],
-                  },
-                }}
-                queryResult={queryResult}
-              />
-            </ScrollerWrapperSC>
-          ) : (
-            <EmptyState message="No runs found." />
-          )
-        ) : null}
+        <StackRunsTable
+          variables={{ id: stackId, pullRequestId: pr.id }}
+          options={{ pollInterval: 5_000, skip: !isOpen }}
+        />
       </AccordionItem>
     </Accordion>
   )
@@ -179,11 +149,4 @@ const TriggerArrowSC = styled(DropdownArrowIcon)(({ theme }) => ({
   transform: 'rotate(-90deg)',
   width: theme.spacing.medium,
   '&.open': { transform: 'rotate(0deg)' },
-}))
-
-const ScrollerWrapperSC = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.xsmall}px 0`,
-  background: theme.colors['fill-two'],
-  height: ACCORDION_TABLE_HEIGHT,
-  position: 'relative', // for the "back to top" button to position correctly
 }))

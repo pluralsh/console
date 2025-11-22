@@ -1,12 +1,24 @@
-import { useState } from 'react'
-import { isEmpty } from 'lodash'
-import { GroupFragment, useGroupMembersQuery } from 'generated/graphql'
+import {
+  GroupFragment,
+  GroupMemberFragment,
+  useDeleteGroupMemberMutation,
+  useGroupMembersQuery,
+} from 'generated/graphql'
+import { useMemo } from 'react'
 
-import { extendConnection } from '../../../../utils/graphql'
-import { StandardScroller } from '../../../utils/SmoothScroller'
-import { List } from '../../../utils/List'
+import { mapExistingNodes } from '../../../../utils/graphql'
 
-import GroupMember from './GroupMember'
+import {
+  IconFrame,
+  Spinner,
+  Table,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import UserInfo from 'components/utils/UserInfo'
 
 export default function GroupMembers({
   group,
@@ -17,53 +29,81 @@ export default function GroupMembers({
   edit?: boolean
   skip?: boolean
 }) {
-  const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useGroupMembersQuery({
-    variables: { id: group.id },
-    fetchPolicy: 'network-only',
-    skip,
-  })
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGroupMembersQuery,
+        keyPath: ['groupMembers'],
+        fetchPolicy: 'network-only',
+        skip,
+      },
+      { id: group.id }
+    )
 
-  if (!data?.groupMembers) return null
-  const { pageInfo, edges } = data?.groupMembers || {}
+  const members = useMemo(
+    () => mapExistingNodes(data?.groupMembers),
+    [data?.groupMembers]
+  )
 
-  if (isEmpty(edges)) return <>This group has no members.</>
+  if (error) return <GqlError error={error} />
 
   return (
-    <List
-      minHeight="230px"
-      position="relative"
-    >
-      <div css={{ flexGrow: 1 }}>
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={edges}
-          loading={loading}
-          placeholder={() => <div css={{ height: '50px', padding: 'small' }} />}
-          hasNextPage={pageInfo.hasNextPage}
-          mapper={({ node }, { next }) => (
-            <GroupMember
-              key={node.user.id}
-              user={node.user}
-              group={group}
-              last={!next.node}
-              edit={edit}
-            />
-          )}
-          loadNextPage={() =>
-            pageInfo.hasNextPage &&
-            fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { groupMembers } }) =>
-                extendConnection(prev, groupMembers, 'groupMembers'),
-            })
-          }
-          handleScroll={undefined}
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-      </div>
-    </List>
+    <Table
+      fullHeightWrap
+      hideHeader
+      rowBg="base"
+      fillLevel={2}
+      data={members}
+      loading={!data && loading}
+      columns={cols}
+      reactTableOptions={{ meta: { edit } }}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'This group has no members.' }}
+    />
   )
 }
+
+const columnHelper = createColumnHelper<GroupMemberFragment>()
+const cols = [
+  columnHelper.accessor((node) => node, {
+    id: 'user',
+    cell: function Cell({ getValue, table: { options } }) {
+      const { user, group } = getValue()
+      const edit = options.meta?.edit
+      const [mutation, { loading }] = useDeleteGroupMemberMutation({
+        refetchQueries: ['GroupMembers'],
+      })
+
+      if (!user || !group) return null
+
+      return (
+        <StretchedFlex>
+          <UserInfo
+            user={user}
+            css={{ width: '100%' }}
+          />
+          {edit && (
+            <IconFrame
+              size="medium"
+              clickable
+              icon={
+                loading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
+              }
+              tooltip={
+                <span>
+                  Remove <b>{user.name}</b> from this group
+                </span>
+              }
+              onClick={() =>
+                mutation({ variables: { groupId: group.id, userId: user.id } })
+              }
+            />
+          )}
+        </StretchedFlex>
+      )
+    },
+  }),
+]

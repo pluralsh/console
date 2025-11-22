@@ -1,5 +1,6 @@
 import {
   FillLevel,
+  SemanticBorderKey,
   SubTab,
   toFillLevel,
   Tooltip,
@@ -9,7 +10,6 @@ import {
 import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
 import styled from 'styled-components'
 import { fillLevelToBackground } from './FillLevelDiv.tsx'
-import { fillLevelToBorder } from './List.tsx'
 
 import { LinkTabWrap } from './Tabs.tsx'
 
@@ -178,3 +178,10 @@ const SubTabSC = styled(SubTab)<{
     '&:focus-visible': { outline: theme.borders['outline-focused'] },
   }
 })
+
+export const fillLevelToBorder: Record<FillLevel, SemanticBorderKey> = {
+  0: 'default',
+  1: 'fill-one',
+  2: 'fill-two',
+  3: 'fill-three',
+}
