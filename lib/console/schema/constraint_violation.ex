@@ -21,5 +21,7 @@ defmodule Console.Schema.ConstraintViolation do
     model
     |> cast(attrs, @valid)
     |> validate_required(~w(name kind message)a)
+    |> validate_length(:name, max: 1_000)
+    |> validate_length(:message, max: 1_000)
   end
 end
