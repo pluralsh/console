@@ -21,4 +21,7 @@ dependencies:
     version: 2.14.0
     repository: https://fluxcd-community.github.io/helm-charts
     condition: flux2.enabled
+  - name: dex
+    version: 0.24.0
+    repository: https://charts.dexidp.io
 type: application
