@@ -1615,6 +1615,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef constrains the global service scope to clusters within a specific project.<br />This provides project-level isolation and ensures services are only deployed<br />to clusters belonging to the designated project. |  | Optional: \{\} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ | Template defines the service deployment specification to be applied across target clusters.<br />This contains the core service definition including Helm charts, configurations,<br />and deployment parameters that will be instantiated on each matching cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `ignoreClusters` _string array_ | IgnoreClusters specifies a list of cluster handles to exclude from the target cluster set. |  | Optional: \{\} <br /> |
 
 
 #### GraphStore
@@ -4549,6 +4550,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `id` _string_ | ID of the resource in the Console API. |  | Optional: \{\} <br />Type: string <br /> |
 | `sha` _string_ | SHA of last applied configuration. |  | Optional: \{\} <br />Type: string <br /> |
+| `readonly` _boolean_ | ReadOnly indicates whether the resource is read-only. | false |  |
 | `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
 
 
