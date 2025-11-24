@@ -14,6 +14,9 @@ type Status struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
+	// ReadOnly indicates whether the resource is read-only.
+	// +kubebuilder:default:=false
+	ReadOnly bool `json:"readonly"`
 	// Represents the observations of a PrAutomation's current state.
 	// +patchMergeKey=type
 	// +patchStrategy=merge

@@ -27,6 +27,7 @@ type ServiceAccountList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the ServiceAccount in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // ServiceAccount provides a programmatic identity for automated processes and tools to interact
 // with the Plural Console API. Unlike user accounts, service accounts are designed for non-human

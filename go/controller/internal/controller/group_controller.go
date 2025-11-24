@@ -83,6 +83,7 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 	}
 	if exists {
 		utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		group.Status.ReadOnly = true
 		return in.handleExistingGroup(group)
 	}
 

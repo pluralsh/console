@@ -34,6 +34,7 @@ type ServiceContextSpec struct {
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // ServiceContext provides a reusable bundle of configuration. It enables sharing configuration data across multiple services.
 // This is particularly useful for passing outputs from infrastructure-as-code tools to Kubernetes services.

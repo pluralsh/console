@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -148,6 +149,22 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		}
 
 		attr.Template = st
+	}
+
+	if len(globalService.Spec.IgnoreClusters) > 0 {
+		attr.IgnoreClusters = make([]*string, 0)
+		errorsList := make([]error, 0)
+		for _, handle := range globalService.Spec.IgnoreClusters {
+			clusterID, err := r.ConsoleClient.GetClusterIdByHandle(handle)
+			if err != nil {
+				errorsList = append(errorsList, err)
+				continue
+			}
+			attr.IgnoreClusters = append(attr.IgnoreClusters, lo.ToPtr(clusterID))
+		}
+		if len(errorsList) > 0 {
+			logger.Info("failed to get cluster ids for global service", "errors", utilerrors.NewAggregate(errorsList), "globalService", globalService.Name, "namespace", globalService.Namespace)
+		}
 	}
 
 	sha, err := utils.HashObject(attr)

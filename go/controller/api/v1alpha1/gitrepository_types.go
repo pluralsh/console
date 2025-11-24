@@ -60,6 +60,7 @@ type GitRepositoryStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Repo health status"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console repo Id"
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // GitRepository provides Git-based source control integration for Plural's GitOps workflows.
 // It represents a Git repository available for deployments, enabling automated fetching of manifests,

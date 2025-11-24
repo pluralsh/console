@@ -23,6 +23,7 @@ type ProjectList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Project in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Project provides organizational segmentation and multi-tenancy capabilities within Plural Console.
 // It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade

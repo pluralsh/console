@@ -183,6 +183,14 @@ query GetClusterByHandle($handle: String) {
     }
 }
 
+query GetClusterIdByHandle($handle: String) {
+    cluster(handle: $handle) {
+        ...{
+            id
+        }
+    }
+}
+
 query GetClusterProvider($id: ID!) {
     clusterProvider(id: $id) {
         ...ClusterProviderFragment

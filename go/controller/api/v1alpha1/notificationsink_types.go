@@ -40,6 +40,7 @@ type NotificationSinkList struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the NotificationSink in the Console API."
+//+kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // NotificationSink defines notification delivery destinations for events routed by NotificationRouter.
 // It represents the actual channels where notifications are sent, such as Slack webhooks,

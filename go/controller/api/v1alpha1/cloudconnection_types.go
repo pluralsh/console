@@ -27,6 +27,7 @@ type CloudConnectionList struct {
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 //+kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.provider",description="Name of the Provider cloud service."
+//+kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // CloudConnection is a credential for querying a cloud provider.  It will be used in agentic chats to perform generic sql-like
 // queries against cloud configuration data.

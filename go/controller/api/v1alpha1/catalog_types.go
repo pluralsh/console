@@ -23,6 +23,7 @@ type CatalogList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Catalog in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Catalog is an organized collection of PR Automations.
 // It enables teams to group related automation workflows by category (like "data", "security",

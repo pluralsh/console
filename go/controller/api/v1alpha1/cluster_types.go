@@ -30,6 +30,7 @@ type ClusterList struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="CurrentVersion",type="string",JSONPath=".status.currentVersion",description="Current Kubernetes version"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Cluster represents a Kubernetes cluster managed by the Plural Console for continuous deployment.
 // Clusters serve as deployment targets for services and can be either management clusters (hosting

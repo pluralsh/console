@@ -28,6 +28,7 @@ type ConsoleClient interface {
 	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error)
 	GetCluster(id *string) (*console.ClusterFragment, error)
 	GetClusterByHandle(handle *string) (*console.ClusterFragment, error)
+	GetClusterIdByHandle(handle string) (string, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)
 	UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error)
 	ListClusters() (*console.ListClusters, error)

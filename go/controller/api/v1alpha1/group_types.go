@@ -39,6 +39,7 @@ type GroupList struct {
 //+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Group in the Console API"
+//+kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Group represents a group of users within the system, managed via the Console API.
 // It includes specifications for the group's name and description.
