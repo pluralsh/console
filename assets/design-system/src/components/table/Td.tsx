@@ -7,6 +7,7 @@ import {
   tableFillLevelToHighlightedCellBg,
 } from './colors'
 import { type TableFillLevel } from './tableUtils'
+import { TOOLTIP_TRIGGER_ATTRIBUTE } from '../Tooltip'
 
 export const Td = styled.td<{
   $fillLevel: TableFillLevel
@@ -75,7 +76,8 @@ export const Td = styled.td<{
       zIndex: 1,
       // disable pointer events for children besides interactive elements so row links can capture most clicks
       pointerEvents: 'none',
-      '& button, & a, & input, & select, & textarea': { pointerEvents: 'auto' },
+      [`& button, & a, & input, & select, & textarea, & [${TOOLTIP_TRIGGER_ATTRIBUTE}="true"]`]:
+        { pointerEvents: 'auto' },
     }),
   })
 )

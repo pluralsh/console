@@ -7,37 +7,31 @@ import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
 import { type SEVERITIES } from '../types'
 
-import Card, {
-  type BaseCardProps,
-  type CardFillLevel,
-  useDecideFillLevel,
-} from './Card'
+import Card, { type CardFillLevel, useDecideFillLevel } from './Card'
 import CloseIcon from './icons/CloseIcon'
 import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
-import { FlexProps } from './Flex'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 export type ChipSize = 'small' | 'medium' | 'large'
 export type ChipSeverity = (typeof SEVERITIES)[number]
 
-export type ChipProps = Omit<FlexProps, 'size'> &
-  BaseCardProps & {
-    size?: ChipSize
-    condensed?: boolean
-    severity?: ChipSeverity
-    inactive?: boolean
-    icon?: ReactElement<any>
-    loading?: boolean
-    closeButton?: boolean
-    closeButtonProps?: ComponentPropsWithRef<'div'>
-    clickable?: boolean
-    truncateWidth?: number
-    truncateEdge?: 'start' | 'end'
-    tooltip?: boolean | ComponentProps<typeof Tooltip>['label']
-    tooltipProps?: ComponentProps<typeof Tooltip>
-    [x: string]: unknown
-  } & ({ severity?: ChipSeverity } | { severity: 'error' })
+export type ChipProps = ComponentPropsWithRef<typeof Card> & {
+  size?: ChipSize
+  condensed?: boolean
+  severity?: ChipSeverity
+  inactive?: boolean
+  icon?: ReactElement<any>
+  loading?: boolean
+  closeButton?: boolean
+  closeButtonProps?: ComponentPropsWithRef<'div'>
+  clickable?: boolean
+  truncateWidth?: number
+  truncateEdge?: 'start' | 'end'
+  tooltip?: boolean | ComponentProps<typeof Tooltip>['label']
+  tooltipProps?: ComponentProps<typeof Tooltip>
+  [x: string]: unknown
+} & ({ severity?: ChipSeverity } | { severity: 'error' })
 
 export const severityToColor = {
   neutral: 'text',
