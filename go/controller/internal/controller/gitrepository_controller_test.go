@@ -95,7 +95,8 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.GitRepositoryStatus{
 					Status: v1alpha1.Status{
-						ID: lo.ToPtr("123"),
+						ID:       lo.ToPtr("123"),
+						ReadOnly: true,
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
