@@ -17,6 +17,7 @@ type ConsoleClient interface {
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
+	GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
 	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
 	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
@@ -10175,6 +10176,17 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime) GetPendingRuns() *ListAgentRu
 		t = &ListAgentRuntimePendingRuns_AgentRuntime{}
 	}
 	return t.PendingRuns
+}
+
+type GetAgentRunTodos_AgentRun struct {
+	Todos []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+}
+
+func (t *GetAgentRunTodos_AgentRun) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &GetAgentRunTodos_AgentRun{}
+	}
+	return t.Todos
 }
 
 type CancelAgentRun_CancelAgentRun struct {
@@ -21673,6 +21685,17 @@ func (t *ListAgentRuntimePendingRuns) GetAgentRuntime() *ListAgentRuntimePending
 	return t.AgentRuntime
 }
 
+type GetAgentRunTodos struct {
+	AgentRun *GetAgentRunTodos_AgentRun "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunTodos) GetAgentRun() *GetAgentRunTodos_AgentRun {
+	if t == nil {
+		t = &GetAgentRunTodos{}
+	}
+	return t.AgentRun
+}
+
 type CancelAgentRun struct {
 	CancelAgentRun *CancelAgentRun_CancelAgentRun "json:\"cancelAgentRun,omitempty\" graphql:\"cancelAgentRun\""
 }
@@ -25428,6 +25451,37 @@ func (c *Client) ListAgentRuntimePendingRuns(ctx context.Context, id string, aft
 
 	var res ListAgentRuntimePendingRuns
 	if err := c.Client.Post(ctx, "ListAgentRuntimePendingRuns", ListAgentRuntimePendingRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunTodosDocument = `query GetAgentRunTodos ($id: ID!) {
+	agentRun(id: $id) {
+		todos {
+			... AgentTodoFragment
+		}
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+`
+
+func (c *Client) GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunTodos
+	if err := c.Client.Post(ctx, "GetAgentRunTodos", GetAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -44831,6 +44885,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentRunDocument:                               "GetAgentRun",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
+	GetAgentRunTodosDocument:                          "GetAgentRunTodos",
 	CancelAgentRunDocument:                            "CancelAgentRun",
 	CreateAgentRunDocument:                            "CreateAgentRun",
 	UpdateAgentRunDocument:                            "UpdateAgentRun",
