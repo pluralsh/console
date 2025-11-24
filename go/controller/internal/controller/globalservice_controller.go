@@ -151,21 +151,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		attr.Template = st
 	}
 
-	if len(globalService.Spec.IgnoreClusters) > 0 {
-		attr.IgnoreClusters = make([]*string, 0)
-		errorsList := make([]error, 0)
-		for _, handle := range globalService.Spec.IgnoreClusters {
-			clusterID, err := r.ConsoleClient.GetClusterIdByHandle(handle)
-			if err != nil {
-				errorsList = append(errorsList, err)
-				continue
-			}
-			attr.IgnoreClusters = append(attr.IgnoreClusters, lo.ToPtr(clusterID))
-		}
-		if len(errorsList) > 0 {
-			logger.Info("failed to get cluster ids for global service", "errors", utilerrors.NewAggregate(errorsList), "globalService", globalService.Name, "namespace", globalService.Namespace)
-		}
-	}
+	attr.IgnoreClusters = r.ignoreClusters(ctx, globalService)
 
 	sha, err := utils.HashObject(attr)
 	if err != nil {
@@ -211,6 +197,28 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return globalService.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *GlobalServiceReconciler) ignoreClusters(ctx context.Context, globalService *v1alpha1.GlobalService) []*string {
+	if globalService.Spec.IgnoreClusters == nil {
+		return nil
+	}
+	logger := log.FromContext(ctx)
+
+	clusters := make([]*string, 0)
+	errorsList := make([]error, 0)
+	for _, handle := range globalService.Spec.IgnoreClusters {
+		clusterID, err := r.ConsoleClient.GetClusterIdByHandle(handle)
+		if err != nil {
+			errorsList = append(errorsList, err)
+			continue
+		}
+		clusters = append(clusters, lo.ToPtr(clusterID))
+	}
+	if len(errorsList) > 0 {
+		logger.Info("failed to get cluster ids for global service", "errors", utilerrors.NewAggregate(errorsList), "globalService", globalService.Name, "namespace", globalService.Namespace)
+	}
+	return clusters
 }
 
 func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {
@@ -279,7 +287,7 @@ func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) 
 // SetupWithManager sets up the controller with the Manager.
 func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                           // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.GlobalServiceList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.GlobalService{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
