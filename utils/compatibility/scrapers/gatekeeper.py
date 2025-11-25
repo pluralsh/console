@@ -13,7 +13,7 @@ from utils import (
     get_chart_versions,
 )
 
-app_name = "opa-gatekeeper"
+app_name = "gatekeeper"
 
 
 def scrape():

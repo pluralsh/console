@@ -2646,13 +2646,14 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.21.0
-    images: ['openpolicyagent/gatekeeper:v3.21.0', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0',
+      'openpolicyagent/gatekeeper:v3.21.0']
   - version: 3.20.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 3.20.1
-    images: ['openpolicyagent/gatekeeper:v3.20.1', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.1']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper:v3.20.1', 'openpolicyagent/gatekeeper-crds:v3.20.1']
   - version: 3.20.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -2664,134 +2665,144 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.19.1
-    images: ['openpolicyagent/gatekeeper:v3.19.1', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1',
+      'openpolicyagent/gatekeeper:v3.19.1']
   - version: 3.19.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 3.19.0
-    images: ['openpolicyagent/gatekeeper:v3.19.0', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0',
+      'openpolicyagent/gatekeeper:v3.19.0']
   - version: 3.18.3
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 3.18.3
-    images: ['openpolicyagent/gatekeeper:v3.18.3', 'curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.3']
+    images: ['openpolicyagent/gatekeeper-crds:v3.18.3', 'openpolicyagent/gatekeeper:v3.18.3',
+      'curlimages/curl:7.83.1']
   - version: 3.18.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 3.18.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.18.0', 'openpolicyagent/gatekeeper-crds:v3.18.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.18.0', 'openpolicyagent/gatekeeper:v3.18.0',
+      'curlimages/curl:7.83.1']
   - version: 3.17.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 3.17.2
-    images: ['openpolicyagent/gatekeeper-crds:v3.17.2', 'curlimages/curl:7.83.1',
-      'openpolicyagent/gatekeeper:v3.17.2']
+    images: ['openpolicyagent/gatekeeper-crds:v3.17.2', 'openpolicyagent/gatekeeper:v3.17.2',
+      'curlimages/curl:7.83.1']
   - version: 3.17.1
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     chart_version: 3.17.1
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.17.1', 'openpolicyagent/gatekeeper-crds:v3.17.1']
+    images: ['openpolicyagent/gatekeeper:v3.17.1', 'openpolicyagent/gatekeeper-crds:v3.17.1',
+      'curlimages/curl:7.83.1']
   - version: 3.17.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 3.17.0
-    images: ['openpolicyagent/gatekeeper:v3.17.0', 'curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.17.0', 'openpolicyagent/gatekeeper:v3.17.0',
+      'curlimages/curl:7.83.1']
   - version: 3.16.2
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 3.16.2
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.2',
-      'openpolicyagent/gatekeeper:v3.16.2']
+    images: ['openpolicyagent/gatekeeper-crds:v3.16.2', 'openpolicyagent/gatekeeper:v3.16.2',
+      'curlimages/curl:7.83.1']
   - version: 3.16.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.16.0
-    images: ['openpolicyagent/gatekeeper:v3.16.0', 'curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.16.0', 'openpolicyagent/gatekeeper:v3.16.0',
+      'curlimages/curl:7.83.1']
   - version: 3.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.15.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.15.0',
-      'openpolicyagent/gatekeeper:v3.15.0']
+    images: ['openpolicyagent/gatekeeper:v3.15.0', 'openpolicyagent/gatekeeper-crds:v3.15.0',
+      'curlimages/curl:7.83.1']
   - version: 3.14.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.14.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.14.0', 'curlimages/curl:7.83.1',
-      'openpolicyagent/gatekeeper:v3.14.0']
+    images: ['openpolicyagent/gatekeeper:v3.14.0', 'openpolicyagent/gatekeeper-crds:v3.14.0',
+      'curlimages/curl:7.83.1']
   - version: 3.13.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.13.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0',
-      'openpolicyagent/gatekeeper:v3.13.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.13.0', 'openpolicyagent/gatekeeper:v3.13.0',
+      'curlimages/curl:7.83.1']
   - version: 3.12.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.12.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.12.0', 'openpolicyagent/gatekeeper-crds:v3.12.0']
+    images: ['openpolicyagent/gatekeeper:v3.12.0', 'openpolicyagent/gatekeeper-crds:v3.12.0',
+      'curlimages/curl:7.83.1']
   - version: 3.11.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.11.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.0',
-      'openpolicyagent/gatekeeper:v3.11.0']
+    images: ['openpolicyagent/gatekeeper:v3.11.0', 'openpolicyagent/gatekeeper-crds:v3.11.0',
+      'curlimages/curl:7.83.1']
   - version: 3.10.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.10.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.10.0', 'openpolicyagent/gatekeeper-crds:v3.10.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.10.0', 'openpolicyagent/gatekeeper:v3.10.0',
+      'curlimages/curl:7.83.1']
   - version: 3.9.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.9.0
-    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.9.0', 'openpolicyagent/gatekeeper-crds:v3.9.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.9.0', 'openpolicyagent/gatekeeper:v3.9.0',
+      'curlimages/curl:7.83.1']
   - version: 3.8.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.8.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.8.0', 'openpolicyagent/gatekeeper:v3.8.0']
+    images: ['openpolicyagent/gatekeeper:v3.8.0', 'openpolicyagent/gatekeeper-crds:v3.8.0']
   - version: 3.7.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.7.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.7.0', 'openpolicyagent/gatekeeper:v3.7.0']
+    images: ['openpolicyagent/gatekeeper:v3.7.0', 'openpolicyagent/gatekeeper-crds:v3.7.0']
   - version: 3.6.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.6.0
-    images: ['openpolicyagent/gatekeeper:v3.6.0', 'line/kubectl-kustomize:1.20.4-4.0.5',
-      'openpolicyagent/gatekeeper-crds:v3.6.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.6.0', 'openpolicyagent/gatekeeper:v3.6.0',
+      'line/kubectl-kustomize:1.20.4-4.0.5']
   - version: 3.5.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.5.0
-    images: ['openpolicyagent/gatekeeper:v3.5.0', 'line/kubectl-kustomize:1.20.4-4.0.5']
+    images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.5.0']
   - version: 3.4.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.4.0
-    images: ['openpolicyagent/gatekeeper:v3.4.0', 'line/kubectl-kustomize:1.20.4-4.0.5']
+    images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.4.0']
   - version: 3.3.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -2804,7 +2815,7 @@ addons:
     incompatibilities: []
     chart_version: 3.2.2
     images: ['openpolicyagent/gatekeeper:v3.2.2']
-  name: opa-gatekeeper
+  name: gatekeeper
 - icon: https://docs.tigera.io/img/calico-logo.webp
   git_url: https://github.com/projectcalico/calico
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
