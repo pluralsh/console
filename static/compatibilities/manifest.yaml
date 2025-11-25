@@ -1,4 +1,5 @@
 names:
+- argo-cd
 - argo-rollouts
 - aws-ebs-csi-driver
 - aws-efs-csi-driver
