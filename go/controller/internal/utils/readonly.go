@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func MarkReadOnly(resource v1alpha1.ReadOnlyPluralResource) {
