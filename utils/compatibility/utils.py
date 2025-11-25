@@ -5,6 +5,7 @@ import semantic_version
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
+from datetime import datetime
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -165,6 +166,28 @@ def get_github_releases(repo_owner, repo_name):
         raise Exception(
             f"Failed to fetch latest releases: {response.status_code}"
         )
+
+def get_kube_release_info():
+    kube_releases = list(reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))))
+    return [kube_release for kube_release in kube_releases if clean_kube_version(kube_release[0])]
+
+def get_github_releases_timestamps(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=100"
+    response = requests.get(url)
+    if response.status_code == 200:
+        releases = response.json()
+        for release in releases:
+            yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
+    else:
+        raise Exception(f"Failed to fetch releases timestamps: {response.status_code} {response.text}")
+
+def find_last_n_releases(releases, ts, n=3):
+    for i in range(len(releases)):
+        if releases[i][1] > ts:
+            if i == 0:
+                return releases[0:n]
+            return releases[max(0, i-n):i]
+    return releases[-n:]
 
 
 def get_latest_github_release(repo_owner, repo_name):
@@ -347,6 +370,14 @@ def reduce_versions(versions):
 
     return list(reversed(reduced_versions))
 
+
+def clean_kube_version(vsn):
+    if vsn.startswith("v"):
+        vsn = vsn[1:]
+    as_semver = validate_semver(vsn)
+    if not as_semver:
+        return None
+    return f"{as_semver.major}.{as_semver.minor}"
 
 def update_compatibility_info(filepath, new_versions):
     try:

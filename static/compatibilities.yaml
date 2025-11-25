@@ -609,37 +609,121 @@ addons:
   release_url: https://github.com/cilium/cilium/releases/tag/{vsn}
   helm_repository_url: https://helm.cilium.io/
   versions:
+  - version: 1.18.4
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+  - version: 1.18.2
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
   - version: 1.18.0
-    kube: ['1.33', '1.32', '1.31', '1.30']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 1.18.0
+  - version: 1.17.8
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+  - version: 1.17.4
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
   - version: 1.17.0
-    kube: ['1.32', '1.31', '1.30', '1.29']
+    kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    chart_version: 1.17.0
+  - version: 1.16.15
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+  - version: 1.16.10
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+  - version: 1.16.5
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 1.16.2
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 1.16.1
+    kube: ['1.31', '1.30', '1.27']
+    requirements: []
+    incompatibilities: []
   - version: 1.16.0
-    kube: ['1.30', '1.29', '1.28', '1.27']
+    kube: ['1.30', '1.29', '1.27']
     requirements: []
     incompatibilities: []
-    chart_version: 1.16.0
+  - version: 1.15.17
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+  - version: 1.15.12
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 1.15.9
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 1.15.8
+    kube: ['1.31', '1.30', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 1.15.5
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
   - version: 1.15.0
-    kube: ['1.29', '1.28', '1.27', '1.26']
+    kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    chart_version: 1.15.0
+  - version: 1.14.18
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 1.14.15
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 1.14.14
+    kube: ['1.31', '1.30', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 1.14.11
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 1.14.6
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
   - version: 1.14.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     chart_version: 1.14.0
+  - version: 1.13.16
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 1.13.11
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
       '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 1.13.0
+  - version: 1.12.18
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
   - version: 1.12.0
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
@@ -2077,3 +2161,112 @@ addons:
     requirements: []
     incompatibilities: []
   name: vitess
+- icon: https://avatars.githubusercontent.com/u/16468693?s=48&v=4
+  git_url: https://github.com/open-policy-agent/gatekeeper
+  release_url: https://github.com/open-policy-agent/gatekeeper/releases/tag/v{vsn}
+  versions:
+  - version: 3.21.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+  - version: 3.20.1
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+  - version: 3.20.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+  - version: 3.19.1
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+  - version: 3.19.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.18.3
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+  - version: 3.18.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.17.2
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+  - version: 3.17.1
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+  - version: 3.17.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 3.16.2
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+  - version: 3.16.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.15.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.14.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.13.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.12.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.11.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.10.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.9.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.8.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.7.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.6.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.5.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.4.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.3.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  - version: 3.2.2
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+  name: opa-gatekeeper

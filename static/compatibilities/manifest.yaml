@@ -25,3 +25,4 @@ names:
 - traefik
 - velero
 - vitess
+- opa-gatekeeper
