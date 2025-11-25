@@ -97,6 +97,8 @@ type AddonVersion struct {
 	Requirements []*VersionReference `json:"requirements,omitempty"`
 	// any add-ons this might break
 	Incompatibilities []*VersionReference `json:"incompatibilities,omitempty"`
+	// the images used by this add-on's helm chart
+	Images []*string `json:"images,omitempty"`
 	// the version of the helm chart to install for this version
 	ChartVersion *string `json:"chartVersion,omitempty"`
 	// the release page for a runtime service at a version, this is a heavy operation not suitable for lists

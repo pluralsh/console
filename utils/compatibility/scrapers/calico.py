@@ -13,8 +13,7 @@ app_name = "calico"
 compatibility_url = "https://docs.tigera.io/calico/latest/getting-started/kubernetes/requirements#kubernetes-requirements"
 
 
-def scrape():
-
+def do_scrape(app_name):
     # https://docs.tigera.io/calico/latest/getting-started/kubernetes/requirements#supported-versions
     # We test Calico v3.28 against the following Kubernetes versions. Other versions may work,
     # but we are not actively testing them.
@@ -36,6 +35,9 @@ def scrape():
                 ("version", ver),
                 ("kube", kube_versions),
                 ("chart_version", chart_version),
+                ("images", []),
+                ("requirements", []),
+                ("incompatibilities", []),
             ]
         )
         versions.append(version_info)
@@ -44,3 +46,6 @@ def scrape():
         f"../../static/compatibilities/{app_name}.yaml", versions
     )
 
+
+def scrape():
+    do_scrape("calico")

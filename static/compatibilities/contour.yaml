@@ -8,26 +8,31 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 21.1.4
+  images: ['docker.io/bitnami/contour:1.32.1-debian-12-r0', 'docker.io/bitnami/envoy:1.34.5-debian-12-r0']
 - version: 1.32.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 21.1.2
+  images: ['docker.io/bitnami/contour:1.32.0-debian-12-r8', 'docker.io/bitnami/envoy:1.34.4-debian-12-r0']
 - version: 1.31.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   chart_version: 20.0.1
+  images: ['docker.io/bitnami/envoy:1.34.1-debian-12-r0', 'docker.io/bitnami/contour:1.31.0-debian-12-r2']
 - version: 1.30.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  chart_version: 19.0.0
+  chart_version: 19.2.1
+  images: ['docker.io/bitnami/contour:1.30.0-debian-12-r6', 'docker.io/bitnami/envoy:1.31.2-debian-12-r0']
 - version: 1.29.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  chart_version: 18.0.0
+  chart_version: 18.2.3
+  images: ['docker.io/bitnami/envoy:1.29.5-debian-12-r0', 'docker.io/bitnami/contour:1.29.0-debian-12-r1']
 - version: 1.28.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -36,17 +41,20 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  chart_version: 15.0.0
+  chart_version: 15.4.0
+  images: ['docker.io/bitnami/envoy:1.27.2-debian-11-r8', 'docker.io/bitnami/contour:1.27.0-debian-11-r9']
 - version: 1.26.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  chart_version: 13.0.0
+  chart_version: 13.1.4
+  images: ['docker.io/bitnami/envoy:1.26.5-debian-11-r0', 'docker.io/bitnami/contour:1.26.0-debian-11-r17']
 - version: 1.25.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  chart_version: 12.0.0
+  chart_version: 12.2.2
+  images: ['docker.io/bitnami/envoy:1.26.3-debian-11-r10', 'docker.io/bitnami/contour:1.25.0-debian-11-r73']
 - version: 1.24.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -55,14 +63,23 @@ versions:
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  chart_version: 10.0.0
+  chart_version: 10.1.1
+  images: ['docker.io/bitnami/envoy:1.24.0-debian-11-r11', 'docker.io/bitnami/contour:1.23.0-debian-11-r10']
 - version: 1.22.0
   kube: ['1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  chart_version: 9.0.0
+  chart_version: 9.1.1
+  images: ['docker.io/bitnami/contour:1.22.0-debian-11-r4', 'docker.io/bitnami/envoy:1.23.0-debian-11-r8']
 - version: 1.21.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   chart_version: 8.0.0
+  images: ['docker.io/bitnami/contour:1.21.0-debian-11-r0', 'docker.io/bitnami/envoy:1.22.1-debian-11-r0']
+- version: 1.20.1
+  kube: ['1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  chart_version: 7.10.2
+  images: ['docker.io/bitnami/contour:1.20.1-debian-11-r0', 'docker.io/bitnami/envoy:1.21.2-debian-11-r0']

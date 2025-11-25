@@ -60,6 +60,7 @@ def scrape():
                 ("version", tag_version),
                 ("kube", kube_versions),
                 ("chart_version", chart_version),
+                ("images", []),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]

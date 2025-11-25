@@ -8,21 +8,31 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 37.4.0
+  images: ['docker.io/traefik:v3.6.2']
 - version: 3.6.0
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 37.3.0
+  images: ['docker.io/traefik:v3.6.0']
 - version: 3.5.0
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 37.0.0
+  images: ['docker.io/traefik:v3.5.0']
 - version: 3.4.0
-  kube: ['1.33', '1.32', '1.31', '1.30']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 35.4.0
+  images: ['docker.io/traefik:v3.4.0']
+- version: 3.3.6
+  kube: ['1.34', '1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  chart_version: 35.2.0
+  images: ['docker.io/traefik:v3.3.6']
 - version: 3.3.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
@@ -32,6 +42,7 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 33.0.0
+  images: ['docker.io/traefik:v3.2.0']
 - version: 3.1.7
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
@@ -41,16 +52,19 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 31.1.1
+  images: ['docker.io/traefik:v3.1.4']
 - version: 3.1.3
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   chart_version: 31.1.0
+  images: ['docker.io/traefik:v3.1.3']
 - version: 3.0.2
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   chart_version: 28.3.0
+  images: ['docker.io/traefik:v3.0.2']
 - version: 2.11.13
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []

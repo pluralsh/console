@@ -34,7 +34,7 @@ def get_kube_versions(version):
     ]
 
     latest = get_latest_github_release("kubernetes-sigs", "aws-efs-csi-driver")
-    if Version(version) >= Version(latest):
+    if latest.startswith("v") and Version(version) >= Version(latest.lstrip("v")):
         return latest_kube_versions
 
     for pattern, kube_versions in compatibility:
@@ -62,6 +62,7 @@ def scrape():
                     ("version", ver),
                     ("kube", kube_ver),
                     ("chart_version", chart_version),
+                    ("images", []),
                 ]
             )
             versions.append(version_info)

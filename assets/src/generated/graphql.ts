@@ -134,6 +134,8 @@ export type AddonVersion = {
   blocking?: Maybe<Scalars['Boolean']['output']>;
   /** the version of the helm chart to install for this version */
   chartVersion?: Maybe<Scalars['String']['output']>;
+  /** the images used by this add-on's helm chart */
+  images?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** any add-ons this might break */
   incompatibilities?: Maybe<Array<Maybe<VersionReference>>>;
   /** kubernetes versions this add-on works with */

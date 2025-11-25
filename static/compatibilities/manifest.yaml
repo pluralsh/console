@@ -26,3 +26,4 @@ names:
 - velero
 - vitess
 - opa-gatekeeper
+- tigera-operator
