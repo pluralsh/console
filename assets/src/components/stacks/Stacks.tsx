@@ -5,6 +5,7 @@ import {
   Divider,
   EmptyState,
   FiltersIcon,
+  Flex,
   IconFrame,
   Input,
   ListBoxItem,
@@ -82,6 +83,8 @@ import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
 import { StackEntry } from './StacksEntry'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -131,7 +134,7 @@ const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   { path: STACK_OVERVIEW_REL_PATH, label: 'Configuration', enabled: true },
 ]
 
-export default function Stacks() {
+export function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { ai } = useDeploymentSettings()
@@ -272,21 +275,13 @@ export default function Stacks() {
           Stack &quot;{tinyStack?.name}&quot; restored.
         </Toast>
       )}
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.small,
-          minWidth: 340,
-          width: 340,
-        }}
+      <Flex
+        direction="column"
+        gap="small"
+        minWidth={340}
+        width={340}
       >
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.small,
-          }}
-        >
+        <Flex gap="small">
           <Input
             flexGrow={1}
             placeholder="Search stacks"
@@ -306,7 +301,7 @@ export default function Stacks() {
               <FiltersIcon />
             </Button>
           )}
-        </div>
+        </Flex>
         {filterExpanded && (
           <TagsFilter
             type={TagType.Stack}
@@ -358,182 +353,160 @@ export default function Stacks() {
               </EmptyState>
             )}
         </div>
-      </div>
+      </Flex>
       {stackError && !fullStack ? (
         <StackDeletedEmptyState />
       ) : (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            gap: theme.spacing.medium,
-            overflow: 'hidden',
-          }}
+        <Flex
+          direction="column"
+          gap="medium"
+          minWidth={600}
+          flex={1}
         >
-          <div
-            css={{
-              alignItems: 'start',
-              display: 'flex',
-              gap: theme.spacing.medium,
+          <StretchedFlex align="start">
+            <StackedText
+              first={
+                <Flex
+                  gap="small"
+                  align="center"
+                >
+                  {tinyStack?.name}
+                  {deleting && (
+                    <StackStatusChip
+                      status={tinyStack?.status}
+                      deleting={deleting}
+                      size="small"
+                    />
+                  )}
+                </Flex>
+              }
+              firstPartialType="subtitle1"
+              firstColor="text"
+              second={tinyStack?.repository?.url}
+              secondPartialType="body1"
+            />
+            <Flex gap="medium">
+              {!deleting ? (
+                <KickButton
+                  floating
+                  pulledAt={tinyStack?.repository?.pulledAt}
+                  kickMutationHook={useKickStackMutation}
+                  message="Resync"
+                  tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
+                  variables={{ id: tinyStack?.id }}
+                  width="max-content"
+                />
+              ) : (
+                <RestoreStackButton
+                  id={tinyStack?.id ?? ''}
+                  setShowToast={setShowRestoreToast}
+                />
+              )}
+              <StackCustomRun stackId={tinyStack?.id ?? ''} />
+              <MoreMenu
+                disabled={!fullStack}
+                onSelectionChange={(newKey) => setMenuKey(newKey)}
+                width={240}
+                triggerButton={
+                  <IconFrame
+                    textValue="Menu"
+                    clickable
+                    size="large"
+                    icon={
+                      <MoreIcon
+                        width={16}
+                        color={
+                          !fullStack ? theme.colors['icon-disabled'] : undefined
+                        }
+                      />
+                    }
+                    type="secondary"
+                  />
+                }
+              >
+                <ListBoxItem
+                  key={MenuItemKey.ManagePermissions}
+                  label="Manage permissions"
+                  textValue="Manage permissions"
+                  leftContent={<PeopleIcon />}
+                />
+                <ListBoxItem
+                  destructive
+                  key={MenuItemKey.Detach}
+                  label="Detach stack"
+                  textValue="Detach stack"
+                  leftContent={
+                    <ReturnIcon color={theme.colors['icon-danger']} />
+                  }
+                />
+                <ListBoxItem
+                  destructive
+                  key={MenuItemKey.Delete}
+                  label={deleteLabel}
+                  textValue={deleteLabel}
+                  leftContent={
+                    <TrashCanIcon color={theme.colors['icon-danger']} />
+                  }
+                />
+              </MoreMenu>
+              {fullStack && (
+                <>
+                  <StackPermissionsModal
+                    stack={fullStack}
+                    open={menuKey === MenuItemKey.ManagePermissions}
+                    onClose={() => setMenuKey(MenuItemKey.None)}
+                  />
+                  <StackDetachModal
+                    stack={fullStack}
+                    refetch={refetch}
+                    open={menuKey === MenuItemKey.Detach}
+                    onClose={() => setMenuKey(MenuItemKey.None)}
+                  />
+                  <StackDeleteModal
+                    stack={fullStack}
+                    refetch={refetch}
+                    open={menuKey === MenuItemKey.Delete}
+                    onClose={() => setMenuKey(MenuItemKey.None)}
+                  />
+                </>
+              )}
+            </Flex>
+          </StretchedFlex>
+          <Divider backgroundColor={theme.colors.border} />
+          <TabList
+            scrollable
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
             }}
           >
-            <div css={{ flexGrow: 1 }}>
-              <div
-                css={{
-                  display: 'flex',
-                  gap: theme.spacing.small,
-                  alignItems: 'center',
-
-                  ...theme.partials.text.subtitle1,
-                }}
-              >
-                {tinyStack?.name}
-                {deleting && (
-                  <StackStatusChip
-                    status={tinyStack?.status}
-                    deleting={deleting}
-                    size="small"
-                  />
-                )}
-              </div>
-              <div
-                css={{
-                  ...theme.partials.text.body1,
-                  color: theme.colors['text-xlight'],
-                }}
-              >
-                {tinyStack?.repository?.url}
-              </div>
-            </div>
-            {!deleting ? (
-              <KickButton
-                floating
-                pulledAt={tinyStack?.repository?.pulledAt}
-                kickMutationHook={useKickStackMutation}
-                message="Resync"
-                tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
-                variables={{ id: tinyStack?.id }}
-                width="max-content"
-              />
-            ) : (
-              <RestoreStackButton
-                id={tinyStack?.id ?? ''}
-                setShowToast={setShowRestoreToast}
-              />
-            )}
-            <StackCustomRun stackId={tinyStack?.id ?? ''} />
-            <MoreMenu
-              disabled={!fullStack}
-              onSelectionChange={(newKey) => setMenuKey(newKey)}
-              width={240}
-              triggerButton={
-                <IconFrame
-                  textValue="Menu"
-                  clickable
-                  size="large"
-                  icon={
-                    <MoreIcon
-                      width={16}
-                      color={
-                        !fullStack ? theme.colors['icon-disabled'] : undefined
-                      }
-                    />
-                  }
-                  type="secondary"
-                />
-              }
-            >
-              <ListBoxItem
-                key={MenuItemKey.ManagePermissions}
-                label="Manage permissions"
-                textValue="Manage permissions"
-                leftContent={<PeopleIcon />}
-              />
-              <ListBoxItem
-                destructive
-                key={MenuItemKey.Detach}
-                label="Detach stack"
-                textValue="Detach stack"
-                leftContent={<ReturnIcon color={theme.colors['icon-danger']} />}
-              />
-              <ListBoxItem
-                destructive
-                key={MenuItemKey.Delete}
-                label={deleteLabel}
-                textValue={deleteLabel}
-                leftContent={
-                  <TrashCanIcon color={theme.colors['icon-danger']} />
-                }
-              />
-            </MoreMenu>
-            {fullStack && (
-              <>
-                <StackPermissionsModal
-                  stack={fullStack}
-                  open={menuKey === MenuItemKey.ManagePermissions}
-                  onClose={() => setMenuKey(MenuItemKey.None)}
-                />
-                <StackDetachModal
-                  stack={fullStack}
-                  refetch={refetch}
-                  open={menuKey === MenuItemKey.Detach}
-                  onClose={() => setMenuKey(MenuItemKey.None)}
-                />
-                <StackDeleteModal
-                  stack={fullStack}
-                  refetch={refetch}
-                  open={menuKey === MenuItemKey.Delete}
-                  onClose={() => setMenuKey(MenuItemKey.None)}
-                />
-              </>
-            )}
-          </div>
-          <Divider backgroundColor={theme.colors.border} />
-          <div>
-            <TabList
-              scrollable
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {directory
-                .filter(({ enabled }) => enabled)
-                .map(({ label, path }) => (
-                  <LinkTabWrap
-                    subTab
-                    key={path}
-                    to={`${getStacksAbsPath(stackId)}/${path}`}
-                  >
-                    <SubTab key={path}>{label}</SubTab>
-                  </LinkTabWrap>
-                ))}
-            </TabList>
-          </div>
+            {directory
+              .filter(({ enabled }) => enabled)
+              .map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
+                  key={path}
+                  to={`${getStacksAbsPath(stackId)}/${path}`}
+                >
+                  <SubTab key={path}>{label}</SubTab>
+                </LinkTabWrap>
+              ))}
+          </TabList>
           {!fullStack ? (
             <LoopingLogo css={{ flex: 1 }} />
           ) : (
-            <div
-              css={{
-                width: '100%',
-                height: '100%',
-                overflowX: 'auto',
-              }}
-            >
-              <Outlet
-                context={
-                  {
-                    stack: fullStack,
-                    refetch,
-                    loading,
-                  } satisfies StackOutletContextT
-                }
-              />
-            </div>
+            <Outlet
+              context={
+                {
+                  stack: fullStack,
+                  refetch,
+                  loading,
+                } satisfies StackOutletContextT
+              }
+            />
           )}
-        </div>
+        </Flex>
       )}
     </ResponsiveLayoutPage>
   )

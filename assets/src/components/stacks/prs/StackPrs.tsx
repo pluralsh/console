@@ -1,28 +1,35 @@
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  DropdownArrowIcon,
+  IconFrame,
+  ReloadIcon,
+  Table,
+  Toast,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { PullRequestEdge, useStackPrsQuery } from 'generated/graphql'
-import { useOutletContext, useParams } from 'react-router-dom'
+import {
+  PullRequestFragment,
+  useKickStackPullRequestMutation,
+  useStackPrsQuery,
+} from 'generated/graphql'
+import { Link, useOutletContext } from 'react-router-dom'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
-import { PrStackRunsAccordion } from './PrStackRunsAccordion'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
+import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { StackRunsTable } from '../runs/StackRunsTable'
 
 export function StackPrs() {
-  const { stackId } = useParams()
-  const { stack } = useOutletContext() as StackOutletContextT
-
-  const [openRowIdx, setOpenRowIdx] = useState(-1)
-
-  const reactTableOptions = {
-    meta: { openRowIdx, setOpenRowIdx },
-  }
+  const { stack } = useOutletContext<StackOutletContextT>()
 
   useSetBreadcrumbs(
     useMemo(
@@ -37,56 +44,143 @@ export function StackPrs() {
         queryHook: useStackPrsQuery,
         keyPath: ['infrastructureStack', 'pullRequests'],
       },
-      { id: stackId ?? '' }
+      { id: stack.id ?? '' }
     )
-  const prs = data?.infrastructureStack?.pullRequests?.edges
+
+  const prs = useMemo(
+    () => mapExistingNodes(data?.infrastructureStack?.pullRequests),
+    [data?.infrastructureStack?.pullRequests]
+  )
 
   if (error) return <GqlError error={error} />
-  if (!prs) return <LoadingIndicator />
 
   return (
     <Table
+      hideHeader
       fullHeightWrap
-      virtualizeRows
       data={prs}
       padCells={false}
       columns={cols}
-      hideHeader
+      loading={!data && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      reactTableOptions={reactTableOptions}
-      css={{ height: '100%' }}
-      emptyStateProps={{
-        message: 'No PRs found.',
-      }}
+      renderExpanded={({ row }) => (
+        <StackPrsExpandedRow
+          pr={row.original}
+          stackId={stack.id ?? ''}
+        />
+      )}
+      onRowClick={(_, row) => row.toggleExpanded()}
+      expandedRowType="custom"
+      emptyStateProps={{ message: 'No PRs found.' }}
     />
   )
 }
 
-const columnHelper = createColumnHelper<PullRequestEdge>()
+const columnHelper = createColumnHelper<PullRequestFragment>()
 
 const cols = [
-  columnHelper.accessor((edge) => edge.node, {
+  columnHelper.accessor((pr) => pr, {
     id: 'accordion',
-    cell: function Cell({ getValue, table, row }) {
-      const pr = getValue()
-      const isOpen = table?.options?.meta?.openRowIdx === row.index
+    cell: function Cell({ getValue, row }) {
+      const { title, status, creator, id, url } = getValue()
 
-      const toggleOpen = useCallback(
-        (open: boolean) =>
-          table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
-        [row.index, table?.options?.meta]
+      return (
+        <TriggerWrapperSC>
+          <TriggerArrowSC data-open={row.getIsExpanded()} />
+          <span>{title}</span>
+          <PrStatusChip status={status} />
+          {creator && <span>created by {creator}</span>}
+          <ResyncStackPr id={id} />
+          <IconFrame
+            clickable
+            as={Link}
+            icon={<ArrowTopRightIcon />}
+            to={url}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        </TriggerWrapperSC>
       )
-
-      return pr ? (
-        <PrStackRunsAccordion
-          isOpen={isOpen}
-          toggleOpen={toggleOpen}
-          pr={pr}
-        />
-      ) : null
     },
   }),
 ]
+
+function StackPrsExpandedRow({
+  pr,
+  stackId,
+}: {
+  pr: PullRequestFragment
+  stackId: string
+}) {
+  return (
+    <StackRunsTable
+      flush
+      virtualizeRows={false}
+      fillLevel={2}
+      variables={{ id: stackId, pullRequestId: pr.id }}
+      options={{ pollInterval: 5_000 }}
+      height={400}
+      borderRadius={0}
+      paddingLeft={24}
+    />
+  )
+}
+
+function ResyncStackPr({ id }: { id: string }) {
+  const [mutation, { loading, error }] = useKickStackPullRequestMutation({
+    variables: { id },
+  })
+
+  return (
+    <>
+      <IconFrame
+        css={{ marginLeft: 'auto' }}
+        disabled={loading}
+        clickable
+        type="floating"
+        tooltip="Resync"
+        icon={<ReloadIcon />}
+        onClick={(e) => {
+          e.stopPropagation()
+          mutation()
+        }}
+      />
+      {error && (
+        <Toast
+          heading="Resync error"
+          severity="danger"
+          closeTimeout={4500}
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </>
+  )
+}
+
+const TriggerWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  width: '100%',
+  ...theme.partials.text.body2Bold,
+  color: theme.colors['text-light'],
+  alignItems: 'center',
+  gap: theme.spacing.large,
+  padding: `${theme.spacing.medium}px`,
+  cursor: 'pointer',
+  background: theme.colors['fill-one'],
+  '&:hover': {
+    background: theme.colors['fill-one-hover'],
+  },
+}))
+
+const TriggerArrowSC = styled(DropdownArrowIcon)(({ theme }) => ({
+  transition: 'transform 0.25s ease',
+  transform: 'rotate(-90deg)',
+  width: theme.spacing.medium,
+  '&[data-open="true"]': { transform: 'rotate(0deg)' },
+}))
