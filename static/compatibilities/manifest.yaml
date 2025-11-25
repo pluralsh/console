@@ -28,3 +28,4 @@ names:
 - opa-gatekeeper
 - tigera-operator
 - argo-cd
+- vector
