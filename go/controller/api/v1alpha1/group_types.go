@@ -39,6 +39,7 @@ type GroupList struct {
 //+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Group in the Console API"
+//+kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Group represents a group of users within the system, managed via the Console API.
 // It includes specifications for the group's name and description.
@@ -52,6 +53,11 @@ type Group struct {
 	// Status represents the current state of this Group resource, including
 	// synchronization status with the Console API.
 	Status Status `json:"status,omitempty"`
+}
+
+// SetReadOnlyStatus sets the read-only status of the Group.
+func (in *Group) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
 }
 
 // GroupName returns the effective name to be used for this Group.

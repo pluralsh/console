@@ -65,6 +65,7 @@ type ConsoleClient interface {
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
 	GetClusterWithToken(ctx context.Context, id *string, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterWithToken, error)
 	GetClusterByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterByHandle, error)
+	GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error)
 	GetClusterProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProvider, error)
 	GetClusterProviderByCloud(ctx context.Context, cloud string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProviderByCloud, error)
 	ListClusterServices(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListClusterServices, error)
@@ -12537,6 +12538,17 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	return t.Fqdns
 }
 
+type GetClusterIdByHandle_Cluster_ struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetClusterIdByHandle_Cluster_) GetID() string {
+	if t == nil {
+		t = &GetClusterIdByHandle_Cluster_{}
+	}
+	return t.ID
+}
+
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
@@ -22201,6 +22213,17 @@ func (t *GetClusterByHandle) GetCluster() *ClusterFragment {
 	return t.Cluster
 }
 
+type GetClusterIDByHandle struct {
+	Cluster *GetClusterIdByHandle_Cluster_ "json:\"cluster,omitempty\" graphql:\"cluster\""
+}
+
+func (t *GetClusterIDByHandle) GetCluster() *GetClusterIdByHandle_Cluster_ {
+	if t == nil {
+		t = &GetClusterIDByHandle{}
+	}
+	return t.Cluster
+}
+
 type GetClusterProvider struct {
 	ClusterProvider *ClusterProviderFragment "json:\"clusterProvider,omitempty\" graphql:\"clusterProvider\""
 }
@@ -29164,6 +29187,32 @@ func (c *Client) GetClusterByHandle(ctx context.Context, handle *string, interce
 
 	var res GetClusterByHandle
 	if err := c.Client.Post(ctx, "GetClusterByHandle", GetClusterByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterIDByHandleDocument = `query GetClusterIdByHandle ($handle: String) {
+	cluster(handle: $handle) {
+		... {
+			id
+		}
+	}
+}
+`
+
+func (c *Client) GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error) {
+	vars := map[string]any{
+		"handle": handle,
+	}
+
+	var res GetClusterIDByHandle
+	if err := c.Client.Post(ctx, "GetClusterIdByHandle", GetClusterIDByHandleDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -44884,6 +44933,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentURLDocument:                               "GetAgentUrl",
 	GetClusterWithTokenDocument:                       "GetClusterWithToken",
 	GetClusterByHandleDocument:                        "GetClusterByHandle",
+	GetClusterIDByHandleDocument:                      "GetClusterIdByHandle",
 	GetClusterProviderDocument:                        "GetClusterProvider",
 	GetClusterProviderByCloudDocument:                 "GetClusterProviderByCloud",
 	ListClusterServicesDocument:                       "ListClusterServices",

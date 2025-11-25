@@ -100,7 +100,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	if ro {
 		logger.V(9).Info("Notification Sink already exists in the API, running in read-only mode")
-		utils.MarkCondition(sink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		utils.MarkReadOnly(sink)
 		return r.handleExisting(ctx, sink)
 	}
 
