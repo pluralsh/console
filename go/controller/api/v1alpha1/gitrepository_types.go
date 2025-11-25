@@ -74,6 +74,11 @@ type GitRepository struct {
 	Status GitRepositoryStatus `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the ReadOnly status of the GitRepository.
+func (in *GitRepository) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 // ConsoleID implements PluralResource interface
 func (in *GitRepository) ConsoleID() *string {
 	return in.Status.ID

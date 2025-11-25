@@ -47,6 +47,11 @@ type ServiceAccount struct {
 	Status Status `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the read-only status of the ServiceAccount.
+func (in *ServiceAccount) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 // ConsoleID returns an ID used in Console API.
 func (in *ServiceAccount) ConsoleID() *string {
 	return in.Status.ID

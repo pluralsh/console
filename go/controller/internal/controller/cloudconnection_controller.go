@@ -78,8 +78,7 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 	if exists {
 		logger.V(9).Info("CloudConnection already exists in the API, running in read-only mode")
-		utils.MarkCondition(connection.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		connection.Status.ReadOnly = true
+		utils.MarkReadOnly(connection)
 		return r.handleExistingConnection(ctx, connection)
 	}
 

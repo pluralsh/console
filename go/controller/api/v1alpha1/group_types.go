@@ -55,6 +55,11 @@ type Group struct {
 	Status Status `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the read-only status of the Group.
+func (in *Group) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 // GroupName returns the effective name to be used for this Group.
 // It returns the explicitly configured name if provided, otherwise falls back to
 // the Group resource's own name from metadata.

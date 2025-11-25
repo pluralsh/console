@@ -69,8 +69,7 @@ func (r *ServiceContextReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	if !r.handleExisting(serviceContext) && !serviceContext.DriftDetect() {
 		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-		utils.MarkCondition(serviceContext.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		serviceContext.Status.ReadOnly = true
+		utils.MarkReadOnly(serviceContext)
 		return serviceContext.Spec.Reconciliation.Requeue(), err
 	}
 	// Mark resource as managed by this operator.

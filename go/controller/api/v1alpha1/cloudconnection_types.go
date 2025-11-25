@@ -39,6 +39,21 @@ type CloudConnection struct {
 	Status Status              `json:"status,omitempty"`
 }
 
+func (c *CloudConnection) ConsoleID() *string {
+	return c.Status.ID
+}
+
+func (c *CloudConnection) ConsoleName() string {
+	if c.Spec.Name != nil && len(*c.Spec.Name) > 0 {
+		return *c.Spec.Name
+	}
+	return c.Name
+}
+
+func (c *CloudConnection) SetReadOnlyStatus(readOnly bool) {
+	c.Status.ReadOnly = readOnly
+}
+
 // CloudConnectionGetter is just a helper function that can be implemented to properly
 // build Console API attributes
 // +kubebuilder:object:generate:=false

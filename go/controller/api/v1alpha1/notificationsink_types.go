@@ -59,6 +59,22 @@ type NotificationSink struct {
 	Status Status `json:"status,omitempty"`
 }
 
+func (p *NotificationSink) ConsoleID() *string {
+	return p.Status.ID
+}
+
+func (p *NotificationSink) ConsoleName() string {
+	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
+		return *p.Spec.Name
+	}
+
+	return p.Name
+}
+
+func (p *NotificationSink) SetReadOnlyStatus(readOnly bool) {
+	p.Status.ReadOnly = readOnly
+}
+
 // SetCondition sets a condition on the NotificationSink status.
 func (p *NotificationSink) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)

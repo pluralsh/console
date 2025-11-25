@@ -43,6 +43,11 @@ type Project struct {
 	Status Status `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the read-only status of the project.
+func (in *Project) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 // ConsoleID implements [PluralResource] interface
 func (in *Project) ConsoleID() *string {
 	return in.Status.ID

@@ -38,6 +38,11 @@ type Catalog struct {
 	Status Status      `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the Catalog's readonly status.
+func (in *Catalog) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 func (in *Catalog) CatalogName() string {
 	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
 		return *in.Spec.Name

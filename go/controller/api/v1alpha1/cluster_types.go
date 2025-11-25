@@ -44,6 +44,11 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the readonly status of the cluster
+func (c *Cluster) SetReadOnlyStatus(readOnly bool) {
+	c.Status.ReadOnly = readOnly
+}
+
 // ConsoleID implements PluralResource interface
 func (c *Cluster) ConsoleID() *string {
 	return c.Status.ID

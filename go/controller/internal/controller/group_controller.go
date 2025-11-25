@@ -82,8 +82,7 @@ func (in *GroupReconciler) Reconcile(ctx context.Context, req reconcile.Request)
 		return ctrl.Result{}, err
 	}
 	if exists {
-		utils.MarkCondition(group.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		group.Status.ReadOnly = true
+		utils.MarkReadOnly(group)
 		return in.handleExistingGroup(group)
 	}
 

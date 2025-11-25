@@ -257,9 +257,10 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 	if existingRepo.Health != nil && *existingRepo.Health == console.GitHealthPullable {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	}
-	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+
+	utils.MarkReadOnly(repo)
 	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	repo.Status.ReadOnly = true
+
 	return repo.Spec.Reconciliation.Requeue(), nil
 }
 

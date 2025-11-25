@@ -46,6 +46,11 @@ type ServiceContext struct {
 	Status Status             `json:"status,omitempty"`
 }
 
+// SetReadOnlyStatus sets the read-only status of the ServiceContext.
+func (in *ServiceContext) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
+}
+
 // +kubebuilder:object:root=true
 
 // ServiceContextList contains a list of ServiceContext resources.
