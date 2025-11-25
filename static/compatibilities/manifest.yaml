@@ -27,3 +27,4 @@ names:
 - vitess
 - opa-gatekeeper
 - tigera-operator
+- argo-cd
