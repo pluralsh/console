@@ -23,5 +23,6 @@ names:
 - rook
 - strimzi-kafka
 - traefik
+- vector
 - velero
 - vitess

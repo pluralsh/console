@@ -1,0 +1,5 @@
+icon: https://avatars.githubusercontent.com/u/16866914
+git_url: https://github.com/vectordotdev/vector/
+release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
+helm_repository_url: https://helm.vector.dev
+versions: []
