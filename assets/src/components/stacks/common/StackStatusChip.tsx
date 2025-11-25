@@ -68,7 +68,9 @@ export default function StackStatusChip({
           ? 'Deleting'
           : status === StackStatus.PendingApproval
             ? 'Pending Approval'
-            : capitalize(status)}
+            : status === StackStatus.Successful
+              ? 'Succeeded'
+              : capitalize(status)}
       </Flex>
     </Chip>
   )

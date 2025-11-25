@@ -39,7 +39,7 @@ import {
   SentinelFragment,
   SentinelRunStatus,
   useRunSentinelMutation,
-} from '../../../generated/graphql.ts'
+} from 'generated/graphql'
 
 const columnHelper = createColumnHelper<SentinelFragment>()
 
@@ -338,7 +338,7 @@ export function SentinelStatusChip({
         >
           {(showIcon || isPending) && statusToIcon(status, spinner)}
           {isPending ? (
-            <CaptionP $color="icon-info">In progress</CaptionP>
+            <CaptionP $color="icon-info">Running</CaptionP>
           ) : (
             <TextComponent $color={showSeverity ? undefined : 'text-light'}>
               {statusToText[status]}
