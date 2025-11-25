@@ -1,0 +1,5 @@
+icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/argo-cd/plural/icons/argo-stacked-color-square.png?raw=true
+git_url: https://github.com/argoproj/argo-cd
+release_url: https://github.com/argoproj/argo-cd/releases/tag/{vsn}
+helm_repository_url: https://argoproj.github.io/argo-helm
+versions: []
