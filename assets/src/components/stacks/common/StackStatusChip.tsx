@@ -1,8 +1,14 @@
 import { ComponentProps } from 'react'
-import { Chip, ChipProps } from '@pluralsh/design-system'
+import { Chip, ChipProps, Flex } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 
-import { StackStatus } from '../../../generated/graphql'
+import { AiInsightSummaryFragment, StackStatus } from 'generated/graphql'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
+import {
+  getStackRunsAbsPath,
+  STACK_RUNS_INSIGHTS_REL_PATH,
+} from 'routes/stacksRoutesConsts'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 const statusToSeverity = {
   [StackStatus.Queued]: 'neutral',
@@ -20,28 +26,50 @@ const statusToSeverity = {
 export default function StackStatusChip({
   status,
   deleting = false,
+  insight,
+  stackId,
+  runId,
   ...props
 }: {
   status?: StackStatus
   deleting?: boolean
-} & ChipProps) {
-  const severity = statusToSeverity[status ?? '']
-
-  return deleting ? (
-    <Chip
-      severity="danger"
-      {...props}
-    >
-      Deleting
-    </Chip>
-  ) : (
+} & ChipProps &
+  (
+    | {
+        insight?: never
+        stackId?: never
+        runId?: never
+      }
+    | {
+        insight: Nullable<AiInsightSummaryFragment>
+        stackId: string
+        runId: string
+      }
+  )) {
+  const severity = deleting ? 'danger' : statusToSeverity[status ?? '']
+  const { ai } = useDeploymentSettings()
+  return (
     <Chip
       severity={severity}
       {...props}
     >
-      {status === StackStatus.PendingApproval
-        ? 'Pending Approval'
-        : capitalize(status)}
+      <Flex
+        gap="xsmall"
+        align="center"
+      >
+        {ai?.enabled && insight && stackId && runId && (
+          <AiInsightSummaryIcon
+            size="small"
+            navPath={`${getStackRunsAbsPath(stackId, runId)}/${STACK_RUNS_INSIGHTS_REL_PATH}`}
+            insight={insight}
+          />
+        )}
+        {deleting
+          ? 'Deleting'
+          : status === StackStatus.PendingApproval
+            ? 'Pending Approval'
+            : capitalize(status)}
+      </Flex>
     </Chip>
   )
 }

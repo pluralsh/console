@@ -90,7 +90,7 @@ const cols = [
       return (
         <TriggerWrapperSC>
           <TriggerArrowSC data-open={row.getIsExpanded()} />
-          <span>{title}</span>
+          <span css={{ flex: 1 }}>{title}</span>
           <PrStatusChip status={status} />
           {creator && <span>created by {creator}</span>}
           <ResyncStackPr id={id} />
@@ -137,7 +137,6 @@ function ResyncStackPr({ id }: { id: string }) {
   return (
     <>
       <IconFrame
-        css={{ marginLeft: 'auto' }}
         disabled={loading}
         clickable
         type="floating"

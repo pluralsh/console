@@ -18,8 +18,6 @@ import {
   TableProps,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -28,10 +26,7 @@ import {
 } from 'components/utils/table/useFetchPaginatedData'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
-import {
-  getStackRunsAbsPath,
-  STACK_RUNS_INSIGHTS_REL_PATH,
-} from 'routes/stacksRoutesConsts'
+import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 import { fromNow } from 'utils/datetime'
 import StackRunIcon from '../common/StackRunIcon'
 import StackStatusChip from '../common/StackStatusChip'
@@ -85,6 +80,7 @@ export function StackRunsTable({
         const { id } = original as StackRunFragment
         return <Link to={getStackRunsAbsPath(stackId, id)} />
       }}
+      emptyStateProps={{ message: 'No runs found.' }}
       {...props}
     />
   )
@@ -95,15 +91,14 @@ const columnHelper = createColumnHelper<StackRunFragment>()
 const cols = [
   columnHelper.accessor((run) => run, {
     id: 'name',
-    meta: { gridTemplate: '1fr' },
+    meta: { truncate: true },
     cell: function Cell({ getValue }) {
       const { stack } = useOutletContext<Nullable<StackOutletContextT>>() ?? {}
-      const { id, message, approver, status, git } = getValue()
+      const { id, message, status, git } = getValue()
       return (
         <StackedText
           icon={
             <StackRunIcon
-              css={{ width: 'fit-content' }}
               status={status}
               deleting={stack?.deleteRun?.id === id}
             />
@@ -118,20 +113,12 @@ const cols = [
               }}
             >
               <Body2BoldP $color="text">{message ?? 'No message'}</Body2BoldP>
-              {approver && (
-                <CaptionP
-                  $color="text-xlight"
-                  as="span"
-                >
-                  approved by {approver?.name}
-                </CaptionP>
-              )}
             </Flex>
           }
           second={
             <Flex gap="xsmall">
               <GitCommitIcon />
-              {git.ref}
+              <span>{git.ref}</span>
             </Flex>
           }
           secondPartialType="caption"
@@ -139,26 +126,31 @@ const cols = [
       )
     },
   }),
+  columnHelper.accessor((run) => run.insertedAt, {
+    id: 'insertedAt',
+    cell: function Cell({ getValue }) {
+      return <CaptionP $color="text-xlight">{fromNow(getValue())}</CaptionP>
+    },
+  }),
   columnHelper.accessor((run) => run, {
     id: 'status',
     cell: function Cell({ getValue }) {
-      const { id, insight, status, insertedAt } = getValue()
-      const { ai } = useDeploymentSettings()
-      const { stackId } = useParams()
+      const { id, insight, status } = getValue()
+      const { stackId = '' } = useParams()
+
       return (
         <Flex
-          gap="small"
+          gap="xsmall"
           align="center"
           alignSelf="end"
         >
-          <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
-          {ai?.enabled && (
-            <AiInsightSummaryIcon
-              navPath={`${getStackRunsAbsPath(stackId, id)}/${STACK_RUNS_INSIGHTS_REL_PATH}`}
-              insight={insight}
-            />
-          )}
-          <StackStatusChip status={status} />
+          <StackStatusChip
+            css={{ alignSelf: 'end' }}
+            status={status}
+            insight={insight}
+            stackId={stackId}
+            runId={id}
+          />
         </Flex>
       )
     },

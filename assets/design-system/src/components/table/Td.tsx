@@ -64,7 +64,8 @@ export const Td = styled.td<{
       : {},
     ...(truncateColumn
       ? {
-          '*': {
+          // applies to everything, with an effort to avoid applying to icons and their wrappers (probably won't be perfect for every case)
+          '*:not(:has( > svg)):not(:has( > * > svg))': {
             width: '100%',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
