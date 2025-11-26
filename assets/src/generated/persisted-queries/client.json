@@ -42,6 +42,11 @@
          "name": "AgentRunChat",
          "body": "subscription AgentRunChat($runId: ID!) {\n  agentMessageDelta(runId: $runId) {\n    delta\n    payload {\n      ...AgentMessage\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AgentMessage on AgentMessage {\n  id\n  seq\n  role\n  message\n  cost {\n    ...AgentMessageCost\n    __typename\n  }\n  metadata {\n    ...AgentMessageMetadata\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageCost on AgentMessageCost {\n  total\n  tokens {\n    input\n    output\n    reasoning\n    __typename\n  }\n  __typename\n}\n\nfragment AgentMessageMetadata on AgentMessageMetadata {\n  reasoning {\n    text\n    start\n    end\n    __typename\n  }\n  file {\n    name\n    text\n    start\n    end\n    __typename\n  }\n  tool {\n    name\n    state\n    output\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:c145d416d1ed2a0dc96e1246502f99ea793bc37e2d200b3d271ba82803b77fc7": {
+         "type": "subscription",
+         "name": "AgentRunDelta",
+         "body": "subscription AgentRunDelta($runId: ID!) {\n  agentRunDelta(id: $runId) {\n    delta\n    payload {\n      todos {\n        title\n        description\n        done\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:0bbdff23d5fb0e1033f64d6a4e002b470ceb2d17e81b3feda3eec84d78be6356": {
          "type": "query",
          "name": "AgentRunPodLogs",

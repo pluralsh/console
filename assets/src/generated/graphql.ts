@@ -1,7 +1,8 @@
 /* eslint-disable */
 /* prettier-ignore */
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import * as Apollo from '@apollo/client'
+import { gql } from '@apollo/client'
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12912,6 +12913,13 @@ export type AgentRunChatSubscriptionVariables = Exact<{
 
 export type AgentRunChatSubscription = { __typename?: 'RootSubscriptionType', agentMessageDelta?: { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null } | null };
 
+export type AgentRunDeltaSubscriptionVariables = Exact<{
+  runId: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null } | null };
+
 export type AgentRunPodLogsQueryVariables = Exact<{
   runId: Scalars['ID']['input'];
   container: Scalars['String']['input'];
@@ -20871,6 +20879,43 @@ export function useAgentRunChatSubscription(baseOptions: Apollo.SubscriptionHook
       }
 export type AgentRunChatSubscriptionHookResult = ReturnType<typeof useAgentRunChatSubscription>;
 export type AgentRunChatSubscriptionResult = Apollo.SubscriptionResult<AgentRunChatSubscription>;
+export const AgentRunDeltaDocument = gql`
+    subscription AgentRunDelta($runId: ID!) {
+  agentRunDelta(id: $runId) {
+    delta
+    payload {
+      todos {
+        title
+        description
+        done
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAgentRunDeltaSubscription__
+ *
+ * To run a query within a React component, call `useAgentRunDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunDeltaSubscription({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *   },
+ * });
+ */
+export function useAgentRunDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<AgentRunDeltaSubscription, AgentRunDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AgentRunDeltaSubscription, AgentRunDeltaSubscriptionVariables>(AgentRunDeltaDocument, options);
+      }
+export type AgentRunDeltaSubscriptionHookResult = ReturnType<typeof useAgentRunDeltaSubscription>;
+export type AgentRunDeltaSubscriptionResult = Apollo.SubscriptionResult<AgentRunDeltaSubscription>;
 export const AgentRunPodLogsDocument = gql`
     query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
   agentRun(id: $runId) {
@@ -35043,6 +35088,7 @@ export const namedOperations = {
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
+    AgentRunDelta: 'AgentRunDelta',
     AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta'
   },
