@@ -1428,6 +1428,30 @@ defmodule Console.Deployments.ServicesSyncTest do
       assert content["overrides/values-podinfo.yaml"] =~ "tag: 6.0.0"
       assert content["docs/basics.md"]
     end
+
+    @tag :skip
+    test "it can support dod repos" do
+      git = insert(:git_repository, url: "https://repo1.dso.mil/big-bang/bigbang.git")
+      git2 = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      svc = insert(:service,
+        repository: git2,
+        git: %{ref: "main", folder: "charts/deployment-operator"},
+        helm: %{
+          repository_id: git.id,
+          git: %{ref: "refs/tags/3.2.0", folder: "chart"},
+          values_files: ["values.yaml.liquid"]
+        }
+      )
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content) |> IO.inspect()
+
+      assert content["Chart.yaml"] =~ "bigbang"
+      assert content["templates/istiod/values.yaml"]
+      assert content["values.yaml.liquid"]
+    end
   end
 
   describe "#digest/1" do
