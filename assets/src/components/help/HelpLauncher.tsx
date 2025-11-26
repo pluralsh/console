@@ -28,7 +28,7 @@ export function HelpLauncher() {
 
   return (
     <>
-      <div css={{ position: 'relative' }}>
+      <div css={{ position: 'relative', alignSelf: 'flex-start' }}>
         <IconFrame
           clickable
           ref={menuBtnRef}

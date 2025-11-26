@@ -32,6 +32,8 @@ import styled, { useTheme } from 'styled-components'
 import createIcon from './icons/createIcon'
 import WrapWithIf from './WrapWithIf'
 
+export const TOOLTIP_TRIGGER_ATTRIBUTE = 'data-tooltip-trigger'
+
 type TooltipProps = {
   label: ReactNode
   placement?: Placement
@@ -159,12 +161,15 @@ function Tooltip({
     bottom: 'bottom center',
     left: 'center left',
   }[staticSide]
-
   return (
     <>
       {cloneElement(
         children,
-        getReferenceProps({ ...children.props, ref: childrenRef })
+        getReferenceProps({
+          ...children.props,
+          [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
+          ref: childrenRef,
+        })
       )}
       <WrapWithIf
         condition={portal}

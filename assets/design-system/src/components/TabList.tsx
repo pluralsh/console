@@ -136,7 +136,7 @@ function TabList({
   return (
     <WrapWithIf
       condition={scrollable}
-      wrapper={<ArrowScroll />}
+      wrapper={<ArrowScroll css={{ minHeight: 'max-content' }} />}
     >
       <Flex
         {...tabListProps}

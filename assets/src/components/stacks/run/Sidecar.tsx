@@ -21,7 +21,7 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
 import { StackedText } from '../../utils/table/StackedText'
-import StackStatusChip from '../common/StackStatusChip'
+import { StackStatusChip } from '../common/StackStatusChip'
 import StackObservabilityMetrics from '../common/StackObservabilityMetrics'
 import { ViolationSeverity } from './violations/columns.tsx'
 

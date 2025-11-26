@@ -27,7 +27,10 @@ export type GenericQueryHook<
   fetchMore: (options: any) => Promise<any>
 }
 
-type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
+export type FetchPaginatedDataOptions<
+  TQueryType,
+  TVariables extends OperationVariables,
+> = {
   queryHook: GenericQueryHook<TQueryType, TVariables>
   pageSize?: number
   keyPath: string[]
@@ -56,7 +59,7 @@ export function useFetchPaginatedData<
   TQueryType extends Partial<Record<string, any>>,
   TVariables extends OperationVariables,
 >(
-  options: FetchDataOptions<TQueryType, TVariables>,
+  options: FetchPaginatedDataOptions<TQueryType, TVariables>,
   variables: TVariables = {} as TVariables
 ): FetchPaginatedDataResult<TQueryType> {
   const [virtualSlice, setVirtualSlice] = useState<VirtualSlice | undefined>()

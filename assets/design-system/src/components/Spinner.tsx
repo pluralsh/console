@@ -1,12 +1,12 @@
 import { type ComponentPropsWithRef } from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 
 const rotateAnim = keyframes`
   from {
-    transform: rotate(0deg);
+    transform: rotate(270deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(630deg);
   }
 `
 
@@ -49,5 +49,55 @@ export function Spinner({
       $size={size}
       {...props}
     />
+  )
+}
+
+// new spinner, ultimately might want to migrate all to this one
+export function SpinnerAlt({
+  color,
+  size = 16,
+  ...props
+}: { color?: string; size?: number } & ComponentPropsWithRef<'svg'>) {
+  const { mode, colors } = useTheme()
+  const gapColor = mode === 'dark' ? colors.grey[750] : colors.grey[200]
+  const strokeWidth = size * 0.138
+  const radius = (size - strokeWidth) / 2
+  const circumference = radius * 2 * Math.PI
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {/* background track */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={gapColor}
+        strokeWidth={strokeWidth}
+        fill="none"
+      />
+      {/* spinner */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color ?? colors['icon-info']}
+        strokeWidth={strokeWidth}
+        fill="none"
+        strokeDasharray={`${circumference * 0.33} ${circumference * 0.8}`}
+        strokeLinecap="round"
+        css={`
+          transform-origin: center;
+          animation: ${rotateAnim} 1s cubic-bezier(0.4, 0.15, 0.6, 0.85)
+            infinite;
+        `}
+      />
+    </svg>
   )
 }
