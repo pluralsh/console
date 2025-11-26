@@ -20,12 +20,14 @@ export function AiInsightSummaryIcon({
   preserveSpace = false,
   iconFrameType = 'tertiary',
   noPadding = false,
+  size = 'medium',
   ...props
 }: {
   insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
   preserveSpace?: boolean
   iconFrameType?: IconFrameProps['type']
+  size?: IconFrameProps['size']
   noPadding?: boolean
 } & IconProps) {
   const theme = useTheme()
@@ -54,6 +56,7 @@ export function AiInsightSummaryIcon({
       {...(noPadding && { style: { height: 'auto', width: 'auto' } })}
       {...(navPath && { clickable: true, onClick: handleClick })}
       type={iconFrameType}
+      size={size}
       tooltipProps={{
         style: {
           ...theme.partials.text.body2,

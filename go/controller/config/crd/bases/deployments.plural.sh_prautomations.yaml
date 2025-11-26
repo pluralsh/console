@@ -861,9 +861,15 @@ spec:
               id:
                 description: ID of the resource in the Console API.
                 type: string
+              readonly:
+                default: false
+                description: ReadOnly indicates whether the resource is read-only.
+                type: boolean
               sha:
                 description: SHA of last applied configuration.
                 type: string
+            required:
+            - readonly
             type: object
         required:
         - spec

@@ -189,7 +189,8 @@ var _ = Describe("Group Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, readonlyTypeNamespacedName, group)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(group.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
-				ID: lo.ToPtr(readonlyGroupId),
+				ID:       lo.ToPtr(readonlyGroupId),
+				ReadOnly: true,
 				Conditions: []metav1.Condition{
 					{
 						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

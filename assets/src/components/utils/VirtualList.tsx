@@ -1,4 +1,5 @@
-import { Flex, Spinner } from '@pluralsh/design-system'
+import { Flex, Spinner, VirtualSlice } from '@pluralsh/design-system'
+import type { VirtualItem } from '@tanstack/react-virtual'
 import {
   ReactNode,
   RefObject,
@@ -21,9 +22,14 @@ type BaseProps<T> = {
   bottomContent?: ReactNode
   // if true, scroll will start at bottom on mount, and fetches will be triggered at the top
   isReversed?: boolean
+  onVirtualSliceChange?: (slice: VirtualSlice) => void
 } & Omit<VirtualizerProps, 'ref' | 'children'>
 
-type Renderer<T, M> = (props: { rowData: T; meta: M }) => ReactNode
+type Renderer<T, M> = (props: {
+  rowData: T
+  meta: M
+  index: number
+}) => ReactNode
 
 // the overloads allow proper type inference for 'meta' even if it's not provided
 export function VirtualList<T>(
@@ -44,11 +50,30 @@ export function VirtualList<T, M>({
   meta,
   topContent,
   bottomContent,
+  onVirtualSliceChange,
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
   const shouldStickToBottom = useRef(true)
+
+  // for doing slice polling similar to our table component
+  const emitVirtualSlice = useCallback(() => {
+    if (!onVirtualSliceChange || !internalRef.current) return
+    const { findStartIndex, findEndIndex, getItemOffset, getItemSize } =
+      internalRef.current
+
+    const toVirtualItem = (index: number): VirtualItem => {
+      const [start, size] = [getItemOffset(index), getItemSize(index)]
+      const end = start + size
+      return { index, key: `${index}`, start, size, end, lane: 0 }
+    }
+
+    onVirtualSliceChange({
+      start: toVirtualItem(findStartIndex()),
+      end: toVirtualItem(findEndIndex()),
+    })
+  }, [onVirtualSliceChange])
 
   // initially align to top normally, or bottom if reversed
   useLayoutEffect(() => {
@@ -63,27 +88,27 @@ export function VirtualList<T, M>({
       internalRef.current?.scrollToIndex(Infinity, { align: 'end' })
   }, [data.length, bottomContent, isReversed])
 
-  const onScroll = useCallback(
-    (offset: number) => {
-      if (!internalRef.current) return
-      const { viewportSize, scrollSize, findStartIndex, findEndIndex } =
-        internalRef.current
+  // emit virtual slice in case data changes while idle
+  useLayoutEffect(() => emitVirtualSlice(), [data.length, emitVirtualSlice])
 
-      // enable sticky bottom when scrolled there (within 5px buffer), otherwise disable
-      if (scrollSize - (offset + viewportSize) < 5)
-        shouldStickToBottom.current = true
-      else shouldStickToBottom.current = false
+  const onScroll = (offset: number) => {
+    if (!internalRef.current) return
+    emitVirtualSlice()
+    const { viewportSize, scrollSize, findStartIndex, findEndIndex } =
+      internalRef.current
 
-      // infinite scroll (weird indices add a buffer and account for top/bottom content)
-      if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
-        return
-      if (
-        isReversed ? findStartIndex?.() <= 1 : findEndIndex?.() >= data.length
-      )
-        loadNextPage?.()
-    },
-    [hasNextPage, isLoadingNextPage, isReversed, data.length, loadNextPage]
-  )
+    // enable sticky bottom when scrolled there (within 5px buffer), otherwise disable
+    if (scrollSize - (offset + viewportSize) < 5)
+      shouldStickToBottom.current = true
+    else shouldStickToBottom.current = false
+
+    // infinite scroll (weird indices add a buffer and account for top/bottom content)
+    if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
+      return
+    if (isReversed ? findStartIndex() <= 1 : findEndIndex() >= data.length)
+      loadNextPage?.()
+  }
+
   return (
     <VList
       // only shift when infinite scrolling up (and not currently at the bottom)
@@ -110,7 +135,7 @@ export function VirtualList<T, M>({
             index
           }
         >
-          {renderer({ rowData, meta })}
+          {renderer({ rowData, meta, index })}
         </ItemSC>
       ))}
       <div key="bottomContent">

@@ -96,8 +96,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
-					ID:  lo.ToPtr(byokReadonlyClusterConsoleID),
-					SHA: lo.ToPtr("KUEGIQWRYFJEEYRIYV5KIVVWP6AWD66YSD3AODQ54VEIM27IX44A===="),
+					ID:       lo.ToPtr(byokReadonlyClusterConsoleID),
+					SHA:      lo.ToPtr("KUEGIQWRYFJEEYRIYV5KIVVWP6AWD66YSD3AODQ54VEIM27IX44A===="),
+					ReadOnly: true,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -168,8 +169,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
-					ID:  lo.ToPtr(byokReadonlyClusterConsoleID),
-					SHA: lo.ToPtr("QEFWK4PFO6XYSBXXXLRFYEF6FTBAEGSJU2ID3R43IZ2QL4VNVOTQ===="),
+					ID:       lo.ToPtr(byokReadonlyClusterConsoleID),
+					SHA:      lo.ToPtr("QEFWK4PFO6XYSBXXXLRFYEF6FTBAEGSJU2ID3R43IZ2QL4VNVOTQ===="),
+					ReadOnly: true,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

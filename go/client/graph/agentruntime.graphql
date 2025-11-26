@@ -69,6 +69,14 @@ query ListAgentRuntimePendingRuns($id: ID!, $after: String, $first: Int, $before
     }
 }
 
+query GetAgentRunTodos($id: ID!) {
+    agentRun(id: $id) {
+        todos {
+            ...AgentTodoFragment
+        }
+    }
+}
+
 mutation CancelAgentRun($id: ID!) {
     cancelAgentRun(id: $id) {
         id
@@ -158,6 +166,8 @@ fragment AgentRunBaseFragment on AgentRun {
   prompt
   repository
   mode
+  language
+  languageVersion
   todos {
     ...AgentTodoFragment
   }

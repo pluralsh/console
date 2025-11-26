@@ -5,6 +5,7 @@ export default createIcon(({ size, color }) => (
     width={size}
     height={size}
     viewBox="0 0 12 12"
+    fill="none"
   >
     <path
       d="M6 0.5C9.02386 0.5 11.5 2.97614 11.5 6C11.5 9.02386 9.02386 11.5 6 11.5C2.97614 11.5 0.5 9.02386 0.5 6C0.5 2.97614 2.97614 0.5 6 0.5Z"

@@ -4,7 +4,6 @@ import {
   Button,
   Chip,
   DryRunIcon,
-  ErrorIcon,
   Flex,
   GitHubLogoIcon,
   Sidecar,
@@ -21,7 +20,6 @@ import {
   ServicePromotion,
   useKickServiceMutation,
 } from 'generated/graphql'
-import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   CD_REL_PATH,
@@ -34,9 +32,8 @@ import StackStatusIcon from '../../../stacks/common/StackStatusIcon.tsx'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
-import { countDeprecations } from './deprecationUtils'
-import ServicePromote from './ServicePromote'
 import LogsLegend from 'components/cd/logs/LogsLegend.tsx'
+import ServicePromote from './ServicePromote'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
@@ -45,12 +42,6 @@ export function ServiceDetailsSidecar({
 }) {
   const { pathname } = useLocation()
   const theme = useTheme()
-  const deprecationCount = useMemo(() => {
-    const { components } = serviceDeployment || {}
-
-    return components ? countDeprecations(components) : 0
-  }, [serviceDeployment])
-
   if (!serviceDeployment) {
     return null
   }
@@ -136,18 +127,6 @@ export function ServiceDetailsSidecar({
               </Chip>
             )}
           </div>
-        </SidecarItem>
-        <SidecarItem heading="Warnings">
-          {deprecationCount > 0 ? (
-            <Chip
-              icon={<ErrorIcon />}
-              severity="danger"
-            >
-              Deprecations
-            </Chip>
-          ) : (
-            <Chip severity="success">None</Chip>
-          )}
         </SidecarItem>
         {helmRepository && (
           <SidecarItem heading="Helm Repository">

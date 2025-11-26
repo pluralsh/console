@@ -17,6 +17,7 @@ type ConsoleClient interface {
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
+	GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
 	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
 	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
@@ -64,6 +65,7 @@ type ConsoleClient interface {
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
 	GetClusterWithToken(ctx context.Context, id *string, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterWithToken, error)
 	GetClusterByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterByHandle, error)
+	GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error)
 	GetClusterProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProvider, error)
 	GetClusterProviderByCloud(ctx context.Context, cloud string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProviderByCloud, error)
 	ListClusterServices(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListClusterServices, error)
@@ -448,11 +450,13 @@ func (t *PluralCredsFragment) GetURL() *string {
 }
 
 type AgentRunBaseFragment struct {
-	ID         string               "json:\"id\" graphql:\"id\""
-	Prompt     string               "json:\"prompt\" graphql:\"prompt\""
-	Repository string               "json:\"repository\" graphql:\"repository\""
-	Mode       AgentRunMode         "json:\"mode\" graphql:\"mode\""
-	Todos      []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+	ID              string               "json:\"id\" graphql:\"id\""
+	Prompt          string               "json:\"prompt\" graphql:\"prompt\""
+	Repository      string               "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode         "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage    "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string              "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
 }
 
 func (t *AgentRunBaseFragment) GetID() string {
@@ -479,6 +483,18 @@ func (t *AgentRunBaseFragment) GetMode() *AgentRunMode {
 	}
 	return &t.Mode
 }
+func (t *AgentRunBaseFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunBaseFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.LanguageVersion
+}
 func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
 		t = &AgentRunBaseFragment{}
@@ -487,21 +503,23 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 }
 
 type AgentRunFragment struct {
-	ID           string                     "json:\"id\" graphql:\"id\""
-	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
-	Repository   string                     "json:\"repository\" graphql:\"repository\""
-	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
-	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
-	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
-	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
-	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
-	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
-	User         *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
-	Flow         *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
-	PullRequests []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	ID              string                     "json:\"id\" graphql:\"id\""
+	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                     "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
+	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -527,6 +545,18 @@ func (t *AgentRunFragment) GetMode() *AgentRunMode {
 		t = &AgentRunFragment{}
 	}
 	return &t.Mode
+}
+func (t *AgentRunFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.LanguageVersion
 }
 func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
@@ -10148,6 +10178,17 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime) GetPendingRuns() *ListAgentRu
 	return t.PendingRuns
 }
 
+type GetAgentRunTodos_AgentRun struct {
+	Todos []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+}
+
+func (t *GetAgentRunTodos_AgentRun) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &GetAgentRunTodos_AgentRun{}
+	}
+	return t.Todos
+}
+
 type CancelAgentRun_CancelAgentRun struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -12495,6 +12536,17 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+
+type GetClusterIdByHandle_Cluster_ struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetClusterIdByHandle_Cluster_) GetID() string {
+	if t == nil {
+		t = &GetClusterIdByHandle_Cluster_{}
+	}
+	return t.ID
 }
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -21633,6 +21685,17 @@ func (t *ListAgentRuntimePendingRuns) GetAgentRuntime() *ListAgentRuntimePending
 	return t.AgentRuntime
 }
 
+type GetAgentRunTodos struct {
+	AgentRun *GetAgentRunTodos_AgentRun "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunTodos) GetAgentRun() *GetAgentRunTodos_AgentRun {
+	if t == nil {
+		t = &GetAgentRunTodos{}
+	}
+	return t.AgentRun
+}
+
 type CancelAgentRun struct {
 	CancelAgentRun *CancelAgentRun_CancelAgentRun "json:\"cancelAgentRun,omitempty\" graphql:\"cancelAgentRun\""
 }
@@ -22146,6 +22209,17 @@ type GetClusterByHandle struct {
 func (t *GetClusterByHandle) GetCluster() *ClusterFragment {
 	if t == nil {
 		t = &GetClusterByHandle{}
+	}
+	return t.Cluster
+}
+
+type GetClusterIDByHandle struct {
+	Cluster *GetClusterIdByHandle_Cluster_ "json:\"cluster,omitempty\" graphql:\"cluster\""
+}
+
+func (t *GetClusterIDByHandle) GetCluster() *GetClusterIdByHandle_Cluster_ {
+	if t == nil {
+		t = &GetClusterIDByHandle{}
 	}
 	return t.Cluster
 }
@@ -24969,6 +25043,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25117,6 +25193,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25274,6 +25352,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25381,6 +25461,37 @@ func (c *Client) ListAgentRuntimePendingRuns(ctx context.Context, id string, aft
 	return &res, nil
 }
 
+const GetAgentRunTodosDocument = `query GetAgentRunTodos ($id: ID!) {
+	agentRun(id: $id) {
+		todos {
+			... AgentTodoFragment
+		}
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+`
+
+func (c *Client) GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunTodos
+	if err := c.Client.Post(ctx, "GetAgentRunTodos", GetAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CancelAgentRunDocument = `mutation CancelAgentRun ($id: ID!) {
 	cancelAgentRun(id: $id) {
 		id
@@ -25447,6 +25558,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25589,6 +25702,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25699,6 +25814,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25738,6 +25855,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -29068,6 +29187,32 @@ func (c *Client) GetClusterByHandle(ctx context.Context, handle *string, interce
 
 	var res GetClusterByHandle
 	if err := c.Client.Post(ctx, "GetClusterByHandle", GetClusterByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterIDByHandleDocument = `query GetClusterIdByHandle ($handle: String) {
+	cluster(handle: $handle) {
+		... {
+			id
+		}
+	}
+}
+`
+
+func (c *Client) GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error) {
+	vars := map[string]any{
+		"handle": handle,
+	}
+
+	var res GetClusterIDByHandle
+	if err := c.Client.Post(ctx, "GetClusterIdByHandle", GetClusterIDByHandleDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -44740,6 +44885,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentRunDocument:                               "GetAgentRun",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
+	GetAgentRunTodosDocument:                          "GetAgentRunTodos",
 	CancelAgentRunDocument:                            "CancelAgentRun",
 	CreateAgentRunDocument:                            "CreateAgentRun",
 	UpdateAgentRunDocument:                            "UpdateAgentRun",
@@ -44787,6 +44933,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentURLDocument:                               "GetAgentUrl",
 	GetClusterWithTokenDocument:                       "GetClusterWithToken",
 	GetClusterByHandleDocument:                        "GetClusterByHandle",
+	GetClusterIDByHandleDocument:                      "GetClusterIdByHandle",
 	GetClusterProviderDocument:                        "GetClusterProvider",
 	GetClusterProviderByCloudDocument:                 "GetClusterProviderByCloud",
 	ListClusterServicesDocument:                       "ListClusterServices",

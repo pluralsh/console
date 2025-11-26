@@ -99,7 +99,7 @@ export function Sentinels() {
               css={{ display: 'flex', gap: 12 }}
             >
               {label === SentinelRunStatus.Pending
-                ? 'In progress'
+                ? 'Running'
                 : capitalize(label)}
               <Chip
                 size="small"

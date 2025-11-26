@@ -3450,6 +3450,9 @@ input StackCronAttributes {
 
   "configuration overrides for the cron run"
   overrides: StackOverridesAttributes
+
+  "whether to track the stack's ref exactly on cron runs versus the last detected commit"
+  trackRef: Boolean
 }
 
 input PolicyEngineAttributes {
@@ -3715,6 +3718,9 @@ type StackCron {
 
   "configuration overrides for the cron run"
   overrides: StackOverrides
+
+  "whether to track the stack's ref exactly on cron runs versus the last detected commit"
+  trackRef: Boolean
 }
 
 "grab-bag of state configuration urls for supported tools"

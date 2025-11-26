@@ -1510,6 +1510,7 @@ _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
@@ -1614,6 +1615,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef constrains the global service scope to clusters within a specific project.<br />This provides project-level isolation and ensures services are only deployed<br />to clusters belonging to the designated project. |  | Optional: \{\} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ | Template defines the service deployment specification to be applied across target clusters.<br />This contains the core service definition including Helm charts, configurations,<br />and deployment parameters that will be instantiated on each matching cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `ignoreClusters` _string array_ | IgnoreClusters specifies a list of cluster handles to exclude from the target cluster set. |  | Optional: \{\} <br /> |
 
 
 #### GraphStore
@@ -3631,6 +3633,8 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+
+
 #### Reconciliation
 
 
@@ -3896,6 +3900,8 @@ _Appears in:_
 | `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
@@ -4397,6 +4403,7 @@ _Appears in:_
 | `crontab` _string_ | The crontab on which to spawn stack runs. |  |  |
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs. |  | Optional: \{\} <br /> |
 | `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration. |  | Optional: \{\} <br /> |
+| `trackRef` _boolean_ | Whether to track the stack's ref exactly on cron runs versus the last detected commit. This can theoretically cause drift between code if referenced via symlinks. |  | Optional: \{\} <br /> |
 
 
 #### StackDefinition
@@ -4545,6 +4552,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `id` _string_ | ID of the resource in the Console API. |  | Optional: \{\} <br />Type: string <br /> |
 | `sha` _string_ | SHA of last applied configuration. |  | Optional: \{\} <br />Type: string <br /> |
+| `readonly` _boolean_ | ReadOnly indicates whether the resource is read-only. | false |  |
 | `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
 
 

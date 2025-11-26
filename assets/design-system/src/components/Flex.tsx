@@ -2,6 +2,8 @@
 
 import { type CSSProperties, type ReactNode, Ref, memo } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
+import Tooltip, { TooltipProps } from './Tooltip'
+import WrapWithIf from './WrapWithIf'
 
 type FlexBaseProps = {
   /**
@@ -35,6 +37,9 @@ type FlexBaseProps = {
 
   gap?: keyof DefaultTheme['spacing']
   padding?: keyof DefaultTheme['spacing']
+
+  tooltip?: Omit<TooltipProps, 'children'>
+
   ref?: Ref<HTMLDivElement>
   className?: string
   children?: ReactNode
@@ -54,28 +59,34 @@ function BaseFlex({
   justify,
   gap,
   padding,
+  tooltip,
   children,
   ...otherProps
 }: FlexProps) {
   return (
-    <FlexSC
-      ref={ref}
-      className={className}
-      {...{
-        $direction: direction,
-        $wrap: wrap,
-        $basis: basis,
-        $grow: grow,
-        $shrink: shrink,
-        $align: align,
-        $justify: justify,
-        $gap: gap,
-        $padding: padding,
-      }}
-      css={{ ...otherProps }}
+    <WrapWithIf
+      condition={!!tooltip}
+      wrapper={<Tooltip {...tooltip} />}
     >
-      {children}
-    </FlexSC>
+      <FlexSC
+        ref={ref}
+        className={className}
+        {...{
+          $direction: direction,
+          $wrap: wrap,
+          $basis: basis,
+          $grow: grow,
+          $shrink: shrink,
+          $align: align,
+          $justify: justify,
+          $gap: gap,
+          $padding: padding,
+        }}
+        css={{ ...otherProps }}
+      >
+        {children}
+      </FlexSC>
+    </WrapWithIf>
   )
 }
 

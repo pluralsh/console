@@ -3324,6 +3324,62 @@ func (_c *ConsoleClientMock_GetClusterByHandle_Call) RunAndReturn(run func(*stri
 	return _c
 }
 
+// GetClusterIdByHandle provides a mock function with given fields: handle
+func (_m *ConsoleClientMock) GetClusterIdByHandle(handle string) (string, error) {
+	ret := _m.Called(handle)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetClusterIdByHandle")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(handle)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(handle)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(handle)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetClusterIdByHandle_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetClusterIdByHandle'
+type ConsoleClientMock_GetClusterIdByHandle_Call struct {
+	*mock.Call
+}
+
+// GetClusterIdByHandle is a helper method to define mock.On call
+//   - handle string
+func (_e *ConsoleClientMock_Expecter) GetClusterIdByHandle(handle interface{}) *ConsoleClientMock_GetClusterIdByHandle_Call {
+	return &ConsoleClientMock_GetClusterIdByHandle_Call{Call: _e.mock.On("GetClusterIdByHandle", handle)}
+}
+
+func (_c *ConsoleClientMock_GetClusterIdByHandle_Call) Run(run func(handle string)) *ConsoleClientMock_GetClusterIdByHandle_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetClusterIdByHandle_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetClusterIdByHandle_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetClusterIdByHandle_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetClusterIdByHandle_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetClusterRestore provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetClusterRestore(ctx context.Context, id string) (*client.ClusterRestoreFragment, error) {
 	ret := _m.Called(ctx, id)

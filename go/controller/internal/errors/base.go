@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"strings"
 
 	client "github.com/Yamashou/gqlgenc/clientv2"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -19,6 +20,7 @@ func (k KnownError) Error() string {
 
 const (
 	ErrorNotFound             KnownError = "could not find resource"
+	ErrorNotFound2            KnownError = "not found"
 	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
 	ErrDeleteRepository                  = "could not delete repository"
 )
@@ -43,8 +45,9 @@ func (er *wrappedErrorResponse) Has(err KnownError) bool {
 		return false
 	}
 
+	expected := string(err)
 	for _, g := range *er.err.GqlErrors {
-		if g.Message == string(err) {
+		if strings.Contains(g.Message, expected) {
 			return true
 		}
 	}
@@ -69,7 +72,9 @@ func IsNotFound(err error) bool {
 		return false
 	}
 
-	return newAPIError(errorResponse).Has(ErrorNotFound) || newAPIError(errorResponse).Has(ErrorNotFoundOIDCProvider)
+	return (newAPIError(errorResponse).Has(ErrorNotFound) ||
+		newAPIError(errorResponse).Has(ErrorNotFoundOIDCProvider) ||
+		newAPIError(errorResponse).Has(ErrorNotFound2))
 }
 
 func IgnoreNotFound(err error) error {

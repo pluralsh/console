@@ -98,6 +98,12 @@ spec:
                 - K3S
                 - OPENSHIFT
                 type: string
+              ignoreClusters:
+                description: IgnoreClusters specifies a list of cluster handles to
+                  exclude from the target cluster set.
+                items:
+                  type: string
+                type: array
               interval:
                 description: |-
                   Interval specifies the reconciliation interval for the global service.
@@ -908,9 +914,15 @@ spec:
               id:
                 description: ID of the resource in the Console API.
                 type: string
+              readonly:
+                default: false
+                description: ReadOnly indicates whether the resource is read-only.
+                type: boolean
               sha:
                 description: SHA of last applied configuration.
                 type: string
+            required:
+            - readonly
             type: object
         type: object
     served: true

@@ -2,6 +2,7 @@ package client
 
 import (
 	stderrors "errors"
+	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
@@ -99,6 +100,24 @@ func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, e
 	}
 
 	return response.Cluster, err
+}
+
+func (c *client) GetClusterIdByHandle(handle string) (string, error) {
+	if handle == "" {
+		return "", fmt.Errorf("no handle specified")
+	}
+	response, err := c.consoleClient.GetClusterIDByHandle(c.ctx, &handle)
+	if internalerror.IsNotFound(err) {
+		return "", errors.NewNotFound(schema.GroupResource{}, handle)
+	}
+	if err == nil && (response == nil || response.Cluster == nil) {
+		return "", errors.NewNotFound(schema.GroupResource{}, handle)
+	}
+	if response == nil {
+		return "", err
+	}
+
+	return response.Cluster.ID, err
 }
 
 func (c *client) ListClusters() (*console.ListClusters, error) {
