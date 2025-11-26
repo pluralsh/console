@@ -1,16 +1,16 @@
 import {
-  CheckRoundedIcon,
+  CancelledFilledIcon,
+  CheckOutlineIcon,
   Chip,
   ChipProps,
   FailedFilledIcon,
   Flex,
   QueuedOutlineIcon,
-  WrapWithIf,
   SpinnerAlt,
   StatusIpIcon,
-  CancelledFilledIcon,
-  WarningIcon,
   Tooltip,
+  WarningIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 import { ComponentProps, ReactNode } from 'react'
@@ -77,33 +77,36 @@ export function StackStatusChipAlt({ stack }: { stack: StackTinyFragment }) {
   const { id, insight, deletedAt, status } = stack
   const { ai } = useDeploymentSettings()
 
-  if (ai?.enabled && insight)
-    return (
-      <StackStatusChip
-        status={status}
-        deleting={!!deletedAt}
-        insight={insight}
-        stackId={id}
-      />
-    )
   return (
     <WrapWithIf
       condition={!!deletedAt}
       wrapper={<DeletingChip />}
     >
-      <Tooltip
-        placement="top"
-        label={statusToLabel(status)}
+      <Flex
+        align="center"
+        gap="xxsmall"
       >
-        {statusToIcon[status]}
-      </Tooltip>
+        {ai?.enabled && insight && (
+          <AiInsightSummaryIcon
+            size="small"
+            navPath={`${getStacksAbsPath(id)}/${STACK_INSIGHTS_REL_PATH}`}
+            insight={insight}
+          />
+        )}
+        <Tooltip
+          placement="top"
+          label={statusToLabel(status)}
+        >
+          {statusToIcon[status]}
+        </Tooltip>
+      </Flex>
     </WrapWithIf>
   )
 }
 
 function DeletingChip({ children }: { children?: ReactNode }) {
   return (
-    <Chip>
+    <Chip fillLevel={2}>
       <Flex
         align="center"
         gap="xsmall"
@@ -135,11 +138,26 @@ export const statusToSeverity = {
 >
 
 const statusToIcon = {
-  [StackStatus.Queued]: <QueuedOutlineIcon />,
-  [StackStatus.Pending]: <StatusIpIcon />,
-  [StackStatus.Running]: <SpinnerAlt size={16} />,
-  [StackStatus.Cancelled]: <CancelledFilledIcon />,
-  [StackStatus.Failed]: <FailedFilledIcon color="icon-danger" />,
-  [StackStatus.Successful]: <CheckRoundedIcon color="icon-success" />,
-  [StackStatus.PendingApproval]: <WarningIcon color="icon-warning" />,
+  [StackStatus.Queued]: <QueuedOutlineIcon size={18} />,
+  [StackStatus.Pending]: <StatusIpIcon size={18} />,
+  [StackStatus.Running]: <SpinnerAlt size={18} />,
+  [StackStatus.Cancelled]: <CancelledFilledIcon size={18} />,
+  [StackStatus.Failed]: (
+    <FailedFilledIcon
+      color="icon-danger"
+      size={18}
+    />
+  ),
+  [StackStatus.Successful]: (
+    <CheckOutlineIcon
+      color="icon-success"
+      size={18}
+    />
+  ),
+  [StackStatus.PendingApproval]: (
+    <WarningIcon
+      color="icon-warning"
+      size={18}
+    />
+  ),
 } as const satisfies Record<StackStatus, ReactNode>
