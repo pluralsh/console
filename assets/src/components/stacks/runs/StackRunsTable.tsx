@@ -16,6 +16,7 @@ import {
   IconFrame,
   Table,
   TableProps,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
@@ -24,12 +25,13 @@ import {
   FetchPaginatedDataOptions,
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
+import { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import StackRunIcon from '../common/StackRunIcon'
-import StackStatusChip from '../common/StackStatusChip'
+import { StackStatusChip } from '../common/StackStatusChip'
 import { StackOutletContextT } from '../Stacks'
 
 export function StackRunsTable({
@@ -93,6 +95,7 @@ const cols = [
     id: 'name',
     meta: { truncate: true },
     cell: function Cell({ getValue }) {
+      const { colors } = useTheme()
       const { stack } = useOutletContext<Nullable<StackOutletContextT>>() ?? {}
       const { id, message, status, git } = getValue()
       return (
@@ -103,17 +106,19 @@ const cols = [
               deleting={stack?.deleteRun?.id === id}
             />
           }
+          firstPartialType="body2Bold"
           first={
-            <Flex
-              gap="small"
-              align="center"
-              tooltip={{
-                placement: 'top-start',
-                label: message ?? 'No message',
-              }}
+            <Tooltip
+              placement="top"
+              label={message ?? 'No message'}
             >
-              <Body2BoldP $color="text">{message ?? 'No message'}</Body2BoldP>
-            </Flex>
+              <Link
+                css={{ textDecoration: 'none', color: colors['text'] }}
+                to={getStackRunsAbsPath(stack?.id, id)}
+              >
+                {message ?? 'No message'}
+              </Link>
+            </Tooltip>
           }
           second={
             <Flex gap="xsmall">

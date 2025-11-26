@@ -71,11 +71,13 @@ import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { MoreMenu } from '../utils/MoreMenu'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
-import StackStatusChip from './common/StackStatusChip.tsx'
+import { StackStatusChip } from './common/StackStatusChip.tsx'
 import StackCustomRun from './customrun/StackCustomRun'
 import RestoreStackButton from './RestoreStackButton.tsx'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
@@ -83,8 +85,6 @@ import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
 import { StackEntry } from './StacksEntry'
-import { StackedText } from 'components/utils/table/StackedText.tsx'
-import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 
 export type StackOutletContextT = {
   stack: StackFragment
