@@ -123,7 +123,7 @@ type GlobalServiceSpec struct {
 	// This allows targeting services to specific cluster types that may have
 	// distribution-specific requirements or optimizations.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S
+	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// Mgmt indicates whether to include management clusters in the target cluster set.
