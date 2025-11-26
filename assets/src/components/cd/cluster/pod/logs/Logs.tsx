@@ -1,12 +1,13 @@
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
-import { Key, ReactElement, useMemo, useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { Pod } from '../../../../../generated/graphql'
+import { Pod } from 'generated/graphql'
 
-import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import ContainerLogs from './ContainerLogs'
+import { Key } from '@react-types/shared'
 
 export enum SinceSecondsOptions {
   Minute = 60,

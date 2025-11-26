@@ -11,7 +11,7 @@ import { useTheme } from 'styled-components'
 import { LogContextPanel } from './LogContextPanel'
 import { LogLine } from './LogLine'
 import { DEFAULT_LOG_QUERY_LENGTH, secondsToDuration } from './Logs'
-import { LogsFlyoverFiltersT } from './LogsFilters'
+import { LogsFiltersT } from './LogsFilters'
 
 const columnHelper = createColumnHelper<LogLineFragment>()
 
@@ -30,7 +30,7 @@ export function LogsTable({
   logs: LogLineFragment[]
   loading?: boolean
   initialLoading?: boolean
-  filters: LogsFlyoverFiltersT
+  filters: LogsFiltersT
   fetchMore: LogAggregationQueryResult['fetchMore']
   live: boolean
   setLive: (live: boolean) => void

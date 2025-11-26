@@ -1,15 +1,5 @@
-import { Button, Tooltip } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
-
-export const LiveIcon = styled.div<{ $live: boolean }>(({ theme, $live }) => ({
-  backgroundColor: $live
-    ? theme.colors['icon-success']
-    : theme.colors['icon-neutral'],
-  borderRadius: 10,
-  height: 10,
-  width: 10,
-  transition: 'background-color 0.2s ease-in-out',
-}))
+import { Switch } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
 export function LogsScrollIndicator({
   live,
@@ -18,24 +8,15 @@ export function LogsScrollIndicator({
   live: boolean
   setLive: (live: boolean) => void
 }) {
-  const theme = useTheme()
+  const { colors } = useTheme()
   return (
-    <Tooltip
-      label="Note: enabling live logs will ignore any specified end date/time filters"
-      placement="top"
+    <Switch
+      checked={live}
+      onChange={() => setLive(!live)}
+      variant="green"
+      css={{ color: colors.text }}
     >
-      <Button
-        small
-        floating
-        startIcon={<LiveIcon $live={live} />}
-        onClick={() => setLive(!live)}
-        style={{
-          color: live ? theme.colors.text : theme.colors['text-xlight'],
-          transition: 'color 0.2s ease-in-out',
-        }}
-      >
-        Live
-      </Button>
-    </Tooltip>
+      Live logs {live ? 'enabled' : 'disabled'}
+    </Switch>
   )
 }

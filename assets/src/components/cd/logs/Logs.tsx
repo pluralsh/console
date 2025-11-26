@@ -1,25 +1,23 @@
-import {
-  Card,
-  Flex,
-  IconFrame,
-  InfoOutlineIcon,
-  Toast,
-} from '@pluralsh/design-system'
+import { Card, Flex, Toast } from '@pluralsh/design-system'
 import { useCallback, useMemo, useState } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { LogFacetInput, useLogAggregationQuery } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { toISOStringOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { logLevelToColor } from './LogLine'
 import {
-  DEFAULT_LOG_FLYOVER_FILTERS,
-  LogsFilters,
-  LogsFlyoverFiltersT,
+  DEFAULT_LOG_FILTERS,
+  LogsDateDropdown,
+  LogsFiltersT,
+  LogsSearchInput,
+  LogsSinceSecondsSelect,
 } from './LogsFilters'
-import LogsLegend from './LogsLegend'
+import { LegendColor } from './LogsLegend'
 import { LogsScrollIndicator } from './LogsScrollIndicator'
 import { LogsTable } from './LogsTable'
 
@@ -28,11 +26,9 @@ export const DEFAULT_LOG_QUERY_LENGTH = 250
 export function Logs({
   serviceId,
   clusterId,
-  showLegendTooltip,
 }: {
   serviceId?: string
   clusterId?: string
-  showLegendTooltip?: boolean
 }) {
   const theme = useTheme()
   const [showErrorToast, setShowErrorToast] = useState(false)
@@ -41,9 +37,7 @@ export function Logs({
   const [labels, setLabels] = useState<LogFacetInput[]>([])
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 1000)
-  const [filters, setFilters] = useState<LogsFlyoverFiltersT>(
-    DEFAULT_LOG_FLYOVER_FILTERS
-  )
+  const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
 
   const [live, setLive] = useState(true)
 
@@ -65,6 +59,7 @@ export function Logs({
     pollInterval: live ? POLL_INTERVAL : 0,
     skip: !(clusterId || serviceId),
   })
+  const initialLoading = !data && loading
 
   const logs = useMemo(
     () => data?.logAggregation?.filter(isNonNullable) ?? [],
@@ -92,14 +87,11 @@ export function Logs({
   return (
     <>
       <MainContentWrapperSC>
-        <LogsFilters
+        <LogsSearchInput
           q={q}
           setQ={setQ}
-          filters={filters}
-          setFilters={setFilters}
           labels={labels}
           removeLabel={removeLabel}
-          setLive={setLive}
         />
         {error ? (
           <GqlError error={error} />
@@ -109,30 +101,38 @@ export function Logs({
             overflow="hidden"
             header={{
               size: 'large',
+              headerProps: {
+                style: { textTransform: 'none', overflow: 'visible' },
+              },
               content: (
-                <Flex
-                  width="100%"
-                  justify="space-between"
-                >
+                <StretchedFlex>
+                  <Flex gap="small">
+                    <LogsSinceSecondsSelect
+                      sinceSeconds={filters.sinceSeconds}
+                      setSinceSeconds={(sinceSeconds) =>
+                        setFilters({ ...filters, sinceSeconds })
+                      }
+                      disabled={live}
+                    />
+                    <LogsDateDropdown
+                      initialDate={filters.date}
+                      setDate={(date) => setFilters({ ...filters, date })}
+                      setLive={setLive}
+                      disabled={live}
+                    />
+                  </Flex>
                   <LogsScrollIndicator
                     live={live}
                     setLive={setLive}
                   />
-                  {showLegendTooltip && (
-                    <IconFrame
-                      icon={<InfoOutlineIcon color="icon-default" />}
-                      tooltip={<LogsLegend />}
-                      tooltipProps={{ placement: 'right' }}
-                    />
-                  )}
-                </Flex>
+                </StretchedFlex>
               ),
             }}
           >
             <LogsTable
               logs={logs}
               loading={loading}
-              initialLoading={!data && loading}
+              initialLoading={initialLoading}
               fetchMore={fetchMore}
               filters={filters}
               live={live}
@@ -144,6 +144,19 @@ export function Logs({
             />
           </Card>
         )}
+        <Flex gap="medium">
+          {!(error || initialLoading) &&
+            Object.entries(logLevelToColor).map(([level, color]) => (
+              <Flex
+                key={level}
+                gap="xsmall"
+                align="center"
+              >
+                <LegendColor color={color} />
+                {level}
+              </Flex>
+            ))}
+        </Flex>
       </MainContentWrapperSC>
       <Toast
         severity="danger"

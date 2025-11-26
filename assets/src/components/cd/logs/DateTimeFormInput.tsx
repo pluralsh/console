@@ -1,24 +1,13 @@
 import {
-  ArrowRightIcon,
   FormField,
-  IconFrame,
-  Input,
   SegmentedInput,
   SegmentedInputHandle,
-  SemanticColorKey,
   Toast,
   useIsFocused,
 } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 
-import {
-  ComponentPropsWithRef,
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentPropsWithRef, useEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { DateParam, formatDateTime, isValidDateTime } from 'utils/datetime'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
@@ -32,17 +21,13 @@ export function DateTimeFormInput({
   initialDate,
   setDate,
   setHasErrors,
-  clearDTFormRef,
   ...props
 }: {
   initialDate?: DateParam
   setDate?: (date?: DateParam) => void
-  setHasErrors: (hasErrors: boolean) => void
-  clearDTFormRef: RefObject<(() => void) | null>
+  setHasErrors?: (hasErrors: boolean) => void
 } & Omit<ComponentPropsWithRef<typeof FormField>, 'caption'>) {
   const { colors, spacing } = useTheme()
-  const [isEnteringTimestamp, setIsEnteringTimestamp] = useState(false)
-  const [customTimestamp, setCustomTimestamp] = useState('')
   const [timestampError, setTimestampError] = useState(false)
   const [isFocused, focusCallbacks] = useIsFocused({})
 
@@ -63,38 +48,23 @@ export function DateTimeFormInput({
   const dateInputRef = useRef<SegmentedInputHandle>(null)
   const timeInputRef = useRef<SegmentedInputHandle>(null)
 
-  // does an imperative clear, and manually sets state accordingly
-  // necessary because SegmentedInput component is not fully controlled
-  const clearDateTime = useCallback(() => {
-    dateInputRef.current?.clear()
-    timeInputRef.current?.clear()
-    setDateStr(EMPTY_DATE_STR)
-    setTimeStr(EMPTY_TIME_STR)
-    setDate?.(undefined)
-  }, [setDate])
-
-  // a few effects to keep parent in sync, also needed because SegmentedInput is not fully controlled
+  // sync error state with parent
   useEffect(() => {
-    if (!clearDTFormRef.current) clearDTFormRef.current = clearDateTime
-  }, [clearDTFormRef, clearDateTime])
-
-  useEffect(() => {
-    setHasErrors(dateError || timeError)
+    setHasErrors?.(dateError || timeError)
   }, [dateError, setHasErrors, timeError])
 
+  // sync date value with parent when inputs change
   useEffect(() => {
-    if (isSetToNow) return
-    if (dateValid && timeValid) setDate?.(`${dateStr} ${timeStr}`)
-    else setDate?.(initialDate)
-  }, [dateStr, dateValid, initialDate, isSetToNow, setDate, timeStr, timeValid])
+    if (isSetToNow) setDate?.(undefined)
+    else if (dateValid && timeValid) setDate?.(`${dateStr} ${timeStr}`)
+  }, [dateStr, dateValid, isSetToNow, setDate, timeStr, timeValid])
 
   const setValsFromTimestamp = (val?: string) => {
-    const timestamp = handleUnixTS(val ?? customTimestamp)
+    const timestamp = handleUnixTS(val ?? '')
     if (!isValidDateTime(timestamp)) {
       setTimestampError(true)
       return
     }
-    setIsEnteringTimestamp(false)
     const date = formatDateTime(timestamp, DATE_FORMAT, true)
     const time = formatDateTime(timestamp, TIME_FORMAT, true)
     runAfterBrowserLayout(() => {
@@ -106,90 +76,44 @@ export function DateTimeFormInput({
   return (
     <FormField
       hint="All logs displayed will be before this date/time. ISO timestamps can be also be pasted in"
-      caption={
-        isEnteringTimestamp ? (
-          <CaptionTextBtnSC
-            $color="text-primary-accent"
-            onClick={() => setIsEnteringTimestamp(false)}
-          >
-            Cancel
-          </CaptionTextBtnSC>
-        ) : (
-          <CaptionWrapperSC>
-            <CaptionTextBtnSC
-              $disabled={isSetToNow}
-              onClick={isSetToNow ? undefined : clearDateTime}
-            >
-              Set to now
-            </CaptionTextBtnSC>
-            <CaptionTextBtnSC
-              $color="text-primary-accent"
-              onClick={() => setIsEnteringTimestamp(true)}
-            >
-              Enter timestamp
-            </CaptionTextBtnSC>
-          </CaptionWrapperSC>
-        )
-      }
       {...props}
       {...focusCallbacks}
     >
-      {isEnteringTimestamp ? (
-        <Input
-          style={{ borderColor: timestampError && colors['border-danger'] }}
-          endIcon={
-            <IconFrame
-              clickable
-              icon={<ArrowRightIcon />}
-              onClick={() => setValsFromTimestamp()}
-            />
-          }
-          placeholder="Paste timestamp"
-          onChange={(e) => setCustomTimestamp(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              setValsFromTimestamp()
-            }
-          }}
+      <DateTimeInputWrapperSC
+        onPaste={(e) => {
+          e.preventDefault()
+          setValsFromTimestamp(e.clipboardData.getData('text'))
+        }}
+      >
+        <SegmentedInput
+          ref={dateInputRef}
+          {...(isSetToNow && !isFocused && { value: 'Today' })}
+          style={{ borderColor: dateError && colors['border-danger'] }}
+          prefix="Date"
+          endIcon={<Body2P $color="text-xlight">MM/DD/YYYY</Body2P>}
+          onChange={setDateStr}
+          separator="/"
+          segments={[
+            { length: 2, max: 12, name: 'MM', initialVal: initDateM },
+            { length: 2, min: 1, max: 31, name: 'DD', initialVal: initDateD },
+            { length: 4, max: 9999, name: 'YYYY', initialVal: initDateY },
+          ]}
         />
-      ) : (
-        <DateTimeInputWrapperSC
-          onPaste={(e) => {
-            e.preventDefault()
-            setValsFromTimestamp(e.clipboardData.getData('text'))
-          }}
-        >
-          <SegmentedInput
-            ref={dateInputRef}
-            {...(isSetToNow && !isFocused && { value: 'Today' })}
-            style={{ borderColor: dateError && colors['border-danger'] }}
-            prefix="Date"
-            endIcon={<Body2P $color="text-xlight">MM/DD/YYYY</Body2P>}
-            onChange={setDateStr}
-            separator="/"
-            segments={[
-              { length: 2, max: 12, name: 'MM', initialVal: initDateM },
-              { length: 2, min: 1, max: 31, name: 'DD', initialVal: initDateD },
-              { length: 4, max: 9999, name: 'YYYY', initialVal: initDateY },
-            ]}
-          />
-          <SegmentedInput
-            ref={timeInputRef}
-            {...(isSetToNow && !isFocused && { value: 'Now' })}
-            style={{ borderColor: timeError && colors['border-danger'] }}
-            prefix="Time"
-            endIcon={<Body2P $color="text-xlight">UTC</Body2P>}
-            onChange={setTimeStr}
-            separator=":"
-            segments={[
-              { length: 2, max: 23, name: 'HH', initialVal: initTimeH },
-              { length: 2, max: 59, name: 'MM', initialVal: initTimeM },
-              { length: 2, max: 59, name: 'SS', initialVal: initTimeS },
-            ]}
-          />
-        </DateTimeInputWrapperSC>
-      )}
+        <SegmentedInput
+          ref={timeInputRef}
+          {...(isSetToNow && !isFocused && { value: 'Now' })}
+          style={{ borderColor: timeError && colors['border-danger'] }}
+          prefix="Time"
+          endIcon={<Body2P $color="text-xlight">UTC</Body2P>}
+          onChange={setTimeStr}
+          separator=":"
+          segments={[
+            { length: 2, max: 23, name: 'HH', initialVal: initTimeH },
+            { length: 2, max: 59, name: 'MM', initialVal: initTimeM },
+            { length: 2, max: 59, name: 'SS', initialVal: initTimeS },
+          ]}
+        />
+      </DateTimeInputWrapperSC>
       <Toast
         show={timestampError}
         closeTimeout={2000}
@@ -203,25 +127,10 @@ export function DateTimeFormInput({
   )
 }
 
-const CaptionWrapperSC = styled.span(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-}))
-
 const DateTimeInputWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
-}))
-
-const CaptionTextBtnSC = styled.span<{
-  $color?: SemanticColorKey
-  $disabled?: boolean
-}>(({ theme, $color = 'text-xlight', $disabled = false }) => ({
-  color: theme.colors[$color],
-  cursor: $disabled ? 'default' : 'pointer',
-  opacity: $disabled ? 0.4 : 1,
-  '&:hover': { textDecoration: $disabled ? 'none' : 'underline' },
 }))
 
 const handleUnixTS = (val: string) => {
