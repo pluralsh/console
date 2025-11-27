@@ -25,10 +25,12 @@ import {
   AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
+  AgentTodo,
   AiRole,
   ChatType,
   PullRequestFragment,
   useAgentRunChatSubscription,
+  useAgentRunDeltaSubscription,
   useAgentRunPodLogsQuery,
   useAgentRunQuery,
 } from 'generated/graphql'
@@ -49,6 +51,7 @@ import {
   AI_AGENT_RUNS_REL_PATH,
   getAgentRunAbsPath,
 } from 'routes/aiRoutesConsts'
+import { PODS_REL_PATH } from 'routes/cdRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { VListHandle } from 'virtua'
@@ -68,7 +71,6 @@ import { VirtualList } from '../../utils/VirtualList.tsx'
 import { getAIBreadcrumbs } from '../AI'
 import { ChatMessage } from '../chatbot/ChatMessage'
 import { agentRunStatusToSeverity } from './AIAgentRuns'
-import { PODS_REL_PATH } from 'routes/cdRoutesConsts.tsx'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -137,6 +139,17 @@ export function AIAgentRun() {
   )
 }
 function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
+  const [todos, setTodos] = useState<Array<AgentTodo>>(
+    run?.todos as Array<AgentTodo>
+  )
+
+  useAgentRunDeltaSubscription({
+    skip: !run?.id || run?.status !== AgentRunStatus.Running,
+    variables: { runId: run?.id ?? '' },
+    onData: ({ data: { data } }) =>
+      setTodos(data?.agentRunDelta?.payload?.todos as Array<AgentTodo>),
+  })
+
   return (
     <ResponsiveLayoutSidecarContainer>
       {!run ? (
@@ -165,9 +178,9 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
           {run.runtime?.name && (
             <SidecarItem heading="Runtime">{run.runtime.name}</SidecarItem>
           )}
-          {!isEmpty(run.todos) && (
+          {!isEmpty(todos) && (
             <SidecarItem heading="Todos">
-              {run.todos?.filter(isNonNullable).map((todo) => (
+              {todos?.filter(isNonNullable).map((todo) => (
                 <StackedText
                   key={todo.title}
                   first={todo.title}
