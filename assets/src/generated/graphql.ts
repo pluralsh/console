@@ -1,8 +1,7 @@
 /* eslint-disable */
 /* prettier-ignore */
-import * as Apollo from '@apollo/client'
-import { gql } from '@apollo/client'
-
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12920,7 +12919,7 @@ export type AgentRunDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null } | null };
+export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null };
 
 export type AgentRunPodLogsQueryVariables = Exact<{
   runId: Scalars['ID']['input'];
@@ -20885,15 +20884,25 @@ export const AgentRunDeltaDocument = gql`
   agentRunDelta(id: $runId) {
     delta
     payload {
+      ...AgentRunTiny
       todos {
         title
         description
         done
       }
+      analysis {
+        summary
+        analysis
+        bullets
+      }
+      podReference {
+        name
+        namespace
+      }
     }
   }
 }
-    `;
+    ${AgentRunTinyFragmentDoc}`;
 
 /**
  * __useAgentRunDeltaSubscription__

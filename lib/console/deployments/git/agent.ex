@@ -217,7 +217,7 @@ defmodule Console.Deployments.Git.Agent do
            res <- fetch(git),
            {:ok, git} <- save_status(res, git),
            cache <- refresh(git, cache) do
-        {:noreply, %State{git: git, cache: %{cache | git: git}, last_pull: Timex.now()}}
+        {:noreply, %{state | git: git, cache: %{cache | git: git}, last_pull: Timex.now()}}
       else
         {:git, nil} -> {:stop, {:shutdown, :normal}, state}
         {:git, repo} ->
