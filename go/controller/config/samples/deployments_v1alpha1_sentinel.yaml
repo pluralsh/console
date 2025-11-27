@@ -1,4 +1,12 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: terratest
+  labels:
+    environment: dev
+    team: platform
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: full-access
@@ -17,7 +25,6 @@ subjects:
     name: full-access
     namespace: terratest
 ---
-
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Sentinel
 metadata:
@@ -30,19 +37,30 @@ metadata:
   name: sentinel-terratest
   namespace: default
 spec:
-  name: terratest
+  name: terratest-git
   description: "test sentinel for terratest"
   checks:
     - type: INTEGRATION_TEST
       name: test-integration
       configuration:
         integrationTest:
-          distro: EKS
           format: JUNIT
+          repositoryRef:
+            name: terratest-git
+            namespace: default
+          git:
+            ref: main
+            folder: "/"
           jobSpec:
             namespace: terratest
             serviceAccount: full-access
             containers:
-              - image: ghcr.io/pluralsh/sentinel-harness-terratest:latest
-
-
+              - image: ghcr.io/pluralsh/sentinel-harness:sha-b8d4540-terratest-0.51.0
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terratest-git
+  namespace: default
+spec:
+  url: https://github.com/pluralsh/terratest-suite.git

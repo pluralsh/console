@@ -39,7 +39,7 @@ export function ClusterHealthScoresHeatmap({
     <TreeMap
       rounded
       data={data}
-      colors={getColor}
+      colors={(d) => getColor(d).hex()}
       label={truncatedGraphLabel}
       onClick={({ id }) => onClick(id)} // id will be the cluster name
       valueFormat={(value) => `${101 - value}`}

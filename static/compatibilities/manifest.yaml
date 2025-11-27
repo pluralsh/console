@@ -25,3 +25,7 @@ names:
 - traefik
 - velero
 - vitess
+- gatekeeper
+- tigera-operator
+- argo-cd
+- vector

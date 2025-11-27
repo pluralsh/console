@@ -67,7 +67,9 @@ config :console,
   default_project_name: "default",
   prom_plugins: [Console.Prom.Plugin],
   cloudquery: false,
-  jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
+  jwt_pub_key: or_nil.(File.read("config/pubkey.pem")),
+  oidc_sync: :upsert,
+  refresh_token_expiry: "7d"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

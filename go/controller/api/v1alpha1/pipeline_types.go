@@ -142,13 +142,18 @@ type PipelineGate struct {
 	// - APPROVAL (requires human approval)
 	// - WINDOW (time-based constraints),
 	// - JOB (runs custom validation before allowing promotion).
+	// - SENTINEL (runs a Plural Sentinel before allowing promotion).
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=APPROVAL;WINDOW;JOB
+	// +kubebuilder:validation:Enum=APPROVAL;WINDOW;JOB;SENTINEL
 	Type console.GateType `json:"type"`
 
 	// ClusterRef specifies the target cluster where this gate will execute.
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
+
+	// SentinelRef specifies the sentinel to execute for the SENTINEL gate.
+	// +kubebuilder:validation:Optional
+	SentinelRef *corev1.ObjectReference `json:"sentinelRef,omitempty"`
 
 	// Spec contains detailed configuration for complex gate types like JOB gates.
 	// +kubebuilder:validation:Optional

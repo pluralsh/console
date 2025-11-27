@@ -140,7 +140,7 @@ function getMenuItems({
       expandedLabel: 'Self service',
       icon: <CatalogIcon />,
       path: SELF_SERVICE_ABS_PATH,
-      hotkeys: ['shift P'],
+      hotkeys: ['shift S+C'],
     },
     {
       text: 'Kubernetes',

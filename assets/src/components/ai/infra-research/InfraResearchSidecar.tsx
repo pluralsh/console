@@ -7,7 +7,7 @@ import {
   StackIcon,
 } from '@pluralsh/design-system'
 import { ServiceStatusChip } from 'components/cd/services/ServiceStatusChip'
-import StackStatusChip from 'components/stacks/common/StackStatusChip'
+import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import { InfraResearchFragment, InfraResearchStatus } from 'generated/graphql'

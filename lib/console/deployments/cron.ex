@@ -318,4 +318,12 @@ defmodule Console.Deployments.Cron do
     end, max_concurrency: 20)
     |> Stream.run()
   end
+
+  def prune_helm_repositories() do
+    Logger.info "pruning dangling helm repositories"
+    Service.helm_repos()
+    |> Repo.all()
+    |> Console.Schema.HelmRepository.without_urls()
+    |> Repo.delete_all(timeout: 300_000)
+  end
 end

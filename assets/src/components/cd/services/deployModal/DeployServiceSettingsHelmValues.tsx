@@ -148,7 +148,7 @@ const HelmValuesInput = memo(
             value={helmValues}
             language="yaml"
             height={variant === 'large' ? 300 : 200}
-            options={{ lineNumbers: false, minimap: { enabled: false } }}
+            options={{ lineNumbers: 'off', minimap: { enabled: false } }}
             onChange={(value) => {
               setHelmValues(value)
             }}

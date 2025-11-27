@@ -11,7 +11,7 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { OverlineH1 } from '../../utils/typography/Text'
 import StackApprovalChip from '../common/StackApprovalChip'
-import StackStatusChip from '../common/StackStatusChip'
+import { StackStatusChip } from '../common/StackStatusChip'
 import { ViolationSeverity } from '../run/violations/columns.tsx'
 import { StackOutletContextT } from '../Stacks'
 

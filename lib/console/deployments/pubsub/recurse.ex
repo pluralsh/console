@@ -99,6 +99,15 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
   end
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineGateUpdated do
+  alias Console.Deployments.Pipelines
+  alias Console.Schema.PipelineGate
+
+  def process(%@for{item: %PipelineGate{type: :sentinel, sentinel_id: id} = gate}) when is_binary(id),
+    do: Pipelines.run_sentinel(gate)
+  def process(_), do: :ok
+end
+
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
   alias Console.Schema.{PullRequest, Stack, Service, GitRepository}
@@ -251,4 +260,10 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PreviewEnvironmentTemplateUp
     |> Preview.preload_instance()
     |> Enum.each(&Preview.update_instance(&1, &1.pull_request))
   end
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunUpdated do
+  alias Console.Deployments.Pipelines
+
+  def process(%{item: run}), do: Pipelines.broadcast_gate(run)
 end

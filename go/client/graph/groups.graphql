@@ -1,6 +1,20 @@
+fragment GroupFragment on Group {
+    id
+    name
+    description
+    global
+}
+
 query GetGroup($name: String!) {
     group(name: $name) {
         ...GroupFragment
+    }
+}
+
+query GetGroupTiny($name: String!) {
+    group(name: $name) {
+        id
+        name
     }
 }
 

@@ -55,6 +55,7 @@ defmodule Console.Services.UsersTest do
     setup do
       on_exit(fn ->
         Application.put_env(:console, :org_email_suffix, "")
+        Application.put_env(:console, :oidc_sync, :upsert)
       end)
     end
 
@@ -78,6 +79,23 @@ defmodule Console.Services.UsersTest do
       })
 
       assert user.email == "someone@example.com"
+    end
+
+    test "it can full sync user groups based on oidc" do
+      Application.put_env(:console, :oidc_sync, :full)
+      user = insert(:user, email: "someone@example.com")
+      group = insert(:group, name: "wipe")
+      member = insert(:group_member, user: user, group: group)
+
+      {:ok, bootstrapped} = Users.bootstrap_user(%{
+        "email" => "someone@example.com",
+        "name" => "Some User",
+        "profile" => "https://some.image.com",
+        "groups" => ["general"],
+      })
+
+      assert bootstrapped.id == user.id
+      refute refetch(member)
     end
 
     test "if the user doesn't exist, it will create one" do

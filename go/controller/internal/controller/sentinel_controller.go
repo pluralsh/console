@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -25,6 +26,11 @@ import (
 )
 
 const SentinelFinalizer = "deployments.plural.sh/sentinel-protection"
+
+var (
+	ErrGetRepository  = errors.New("failed to get Git repository")
+	ErrWaitRepository = errors.New("repository not ready")
+)
 
 // SentinelReconciler reconciles a Sentinel object
 type SentinelReconciler struct {
@@ -99,6 +105,13 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 
 	attr, err := r.attributes(ctx, sentinel, repository, project)
 	if err != nil {
+		if errors.Is(err, ErrWaitRepository) {
+			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready or healthy")
+			return common.Wait(), nil
+		}
+		if errors.Is(err, ErrGetRepository) {
+			return common.HandleRequeue(nil, err, sentinel.SetCondition)
+		}
 		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -240,6 +253,27 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 						return nil, err
 					}
 					configuration.IntegrationTest.Tags = lo.ToPtr(string(jsonTags))
+				}
+				if check.Configuration.IntegrationTest.RepositoryRef != nil {
+					repository := &v1alpha1.GitRepository{}
+					if err := r.Get(ctx, client.ObjectKey{Name: check.Configuration.IntegrationTest.RepositoryRef.Name, Namespace: check.Configuration.IntegrationTest.RepositoryRef.Namespace}, repository); err != nil {
+						return nil, ErrGetRepository
+					}
+					if !repository.Status.HasID() {
+						utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+						return nil, ErrWaitRepository
+					}
+					if repository.Status.Health == v1alpha1.GitHealthFailed {
+						utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
+						return nil, ErrWaitRepository
+					}
+					configuration.IntegrationTest.RepositoryID = repository.Status.ID
+				}
+				if check.Configuration.IntegrationTest.Git != nil {
+					configuration.IntegrationTest.Git = &console.GitRefAttributes{
+						Ref:    check.Configuration.IntegrationTest.Git.Ref,
+						Folder: check.Configuration.IntegrationTest.Git.Folder,
+					}
 				}
 			}
 			checks[i].Configuration = configuration

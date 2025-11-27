@@ -120,13 +120,6 @@ fragment UserFragment on User {
     email
 }
 
-fragment GroupFragment on Group {
-    id
-    name
-    description
-    global
-}
-
 fragment GroupMemberFragment on GroupMember {
     id
     user { id }

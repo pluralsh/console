@@ -35,6 +35,9 @@ def scrape():
                     ("version", ver),
                     ("kube", kube_versions),
                     ("chart_version", chart_version),
+                    ("images", []),
+                    ("requirements", []),
+                    ("incompatibilities", []),
                 ]
             )
             versions.append(version_info)

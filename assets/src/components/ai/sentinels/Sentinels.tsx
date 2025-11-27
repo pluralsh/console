@@ -70,7 +70,7 @@ export function Sentinels() {
         first="Registered sentinels"
         firstPartialType="body2Bold"
         firstColor="text"
-        second="AI-powered sentinel monitoring for your Kubernetes clusters."
+        second="AI-powered integration testing for your Kubernetes clusters."
         secondPartialType="body2"
         secondColor="text-light"
       />
@@ -99,7 +99,7 @@ export function Sentinels() {
               css={{ display: 'flex', gap: 12 }}
             >
               {label === SentinelRunStatus.Pending
-                ? 'In progress'
+                ? 'Running'
                 : capitalize(label)}
               <Chip
                 size="small"

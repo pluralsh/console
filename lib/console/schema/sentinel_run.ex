@@ -2,7 +2,8 @@ defmodule Console.Schema.SentinelRun do
   use Console.Schema.Base
   alias Console.Schema.{
     Sentinel,
-    SentinelRunJob
+    SentinelRunJob,
+    PipelineGate
   }
 
   defenum Status, pending: 0, success: 1, failed: 2
@@ -26,6 +27,7 @@ defmodule Console.Schema.SentinelRun do
 
     belongs_to :sentinel, Sentinel
     has_many :jobs, SentinelRunJob, on_delete: :delete_all
+    has_one :gate, PipelineGate
 
     timestamps()
   end

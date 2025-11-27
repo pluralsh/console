@@ -33,7 +33,7 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
-  def create(pra, branch, ctx) do
+  def create(pra, branch, ctx, _labels \\ []) do
     name = URI.encode(pra.identifier)
     with {:ok, conn} <- connection(pra),
          {:ok, title, body} <- description(pra, ctx),

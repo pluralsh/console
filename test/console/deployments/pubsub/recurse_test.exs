@@ -480,6 +480,37 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       refute Repo.preload(refetch(ignore), :service).service.helm
     end
   end
+
+  describe "PipelineGateUpdated" do
+    test "it will broadcast a gate update" do
+      bot("console")
+
+      sentinel = insert(:sentinel)
+      gate = insert(:pipeline_gate, type: :sentinel, sentinel: sentinel)
+
+      event = %PubSub.PipelineGateUpdated{item: gate}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      assert updated.id == gate.id
+      assert updated.sentinel_run_id
+    end
+  end
+
+  describe "SentinelRunUpdated" do
+    test "it will broadcast a gate update" do
+      sentinel = insert(:sentinel)
+      run = insert(:sentinel_run, status: :success)
+      %{id: gate_id} = gate = insert(:pipeline_gate, type: :sentinel, sentinel: sentinel, sentinel_run: run)
+
+      event = %PubSub.SentinelRunUpdated{item: run}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      assert updated.id == gate.id
+      assert updated.state == :open
+
+      assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
+    end
+  end
 end
 
 

@@ -149,7 +149,10 @@ defmodule Console.Deployments.Policy do
         end
 
         constraint
-        |> PolicyConstraint.changeset(stabilize_violations(attrs, constraint))
+        |> PolicyConstraint.changeset(
+          stabilize_violations(attrs, constraint)
+          |> truncate_fields(~w(name description)a)
+        )
         |> Repo.insert_or_update()
       end)
     end)
@@ -160,6 +163,7 @@ defmodule Console.Deployments.Policy do
   defp stabilize_violations(%{violations: [_ | _] = violations} = attrs, [_ | _] = current_violations) do
     lookup = Map.new(current_violations, & {{&1.group, &1.version, &1.kind, &1.namespace, &1.name}, &1})
     violations = Enum.map(violations, fn v ->
+      v = truncate_fields(v, ~w(name message)a)
       case lookup[{v[:group], v[:version], v[:kind], v[:namespace], v[:name]}] do
         %ConstraintViolation{id: id} -> Map.put(v, :id, id)
         _ -> v
@@ -168,6 +172,16 @@ defmodule Console.Deployments.Policy do
     %{attrs | violations: violations}
   end
   defp stabilize_violations(attrs, _), do: attrs
+
+  defp truncate_fields(attrs, fields) do
+    Enum.reduce(fields, attrs, fn field, acc ->
+      case Map.get(acc, field) do
+        value when is_binary(value) and byte_size(value) >= 1_000 ->
+          Map.put(acc, field, binary_part(value, 0, 1_000))
+        _ -> acc
+      end
+    end)
+  end
 
   @spec upsert_compliance_report_generator(map, User.t) :: generator_resp
   def upsert_compliance_report_generator(%{name: name} = attrs, %User{} = user) do

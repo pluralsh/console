@@ -31,7 +31,7 @@ export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 const directory = [
   { path: 'compatibility', label: 'Compatibility' },
   { path: 'releases', label: 'Releases' },
-  { path: 'readme', label: 'README' },
+  // { path: 'readme', label: 'README' },
 ]
 
 export default function ClusterAddon() {

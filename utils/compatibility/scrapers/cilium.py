@@ -1,49 +1,41 @@
-# scrapers/cert_manager.py
-
 from bs4 import BeautifulSoup
 from utils import (
     print_error,
     fetch_page,
     update_compatibility_info,
     update_chart_versions,
+    get_kube_release_info,
+    get_github_releases_timestamps,
+    find_last_n_releases,
+    clean_kube_version,
+    get_chart_versions,
 )
 
 app_name = "cilium"
-compatibility_url = (
-    "https://docs.cilium.io/en/stable/network/kubernetes/compatibility/"
-)
-
-
-def parse_page(content):
-    soup = BeautifulSoup(content, "html.parser")
-    sections = soup.find_all("h2")
-    return sections
-
-
-def find_target_tables(sections):
-    target_tables = []
-    return target_tables
-
-
-def extract_table_data(target_tables):
-    rows = []
-    return rows
-
 
 def scrape():
+    kube_releases = get_kube_release_info()
+    cilium_releases = list(reversed(list(get_github_releases_timestamps("cilium", "cilium"))))
 
-    page_content = fetch_page(compatibility_url)
-    if not page_content:
-        return
+    chart_versions = get_chart_versions(app_name)
+    versions = []
+    for cilium_release in cilium_releases:
+        if "-" in cilium_release[0]:
+            continue
+        release_vsn = cilium_release[0].replace("v", "")
+        compatible_kube_releases = find_last_n_releases(kube_releases, cilium_release[1], n=3)
+        chart_version = chart_versions.get(release_vsn)
+        if not chart_version:
+            continue
+        
+        vsn = {
+            "version": release_vsn,
+            "kube": [clean_kube_version(kube_release[0]) for kube_release in compatible_kube_releases],
+            "requirements": [],
+            "chart_version": chart_version,
+            "incompatibilities": [],
+        }
 
-    sections = parse_page(page_content)
-    target_tables = find_target_tables(sections)
-    if target_tables.__len__() >= 1:
-        rows = extract_table_data(target_tables)
-        update_compatibility_info(
-            f"../../static/compatibilities/{app_name}.yaml", rows
-        )
-    else:
-        print_error("No compatibility information found.")
+        versions.append(vsn)
 
-    update_chart_versions(app_name)
+    update_compatibility_info(f"../../static/compatibilities/{app_name}.yaml", versions)

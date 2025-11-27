@@ -133,6 +133,8 @@ export type AddonVersion = {
   blocking?: Maybe<Scalars['Boolean']['output']>;
   /** the version of the helm chart to install for this version */
   chartVersion?: Maybe<Scalars['String']['output']>;
+  /** the images used by this add-on's helm chart */
+  images?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** any add-ons this might break */
   incompatibilities?: Maybe<Array<Maybe<VersionReference>>>;
   /** kubernetes versions this add-on works with */
@@ -3724,6 +3726,7 @@ export type GateStatusAttributes = {
 export enum GateType {
   Approval = 'APPROVAL',
   Job = 'JOB',
+  Sentinel = 'SENTINEL',
   Window = 'WINDOW'
 }
 
@@ -6232,6 +6235,10 @@ export type PipelineGate = {
   job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
+  /** the sentinel this gate will execute */
+  sentinel?: Maybe<Sentinel>;
+  /** the run that the sentinel executed last */
+  sentinelRun?: Maybe<SentinelRun>;
   /** more detailed specification for complex gates */
   spec?: Maybe<GateSpec>;
   /** the current state of this gate */
@@ -6251,6 +6258,8 @@ export type PipelineGateAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
+  /** the id of the sentinel this gate will execute */
+  sentinelId?: InputMaybe<Scalars['ID']['input']>;
   /** a specification for more complex gate types */
   spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */
@@ -6632,6 +6641,8 @@ export type PrAutomation = {
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: Maybe<Scalars['String']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** labels to apply to the created prs */
+  labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6679,6 +6690,8 @@ export type PrAutomationAttributes = {
   icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
+  /** labels to apply to created prs */
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
@@ -11753,6 +11766,8 @@ export type StackCron = {
   crontab: Scalars['String']['output'];
   /** configuration overrides for the cron run */
   overrides?: Maybe<StackOverrides>;
+  /** whether to track the stack's ref exactly on cron runs versus the last detected commit */
+  trackRef?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type StackCronAttributes = {
@@ -11762,6 +11777,8 @@ export type StackCronAttributes = {
   crontab: Scalars['String']['input'];
   /** configuration overrides for the cron run */
   overrides?: InputMaybe<StackOverridesAttributes>;
+  /** whether to track the stack's ref exactly on cron runs versus the last detected commit */
+  trackRef?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type StackDefinition = {
@@ -12742,6 +12759,7 @@ export type VulnerabilityAttributes = {
   pkgPath?: InputMaybe<Scalars['String']['input']>;
   primaryLink?: InputMaybe<Scalars['String']['input']>;
   publishedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   resource?: InputMaybe<Scalars['String']['input']>;
   score?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<VulnSeverity>;
@@ -12895,6 +12913,13 @@ export type AgentRunChatSubscriptionVariables = Exact<{
 
 
 export type AgentRunChatSubscription = { __typename?: 'RootSubscriptionType', agentMessageDelta?: { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null } | null };
+
+export type AgentRunDeltaSubscriptionVariables = Exact<{
+  runId: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null };
 
 export type AgentRunPodLogsQueryVariables = Exact<{
   runId: Scalars['ID']['input'];
@@ -13668,7 +13693,7 @@ export type InsightClientInfoFragment = { __typename?: 'InsightClientInfo', user
 
 export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
-export type RuntimeServiceDetailsFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
+export type RuntimeServiceDetailsFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
 export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
 
@@ -13822,7 +13847,7 @@ export type RuntimeServiceQueryVariables = Exact<{
 }>;
 
 
-export type RuntimeServiceQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null };
+export type RuntimeServiceQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17324,7 +17349,6 @@ export const RuntimeServiceDetailsFragmentDoc = gql`
       ...AddonVersion
     }
     releaseUrl(version: $version)
-    readme
   }
   addonVersion {
     ...AddonVersionBlocking @include(if: $hasKubeVersion)
@@ -20855,6 +20879,53 @@ export function useAgentRunChatSubscription(baseOptions: Apollo.SubscriptionHook
       }
 export type AgentRunChatSubscriptionHookResult = ReturnType<typeof useAgentRunChatSubscription>;
 export type AgentRunChatSubscriptionResult = Apollo.SubscriptionResult<AgentRunChatSubscription>;
+export const AgentRunDeltaDocument = gql`
+    subscription AgentRunDelta($runId: ID!) {
+  agentRunDelta(id: $runId) {
+    delta
+    payload {
+      ...AgentRunTiny
+      todos {
+        title
+        description
+        done
+      }
+      analysis {
+        summary
+        analysis
+        bullets
+      }
+      podReference {
+        name
+        namespace
+      }
+    }
+  }
+}
+    ${AgentRunTinyFragmentDoc}`;
+
+/**
+ * __useAgentRunDeltaSubscription__
+ *
+ * To run a query within a React component, call `useAgentRunDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunDeltaSubscription({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *   },
+ * });
+ */
+export function useAgentRunDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<AgentRunDeltaSubscription, AgentRunDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AgentRunDeltaSubscription, AgentRunDeltaSubscriptionVariables>(AgentRunDeltaDocument, options);
+      }
+export type AgentRunDeltaSubscriptionHookResult = ReturnType<typeof useAgentRunDeltaSubscription>;
+export type AgentRunDeltaSubscriptionResult = Apollo.SubscriptionResult<AgentRunDeltaSubscription>;
 export const AgentRunPodLogsDocument = gql`
     query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
   agentRun(id: $runId) {
@@ -35027,6 +35098,7 @@ export const namedOperations = {
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
+    AgentRunDelta: 'AgentRunDelta',
     AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta'
   },

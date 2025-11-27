@@ -23,6 +23,7 @@ type ProjectList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the Project in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // Project provides organizational segmentation and multi-tenancy capabilities within Plural Console.
 // It serves as a unit of an organization to control permissions for sets of resources, enabling enterprise-grade
@@ -40,6 +41,11 @@ type Project struct {
 	// Status represents the status of this resource.
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
+}
+
+// SetReadOnlyStatus sets the read-only status of the project.
+func (in *Project) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
 }
 
 // ConsoleID implements [PluralResource] interface

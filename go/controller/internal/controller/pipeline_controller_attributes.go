@@ -180,16 +180,26 @@ func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gat
 		return nil, result, err
 	}
 
+	var sentinelID *string
+	if gate.SentinelRef != nil {
+		sentinel, err := utils.GetSentinel(ctx, r.Client, gate.SentinelRef)
+		if err != nil {
+			return nil, nil, err
+		}
+		sentinelID = sentinel.Status.ID
+	}
+
 	spec, err := r.pipelineEdgeGateSpecAttributes(gate.Spec)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return &console.PipelineGateAttributes{
-		Name:      gate.Name,
-		Type:      gate.Type,
-		ClusterID: clusterId,
-		Spec:      spec,
+		Name:       gate.Name,
+		Type:       gate.Type,
+		ClusterID:  clusterId,
+		SentinelID: sentinelID,
+		Spec:       spec,
 	}, nil, nil
 }
 

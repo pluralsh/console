@@ -519,7 +519,7 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:cluster, fn %{auth: auth} ->
       auth
       |> Console.Repo.preload([:node_pools, :service, :tags, :read_bindings, :write_bindings])
-      |> Cluster.changeset(attrs)
+      |> Cluster.changeset(clean_cluster_attrs(attrs))
       |> Repo.update()
     end)
     |> add_revision()
@@ -538,6 +538,10 @@ defmodule Console.Deployments.Clusters do
     end)
     |> notify(:update, user)
   end
+
+  defp clean_cluster_attrs(%{project_id: nil} = attrs), do: Map.delete(attrs, :project_id)
+  defp clean_cluster_attrs(%{project_id: ""} = attrs), do: Map.delete(attrs, :project_id)
+  defp clean_cluster_attrs(attrs), do: attrs
 
   @doc """
   Determines whether the current cluster's version displays kubelet version skew

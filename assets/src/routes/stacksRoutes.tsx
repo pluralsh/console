@@ -5,7 +5,7 @@ import { StackRunJob } from 'components/stacks/run/StackRunJob.tsx'
 import { StackPrs } from 'components/stacks/prs/StackPrs'
 import Violations from '../components/stacks/run/violations/Violations.tsx'
 
-import Stacks from '../components/stacks/Stacks'
+import { Stacks } from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
 import StackRunOutput from '../components/stacks/run/output/Output'
 import StackRunPlan from '../components/stacks/run/plan/Plan'

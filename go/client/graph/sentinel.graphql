@@ -62,6 +62,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
     id
     status
     format
+    usesGit
     jobSpec {
         ...JobSpecFragment
     }

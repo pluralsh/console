@@ -59,6 +59,7 @@ const (
 	InfrastructureStackReconciler        Reconciler = "infrastructurestack"
 	PrGovernanceReconciler               Reconciler = "prgovernance"
 	SentinelReconciler                   Reconciler = "sentinel"
+	GroupReconciler                      Reconciler = "groups"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

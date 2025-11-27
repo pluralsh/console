@@ -17,6 +17,7 @@ type ConsoleClient interface {
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
+	GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
 	CreateAgentRun(ctx context.Context, runtimeID string, attributes AgentRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRun, error)
 	UpdateAgentRun(ctx context.Context, id string, attributes AgentRunStatusAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRun, error)
@@ -64,6 +65,7 @@ type ConsoleClient interface {
 	GetAgentURL(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentURL, error)
 	GetClusterWithToken(ctx context.Context, id *string, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterWithToken, error)
 	GetClusterByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterByHandle, error)
+	GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error)
 	GetClusterProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProvider, error)
 	GetClusterProviderByCloud(ctx context.Context, cloud string, interceptors ...clientv2.RequestInterceptor) (*GetClusterProviderByCloud, error)
 	ListClusterServices(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListClusterServices, error)
@@ -154,6 +156,7 @@ type ConsoleClient interface {
 	DeletePrGovernance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrGovernance, error)
 	UpsertPrGovernance(ctx context.Context, attributes PrGovernanceAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPrGovernance, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
+	GetGroupTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroupTiny, error)
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
 	DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error)
@@ -447,11 +450,13 @@ func (t *PluralCredsFragment) GetURL() *string {
 }
 
 type AgentRunBaseFragment struct {
-	ID         string               "json:\"id\" graphql:\"id\""
-	Prompt     string               "json:\"prompt\" graphql:\"prompt\""
-	Repository string               "json:\"repository\" graphql:\"repository\""
-	Mode       AgentRunMode         "json:\"mode\" graphql:\"mode\""
-	Todos      []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+	ID              string               "json:\"id\" graphql:\"id\""
+	Prompt          string               "json:\"prompt\" graphql:\"prompt\""
+	Repository      string               "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode         "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage    "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string              "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
 }
 
 func (t *AgentRunBaseFragment) GetID() string {
@@ -478,6 +483,18 @@ func (t *AgentRunBaseFragment) GetMode() *AgentRunMode {
 	}
 	return &t.Mode
 }
+func (t *AgentRunBaseFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunBaseFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunBaseFragment{}
+	}
+	return t.LanguageVersion
+}
 func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
 		t = &AgentRunBaseFragment{}
@@ -486,21 +503,23 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 }
 
 type AgentRunFragment struct {
-	ID           string                     "json:\"id\" graphql:\"id\""
-	Prompt       string                     "json:\"prompt\" graphql:\"prompt\""
-	Repository   string                     "json:\"repository\" graphql:\"repository\""
-	Mode         AgentRunMode               "json:\"mode\" graphql:\"mode\""
-	Todos        []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
-	Status       AgentRunStatus             "json:\"status\" graphql:\"status\""
-	PodReference *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
-	Error        *string                    "json:\"error,omitempty\" graphql:\"error\""
-	Analysis     *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	ScmCreds     *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds  *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Runtime      *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
-	User         *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
-	Flow         *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
-	PullRequests []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	ID              string                     "json:\"id\" graphql:\"id\""
+	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                     "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
+	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -526,6 +545,18 @@ func (t *AgentRunFragment) GetMode() *AgentRunMode {
 		t = &AgentRunFragment{}
 	}
 	return &t.Mode
+}
+func (t *AgentRunFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.LanguageVersion
 }
 func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
 	if t == nil {
@@ -1965,6 +1996,38 @@ func (t *PrGovernanceFragment) GetName() string {
 	return t.Name
 }
 
+type GroupFragment struct {
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        string  "json:\"name\" graphql:\"name\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Global      *bool   "json:\"global,omitempty\" graphql:\"global\""
+}
+
+func (t *GroupFragment) GetID() string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.ID
+}
+func (t *GroupFragment) GetName() string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Name
+}
+func (t *GroupFragment) GetDescription() *string {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Description
+}
+func (t *GroupFragment) GetGlobal() *bool {
+	if t == nil {
+		t = &GroupFragment{}
+	}
+	return t.Global
+}
+
 type HelmRepositoryFragment struct {
 	ID         string            "json:\"id\" graphql:\"id\""
 	InsertedAt *string           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
@@ -2671,38 +2734,6 @@ func (t *UserFragment) GetEmail() string {
 		t = &UserFragment{}
 	}
 	return t.Email
-}
-
-type GroupFragment struct {
-	ID          string  "json:\"id\" graphql:\"id\""
-	Name        string  "json:\"name\" graphql:\"name\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Global      *bool   "json:\"global,omitempty\" graphql:\"global\""
-}
-
-func (t *GroupFragment) GetID() string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.ID
-}
-func (t *GroupFragment) GetName() string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Name
-}
-func (t *GroupFragment) GetDescription() *string {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Description
-}
-func (t *GroupFragment) GetGlobal() *bool {
-	if t == nil {
-		t = &GroupFragment{}
-	}
-	return t.Global
 }
 
 type GroupMemberFragment struct {
@@ -4583,6 +4614,7 @@ type SentinelRunJobFragment struct {
 	ID          string                            "json:\"id\" graphql:\"id\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
+	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
 	SentinelRun *SentinelRunFragment              "json:\"sentinelRun,omitempty\" graphql:\"sentinelRun\""
@@ -4606,6 +4638,12 @@ func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Format
+}
+func (t *SentinelRunJobFragment) GetUsesGit() *bool {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.UsesGit
 }
 func (t *SentinelRunJobFragment) GetJobSpec() *JobSpecFragment {
 	if t == nil {
@@ -10140,6 +10178,17 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime) GetPendingRuns() *ListAgentRu
 	return t.PendingRuns
 }
 
+type GetAgentRunTodos_AgentRun struct {
+	Todos []*AgentTodoFragment "json:\"todos,omitempty\" graphql:\"todos\""
+}
+
+func (t *GetAgentRunTodos_AgentRun) GetTodos() []*AgentTodoFragment {
+	if t == nil {
+		t = &GetAgentRunTodos_AgentRun{}
+	}
+	return t.Todos
+}
+
 type CancelAgentRun_CancelAgentRun struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -12487,6 +12536,17 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+
+type GetClusterIdByHandle_Cluster_ struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetClusterIdByHandle_Cluster_) GetID() string {
+	if t == nil {
+		t = &GetClusterIdByHandle_Cluster_{}
+	}
+	return t.ID
 }
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -17533,6 +17593,24 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 	return t.Edges
 }
 
+type GetGroupTiny_Group struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetGroupTiny_Group) GetID() string {
+	if t == nil {
+		t = &GetGroupTiny_Group{}
+	}
+	return t.ID
+}
+func (t *GetGroupTiny_Group) GetName() string {
+	if t == nil {
+		t = &GetGroupTiny_Group{}
+	}
+	return t.Name
+}
+
 type ListHelmRepositories_HelmRepositories_Edges struct {
 	Node *HelmRepositoryFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -21607,6 +21685,17 @@ func (t *ListAgentRuntimePendingRuns) GetAgentRuntime() *ListAgentRuntimePending
 	return t.AgentRuntime
 }
 
+type GetAgentRunTodos struct {
+	AgentRun *GetAgentRunTodos_AgentRun "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunTodos) GetAgentRun() *GetAgentRunTodos_AgentRun {
+	if t == nil {
+		t = &GetAgentRunTodos{}
+	}
+	return t.AgentRun
+}
+
 type CancelAgentRun struct {
 	CancelAgentRun *CancelAgentRun_CancelAgentRun "json:\"cancelAgentRun,omitempty\" graphql:\"cancelAgentRun\""
 }
@@ -22120,6 +22209,17 @@ type GetClusterByHandle struct {
 func (t *GetClusterByHandle) GetCluster() *ClusterFragment {
 	if t == nil {
 		t = &GetClusterByHandle{}
+	}
+	return t.Cluster
+}
+
+type GetClusterIDByHandle struct {
+	Cluster *GetClusterIdByHandle_Cluster_ "json:\"cluster,omitempty\" graphql:\"cluster\""
+}
+
+func (t *GetClusterIDByHandle) GetCluster() *GetClusterIdByHandle_Cluster_ {
+	if t == nil {
+		t = &GetClusterIDByHandle{}
 	}
 	return t.Cluster
 }
@@ -23110,6 +23210,17 @@ type GetGroup struct {
 func (t *GetGroup) GetGroup() *GroupFragment {
 	if t == nil {
 		t = &GetGroup{}
+	}
+	return t.Group
+}
+
+type GetGroupTiny struct {
+	Group *GetGroupTiny_Group "json:\"group,omitempty\" graphql:\"group\""
+}
+
+func (t *GetGroupTiny) GetGroup() *GetGroupTiny_Group {
+	if t == nil {
+		t = &GetGroupTiny{}
 	}
 	return t.Group
 }
@@ -24932,6 +25043,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25080,6 +25193,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25237,6 +25352,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25344,6 +25461,37 @@ func (c *Client) ListAgentRuntimePendingRuns(ctx context.Context, id string, aft
 	return &res, nil
 }
 
+const GetAgentRunTodosDocument = `query GetAgentRunTodos ($id: ID!) {
+	agentRun(id: $id) {
+		todos {
+			... AgentTodoFragment
+		}
+	}
+}
+fragment AgentTodoFragment on AgentTodo {
+	description
+	done
+	title
+}
+`
+
+func (c *Client) GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunTodos
+	if err := c.Client.Post(ctx, "GetAgentRunTodos", GetAgentRunTodosDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CancelAgentRunDocument = `mutation CancelAgentRun ($id: ID!) {
 	cancelAgentRun(id: $id) {
 		id
@@ -25410,6 +25558,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25552,6 +25702,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25662,6 +25814,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -25701,6 +25855,8 @@ fragment AgentRunBaseFragment on AgentRun {
 	prompt
 	repository
 	mode
+	language
+	languageVersion
 	todos {
 		... AgentTodoFragment
 	}
@@ -29031,6 +29187,32 @@ func (c *Client) GetClusterByHandle(ctx context.Context, handle *string, interce
 
 	var res GetClusterByHandle
 	if err := c.Client.Post(ctx, "GetClusterByHandle", GetClusterByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetClusterIDByHandleDocument = `query GetClusterIdByHandle ($handle: String) {
+	cluster(handle: $handle) {
+		... {
+			id
+		}
+	}
+}
+`
+
+func (c *Client) GetClusterIDByHandle(ctx context.Context, handle *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterIDByHandle, error) {
+	vars := map[string]any{
+		"handle": handle,
+	}
+
+	var res GetClusterIDByHandle
+	if err := c.Client.Post(ctx, "GetClusterIdByHandle", GetClusterIDByHandleDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -35647,6 +35829,31 @@ func (c *Client) GetGroup(ctx context.Context, name string, interceptors ...clie
 	return &res, nil
 }
 
+const GetGroupTinyDocument = `query GetGroupTiny ($name: String!) {
+	group(name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetGroupTiny(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroupTiny, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetGroupTiny
+	if err := c.Client.Post(ctx, "GetGroupTiny", GetGroupTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateGroupDocument = `mutation CreateGroup ($attributtes: GroupAttributes!) {
 	createGroup(attributes: $attributtes) {
 		... GroupFragment
@@ -39514,6 +39721,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -39603,6 +39811,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -39720,6 +39929,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	id
 	status
 	format
+	usesGit
 	jobSpec {
 		... JobSpecFragment
 	}
@@ -44675,6 +44885,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentRunDocument:                               "GetAgentRun",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
+	GetAgentRunTodosDocument:                          "GetAgentRunTodos",
 	CancelAgentRunDocument:                            "CancelAgentRun",
 	CreateAgentRunDocument:                            "CreateAgentRun",
 	UpdateAgentRunDocument:                            "UpdateAgentRun",
@@ -44722,6 +44933,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentURLDocument:                               "GetAgentUrl",
 	GetClusterWithTokenDocument:                       "GetClusterWithToken",
 	GetClusterByHandleDocument:                        "GetClusterByHandle",
+	GetClusterIDByHandleDocument:                      "GetClusterIdByHandle",
 	GetClusterProviderDocument:                        "GetClusterProvider",
 	GetClusterProviderByCloudDocument:                 "GetClusterProviderByCloud",
 	ListClusterServicesDocument:                       "ListClusterServices",
@@ -44812,6 +45024,7 @@ var DocumentOperationNames = map[string]string{
 	DeletePrGovernanceDocument:                        "DeletePrGovernance",
 	UpsertPrGovernanceDocument:                        "UpsertPrGovernance",
 	GetGroupDocument:                                  "GetGroup",
+	GetGroupTinyDocument:                              "GetGroupTiny",
 	CreateGroupDocument:                               "CreateGroup",
 	UpdateGroupDocument:                               "UpdateGroup",
 	DeleteGroupDocument:                               "DeleteGroup",

@@ -1,51 +1,37 @@
-import { RefObject, useCallback } from 'react'
+import { RefObject } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
+import { SemanticColorKey } from '@pluralsh/design-system'
 import { LogLineFragment } from 'generated/graphql'
 import { dayjsExtended } from 'utils/datetime'
 
-export const Level = {
-  UNKNOWN: 'u',
-  INFO: 'i',
-  SUCCESS: 's',
-  WARN: 'w',
-  ERROR: 'e',
-  FATAL: 'f',
+export enum LogLevel {
+  SUCCESS = 'Success',
+  WARN = 'Warn',
+  ERROR = 'Error',
+  FATAL = 'Fatal',
+  INFO = 'Info',
+  UNKNOWN = 'Unknown',
 }
 
-export function determineLevel(line) {
-  if (/fatal/i.test(line)) return Level.FATAL
-  if (/error/i.test(line)) return Level.ERROR
-  if (/warn/i.test(line)) return Level.WARN
-  if (/info/i.test(line)) return Level.INFO
-  if (/success/i.test(line)) return Level.SUCCESS
+export function determineLevel(line: string): LogLevel {
+  if (/fatal/i.test(line)) return LogLevel.FATAL
+  if (/error/i.test(line)) return LogLevel.ERROR
+  if (/warn/i.test(line)) return LogLevel.WARN
+  if (/info/i.test(line)) return LogLevel.INFO
+  if (/success/i.test(line)) return LogLevel.SUCCESS
 
-  return Level.UNKNOWN
+  return LogLevel.UNKNOWN
 }
 
-export function useBorderColor() {
-  const theme = useTheme()
-
-  return useCallback(
-    (lvl) => {
-      switch (lvl) {
-        case Level.INFO:
-          return theme.colors['border-selected']
-        case Level.ERROR:
-          return theme.colors['border-danger-light']
-        case Level.SUCCESS:
-          return theme.colors['border-success']
-        case Level.WARN:
-          return theme.colors['border-warning']
-        case Level.FATAL:
-          return theme.colors['icon-danger-critical']
-        default:
-          return theme.colors['border-fill-three']
-      }
-    },
-    [theme.colors]
-  )
+export const logLevelToColor: Record<LogLevel, SemanticColorKey> = {
+  [LogLevel.SUCCESS]: 'border-success',
+  [LogLevel.WARN]: 'border-warning',
+  [LogLevel.ERROR]: 'border-danger-light',
+  [LogLevel.FATAL]: 'icon-danger-critical',
+  [LogLevel.INFO]: 'border-selected',
+  [LogLevel.UNKNOWN]: 'border-fill-three',
 }
 
 export function LogLine({
@@ -61,12 +47,12 @@ export function LogLine({
   highlighted?: boolean
   onClick?: () => void
 }) {
-  const borderColor = useBorderColor()
-  const level = inferLevel ? determineLevel(log) : Level.UNKNOWN
+  const { colors } = useTheme()
+  const level = inferLevel ? determineLevel(log ?? '') : LogLevel.UNKNOWN
   return (
     <LogLineWrapper
       ref={ref}
-      $borderColor={borderColor(level)}
+      $borderColor={colors[logLevelToColor[level]]}
       $highlighted={highlighted}
       onClick={onClick}
     >

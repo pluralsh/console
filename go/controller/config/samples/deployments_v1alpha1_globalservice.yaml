@@ -42,6 +42,9 @@ metadata:
   name: globalservice-guestbook
   namespace: default
 spec:
+  ignoreClusters:
+    - mgmt
+    - test
   serviceRef:
     name: guestbook
     namespace: default

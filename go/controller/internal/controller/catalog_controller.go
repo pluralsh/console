@@ -74,7 +74,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
 	if exists {
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		utils.MarkReadOnly(catalog)
 		return r.handleExistingResource(ctx, catalog)
 	}
 

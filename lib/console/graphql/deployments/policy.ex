@@ -84,17 +84,18 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :installed_version, :string
     field :severity,          :vuln_severity
     field :score,             :float
+    field :repository_url,    :string
 
-    field :title,            :string
-    field :description,      :string
-    field :cvss_source,      :string
-    field :primary_link,     :string
-    field :links,            list_of(:string)
-    field :target,           :string
-    field :class,            :string
-    field :package_type,     :string
-    field :pkg_path,         :string
-    field :vuln_id,          :string
+    field :title,             :string
+    field :description,       :string
+    field :cvss_source,       :string
+    field :primary_link,      :string
+    field :links,             list_of(:string)
+    field :target,            :string
+    field :class,             :string
+    field :package_type,      :string
+    field :pkg_path,          :string
+    field :vuln_id,           :string
 
     field :published_date,     :datetime
     field :last_modified_date, :datetime

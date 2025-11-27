@@ -90,6 +90,8 @@ def build_rows():
                 [
                     ("version", str(semver)),
                     ("kube", kube_versions),
+                    ("chart_version", chart_version),
+                    ("images", []),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]

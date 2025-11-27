@@ -40,6 +40,7 @@ type NotificationSinkList struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Namespaced
 //+kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the NotificationSink in the Console API."
+//+kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // NotificationSink defines notification delivery destinations for events routed by NotificationRouter.
 // It represents the actual channels where notifications are sent, such as Slack webhooks,
@@ -56,6 +57,22 @@ type NotificationSink struct {
 	// Status represents the current state of this NotificationSink resource, including
 	// synchronization status and operational health information.
 	Status Status `json:"status,omitempty"`
+}
+
+func (p *NotificationSink) ConsoleID() *string {
+	return p.Status.ID
+}
+
+func (p *NotificationSink) ConsoleName() string {
+	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
+		return *p.Spec.Name
+	}
+
+	return p.Name
+}
+
+func (p *NotificationSink) SetReadOnlyStatus(readOnly bool) {
+	p.Status.ReadOnly = readOnly
 }
 
 // SetCondition sets a condition on the NotificationSink status.

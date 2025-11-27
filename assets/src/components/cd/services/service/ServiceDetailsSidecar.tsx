@@ -4,7 +4,6 @@ import {
   Button,
   Chip,
   DryRunIcon,
-  ErrorIcon,
   Flex,
   GitHubLogoIcon,
   Sidecar,
@@ -21,36 +20,26 @@ import {
   ServicePromotion,
   useKickServiceMutation,
 } from 'generated/graphql'
-import { useMemo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
-import StackStatusIcon from '../../../stacks/common/StackStatusIcon.tsx'
+import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
+import StackStatusIcon from 'components/stacks/common/StackStatusIcon'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
-import { countDeprecations } from './deprecationUtils'
 import ServicePromote from './ServicePromote'
-import LogsLegend from 'components/cd/logs/LogsLegend.tsx'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
 }) {
-  const { pathname } = useLocation()
   const theme = useTheme()
-  const deprecationCount = useMemo(() => {
-    const { components } = serviceDeployment || {}
-
-    return components ? countDeprecations(components) : 0
-  }, [serviceDeployment])
-
   if (!serviceDeployment) {
     return null
   }
@@ -136,18 +125,6 @@ export function ServiceDetailsSidecar({
               </Chip>
             )}
           </div>
-        </SidecarItem>
-        <SidecarItem heading="Warnings">
-          {deprecationCount > 0 ? (
-            <Chip
-              icon={<ErrorIcon />}
-              severity="danger"
-            >
-              Deprecations
-            </Chip>
-          ) : (
-            <Chip severity="success">None</Chip>
-          )}
         </SidecarItem>
         {helmRepository && (
           <SidecarItem heading="Helm Repository">
@@ -246,7 +223,6 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
       </Sidecar>
-      {pathname.includes('logs') && <LogsLegend />}
     </div>
   )
 }

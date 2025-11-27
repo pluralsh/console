@@ -11,8 +11,10 @@ import {
 import { ComponentProps, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { fillLevelToBackground } from 'components/utils/FillLevelDiv'
-import { fillLevelToBorderColor } from 'components/utils/List'
+import {
+  fillLevelToBackground,
+  fillLevelToBorderColor,
+} from 'components/utils/FillLevelDiv'
 import { PROTECT_TT_TEXT } from './ProtectBadge'
 
 type DynamicClusterIconProps = {

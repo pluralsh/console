@@ -1,7 +1,7 @@
 import {
   Card,
   Chip,
-  CloseRoundedIcon,
+  CancelledFilledIcon,
   Spinner,
   StatusOkIcon,
   Tooltip,
@@ -189,7 +189,7 @@ export function StatusCard({
                 color={theme.colors['icon-success']}
               />
             ) : status === 'closed' ? (
-              <CloseRoundedIcon
+              <CancelledFilledIcon
                 size={20}
                 color={theme.colors['icon-danger-critical']}
               />

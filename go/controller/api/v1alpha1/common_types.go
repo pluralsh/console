@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -34,6 +35,14 @@ type NamespacedPluralResource interface {
 
 	// ConsoleNamespace returns a resource namespace read from the Console API
 	ConsoleNamespace() string
+}
+
+// ReadOnlyPluralResource represents a resource that can be in read-only mode.
+// +k8s:deepcopy-gen=false
+type ReadOnlyPluralResource interface {
+	PluralResource
+	SetCondition(condition metav1.Condition)
+	SetReadOnlyStatus(readOnly bool)
 }
 
 // ObjectKeyReference is a reference to an object in a specific namespace.

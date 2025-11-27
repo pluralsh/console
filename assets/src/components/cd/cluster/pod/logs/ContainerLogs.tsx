@@ -1,20 +1,13 @@
-import {
-  ComponentProps,
-  ReactElement,
-  createRef,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
 import { IconFrame, ReloadIcon, Spinner, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useWindowSize } from 'usehooks-ts'
+import { ComponentProps, createRef, useEffect, useMemo, useState } from 'react'
+import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { useWindowSize } from 'usehooks-ts'
 
 import { Pod, usePodLogsQuery } from '../../../../../generated/graphql'
 import LoadingIndicator from '../../../../utils/LoadingIndicator'
-import { determineLevel, useBorderColor } from '../../../logs/LogLine'
+import { determineLevel, logLevelToColor } from '../../../logs/LogLine'
 
 import { SinceSecondsOptions } from './Logs'
 
@@ -28,7 +21,7 @@ function LogHeader({
   container: string
   refetch: Nullable<() => void>
   loading: boolean
-}): ReactElement<any> {
+}) {
   const theme = useTheme()
 
   return (
@@ -62,16 +55,15 @@ function LogHeader({
   )
 }
 
-function LogLine({ getValue }): ReactElement<any> {
+function LogLine({ getValue }: { getValue: () => string }) {
   const theme = useTheme()
-  const borderColor = useBorderColor()
   const level = determineLevel(getValue())
 
   return (
     <div
       css={{
         height: '100%',
-        borderLeft: `4px solid ${borderColor(level)}`,
+        borderLeft: `4px solid ${theme.colors[logLevelToColor[level]]}`,
         display: 'flex',
         alignItems: 'center',
         paddingLeft: theme.spacing.small,
@@ -142,7 +134,7 @@ const columns = [
 
       return <LogHeader {...{ container, refetch, loading }} />
     },
-    cell: LogLine,
+    cell: ({ getValue }) => LogLine({ getValue }),
   }),
 ]
 
@@ -151,7 +143,7 @@ export function ContainerLogsTable({
   refetch,
   loading,
   logs,
-}: ContainerLogsTableProps): ReactElement<any> {
+}: ContainerLogsTableProps) {
   const size = useWindowSize()
   const containerRef = createRef<HTMLDivElement>()
   const [containerHeight, setContainerHeight] = useState(0)

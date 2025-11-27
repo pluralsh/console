@@ -383,6 +383,14 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def helm_repos(query \\ __MODULE__) do
+    from(s in query,
+      where: not is_nil(s.helm["url"]),
+      select: s.helm["url"],
+      distinct: s.helm["url"]
+    )
+  end
+
   def tree(query \\ __MODULE__) do
     recursion_query = from(s in __MODULE__, join: d in "descendants", on: d.id == s.parent_id)
     cte_query = union_all(query, ^recursion_query)

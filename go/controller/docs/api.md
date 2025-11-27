@@ -24,6 +24,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
+- [Group](#group)
 - [HelmRepository](#helmrepository)
 - [InfrastructureStack](#infrastructurestack)
 - [MCPServer](#mcpserver)
@@ -1509,6 +1510,7 @@ _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
 - [ServiceSpec](#servicespec)
@@ -1606,13 +1608,14 @@ _Appears in:_
 | `interval` _string_ | Interval specifies the reconciliation interval for the global service.<br />This controls how frequently the controller checks and updates the service deployments<br />across target clusters. Defaults to 10 minutes if not specified. |  | Optional: \{\} <br /> |
 | `cascade` _[Cascade](#cascade)_ | Cascade defines the deletion behavior for resources owned by this global service.<br />This controls whether resources are removed from Plural Console only, target clusters only,<br />or both during service deletion operations. |  | Optional: \{\} <br /> |
 | `context` _[TemplateContext](#templatecontext)_ | Context provides data for dynamic template overrides of service deployment properties<br />such as Helm chart versions, values files, or other configuration parameters.<br />This enables environment-specific customization while maintaining a single service definition. |  | Optional: \{\} <br /> |
-| `distro` _[ClusterDistro](#clusterdistro)_ | Distro specifies the Kubernetes distribution type for target cluster selection.<br />This allows targeting services to specific cluster types that may have<br />distribution-specific requirements or optimizations. |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: \{\} <br /> |
+| `distro` _[ClusterDistro](#clusterdistro)_ | Distro specifies the Kubernetes distribution type for target cluster selection.<br />This allows targeting services to specific cluster types that may have<br />distribution-specific requirements or optimizations. |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br />Optional: \{\} <br /> |
 | `mgmt` _boolean_ | Mgmt indicates whether to include management clusters in the target cluster set.<br />Management clusters typically host the Plural Console and operators, and may<br />require special consideration for service deployments. |  | Optional: \{\} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references an existing ServiceDeployment to replicate across target clusters.<br />This allows leveraging an existing service definition as a template for global deployment. |  | Optional: \{\} <br /> |
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef restricts deployment to clusters associated with a specific cloud provider.<br />This enables provider-specific service deployments that may require particular<br />cloud integrations or provider-native services.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef constrains the global service scope to clusters within a specific project.<br />This provides project-level isolation and ensures services are only deployed<br />to clusters belonging to the designated project. |  | Optional: \{\} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ | Template defines the service deployment specification to be applied across target clusters.<br />This contains the core service definition including Helm charts, configurations,<br />and deployment parameters that will be instantiated on each matching cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `ignoreClusters` _string array_ | IgnoreClusters specifies a list of cluster handles to exclude from the target cluster set. |  | Optional: \{\} <br /> |
 
 
 #### GraphStore
@@ -1631,6 +1634,44 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled controls whether the graph store is enabled or not. | false | Optional: \{\} <br /> |
 | `store` _[VectorStore](#vectorstore)_ | Store is the type of the graph store to use. |  | Enum: [ELASTIC] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the graph store. |  | Optional: \{\} <br /> |
+
+
+#### Group
+
+
+
+Group represents a group of users within the system, managed via the Console API.
+It includes specifications for the group's name and description.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Group` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[GroupSpec](#groupspec)_ | Spec defines the desired state of the Group. |  |  |
+
+
+#### GroupSpec
+
+
+
+GroupSpec defines the desired state of Group.
+
+
+
+_Appears in:_
+- [Group](#group)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name specifies the name for this Group.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
+| `description` _string_ | Description provides a detailed explanation of this Group's purpose. |  | Optional: \{\} <br /> |
+| `global` _boolean_ | Global indicates whether all users in the system are automatically added to this group. | false | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### HTTPConnection
@@ -2975,8 +3016,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this gate. |  | Required: \{\} <br />Type: string <br /> |
-| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB] <br />Required: \{\} <br /> |
+| `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion).<br />- SENTINEL (runs a Plural Sentinel before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB SENTINEL] <br />Required: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef specifies the target cluster where this gate will execute. |  | Optional: \{\} <br /> |
+| `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef specifies the sentinel to execute for the SENTINEL gate. |  | Optional: \{\} <br /> |
 | `spec` _[GateSpec](#gatespec)_ | Spec contains detailed configuration for complex gate types like JOB gates. |  | Optional: \{\} <br /> |
 
 
@@ -3307,6 +3349,7 @@ _Appears in:_
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
 
 #### PrAutomationTemplate
@@ -3590,6 +3633,8 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+
+
 #### Reconciliation
 
 
@@ -3613,6 +3658,7 @@ _Appears in:_
 - [GeneratedSecretSpec](#generatedsecretspec)
 - [GitRepositorySpec](#gitrepositoryspec)
 - [GlobalServiceSpec](#globalservicespec)
+- [GroupSpec](#groupspec)
 - [HelmRepositorySpec](#helmrepositoryspec)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [MCPServerSpec](#mcpserverspec)
@@ -3854,6 +3900,8 @@ _Appears in:_
 | `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
@@ -4355,6 +4403,7 @@ _Appears in:_
 | `crontab` _string_ | The crontab on which to spawn stack runs. |  |  |
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs. |  | Optional: \{\} <br /> |
 | `overrides` _[StackOverrides](#stackoverrides)_ | Overrides for the cron triggered stack run configuration. |  | Optional: \{\} <br /> |
+| `trackRef` _boolean_ | Whether to track the stack's ref exactly on cron runs versus the last detected commit. This can theoretically cause drift between code if referenced via symlinks. |  | Optional: \{\} <br /> |
 
 
 #### StackDefinition
@@ -4503,6 +4552,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `id` _string_ | ID of the resource in the Console API. |  | Optional: \{\} <br />Type: string <br /> |
 | `sha` _string_ | SHA of last applied configuration. |  | Optional: \{\} <br />Type: string <br /> |
+| `readonly` _boolean_ | ReadOnly indicates whether the resource is read-only. | false |  |
 | `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
 
 

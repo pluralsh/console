@@ -288,6 +288,15 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v4.7.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v4.6.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -932,6 +941,23 @@
     - '1.29'
     - '1.28'
   publisher: sagemaker
+- name: amazon-sagemaker-spaces
+  versions:
+  - version: v0.1.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v0.1.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  publisher: sagemaker
 - name: appviewx_appviewx-mim-eks
   versions:
   - version: v1.0.0-eksbuild.1
@@ -943,6 +969,15 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.53.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.52.1-eksbuild.1
     compatibilities:
     - '1.34'
@@ -1753,6 +1788,25 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v2.1.15-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v2.1.14-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v2.1.13-eksbuild.1
     compatibilities:
     - '1.34'
@@ -2228,6 +2282,24 @@
   publisher: eks
 - name: aws-guardduty-agent
   versions:
+  - version: v1.12.1-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.12.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.11.0-eksbuild.4
     compatibilities:
     - '1.34'
@@ -2502,6 +2574,15 @@
   publisher: eks
 - name: aws-mountpoint-s3-csi-driver
   versions:
+  - version: v2.2.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v2.1.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -2721,6 +2802,24 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.1.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.0.3-eksbuild.1
     compatibilities:
     - '1.34'
@@ -2788,6 +2887,24 @@
   publisher: eks
 - name: aws-privateca-connector-for-kubernetes
   versions:
+  - version: v1.7.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.7.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.6.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -2800,6 +2917,18 @@
     - '1.27'
     - '1.26'
   publisher: aws-privateca
+- name: aws-secrets-store-csi-driver-provider
+  versions:
+  - version: v2.1.1-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  publisher: aws-secrets-manager
 - name: calyptia_fluent-bit
   versions:
   - version: v22.10.5-eksbuild.0
@@ -2845,6 +2974,15 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.19.1-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.19.1-eksbuild.1
     compatibilities:
     - '1.34'
@@ -3784,6 +3922,14 @@
   publisher: datree
 - name: dynatrace_dynatrace-operator
   versions:
+  - version: v1.7.2-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.7.1-eksbuild.1
     compatibilities:
     - '1.33'
@@ -4011,6 +4157,16 @@
   publisher: eks
 - name: eks-pod-identity-agent
   versions:
+  - version: v1.3.10-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v1.3.9-eksbuild.5
     compatibilities:
     - '1.34'
@@ -4020,6 +4176,7 @@
     - '1.30'
     - '1.29'
     - '1.28'
+    - '1.27'
   - version: v1.3.9-eksbuild.3
     compatibilities:
     - '1.34'
@@ -4329,6 +4486,15 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.20.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v0.19.0-eksbuild.3
     compatibilities:
     - '1.34'
@@ -4428,6 +4594,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v4.2.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v4.1.1-eksbuild.1
     compatibilities:
     - '1.34'
@@ -4749,12 +4924,19 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.34.1-eksbuild.2
+    compatibilities:
+    - '1.34'
   - version: v1.34.0-eksbuild.4
     compatibilities:
     - '1.34'
   - version: v1.34.0-eksbuild.2
     compatibilities:
     - '1.34'
+  - version: v1.33.5-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
   - version: v1.33.3-eksbuild.10
     compatibilities:
     - '1.34'
@@ -4771,6 +4953,11 @@
     compatibilities:
     - '1.34'
     - '1.33'
+  - version: v1.32.9-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.6-eksbuild.12
     compatibilities:
     - '1.34'
@@ -4811,6 +4998,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.13-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.10-eksbuild.12
     compatibilities:
     - '1.34'
@@ -5777,6 +5970,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.17.0-eksbuild.4
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v2.17.0-eksbuild.3
     compatibilities:
     - '1.34'
@@ -5870,15 +6072,6 @@
   publisher: eks
 - name: kubecost_kubecost
   versions:
-  - version: v3.0.3-eksbuild.1
-    compatibilities:
-    - '1.33'
-    - '1.32'
-    - '1.31'
-    - '1.30'
-    - '1.29'
-    - '1.28'
-    - '1.27'
   - version: v2.7.1-eksbuild.1
     compatibilities:
     - '1.32'
@@ -5962,6 +6155,12 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.8.0-eksbuild.5
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.0-eksbuild.3
     compatibilities:
     - '1.34'
@@ -5990,6 +6189,15 @@
     - '1.29'
     - '1.28'
     - '1.27'
+  - version: v0.7.2-eksbuild.6
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v0.7.2-eksbuild.4
     compatibilities:
     - '1.34'
@@ -6194,6 +6402,15 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.10.2-eksbuild.4
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.10.2-eksbuild.2
     compatibilities:
     - '1.34'
@@ -7152,6 +7369,33 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.20.5-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.20.4-eksbuild.3
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.20.4-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.20.4-eksbuild.1
     compatibilities:
     - '1.34'

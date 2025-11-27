@@ -51,6 +51,7 @@ def extract_table_data(target_tables, chart_versions):
                         ("version", str(istio_version)),
                         ("kube", kube_versions),
                         ("chart_version", chart_version),
+                        ("images", []),
                         ("requirements", []),
                         ("incompatibilities", []),
                     ]

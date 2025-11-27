@@ -42,6 +42,7 @@ rules:
   - generatedsecrets
   - gitrepositories
   - globalservices
+  - groups
   - helmrepositories
   - infrastructurestacks
   - managednamespaces
@@ -92,6 +93,7 @@ rules:
   - generatedsecrets/finalizers
   - gitrepositories/finalizers
   - globalservices/finalizers
+  - groups/finalizers
   - helmrepositories/finalizers
   - infrastructurestacks/finalizers
   - managednamespaces/finalizers
@@ -136,6 +138,7 @@ rules:
   - generatedsecrets/status
   - gitrepositories/status
   - globalservices/status
+  - groups/status
   - helmrepositories/status
   - infrastructurestacks/status
   - managednamespaces/status

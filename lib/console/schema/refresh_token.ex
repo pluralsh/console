@@ -2,8 +2,6 @@ defmodule Console.Schema.RefreshToken do
   use Piazza.Ecto.Schema
   alias Console.Schema.User
 
-  @expiry [days: -7]
-
   schema "refresh_tokens" do
     field :token, :string
 
@@ -13,7 +11,7 @@ defmodule Console.Schema.RefreshToken do
   end
 
   def expired(query \\ __MODULE__) do
-    expiry = Timex.now() |> Timex.shift(@expiry)
+    expiry = Timex.now() |> Timex.subtract(expiry())
     from(rt in query, where: rt.inserted_at <= ^expiry)
   end
 
@@ -29,5 +27,12 @@ defmodule Console.Schema.RefreshToken do
     |> put_new_change(:token, fn -> Console.rand_alphanum(32) end)
     |> foreign_key_constraint(:user_id)
     |> validate_required(~w(token user_id)a)
+  end
+
+  defp expiry() do
+    case Console.conf(:refresh_token_expiry) do
+      v when is_binary(v) -> Console.convert_duration(v)
+      _ -> Timex.Duration.from_days(7)
+    end
   end
 end

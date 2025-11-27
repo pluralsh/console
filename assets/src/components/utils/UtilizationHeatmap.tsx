@@ -49,7 +49,7 @@ export function UtilizationHeatmap({
       loading={loading}
       type="canvas"
       label={truncatedGraphLabel}
-      colors={getColor}
+      colors={(d: ComputedNodeWithoutStyles<object>) => getColor(d).hex()}
       valueFormat={(d) => formatValue(d, utilizationType)}
       data={treeMapData}
     />

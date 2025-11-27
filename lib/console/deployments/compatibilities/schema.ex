@@ -9,7 +9,7 @@ defmodule Console.Deployments.Compatibilities.Version do
 
   @type t :: %__MODULE__{requirements: [%Reference{}], incompatibilities: [%Reference{}]}
 
-  defstruct [:version, :kube, :chart_version, :requirements, :incompatibilities]
+  defstruct [:version, :kube, :chart_version, :requirements, :incompatibilities, :images]
 
   def blocking?(%__MODULE__{kube: kube_vsns}, kube_version, inc \\ 1),
     do: Utils.blocking?(kube_vsns, kube_version, inc)

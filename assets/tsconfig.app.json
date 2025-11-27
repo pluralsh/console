@@ -3,15 +3,15 @@
     "baseUrl": "src",
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
+    "paths": {
+      "@pluralsh/design-system": ["design-system/dist"],
+      "@pluralsh/design-system/*": ["design-system/dist/*"]
+    },
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
@@ -28,10 +28,6 @@
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "src/archive"
-  ]
+  "include": ["src"],
+  "exclude": ["src/archive"]
 }

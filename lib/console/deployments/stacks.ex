@@ -634,11 +634,12 @@ defmodule Console.Deployments.Stacks do
   Spawns a new run in response to a stack cron being executable
   """
   @spec spawn_cron(StackCron.t) :: run_resp
-  def spawn_cron(%StackCron{auto_approve: approve} = cron) do
+  def spawn_cron(%StackCron{auto_approve: approve, track_ref: track_ref} = cron) do
     %{stack: stack} = Repo.preload(cron, [stack: @poll_preloads])
     start_transaction()
     |> add_operation(:run, fn _ ->
-      create_run(stack, stack.sha, maybe_merge_overrides(%{
+      ref = (if track_ref, do: stack.git.ref, else: stack.sha)
+      create_run(stack, ref, maybe_merge_overrides(%{
         message: "cron run for #{stack.name}",
         approval: stack.approval || approve
       }, cron))

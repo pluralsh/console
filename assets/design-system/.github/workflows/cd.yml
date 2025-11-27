@@ -1,0 +1,75 @@
+name: CD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: Read Node.js version from package.json
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
+        id: engines
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - run: yarn --immutable
+      - run: yarn build:storybook
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PLURALSH_DESIGN }}'
+          channelId: live
+          projectId: pluralsh-design
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PLURAL_BOT_PAT }}
+    - name: Read Node.js version from package.json
+      run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
+      id: engines
+    - name: 'Setup Node'
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ steps.engines.outputs.nodeVersion }}
+        registry-url: 'https://registry.npmjs.org'
+    - name: 'Install Dependencies and Clean'
+      run: yarn install --immutable && yarn clean
+    - name: Semantic Release
+      uses: cycjimmy/semantic-release-action@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.PLURAL_BOT_PAT }}
+        NODE_AUTH_TOKEN: ${{ secrets.PLURAL_BOT_NPM_TOKEN }}
+  trivy-scan:
+    name: Trivy fs scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          hide-progress: false
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          security-checks: 'vuln,secret'
+          ignore-unfixed: true
+          #severity: 'CRITICAL,HIGH'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'

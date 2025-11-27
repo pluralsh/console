@@ -289,3 +289,11 @@ if is_set("CONSOLE_SENTRY_DSN") do
   config :sentry,
     dsn: get_env("CONSOLE_SENTRY_DSN")
 end
+
+if is_set("CONSOLE_REFRESH_TOKEN_EXPIRY") do
+  config :console, :refresh_token_expiry, get_env("CONSOLE_REFRESH_TOKEN_EXPIRY")
+end
+
+if get_env("CONSOLE_OIDC_SYNC") == "full" do
+  config :console, :oidc_sync, :full
+end

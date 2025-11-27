@@ -334,7 +334,7 @@ export function PodEvents(): ReactElement<any> {
 export function PodExec(): ReactElement<any> {
   const theme = useTheme()
   const navigate = useNavigate()
-  const pod = useOutletContext() as PodT
+  const pod = useOutletContext() as Nullable<PodT>
   const { clusterId, name = '', namespace = '' } = useParams()
   const [searchParams] = useSearchParams()
   const container = searchParams.get('container')
@@ -342,8 +342,8 @@ export function PodExec(): ReactElement<any> {
 
   const containers: Array<string> = useMemo(
     () => [
-      ...(pod.initContainers?.map((c) => c!.name!) ?? []),
-      ...(pod.containers?.map((c) => c!.name!) ?? []),
+      ...(pod?.initContainers?.map((c) => c!.name!) ?? []),
+      ...(pod?.containers?.map((c) => c!.name!) ?? []),
     ],
     [pod]
   )

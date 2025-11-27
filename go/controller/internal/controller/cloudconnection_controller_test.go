@@ -226,7 +226,8 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, readonlyNamespacedName, connection)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(connection.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
-				ID: lo.ToPtr(readonlyConnectionConsoleID),
+				ID:       lo.ToPtr(readonlyConnectionConsoleID),
+				ReadOnly: true,
 				Conditions: []metav1.Condition{
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),

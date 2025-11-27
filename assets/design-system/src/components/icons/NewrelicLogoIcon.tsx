@@ -1,0 +1,23 @@
+import createIcon from './createIcon'
+
+export default createIcon(({ size, color, fullColor }) => (
+  <svg
+    viewBox="0 0 832.8 959.8"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+  >
+    <path
+      d="M672.6 332.3l160.2-92.4v480L416.4 959.8V775.2l256.2-147.6z"
+      fill={fullColor ? '#00ac69' : color}
+    />
+    <path
+      d="M416.4 184.6L160.2 332.3 0 239.9 416.4 0l416.4 239.9-160.2 92.4z"
+      fill={fullColor ? '#1ce783' : color}
+    />
+    <path
+      d="M256.2 572.3L0 424.6V239.9l416.4 240v479.9l-160.2-92.2z"
+      fill={fullColor ? '#1d252c' : color}
+    />
+  </svg>
+))

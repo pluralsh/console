@@ -34,11 +34,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "will configure a promotion gate for a pipeline"
   input_object :pipeline_gate_attributes do
-    field :name,       non_null(:string), description: "the name of this gate"
-    field :type,       non_null(:gate_type), description: "the type of gate this is"
-    field :cluster,    :string, description: "the handle of a cluster this gate will execute on"
-    field :cluster_id, :id, description: "the id of the cluster this gate will execute on"
-    field :spec,       :gate_spec_attributes, description: "a specification for more complex gate types"
+    field :name,        non_null(:string), description: "the name of this gate"
+    field :type,        non_null(:gate_type), description: "the type of gate this is"
+    field :cluster,     :string, description: "the handle of a cluster this gate will execute on"
+    field :cluster_id,  :id, description: "the id of the cluster this gate will execute on"
+    field :spec,        :gate_spec_attributes, description: "a specification for more complex gate types"
+    field :sentinel_id, :id, description: "the id of the sentinel this gate will execute"
   end
 
   @desc "attributes needed to create a new pipeline context"
@@ -227,6 +228,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       resolve fn gate, _, _ -> Pipelines.gate_job(gate) end
       middleware ErrorHandler
     end
+
+    field :sentinel,     :sentinel, description: "the sentinel this gate will execute", resolve: dataloader(Deployments)
+    field :sentinel_run, :sentinel_run, description: "the run that the sentinel executed last", resolve: dataloader(Deployments)
 
     field :edge,     :pipeline_stage_edge, description: "the edge this gate lives on", resolve: dataloader(Deployments)
     field :cluster,  :cluster, description: "the cluster this gate can run on", resolve: dataloader(Deployments)

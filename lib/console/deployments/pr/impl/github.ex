@@ -7,7 +7,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
 
   @behaviour Console.Deployments.Pr.Dispatcher
 
-  def create(pr, branch, ctx) do
+  def create(pr, branch, ctx, labels \\ []) do
     with {:ok, client} <- client(pr),
          {:ok, owner, repo} <- identifier(pr),
          {:ok, title, body} <- description(pr, ctx) do
@@ -19,6 +19,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       })
       |> case do
         {_, %{"html_url" => url} = result, _} ->
+          maybe_add_labels(client, owner, repo, result["number"], labels)
           {:ok, %{title: title, url: url, body: body, ref: branch, owner: owner(result)}}
         {_, body, _} -> {:error, "failed to create pull request: #{Jason.encode!(body)}"}
       end
@@ -158,6 +159,11 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp to_commit_status(_), do: {:in_progress, %{started_at: Timex.now()}}
 
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
+
+  defp maybe_add_labels(client, owner, repo, id, [_ | _] = labels) when not is_nil(id) do
+    Tentacat.Issues.Labels.add(client, owner, repo, id, labels)
+  end
+  defp maybe_add_labels(_, _, _, _, _), do: :ok
 
   defp to_files(client, url, pr, files) do
     Enum.map(files, fn f ->

@@ -12,7 +12,7 @@ import { StackMinimalFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useServiceContext } from './ServiceDetails'
 import { capitalize } from 'lodash'
-import StackStatusChip from 'components/stacks/common/StackStatusChip'
+import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
 import { Link } from 'react-router-dom'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 

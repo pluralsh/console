@@ -444,7 +444,7 @@ function AddContextModal({
             language="json"
             onChange={setJson}
             height="160px"
-            options={{ lineNumbers: false, minimap: { enabled: false } }}
+            options={{ lineNumbers: 'off', minimap: { enabled: false } }}
           />
         </FormField>
         {(jsonError || error) && <GqlError error={jsonError || error} />}

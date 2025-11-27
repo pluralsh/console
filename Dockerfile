@@ -13,6 +13,7 @@ COPY assets/package.json ./package.json
 COPY assets/yarn.lock ./yarn.lock
 COPY assets/.yarn ./.yarn
 COPY assets/.yarnrc.yml ./.yarnrc.yml
+COPY assets/design-system/package.json ./design-system/package.json
 
 RUN yarn install
 

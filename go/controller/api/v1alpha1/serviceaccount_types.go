@@ -27,6 +27,7 @@ type ServiceAccountList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the ServiceAccount in the Console API."
+// +kubebuilder:printcolumn:name="READONLY",type="boolean",JSONPath=".status.readonly",description="Flag indicating if the object is read-only"
 
 // ServiceAccount provides a programmatic identity for automated processes and tools to interact
 // with the Plural Console API. Unlike user accounts, service accounts are designed for non-human
@@ -44,6 +45,11 @@ type ServiceAccount struct {
 	// Status represents the current state of this ServiceAccount resource.
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
+}
+
+// SetReadOnlyStatus sets the read-only status of the ServiceAccount.
+func (in *ServiceAccount) SetReadOnlyStatus(readOnly bool) {
+	in.Status.ReadOnly = readOnly
 }
 
 // ConsoleID returns an ID used in Console API.

@@ -48,8 +48,22 @@ migrator:
   containerSecurityContext: ~
   tolerations: ~
 
-# console is used to configure any additional containers to add to the console. Standard kubernetes container configuration
+# console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  config:
+    # refreshTokenExpiry is used to configure the refresh token expiry time.  Use a duration string like ``7d``, ``1h`` etc to set the expiry,.
+    refreshTokenExpiry: 7d
+    # oidcSync is used to configure whether oidc group claims full sync or not in the db.  Use ``full`` to enable full sync.
+    oidcSync: upsert
+    # defaultProjectName is used to configure the default project name.
+    defaultProjectName: ~
+    # serviceAccountDomain is used to configure the service account domain.
+    serviceAccountDomain: ~
+    # deployOperatorUrl is used to configure the default deploy-operator git repository url, uses https://github.com/pluralsh/deployment-operator.git if not set.
+    deployOperatorUrl: ~  
+    # artifactsUrl is used to configure the default artifacts url, uses https://github.com/pluralsh/scaffolds.git if not set.
+    artifactsUrl: ~
+
   additionalContainers: ~
   containerSecurityContext:
     capabilities:
@@ -863,3 +877,63 @@ cloudQuery:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+dex:
+  enabled: false
+
+  clientSecret: ~
+
+  additionalDexSecrets: {}
+
+  config:
+    # Set it to a valid URL
+    issuer: https://<your-console-fqdn>/dex
+
+    # See https://dexidp.io/docs/storage/ for more options
+    storage:
+      type: memory
+
+    connectors:
+    # - type: microsoft
+    #   # Required field for connector id.
+    #   id: microsoft
+    #   # Required field for connector name.
+    #   name: Microsoft
+    #   config:
+    #     # Credentials can be string literals or pulled from the environment.
+    #     clientID: $MICROSOFT_APPLICATION_ID
+    #     clientSecret: $MICROSOFT_CLIENT_SECRET
+    #     redirectURI: https://<your-console-fqdn>/dex/callback
+    #     tenant: a2bed0c4-5957-4f73-b0c2-a811407590fb
+    #     emailToLowercase: false
+
+    staticClients:
+    - id: console
+      secretEnv: CONSOLE_CLIENT_SECRET
+      name: 'Plural Console'
+      # Where the app will be running.
+      redirectURIs:
+      - 'https://<your-console-host>/oauth/callback'
+
+  envFrom:
+  - secretRef:
+      name: dex-env
+
+  ingress:
+    enabled: true
+    className: nginx
+
+    annotations:
+      kubernetes.io/tls-acme: 'true'
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+    hosts:
+      - host: <your-console-fqdn>
+        paths:
+          - path: /dex
+            pathType: Prefix
+
+    tls:
+      - hosts:
+          - <your-console-fqdn>
+        secretName: dex-cert

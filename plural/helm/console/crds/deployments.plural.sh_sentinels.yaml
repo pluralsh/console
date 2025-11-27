@@ -72,6 +72,28 @@ spec:
                               - PLAINTEXT
                               - JUNIT
                               type: string
+                            git:
+                              description: The git location to use for this integration
+                                test.
+                              properties:
+                                files:
+                                  description: Optional files to add to the manifests
+                                    for this service
+                                  items:
+                                    type: string
+                                  type: array
+                                folder:
+                                  description: Folder is the folder in the Git repository
+                                    where the manifests are located.
+                                  type: string
+                                ref:
+                                  description: Ref is the Git reference (branch, tag,
+                                    or commit) to use.
+                                  type: string
+                              required:
+                              - folder
+                              - ref
+                              type: object
                             gotestsum:
                               description: the configuration for the gotestsum test
                                 runner for this check
@@ -9681,6 +9703,50 @@ spec:
                               required:
                               - namespace
                               type: object
+                            repositoryRef:
+                              description: RepositoryRef references a Git repository
+                                to use for this integration test.
+                              properties:
+                                apiVersion:
+                                  description: API version of the referent.
+                                  type: string
+                                fieldPath:
+                                  description: |-
+                                    If referring to a piece of an object instead of an entire object, this string
+                                    should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                                    For example, if the object reference is to a container within a pod, this would take on a value like:
+                                    "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                                    the event) or if no container name is specified "spec.containers[2]" (container with
+                                    index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                                    referencing a part of an object.
+                                  type: string
+                                kind:
+                                  description: |-
+                                    Kind of the referent.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  type: string
+                                namespace:
+                                  description: |-
+                                    Namespace of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                                  type: string
+                                resourceVersion:
+                                  description: |-
+                                    Specific resourceVersion to which this reference is made, if any.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                                  type: string
+                                uid:
+                                  description: |-
+                                    UID of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                                  type: string
+                              type: object
+                              x-kubernetes-map-type: atomic
                             tags:
                               additionalProperties:
                                 type: string
@@ -10057,9 +10123,15 @@ spec:
               id:
                 description: ID of the resource in the Console API.
                 type: string
+              readonly:
+                default: false
+                description: ReadOnly indicates whether the resource is read-only.
+                type: boolean
               sha:
                 description: SHA of last applied configuration.
                 type: string
+            required:
+            - readonly
             type: object
         type: object
     served: true

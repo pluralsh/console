@@ -8,5 +8,6 @@
   "files.associations": {
     "**/src/archive/**/*": "plaintext"
   },
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "editor.formatOnSave": true
 }
