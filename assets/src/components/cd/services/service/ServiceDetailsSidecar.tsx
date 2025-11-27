@@ -20,19 +20,18 @@ import {
   ServicePromotion,
   useKickServiceMutation,
 } from 'generated/graphql'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-import { getStacksAbsPath } from '../../../../routes/stacksRoutesConsts.tsx'
-import StackStatusIcon from '../../../stacks/common/StackStatusIcon.tsx'
+import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
+import StackStatusIcon from 'components/stacks/common/StackStatusIcon'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
-import LogsLegend from 'components/cd/logs/LogsLegend.tsx'
 import ServicePromote from './ServicePromote'
 
 export function ServiceDetailsSidecar({
@@ -40,7 +39,6 @@ export function ServiceDetailsSidecar({
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
 }) {
-  const { pathname } = useLocation()
   const theme = useTheme()
   if (!serviceDeployment) {
     return null
@@ -225,7 +223,6 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
       </Sidecar>
-      {pathname.includes('logs') && <LogsLegend />}
     </div>
   )
 }

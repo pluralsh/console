@@ -2,11 +2,11 @@ import styled from 'styled-components'
 
 import { Prop, PropsContainer } from '@pluralsh/design-system'
 
-import { useBorderColor, Level } from './LogLine'
 import { ComponentPropsWithRef } from 'react'
+import { logLevelToColor } from './LogLine'
 
-export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
-  backgroundColor: color,
+export const LegendColor = styled.div(({ theme, color = 'border' }) => ({
+  backgroundColor: theme.colors[color],
   borderRadius: theme.borderRadiuses.medium,
   height: 12,
   width: 12,
@@ -21,31 +21,15 @@ export const LegendWrap = styled.div(({ theme }) => ({
 export default function LogsLegend(
   props: ComponentPropsWithRef<typeof PropsContainer>
 ) {
-  const borderColor = useBorderColor()
-
   return (
     <PropsContainer {...props}>
       <FlexPropSC title="Log legend">
-        <LegendWrap>
-          <LegendColor color={borderColor(Level.UNKNOWN)} />
-          Unknown
-        </LegendWrap>
-        <LegendWrap>
-          <LegendColor color={borderColor(Level.INFO)} />
-          Info
-        </LegendWrap>
-        <LegendWrap>
-          <LegendColor color={borderColor(Level.SUCCESS)} />
-          Success
-        </LegendWrap>
-        <LegendWrap>
-          <LegendColor color={borderColor(Level.WARN)} />
-          Warning
-        </LegendWrap>
-        <LegendWrap>
-          <LegendColor color={borderColor(Level.ERROR)} />
-          Error
-        </LegendWrap>
+        {Object.entries(logLevelToColor).map(([level, color]) => (
+          <LegendWrap key={level}>
+            <LegendColor color={color} />
+            {level}
+          </LegendWrap>
+        ))}
       </FlexPropSC>
     </PropsContainer>
   )

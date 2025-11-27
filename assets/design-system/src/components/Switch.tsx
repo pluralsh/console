@@ -6,13 +6,18 @@ import {
   useFocusRing,
 } from 'react-aria'
 import { type ToggleState, useToggleState } from 'react-stately'
+import { green } from '../theme/colors-base'
 import styled from 'styled-components'
+
+const GREEN_VARIANT_BASE = green[600]
+const GREEN_VARIANT_HOVER = green[500]
 
 export type SwitchStyleProps = {
   $checked: boolean
   $disabled: boolean
   $readOnly: boolean
   $focused: boolean
+  $variant: 'default' | 'green'
 }
 
 type UseSwitchProps = Omit<
@@ -23,12 +28,13 @@ type UseSwitchProps = Omit<
   defaultChecked?: boolean
   disabled?: boolean
   readOnly?: boolean
+  variant?: 'default' | 'green'
 }
 
 export type SwitchProps = UseSwitchProps & { className?: string }
 
 const SwitchSC = styled.label<SwitchStyleProps>(
-  ({ $checked, $disabled, $readOnly, theme }) => ({
+  ({ $checked, $disabled, $readOnly, $variant, theme }) => ({
     position: 'relative',
     display: 'flex',
     columnGap: theme.spacing.xsmall,
@@ -43,7 +49,9 @@ const SwitchSC = styled.label<SwitchStyleProps>(
             color: theme.colors.text,
             [SwitchToggleSC]: {
               backgroundColor: $checked
-                ? theme.colors['action-primary-hover']
+                ? $variant === 'green'
+                  ? GREEN_VARIANT_HOVER
+                  : theme.colors['action-primary-hover']
                 : theme.colors['action-input-hover'],
             },
             [SwitchHandleSC]: {
@@ -57,7 +65,7 @@ const SwitchSC = styled.label<SwitchStyleProps>(
 )
 
 const SwitchToggleSC = styled.div<SwitchStyleProps>(
-  ({ $checked, $focused, $disabled, theme }) => ({
+  ({ $checked, $focused, $disabled, $variant, theme }) => ({
     position: 'relative',
     width: 42,
     height: 24,
@@ -65,7 +73,9 @@ const SwitchToggleSC = styled.div<SwitchStyleProps>(
     backgroundColor: $checked
       ? $disabled
         ? theme.colors['action-primary-disabled']
-        : theme.colors['action-primary']
+        : $variant === 'green'
+          ? GREEN_VARIANT_BASE
+          : theme.colors['action-primary']
       : 'transparent',
     outlineWidth: 1,
     outlineStyle: 'solid',
@@ -109,6 +119,7 @@ export const useSwitch = ({
   defaultChecked,
   disabled,
   readOnly,
+  variant,
   ...props
 }: UseSwitchProps): {
   inputProps: ComponentPropsWithRef<'input'>
@@ -141,6 +152,7 @@ export const useSwitch = ({
         $disabled: isDisabled,
         $checked: isSelected,
         $readOnly: isReadOnly,
+        $variant: variant,
       },
       state,
     }),

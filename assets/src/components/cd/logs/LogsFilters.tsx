@@ -1,22 +1,19 @@
 import {
   Button,
-  FillLevelContext,
-  FiltersIcon,
+  DropdownArrowIcon,
   Flex,
-  Flyover,
-  FormField,
   Input,
   ListBoxItem,
   SearchIcon,
   Select,
-  Toast,
 } from '@pluralsh/design-system'
-import { useUpdateState } from 'components/hooks/useUpdateState'
+import { useOutsideClick } from 'components/hooks/useOutsideClick'
+import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
+import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { LogFacetInput } from 'generated/graphql'
-import { clamp, isEqual } from 'lodash'
-import { FormEvent, useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { DateParam } from 'utils/datetime'
+import { DateParam, formatDateTime } from 'utils/datetime'
 import {
   SinceSecondsOptions,
   SinceSecondsSelectOptions,
@@ -24,80 +21,40 @@ import {
 import { DateTimeFormInput } from './DateTimeFormInput'
 import { LogsLabels } from './LogsLabels'
 
-const MAX_QUERY_LENGTH = 250
-
-export type LogsFlyoverFiltersT = {
+export type LogsFiltersT = {
   date?: DateParam
   sinceSeconds: SinceSecondsOptions
   queryLength: number
 }
 
-export const DEFAULT_LOG_FLYOVER_FILTERS: LogsFlyoverFiltersT = {
+export const DEFAULT_LOG_FILTERS: LogsFiltersT = {
   date: undefined,
   sinceSeconds: SinceSecondsOptions.QuarterHour,
   queryLength: 100,
 }
 
-export function LogsFilters({
+export function LogsSearchInput({
   q,
   setQ,
-  filters,
-  setFilters,
   labels,
   removeLabel,
-  setLive,
 }: {
   q: string
   setQ: (q: string) => void
-  filters: LogsFlyoverFiltersT
-  setFilters: (filters: LogsFlyoverFiltersT) => void
   labels: LogFacetInput[]
   removeLabel: (label: string) => void
-  setLive: (live: boolean) => void
 }) {
-  const { colors } = useTheme()
-  const [open, setOpen] = useState(false)
-  const hasCustomFilters = !isEqual(filters, DEFAULT_LOG_FLYOVER_FILTERS)
-
   return (
     <Flex
       direction="column"
       gap="medium"
     >
-      <Flex gap="small">
-        <Input
-          placeholder="Filter logs"
-          startIcon={<SearchIcon size={14} />}
-          value={q}
-          onChange={({ target: { value } }) => setQ(value)}
-          flex={1}
-        />
-        <Button
-          css={{ borderColor: hasCustomFilters && colors['border-primary'] }}
-          floating
-          startIcon={<FiltersIcon />}
-          onClick={() => setOpen(true)}
-        >
-          <Flex
-            align="center"
-            gap="small"
-          >
-            Filters
-            {hasCustomFilters && <FilterIndicatorSC />}
-          </Flex>
-        </Button>
-        <Flyover
-          open={open}
-          onClose={() => setOpen(false)}
-          header="Log filters"
-        >
-          <FiltersForm
-            initialForm={filters}
-            onSubmit={setFilters}
-            setLive={setLive}
-          />
-        </Flyover>
-      </Flex>
+      <Input
+        placeholder="Filter logs"
+        startIcon={<SearchIcon size={14} />}
+        value={q}
+        onChange={({ target: { value } }) => setQ(value)}
+      />
       <LogsLabels
         labels={labels}
         removeLabel={removeLabel}
@@ -106,127 +63,125 @@ export function LogsFilters({
   )
 }
 
-function FiltersForm({
-  initialForm,
-  onSubmit,
+export function LogsDateDropdown({
+  initialDate,
+  setDate,
   setLive,
+  disabled = false,
 }: {
-  initialForm: LogsFlyoverFiltersT
-  onSubmit: (form: LogsFlyoverFiltersT) => void
+  initialDate: DateParam
+  setDate: (date: DateParam) => void
   setLive: (live: boolean) => void
+  disabled?: boolean
 }) {
-  const { spacing } = useTheme()
+  const { colors, partials } = useTheme()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const menuBtnRef = useRef<HTMLButtonElement>(null)
+  useOutsideClick(menuBtnRef, () => setDropdownOpen(false))
+
   const [hasDTErrors, setHasDTErrors] = useState(false)
-  const clearDTFormRef = useRef<() => void>(null)
-  const [showSuccessToast, setShowSuccessToast] = useState(false)
+  const [formResetKey, setFormResetKey] = useState(0)
+  const [internalDate, setInternalDate] = useState(initialDate)
 
-  const { state, update, initialState, hasUpdates } =
-    useUpdateState(initialForm)
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    onSubmit(state)
+  const toggleDropdown = (open?: boolean) => {
+    setDropdownOpen(open ?? !dropdownOpen)
+    setInternalDate(initialDate)
+  }
+  const handleSubmit = () => {
+    setDate(internalDate)
     // by default, logs should be live if no specific date is set, and vice versa
-    setLive(!state.date)
-    setShowSuccessToast(true)
+    setLive(!internalDate)
   }
 
-  const resetToDefault = () => {
-    update(DEFAULT_LOG_FLYOVER_FILTERS)
-    clearDTFormRef.current?.()
+  const resetToNow = () => {
+    setInternalDate(null)
+    // forces DateTimeFormInput to remount, needed since the component is brittle
+    setFormResetKey((k) => k + 1)
   }
 
   return (
-    <FillLevelContext value={0}>
-      <WrapperFormSC onSubmit={handleSubmit}>
-        <DateTimeFormInput
-          label="Range end date/time"
-          initialDate={initialState.date}
-          setDate={(date) => update({ date })}
-          setHasErrors={setHasDTErrors}
-          clearDTFormRef={clearDTFormRef}
-        />
-        <FormField
-          label="Range duration"
-          hint="How far back to search from the selected date/time"
-        >
-          <Select
-            selectedKey={`${state.sinceSeconds}`}
-            onSelectionChange={(key) =>
-              update({ sinceSeconds: key as SinceSecondsOptions })
-            }
-          >
-            {SinceSecondsSelectOptions.map((opts) => (
-              <ListBoxItem
-                key={`${opts.key}`}
-                label={opts.label}
-                selected={opts.key === state.sinceSeconds}
-              />
-            ))}
-          </Select>
-        </FormField>
-        <FormField
-          label="Query length"
-          hint="The number of lines loaded at a time — min: 10, max: 250"
-        >
-          <Input
-            inputProps={{
-              css: {
-                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                },
-              },
-            }}
-            type="number"
-            value={state.queryLength || ''}
-            onChange={({ target: { value } }) =>
-              update({
-                queryLength: clamp(Number(value), 10, MAX_QUERY_LENGTH),
-              })
-            }
-          />
-        </FormField>
-        <Flex
-          gap="medium"
-          width="100%"
-        >
-          <Button
-            flex={1}
-            floating
-            onClick={resetToDefault}
-          >
-            Reset to default
-          </Button>
-          <Button
-            flex={1}
-            disabled={!hasUpdates || hasDTErrors}
-            type="submit"
-          >
-            Apply filters
-          </Button>
-        </Flex>
-      </WrapperFormSC>
-      <Toast
-        show={showSuccessToast}
-        closeTimeout={2000}
-        onClose={() => setShowSuccessToast(false)}
-        margin={spacing.xlarge}
+    <div css={{ position: 'relative' }}>
+      <Button
+        ref={menuBtnRef}
+        small
+        secondary
+        onClick={() => toggleDropdown()}
+        endIcon={<DropdownArrowIcon />}
+        disabled={disabled}
+        style={{
+          background: colors['fill-three'],
+          color: disabled
+            ? colors['text-input-disabled']
+            : colors['text-light'],
+          ...partials.text.body2,
+        }}
       >
-        Filters applied
-      </Toast>
-    </FillLevelContext>
+        {initialDate
+          ? formatDateTime(initialDate, 'Before MM/DD/YY - HH:mm:ss')
+          : 'Before now'}
+      </Button>
+      <DateFormSC
+        type="fromTopLeft"
+        isOpen={dropdownOpen}
+        setIsOpen={setDropdownOpen}
+      >
+        <DateTimeFormInput
+          key={`${formResetKey}-${dropdownOpen}`}
+          label="Range end date/time"
+          initialDate={internalDate}
+          setDate={setInternalDate}
+          setHasErrors={setHasDTErrors}
+        />
+        <Button
+          flex={1}
+          disabled={initialDate === internalDate || hasDTErrors}
+          onClick={handleSubmit}
+        >
+          Apply filter
+        </Button>
+        <Button
+          flex={1}
+          floating
+          onClick={resetToNow}
+        >
+          Reset to now
+        </Button>
+      </DateFormSC>
+    </div>
   )
 }
 
-const WrapperFormSC = styled.form(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xlarge,
-}))
+export function LogsSinceSecondsSelect({
+  sinceSeconds,
+  setSinceSeconds,
+  disabled = false,
+}: {
+  sinceSeconds: number
+  setSinceSeconds: (sinceSeconds: SinceSecondsOptions) => void
+  disabled?: boolean
+}) {
+  return (
+    <FillLevelDiv fillLevel={2}>
+      <Select
+        size="small"
+        selectedKey={`${sinceSeconds}`}
+        onSelectionChange={(key) => setSinceSeconds(key as SinceSecondsOptions)}
+        isDisabled={disabled}
+      >
+        {SinceSecondsSelectOptions.map(({ key, label }) => (
+          <ListBoxItem
+            key={`${key}`}
+            label={label}
+            selected={key === sinceSeconds}
+          />
+        ))}
+      </Select>
+    </FillLevelDiv>
+  )
+}
 
-const FilterIndicatorSC = styled.div(({ theme }) => ({
-  height: 12,
-  width: 12,
-  backgroundColor: theme.colors['border-primary'],
-  borderRadius: '50%',
+const DateFormSC = styled(SimplePopupMenu)(({ theme }) => ({
+  width: 350,
+  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
+  gap: theme.spacing.small,
 }))

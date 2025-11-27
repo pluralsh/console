@@ -31,23 +31,29 @@ export function StackEntry({
       onClick={() => !active && navigate(getStacksAbsPath(stack.id))}
     >
       <Flex
-        align="center"
-        gap="small"
+        direction="column"
+        gap="xsmall"
+        minWidth={0}
       >
-        <AppIcon
-          icon={<StackTypeIcon stackType={stack.type} />}
-          size="xxsmall"
-          $boxSize={24}
-        />
-        <NameSC $active={active}>{stack.name}</NameSC>
-        <StackStatusChipAlt stack={stack} />
+        <Flex
+          align="center"
+          gap="small"
+        >
+          <AppIcon
+            icon={<StackTypeIcon stackType={stack.type} />}
+            size="xxsmall"
+            $boxSize={24}
+          />
+          <NameSC $active={active}>{stack.name}</NameSC>
+        </Flex>
+        <CaptionP
+          $color="text-xlight"
+          css={{ ...TRUNCATE_LEFT }}
+        >
+          {stack.repository?.url}
+        </CaptionP>
       </Flex>
-      <CaptionP
-        $color="text-xlight"
-        css={{ ...TRUNCATE_LEFT }}
-      >
-        {stack.repository?.url}
-      </CaptionP>
+      <StackStatusChipAlt stack={stack} />
     </WrapperSC>
   )
 }
@@ -55,8 +61,9 @@ export function StackEntry({
 const WrapperSC = styled.div<{ $active: boolean; $first: boolean }>(
   ({ theme, $active, $first }) => ({
     display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.xsmall,
+    justifyContent: 'space-between',
+    gap: theme.spacing.large,
+    alignItems: 'center',
     padding: theme.spacing.medium,
     borderLeft: theme.borders.default,
     borderRight: theme.borders.default,

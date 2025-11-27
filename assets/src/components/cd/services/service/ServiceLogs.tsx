@@ -8,10 +8,7 @@ export default function ServiceLogs() {
 
   return (
     <WrapperSC>
-      <Logs
-        serviceId={serviceId}
-        showLegendTooltip={false}
-      />
+      <Logs serviceId={serviceId} />
     </WrapperSC>
   )
 }

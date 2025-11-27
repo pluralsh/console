@@ -1,4 +1,4 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, CardProps } from '@pluralsh/design-system'
 import { useKeyDown } from '@react-hooks-library/core'
 import { animated, useTransition } from '@react-spring/web'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
@@ -9,12 +9,13 @@ export function SimplePopupMenu({
   setIsOpen,
   type = 'header',
   children,
+  ...props
 }: {
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
-  type?: 'header' | 'sidebar'
+  type?: 'header' | 'sidebar' | 'fromTopLeft'
   children: ReactNode
-}) {
+} & CardProps) {
   useKeyDown(['Escape'], () => setIsOpen(false))
 
   const transitions = useTransition(isOpen ? [true] : [], {
@@ -31,7 +32,12 @@ export function SimplePopupMenu({
       onClick={(e) => e.stopPropagation()}
       style={styles}
     >
-      <MenuCardSC fillLevel={2}>{children}</MenuCardSC>
+      <MenuCardSC
+        fillLevel={2}
+        {...props}
+      >
+        {children}
+      </MenuCardSC>
     </AnimatedWrapperSC>
   ))
 }
@@ -52,15 +58,17 @@ const MenuCardSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-const AnimatedWrapperSC = styled(animated.div)<{ $type: 'header' | 'sidebar' }>(
-  ({ theme, $type }) => ({
-    position: 'absolute',
-    zIndex: theme.zIndexes.modal,
-    minWidth: 175,
-    display: 'flex',
-    flexDirection: 'column',
-    ...($type === 'header'
-      ? { top: 40, right: 0, transformOrigin: 'top right' }
+const AnimatedWrapperSC = styled(animated.div)<{
+  $type: 'header' | 'sidebar' | 'fromTopLeft'
+}>(({ theme, $type }) => ({
+  position: 'absolute',
+  zIndex: theme.zIndexes.modal,
+  minWidth: 175,
+  display: 'flex',
+  flexDirection: 'column',
+  ...($type === 'header'
+    ? { top: 40, right: 0, transformOrigin: 'top right' }
+    : $type === 'fromTopLeft'
+      ? { top: 40, left: 0, transformOrigin: 'top left' }
       : { bottom: 0, left: 40, transformOrigin: 'bottom left' }),
-  })
-)
+}))
