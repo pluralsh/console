@@ -1,10 +1,13 @@
 import yaml
 import requests
 import semantic_version
+import subprocess
+import os
 
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
+from datetime import datetime
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -150,6 +153,48 @@ def expand_kube_versions(start, end):
 
     return expanded_versions
 
+IMPORTED_REPOS = set()
+
+def get_chart_images(url, chart, version, values=None):
+    """
+    Template a Helm chart for a given repo URL and chart name.
+    Returns the Helm chart YAML or None if not found.
+    This assumes the chart is available via a Helm repository.
+    """
+    # Add repo with a temp name
+    if url not in IMPORTED_REPOS:
+        subprocess.run(["helm", "repo", "add", chart, url], check=True)
+        subprocess.run(["helm", "repo", "update"], check=True)
+        IMPORTED_REPOS.add(url)
+    cmd = ["helm", "template", f"{chart}/{chart}", "--version", version]
+    if values:
+        cmd.append("--set")
+        cmd.append(values)
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True
+    )
+    if result.returncode != 0:
+        print_error(f"Failed to template helm chart: {result.stderr}")
+        return None
+    
+    result = list(yaml.safe_load_all(result.stdout))
+    return list(set(find_nested_images(result)))
+
+def find_nested_images(objs):
+    if isinstance(objs, list):
+        for obj in objs:
+            for result in find_nested_images(obj):
+                yield result
+    elif isinstance(objs, dict):
+        for key, value in objs.items():
+            if key == "image" and isinstance(value, str):
+                yield value
+            else:
+                for result in find_nested_images(value):
+                    yield result
+    
 
 def get_github_releases(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
@@ -165,6 +210,28 @@ def get_github_releases(repo_owner, repo_name):
         raise Exception(
             f"Failed to fetch latest releases: {response.status_code}"
         )
+
+def get_kube_release_info():
+    kube_releases = list(reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))))
+    return [kube_release for kube_release in kube_releases if clean_kube_version(kube_release[0])]
+
+def get_github_releases_timestamps(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=100"
+    response = requests.get(url)
+    if response.status_code == 200:
+        releases = response.json()
+        for release in releases:
+            yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
+    else:
+        raise Exception(f"Failed to fetch releases timestamps: {response.status_code} {response.text}")
+
+def find_last_n_releases(releases, ts, n=3):
+    for i in range(len(releases)):
+        if releases[i][1] > ts:
+            if i == 0:
+                return releases[0:n]
+            return releases[max(0, i-n):i]
+    return releases[-n:]
 
 
 def get_latest_github_release(repo_owner, repo_name):
@@ -198,6 +265,8 @@ def get_chart_versions(app_name: str, chart_name: str = "") -> dict[str, str]:
         return map_versions
 
     helm_repository_url = compatibility_yaml.get("helm_repository_url")
+    if compatibility_yaml.get('chart_name'):
+        chart_name = compatibility_yaml.get('chart_name')
     if not helm_repository_url:
         print_error(f"'helm_repository_url' is missing in {yaml_file_name}.")
         return map_versions
@@ -222,7 +291,6 @@ def get_chart_versions(app_name: str, chart_name: str = "") -> dict[str, str]:
         chart_version = chart_entry.get("version", "").lstrip("v")
         if not map_versions.get(app_version):
             map_versions[app_version] = chart_version
-            break
 
     return map_versions
 
@@ -342,19 +410,40 @@ def reduce_versions(versions):
             # Include chart_version if it exists in the original data
             if "chart_version" in data:
                 version_info["chart_version"] = data["chart_version"]
+                version_info["images"] = data.get("images", [])
 
             reduced_versions.append(version_info)
 
     return list(reversed(reduced_versions))
 
 
+def clean_kube_version(vsn):
+    if vsn.startswith("v"):
+        vsn = vsn[1:]
+    as_semver = validate_semver(vsn)
+    if not as_semver:
+        return None
+    return f"{as_semver.major}.{as_semver.minor}"
+
 def update_compatibility_info(filepath, new_versions):
+    app_name = filepath.split("/")[-1].split(".")[0]
     try:
         data = read_yaml(filepath)
         if data:
             new_versions = [ensure_keys(v) for v in new_versions]
             update_versions_data(data, new_versions)
+            
             data["versions"] = reduce_versions(data["versions"])
+
+            if data.get('helm_repository_url'):
+                url = data.get('helm_repository_url')
+                versions = data.get('versions', [])
+                for version in versions:
+                    if "chart_version" in version:
+                        print(f"Updating images for {app_name} {version['version']}")
+                        imgs = get_chart_images(url, data.get('chart_name', app_name), version["chart_version"], data.get('helm_values'))
+                        if imgs:
+                            version["images"] = imgs
         else:
             print_warning("No existing versions found. Writing new data.")
             data = {
@@ -362,6 +451,8 @@ def update_compatibility_info(filepath, new_versions):
                     [ensure_keys(v) for v in new_versions]
                 )
             }
+
+        
         if write_yaml(filepath, data):
             print_success(
                 f"Updated compatibility info table: {Fore.CYAN}{filepath}"

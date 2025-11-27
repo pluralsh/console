@@ -11,9 +11,11 @@ def call_scraper(scraper):
         scraper_module.scrape()
     except ModuleNotFoundError:
         print_warning(f"No scraper found for {scraper}")
-    except AttributeError:
-        print_error(f"Error While Running the Scraper for {scraper}")
+    # except AttributeError:
+    #     print_error(f"Error While Running the Scraper for {scraper}")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print_error(f"An unexpected error occurred: {e}")
 
 

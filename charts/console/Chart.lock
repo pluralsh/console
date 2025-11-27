@@ -11,5 +11,8 @@ dependencies:
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.0
-digest: sha256:0dc69f294f68c15db81fda2528ef615206b945b7bb4b62d47ed153daca328bda
-generated: "2025-11-21T22:09:36.159583839Z"
+- name: dex
+  repository: https://charts.dexidp.io
+  version: 0.24.0
+digest: sha256:8705a4f4b96e605266cca17dba55a4ec211307f542c89e9fb57e165fbd5f2874
+generated: "2025-11-24T17:39:34.995895-05:00"

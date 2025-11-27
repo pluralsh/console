@@ -141,7 +141,6 @@ fragment RuntimeServiceDetails on RuntimeService {
       ...AddonVersion
     }
     releaseUrl(version: $version)
-    readme
   }
   addonVersion {
     ...AddonVersionBlocking @include(if: $hasKubeVersion)

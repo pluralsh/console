@@ -7702,6 +7702,9 @@ type AddonVersion {
   "any add-ons this might break"
   incompatibilities: [VersionReference]
 
+  "the images used by this add-on's helm chart"
+  images: [String]
+
   "the version of the helm chart to install for this version"
   chartVersion: String
 

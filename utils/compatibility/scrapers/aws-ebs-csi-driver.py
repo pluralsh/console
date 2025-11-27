@@ -44,6 +44,7 @@ def scrape():
                     ("version", ver),
                     ("kube", k8s_versions),
                     ("chart_version", chart_version),
+                    ("images", []),
                 ]
             )
             versions.append(version_info)

@@ -5,6 +5,7 @@ from utils import (
     update_compatibility_info,
     get_chart_versions,
 )
+from collections import OrderedDict
 import re
 
 app_name = "coredns"
@@ -45,7 +46,16 @@ def extract_table_data(table, chart_versions):
             continue
 
         rows.append(
-            {"version": coredns_version, "kube": kubernetes_versions_list, "chart_version": chart_version}
+            rows.append(
+                OrderedDict([
+                    ("version", coredns_version),
+                    ("kube", kubernetes_versions_list),
+                    ("chart_version", chart_version),
+                    ("images", []),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ])
+            )
         )
     return rows
 

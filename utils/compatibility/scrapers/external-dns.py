@@ -68,6 +68,7 @@ def extract_version_info(release_tags, chart_versions):
                 ("version", tag_version),
                 ("kube", kube_versions.copy()),
                 ("chart_version", chart_version),
+                ("images", []),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]

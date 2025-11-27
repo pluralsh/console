@@ -11,20 +11,21 @@ from utils import (
     get_chart_versions,
 )
 
-app_name = "cilium"
+app_name = "vector"
 
 def scrape():
     kube_releases = get_kube_release_info()
-    cilium_releases = list(reversed(list(get_github_releases_timestamps("cilium", "cilium"))))
-
+    vector_releases = list(reversed(list(get_github_releases_timestamps("vectordotdev", "vector"))))
+    print(vector_releases)
     chart_versions = get_chart_versions(app_name)
+    print(chart_versions)
     versions = []
-    for cilium_release in cilium_releases:
-        if "-" in cilium_release[0]:
+    for vector_release in vector_releases:
+        if "-" in vector_release[0]:
             continue
-        release_vsn = cilium_release[0].replace("v", "")
-        compatible_kube_releases = find_last_n_releases(kube_releases, cilium_release[1], n=3)
-        chart_version = chart_versions.get(release_vsn)
+        release_vsn = vector_release[0].lstrip("v")
+        compatible_kube_releases = find_last_n_releases(kube_releases, vector_release[1], n=3)
+        chart_version = chart_versions.get(release_vsn + '-distroless-libc')
         if not chart_version:
             continue
         

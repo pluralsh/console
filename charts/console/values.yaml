@@ -877,3 +877,63 @@ cloudQuery:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+dex:
+  enabled: false
+
+  clientSecret: ~
+
+  additionalDexSecrets: {}
+
+  config:
+    # Set it to a valid URL
+    issuer: https://<your-console-fqdn>/dex
+
+    # See https://dexidp.io/docs/storage/ for more options
+    storage:
+      type: memory
+
+    connectors:
+    # - type: microsoft
+    #   # Required field for connector id.
+    #   id: microsoft
+    #   # Required field for connector name.
+    #   name: Microsoft
+    #   config:
+    #     # Credentials can be string literals or pulled from the environment.
+    #     clientID: $MICROSOFT_APPLICATION_ID
+    #     clientSecret: $MICROSOFT_CLIENT_SECRET
+    #     redirectURI: https://<your-console-fqdn>/dex/callback
+    #     tenant: a2bed0c4-5957-4f73-b0c2-a811407590fb
+    #     emailToLowercase: false
+
+    staticClients:
+    - id: console
+      secretEnv: CONSOLE_CLIENT_SECRET
+      name: 'Plural Console'
+      # Where the app will be running.
+      redirectURIs:
+      - 'https://<your-console-host>/oauth/callback'
+
+  envFrom:
+  - secretRef:
+      name: dex-env
+
+  ingress:
+    enabled: true
+    className: nginx
+
+    annotations:
+      kubernetes.io/tls-acme: 'true'
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+    hosts:
+      - host: <your-console-fqdn>
+        paths:
+          - path: /dex
+            pathType: Prefix
+
+    tls:
+      - hosts:
+          - <your-console-fqdn>
+        secretName: dex-cert

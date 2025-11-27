@@ -178,10 +178,20 @@ subscription AgentRunDelta($runId: ID!) {
   agentRunDelta(id: $runId) {
     delta
     payload {
+      ...AgentRunTiny
       todos {
         title
         description
         done
+      }
+      analysis {
+        summary
+        analysis
+        bullets
+      }
+      podReference {
+        name
+        namespace
       }
     }
   }
