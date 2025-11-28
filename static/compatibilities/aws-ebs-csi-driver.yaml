@@ -9,31 +9,32 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 2.53.0
-  images: ['public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
-    'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
+  images: ['public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.5', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.53.0', 'public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.2',
     'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20251021-e2c2c9806f-master',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.53.0']
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2']
 - version: 1.52.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.52.0
-  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.52.0',
+  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4',
+    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.52.0',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
     'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
 - version: 1.51.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.51.0
-  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.51.0',
+  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.51.0',
+    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
     'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
 - version: 1.50.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -41,61 +42,62 @@ versions:
   incompatibilities: []
   chart_version: 2.50.0
   images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.50.0',
-    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
+    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
     'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
 - version: 1.49.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.49.1
-  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250905-c89b045f57-master',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.49.0', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4']
+  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250905-c89b045f57-master',
+    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.49.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
 - version: 1.48.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.48.0
-  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
+  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.48.0', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
     'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250815-171060767f-master',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.48.0']
+    'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
 - version: 1.47.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.47.0
-  images: ['us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250722-31ecdfb417-master',
-    'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
+  images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4',
     'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.47.0',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3']
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.47.0', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250722-31ecdfb417-master',
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3']
 - version: 1.46.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.46.0
-  images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.46.0', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3',
+  images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
     'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
-    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master']
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.46.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3',
+    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3']
 - version: 1.45.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.45.1
-  images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.3',
-    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.2',
-    'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.45.0',
-    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
-    'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.2']
+  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.45.0', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
+    'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.3',
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.2',
+    'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.3']
 - version: 1.44.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
@@ -103,45 +105,46 @@ versions:
   incompatibilities: []
   chart_version: 2.44.0
   images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-3',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-3',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.44.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-3',
     'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250513-98d205aae3-master',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.44.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-3',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-3',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-3', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-3']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-3']
 - version: 1.43.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.43.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
-    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.43.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.43.0',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master']
 - version: 1.42.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.42.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
-    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.42.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.42.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1']
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master']
 - version: 1.41.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.41.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-7',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-7',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250311-73aac21714-master',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-32-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-32-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-7', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250311-73aac21714-master',
     'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.41.0']
 - version: 1.40.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
@@ -149,139 +152,137 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 2.40.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-6',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.1-eks-1-32-6',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-6',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-6',
     'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250212-686cf422c6-master',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.40.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-32-6',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-6']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.1-eks-1-32-6',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-6', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.40.0',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-32-6',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-6']
 - version: 1.39.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.39.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-31-12',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-12',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-11',
+  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.39.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-11',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-31-12',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.39.0', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241230-3006692a6f-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-12']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-12',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-31-12',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-12',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241230-3006692a6f-master']
 - version: 1.38.1
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.38.1
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-1',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-32-1',
-    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241128-8df65c072f-master',
+  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.38.1', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241128-8df65c072f-master',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-32-1',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-32-1',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-32-1',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-32-1',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.38.1']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-32-1']
 - version: 1.37.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.37.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-7',
+  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.37.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-7',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241021-d3a4913879-master',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-7',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.37.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-7', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241021-d3a4913879-master']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-7']
 - version: 1.36.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.36.0
-  images: ['us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241011-e8871c079d-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-5',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.36.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-5',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-5',
-    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5']
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241011-e8871c079d-master',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.36.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5']
 - version: 1.35.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.35.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-3',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.35.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240903-6a352c5344-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-3',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-3',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-3',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-3']
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-3',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-3',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.35.0',
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240903-6a352c5344-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-3',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-3']
 - version: 1.34.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.34.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-10',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.34.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240803-cf1183f2db-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10']
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240803-cf1183f2db-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.34.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10']
 - version: 1.33.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.33.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
-    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240705-131cd74733-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-10',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.33.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10',
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240705-131cd74733-master', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.33.0']
 - version: 1.32.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
     '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.32.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-8',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-8', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-8',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-8',
-    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240611-597c402033-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-8',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.32.0']
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-8',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-8',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-8',
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240611-597c402033-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-8',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-8', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.32.0']
 - version: 1.31.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
     '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.31.0
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4',
-    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-4',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-4',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-4',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-4',
     'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-30-4', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.1-eks-1-30-4',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0']
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4']
 - version: 1.30.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
     '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.30.0
-  images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.1-eks-1-30-2',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-2',
     'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.30.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-2',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-2',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-30-2', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-2']
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-30-2',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.1-eks-1-30-2']
 - version: 1.29.1
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
     '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.29.1
-  images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
     'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.1']
 - version: 1.29.0
   kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
@@ -289,41 +290,42 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 2.29.0
-  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.0']
 - version: 1.28.0
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.28.0
-  images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-5',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-5',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-5',
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-5',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-5',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.28.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-5',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-5']
+    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.28.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-5',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-5']
 - version: 1.26.1
   kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
     '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.26.1
-  images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.26.1', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
-    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.9.3-eks-1-29-2',
+  images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.26.1',
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.4.3-eks-1-29-2',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2']
+    'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.9.3-eks-1-29-2']
 - version: 1.23.1
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.23.1
-  images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.8.0-eks-1-28-4',
-    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.10.0-eks-1-28-4', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20230727-ea685f8747-master',
-    'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.5.0-eks-1-28-4',
+  images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.5.0-eks-1-28-4',
+    'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.8.0-eks-1-28-4',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.8.0-eks-1-28-4',
     'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.3.0-eks-1-28-4',
-    'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.23.1']
+    'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.10.0-eks-1-28-4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.23.1',
+    'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20230727-ea685f8747-master']
