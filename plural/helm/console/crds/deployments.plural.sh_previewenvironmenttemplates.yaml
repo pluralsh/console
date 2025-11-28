@@ -525,7 +525,9 @@ spec:
                           Used for inflating Helm charts.
                         type: boolean
                       path:
-                        description: Path to the kustomization file to use.
+                        description: The folder your base kustomization file lives
+                          within relative to your main git folder path.  It can be
+                          a subdirectory.
                         type: string
                     required:
                     - path

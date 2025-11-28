@@ -4225,7 +4225,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ | Path to the kustomization file to use. |  |  |
+| `path` _string_ | The folder your base kustomization file lives within relative to your main git folder path.  It can be a subdirectory. |  |  |
 | `enableHelm` _boolean_ | EnableHelm indicates whether to enable Helm for this Kustomize deployment.<br />Used for inflating Helm charts. |  | Optional: \{\} <br /> |
 
 
