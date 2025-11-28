@@ -6635,6 +6635,8 @@ export type PrAutomation = {
   darkIcon?: Maybe<Scalars['String']['output']>;
   deletes?: Maybe<PrDeleteSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
+  /** location in git for external templates and scripts */
+  git?: Maybe<GitRef>;
   /** an icon url to use for this catalog */
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -6643,6 +6645,8 @@ export type PrAutomation = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** labels to apply to the created prs */
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a set of lua scripts to use to preprocess the PR automation */
+  lua?: Maybe<PrLuaSpec>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6684,6 +6688,8 @@ export type PrAutomationAttributes = {
   darkIcon?: InputMaybe<Scalars['String']['input']>;
   deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
+  /** location in git for external templates and scripts */
+  git?: InputMaybe<GitRefAttributes>;
   /** the governance controller to use for this pr */
   governanceId?: InputMaybe<Scalars['ID']['input']>;
   /** an icon url to use for this catalog */
@@ -6692,6 +6698,8 @@ export type PrAutomationAttributes = {
   identifier?: InputMaybe<Scalars['String']['input']>;
   /** labels to apply to created prs */
   labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a specification for sourcing lua scripts to preprocess the PR automation */
+  lua?: InputMaybe<PrLuaSpecAttributes>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
@@ -6894,6 +6902,23 @@ export type PrGovernanceConfiguration = {
 /** The settings for configuring a pr governance controller */
 export type PrGovernanceConfigurationAttributes = {
   webhook?: InputMaybe<GovernanceWebhookAttributes>;
+};
+
+/** a specification for sourcing lua scripts to preprocess the PR automation */
+export type PrLuaSpec = {
+  __typename?: 'PrLuaSpec';
+  /** a folder with lua library code and scripts to use */
+  folder?: Maybe<Scalars['String']['output']>;
+  /** file of a flat script to use */
+  script?: Maybe<Scalars['String']['output']>;
+};
+
+/** a specification for sourcing lua scripts to preprocess the PR automation */
+export type PrLuaSpecAttributes = {
+  /** a folder with lua library code and scripts to use */
+  folder?: InputMaybe<Scalars['String']['input']>;
+  /** file of a flat script to use */
+  script?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum PrRole {

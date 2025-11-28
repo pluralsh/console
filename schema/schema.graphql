@@ -8477,6 +8477,12 @@ input PrAutomationAttributes {
 
   deletes: PrAutomationDeleteSpecAttributes
 
+  "a specification for sourcing lua scripts to preprocess the PR automation"
+  lua: PrLuaSpecAttributes
+
+  "location in git for external templates and scripts"
+  git: GitRefAttributes
+
   "labels to apply to created prs"
   labels: [String]
 
@@ -8685,6 +8691,15 @@ input YamlOverlayAttributes {
 
   "whether you want to apply liquid templating on the yaml before compiling"
   templated: Boolean
+}
+
+"a specification for sourcing lua scripts to preprocess the PR automation"
+input PrLuaSpecAttributes {
+  "file of a flat script to use"
+  script: String
+
+  "a folder with lua library code and scripts to use"
+  folder: String
 }
 
 "attributes for a pull request pointer record"
@@ -9005,6 +9020,12 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a set of lua scripts to use to preprocess the PR automation"
+  lua: PrLuaSpec
+
+  "location in git for external templates and scripts"
+  git: GitRef
+
   "labels to apply to the created prs"
   labels: [String]
 
@@ -9155,6 +9176,15 @@ type PrConfigurationCondition {
 
   "a fixed value to check against if its a binary operation"
   value: String
+}
+
+"a specification for sourcing lua scripts to preprocess the PR automation"
+type PrLuaSpec {
+  "file of a flat script to use"
+  script: String
+
+  "a folder with lua library code and scripts to use"
+  folder: String
 }
 
 type PrSecrets {

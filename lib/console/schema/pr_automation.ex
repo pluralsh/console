@@ -33,6 +33,13 @@ defmodule Console.Schema.PrAutomation do
     field :branch_prefix,    :string
     field :labels,           {:array, :string}
 
+    embeds_one :git, Service.Git, on_replace: :update
+
+    embeds_one :lua, LuaSpec, on_replace: :update do
+      field :script, :string
+      field :folder, :string
+    end
+
     embeds_one :creates, CreateSpec, on_replace: :update do
       embeds_one :git, Service.Git, on_replace: :update
 
@@ -166,6 +173,8 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, @valid)
     |> validate_length(:name, max: 255)
+    |> cast_embed(:git)
+    |> cast_embed(:lua, with: &lua_changeset/2)
     |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_embed(:creates, with: &create_changeset/2)
     |> cast_embed(:deletes, with: &delete_changeset/2)
@@ -202,6 +211,11 @@ defmodule Console.Schema.PrAutomation do
     |> cast(attrs, [])
     |> cast_embed(:git)
     |> cast_embed(:templates, with: &template_changeset/2)
+  end
+
+  defp lua_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(script folder)a)
   end
 
   defp delete_changeset(model, attrs) do

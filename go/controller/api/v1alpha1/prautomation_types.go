@@ -159,6 +159,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
+	// Git location to source external files from.
+	// +kubebuilder:validation:Optional
+	Git *GitRef `json:"git,omitempty"`
+
 	// ServiceRef references a specific service that this PR automation acts upon.
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
@@ -206,6 +210,10 @@ type PrAutomationSpec struct {
 	// of the PR, useful for cleanup or migration scenarios.
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
+
+	// Lua specification to source lua scripts to preprocess the PR automation.
+	// +kubebuilder:validation:Optional
+	Lua *PrAutomationLuaConfiguration `json:"lua,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
@@ -631,4 +639,22 @@ func (in *PrAutomationSecretEntry) Attributes() *console.PrSecretEntryAttributes
 		Documentation: lo.ToPtr(in.Documentation),
 		Autogenerate:  in.Autogenerate,
 	}
+}
+
+type PrAutomationLuaConfiguration struct {
+	// File of a flat script to use
+	// +kubebuilder:validation:Optional
+	Script *string `json:"script,omitempty"`
+
+	// Folder with lua library code and scripts to use
+	// +kubebuilder:validation:Optional
+	Folder *string `json:"folder,omitempty"`
+}
+
+func (in *PrAutomationLuaConfiguration) Attributes() *console.PrLuaSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrLuaSpecAttributes{Script: in.Script, Folder: in.Folder}
 }

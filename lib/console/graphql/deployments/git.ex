@@ -144,6 +144,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
+    field :lua,           :pr_lua_spec_attributes, description: "a specification for sourcing lua scripts to preprocess the PR automation"
+    field :git,           :git_ref_attributes, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to created prs"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
@@ -279,6 +281,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :list_merge, :list_merge, description: "configure how list merge should be performed"
     field :templated,  :boolean,
       description: "whether you want to apply liquid templating on the yaml before compiling"
+  end
+
+  @desc "a specification for sourcing lua scripts to preprocess the PR automation"
+  input_object :pr_lua_spec_attributes do
+    field :script, :string, description: "file of a flat script to use"
+    field :folder, :string, description: "a folder with lua library code and scripts to use"
   end
 
   @desc "attributes for a pull request pointer record"
@@ -518,6 +526,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :lua,           :pr_lua_spec, description: "a set of lua scripts to use to preprocess the PR automation"
+    field :git,           :git_ref, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to the created prs"
     field :branch_prefix, :string, description: "a prefix to use for the branch name, will be appended with a random string for deduplication"
 
@@ -628,6 +638,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :operation, non_null(:operation), description: "a boolean operation to apply"
     field :field,     non_null(:string), description: "the prior field to check"
     field :value,     :string, description: "a fixed value to check against if its a binary operation"
+  end
+
+  @desc "a specification for sourcing lua scripts to preprocess the PR automation"
+  object :pr_lua_spec do
+    field :script, :string, description: "file of a flat script to use"
+    field :folder, :string, description: "a folder with lua library code and scripts to use"
   end
 
   object :pr_secrets do

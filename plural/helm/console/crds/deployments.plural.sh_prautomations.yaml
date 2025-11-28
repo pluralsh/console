@@ -425,6 +425,26 @@ spec:
                   Documentation provides detailed explanation of what this automation does,
                   when to use it, and any prerequisites or considerations.
                 type: string
+              git:
+                description: Git location to source external files from.
+                properties:
+                  files:
+                    description: Optional files to add to the manifests for this service
+                    items:
+                      type: string
+                    type: array
+                  folder:
+                    description: Folder is the folder in the Git repository where
+                      the manifests are located.
+                    type: string
+                  ref:
+                    description: Ref is the Git reference (branch, tag, or commit)
+                      to use.
+                    type: string
+                required:
+                - folder
+                - ref
+                type: object
               icon:
                 description: |-
                   Icon provides a URL to an icon image to visually represent this automation
@@ -440,6 +460,17 @@ spec:
                 items:
                   type: string
                 type: array
+              lua:
+                description: Lua specification to source lua scripts to preprocess
+                  the PR automation.
+                properties:
+                  folder:
+                    description: Folder with lua library code and scripts to use
+                    type: string
+                  script:
+                    description: File of a flat script to use
+                    type: string
+                type: object
               message:
                 description: |-
                   Message defines the commit message template that will be used in the generated PR.
