@@ -49,10 +49,10 @@ def parse_table(table):
     return min_map
 
 
-def build_rows_from_table(table, chart_versions):
-    min_map = parse_table(table)
-    if not min_map:
-        return {}
+def extract_table_data(target_tables):
+    if len(target_tables) < 2:
+        print_error("Insufficient data in target tables.")
+        return []
 
     version_sets = {}
     versions = sorted({v for v in min_map.values()}, key=lambda s: validate_semver(s))
@@ -62,32 +62,19 @@ def build_rows_from_table(table, chart_versions):
         if not ver_sem:
             continue
 
-        kube_versions = []
-        for kube, required in min_map.items():
-            req_sem = validate_semver(required)
-            if req_sem and req_sem <= ver_sem:
-                kube_versions.append(kube)
-
-        if kube_versions:
-            version_sets.setdefault(ver, set()).update(kube_versions)
-
-    rows = {}
-    for ver, kube_set in version_sets.items():
-        chart_version = chart_versions.get(ver)
-        kube_sorted = sorted(kube_set, key=lambda k: Version(k), reverse=True)
-        ordered_items = [
-            ("version", ver),
-            ("kube", kube_sorted),
-        ]
-        if chart_version:
-            ordered_items.append(("chart_version", chart_version))
-        ordered_items.extend(
-            [
-                ("requirements", []),
-                ("incompatibilities", []),
-            ]
-        )
-        rows[ver] = OrderedDict(ordered_items)
+        if kar_ver:
+            ver = str(kar_ver)
+            version_info = OrderedDict(
+                {
+                    "version": ver,
+                    "kube": expanded_k8s_ver,
+                    "chart_version": str(kar_ver),
+                    "images": [],
+                    "requirements": [],
+                    "incompatibilities": [],
+                }
+            )
+            rows.append(version_info)
 
     return rows
 
@@ -98,7 +85,15 @@ def scrape():
     if not page_content:
         return
 
-    chart_versions = get_chart_versions(app_name)
+    sections = parse_page(page_content)
+    target_tables = find_target_tables(sections)
+    if len(target_tables) >= 1:
+        rows = extract_table_data(target_tables)
+        update_compatibility_info(
+            f"../../static/compatibilities/{app_name}.yaml", rows
+        )
+    else:
+        print_error("No compatibility information found.")
 
     table = find_compatibility_table(page_content)
     if table is None:

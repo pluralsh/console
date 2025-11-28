@@ -12,6 +12,7 @@ from utils import (
     read_yaml,
     update_chart_versions,
     update_compatibility_info,
+    get_chart_versions,
 )
 
 app_name = "kyverno"
@@ -44,6 +45,7 @@ def _normalize_version(ver: str) -> Optional[str]:
 def _parse_rows(table) -> list[OrderedDict[str, object]]:
     rows: list[OrderedDict[str, object]] = []
     tbody = table.find("tbody") or table
+    chart_versions = get_chart_versions(app_name)
     for tr in tbody.find_all("tr"):
         cols = [c.get_text(strip=True) for c in tr.find_all(["td", "th"])]
         if len(cols) < 3:
@@ -69,6 +71,7 @@ def _parse_rows(table) -> list[OrderedDict[str, object]]:
                 ("kube", kube_versions),
                 ("requirements", []),
                 ("incompatibilities", []),
+                ("chart_version", chart_versions.get(kyverno_version)),
             ]
         )
         rows.append(version_info)
@@ -94,7 +97,3 @@ def scrape() -> None:
 
     output_path = f"../../static/compatibilities/{app_name}.yaml"
     update_compatibility_info(output_path, rows)
-
-    compatibility_yaml = read_yaml(output_path)
-    if compatibility_yaml and compatibility_yaml.get("helm_repository_url"):
-        update_chart_versions(app_name)

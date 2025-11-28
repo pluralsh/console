@@ -194,6 +194,9 @@ defmodule Console.GraphQl.Deployments.Global do
   object :global_queries do
     connection field :managed_namespaces, node_type: :managed_namespace do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :read
       arg :project_id, :id
 
       resolve &Deployments.list_managed_namespaces/2
@@ -201,6 +204,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :global_service, :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -209,6 +215,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     connection field :global_services, node_type: :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :read
       arg :project_id, :id
       arg :q,          :string
 
@@ -219,6 +228,9 @@ defmodule Console.GraphQl.Deployments.Global do
   object :global_mutations do
     field :create_global_service, :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :service_id, :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :name,       :string
@@ -229,6 +241,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :update_global_service, :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :id, non_null(:id)
       arg :attributes, non_null(:global_service_attributes)
 
@@ -237,6 +252,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :delete_global_service, :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_global_service/2
@@ -244,6 +262,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :sync_global_service, :global_service do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.sync_global_service/2
@@ -251,6 +272,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :create_managed_namespace, :managed_namespace do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :attributes, non_null(:managed_namespace_attributes)
 
       safe_resolve &Deployments.create_managed_namespace/2
@@ -258,6 +282,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :update_managed_namespace, :managed_namespace do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :id, non_null(:id)
       arg :attributes, non_null(:managed_namespace_attributes)
 
@@ -266,6 +293,9 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :delete_managed_namespace, :managed_namespace do
       middleware Authenticated
+      middleware Scope,
+        resource: :global,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_managed_namespace/2

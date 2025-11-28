@@ -232,6 +232,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_queries do
     field :sentinel, :sentinel do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -240,6 +243,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :sentinel_run, :sentinel_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :read
       arg :id, :id
 
       resolve &Deployments.sentinel_run/2
@@ -247,6 +253,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     connection field :sentinels, node_type: :sentinel do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :read
       arg :q,      :string
       arg :status, :sentinel_run_status
 
@@ -264,6 +273,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_mutations do
     field :create_sentinel, :sentinel do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :write
       arg :attributes, :sentinel_attributes
 
       resolve &Deployments.create_sentinel/2
@@ -271,6 +283,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :update_sentinel, :sentinel do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :write
       arg :id, non_null(:id)
       arg :attributes, :sentinel_attributes
 
@@ -279,6 +294,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :delete_sentinel, :sentinel do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_sentinel/2
@@ -286,6 +304,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
     field :run_sentinel, :sentinel_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :sentinel,
+        action: :write
       arg :id,   :id
       arg :name, :string
 

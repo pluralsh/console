@@ -628,7 +628,10 @@ defmodule Console.GraphQl.Deployments.Service do
   object :service_queries do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
-      middleware Scope, api: "serviceDeployments"
+      middleware Scope,
+        resource: :service,
+        action: :read,
+        api: "serviceDeployments"
       arg :cluster_id, :id
       arg :q,          :string
       arg :status,     :service_deployment_status
@@ -663,6 +666,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :service_context, :service_context do
       middleware Authenticated
+      middleware Scope,
+        resource: "service.context",
+        action: :read
       arg :name, non_null(:string)
 
       resolve &Deployments.resolve_service_context/2
@@ -697,7 +703,10 @@ defmodule Console.GraphQl.Deployments.Service do
     field :create_service_deployment, :service_deployment do
       middleware Authenticated
       middleware Feature, :cd
-      middleware Scope, api: "createServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "createServiceDeployment"
 
       arg :cluster_id, :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
@@ -709,7 +718,10 @@ defmodule Console.GraphQl.Deployments.Service do
     field :update_service_deployment, :service_deployment do
       middleware Authenticated
       middleware Feature, :cd
-      middleware Scope, api: "updateServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "updateServiceDeployment"
 
       arg :id,         :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
@@ -721,7 +733,10 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :delete_service_deployment, :service_deployment do
       middleware Authenticated
-      middleware Scope, api: "deleteServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "deleteServiceDeployment"
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_service/2
@@ -730,7 +745,10 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster"
     field :detach_service_deployment, :service_deployment do
       middleware Authenticated
-      middleware Scope, api: "deleteServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "deleteServiceDeployment"
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_service/2
@@ -759,7 +777,10 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "clones the spec of the given service to be deployed either into a new namespace or new cluster"
     field :clone_service, :service_deployment do
       middleware Authenticated
-      middleware Scope, api: "createServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "createServiceDeployment"
       arg :service_id, :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :name,       :string
@@ -771,7 +792,10 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :kick_service, :service_deployment do
       middleware Authenticated
-      middleware Scope, api: "updateServiceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :write,
+        api: "updateServiceDeployment"
       arg :service_id, :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :name,       :string
@@ -799,6 +823,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :save_service_context, :service_context do
       middleware Authenticated
+      middleware Scope,
+        resource: "service.context",
+        action: :write
       arg :name,       non_null(:string)
       arg :attributes, non_null(:service_context_attributes)
 
@@ -807,6 +834,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :delete_service_context, :service_context do
       middleware Authenticated
+      middleware Scope,
+        resource: "service.context",
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_service_context/2

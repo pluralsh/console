@@ -12,6 +12,7 @@ from utils import (
     read_yaml,
     validate_semver,
     write_yaml,
+    update_compatibility_info,
 )
 
 app_name = "kube-prometheus-stack"
@@ -124,9 +125,4 @@ def scrape():
         print_error("No compatibility rows parsed.")
         return
 
-    existing = read_yaml(OUTPUT_PATH) or {}
-    existing["versions"] = rows
-    if not write_yaml(OUTPUT_PATH, existing):
-        print_error("Failed to write compatibility info for kube-prometheus-stack.")
-    else:
-        print_success("Updated compatibility table from kube-prometheus-stack helm index.")
+    update_compatibility_info(str(OUTPUT_PATH), rows)

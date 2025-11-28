@@ -181,6 +181,9 @@ defmodule Console.GraphQl.Deployments.Flow do
   object :flow_queries do
     connection field :flows, node_type: :flow do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
       arg :q, :string
 
       resolve &Deployments.list_flows/2
@@ -188,6 +191,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :flow, :flow do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_flow/2
@@ -195,6 +201,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     connection field :mcp_servers, node_type: :mcp_server do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :read
       arg :q, :string
 
       resolve &Deployments.list_mcp_servers/2
@@ -202,6 +211,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :mcp_server, :mcp_server do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_mcp_server/2
@@ -209,6 +221,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :preview_environment_template, :preview_environment_template do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
       arg :id,      :id
       arg :flow_id, :id
       arg :name,    :string
@@ -220,6 +235,9 @@ defmodule Console.GraphQl.Deployments.Flow do
   object :flow_mutations do
     field :upsert_flow, :flow do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :write
       arg :attributes, non_null(:flow_attributes)
 
       resolve &Deployments.upsert_flow/2
@@ -227,6 +245,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :delete_flow, :flow do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_flow/2
@@ -234,6 +255,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :upsert_mcp_server, :mcp_server do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
       arg :attributes, non_null(:mcp_server_attributes)
 
       resolve &Deployments.upsert_mcp_server/2
@@ -241,6 +265,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :delete_mcp_server, :mcp_server do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_mcp_server/2
@@ -248,6 +275,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :upsert_preview_environment_template, :preview_environment_template do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :write
       arg :attributes, non_null(:preview_environment_template_attributes)
 
       resolve &Deployments.upsert_preview_environment_template/2
@@ -255,6 +285,9 @@ defmodule Console.GraphQl.Deployments.Flow do
 
     field :delete_preview_environment_template, :preview_environment_template do
       middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_preview_environment_template/2
