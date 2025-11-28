@@ -426,7 +426,8 @@ spec:
                   when to use it, and any prerequisites or considerations.
                 type: string
               git:
-                description: Git location to source external files from.
+                description: Git location to source external files from.  If `creates.git`
+                  is also specified, the results will be merged.
                 properties:
                   files:
                     description: Optional files to add to the manifests for this service

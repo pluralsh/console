@@ -1510,6 +1510,7 @@ _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
+- [PrAutomationSpec](#prautomationspec)
 - [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
 - [SentinelSpec](#sentinelspec)
 - [ServiceHelm](#servicehelm)
@@ -3273,6 +3274,23 @@ _Appears in:_
 | `folders` _string array_ | Entire folders to delete. |  | Optional: \{\} <br /> |
 
 
+#### PrAutomationLuaConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `script` _string_ | File of a flat script to use |  | Optional: \{\} <br /> |
+| `folder` _string_ | Folder with lua library code and scripts to use |  | Optional: \{\} <br /> |
+
+
 #### PrAutomationSecretConfiguration
 
 
@@ -3338,6 +3356,7 @@ _Appears in:_
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references a specific cluster that this PR operates on. |  | Optional: \{\} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef references the SCM connection to use for authentication when creating pull requests. |  | Required: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository resource this automation uses. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git location to source external files from.  If `creates.git` is also specified, the results will be merged. |  | Optional: \{\} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references a specific service that this PR automation acts upon. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this automation belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
 | `catalogRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | CatalogRef references the catalog this automation belongs to for<br />organizational purposes and discoverability in the service catalog. |  | Optional: \{\} <br /> |
@@ -3348,6 +3367,7 @@ _Appears in:_
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: \{\} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
+| `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 | `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 

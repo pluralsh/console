@@ -159,7 +159,7 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// Git location to source external files from.
+	// Git location to source external files from.  If `creates.git` is also specified, the results will be merged.
 	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 
