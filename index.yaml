@@ -96,6 +96,37 @@ entries:
     version: 0.0.1
   console:
   - apiVersion: v2
+    appVersion: 0.11.54
+    created: "2025-11-28T20:04:28.358533343Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.158
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.14.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    - name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: f750f630b31a97fe9695df4a2b09572ae7b2a21f24d8a03f13184e871a845722
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.129/console-0.3.129.tgz
+    version: 0.3.129
+  - apiVersion: v2
     appVersion: 0.11.53
     created: "2025-11-22T00:01:38.731217546Z"
     dependencies:
@@ -9249,6 +9280,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.11.54
+    created: "2025-11-28T20:04:28.596434114Z"
+    description: deploys the datastore operator for plural cd
+    digest: a2b4839512ee8915576880149fa70d9ffdd9aaecd64826263aaa7bae18116ab7
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.36/datastore-0.0.36.tgz
+    version: 0.0.36
+  - apiVersion: v2
     appVersion: 0.11.53
     created: "2025-11-22T00:01:38.848548001Z"
     description: deploys the datastore operator for plural cd
@@ -9766,4 +9807,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-28T19:12:56.710394392Z"
+generated: "2025-11-28T20:04:28.597813397Z"
