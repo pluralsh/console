@@ -281,8 +281,12 @@ defmodule Console.Deployments.Services do
       end
     end)
     |> add_operation(:base, fn _ ->
-      %Service{cluster_id: cluster_id}
-      |> Service.changeset(add_version(attrs, "0.0.1"))
+      svc = %Service{cluster_id: cluster_id}
+
+      Service.changeset(svc,
+        add_version(attrs, "0.0.1")
+        |> backfill_dependencies(svc)
+      )
       |> Console.Repo.insert()
     end)
     |> add_operation(:check_repo, fn
@@ -296,6 +300,33 @@ defmodule Console.Deployments.Services do
     |> execute(extract: :service)
     |> notify(:create, user)
   end
+
+  defp backfill_dependencies(%{dependencies: [_ | _] = deps} = attrs, %Service{cluster_id: cluster_id} = svc) do
+    existing = deps(svc) |> Enum.map(& &1.name)
+
+    Enum.filter(deps, & !Enum.member?(existing, &1[:name]))
+    |> Enum.map(& &1[:name])
+    |> Enum.filter(& &1)
+    |> case do
+      [_ | _] = names ->
+        svcs  = Service.for_cluster(cluster_id)
+                |> Service.for_names(names)
+                |> Repo.all()
+                |> Map.new(& {&1.name, &1})
+
+        Map.put(attrs, :dependencies, Enum.map(deps, fn %{name: name} = dep ->
+          case Map.get(svcs, name) do
+            %Service{} = svc -> Map.merge(dep, %{status: svc.status})
+            nil -> dep
+          end
+        end))
+      _ -> attrs
+    end
+  end
+  defp backfill_dependencies(attrs, _), do: attrs
+
+  defp deps(%Service{dependencies: [_ | _] = deps}), do: deps
+  defp deps(_), do: []
 
   @doc """
   modifies rbac settings for this service
@@ -602,6 +633,7 @@ defmodule Console.Deployments.Services do
       |> Service.changeset(
         stabilize_deps(attrs, svc)
         |> stabilize_contexts(svc)
+        |> backfill_dependencies(svc)
       )
       |> Service.update_changeset()
       |> Console.Repo.update()

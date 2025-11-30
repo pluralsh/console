@@ -417,6 +417,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_queries do
     connection field :pipelines, node_type: :pipeline do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :read
       arg :q,          :string
       arg :project_id, :id
 
@@ -425,6 +428,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
     field :pipeline, :pipeline do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_pipeline/2
@@ -432,6 +438,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
     field :pipeline_gate, :pipeline_gate do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_gate/2
@@ -439,6 +448,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
     field :pipeline_context, :pipeline_context do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_pipeline_context/2
@@ -449,6 +461,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "upserts a pipeline with a given name"
     field :save_pipeline, :pipeline do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :write
       arg :name,       non_null(:string)
       arg :attributes, non_null(:pipeline_attributes)
 
@@ -458,7 +473,10 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "creates a new pipeline context and binds it to the beginning stage"
     field :create_pipeline_context, :pipeline_context do
       middleware Authenticated
-      middleware Scope, api: "createPipelineContext"
+      middleware Scope,
+        resource: :pipeline,
+        action: :write,
+        api: "createPipelineContext"
       arg :pipeline_id,   :id
       arg :pipeline_name, :string
       arg :attributes,    non_null(:pipeline_context_attributes)
@@ -468,6 +486,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
     field :delete_pipeline, :pipeline do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_pipeline/2
@@ -476,6 +497,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "approves an approval pipeline gate"
     field :approve_gate, :pipeline_gate do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.approve_gate/2
@@ -484,6 +508,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "forces a pipeline gate to be in open state"
     field :force_gate, :pipeline_gate do
       middleware Authenticated
+      middleware Scope,
+        resource: :pipeline,
+        action: :write
       arg :id,    non_null(:id)
       arg :state, :gate_state
 

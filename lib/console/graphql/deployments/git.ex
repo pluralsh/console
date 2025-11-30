@@ -144,6 +144,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
+    field :lua,           :pr_lua_spec_attributes, description: "a specification for sourcing lua scripts to preprocess the PR automation"
+    field :git,           :git_ref_attributes, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to created prs"
 
     field :icon,      :string, description: "an icon url to use for this catalog"
@@ -279,6 +281,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :list_merge, :list_merge, description: "configure how list merge should be performed"
     field :templated,  :boolean,
       description: "whether you want to apply liquid templating on the yaml before compiling"
+  end
+
+  @desc "a specification for sourcing lua scripts to preprocess the PR automation"
+  input_object :pr_lua_spec_attributes do
+    field :script, :string, description: "file of a flat script to use"
+    field :folder, :string, description: "a folder with lua library code and scripts to use"
   end
 
   @desc "attributes for a pull request pointer record"
@@ -518,6 +526,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :lua,           :pr_lua_spec, description: "a set of lua scripts to use to preprocess the PR automation"
+    field :git,           :git_ref, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to the created prs"
     field :branch_prefix, :string, description: "a prefix to use for the branch name, will be appended with a random string for deduplication"
 
@@ -628,6 +638,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :operation, non_null(:operation), description: "a boolean operation to apply"
     field :field,     non_null(:string), description: "the prior field to check"
     field :value,     :string, description: "a fixed value to check against if its a binary operation"
+  end
+
+  @desc "a specification for sourcing lua scripts to preprocess the PR automation"
+  object :pr_lua_spec do
+    field :script, :string, description: "file of a flat script to use"
+    field :folder, :string, description: "a folder with lua library code and scripts to use"
   end
 
   object :pr_secrets do
@@ -884,6 +900,9 @@ defmodule Console.GraphQl.Deployments.Git do
   object :git_queries do
     field :git_repository, :git_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
       arg :id,  :id
       arg :url, :string
 
@@ -892,18 +911,27 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :git_repositories, node_type: :git_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
 
       resolve &Deployments.list_git_repositories/2
     end
 
     connection field :helm_repositories, node_type: :helm_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
 
       resolve &Deployments.list_helm_repositories/2
     end
 
     field :helm_repository, :helm_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
       arg :url, non_null(:string)
 
       resolve &Deployments.resolve_helm_repository/2
@@ -925,12 +953,18 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :scm_connections, node_type: :scm_connection do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
 
       resolve &Deployments.list_scm_connections/2
     end
 
     field :scm_connection, :scm_connection do
       middleware Authenticated
+      middleware Scope,
+        resource: :self_service,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -939,6 +973,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :pr_automations, node_type: :pr_automation do
       middleware Authenticated
+      middleware Scope,
+        resource: :self_service,
+        action: :read
       arg :catalog_id, :id
       arg :project_id, :id
       arg :q,          :string
@@ -949,6 +986,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :pr_automation, :pr_automation do
       middleware Authenticated
+      middleware Scope,
+        resource: :self_service,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -957,6 +997,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :pr_governance, :pr_governance do
       middleware Authenticated
+      middleware Scope,
+        resource: :self_service,
+        action: :read
       arg :id, :id
       arg :name, :string
 
@@ -965,6 +1008,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :pull_requests, node_type: :pull_request do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
       arg :cluster_id, :id
       arg :service_id, :id
       arg :open,       :boolean
@@ -976,6 +1022,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :scm_webhook, :scm_webhook do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
       arg :id,   :id
       arg :external_id, :string
 
@@ -984,6 +1033,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :scm_webhooks, node_type: :scm_webhook do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
 
       resolve &Deployments.list_scm_webhooks/2
     end
@@ -996,6 +1048,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :observer, :observer do
       middleware Authenticated
+      middleware Scope,
+        resource: :observer,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -1004,6 +1059,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :observers, node_type: :observer do
       middleware Authenticated
+      middleware Scope,
+        resource: :observer,
+        action: :read
       arg :project_id, :id
 
       resolve &Deployments.list_observers/2
@@ -1011,6 +1069,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :catalog, :catalog do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -1019,6 +1080,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :catalogs, node_type: :catalog do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
       arg :project_id, :id
 
       resolve &Deployments.list_catalogs/2
@@ -1026,6 +1090,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :catalog_search, list_of(:catalog_search_result) do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :read
       arg :q, non_null(:string)
 
       resolve &Deployments.catalog_search/2
@@ -1035,6 +1102,9 @@ defmodule Console.GraphQl.Deployments.Git do
   object :git_mutations do
     field :create_git_repository, :git_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :write
       arg :attributes, non_null(:git_attributes)
 
       safe_resolve &Deployments.create_git_repository/2
@@ -1042,6 +1112,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :update_git_repository, :git_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:git_attributes)
 
@@ -1050,6 +1123,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_git_repository, :git_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_git_repository/2
@@ -1057,6 +1133,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :create_scm_connection, :scm_connection do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :attributes, non_null(:scm_connection_attributes)
 
       safe_resolve &Deployments.create_scm_connection/2
@@ -1064,6 +1143,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :update_scm_connection, :scm_connection do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:scm_connection_attributes)
 
@@ -1072,6 +1154,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_scm_connection, :scm_connection do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_scm_connection/2
@@ -1079,6 +1164,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :create_scm_webhook, :scm_webhook do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :connection_id, non_null(:id)
       arg :owner,         non_null(:string)
 
@@ -1087,6 +1175,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_scm_webhook, :scm_webhook do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_scm_webhook/2
@@ -1095,6 +1186,9 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "creates a webhook reference in our system but doesn't attempt to create it in your upstream provider"
     field :create_scm_webhook_pointer, :scm_webhook do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :attributes, non_null(:scm_webhook_attributes)
 
       resolve &Deployments.create_webhook/2
@@ -1102,6 +1196,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :create_pr_automation, :pr_automation do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :attributes, non_null(:pr_automation_attributes)
 
       safe_resolve &Deployments.create_pr_automation/2
@@ -1109,6 +1206,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :update_pr_automation, :pr_automation do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:pr_automation_attributes)
 
@@ -1117,6 +1217,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_pr_automation, :pr_automation do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr_automation/2
@@ -1125,6 +1228,9 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "upserts a governance controller"
     field :upsert_pr_governance, :pr_governance do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :attributes, non_null(:pr_governance_attributes)
 
       safe_resolve &Deployments.upsert_pr_governance/2
@@ -1133,6 +1239,9 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "deletes a governance controller"
     field :delete_pr_governance, :pr_governance do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr_governance/2
@@ -1159,7 +1268,10 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :create_pull_request, :pull_request do
       middleware Authenticated
-      middleware Scope, api: "createPullRequest"
+      middleware Scope,
+        resource: :catalog,
+        action: :write,
+        api: "createPullRequest"
       arg :id,         :id, description: "the id of the PR automation instance to use"
       arg :name,       :string, description: "the name of the PR automation instance to use"
       arg :identifier, :string
@@ -1174,7 +1286,10 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "just registers a pointer record to a PR after it was created externally be some other automation"
     field :create_pull_request_pointer, :pull_request do
       middleware Authenticated
-      middleware Scope, api: "createPullRequestPointer"
+      middleware Scope,
+        resource: :catalog,
+        action: :write,
+        api: "createPullRequestPointer"
       arg :attributes, :pull_request_attributes
 
       safe_resolve &Deployments.create_pr/2
@@ -1182,6 +1297,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :update_pull_request, :pull_request do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :writes
       arg :id,         non_null(:id)
       arg :attributes, :pull_request_update_attributes
 
@@ -1190,6 +1308,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_pull_request, :pull_request do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr/2
@@ -1197,6 +1318,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :upsert_helm_repository, :helm_repository do
       middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :write
       arg :url,        non_null(:string)
       arg :attributes, :helm_repository_attributes
 
@@ -1205,6 +1329,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :upsert_observer, :observer do
       middleware Authenticated
+      middleware Scope,
+        resource: :observer,
+        action: :write
       arg :attributes, :observer_attributes
 
       resolve &Deployments.upsert_observer/2
@@ -1212,6 +1339,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_observer, :observer do
       middleware Authenticated
+      middleware Scope,
+        resource: :observer,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_observer/2
@@ -1219,6 +1349,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :kick_observer, :observer do
       middleware Authenticated
+      middleware Scope,
+        resource: :observer,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.kick_observer/2
@@ -1234,6 +1367,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :upsert_catalog, :catalog do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :attributes, :catalog_attributes
 
       resolve &Deployments.upsert_catalog/2
@@ -1241,6 +1377,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :delete_catalog, :catalog do
       middleware Authenticated
+      middleware Scope,
+        resource: :catalog,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_catalog/2

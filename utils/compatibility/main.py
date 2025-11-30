@@ -1,5 +1,6 @@
 # main.py
 import os
+import time
 import importlib
 from colorama import Fore, Style
 from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
@@ -50,6 +51,7 @@ for name in manifest["names"]:
     )
     call_scraper(name)
     print("\n")
+    time.sleep(5)
 
 addons = []
 for name in manifest["names"]:

@@ -608,6 +608,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_queries do
     field :infrastructure_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
       arg :id,   :id
       arg :name, :string
 
@@ -616,6 +619,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :stack_definition, :stack_definition do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_stack_definition/2
@@ -623,12 +629,18 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     connection field :stack_definitions, node_type: :stack_definition do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
 
       resolve &Deployments.list_stack_definitions/2
     end
 
     connection field :infrastructure_stacks, node_type: :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
       arg :q,          :string
       arg :project_id, :id
       arg :tag_query,  :tag_query
@@ -640,6 +652,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_mutations do
     field :create_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :attributes, non_null(:stack_attributes)
 
       resolve &Deployments.create_stack/2
@@ -647,6 +662,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :update_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:stack_attributes)
 
@@ -655,6 +673,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :delete_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_stack/2
@@ -662,6 +683,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :detach_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_stack/2
@@ -670,6 +694,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     @desc "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"
     field :restore_stack, :infrastructure_stack do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.restore_stack/2
@@ -678,6 +705,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     @desc "refresh the source repo of this stack, and potentially create a fresh run"
     field :kick_stack, :stack_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.kick_stack/2
@@ -686,6 +716,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     @desc "refresh the source repo of this stack, and potentially create a fresh run for this pr"
     field :kick_stack_pull_request, :stack_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.kick_stack_pr/2
@@ -693,6 +726,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :approve_stack_run, :stack_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.approve_stack_run/2
@@ -700,6 +736,9 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :restart_stack_run, :stack_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.restart_stack_run/2
@@ -762,6 +801,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     @desc "start a new run from the newest sha in the stack's run history"
     field :trigger_run, :stack_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.trigger_run/2

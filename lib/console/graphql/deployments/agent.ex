@@ -319,6 +319,9 @@ defmodule Console.GraphQl.Deployments.Agent do
   object :agent_queries do
     field :shared_agent_run, :agent_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.shared_agent_run/2
@@ -326,6 +329,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     connection field :agent_runtimes, node_type: :agent_runtime do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :read
       arg :q,    :string
       arg :type, :agent_runtime_type
 
@@ -334,6 +340,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     connection field :agent_runs, node_type: :agent_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :read
       arg :runtime_id, :id
 
       resolve &Deployments.agent_runs/2
@@ -343,6 +352,9 @@ defmodule Console.GraphQl.Deployments.Agent do
   object :agent_mutations do
     field :cancel_agent_run, :agent_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.cancel_agent_run/2
@@ -350,6 +362,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :create_agent_run, :agent_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
       arg :runtime_id, non_null(:id)
       arg :attributes, non_null(:agent_run_attributes)
 
@@ -358,6 +373,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :share_agent_run, :agent_run do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.share_agent_run/2

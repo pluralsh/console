@@ -367,6 +367,9 @@ defmodule Console.GraphQl.Users do
   object :user_queries do
     field :user, :user do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :email, non_null(:string)
 
       resolve &User.get_user/2
@@ -374,6 +377,9 @@ defmodule Console.GraphQl.Users do
 
     field :group, :group do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :name, non_null(:string)
 
       resolve &User.get_group/2
@@ -381,6 +387,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :users, node_type: :user do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :q, :string
 
       resolve &User.list_users/2
@@ -388,6 +397,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :service_accounts, node_type: :user do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :q, :string
 
       resolve &User.list_service_accounts/2
@@ -407,6 +419,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :groups, node_type: :group  do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :q, :string
 
       resolve &User.list_groups/2
@@ -414,6 +429,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :group_members, node_type: :group_member  do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :group_id, non_null(:id)
 
       resolve &User.list_group_members/2
@@ -421,12 +439,18 @@ defmodule Console.GraphQl.Users do
 
     field :role, :role do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
 
       safe_resolve &User.resolve_role/2
     end
 
     connection field :roles, node_type: :role do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :q, :string
 
       resolve &User.list_roles/2
@@ -434,6 +458,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :notifications, node_type: :notification do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :all, :boolean
 
       resolve &User.list_notifications/2
@@ -460,6 +487,9 @@ defmodule Console.GraphQl.Users do
 
     field :persona, :persona do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &User.get_persona/2
@@ -467,6 +497,9 @@ defmodule Console.GraphQl.Users do
 
     connection field :personas, node_type: :persona do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :read
 
       resolve &User.list_personas/2
     end
@@ -550,6 +583,9 @@ defmodule Console.GraphQl.Users do
     field :create_service_account, :user do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :attributes, non_null(:service_account_attributes)
 
       resolve &User.create_service_account/2
@@ -558,6 +594,9 @@ defmodule Console.GraphQl.Users do
     field :update_service_account, :user do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:service_account_attributes)
 
@@ -608,6 +647,9 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
       middleware AdminRequired
       middleware Sandboxed
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :attributes, non_null(:group_attributes)
 
       safe_resolve &User.create_group/2
@@ -617,6 +659,9 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
       middleware AdminRequired
       middleware Sandboxed
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :group_id, non_null(:id)
 
       safe_resolve &User.delete_group/2
@@ -626,6 +671,9 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
       middleware AdminRequired
       middleware Sandboxed
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :group_id, non_null(:id)
       arg :attributes, non_null(:group_attributes)
 
@@ -636,6 +684,9 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
       middleware AdminRequired
       middleware Sandboxed
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -646,6 +697,9 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
       middleware AdminRequired
       middleware Sandboxed
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -706,6 +760,9 @@ defmodule Console.GraphQl.Users do
 
     field :create_bootstrap_token, :bootstrap_token do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :attributes, non_null(:bootstrap_token_attributes)
 
       resolve &User.create_bootstrap_token/2
@@ -713,6 +770,9 @@ defmodule Console.GraphQl.Users do
 
     field :delete_bootstrap_token, :bootstrap_token do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &User.delete_bootstrap_token/2
@@ -721,6 +781,9 @@ defmodule Console.GraphQl.Users do
     field :create_persona, :persona do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :attributes, non_null(:persona_attributes)
 
       resolve &User.create_persona/2
@@ -729,6 +792,9 @@ defmodule Console.GraphQl.Users do
     field :update_persona, :persona do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:persona_attributes)
 
@@ -738,6 +804,9 @@ defmodule Console.GraphQl.Users do
     field :delete_persona, :persona do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &User.delete_persona/2
