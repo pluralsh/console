@@ -14,7 +14,7 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 21.1.2
-  images: ['docker.io/bitnami/contour:1.32.0-debian-12-r8', 'docker.io/bitnami/envoy:1.34.4-debian-12-r0']
+  images: ['docker.io/bitnami/envoy:1.34.4-debian-12-r0', 'docker.io/bitnami/contour:1.32.0-debian-12-r8']
 - version: 1.31.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -42,7 +42,7 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 15.4.0
-  images: ['docker.io/bitnami/envoy:1.27.2-debian-11-r8', 'docker.io/bitnami/contour:1.27.0-debian-11-r9']
+  images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
 - version: 1.26.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -54,7 +54,7 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 12.2.2
-  images: ['docker.io/bitnami/envoy:1.26.3-debian-11-r10', 'docker.io/bitnami/contour:1.25.0-debian-11-r73']
+  images: ['docker.io/bitnami/contour:1.25.0-debian-11-r73', 'docker.io/bitnami/envoy:1.26.3-debian-11-r10']
 - version: 1.24.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -70,16 +70,16 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 9.1.1
-  images: ['docker.io/bitnami/contour:1.22.0-debian-11-r4', 'docker.io/bitnami/envoy:1.23.0-debian-11-r8']
+  images: ['docker.io/bitnami/envoy:1.23.0-debian-11-r8', 'docker.io/bitnami/contour:1.22.0-debian-11-r4']
 - version: 1.21.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   chart_version: 8.0.0
-  images: ['docker.io/bitnami/contour:1.21.0-debian-11-r0', 'docker.io/bitnami/envoy:1.22.1-debian-11-r0']
+  images: ['docker.io/bitnami/envoy:1.22.1-debian-11-r0', 'docker.io/bitnami/contour:1.21.0-debian-11-r0']
 - version: 1.20.1
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   chart_version: 7.10.2
-  images: ['docker.io/bitnami/contour:1.20.1-debian-11-r0', 'docker.io/bitnami/envoy:1.21.2-debian-11-r0']
+  images: ['docker.io/bitnami/envoy:1.21.2-debian-11-r0', 'docker.io/bitnami/contour:1.20.1-debian-11-r0']
