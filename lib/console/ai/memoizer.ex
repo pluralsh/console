@@ -101,7 +101,7 @@ defmodule Console.AI.Memoizer do
     |> String.downcase()
   end
 
-  @poll_duration 10 * 60 # 10 minutes
+  @poll_duration 30 * 60 # 30 minutes
 
   defp next_poll_at() do
     duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
