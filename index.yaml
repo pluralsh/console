@@ -97,6 +97,38 @@ entries:
   console:
   - apiVersion: v2
     appVersion: 0.11.54
+    created: "2025-12-01T19:28:35.1107392Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.158
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.14.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 644e6650aa4ee17975639992241757ade36d23958020408aed60c0804841dd1f
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.130/console-0.3.130.tgz
+    version: 0.3.130
+  - apiVersion: v2
+    appVersion: 0.11.54
     created: "2025-11-28T20:04:28.358533343Z"
     dependencies:
     - name: kas
@@ -4480,6 +4512,37 @@ entries:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.1/console-0.1.1.tgz
     version: 0.1.1
   console-rapid:
+  - apiVersion: v2
+    appVersion: 0.11.54
+    created: "2025-12-01T19:28:35.348106316Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.158
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.14.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    description: rapid channel chart for the plural console (used for testing)
+    digest: e32da84170eaf9349ac639769368add72ac14cab0a200b30a77cf2e71870a669
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.162/console-rapid-0.3.162.tgz
+    version: 0.3.162
   - apiVersion: v2
     appVersion: 0.11.54
     created: "2025-11-28T19:12:56.564949616Z"
@@ -9807,4 +9870,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-28T20:04:28.597813397Z"
+generated: "2025-12-01T19:28:35.533948374Z"
