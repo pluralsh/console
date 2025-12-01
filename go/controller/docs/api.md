@@ -3287,6 +3287,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `external` _boolean_ | Whether the lua script is sourced from an external git repo bound to this automation |  | Optional: \{\} <br /> |
 | `script` _string_ | File of a flat script to use |  | Optional: \{\} <br /> |
 | `folder` _string_ | Folder with lua library code and scripts to use |  | Optional: \{\} <br /> |
 

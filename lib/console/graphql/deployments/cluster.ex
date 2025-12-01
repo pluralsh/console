@@ -472,6 +472,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
       cluster, _, _ -> {:ok, Clusters.extended_support(cluster)}
     end
 
+    @desc "a consolidated view of all changes we've found to upgrade this cluster"
+    field :upgrade_plan_summary, :upgrade_plan_summary, resolve: fn
+      cluster, _, _ -> {:ok, Clusters.upgrade_plan(cluster)}
+    end
+
     field :agent_url, :string,
       description: "the url this clusters deployment operator will use for gql requests",
       resolve: fn _, _, _ -> {:ok, Console.Deployments.Services.api_url("gql")} end
@@ -840,6 +845,22 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :kube_version, non_null(:string)
       resolve fn vsn, %{kube_version: kube}, _ -> {:ok, Compatibilities.Version.blocking?(vsn, kube)} end
     end
+  end
+
+  object :upgrade_plan_summary do
+    field :failed_insights,       list_of(:upgrade_insight)
+    field :blocking_addons,       list_of(:runtime_addon_upgrade)
+    field :blocking_cloud_addons, list_of(:cloud_addon_upgrade)
+  end
+
+  object :runtime_addon_upgrade do
+    field :current, :addon_version
+    field :fix, :addon_version
+  end
+
+  object :cloud_addon_upgrade do
+    field :current, :cloud_addon_version_information
+    field :fix, :cloud_addon_version_information
   end
 
   @desc "a shortform reference to an addon by version"

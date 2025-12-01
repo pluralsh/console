@@ -7250,6 +7250,9 @@ type Cluster {
   "information about the extended support status of this cluster"
   extendedSupport: ExtendedSupportInfo
 
+  "a consolidated view of all changes we've found to upgrade this cluster"
+  upgradePlanSummary: UpgradePlanSummary
+
   "the url this clusters deployment operator will use for gql requests"
   agentUrl: String
 
@@ -7713,6 +7716,22 @@ type AddonVersion {
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+type UpgradePlanSummary {
+  failedInsights: [UpgradeInsight]
+  blockingAddons: [RuntimeAddonUpgrade]
+  blockingCloudAddons: [CloudAddonUpgrade]
+}
+
+type RuntimeAddonUpgrade {
+  current: AddonVersion
+  fix: AddonVersion
+}
+
+type CloudAddonUpgrade {
+  current: CloudAddonVersionInformation
+  fix: CloudAddonVersionInformation
 }
 
 "a shortform reference to an addon by version"
@@ -8695,6 +8714,9 @@ input YamlOverlayAttributes {
 
 "a specification for sourcing lua scripts to preprocess the PR automation"
 input PrLuaSpecAttributes {
+  "whether the lua script is sourced from an external git repo bound to this automation"
+  external: Boolean
+
   "file of a flat script to use"
   script: String
 
@@ -9185,6 +9207,9 @@ type PrLuaSpec {
 
   "a folder with lua library code and scripts to use"
   folder: String
+
+  "whether the lua script is sourced from an external git repo bound to this automation"
+  external: Boolean
 }
 
 type PrSecrets {

@@ -36,8 +36,9 @@ defmodule Console.Schema.PrAutomation do
     embeds_one :git, Service.Git, on_replace: :update
 
     embeds_one :lua, LuaSpec, on_replace: :update do
-      field :script, :string
-      field :folder, :string
+      field :external, :boolean, default: false
+      field :script,   :string
+      field :folder,   :string
     end
 
     embeds_one :creates, CreateSpec, on_replace: :update do
@@ -215,7 +216,7 @@ defmodule Console.Schema.PrAutomation do
 
   defp lua_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(script folder)a)
+    |> cast(attrs, ~w(script folder external)a)
   end
 
   defp delete_changeset(model, attrs) do

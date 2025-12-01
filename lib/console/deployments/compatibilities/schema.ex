@@ -25,6 +25,7 @@ end
 defmodule Console.Deployments.Compatibilities.AddOn do
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
   alias Console.Deployments.Compatibilities
+  alias Console.Schema.Cluster
 
   @type t :: %__MODULE__{versions: [%Compatibilities.Version{}]}
 
@@ -35,6 +36,21 @@ defmodule Console.Deployments.Compatibilities.AddOn do
       versions: [Compatibilities.Version.spec()]
     }
   end
+
+  @spec upgrade_version(t(), Cluster.t) :: Compatibilities.Version.t | nil
+  def upgrade_version(%__MODULE__{versions: [_ | _] = vsns}, %Cluster{current_version: cv}) when is_binary(cv) do
+    cleaned = clean_version(cv)
+    with {:ok, %Version{major: maj, minor: min}} <- Version.parse(cleaned) do
+      Enum.find(vsns, fn
+        %Compatibilities.Version{kube: [_ | _] = kube} ->
+          Enum.member?(kube, "#{maj}.#{min + 1}")
+        _ -> false
+      end)
+    else
+      _ -> nil
+    end
+  end
+  def upgrade_version(_, _), do: nil
 
   def find_version(%__MODULE__{versions: [_ | _] = vsns}, version) do
     cleaned = clean_version(version)
@@ -75,6 +91,8 @@ defmodule Console.Deployments.Compatibilities.AddOn do
 end
 
 defmodule Console.Deployments.Compatibilities.CloudAddOn do
+  import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
+  alias Console.Schema.Cluster
 
   defstruct [:name, :versions, :publisher]
 
@@ -92,6 +110,21 @@ defmodule Console.Deployments.Compatibilities.CloudAddOn do
   def spec() do
     %__MODULE__{versions: [%Version{}]}
   end
+
+  @spec upgrade_version(t(), Cluster.t) :: Version.t | nil
+  def upgrade_version(%__MODULE__{versions: [_ | _] = vsns}, %Cluster{current_version: cv}) when is_binary(cv) do
+    cleaned = clean_version(cv)
+    with {:ok, %Elixir.Version{major: maj, minor: min}} <- Elixir.Version.parse(cleaned) do
+      Enum.find(vsns, fn
+        %Version{compatibilities: [_ | _] = kube} ->
+          Enum.member?(kube, "#{maj}.#{min + 1}")
+        _ -> false
+      end)
+    else
+      _ -> nil
+    end
+  end
+  def upgrade_version(_, _), do: nil
 
   def find_version(%__MODULE__{versions: vsns}, vsn) when is_list(vsns),
     do: Enum.find(vsns, & &1.version == vsn)

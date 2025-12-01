@@ -285,8 +285,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "a specification for sourcing lua scripts to preprocess the PR automation"
   input_object :pr_lua_spec_attributes do
-    field :script, :string, description: "file of a flat script to use"
-    field :folder, :string, description: "a folder with lua library code and scripts to use"
+    field :external, :boolean, description: "whether the lua script is sourced from an external git repo bound to this automation"
+    field :script,   :string, description: "file of a flat script to use"
+    field :folder,   :string, description: "a folder with lua library code and scripts to use"
   end
 
   @desc "attributes for a pull request pointer record"
@@ -642,8 +643,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "a specification for sourcing lua scripts to preprocess the PR automation"
   object :pr_lua_spec do
-    field :script, :string, description: "file of a flat script to use"
-    field :folder, :string, description: "a folder with lua library code and scripts to use"
+    field :script,   :string, description: "file of a flat script to use"
+    field :folder,   :string, description: "a folder with lua library code and scripts to use"
+    field :external, :boolean, description: "whether the lua script is sourced from an external git repo bound to this automation"
   end
 
   object :pr_secrets do

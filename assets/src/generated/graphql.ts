@@ -1702,6 +1702,12 @@ export type CloudAddonInformation = {
   versions?: Maybe<Array<Maybe<CloudAddonVersionInformation>>>;
 };
 
+export type CloudAddonUpgrade = {
+  __typename?: 'CloudAddonUpgrade';
+  current?: Maybe<CloudAddonVersionInformation>;
+  fix?: Maybe<CloudAddonVersionInformation>;
+};
+
 export type CloudAddonVersionInformation = {
   __typename?: 'CloudAddonVersionInformation';
   /** checks if this is blocking a specific kubernetes upgrade */
@@ -1926,6 +1932,8 @@ export type Cluster = {
   upgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   /** Checklist of tasks to complete to safely upgrade this cluster */
   upgradePlan?: Maybe<ClusterUpgradePlan>;
+  /** a consolidated view of all changes we've found to upgrade this cluster */
+  upgradePlanSummary?: Maybe<UpgradePlanSummary>;
   /** desired k8s version for the cluster */
   version?: Maybe<Scalars['String']['output']>;
   /** Computes a list of statistics for OPA constraint violations w/in this cluster */
@@ -6907,6 +6915,8 @@ export type PrGovernanceConfigurationAttributes = {
 /** a specification for sourcing lua scripts to preprocess the PR automation */
 export type PrLuaSpec = {
   __typename?: 'PrLuaSpec';
+  /** whether the lua script is sourced from an external git repo bound to this automation */
+  external?: Maybe<Scalars['Boolean']['output']>;
   /** a folder with lua library code and scripts to use */
   folder?: Maybe<Scalars['String']['output']>;
   /** file of a flat script to use */
@@ -6915,6 +6925,8 @@ export type PrLuaSpec = {
 
 /** a specification for sourcing lua scripts to preprocess the PR automation */
 export type PrLuaSpecAttributes = {
+  /** whether the lua script is sourced from an external git repo bound to this automation */
+  external?: InputMaybe<Scalars['Boolean']['input']>;
   /** a folder with lua library code and scripts to use */
   folder?: InputMaybe<Scalars['String']['input']>;
   /** file of a flat script to use */
@@ -10574,6 +10586,12 @@ export type RuntimeAddonReleaseUrlArgs = {
   version: Scalars['String']['input'];
 };
 
+export type RuntimeAddonUpgrade = {
+  __typename?: 'RuntimeAddonUpgrade';
+  current?: Maybe<AddonVersion>;
+  fix?: Maybe<AddonVersion>;
+};
+
 /** a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api */
 export type RuntimeService = {
   __typename?: 'RuntimeService';
@@ -12462,6 +12480,13 @@ export type UpgradePlanSpec = {
 export type UpgradePlanStatus = {
   __typename?: 'UpgradePlanStatus';
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+};
+
+export type UpgradePlanSummary = {
+  __typename?: 'UpgradePlanSummary';
+  blockingAddons?: Maybe<Array<Maybe<RuntimeAddonUpgrade>>>;
+  blockingCloudAddons?: Maybe<Array<Maybe<CloudAddonUpgrade>>>;
+  failedInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
 };
 
 /** Summary statistics of the upgradeability of your fleet */

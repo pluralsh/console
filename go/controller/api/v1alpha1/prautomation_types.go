@@ -642,6 +642,10 @@ func (in *PrAutomationSecretEntry) Attributes() *console.PrSecretEntryAttributes
 }
 
 type PrAutomationLuaConfiguration struct {
+	// Whether the lua script is sourced from an external git repo bound to this automation
+	// +kubebuilder:validation:Optional
+	External *bool `json:"external,omitempty"`
+
 	// File of a flat script to use
 	// +kubebuilder:validation:Optional
 	Script *string `json:"script,omitempty"`
@@ -656,5 +660,9 @@ func (in *PrAutomationLuaConfiguration) Attributes() *console.PrLuaSpecAttribute
 		return nil
 	}
 
-	return &console.PrLuaSpecAttributes{Script: in.Script, Folder: in.Folder}
+	return &console.PrLuaSpecAttributes{
+		Script:   in.Script,
+		Folder:   in.Folder,
+		External: in.External,
+	}
 }
