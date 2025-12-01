@@ -452,14 +452,20 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :settings_queries do
     field :deployment_settings, :deployment_settings do
       middleware Authenticated, :cluster
-      middleware Scope, api: "deploymentSettings"
+      middleware Scope,
+        resource: :settings,
+        action: :read,
+        api: "deploymentSettings"
 
       resolve &Deployments.settings/2
     end
 
     connection field :projects, node_type: :project do
       middleware Authenticated
-      middleware Scope, api: "projects"
+      middleware Scope,
+        resource: :project,
+        action: :read,
+        api: "projects"
       arg :q, :string
 
       resolve &Deployments.list_projects/2
@@ -467,7 +473,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :project, :project do
       middleware Authenticated
-      middleware Scope, api: "project"
+      middleware Scope,
+        resource: :project,
+        action: :read,
+        api: "project"
       arg :id,   :id
       arg :name, :string
 
@@ -476,7 +485,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :cloud_connection, :cloud_connection do
       middleware Authenticated
-      middleware Scope, api: "cloudConnection"
+      middleware Scope,
+        resource: :settings,
+        action: :read,
+        api: "cloudConnection"
       arg :id,   :id
       arg :name, :string
 
@@ -485,7 +497,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     connection field :cloud_connections, node_type: :cloud_connection do
       middleware Authenticated
-      middleware Scope, api: "cloudConnections"
+      middleware Scope,
+        resource: :settings,
+        action: :read,
+        api: "cloudConnections"
       arg :q, :string
 
       resolve &Deployments.list_cloud_connections/2
@@ -502,6 +517,9 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :settings_mutations do
     field :update_deployment_settings, :deployment_settings do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
       arg :attributes, non_null(:deployment_settings_attributes)
 
       safe_resolve &Deployments.update_settings/2
@@ -515,6 +533,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :create_project, :project do
       middleware Authenticated
+      middleware Scope,
+        resource: :project,
+        action: :write
       arg :attributes, non_null(:project_attributes)
 
       resolve &Deployments.create_project/2
@@ -522,6 +543,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :update_project, :project do
       middleware Authenticated
+      middleware Scope,
+        resource: :project,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:project_attributes)
 
@@ -530,6 +554,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :delete_project, :project do
       middleware Authenticated
+      middleware Scope,
+        resource: :project,
+        action: :write
       arg :id,         non_null(:id)
 
       resolve &Deployments.delete_project/2
@@ -537,7 +564,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :upsert_cloud_connection, :cloud_connection do
       middleware Authenticated
-      middleware Scope, api: "upsertCloudConnection"
+      middleware Scope,
+        resource: :settings,
+        action: :write,
+        api: "upsertCloudConnection"
       arg :attributes, non_null(:cloud_connection_attributes)
 
       resolve &Deployments.upsert_cloud_connection/2
@@ -545,7 +575,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :delete_cloud_connection, :cloud_connection do
       middleware Authenticated
-      middleware Scope, api: "deleteCloudConnection"
+      middleware Scope,
+        resource: :settings,
+        action: :write,
+        api: "deleteCloudConnection"
       arg :id,   non_null(:id)
 
       resolve &Deployments.delete_cloud_connection/2

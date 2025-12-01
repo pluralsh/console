@@ -128,14 +128,41 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl.pr_info(url)
   end
 
-  defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do
+  defp external_git(%PrAutomation{repository: %GitRepository{} = git, git: %{ref: _, folder: _} = ref1, creates: %{git: %{ref: _, folder: _} = ref2}}),
+    do: external_git(git, [ref1, ref2])
+  defp external_git(%PrAutomation{repository: %GitRepository{} = git, git: %{ref: _, folder: _} = ref}),
+    do: external_git(git, ref)
+  defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}),
+    do: external_git(git, ref)
+  defp external_git(_), do: {:ok, nil}
+
+  defp external_git(%GitRepository{} = git, ref) when is_map(ref) or is_list(ref) do
     with {:ok, dir} <- Briefly.create(directory: true),
-         {:ok, f} <- Discovery.fetch(git, ref),
-         {:ok, contents} <- Tar.tar_stream(f),
+         {:ok, contents} <- git_contents(git, ref),
          :ok <- Console.dump_folder(dir, contents),
       do: {:ok, dir}
   end
-  defp external_git(_), do: {:ok, nil}
+  defp external_git(_, _), do: {:ok, nil}
+
+  defp git_contents(%GitRepository{} = git, [_ | _] = refs) do
+    Enum.reduce_while(refs, %{}, fn ref, acc ->
+      with {:ok, f} <- Discovery.fetch(git, ref),
+           {:ok, contents} <- Tar.tar_stream(f) do
+        {:cont, Map.merge(acc, Map.new(contents))}
+      else
+        {:error, _} = err -> {:halt, err}
+      end
+    end)
+    |> case do
+      %{} = contents -> {:ok, contents}
+      {:error, _} = err -> err
+    end
+  end
+
+  defp git_contents(%GitRepository{} = git, %{ref: _, folder: _} = ref) do
+    with {:ok, f} <- Discovery.fetch(git, ref),
+      do: Tar.tar_stream(f)
+  end
 
   defp resolve_repo("mgmt") do
     case Settings.cached() do

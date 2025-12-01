@@ -162,11 +162,15 @@ def get_chart_images(url, chart, version, values=None):
     This assumes the chart is available via a Helm repository.
     """
     # Add repo with a temp name
-    if url not in IMPORTED_REPOS:
+    oci_repo = url.startswith("oci://")
+    if url not in IMPORTED_REPOS and not oci_repo:
         subprocess.run(["helm", "repo", "add", chart, url], check=True)
         subprocess.run(["helm", "repo", "update"], check=True)
         IMPORTED_REPOS.add(url)
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version]
+    if oci_repo:
+        cmd = ["helm", "template", chart, url, "--version", version]
+
     if values:
         cmd.append("--set")
         cmd.append(values)
@@ -180,7 +184,7 @@ def get_chart_images(url, chart, version, values=None):
         return None
     
     result = list(yaml.safe_load_all(result.stdout))
-    return list(set(find_nested_images(result)))
+    return sorted(list(set(find_nested_images(result))))
 
 def find_nested_images(objs):
     if isinstance(objs, list):
@@ -437,8 +441,7 @@ def update_compatibility_info(filepath, new_versions):
 
             if data.get('helm_repository_url'):
                 url = data.get('helm_repository_url')
-                versions = data.get('versions', [])
-                for version in versions:
+                for version in data["versions"]:
                     if "chart_version" in version:
                         print(f"Updating images for {app_name} {version['version']}")
                         imgs = get_chart_images(url, data.get('chart_name', app_name), version["chart_version"], data.get('helm_values'))

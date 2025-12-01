@@ -8,6 +8,8 @@ defmodule Console.Deployments.Clusters do
   alias Console.Deployments.{Services, Git, Providers.Configuration, Settings}
   alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Compatibilities.{Table, AddOn, Version, CloudAddOns}
+  alias Console.Deployments.Compatibilities.CloudAddOn.Version, as: CloudAddOnVersion
+  alias Console.Deployments.Compatibilities.CloudAddOn, as: CloudAddOnSpec
   alias Console.Deployments.Ecto.Validations
   alias Console.Deployments.KubeVersions.Table, as: KubeTable
   alias Console.Services.Users
@@ -555,6 +557,36 @@ defmodule Console.Deployments.Clusters do
     end
   end
   def kubelet_skew?(_), do: true
+
+  @spec upgrade_plan(Cluster.t) :: %{
+    failed_insights: [UpgradeInsight.t],
+    blocking_addons: [%{current: Version.t, fix: Version.t | nil}],
+    blocking_cloud_addons: [%{current: CloudAddOnVersion.t, fix: CloudAddOnVersion.t | nil}]
+  }
+  def upgrade_plan(%Cluster{} = cluster) do
+    cluster = Repo.preload(cluster, [:upgrade_insights])
+    blocking_addons = Enum.filter(runtime_services(cluster), fn
+      %{addon_version: %Version{} = vsn} ->
+        Version.blocking?(vsn, cluster.current_version)
+      _ -> false
+    end)
+
+    blocking_cloud_addons = Enum.filter(cloud_addons(cluster), fn
+      %CloudAddon{version_info: %CloudAddOnVersion{} = vsn} ->
+        CloudAddOnVersion.blocking?(vsn, cluster.current_version)
+      _ -> false
+    end)
+
+    %{
+      failed_insights: Enum.filter(cluster.upgrade_insights, & &1.status == :failed),
+      blocking_addons: Enum.map(blocking_addons, fn %RuntimeService{addon_version: vsn, addon: addon} ->
+        %{current: vsn, fix: AddOn.upgrade_version(addon, cluster)}
+      end),
+      blocking_cloud_addons: Enum.map(blocking_cloud_addons, fn %CloudAddon{info: ca, version_info: vsn} ->
+        %{current: vsn, fix: CloudAddOnSpec.upgrade_version(ca, cluster)}
+      end),
+    }
+  end
 
   @doc """
   Determines current status of this clusters upgrade plan given what information we currently have

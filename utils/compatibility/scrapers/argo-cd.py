@@ -17,7 +17,6 @@ app_name = "argo-cd"
 def scrape():
     kube_releases = get_kube_release_info()
     argo_releases = list(reversed(list(get_github_releases_timestamps("argoproj", "argo-cd"))))
-    print(argo_releases)
     chart_versions = get_chart_versions(app_name)
     versions = []
 

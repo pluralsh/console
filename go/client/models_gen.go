@@ -1363,6 +1363,11 @@ type CloudAddonInformation struct {
 	Versions  []*CloudAddonVersionInformation `json:"versions,omitempty"`
 }
 
+type CloudAddonUpgrade struct {
+	Current *CloudAddonVersionInformation `json:"current,omitempty"`
+	Fix     *CloudAddonVersionInformation `json:"fix,omitempty"`
+}
+
 type CloudAddonVersionInformation struct {
 	Version         *string   `json:"version,omitempty"`
 	Compatibilities []*string `json:"compatibilities,omitempty"`
@@ -1497,6 +1502,8 @@ type Cluster struct {
 	KasURL *string `json:"kasUrl,omitempty"`
 	// information about the extended support status of this cluster
 	ExtendedSupport *ExtendedSupportInfo `json:"extendedSupport,omitempty"`
+	// a consolidated view of all changes we've found to upgrade this cluster
+	UpgradePlanSummary *UpgradePlanSummary `json:"upgradePlanSummary,omitempty"`
 	// the url this clusters deployment operator will use for gql requests
 	AgentURL *string `json:"agentUrl,omitempty"`
 	// a auth token to be used by the deploy operator, only readable on create
@@ -5448,6 +5455,10 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// a set of lua scripts to use to preprocess the PR automation
+	Lua *PrLuaSpec `json:"lua,omitempty"`
+	// location in git for external templates and scripts
+	Git *GitRef `json:"git,omitempty"`
 	// labels to apply to the created prs
 	Labels []*string `json:"labels,omitempty"`
 	// a prefix to use for the branch name, will be appended with a random string for deduplication
@@ -5499,6 +5510,10 @@ type PrAutomationAttributes struct {
 	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// a specification for sourcing lua scripts to preprocess the PR automation
+	Lua *PrLuaSpecAttributes `json:"lua,omitempty"`
+	// location in git for external templates and scripts
+	Git *GitRefAttributes `json:"git,omitempty"`
 	// labels to apply to created prs
 	Labels []*string `json:"labels,omitempty"`
 	// an icon url to use for this catalog
@@ -5702,6 +5717,26 @@ type PrGovernanceConfiguration struct {
 // The settings for configuring a pr governance controller
 type PrGovernanceConfigurationAttributes struct {
 	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
+}
+
+// a specification for sourcing lua scripts to preprocess the PR automation
+type PrLuaSpec struct {
+	// file of a flat script to use
+	Script *string `json:"script,omitempty"`
+	// a folder with lua library code and scripts to use
+	Folder *string `json:"folder,omitempty"`
+	// whether the lua script is sourced from an external git repo bound to this automation
+	External *bool `json:"external,omitempty"`
+}
+
+// a specification for sourcing lua scripts to preprocess the PR automation
+type PrLuaSpecAttributes struct {
+	// whether the lua script is sourced from an external git repo bound to this automation
+	External *bool `json:"external,omitempty"`
+	// file of a flat script to use
+	Script *string `json:"script,omitempty"`
+	// a folder with lua library code and scripts to use
+	Folder *string `json:"folder,omitempty"`
 }
 
 type PrSecretEntry struct {
@@ -6265,6 +6300,11 @@ type RuntimeAddon struct {
 	// the release page for a runtime service at a version, this is a heavy operation not suitable for lists
 	ReleaseURL *string         `json:"releaseUrl,omitempty"`
 	Versions   []*AddonVersion `json:"versions,omitempty"`
+}
+
+type RuntimeAddonUpgrade struct {
+	Current *AddonVersion `json:"current,omitempty"`
+	Fix     *AddonVersion `json:"fix,omitempty"`
 }
 
 // a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api
@@ -7873,6 +7913,12 @@ type UpgradePlanSpec struct {
 
 type UpgradePlanStatus struct {
 	Conditions []*StatusCondition `json:"conditions,omitempty"`
+}
+
+type UpgradePlanSummary struct {
+	FailedInsights      []*UpgradeInsight      `json:"failedInsights,omitempty"`
+	BlockingAddons      []*RuntimeAddonUpgrade `json:"blockingAddons,omitempty"`
+	BlockingCloudAddons []*CloudAddonUpgrade   `json:"blockingCloudAddons,omitempty"`
 }
 
 // Summary statistics of the upgradeability of your fleet

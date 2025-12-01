@@ -307,6 +307,10 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def for_names(query \\ __MODULE__, names) do
+    from(s in query, where: s.name in ^names)
+  end
+
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
   end

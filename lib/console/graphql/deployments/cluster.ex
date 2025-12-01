@@ -472,6 +472,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
       cluster, _, _ -> {:ok, Clusters.extended_support(cluster)}
     end
 
+    @desc "a consolidated view of all changes we've found to upgrade this cluster"
+    field :upgrade_plan_summary, :upgrade_plan_summary, resolve: fn
+      cluster, _, _ -> {:ok, Clusters.upgrade_plan(cluster)}
+    end
+
     field :agent_url, :string,
       description: "the url this clusters deployment operator will use for gql requests",
       resolve: fn _, _, _ -> {:ok, Console.Deployments.Services.api_url("gql")} end
@@ -840,6 +845,22 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :kube_version, non_null(:string)
       resolve fn vsn, %{kube_version: kube}, _ -> {:ok, Compatibilities.Version.blocking?(vsn, kube)} end
     end
+  end
+
+  object :upgrade_plan_summary do
+    field :failed_insights,       list_of(:upgrade_insight)
+    field :blocking_addons,       list_of(:runtime_addon_upgrade)
+    field :blocking_cloud_addons, list_of(:cloud_addon_upgrade)
+  end
+
+  object :runtime_addon_upgrade do
+    field :current, :addon_version
+    field :fix, :addon_version
+  end
+
+  object :cloud_addon_upgrade do
+    field :current, :cloud_addon_version_information
+    field :fix, :cloud_addon_version_information
   end
 
   @desc "a shortform reference to an addon by version"
@@ -1248,6 +1269,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :q,            :string
       arg :healthy,      :boolean
       arg :tag,          :tag_input
@@ -1310,7 +1334,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster"
     field :cluster, :cluster do
       middleware Authenticated, :cluster
-      middleware Scope, api: "cluster"
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :id, :id
       arg :handle, :string
 
@@ -1320,6 +1346,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster provider"
     field :cluster_provider, :cluster_provider do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :id,    :id
       arg :cloud, :string
       arg :name,  :string
@@ -1344,6 +1373,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :cluster_usages, node_type: :cluster_usage do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :q,          :string
       arg :tag_query,  :tag_query
       arg :project_id, :id
@@ -1353,6 +1385,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :cluster_usage, :cluster_usage do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_cluster_usage/2
@@ -1360,12 +1395,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :project_usage_history, node_type: :project_usage_history do
       middleware Authenticated
+      middleware Scope,
+        resource: :project,
+        action: :read
 
       resolve &Deployments.list_aggregated_cluster_usage_history/2
     end
 
     field :cluster_registration, :cluster_registration do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :id,         :id
       arg :machine_id, :string
 
@@ -1374,12 +1415,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :cluster_registrations, node_type: :cluster_registration do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
 
       resolve &Deployments.list_cluster_registrations/2
     end
 
     field :cluster_iso_image, :cluster_iso_image do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
       arg :id,         :id
       arg :image,      :string
 
@@ -1388,6 +1435,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :cluster_iso_images, node_type: :cluster_iso_image do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :read
 
       resolve &Deployments.list_cluster_iso_images/2
     end
@@ -1404,7 +1454,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :create_cluster, :cluster do
       middleware Authenticated
       middleware Feature, :cd
-      middleware Scope, api: "createCluster"
+      middleware Scope,
+        resource: :cluster,
+        action: :write,
+        api: "createCluster"
       arg :attributes, non_null(:cluster_attributes)
 
       safe_resolve &Deployments.create_cluster/2
@@ -1413,7 +1466,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :update_cluster, :cluster do
       middleware Authenticated
       middleware Feature, :cd
-      middleware Scope, api: "updateCluster"
+      middleware Scope,
+        resource: :cluster,
+        action: :write,
+        api: "updateCluster"
       arg :id, non_null(:id)
       arg :attributes, non_null(:cluster_update_attributes)
 
@@ -1422,7 +1478,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :delete_cluster, :cluster do
       middleware Authenticated
-      middleware Scope, api: "deleteCluster"
+      middleware Scope,
+        resource: :cluster,
+        action: :write,
+        api: "deleteCluster"
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_cluster/2
@@ -1431,7 +1490,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects"
     field :detach_cluster, :cluster do
       middleware Authenticated
-      middleware Scope, api: "deleteCluster"
+      middleware Scope,
+        resource: :cluster,
+        action: :write,
+        api: "deleteCluster"
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_cluster/2
@@ -1486,6 +1548,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :create_agent_migration, :agent_migration do
       middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
       arg :attributes, non_null(:agent_migration_attributes)
 
       resolve &Deployments.create_agent_migration/2
@@ -1493,6 +1558,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :create_pinned_custom_resource, :pinned_custom_resource do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :attributes, non_null(:pinned_custom_resource_attributes)
 
       resolve &Deployments.create_pinned_custom_resource/2
@@ -1500,6 +1568,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :delete_pinned_custom_resource, :pinned_custom_resource do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_pinned_custom_resource/2
@@ -1514,6 +1585,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :apply_scaling_recommendation, :pull_request do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id, non_null(:id), description: "the id of the scaling recommendation to fix"
 
       resolve &Deployments.scaling_pr/2
@@ -1528,6 +1602,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :create_cluster_registration, :cluster_registration do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :attributes, non_null(:cluster_registration_create_attributes)
 
       resolve &Deployments.create_cluster_registration/2
@@ -1535,6 +1612,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :update_cluster_registration, :cluster_registration do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:cluster_registration_update_attributes)
 
@@ -1543,6 +1623,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :delete_cluster_registration, :cluster_registration do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_cluster_registration/2
@@ -1550,6 +1633,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :create_cluster_iso_image, :cluster_iso_image do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :attributes, non_null(:cluster_iso_image_attributes)
 
       resolve &Deployments.create_cluster_iso_image/2
@@ -1557,6 +1643,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :update_cluster_iso_image, :cluster_iso_image do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id,         non_null(:id)
       arg :attributes, non_null(:cluster_iso_image_attributes)
 
@@ -1565,6 +1654,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :delete_cluster_iso_image, :cluster_iso_image do
       middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_cluster_iso_image/2

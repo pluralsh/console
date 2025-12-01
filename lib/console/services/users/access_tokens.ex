@@ -2,6 +2,10 @@ defmodule Console.Users.AccessTokens do
   alias Console.Schema.AccessToken.Scope
 
   @spec scopes_match?([Scope.t], binary, binary | nil) :: boolean
+  def scopes_match?(scopes, apis, id) when is_list(apis) and is_list(scopes) do
+    Enum.any?(apis, &scopes_match?(scopes, &1, id))
+  end
+
   def scopes_match?(scopes, api, id) when is_list(scopes) do
     Enum.any?(scopes, &matches_api?(&1, api) && matches_id?(&1, id))
   end

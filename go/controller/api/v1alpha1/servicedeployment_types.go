@@ -21,7 +21,7 @@ type ComponentState string
 const ComponentStateRunning ComponentState = "RUNNING"
 
 type ServiceKustomize struct {
-	// Path to the kustomization file to use.
+	// The folder your base kustomization file lives within relative to your main git folder path.  It can be a subdirectory.
 	Path string `json:"path"`
 
 	// EnableHelm indicates whether to enable Helm for this Kustomize deployment.

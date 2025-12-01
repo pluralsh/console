@@ -1702,6 +1702,12 @@ export type CloudAddonInformation = {
   versions?: Maybe<Array<Maybe<CloudAddonVersionInformation>>>;
 };
 
+export type CloudAddonUpgrade = {
+  __typename?: 'CloudAddonUpgrade';
+  current?: Maybe<CloudAddonVersionInformation>;
+  fix?: Maybe<CloudAddonVersionInformation>;
+};
+
 export type CloudAddonVersionInformation = {
   __typename?: 'CloudAddonVersionInformation';
   /** checks if this is blocking a specific kubernetes upgrade */
@@ -1926,6 +1932,8 @@ export type Cluster = {
   upgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   /** Checklist of tasks to complete to safely upgrade this cluster */
   upgradePlan?: Maybe<ClusterUpgradePlan>;
+  /** a consolidated view of all changes we've found to upgrade this cluster */
+  upgradePlanSummary?: Maybe<UpgradePlanSummary>;
   /** desired k8s version for the cluster */
   version?: Maybe<Scalars['String']['output']>;
   /** Computes a list of statistics for OPA constraint violations w/in this cluster */
@@ -6635,6 +6643,8 @@ export type PrAutomation = {
   darkIcon?: Maybe<Scalars['String']['output']>;
   deletes?: Maybe<PrDeleteSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
+  /** location in git for external templates and scripts */
+  git?: Maybe<GitRef>;
   /** an icon url to use for this catalog */
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -6643,6 +6653,8 @@ export type PrAutomation = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** labels to apply to the created prs */
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a set of lua scripts to use to preprocess the PR automation */
+  lua?: Maybe<PrLuaSpec>;
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
@@ -6684,6 +6696,8 @@ export type PrAutomationAttributes = {
   darkIcon?: InputMaybe<Scalars['String']['input']>;
   deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
+  /** location in git for external templates and scripts */
+  git?: InputMaybe<GitRefAttributes>;
   /** the governance controller to use for this pr */
   governanceId?: InputMaybe<Scalars['ID']['input']>;
   /** an icon url to use for this catalog */
@@ -6692,6 +6706,8 @@ export type PrAutomationAttributes = {
   identifier?: InputMaybe<Scalars['String']['input']>;
   /** labels to apply to created prs */
   labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a specification for sourcing lua scripts to preprocess the PR automation */
+  lua?: InputMaybe<PrLuaSpecAttributes>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** whether to generate a patch for this pr instead of a full pr */
@@ -6894,6 +6910,27 @@ export type PrGovernanceConfiguration = {
 /** The settings for configuring a pr governance controller */
 export type PrGovernanceConfigurationAttributes = {
   webhook?: InputMaybe<GovernanceWebhookAttributes>;
+};
+
+/** a specification for sourcing lua scripts to preprocess the PR automation */
+export type PrLuaSpec = {
+  __typename?: 'PrLuaSpec';
+  /** whether the lua script is sourced from an external git repo bound to this automation */
+  external?: Maybe<Scalars['Boolean']['output']>;
+  /** a folder with lua library code and scripts to use */
+  folder?: Maybe<Scalars['String']['output']>;
+  /** file of a flat script to use */
+  script?: Maybe<Scalars['String']['output']>;
+};
+
+/** a specification for sourcing lua scripts to preprocess the PR automation */
+export type PrLuaSpecAttributes = {
+  /** whether the lua script is sourced from an external git repo bound to this automation */
+  external?: InputMaybe<Scalars['Boolean']['input']>;
+  /** a folder with lua library code and scripts to use */
+  folder?: InputMaybe<Scalars['String']['input']>;
+  /** file of a flat script to use */
+  script?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum PrRole {
@@ -10549,6 +10586,12 @@ export type RuntimeAddonReleaseUrlArgs = {
   version: Scalars['String']['input'];
 };
 
+export type RuntimeAddonUpgrade = {
+  __typename?: 'RuntimeAddonUpgrade';
+  current?: Maybe<AddonVersion>;
+  fix?: Maybe<AddonVersion>;
+};
+
 /** a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api */
 export type RuntimeService = {
   __typename?: 'RuntimeService';
@@ -12437,6 +12480,13 @@ export type UpgradePlanSpec = {
 export type UpgradePlanStatus = {
   __typename?: 'UpgradePlanStatus';
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+};
+
+export type UpgradePlanSummary = {
+  __typename?: 'UpgradePlanSummary';
+  blockingAddons?: Maybe<Array<Maybe<RuntimeAddonUpgrade>>>;
+  blockingCloudAddons?: Maybe<Array<Maybe<CloudAddonUpgrade>>>;
+  failedInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
 };
 
 /** Summary statistics of the upgradeability of your fleet */

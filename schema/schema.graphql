@@ -7250,6 +7250,9 @@ type Cluster {
   "information about the extended support status of this cluster"
   extendedSupport: ExtendedSupportInfo
 
+  "a consolidated view of all changes we've found to upgrade this cluster"
+  upgradePlanSummary: UpgradePlanSummary
+
   "the url this clusters deployment operator will use for gql requests"
   agentUrl: String
 
@@ -7713,6 +7716,22 @@ type AddonVersion {
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+type UpgradePlanSummary {
+  failedInsights: [UpgradeInsight]
+  blockingAddons: [RuntimeAddonUpgrade]
+  blockingCloudAddons: [CloudAddonUpgrade]
+}
+
+type RuntimeAddonUpgrade {
+  current: AddonVersion
+  fix: AddonVersion
+}
+
+type CloudAddonUpgrade {
+  current: CloudAddonVersionInformation
+  fix: CloudAddonVersionInformation
 }
 
 "a shortform reference to an addon by version"
@@ -8477,6 +8496,12 @@ input PrAutomationAttributes {
 
   deletes: PrAutomationDeleteSpecAttributes
 
+  "a specification for sourcing lua scripts to preprocess the PR automation"
+  lua: PrLuaSpecAttributes
+
+  "location in git for external templates and scripts"
+  git: GitRefAttributes
+
   "labels to apply to created prs"
   labels: [String]
 
@@ -8685,6 +8710,18 @@ input YamlOverlayAttributes {
 
   "whether you want to apply liquid templating on the yaml before compiling"
   templated: Boolean
+}
+
+"a specification for sourcing lua scripts to preprocess the PR automation"
+input PrLuaSpecAttributes {
+  "whether the lua script is sourced from an external git repo bound to this automation"
+  external: Boolean
+
+  "file of a flat script to use"
+  script: String
+
+  "a folder with lua library code and scripts to use"
+  folder: String
 }
 
 "attributes for a pull request pointer record"
@@ -9005,6 +9042,12 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a set of lua scripts to use to preprocess the PR automation"
+  lua: PrLuaSpec
+
+  "location in git for external templates and scripts"
+  git: GitRef
+
   "labels to apply to the created prs"
   labels: [String]
 
@@ -9155,6 +9198,18 @@ type PrConfigurationCondition {
 
   "a fixed value to check against if its a binary operation"
   value: String
+}
+
+"a specification for sourcing lua scripts to preprocess the PR automation"
+type PrLuaSpec {
+  "file of a flat script to use"
+  script: String
+
+  "a folder with lua library code and scripts to use"
+  folder: String
+
+  "whether the lua script is sourced from an external git repo bound to this automation"
+  external: Boolean
 }
 
 type PrSecrets {

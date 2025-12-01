@@ -16,9 +16,8 @@ app_name = "vector"
 def scrape():
     kube_releases = get_kube_release_info()
     vector_releases = list(reversed(list(get_github_releases_timestamps("vectordotdev", "vector"))))
-    print(vector_releases)
     chart_versions = get_chart_versions(app_name)
-    print(chart_versions)
+
     versions = []
     for vector_release in vector_releases:
         if "-" in vector_release[0]:
