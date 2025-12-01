@@ -49,32 +49,33 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 3.0.0
-  images: ['ghcr.io/kyverno/kyverno:v1.10.0', 'bitnami/kubectl:1.26.4', 'ghcr.io/kyverno/kyvernopre:v1.10.0',
-    'ghcr.io/kyverno/reports-controller:v1.10.0', 'ghcr.io/kyverno/cleanup-controller:v1.10.0',
-    'ghcr.io/kyverno/background-controller:v1.10.0', 'busybox:1.35']
+  images: ['busybox:1.35', 'ghcr.io/kyverno/kyverno:v1.10.0', 'ghcr.io/kyverno/background-controller:v1.10.0',
+    'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0',
+    'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'bitnami/kubectl:1.26.4']
 - version: 1.9.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   chart_version: 2.7.0
-  images: ['ghcr.io/kyverno/kyvernopre:v1.9.0', 'busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0',
-    'ghcr.io/kyverno/kyverno:v1.9.0']
+  images: ['ghcr.io/kyverno/kyvernopre:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
+    'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'busybox:1.35']
 - version: 1.8.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   chart_version: 2.6.0
-  images: [busybox, 'ghcr.io/kyverno/kyvernopre:v1.8.0', 'ghcr.io/kyverno/kyverno:v1.8.0']
+  images: ['ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0',
+    busybox]
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   chart_version: 2.4.0
-  images: ['ghcr.io/kyverno/kyverno:v1.7.0', busybox, 'ghcr.io/kyverno/kyvernopre:v1.7.0']
+  images: ['ghcr.io/kyverno/kyverno:v1.7.0', 'ghcr.io/kyverno/kyvernopre:v1.7.0',
+    busybox]
 - version: 1.6.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
   chart_version: 2.2.0
-  images: ['ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0',
-    busybox]
+  images: [busybox, 'ghcr.io/kyverno/kyvernopre:v1.6.0', 'ghcr.io/kyverno/kyverno:v1.6.0']

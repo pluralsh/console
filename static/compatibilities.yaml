@@ -52,82 +52,84 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 2.53.0
-    images: ['public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
-      'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.53.0', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.5',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20251021-e2c2c9806f-master',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.53.0']
+      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
+      'public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2']
   - version: 1.52.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.52.0
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.52.0',
-      'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.52.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
+      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4']
   - version: 1.51.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.51.0
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.51.0',
-      'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.51.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
+      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4']
   - version: 1.50.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.50.0
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.50.0',
-      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250925-95b5a2c7a5-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.50.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
+      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4']
   - version: 1.49.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.49.1
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250905-c89b045f57-master',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.49.0', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4',
+      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250905-c89b045f57-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.49.0']
   - version: 1.48.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.48.0
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250815-171060767f-master',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.48.0']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.48.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4',
+      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250815-171060767f-master']
   - version: 1.47.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.47.0
-    images: ['us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250722-31ecdfb417-master',
-      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.47.0', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.47.0',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3']
+      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
+      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250722-31ecdfb417-master']
   - version: 1.46.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.46.0
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.46.0', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3',
-      'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master']
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
+      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.46.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3']
   - version: 1.45.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -135,20 +137,19 @@ addons:
     incompatibilities: []
     chart_version: 2.45.1
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.3',
-      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.2',
-      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.45.0',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
-      'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.2']
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.45.0', 'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.2',
+      'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.2', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250613-876fb90a97-master',
+      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.2']
   - version: 1.44.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.44.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-3',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250513-98d205aae3-master',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.44.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-3',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-3',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-3',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250513-98d205aae3-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.44.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-3',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-3',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-3']
   - version: 1.43.0
@@ -157,205 +158,201 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 2.43.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.43.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.43.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master']
   - version: 1.42.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.42.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.42.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.15.0-eks-1-33-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.42.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-33-1']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-33-1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250411-0688312353-master']
   - version: 1.41.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.41.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-32-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-7',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-32-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.2-eks-1-32-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-7',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250311-73aac21714-master',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.41.0']
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-7',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.41.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-7']
   - version: 1.40.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.40.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-6',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.1-eks-1-32-6',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-6',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.40.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-6',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20250212-686cf422c6-master',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.40.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-32-6',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-6']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.13.1-eks-1-32-6',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-32-6',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-32-6',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-6']
   - version: 1.39.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.39.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-31-12',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-12',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-11',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-12',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-12',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.13.0-eks-1-31-12',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.39.0', 'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241230-3006692a6f-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-12']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-31-12',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.39.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-11',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241230-3006692a6f-master']
   - version: 1.38.1
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.38.1
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-1',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-32-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-32-1',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241128-8df65c072f-master',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-32-1',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-32-1',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-32-1',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.38.1']
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-32-1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241128-8df65c072f-master',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.38.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-32-1']
   - version: 1.37.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.37.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-7',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.37.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-7',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-7',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241021-d3a4913879-master']
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-7',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241021-d3a4913879-master',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-7',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.37.0']
   - version: 1.36.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.36.0
-    images: ['us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241011-e8871c079d-master',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20241011-e8871c079d-master',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-5',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.36.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-5',
-      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5']
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.36.0']
   - version: 1.35.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.35.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-3',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.35.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240903-6a352c5344-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-3',
+    images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240903-6a352c5344-master',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-3',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-3',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.12.0-eks-1-31-3',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-3']
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-3',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.35.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-3']
   - version: 1.34.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.34.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-10',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.34.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240803-cf1183f2db-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10']
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.34.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
+      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240803-cf1183f2db-master']
   - version: 1.33.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.33.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
       'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240705-131cd74733-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-10',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-10',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-10',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.33.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-10',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.33.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10']
   - version: 1.32.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.32.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-8',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-8',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-8',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-8',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.0.1-eks-1-30-8',
       'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240611-597c402033-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.11.1-eks-1-30-8',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.32.0']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-8',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.32.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.13.0-eks-1-30-8',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.11.0-eks-1-30-8']
   - version: 1.31.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.31.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4',
-      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-4',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-4',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-4',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-30-4',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.1-eks-1-30-4',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-4']
   - version: 1.30.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.30.0
-    images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-2',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.1-eks-1-30-2',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.30.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.1-eks-1-30-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-2',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-30-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-2']
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-2',
+      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.1-eks-1-30-2',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.30.0']
   - version: 1.29.1
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.29.1
-    images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.1', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.1']
+      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7']
   - version: 1.29.0
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
       '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.29.0
-    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.0', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7']
+      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-7']
   - version: 1.28.0
     kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
       '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.28.0
-    images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
-      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-5',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-5',
+    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.28.0', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-5',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.28.0', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-5',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.10.0-eks-1-29-5']
   - version: 1.26.1
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
@@ -363,23 +360,23 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 2.26.1
-    images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.26.1', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
-      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.9.3-eks-1-29-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.4.3-eks-1-29-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2']
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.9.3-eks-1-29-2',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2',
+      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.4.3-eks-1-29-2',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.26.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2']
   - version: 1.23.1
     kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
       '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 2.23.1
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.8.0-eks-1-28-4',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.10.0-eks-1-28-4',
-      'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20230727-ea685f8747-master', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.5.0-eks-1-28-4',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.8.0-eks-1-28-4',
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.8.0-eks-1-28-4',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.5.0-eks-1-28-4',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.3.0-eks-1-28-4',
-      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.23.1']
+      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.10.0-eks-1-28-4',
+      'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.23.1', 'gcr.io/k8s-staging-test-infra/kubekins-e2e:v20230727-ea685f8747-master',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.8.0-eks-1-28-4']
   name: aws-ebs-csi-driver
 - icon: https://cdn.worldvectorlogo.com/logos/amazon-elastic-file-system.svg
   git_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver
@@ -392,46 +389,46 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.2.6
-    images: ['public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.15']
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5', 'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.15',
+      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4']
   - version: 2.1.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     chart_version: 3.1.2
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
-      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
-      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.1']
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5',
+      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.1', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5']
   - version: 2.0.2
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
       '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     chart_version: 3.0.3
-    images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.0.2', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7']
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
+      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.0.2']
   - version: 2.0.0
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
       '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     chart_version: 3.0.0
-    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
-      'amazon/aws-efs-csi-driver:v2.0.0']
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
+      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7',
+      'amazon/aws-efs-csi-driver:v2.0.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7']
   - version: 1.7.4
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
       '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     chart_version: 2.5.4
-    images: ['amazon/aws-efs-csi-driver:v1.7.4', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
-      'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2']
+    images: ['public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2',
+      'amazon/aws-efs-csi-driver:v1.7.4', 'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2',
+      'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2']
   name: aws-efs-csi-driver
 - icon: https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/e5d625f96415fd44e6399e9c75e2bd985f5a2288/docs/assets/images/aws_load_balancer_icon.svg
   git_url: https://github.com/kubernetes-sigs/aws-load-balancer-controller
@@ -678,128 +675,128 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.19.0
-    images: ['quay.io/jetstack/cert-manager-webhook:v1.19.0', 'quay.io/jetstack/cert-manager-cainjector:v1.19.0',
-      'quay.io/jetstack/cert-manager-controller:v1.19.0', 'quay.io/jetstack/cert-manager-startupapicheck:v1.19.0']
+    images: ['quay.io/jetstack/cert-manager-startupapicheck:v1.19.0', 'quay.io/jetstack/cert-manager-controller:v1.19.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.19.0', 'quay.io/jetstack/cert-manager-webhook:v1.19.0']
   - version: 1.18.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     chart_version: 1.18.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v1.18.0', 'quay.io/jetstack/cert-manager-controller:v1.18.0',
-      'quay.io/jetstack/cert-manager-startupapicheck:v1.18.0', 'quay.io/jetstack/cert-manager-webhook:v1.18.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.18.0', 'quay.io/jetstack/cert-manager-cainjector:v1.18.0',
+      'quay.io/jetstack/cert-manager-startupapicheck:v1.18.0', 'quay.io/jetstack/cert-manager-controller:v1.18.0']
   - version: 1.17.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     chart_version: 1.17.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.17.0', 'quay.io/jetstack/cert-manager-webhook:v1.17.0',
-      'quay.io/jetstack/cert-manager-startupapicheck:v1.17.0', 'quay.io/jetstack/cert-manager-cainjector:v1.17.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.17.0', 'quay.io/jetstack/cert-manager-startupapicheck:v1.17.0',
+      'quay.io/jetstack/cert-manager-controller:v1.17.0', 'quay.io/jetstack/cert-manager-webhook:v1.17.0']
   - version: 1.16.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.0
-    images: ['quay.io/jetstack/cert-manager-startupapicheck:v1.16.0', 'quay.io/jetstack/cert-manager-cainjector:v1.16.0',
-      'quay.io/jetstack/cert-manager-controller:v1.16.0', 'quay.io/jetstack/cert-manager-webhook:v1.16.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.16.0', 'quay.io/jetstack/cert-manager-webhook:v1.16.0',
+      'quay.io/jetstack/cert-manager-controller:v1.16.0', 'quay.io/jetstack/cert-manager-startupapicheck:v1.16.0']
   - version: 1.15.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     chart_version: 1.15.0
-    images: ['quay.io/jetstack/cert-manager-startupapicheck:v1.15.0', 'quay.io/jetstack/cert-manager-controller:v1.15.0',
-      'quay.io/jetstack/cert-manager-cainjector:v1.15.0', 'quay.io/jetstack/cert-manager-webhook:v1.15.0']
+    images: ['quay.io/jetstack/cert-manager-controller:v1.15.0', 'quay.io/jetstack/cert-manager-cainjector:v1.15.0',
+      'quay.io/jetstack/cert-manager-startupapicheck:v1.15.0', 'quay.io/jetstack/cert-manager-webhook:v1.15.0']
   - version: 1.14.0
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     chart_version: 1.14.0
     images: ['quay.io/jetstack/cert-manager-startupapicheck:v1.14.0', 'quay.io/jetstack/cert-manager-controller:v1.14.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.14.0', 'quay.io/jetstack/cert-manager-cainjector:v1.14.0']
+      'quay.io/jetstack/cert-manager-cainjector:v1.14.0', 'quay.io/jetstack/cert-manager-webhook:v1.14.0']
   - version: 1.13.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     chart_version: 1.13.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.13.0', 'quay.io/jetstack/cert-manager-cainjector:v1.13.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.13.0', 'quay.io/jetstack/cert-manager-ctl:v1.13.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.13.0', 'quay.io/jetstack/cert-manager-controller:v1.13.0',
+      'quay.io/jetstack/cert-manager-ctl:v1.13.0', 'quay.io/jetstack/cert-manager-webhook:v1.13.0']
   - version: 1.12.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22']
     requirements: []
     incompatibilities: []
     chart_version: 1.12.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.12.0', 'quay.io/jetstack/cert-manager-ctl:v1.12.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.12.0', 'quay.io/jetstack/cert-manager-cainjector:v1.12.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.12.0', 'quay.io/jetstack/cert-manager-ctl:v1.12.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.12.0', 'quay.io/jetstack/cert-manager-controller:v1.12.0']
   - version: 1.11.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     chart_version: 1.11.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.11.0', 'quay.io/jetstack/cert-manager-webhook:v1.11.0',
-      'quay.io/jetstack/cert-manager-cainjector:v1.11.0', 'quay.io/jetstack/cert-manager-ctl:v1.11.0']
+    images: ['quay.io/jetstack/cert-manager-ctl:v1.11.0', 'quay.io/jetstack/cert-manager-webhook:v1.11.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.11.0', 'quay.io/jetstack/cert-manager-controller:v1.11.0']
   - version: 1.10.0
     kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 1.10.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v1.10.0', 'quay.io/jetstack/cert-manager-controller:v1.10.0',
-      'quay.io/jetstack/cert-manager-ctl:v1.10.0', 'quay.io/jetstack/cert-manager-webhook:v1.10.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.10.0', 'quay.io/jetstack/cert-manager-ctl:v1.10.0',
+      'quay.io/jetstack/cert-manager-controller:v1.10.0', 'quay.io/jetstack/cert-manager-webhook:v1.10.0']
   - version: 1.9.0
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     chart_version: 1.9.0
-    images: ['quay.io/jetstack/cert-manager-ctl:v1.9.0', 'quay.io/jetstack/cert-manager-cainjector:v1.9.0',
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.9.0', 'quay.io/jetstack/cert-manager-ctl:v1.9.0',
       'quay.io/jetstack/cert-manager-controller:v1.9.0', 'quay.io/jetstack/cert-manager-webhook:v1.9.0']
   - version: 1.8.0
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     chart_version: 1.8.0
-    images: ['quay.io/jetstack/cert-manager-ctl:v1.8.0', 'quay.io/jetstack/cert-manager-webhook:v1.8.0',
-      'quay.io/jetstack/cert-manager-controller:v1.8.0', 'quay.io/jetstack/cert-manager-cainjector:v1.8.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.8.0', 'quay.io/jetstack/cert-manager-ctl:v1.8.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.8.0', 'quay.io/jetstack/cert-manager-controller:v1.8.0']
   - version: 1.7.0
     kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 1.7.0
-    images: ['quay.io/jetstack/cert-manager-webhook:v1.7.0', 'quay.io/jetstack/cert-manager-cainjector:v1.7.0',
-      'quay.io/jetstack/cert-manager-controller:v1.7.0', 'quay.io/jetstack/cert-manager-ctl:v1.7.0']
+    images: ['quay.io/jetstack/cert-manager-controller:v1.7.0', 'quay.io/jetstack/cert-manager-cainjector:v1.7.0',
+      'quay.io/jetstack/cert-manager-webhook:v1.7.0', 'quay.io/jetstack/cert-manager-ctl:v1.7.0']
   - version: 1.6.0
     kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     chart_version: 1.6.0
-    images: ['quay.io/jetstack/cert-manager-ctl:v1.6.0', 'quay.io/jetstack/cert-manager-cainjector:v1.6.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.6.0', 'quay.io/jetstack/cert-manager-controller:v1.6.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.6.0', 'quay.io/jetstack/cert-manager-ctl:v1.6.0',
+      'quay.io/jetstack/cert-manager-controller:v1.6.0', 'quay.io/jetstack/cert-manager-cainjector:v1.6.0']
   - version: 1.5.0
     kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 1.5.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.5.0', 'quay.io/jetstack/cert-manager-cainjector:v1.5.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.5.0', 'quay.io/jetstack/cert-manager-ctl:v1.5.0']
+    images: ['quay.io/jetstack/cert-manager-controller:v1.5.0', 'quay.io/jetstack/cert-manager-webhook:v1.5.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.5.0', 'quay.io/jetstack/cert-manager-ctl:v1.5.0']
   - version: 1.4.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 1.4.0
-    images: ['quay.io/jetstack/cert-manager-controller:v1.4.0', 'quay.io/jetstack/cert-manager-cainjector:v1.4.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.4.0']
+    images: ['quay.io/jetstack/cert-manager-controller:v1.4.0', 'quay.io/jetstack/cert-manager-webhook:v1.4.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.4.0']
   - version: 1.3.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 1.3.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v1.3.0', 'quay.io/jetstack/cert-manager-webhook:v1.3.0',
-      'quay.io/jetstack/cert-manager-controller:v1.3.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.3.0', 'quay.io/jetstack/cert-manager-controller:v1.3.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.3.0']
   - version: 1.2.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 1.2.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v1.2.0', 'quay.io/jetstack/cert-manager-controller:v1.2.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.2.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.2.0', 'quay.io/jetstack/cert-manager-controller:v1.2.0',
+      'quay.io/jetstack/cert-manager-cainjector:v1.2.0']
   - version: 1.1.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
@@ -814,48 +811,48 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.0.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v1.0.0', 'quay.io/jetstack/cert-manager-controller:v1.0.0',
-      'quay.io/jetstack/cert-manager-webhook:v1.0.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v1.0.0', 'quay.io/jetstack/cert-manager-cainjector:v1.0.0',
+      'quay.io/jetstack/cert-manager-controller:v1.0.0']
   - version: 0.16.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
     requirements: []
     incompatibilities: []
     chart_version: 0.16.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v0.16.0', 'quay.io/jetstack/cert-manager-controller:v0.16.0',
-      'quay.io/jetstack/cert-manager-webhook:v0.16.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v0.16.0', 'quay.io/jetstack/cert-manager-webhook:v0.16.0',
+      'quay.io/jetstack/cert-manager-controller:v0.16.0']
   - version: 0.15.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
     requirements: []
     incompatibilities: []
     chart_version: 0.15.0
-    images: ['quay.io/jetstack/cert-manager-webhook:v0.15.0', 'quay.io/jetstack/cert-manager-controller:v0.15.0',
-      'quay.io/jetstack/cert-manager-cainjector:v0.15.0']
+    images: ['quay.io/jetstack/cert-manager-controller:v0.15.0', 'quay.io/jetstack/cert-manager-cainjector:v0.15.0',
+      'quay.io/jetstack/cert-manager-webhook:v0.15.0']
   - version: 0.14.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
     requirements: []
     incompatibilities: []
     chart_version: 0.14.0
-    images: ['quay.io/jetstack/cert-manager-webhook:v0.14.0', 'quay.io/jetstack/cert-manager-controller:v0.14.0',
-      'quay.io/jetstack/cert-manager-cainjector:v0.14.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v0.14.0', 'quay.io/jetstack/cert-manager-controller:v0.14.0',
+      'quay.io/jetstack/cert-manager-webhook:v0.14.0']
   - version: 0.13.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
     requirements: []
     incompatibilities: []
     chart_version: 0.13.0
-    images: ['quay.io/jetstack/cert-manager-cainjector:v0.13.0', 'quay.io/jetstack/cert-manager-controller:v0.13.0',
-      'quay.io/jetstack/cert-manager-webhook:v0.13.0']
+    images: ['quay.io/jetstack/cert-manager-webhook:v0.13.0', 'quay.io/jetstack/cert-manager-cainjector:v0.13.0',
+      'quay.io/jetstack/cert-manager-controller:v0.13.0']
   - version: 0.12.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13',
       '1.12', '1.11']
     requirements: []
     incompatibilities: []
     chart_version: 0.12.0
-    images: ['quay.io/jetstack/cert-manager-webhook:v0.12.0', 'quay.io/jetstack/cert-manager-cainjector:v0.12.0',
-      'quay.io/jetstack/cert-manager-controller:v0.12.0']
+    images: ['quay.io/jetstack/cert-manager-cainjector:v0.12.0', 'quay.io/jetstack/cert-manager-controller:v0.12.0',
+      'quay.io/jetstack/cert-manager-webhook:v0.12.0']
   - version: 0.11.0
     kube: ['1.9']
     requirements: []
@@ -873,97 +870,73 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.18.4
-    images: ['quay.io/cilium/cilium:v1.18.4@sha256:49d87af187eeeb9e9e3ec2bc6bd372261a0b5cb2d845659463ba7cc10fe9e45f',
-      'quay.io/cilium/operator-generic:v1.18.4@sha256:1b22b9ff28affdf574378a70dade4ef835b00b080c2ee2418530809dd62c3012',
-      'quay.io/cilium/cilium-envoy:v1.34.10-1762597008-ff7ae7d623be00078865cff1b0672cc5d9bfc6d5@sha256:1deb6709afcb5523579bf1abbc3255adf9e354565a88c4a9162c8d9cb1d77ab5']
+    images: []
   - version: 1.18.2
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 1.18.2
-    images: ['quay.io/cilium/operator-generic:v1.18.2@sha256:cb4e4ffc5789fd5ff6a534e3b1460623df61cba00f5ea1c7b40153b5efb81805',
-      'quay.io/cilium/cilium:v1.18.2@sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667',
-      'quay.io/cilium/cilium-envoy:v1.34.7-1757592137-1a52bb680a956879722f48c591a2ca90f7791324@sha256:7932d656b63f6f866b6732099d33355184322123cfe1182e6f05175a3bc2e0e0']
+    images: []
   - version: 1.18.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 1.18.0
-    images: ['quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
-      'quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
-      'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+    images: []
   - version: 1.17.8
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 1.17.8
-    images: ['quay.io/cilium/operator-generic:v1.17.8@sha256:5468807b9c31997f3a1a14558ec7c20c5b962a2df6db633b7afbe2f45a15da1c',
-      'quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
-      'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636']
+    images: []
   - version: 1.17.4
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 1.17.4
-    images: ['quay.io/cilium/operator-generic:v1.17.4@sha256:a3906412f477b09904f46aac1bed28eb522bef7899ed7dd81c15f78b7aa1b9b5',
-      'quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
-      'quay.io/cilium/cilium:v1.17.4@sha256:24a73fe795351cf3279ac8e84918633000b52a9654ff73a6b0d7223bcff4a67a']
+    images: []
   - version: 1.17.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 1.17.0
-    images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
-      'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
-      'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+    images: []
   - version: 1.16.15
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.15
-    images: ['quay.io/cilium/cilium:v1.16.15@sha256:c0fa87d70a7ba624fbe581d40a7b7e9e8773a6efd4bb17d0bd14ff854039ec75',
-      'quay.io/cilium/operator-generic:v1.16.15@sha256:fea37022f858272c27cefe6b4959d45e2ca03d957decbfa210ce35931f346ecd',
-      'quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28']
+    images: []
   - version: 1.16.10
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.10
-    images: ['quay.io/cilium/operator-generic:v1.16.10@sha256:05e5f5e676aa51ae5e3bf6be3594ecf52958f46f07f9f55368a7a952012a13c1',
-      'quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
-      'quay.io/cilium/cilium:v1.16.10@sha256:fc4ccc494c4a381439162fd3684c07ba9c26d3c2670a2b2e1623acee99097461']
+    images: []
   - version: 1.16.5
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.5
-    images: ['quay.io/cilium/operator-generic:v1.16.5@sha256:f7884848483bbcd7b1e0ccfd34ba4546f258b460cb4b7e2f06a1bcc96ef88039',
-      'quay.io/cilium/cilium-envoy:v1.30.8-1733837904-eaae5aca0fb988583e5617170a65ac5aa51c0aa8@sha256:709c08ade3d17d52da4ca2af33f431360ec26268d288d9a6cd1d98acc9a1dced',
-      'quay.io/cilium/cilium:v1.16.5@sha256:758ca0793f5995bb938a2fa219dcce63dc0b3fa7fc4ce5cc851125281fb7361d']
+    images: []
   - version: 1.16.2
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.2
-    images: ['quay.io/cilium/operator-generic:v1.16.2@sha256:cccfd3b886d52cb132c06acca8ca559f0fce91a6bd99016219b1a81fdbc4813a',
-      'quay.io/cilium/cilium:v1.16.2@sha256:4386a8580d8d86934908eea022b0523f812e6a542f30a86a47edd8bed90d51ea',
-      'quay.io/cilium/cilium-envoy:v1.29.9-1726784081-a90146d13b4cd7d168d573396ccf2b3db5a3b047@sha256:9762041c3760de226a8b00cc12f27dacc28b7691ea926748f9b5c18862db503f']
+    images: []
   - version: 1.16.1
     kube: ['1.31', '1.30', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.1
-    images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
-      'quay.io/cilium/cilium:v1.16.1@sha256:0b4a3ab41a4760d86b7fc945b8783747ba27f29dac30dd434d94f2c9e3679f39',
-      'quay.io/cilium/operator-generic:v1.16.1@sha256:3bc7e7a43bc4a4d8989cb7936c5d96675dd2d02c306adf925ce0a7c35aa27dc4']
+    images: []
   - version: 1.16.0
     kube: ['1.30', '1.29', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 1.16.0
-    images: ['quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058',
-      'quay.io/cilium/operator-generic:v1.16.0@sha256:d6621c11c4e4943bf2998af7febe05be5ed6fdcf812b27ad4388f47022190316',
-      'quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b']
+    images: []
   - version: 1.15.17
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -997,8 +970,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.15.5
-    images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
-      'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
+    images: ['quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8',
+      'quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40']
   - version: 1.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -1011,8 +984,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.14.18
-    images: ['quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e',
-      'quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123']
+    images: ['quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123',
+      'quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e']
   - version: 1.14.15
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -1039,15 +1012,15 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.14.6
-    images: ['quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848',
-      'quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a']
+    images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
+      'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
   - version: 1.14.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     chart_version: 1.14.0
-    images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
-      'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
+    images: ['quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9',
+      'quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a']
   - version: 1.13.16
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -1060,8 +1033,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.13.11
-    images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
-      'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
+    images: ['quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1',
+      'quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5']
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
       '1.17', '1.16']
@@ -1075,8 +1048,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.12.18
-    images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
-      'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
+    images: ['quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab',
+      'quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b']
   - version: 1.12.0
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
@@ -1089,8 +1062,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.11.0
-    images: ['quay.io/cilium/cilium:v1.11.0@sha256:ea677508010800214b0b5497055f38ed3bff57963fa2399bcb1c69cf9476453a',
-      'quay.io/cilium/operator-generic:v1.11.0@sha256:b522279577d0d5f1ad7cadaacb7321d1b172d8ae8c8bc816e503c897b420cfe3']
+    images: ['quay.io/cilium/operator-generic:v1.11.0@sha256:b522279577d0d5f1ad7cadaacb7321d1b172d8ae8c8bc816e503c897b420cfe3',
+      'quay.io/cilium/cilium:v1.11.0@sha256:ea677508010800214b0b5497055f38ed3bff57963fa2399bcb1c69cf9476453a']
   - version: 1.10.0
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
@@ -1103,7 +1076,7 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 1.9.0
-    images: ['quay.io/cilium/operator-generic:v1.9.0', 'quay.io/cilium/cilium:v1.9.0']
+    images: ['quay.io/cilium/cilium:v1.9.0', 'quay.io/cilium/operator-generic:v1.9.0']
   name: cilium
 - icon: https://raw.githubusercontent.com/projectcontour/contour/main/assets/logo.png
   git_url: https://github.com/projectcontour/contour
@@ -1115,19 +1088,19 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 21.1.4
-    images: ['docker.io/bitnami/contour:1.32.1-debian-12-r0', 'docker.io/bitnami/envoy:1.34.5-debian-12-r0']
+    images: ['docker.io/bitnami/envoy:1.34.5-debian-12-r0', 'docker.io/bitnami/contour:1.32.1-debian-12-r0']
   - version: 1.32.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 21.1.2
-    images: ['docker.io/bitnami/contour:1.32.0-debian-12-r8', 'docker.io/bitnami/envoy:1.34.4-debian-12-r0']
+    images: ['docker.io/bitnami/envoy:1.34.4-debian-12-r0', 'docker.io/bitnami/contour:1.32.0-debian-12-r8']
   - version: 1.31.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 20.0.1
-    images: ['docker.io/bitnami/envoy:1.34.1-debian-12-r0', 'docker.io/bitnami/contour:1.31.0-debian-12-r2']
+    images: ['docker.io/bitnami/contour:1.31.0-debian-12-r2', 'docker.io/bitnami/envoy:1.34.1-debian-12-r0']
   - version: 1.30.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -1149,13 +1122,13 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 15.4.0
-    images: ['docker.io/bitnami/envoy:1.27.2-debian-11-r8', 'docker.io/bitnami/contour:1.27.0-debian-11-r9']
+    images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
   - version: 1.26.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     chart_version: 13.1.4
-    images: ['docker.io/bitnami/envoy:1.26.5-debian-11-r0', 'docker.io/bitnami/contour:1.26.0-debian-11-r17']
+    images: ['docker.io/bitnami/contour:1.26.0-debian-11-r17', 'docker.io/bitnami/envoy:1.26.5-debian-11-r0']
   - version: 1.25.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -1171,13 +1144,13 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 10.1.1
-    images: ['docker.io/bitnami/envoy:1.24.0-debian-11-r11', 'docker.io/bitnami/contour:1.23.0-debian-11-r10']
+    images: ['docker.io/bitnami/contour:1.23.0-debian-11-r10', 'docker.io/bitnami/envoy:1.24.0-debian-11-r11']
   - version: 1.22.0
     kube: ['1.24', '1.23', '1.22']
     requirements: []
     incompatibilities: []
     chart_version: 9.1.1
-    images: ['docker.io/bitnami/contour:1.22.0-debian-11-r4', 'docker.io/bitnami/envoy:1.23.0-debian-11-r8']
+    images: ['docker.io/bitnami/envoy:1.23.0-debian-11-r8', 'docker.io/bitnami/contour:1.22.0-debian-11-r4']
   - version: 1.21.0
     kube: ['1.23', '1.22', '1.21']
     requirements: []
@@ -1418,29 +1391,29 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 4.10.0
-    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0@sha256:44d1d0e9f19c63f58b380c5fddaca7cf22c7cee564adeff365225a5df5ef3334',
-      'registry.k8s.io/ingress-nginx/controller:v1.10.0@sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c']
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.10.0@sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0@sha256:44d1d0e9f19c63f58b380c5fddaca7cf22c7cee564adeff365225a5df5ef3334']
   - version: 1.9.6
     kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     chart_version: 4.9.1
-    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084',
-      'registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c']
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']
   - version: 1.9.0
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     chart_version: 4.8.0
-    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407@sha256:543c40fd093964bc9ab509d3e791f9989963021f1e9e4c9c7b6700b02bfb227b',
-      'registry.k8s.io/ingress-nginx/controller:v1.9.0@sha256:c15d1a617858d90fb8f8a2dd60b0676f2bb85c54e3ed11511794b86ec30c8c60']
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.9.0@sha256:c15d1a617858d90fb8f8a2dd60b0676f2bb85c54e3ed11511794b86ec30c8c60',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407@sha256:543c40fd093964bc9ab509d3e791f9989963021f1e9e4c9c7b6700b02bfb227b']
   - version: 1.8.4
     kube: ['1.27', '1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     chart_version: 4.7.3
-    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80',
-      'registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9']
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80']
   - version: 1.7.1
     kube: ['1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -1453,8 +1426,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 4.5.2
-    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f',
-      'registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f']
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
   - version: 1.5.1
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -1467,8 +1440,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 4.3.0
-    images: ['registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143',
-      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+    images: ['registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f',
+      'registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143']
   - version: 1.3.1
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
@@ -1850,134 +1823,186 @@ addons:
   readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/README.md
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   versions:
-  - version: 79.5.0
+  - version: 79.9.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 79.9.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 78.5.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 78.5.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 77.14.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 77.14.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 76.5.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 76.5.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 75.18.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 75.18.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 74.2.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 74.2.2
+    images: []
     requirements: []
     incompatibilities: []
   - version: 73.2.3
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
+    chart_version: 73.2.3
+    images: []
     requirements: []
     incompatibilities: []
   - version: 72.9.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 72.9.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 71.2.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 71.2.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 70.10.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 70.10.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 69.8.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 69.8.2
+    images: []
     requirements: []
     incompatibilities: []
   - version: 68.5.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 68.5.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 67.11.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 67.11.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 66.7.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 66.7.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 65.8.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 65.8.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 64.0.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 64.0.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 63.1.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 63.1.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 62.7.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 62.7.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 61.9.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 61.9.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 60.5.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 60.5.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 59.1.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 59.1.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 58.7.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 58.7.2
+    images: []
     requirements: []
     incompatibilities: []
   - version: 57.2.1
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 57.2.1
+    images: []
     requirements: []
     incompatibilities: []
   - version: 56.21.4
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 56.21.4
+    images: []
     requirements: []
     incompatibilities: []
   - version: 55.11.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 55.11.0
+    images: []
     requirements: []
     incompatibilities: []
   - version: 54.2.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    chart_version: 54.2.2
+    images: []
     requirements: []
     incompatibilities: []
   name: kube-prometheus-stack
@@ -2033,35 +2058,36 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.0.0
-    images: ['ghcr.io/kyverno/kyverno:v1.10.0', 'bitnami/kubectl:1.26.4', 'ghcr.io/kyverno/kyvernopre:v1.10.0',
-      'ghcr.io/kyverno/reports-controller:v1.10.0', 'ghcr.io/kyverno/cleanup-controller:v1.10.0',
-      'ghcr.io/kyverno/background-controller:v1.10.0', 'busybox:1.35']
+    images: ['busybox:1.35', 'ghcr.io/kyverno/kyverno:v1.10.0', 'ghcr.io/kyverno/background-controller:v1.10.0',
+      'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0',
+      'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'bitnami/kubectl:1.26.4']
   - version: 1.9.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     chart_version: 2.7.0
-    images: ['ghcr.io/kyverno/kyvernopre:v1.9.0', 'busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0',
-      'ghcr.io/kyverno/kyverno:v1.9.0']
+    images: ['ghcr.io/kyverno/kyvernopre:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
+      'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'busybox:1.35']
   - version: 1.8.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     chart_version: 2.6.0
-    images: [busybox, 'ghcr.io/kyverno/kyvernopre:v1.8.0', 'ghcr.io/kyverno/kyverno:v1.8.0']
+    images: ['ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0',
+      busybox]
   - version: 1.7.0
     kube: ['1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     chart_version: 2.4.0
-    images: ['ghcr.io/kyverno/kyverno:v1.7.0', busybox, 'ghcr.io/kyverno/kyvernopre:v1.7.0']
+    images: ['ghcr.io/kyverno/kyverno:v1.7.0', 'ghcr.io/kyverno/kyvernopre:v1.7.0',
+      busybox]
   - version: 1.6.0
     kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     chart_version: 2.2.0
-    images: ['ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0',
-      busybox]
+    images: [busybox, 'ghcr.io/kyverno/kyvernopre:v1.6.0', 'ghcr.io/kyverno/kyverno:v1.6.0']
   name: kyverno
 - icon: https://avatars.githubusercontent.com/u/25301026?s=200&v=4
   git_url: https://github.com/linkerd/linkerd2
@@ -2522,7 +2548,7 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 37.4.0
-    images: ['docker.io/traefik:v3.6.2']
+    images: []
   - version: 3.6.0
     kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -2607,56 +2633,56 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 11.2.0
-    images: ['velero/velero:v1.17.1', 'docker.io/bitnamilegacy/kubectl:1.33']
+    images: ['velero/velero:v1.17.1', 'docker.io/bitnamilegacy/kubectl:1.24']
   - version: 1.17.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 11.2.0
-    images: ['velero/velero:v1.17.1', 'docker.io/bitnamilegacy/kubectl:1.33']
+    images: ['velero/velero:v1.17.1', 'docker.io/bitnamilegacy/kubectl:1.24']
   - version: 1.16.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 10.1.3
-    images: ['docker.io/bitnamilegacy/kubectl:1.33', 'velero/velero:v1.16.2']
+    images: ['docker.io/bitnamilegacy/kubectl:1.24', 'velero/velero:v1.16.2']
   - version: 1.15.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 8.7.2
-    images: ['velero/velero:v1.15.2', 'docker.io/bitnami/kubectl:1.33']
+    images: ['velero/velero:v1.15.2', 'docker.io/bitnami/kubectl:1.24']
   - version: 1.14.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 7.2.2
-    images: ['docker.io/bitnami/kubectl:1.33', 'velero/velero:v1.14.1']
+    images: ['velero/velero:v1.14.1', 'docker.io/bitnami/kubectl:1.24']
   - version: 1.13.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 6.7.0
-    images: ['docker.io/bitnami/kubectl:1.33', 'velero/velero:v1.13.2']
+    images: ['velero/velero:v1.13.2', 'docker.io/bitnami/kubectl:1.24']
   - version: 1.12.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 5.2.2
-    images: ['docker.io/bitnami/kubectl:1.33', 'velero/velero:v1.12.3']
+    images: ['velero/velero:v1.12.3', 'docker.io/bitnami/kubectl:1.24']
   - version: 1.11.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     chart_version: 5.0.2
-    images: ['velero/velero:v1.11.1', 'docker.io/bitnami/kubectl:1.33']
+    images: ['velero/velero:v1.11.1', 'docker.io/bitnami/kubectl:1.24']
   - version: 1.10.0
     kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
       '1.19', '1.18']
@@ -2757,27 +2783,25 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.21.0
-    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0',
-      'openpolicyagent/gatekeeper:v3.21.0']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper:v3.21.0', 'openpolicyagent/gatekeeper-crds:v3.21.0']
   - version: 3.20.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 3.20.1
-    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper:v3.20.1', 'openpolicyagent/gatekeeper-crds:v3.20.1']
+    images: ['openpolicyagent/gatekeeper:v3.20.1', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.1']
   - version: 3.20.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 3.20.0
-    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper:v3.20.0', 'openpolicyagent/gatekeeper-crds:v3.20.0']
+    images: ['openpolicyagent/gatekeeper:v3.20.0', 'curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.0']
   - version: 3.19.1
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 3.19.1
-    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1',
-      'openpolicyagent/gatekeeper:v3.19.1']
+    images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper:v3.19.1', 'openpolicyagent/gatekeeper-crds:v3.19.1']
   - version: 3.19.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -2797,14 +2821,14 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.18.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.18.0', 'openpolicyagent/gatekeeper:v3.18.0',
+    images: ['openpolicyagent/gatekeeper:v3.18.0', 'openpolicyagent/gatekeeper-crds:v3.18.0',
       'curlimages/curl:7.83.1']
   - version: 3.17.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 3.17.2
-    images: ['openpolicyagent/gatekeeper-crds:v3.17.2', 'openpolicyagent/gatekeeper:v3.17.2',
+    images: ['openpolicyagent/gatekeeper:v3.17.2', 'openpolicyagent/gatekeeper-crds:v3.17.2',
       'curlimages/curl:7.83.1']
   - version: 3.17.1
     kube: ['1.31', '1.30', '1.29']
@@ -2818,7 +2842,7 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.17.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.17.0', 'openpolicyagent/gatekeeper:v3.17.0',
+    images: ['openpolicyagent/gatekeeper:v3.17.0', 'openpolicyagent/gatekeeper-crds:v3.17.0',
       'curlimages/curl:7.83.1']
   - version: 3.16.2
     kube: ['1.30', '1.29', '1.28']
@@ -2832,7 +2856,7 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.16.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.16.0', 'openpolicyagent/gatekeeper:v3.16.0',
+    images: ['openpolicyagent/gatekeeper:v3.16.0', 'openpolicyagent/gatekeeper-crds:v3.16.0',
       'curlimages/curl:7.83.1']
   - version: 3.15.0
     kube: ['1.29', '1.28', '1.27']
@@ -2853,8 +2877,8 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.13.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.13.0', 'openpolicyagent/gatekeeper:v3.13.0',
-      'curlimages/curl:7.83.1']
+    images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0',
+      'openpolicyagent/gatekeeper:v3.13.0']
   - version: 3.12.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -2867,7 +2891,7 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.11.0
-    images: ['openpolicyagent/gatekeeper:v3.11.0', 'openpolicyagent/gatekeeper-crds:v3.11.0',
+    images: ['openpolicyagent/gatekeeper-crds:v3.11.0', 'openpolicyagent/gatekeeper:v3.11.0',
       'curlimages/curl:7.83.1']
   - version: 3.10.0
     kube: ['1.29', '1.28', '1.27']
@@ -2881,14 +2905,13 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.9.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.9.0', 'openpolicyagent/gatekeeper:v3.9.0',
-      'curlimages/curl:7.83.1']
+    images: ['openpolicyagent/gatekeeper-crds:v3.9.0', 'curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper:v3.9.0']
   - version: 3.8.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.8.0
-    images: ['openpolicyagent/gatekeeper:v3.8.0', 'openpolicyagent/gatekeeper-crds:v3.8.0']
+    images: ['openpolicyagent/gatekeeper-crds:v3.8.0', 'openpolicyagent/gatekeeper:v3.8.0']
   - version: 3.7.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -2900,20 +2923,20 @@ addons:
     requirements: []
     incompatibilities: []
     chart_version: 3.6.0
-    images: ['openpolicyagent/gatekeeper-crds:v3.6.0', 'openpolicyagent/gatekeeper:v3.6.0',
+    images: ['openpolicyagent/gatekeeper:v3.6.0', 'openpolicyagent/gatekeeper-crds:v3.6.0',
       'line/kubectl-kustomize:1.20.4-4.0.5']
   - version: 3.5.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.5.0
-    images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.5.0']
+    images: ['openpolicyagent/gatekeeper:v3.5.0', 'line/kubectl-kustomize:1.20.4-4.0.5']
   - version: 3.4.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     chart_version: 3.4.0
-    images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.4.0']
+    images: ['openpolicyagent/gatekeeper:v3.4.0', 'line/kubectl-kustomize:1.20.4-4.0.5']
   - version: 3.3.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3011,60 +3034,60 @@ addons:
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
   versions:
+  - version: 3.2.1
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.1.5
+    images: []
   - version: 3.2.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 9.1.4
-    images: ['quay.io/argoproj/argocd:v3.2.0', 'ecr-public.aws.com/docker/library/redis:8.2.2-alpine',
-      'ghcr.io/dexidp/dex:v2.44.0']
+    images: []
   - version: 3.1.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     chart_version: 8.3.3
-    images: ['quay.io/argoproj/argocd:v3.1.1', 'ecr-public.aws.com/docker/library/redis:7.2.8-alpine',
-      'ghcr.io/dexidp/dex:v2.44.0']
+    images: []
   - version: 3.1.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 8.3.0
-    images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'quay.io/argoproj/argocd:v3.1.0',
-      'ghcr.io/dexidp/dex:v2.43.1']
+    images: []
   - version: 3.0.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 8.0.1
-    images: ['public.ecr.aws/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.42.1',
-      'quay.io/argoproj/argocd:v3.0.0']
+    images: []
   - version: 2.14.11
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     chart_version: 7.9.1
-    images: ['quay.io/argoproj/argocd:v2.14.11', 'ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine']
+    images: []
   - version: 2.14.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 7.8.0
-    images: ['ghcr.io/dexidp/dex:v2.41.1', 'quay.io/argoproj/argocd:v2.14.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine']
+    images: []
   - version: 2.13.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     chart_version: 7.7.12
-    images: ['quay.io/argoproj/argocd:v2.13.2', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-      'ghcr.io/dexidp/dex:v2.41.1']
+    images: []
   - version: 2.13.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     chart_version: 7.7.3
-    images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-      'quay.io/argoproj/argocd:v2.13.0']
+    images: []
   - version: 2.12.4
     kube: ['1.31', '1.30', '1.29']
     requirements: []
