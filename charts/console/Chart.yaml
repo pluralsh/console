@@ -24,4 +24,5 @@ dependencies:
   - name: dex
     version: 0.24.0
     repository: https://charts.dexidp.io
+    condition: dex.enabled
 type: application
