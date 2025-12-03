@@ -7714,7 +7714,7 @@ type AddonVersion {
   chartVersion: String
 
   "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
-  releaseUrl(version: String!): String
+  releaseUrl(version: String): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
@@ -7727,11 +7727,13 @@ type UpgradePlanSummary {
 }
 
 type RuntimeAddonUpgrade {
+  addon: RuntimeAddon
   current: AddonVersion
   fix: AddonVersion
 }
 
 type CloudAddonUpgrade {
+  addon: CloudAddon
   current: CloudAddonVersionInformation
   fix: CloudAddonVersionInformation
 }

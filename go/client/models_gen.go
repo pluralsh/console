@@ -1364,6 +1364,7 @@ type CloudAddonInformation struct {
 }
 
 type CloudAddonUpgrade struct {
+	Addon   *CloudAddon                   `json:"addon,omitempty"`
 	Current *CloudAddonVersionInformation `json:"current,omitempty"`
 	Fix     *CloudAddonVersionInformation `json:"fix,omitempty"`
 }
@@ -6304,6 +6305,7 @@ type RuntimeAddon struct {
 }
 
 type RuntimeAddonUpgrade struct {
+	Addon   *RuntimeAddon `json:"addon,omitempty"`
 	Current *AddonVersion `json:"current,omitempty"`
 	Fix     *AddonVersion `json:"fix,omitempty"`
 }

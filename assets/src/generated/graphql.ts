@@ -156,7 +156,7 @@ export type AddonVersionBlockingArgs = {
 
 /** the specification of a runtime service at a specific version */
 export type AddonVersionReleaseUrlArgs = {
-  version: Scalars['String']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AgentAnalysis = {
@@ -1704,6 +1704,7 @@ export type CloudAddonInformation = {
 
 export type CloudAddonUpgrade = {
   __typename?: 'CloudAddonUpgrade';
+  addon?: Maybe<CloudAddon>;
   current?: Maybe<CloudAddonVersionInformation>;
   fix?: Maybe<CloudAddonVersionInformation>;
 };
@@ -10589,6 +10590,7 @@ export type RuntimeAddonReleaseUrlArgs = {
 
 export type RuntimeAddonUpgrade = {
   __typename?: 'RuntimeAddonUpgrade';
+  addon?: Maybe<RuntimeAddon>;
   current?: Maybe<AddonVersion>;
   fix?: Maybe<AddonVersion>;
 };
