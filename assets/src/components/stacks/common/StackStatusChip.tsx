@@ -138,10 +138,25 @@ export const statusToSeverity = {
 >
 
 const statusToIcon = {
-  [StackStatus.Queued]: <QueuedOutlineIcon size={18} />,
-  [StackStatus.Pending]: <StatusIpIcon size={18} />,
+  [StackStatus.Queued]: (
+    <QueuedOutlineIcon
+      color="icon-light"
+      size={18}
+    />
+  ),
+  [StackStatus.Pending]: (
+    <StatusIpIcon
+      color="icon-light"
+      size={18}
+    />
+  ),
   [StackStatus.Running]: <SpinnerAlt size={18} />,
-  [StackStatus.Cancelled]: <CancelledFilledIcon size={18} />,
+  [StackStatus.Cancelled]: (
+    <CancelledFilledIcon
+      color="icon-light"
+      size={18}
+    />
+  ),
   [StackStatus.Failed]: (
     <FailedFilledIcon
       color="icon-danger"
