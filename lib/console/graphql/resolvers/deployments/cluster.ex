@@ -321,6 +321,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def scaling_pr(%{id: id}, %{context: %{current_user: user}}),
     do: Pr.create(id, user)
 
+  def supported_addons(_, _, _), do: Console.Deployments.Compatibilities.Table.all()
+
   def scaling_pr_suggestion(%{id: id}, %{context: %{current_user: user}}) do
     Stream.topic(:cost, id, user)
     |> Stream.enable()

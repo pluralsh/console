@@ -170,12 +170,13 @@ spec:
               type:
                 description: |-
                   Type is the name of the scm service for the ScmConnection.
-                  One of (ScmType): [GITHUB, GITLAB, AZURE_DEVOPS, BITBUCKET]
+                  One of (ScmType): [GITHUB, GITLAB, AZURE_DEVOPS, BITBUCKET, BITBUCKET_DATACENTER]
                 enum:
                 - GITHUB
                 - GITLAB
                 - BITBUCKET
                 - AZURE_DEVOPS
+                - BITBUCKET_DATACENTER
                 example: GITHUB
                 type: string
               username:

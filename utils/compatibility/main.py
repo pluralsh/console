@@ -51,7 +51,7 @@ for name in manifest["names"]:
     )
     call_scraper(name)
     print("\n")
-    time.sleep(5)
+    time.sleep(60)
 
 addons = []
 for name in manifest["names"]:

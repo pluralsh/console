@@ -1561,7 +1561,8 @@ type Cluster struct {
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
 	Status *ClusterStatus `json:"status,omitempty"`
 	// a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit
-	Revisions *ClusterRevisionConnection `json:"revisions,omitempty"`
+	Revisions       *ClusterRevisionConnection `json:"revisions,omitempty"`
+	SupportedAddons []*string                  `json:"supportedAddons,omitempty"`
 	// lists OPA constraints registered in this cluster
 	PolicyConstraints *PolicyConstraintConnection `json:"policyConstraints,omitempty"`
 	// Computes a list of statistics for OPA constraint violations w/in this cluster
@@ -11001,10 +11002,11 @@ func (e ScalingRecommendationType) MarshalGQL(w io.Writer) {
 type ScmType string
 
 const (
-	ScmTypeGithub      ScmType = "GITHUB"
-	ScmTypeGitlab      ScmType = "GITLAB"
-	ScmTypeBitbucket   ScmType = "BITBUCKET"
-	ScmTypeAzureDevops ScmType = "AZURE_DEVOPS"
+	ScmTypeGithub              ScmType = "GITHUB"
+	ScmTypeGitlab              ScmType = "GITLAB"
+	ScmTypeBitbucket           ScmType = "BITBUCKET"
+	ScmTypeAzureDevops         ScmType = "AZURE_DEVOPS"
+	ScmTypeBitbucketDatacenter ScmType = "BITBUCKET_DATACENTER"
 )
 
 var AllScmType = []ScmType{
@@ -11012,11 +11014,12 @@ var AllScmType = []ScmType{
 	ScmTypeGitlab,
 	ScmTypeBitbucket,
 	ScmTypeAzureDevops,
+	ScmTypeBitbucketDatacenter,
 }
 
 func (e ScmType) IsValid() bool {
 	switch e {
-	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket, ScmTypeAzureDevops:
+	case ScmTypeGithub, ScmTypeGitlab, ScmTypeBitbucket, ScmTypeAzureDevops, ScmTypeBitbucketDatacenter:
 		return true
 	}
 	return false

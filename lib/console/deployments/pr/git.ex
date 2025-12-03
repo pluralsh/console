@@ -49,6 +49,9 @@ defmodule Console.Deployments.Pr.Git do
   def push(%ScmConnection{} = conn),
     do: git(conn, "push", [])
 
+  @spec sha(ScmConnection.t, binary) :: git_resp
+  def sha(%ScmConnection{} = conn, branch), do: git(conn, "rev-parse", ["#{branch}"])
+
   def git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
     case System.cmd("git", [cmd | args], opts(conn)) do
       {out, 0} -> {:ok, String.trim(out)}
@@ -86,6 +89,11 @@ defmodule Console.Deployments.Pr.Git do
   end
   defp _to_http(_, "https://" <> _ = url), do: url
 
+  defp url(%ScmConnection{type: :bitbucket_datacenter, base_url: base_url} = conn, id)
+    when is_binary(id) and is_binary(base_url) do
+    url = String.trim_trailing(base_url, "/scm")
+    url(%{conn | type: :bitbucket, base_url: Path.join([url, "scm"])}, id)
+  end
   defp url(%ScmConnection{azure: %ScmConnection.Azure{organization: organization}, username: uname} = conn, id)
     when uname != organization, do: url(%{conn | username: organization}, id)
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)

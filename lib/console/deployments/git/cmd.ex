@@ -14,9 +14,6 @@ defmodule Console.Deployments.Git.Cmd do
     end
   end
 
-  def save_private_key(%GitRepository{connection: %ScmConnection{token: t}} = git) when is_binary(t),
-    do: {:ok, %{git | password: t}}
-
   def save_private_key(%GitRepository{
     connection: %ScmConnection{
       base_url: url,
@@ -27,10 +24,17 @@ defmodule Console.Deployments.Git.Cmd do
     with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk, request_options(conn)),
       do: {:ok, %{git | password: token}}
   end
-
+  def save_private_key(%GitRepository{connection: %ScmConnection{token: t} = conn} = git) when is_binary(t),
+    do: {:ok, sync_scm_conn(git, conn)}
   def save_private_key(git), do: {:ok, git}
 
   def refresh_key(git), do: save_private_key(git)
+
+  @basic_auths ~w(bitbucket bitbucket_datacenter)a
+
+  defp sync_scm_conn(git, %ScmConnection{type: scm, username: uname, token: pwd})
+    when is_binary(pwd) and is_binary(uname) and scm in @basic_auths, do: %{git | username: uname, password: pwd}
+  defp sync_scm_conn(git, %ScmConnection{token: pwd}) when is_binary(pwd), do: %{git | password: pwd}
 
   defp private_key_file(%GitRepository{private_key_file: f}) when is_binary(f), do: {:exists, f}
   defp private_key_file(_), do: Briefly.create()

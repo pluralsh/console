@@ -7340,6 +7340,8 @@ type Cluster {
   "a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): ClusterRevisionConnection
 
+  supportedAddons: [String]
+
   "lists OPA constraints registered in this cluster"
   policyConstraints(
     after: String
@@ -8217,6 +8219,7 @@ enum ScmType {
   GITLAB
   BITBUCKET
   AZURE_DEVOPS
+  BITBUCKET_DATACENTER
 }
 
 enum MatchStrategy {

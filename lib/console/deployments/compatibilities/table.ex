@@ -41,6 +41,16 @@ defmodule Console.Deployments.Compatibilities.Table do
     end
   end
 
+  @spec all() :: {:ok, [binary]}
+  def all() do
+    with {:ok, set} <- KeyValueSet.wrap_existing(@table),
+         {:ok, l} <- KeyValueSet.to_list(set) do
+      {:ok, Enum.map(l, fn {name, _} -> name end)}
+    else
+      _ -> {:ok, []}
+    end
+  end
+
   def handle_call(:ping, _, state), do: {:reply, state.ready, state}
 
   def handle_info(:poll, %State{table: table, static: true} = state) do
