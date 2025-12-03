@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to search for a kubernetes cluster.  This should be a natural language query that describes the cluster you are looking for."
+        }
+    },
+    "required": [
+        "query"
+    ]
+}
