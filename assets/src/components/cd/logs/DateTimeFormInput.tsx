@@ -5,17 +5,33 @@ import {
   Toast,
   useIsFocused,
 } from '@pluralsh/design-system'
+import {
+  DateOrderChar,
+  DateOrderString,
+  useDateFormat,
+} from 'components/hooks/useDateFormat'
 import { Body2P } from 'components/utils/typography/Text'
 
 import { ComponentPropsWithRef, useEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { DateParam, formatDateTime, isValidDateTime } from 'utils/datetime'
+import {
+  DateParam,
+  dayjsExtended,
+  formatDateTime,
+  isValidDateTime,
+} from 'utils/datetime'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
 
 const EMPTY_DATE_STR = '//'
 const EMPTY_TIME_STR = '::'
-const DATE_FORMAT = 'M/D/YYYY'
 const TIME_FORMAT = 'H:m:s'
+
+const DATE_FORMATS: Record<DateOrderString, { label: string; format: string }> =
+  {
+    MDY: { label: 'MM/DD/YYYY', format: 'M/D/YYYY' },
+    DMY: { label: 'DD/MM/YYYY', format: 'D/M/YYYY' },
+    YMD: { label: 'YYYY/MM/DD', format: 'YYYY/M/D' },
+  }
 
 export function DateTimeFormInput({
   initialDate,
@@ -31,16 +47,20 @@ export function DateTimeFormInput({
   const [timestampError, setTimestampError] = useState(false)
   const [isFocused, focusCallbacks] = useIsFocused({})
 
-  const initDateStr = formatDateTime(initialDate, DATE_FORMAT) || EMPTY_DATE_STR
+  const dateOrder = useDateFormat()
+  const { label: dateLabel, format: dateFormat } =
+    DATE_FORMATS[dateOrder.join('') as DateOrderString]
+
+  const initDateStr = formatDateTime(initialDate, dateFormat) || EMPTY_DATE_STR
   const initTimeStr = formatDateTime(initialDate, TIME_FORMAT) || EMPTY_TIME_STR
-  const [initDateM, initDateD, initDateY] = initDateStr.split('/')
+  const [initDateA, initDateB, initDateC] = initDateStr.split('/')
   const [initTimeH, initTimeM, initTimeS] = initTimeStr.split(':')
 
   const [dateStr, setDateStr] = useState(initDateStr)
   const [timeStr, setTimeStr] = useState(initTimeStr)
   const isSetToNow = dateStr === EMPTY_DATE_STR && timeStr === EMPTY_TIME_STR
 
-  const dateValid = isValidDateTime(dateStr, DATE_FORMAT, true)
+  const dateValid = isValidDateTime(dateStr, dateFormat, true)
   const dateError = !isSetToNow && !dateValid
   const timeValid = isValidDateTime(timeStr, TIME_FORMAT)
   const timeError = !isSetToNow && !timeValid
@@ -54,10 +74,20 @@ export function DateTimeFormInput({
   }, [dateError, setHasErrors, timeError])
 
   // sync date value with parent when inputs change
+  // always output in ISO format so parsing is unambiguous regardless of locale
   useEffect(() => {
     if (isSetToNow) setDate?.(undefined)
-    else if (dateValid && timeValid) setDate?.(`${dateStr} ${timeStr}`)
-  }, [dateStr, dateValid, isSetToNow, setDate, timeStr, timeValid])
+    else if (dateValid && timeValid)
+      setDate?.(
+        dayjsExtended(
+          `${dateStr} ${timeStr}`,
+          `${dateFormat} ${TIME_FORMAT}`,
+          true
+        )
+          .utc(true)
+          .toISOString()
+      )
+  }, [dateFormat, dateStr, dateValid, isSetToNow, setDate, timeStr, timeValid])
 
   const setValsFromTimestamp = (val?: string) => {
     const timestamp = handleUnixTS(val ?? '')
@@ -65,7 +95,7 @@ export function DateTimeFormInput({
       setTimestampError(true)
       return
     }
-    const date = formatDateTime(timestamp, DATE_FORMAT, true)
+    const date = formatDateTime(timestamp, dateFormat, true)
     const time = formatDateTime(timestamp, TIME_FORMAT, true)
     runAfterBrowserLayout(() => {
       dateInputRef.current?.setValue(date)
@@ -90,13 +120,13 @@ export function DateTimeFormInput({
           {...(isSetToNow && !isFocused && { value: 'Today' })}
           style={{ borderColor: dateError && colors['border-danger'] }}
           prefix="Date"
-          endIcon={<Body2P $color="text-xlight">MM/DD/YYYY</Body2P>}
+          endIcon={<Body2P $color="text-xlight">{dateLabel}</Body2P>}
           onChange={setDateStr}
           separator="/"
           segments={[
-            { length: 2, max: 12, name: 'MM', initialVal: initDateM },
-            { length: 2, min: 1, max: 31, name: 'DD', initialVal: initDateD },
-            { length: 4, max: 9999, name: 'YYYY', initialVal: initDateY },
+            { ...charToDateSegment(dateOrder[0]), initialVal: initDateA },
+            { ...charToDateSegment(dateOrder[1]), initialVal: initDateB },
+            { ...charToDateSegment(dateOrder[2]), initialVal: initDateC },
           ]}
         />
         <SegmentedInput
@@ -139,4 +169,15 @@ const handleUnixTS = (val: string) => {
   const valNum = Number(val)
   if (!isNaN(valNum)) return val.length === 10 ? valNum * 1000 : valNum
   return val
+}
+
+const charToDateSegment = (char: DateOrderChar) => {
+  switch (char) {
+    case 'Y':
+      return { length: 4, max: 9999, name: 'YYYY' }
+    case 'M':
+      return { length: 2, max: 12, name: 'MM' }
+    case 'D':
+      return { length: 2, min: 1, max: 31, name: 'DD' }
+  }
 }
