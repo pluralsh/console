@@ -221,6 +221,7 @@ query MyCluster {
             id
             name
             distro
+            supportedAddons
             restore {... ClusterRestoreFragment }
         }
     }

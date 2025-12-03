@@ -30,8 +30,10 @@ defmodule Console.Deployments.Git.Cmd do
 
   def refresh_key(git), do: save_private_key(git)
 
-  defp sync_scm_conn(git, %ScmConnection{type: :bitbucket, username: uname, token: pwd})
-    when is_binary(pwd) and is_binary(uname), do: %{git | username: uname, password: pwd}
+  @basic_auths ~w(bitbucket bitbucket_datacenter)a
+
+  defp sync_scm_conn(git, %ScmConnection{type: scm, username: uname, token: pwd})
+    when is_binary(pwd) and is_binary(uname) and scm in @basic_auths, do: %{git | username: uname, password: pwd}
   defp sync_scm_conn(git, %ScmConnection{token: pwd}) when is_binary(pwd), do: %{git | password: pwd}
 
   defp private_key_file(%GitRepository{private_key_file: f}) when is_binary(f), do: {:exists, f}

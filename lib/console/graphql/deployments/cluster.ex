@@ -532,6 +532,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.list_cluster_revisions/3
     end
 
+    field :supported_addons, list_of(:string), resolve: &Deployments.supported_addons/3
+
     @desc "lists OPA constraints registered in this cluster"
     connection field :policy_constraints, node_type: :policy_constraint do
       arg :namespace,  :string, description: "only show constraints with a violation for the given namespace"

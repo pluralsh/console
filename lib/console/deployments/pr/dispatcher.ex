@@ -4,7 +4,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Repo
   alias Console.Deployments.{Pr.Config, Pr.File, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
-  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket, Azure}
+  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket, BitBucketDatacenter, Azure}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
 
   @type pr_attrs :: %{title: binary, body: binary, branch: binary}
@@ -71,7 +71,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   defp handle_create(%PrAutomation{} = pr, conn, branch, ctx) do
     impl = dispatcher(conn)
     with {:ok, _} <- push(conn, branch),
-      do: impl.create(%{pr | branch: conn.branch}, branch, ctx, pr.labels || [])
+      do: impl.create(%{pr | branch: conn.branch, connection: conn}, branch, ctx, pr.labels || [])
   end
 
   def pr(%ScmConnection{} = conn, title, body, url, base, head) do
@@ -183,5 +183,6 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def dispatcher(%{type: :github}), do: Github
   def dispatcher(%{type: :gitlab}), do: Gitlab
   def dispatcher(%{type: :bitbucket}), do: BitBucket
+  def dispatcher(%{type: :bitbucket_datacenter}), do: BitBucketDatacenter
   def dispatcher(%{type: :azure_devops}), do: Azure
 end

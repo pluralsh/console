@@ -713,11 +713,17 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       {:ok, %{data: %{"myCluster" => found}}} = run_query("""
         query {
-          myCluster { id }
+          myCluster {
+            id
+            supportedAddons
+          }
         }
       """, %{}, %{cluster: cluster})
 
+      {:ok, addons} = Console.Deployments.Compatibilities.Table.all()
+
       assert found["id"] == cluster.id
+      assert found["supportedAddons"] == addons
     end
   end
 

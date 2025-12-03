@@ -1925,6 +1925,7 @@ export type Cluster = {
   settings?: Maybe<CloudSettings>;
   /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
   status?: Maybe<ClusterStatus>;
+  supportedAddons?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -10701,6 +10702,7 @@ export type ScmCreds = {
 export enum ScmType {
   AzureDevops = 'AZURE_DEVOPS',
   Bitbucket = 'BITBUCKET',
+  BitbucketDatacenter = 'BITBUCKET_DATACENTER',
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
 }

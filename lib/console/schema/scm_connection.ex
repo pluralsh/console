@@ -7,7 +7,8 @@ defmodule Console.Schema.ScmConnection do
     github: 0,
     gitlab: 1,
     bitbucket: 2,
-    azure_devops: 3
+    azure_devops: 3,
+    bitbucket_datacenter: 4
 
   schema "scm_connections" do
     field :name,     :string
