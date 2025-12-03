@@ -10,6 +10,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -268,6 +269,13 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 						return nil, ErrWaitRepository
 					}
 					configuration.IntegrationTest.RepositoryID = repository.Status.ID
+				}
+				if check.Configuration.IntegrationTest.RepositoryUrl != nil {
+					id, err := plural.Cache().GetGitRepoID(lo.FromPtr(check.Configuration.IntegrationTest.RepositoryUrl))
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.RepositoryID = lo.ToPtr(id)
 				}
 				if check.Configuration.IntegrationTest.Git != nil {
 					configuration.IntegrationTest.Git = &console.GitRefAttributes{

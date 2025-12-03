@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -140,7 +141,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		attr.RouterSinks = []*console.RouterSinkAttributes{}
 	}
 	for _, filter := range router.Spec.Filters {
-		clusterID, err := r.getClusterID(ctx, filter.ClusterRef)
+		clusterID, err := r.getClusterID(ctx, filter.ClusterRef, filter.Cluster)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -175,10 +176,19 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 	return attr, nil, nil
 }
 
-func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *corev1.ObjectReference) (*string, error) {
+func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *corev1.ObjectReference, handle *string) (*string, error) {
 	if obj == nil {
 		return nil, nil
 	}
+
+	if handle != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(handle))
+		if err != nil {
+			return nil, err
+		}
+		return lo.ToPtr(id), nil
+	}
+
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: obj.Name, Namespace: obj.Namespace}, cluster); err != nil {
 		return nil, err
@@ -220,7 +230,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 // SetupWithManager sets up the controller with the Manager.
 func (r *NotificationRouterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.NotificationRouterList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.NotificationRouter{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
