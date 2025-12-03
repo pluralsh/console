@@ -73,13 +73,21 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Interval *string `json:"interval,omitempty"`
 
-	// RepositoryRef references the GitRepository containing the IaC source code.
+	// RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use RepositoryUrl instead.
 	// +kubebuilder:validation:Required
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
+
+	// RepositoryUrl references the GitRepository URL containing the service source code.
+	// +kubebuilder:validation:Optional
+	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
 
 	// ClusterRef references the target Cluster where this stack will be executed.
 	// +kubebuilder:validation:Required
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
+
+	// Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead.
+	// +kubebuilder:validation:Optional
+	Cluster *string `json:"cluster,omitempty"`
 
 	// ProjectRef references a project this stack belongs to.
 	// If not provided, it will use the default project.

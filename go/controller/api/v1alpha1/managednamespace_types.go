@@ -176,6 +176,10 @@ type ServiceTemplate struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 
+	// RepositoryUrl references the GitRepository URL containing the service source code.
+	// +kubebuilder:validation:Optional
+	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
+
 	// Protect indicates whether to protect this service from deletion.
 	// Protected services are not automatically deleted during namespace cleanup
 	// or cluster deletion operations, providing safety for critical workloads.

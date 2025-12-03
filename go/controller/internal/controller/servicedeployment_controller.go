@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -107,18 +108,28 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		return *result, nil
 	}
 
-	cluster := &v1alpha1.Cluster{}
-	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		return common.HandleRequeue(nil, err, service.SetCondition)
+	clusterID := ""
+	if service.Spec.Cluster != nil {
+		clusterID, err = plural.Cache().GetClusterID(lo.FromPtr(service.Spec.Cluster))
+		if err != nil {
+			return common.HandleRequeue(nil, err, service.SetCondition)
+		}
+	} else {
+		cluster := &v1alpha1.Cluster{}
+		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
+			return common.HandleRequeue(nil, err, service.SetCondition)
+		}
+
+		if !cluster.Status.HasID() {
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
+			return common.Wait(), nil
+		}
+		clusterID = cluster.Status.GetID()
 	}
 
-	if !cluster.Status.HasID() {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return common.Wait(), nil
-	}
-
-	repository := &v1alpha1.GitRepository{}
+	var repositoryID *string
 	if service.Spec.RepositoryRef != nil {
+		repository := &v1alpha1.GitRepository{}
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			return common.HandleRequeue(nil, err, service.SetCondition)
 		}
@@ -139,25 +150,33 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 			return common.Wait(), nil
 		}
+		repositoryID = repository.Status.ID
+	}
+	if service.Spec.RepositoryUrl != nil {
+		repoID, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.RepositoryUrl))
+		if err != nil {
+			return common.HandleRequeue(nil, err, service.SetCondition)
+		}
+		repositoryID = &repoID
 	}
 
-	attr, result, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
+	attr, result, err := r.genServiceAttributes(ctx, service, repositoryID)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, service.SetCondition)
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
+	existingService, err := r.ConsoleClient.GetService(clusterID, service.ConsoleName())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if existingService == nil {
-		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
+		_, err = r.ConsoleClient.CreateService(&clusterID, *attr)
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
+		existingService, err = r.ConsoleClient.GetService(clusterID, service.ConsoleName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -365,6 +384,13 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 			}
 
 			attr.Helm.RepositoryID = repo.Status.ID
+		}
+		if service.Spec.Helm.RepositoryUrl != nil {
+			id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.RepositoryUrl))
+			if err != nil {
+				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
+			}
+			attr.Helm.RepositoryID = lo.ToPtr(id)
 		}
 
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
@@ -669,7 +695,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).

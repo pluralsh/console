@@ -39,6 +39,14 @@ query GetGitRepository($id: ID, $url: String) {
     }
 }
 
+query GetGitRepositoryID($url: String) {
+    gitRepository(url: $url) {
+        ...{
+            id
+        }
+    }
+}
+
 query GetScmConnection($id: ID!) {
     scmConnection(id: $id) {
         ...ScmConnectionFragment
