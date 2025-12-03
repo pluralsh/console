@@ -586,3 +586,201 @@ defmodule Console.Schema.Cluster do
     def match(_, _), do: {:error, :not_found}
   end
 end
+
+defmodule Console.Schema.Cluster.Mini do
+  @moduledoc """
+  A minified version of a cluster to be used for vector indexing
+  """
+  alias Console.Schema.{Cluster, CloudAddon}
+
+  @derive Jason.Encoder
+  @derive JSON.Encoder
+
+  @type runtime_service_data :: %{
+    name: binary,
+    version: binary,
+    addon: map | nil,
+    addon_version: map | nil
+  }
+
+  @type cloud_addon_data :: %{
+    name: binary,
+    version: binary,
+    distro: binary,
+    info: map | nil,
+    version_info: map | nil
+  }
+
+  @type t :: %__MODULE__{
+    id: binary,
+    name: binary,
+    handle: binary,
+    distro: binary,
+    cluster_url: binary,
+    version: binary | nil,
+    current_version: binary | nil,
+    kubelet_version: binary | nil,
+    health_score: integer | nil,
+    node_count: integer | nil,
+    pod_count: integer | nil,
+    namespace_count: integer | nil,
+    availability_zones: [binary] | nil,
+    runtime_services: [runtime_service_data] | nil,
+    cloud_addons: [cloud_addon_data] | nil,
+    upgrade_plan: map | nil,
+    metadata: map | nil,
+    pinged_at: DateTime.t | nil
+  }
+
+  defstruct [
+    :id,
+    :name,
+    :handle,
+    :distro,
+    :cluster_url,
+    :version,
+    :current_version,
+    :kubelet_version,
+    :health_score,
+    :node_count,
+    :pod_count,
+    :namespace_count,
+    :availability_zones,
+    :runtime_services,
+    :cloud_addons,
+    :upgrade_plan,
+    :metadata,
+    :pinged_at
+  ]
+
+  def new(%Cluster{} = cluster) do
+    %__MODULE__{
+      id: cluster.id,
+      name: cluster.name,
+      handle: cluster.handle,
+      distro: cluster.distro,
+      cluster_url: Console.url("/cd/clusters/#{cluster.id}"),
+      version: cluster.version,
+      current_version: cluster.current_version,
+      kubelet_version: cluster.kubelet_version,
+      health_score: cluster.health_score,
+      node_count: cluster.node_count,
+      pod_count: cluster.pod_count,
+      namespace_count: cluster.namespace_count,
+      availability_zones: cluster.availability_zones,
+      runtime_services: handle_runtime_services(cluster),
+      cloud_addons: handle_cloud_addons(cluster),
+      upgrade_plan: handle_upgrade_plan(cluster.upgrade_plan),
+      metadata: cluster.metadata,
+      pinged_at: cluster.pinged_at
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      name: attrs["name"],
+      handle: attrs["handle"],
+      distro: attrs["distro"],
+      cluster_url: attrs["cluster_url"],
+      version: attrs["version"],
+      current_version: attrs["current_version"],
+      kubelet_version: attrs["kubelet_version"],
+      health_score: attrs["health_score"],
+      node_count: attrs["node_count"],
+      pod_count: attrs["pod_count"],
+      namespace_count: attrs["namespace_count"],
+      availability_zones: attrs["availability_zones"],
+      runtime_services: attrs["runtime_services"],
+      cloud_addons: attrs["cloud_addons"],
+      upgrade_plan: attrs["upgrade_plan"],
+      metadata: attrs["metadata"],
+      pinged_at: attrs["pinged_at"]
+    }
+  end
+
+  defp handle_runtime_services(%Cluster{} = cluster) do
+    # Check if runtime_services was manually attached to the struct
+    case Map.get(cluster, :runtime_services) do
+      [_ | _] = services -> Enum.map(services, &format_runtime_service/1)
+      _ -> nil
+    end
+  end
+  defp handle_runtime_services(_), do: nil
+
+  defp handle_cloud_addons(%Cluster{cloud_addons: [_ | _] = addons}) do
+    Enum.map(addons, &format_cloud_addon/1)
+  end
+  defp handle_cloud_addons(_), do: nil
+
+  defp format_cloud_addon(%CloudAddon{} = addon) do
+    %{
+      name: addon.name,
+      version: addon.version,
+      distro: addon.distro,
+      info: addon.info,
+      version_info: addon.version_info
+    }
+  end
+  defp format_cloud_addon(_), do: nil
+
+  defp format_runtime_service(%{name: name, version: version} = svc) do
+    %{
+      name: name,
+      version: version,
+      addon: handle_addon(Map.get(svc, :addon)),
+      addon_version: handle_addon_version(Map.get(svc, :addon_version))
+    }
+  end
+  defp format_runtime_service(svc) when is_map(svc) do
+    %{
+      name: Map.get(svc, "name"),
+      version: Map.get(svc, "version"),
+      addon: handle_addon(Map.get(svc, "addon")),
+      addon_version: handle_addon_version(Map.get(svc, "addon_version"))
+    }
+  end
+
+  defp handle_addon(%{name: name, description: desc, category: cat} = addon) do
+    %{
+      name: name,
+      description: desc,
+      category: cat,
+      icon: Map.get(addon, :icon),
+      readme: Map.get(addon, :readme)
+    }
+  end
+  defp handle_addon(_), do: nil
+
+  defp handle_addon_version(%{version: vsn, requirements: reqs, blocking: blocking} = av) do
+    %{
+      version: vsn,
+      requirements: handle_requirements(reqs),
+      blocking: blocking,
+      incompatibilities: Map.get(av, :incompatibilities, []),
+      deprecations: Map.get(av, :deprecations, [])
+    }
+  end
+  defp handle_addon_version(_), do: nil
+
+  defp handle_requirements([_ | _] = requirements) do
+    Enum.map(requirements, fn req ->
+      %{
+        kubernetes_constraint: Map.get(req, :kubernetes_constraint),
+        addon_constraint: Map.get(req, :addon_constraint),
+        addon_name: Map.get(req, :addon_name)
+      }
+    end)
+  end
+  defp handle_requirements(_), do: []
+
+  defp handle_upgrade_plan(%{deprecations: d, compatibilities: c, incompatibilities: i, kubelet_skew: k}) do
+    %{
+      deprecations: d,
+      compatibilities: c,
+      incompatibilities: i,
+      kubelet_skew: k
+    }
+  end
+  defp handle_upgrade_plan(_), do: nil
+end

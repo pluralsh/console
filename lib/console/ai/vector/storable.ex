@@ -226,3 +226,48 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.Catalog.Mini do
 
   def prompt(%@for{}), do: ""
 end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.Cluster.Mini do
+  alias Console.AI.Utils
+  alias Console.AI.Tools.Utils, as: TU
+
+  def id(%@for{id: id}), do: id
+
+  def content(%@for{} = mini) do
+    base_content(mini)
+    |> append_yaml("runtime_services", mini.runtime_services)
+    |> append_yaml("cloud_addons", mini.cloud_addons)
+    |> append_yaml("upgrade_plan", mini.upgrade_plan)
+    |> append_yaml("metadata", mini.metadata)
+  end
+
+  defp append_yaml(base, field_name, content) do
+    case TU.yaml_encode(content) do
+      {:ok, yaml} -> "#{base}\n#{field_name}:\n#{TU.indent(yaml, 2)}"
+      _ -> "\n#{field_name}: #{inspect(content)}"
+    end
+  end
+
+  defp base_content(%@for{} = mini) do
+    """
+    A Kubernetes cluster with data like so:
+    name: #{mini.name}
+    handle: #{mini.handle}
+    cluster_url: #{mini.cluster_url}
+    distro: #{mini.distro}
+    version: #{mini.version}
+    current_version: #{mini.current_version}
+    kubelet_version: #{mini.kubelet_version}
+    health_score: #{mini.health_score}
+    node_count: #{mini.node_count}
+    pod_count: #{mini.pod_count}
+    namespace_count: #{mini.namespace_count}
+    availability_zones: #{mini.availability_zones}
+    pinged_at: #{mini.pinged_at}
+    """
+  end
+
+  def datatype(_), do: "cluster"
+
+  def prompt(%@for{}), do: ""
+end
