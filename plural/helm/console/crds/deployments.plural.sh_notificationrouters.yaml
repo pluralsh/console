@@ -70,6 +70,11 @@ spec:
                     RouterFilters defines filtering criteria for routing events to notification destinations.
                     Filters can be based on regex patterns, resource associations, or combinations thereof.
                   properties:
+                    cluster:
+                      description: Cluster is the handle of the target Cluster where
+                        this service will be deployed. Leave it empty to use the clusterRef
+                        field instead.
+                      type: string
                     clusterRef:
                       description: ClusterRef filters events to only those associated
                         with a specific cluster.

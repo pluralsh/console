@@ -151,6 +151,10 @@ type PipelineGate struct {
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
+	// Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead.
+	// +kubebuilder:validation:Optional
+	Cluster *string `json:"cluster,omitempty"`
+
 	// SentinelRef specifies the sentinel to execute for the SENTINEL gate.
 	// +kubebuilder:validation:Optional
 	SentinelRef *corev1.ObjectReference `json:"sentinelRef,omitempty"`

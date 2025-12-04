@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	console "github.com/pluralsh/console/go/client"
@@ -31,6 +33,17 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 	repositoryID, err := helper.IDFromRef(pra.Spec.RepositoryRef, &v1alpha1.GitRepository{})
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if pra.Spec.RepositoryUrl != nil {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pra.Spec.RepositoryUrl))
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("git repository is not ready")
+			}
+			return nil, nil, err
+		}
+		repositoryID = lo.ToPtr(id)
 	}
 
 	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})

@@ -165,10 +165,18 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	DeploymentRepositoryRef *NamespacedName `json:"deploymentRepositoryRef,omitempty"`
 
+	// DeploymentRepositoryUrl references the GitRepository URL containing the service source code.
+	// +kubebuilder:validation:Optional
+	DeploymentRepositoryUrl *string `json:"deploymentRepositoryUrl,omitempty"`
+
 	// ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use
 	//
 	// +kubebuilder:validation:Optional
 	ScaffoldsRepositoryRef *NamespacedName `json:"scaffoldsRepositoryRef,omitempty"`
+
+	// ScaffoldsRepositoryUrl references the GitRepository URL containing the scaffold source code.
+	// +kubebuilder:validation:Optional
+	ScaffoldsRepositoryUrl *string `json:"scaffoldsRepositoryUrl,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.

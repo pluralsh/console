@@ -2,6 +2,9 @@ package client
 
 import (
 	console "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error) {
@@ -39,4 +42,18 @@ func (c *client) DeleteRepository(id string) error {
 func (c *client) GetRepository(url *string) (*console.GetGitRepository, error) {
 
 	return c.consoleClient.GetGitRepository(c.ctx, nil, url)
+}
+
+func (c *client) GetRepositoryID(url string) (string, error) {
+	response, err := c.consoleClient.GetGitRepositoryID(c.ctx, &url)
+	if internalerror.IsNotFound(err) {
+		return "", errors.NewNotFound(schema.GroupResource{}, url)
+	}
+	if err == nil && (response == nil || response.GitRepository == nil) {
+		return "", errors.NewNotFound(schema.GroupResource{}, url)
+	}
+	if response == nil {
+		return "", err
+	}
+	return response.GitRepository.ID, err
 }
