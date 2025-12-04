@@ -15,7 +15,10 @@ import { ClusterHealth, healthScoreToSeverity } from '../../ClusterHealthChip'
 import { getClusterUpgradeInfo } from '../../ClusterUpgradeButton'
 import { ClusterInfoFlyoverTab } from '../ClusterInfoFlyover'
 import { componentHasInsight } from '../health/ConfigurationIssuesSection'
-import { getPreFlightChecklist, UpgradeAccordionName } from '../UpgradesTab'
+import {
+  getPreFlightChecklist,
+  UpgradeAccordionName,
+} from '../upgrades/UpgradesTab'
 import { OverviewHeatmaps } from './OverviewHeatmaps'
 import { OverviewTabCard } from './OverviewTabCard'
 export function OverviewTab({

@@ -26,25 +26,25 @@ import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { GqlError } from '../../../utils/Alert.tsx'
+import { GqlError } from '../../../../utils/Alert.tsx'
 
 import { produce } from 'immer'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
-import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
-import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
-import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
+import { ClusterDistroShortNames } from '../../../../utils/ClusterDistro.tsx'
+import { clusterDeprecatedCustomResourcesColumns } from '../../clusterDeprecatedCustomResourcesColumns.tsx'
+import { getClusterUpgradeInfo } from '../../ClusterUpgradeButton.tsx'
 import {
   clusterPreFlightCols,
   clusterUpgradeColumns,
   initialClusterPreFlightItems,
-} from '../clusterUpgradeColumns.tsx'
-import { deprecationsColumns } from '../deprecationsColumns.tsx'
-import CloudAddons from '../runtime/CloudAddons.tsx'
-import { RuntimeServices } from '../runtime/RuntimeServices.tsx'
+} from '../../clusterUpgradeColumns.tsx'
+import { deprecationsColumns } from '../../deprecationsColumns.tsx'
+import CloudAddons from '../../runtime/CloudAddons.tsx'
+import { RuntimeServices } from '../../runtime/RuntimeServices.tsx'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
-} from '../UpgradeInsights.tsx'
+} from '../../UpgradeInsights.tsx'
 
 enum DeprecationType {
   GitOps = 'gitOps',
