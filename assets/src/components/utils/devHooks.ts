@@ -14,7 +14,6 @@ export function useMountLogging(name?: string) {
     return () => {
       console.log(id, 'unmounted')
     }
-    // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }

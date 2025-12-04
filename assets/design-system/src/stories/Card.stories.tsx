@@ -70,7 +70,7 @@ function Template({
                 height={height}
                 justifyContent="center"
               >
-                cornerSize="{cornerSize}"
+                cornerSize=&quot;{cornerSize}&quot;
                 <br />
                 fillLevel=
                 {fillLevel === undefined ? 'undefined' : `"${fillLevel}"`}

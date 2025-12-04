@@ -824,18 +824,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-proposal-private-methods@npm:^7.18.6":
-  version: 7.18.6
-  resolution: "@babel/plugin-proposal-private-methods@npm:7.18.6"
-  dependencies:
-    "@babel/helper-create-class-features-plugin": ^7.18.6
-    "@babel/helper-plugin-utils": ^7.18.6
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 22d8502ee96bca99ad2c8393e8493e2b8d4507576dd054490fd8201a36824373440106f5b098b6d821b026c7e72b0424ff4aeca69ed5f42e48f029d3a156d5ad
-  languageName: node
-  linkType: hard
-
 "@babel/plugin-proposal-private-property-in-object@npm:7.21.0-placeholder-for-preset-env.2":
   version: 7.21.0-placeholder-for-preset-env.2
   resolution: "@babel/plugin-proposal-private-property-in-object@npm:7.21.0-placeholder-for-preset-env.2"
@@ -2923,13 +2911,6 @@ __metadata:
   version: 4.12.1
   resolution: "@eslint-community/regexpp@npm:4.12.1"
   checksum: 0d628680e204bc316d545b4993d3658427ca404ae646ce541fcc65306b8c712c340e5e573e30fb9f85f4855c0c5f6dca9868931f2fcced06417fbe1a0c6cd2d6
-  languageName: node
-  linkType: hard
-
-"@eslint/compat@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@eslint/compat@npm:1.1.1"
-  checksum: c9146b139e52ee4f79e25b97f22d2936c50b876cef8e9c5789600f12d8fabae689d75571a8429e5aae0d5e8067b0628fd87b7e849cee391b485db9557b40b6a4
   languageName: node
   linkType: hard
 
@@ -12117,7 +12098,6 @@ __metadata:
     "@docsearch/js": 3.5.2
     "@docsearch/react": 3.5.2
     "@emotion/is-prop-valid": 1.3.1
-    "@eslint/compat": 1.1.1
     "@graphql-codegen/add": 5.0.0
     "@graphql-codegen/cli": 5.0.0
     "@graphql-codegen/fragment-matcher": 5.0.2
@@ -12186,9 +12166,8 @@ __metadata:
     eslint-config-prettier: 10.0.1
     eslint-plugin-import: 2.31.0
     eslint-plugin-prettier: 5.2.3
-    eslint-plugin-react: 7.37.4
-    eslint-plugin-react-compiler: beta
-    eslint-plugin-react-hooks: 4.6.2
+    eslint-plugin-react: 7.37.5
+    eslint-plugin-react-hooks: 7.0.1
     filesize: 10.1.6
     fuse.js: 6.6.2
     globals: 15.10.0
@@ -12209,10 +12188,10 @@ __metadata:
     prettier: 3.3.3
     qs: 6.14.0
     query-string: 8.1.0
-    react: 19.1.1
+    react: 19.2.1
     react-copy-to-clipboard: 5.1.0
     react-diff-viewer: 3.1.1
-    react-dom: 19.1.1
+    react-dom: 19.2.1
     react-dropzone: 14.2.3
     react-error-boundary: 4.0.11
     react-focus-lock: 2.13.5
@@ -14508,34 +14487,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-compiler@npm:beta":
-  version: 19.0.0-beta-af1b7da-20250417
-  resolution: "eslint-plugin-react-compiler@npm:19.0.0-beta-af1b7da-20250417"
+"eslint-plugin-react-hooks@npm:7.0.1":
+  version: 7.0.1
+  resolution: "eslint-plugin-react-hooks@npm:7.0.1"
   dependencies:
     "@babel/core": ^7.24.4
     "@babel/parser": ^7.24.4
-    "@babel/plugin-proposal-private-methods": ^7.18.6
     hermes-parser: ^0.25.1
-    zod: ^3.22.4
-    zod-validation-error: ^3.0.3
+    zod: ^3.25.0 || ^4.0.0
+    zod-validation-error: ^3.5.0 || ^4.0.0
   peerDependencies:
-    eslint: ">=7"
-  checksum: 21a0bff58a95f5d4d822d3c67e4742be08f7f2936294714186942fe7abe2c20407f7c60c4874ad36d00cc0b4796bf2488d29cd52026a64bac8efd21c29f807f8
+    eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
+  checksum: d2216919137e6593309640c47d5cbeb903a2989b2ddc1197107b4b1967a8ec2e696d9586015c02cfa2468bdb4ce28b6866f9fd2b555ccbec635556f0a4e1f434
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:4.6.2":
-  version: 4.6.2
-  resolution: "eslint-plugin-react-hooks@npm:4.6.2"
-  peerDependencies:
-    eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
-  checksum: 395c433610f59577cfcf3f2e42bcb130436c8a0b3777ac64f441d88c5275f4fcfc89094cedab270f2822daf29af1079151a7a6579a8e9ea8cee66540ba0384c4
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-react@npm:7.37.4":
-  version: 7.37.4
-  resolution: "eslint-plugin-react@npm:7.37.4"
+"eslint-plugin-react@npm:7.37.5":
+  version: 7.37.5
+  resolution: "eslint-plugin-react@npm:7.37.5"
   dependencies:
     array-includes: ^3.1.8
     array.prototype.findlast: ^1.2.5
@@ -14547,7 +14516,7 @@ __metadata:
     hasown: ^2.0.2
     jsx-ast-utils: ^2.4.1 || ^3.0.0
     minimatch: ^3.1.2
-    object.entries: ^1.1.8
+    object.entries: ^1.1.9
     object.fromentries: ^2.0.8
     object.values: ^1.2.1
     prop-types: ^15.8.1
@@ -14557,7 +14526,7 @@ __metadata:
     string.prototype.repeat: ^1.0.0
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
-  checksum: 8a37bdc9b347bf3a1273fef73dfbc39279cc3e58441940a5e13b3ba4e82b34132d1d1172db9d6746f153ee981280bd6bd06a9065fb453388c68f4bebe0d9f839
+  checksum: 8675e7558e646e3c2fcb04bb60cfe416000b831ef0b363f0117838f5bfc799156113cb06058ad4d4b39fc730903b7360b05038da11093064ca37caf76b7cf2ca
   languageName: node
   linkType: hard
 
@@ -20362,7 +20331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.entries@npm:^1.1.8":
+"object.entries@npm:^1.1.9":
   version: 1.1.9
   resolution: "object.entries@npm:1.1.9"
   dependencies:
@@ -21811,14 +21780,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.1":
-  version: 19.1.1
-  resolution: "react-dom@npm:19.1.1"
+"react-dom@npm:19.2.1":
+  version: 19.2.1
+  resolution: "react-dom@npm:19.2.1"
   dependencies:
-    scheduler: ^0.26.0
+    scheduler: ^0.27.0
   peerDependencies:
-    react: ^19.1.1
-  checksum: 71d63df955e99bb58470c6ae12ebb82fa80e2a73147c387b73a31c17bcff803ce8aded52ae0c4391c9b413be0aa449249d8be7d063136826d1f0caba9720a907
+    react: ^19.2.1
+  checksum: 45a7c57696b6fcc9f018a1626a0c5f6da7085510bcebb9ab585414ea1b73061df1139d57b4384ece47c0a53d46045c28b93fe85e249771eca8cfac8d3e613833
   languageName: node
   linkType: hard
 
@@ -22255,10 +22224,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.1.1":
-  version: 19.1.1
-  resolution: "react@npm:19.1.1"
-  checksum: f2f18fea5deac87b1167365bd5160bcba64d383c26a37afa905b714ca424f423ef97d8daf53f041ab9ac25a06357fafcf0b5d3b6b84c9d1eace0e621bfeae629
+"react@npm:19.2.1":
+  version: 19.2.1
+  resolution: "react@npm:19.2.1"
+  checksum: 9b32ace5c532ed78bc5a907bfec77d966c8f117049d9bf06b627c4cebe5ef2c899f18ed283f8ed5b85346176b5ccc5328ab6fae0b389f2936a87575ce0e47670
   languageName: node
   linkType: hard
 
@@ -23164,13 +23133,6 @@ __metadata:
   dependencies:
     xmlchars: ^2.2.0
   checksum: d3fa3e2aaf6c65ed52ee993aff1891fc47d5e47d515164b5449cbf5da2cbdc396137e55590472e64c5c436c14ae64a8a03c29b9e7389fc6f14035cf4e982ef3b
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.26.0":
-  version: 0.26.0
-  resolution: "scheduler@npm:0.26.0"
-  checksum: c63a9f1c0e5089b537231cff6c11f75455b5c8625ae09535c1d7cd0a1b0c77ceecdd9f1074e5e063da5d8dc11e73e8033dcac3361791088be08a6e60c0283ed9
   languageName: node
   linkType: hard
 
@@ -26740,19 +26702,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-validation-error@npm:^3.0.3":
-  version: 3.5.3
-  resolution: "zod-validation-error@npm:3.5.3"
+"zod-validation-error@npm:^3.5.0 || ^4.0.0":
+  version: 4.0.2
+  resolution: "zod-validation-error@npm:4.0.2"
   peerDependencies:
     zod: ^3.25.0 || ^4.0.0
-  checksum: 30735d76e1a7dc37b5b65581d76feac930c995b76d8cd2bf1003c2a8016a1f094f013f33cc60d99ec77e2055943916b82b9ebab06a1b5834dfb0c91e92f39f49
+  checksum: f16ccbc08c5345f28788beea814d82e1f047978414f1511bd97a171580d7dbe63cecc368caa352c1391e201539288c241d61145e57c6b84cb19112dc88a72098
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.4":
-  version: 3.25.76
-  resolution: "zod@npm:3.25.76"
-  checksum: c9a403a62b329188a5f6bd24d5d935d2bba345f7ab8151d1baa1505b5da9f227fb139354b043711490c798e91f3df75991395e40142e6510a4b16409f302b849
+"zod@npm:^3.25.0 || ^4.0.0":
+  version: 4.1.13
+  resolution: "zod@npm:4.1.13"
+  checksum: e5459280d46567df0adc188b0c687d425e616a206d4a73ee3bacf62d246f5546e24ef45790c7c4762d3ce7659c5e41052a29445d32d0d272410be9fe23162d03
   languageName: node
   linkType: hard
 

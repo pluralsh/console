@@ -33,7 +33,7 @@ function Template({
         caption
         marginBottom="xxsmall"
       >
-        type="{type}"
+        type=&quot;{type}&quot;
       </H1>
       <Flex
         gap="xsmall"
@@ -43,7 +43,7 @@ function Template({
       >
         {sizes.map((size) => (
           <>
-            <P caption>size="{size}"</P>
+            <P caption>size=&quot;{size}&quot;</P>
             <IconFrame
               size={size || 'medium'}
               clickable={clickable === undefined ? true : clickable}

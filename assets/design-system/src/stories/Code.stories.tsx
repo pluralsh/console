@@ -99,7 +99,7 @@ function Template({ onFillLevel, ...args }: any) {
           language="js"
           {...args}
         >
-          console.warn('test')
+          console.warn(&apos;test&apos;)
         </Code>
         <Code
           width="400px"

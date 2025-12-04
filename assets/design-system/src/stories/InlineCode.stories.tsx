@@ -16,14 +16,14 @@ const FlexWrap = styled.div(({ theme }) => ({
 
 const kitchenSink = (
   <InlineCode>
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;?!“”"'’ abcdefghijklmnopqrstuvwxyz 0123456789
-    / * + () {'{}'}
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;?!&quot;&quot;&quot;&apos;&apos;
+    abcdefghijklmnopqrstuvwxyz 0123456789 / * + () {'{}'}
   </InlineCode>
 )
 
 const dummyText = (
   <>
-    Here's some text in which we'd like to see some{' '}
+    Here&apos;s some text in which we&apos;d like to see some{' '}
     <InlineCode>inline code</InlineCode>, some{' '}
     <InlineCode>
       inline code with some{' '}
@@ -44,7 +44,7 @@ const dummyText = (
     >
       <InlineCode>code block fully wrapped in a link</InlineCode>
     </A>
-    , and let's see how the ends look with ascenders/descenders:{' '}
+    , and let&apos;s see how the ends look with ascenders/descenders:{' '}
     <InlineCode>p1p</InlineCode>
     <InlineCode>g0g</InlineCode>
     <InlineCode>l2l</InlineCode>
@@ -53,7 +53,8 @@ const dummyText = (
     <InlineCode>q4q</InlineCode>
     <InlineCode>/regex/</InlineCode>
     <InlineCode>brew install stew</InlineCode>
-    <InlineCode>Plural.console.warn('stuff')</InlineCode>. That is all.
+    <InlineCode>Plural.console.warn(&apos;stuff&apos;)</InlineCode>. That is
+    all.
   </>
 )
 
