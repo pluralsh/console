@@ -2058,9 +2058,19 @@ func (in *DeploymentSettingsSpec) DeepCopyInto(out *DeploymentSettingsSpec) {
 		*out = new(NamespacedName)
 		**out = **in
 	}
+	if in.DeploymentRepositoryUrl != nil {
+		in, out := &in.DeploymentRepositoryUrl, &out.DeploymentRepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	if in.ScaffoldsRepositoryRef != nil {
 		in, out := &in.ScaffoldsRepositoryRef, &out.ScaffoldsRepositoryRef
 		*out = new(NamespacedName)
+		**out = **in
+	}
+	if in.ScaffoldsRepositoryUrl != nil {
+		in, out := &in.ScaffoldsRepositoryUrl, &out.ScaffoldsRepositoryUrl
+		*out = new(string)
 		**out = **in
 	}
 	if in.Reconciliation != nil {
@@ -3414,7 +3424,17 @@ func (in *InfrastructureStackSpec) DeepCopyInto(out *InfrastructureStackSpec) {
 		**out = **in
 	}
 	out.RepositoryRef = in.RepositoryRef
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	out.ClusterRef = in.ClusterRef
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	if in.ProjectRef != nil {
 		in, out := &in.ProjectRef, &out.ProjectRef
 		*out = new(v1.ObjectReference)
@@ -4583,6 +4603,11 @@ func (in *ObserverConfiguration) DeepCopy() *ObserverConfiguration {
 func (in *ObserverGit) DeepCopyInto(out *ObserverGit) {
 	*out = *in
 	out.GitRepositoryRef = in.GitRepositoryRef
+	if in.GitRepositoryUrl != nil {
+		in, out := &in.GitRepositoryUrl, &out.GitRepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	if in.Filter != nil {
 		in, out := &in.Filter, &out.Filter
 		*out = new(ObserverGitFilter)
@@ -5407,6 +5432,11 @@ func (in *PipelineGate) DeepCopyInto(out *PipelineGate) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	if in.SentinelRef != nil {
 		in, out := &in.SentinelRef, &out.SentinelRef
 		*out = new(v1.ObjectReference)
@@ -6048,6 +6078,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
 		**out = **in
 	}
 	if in.Git != nil {
@@ -6736,6 +6771,11 @@ func (in *RouterFilters) DeepCopyInto(out *RouterFilters) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	if in.PipelineRef != nil {
 		in, out := &in.PipelineRef, &out.PipelineRef
 		*out = new(v1.ObjectReference)
@@ -7029,6 +7069,11 @@ func (in *SentinelCheckIntegrationTestConfiguration) DeepCopyInto(out *SentinelC
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	if in.Git != nil {
 		in, out := &in.Git, &out.Git
 		*out = new(GitRef)
@@ -7158,6 +7203,11 @@ func (in *SentinelSpec) DeepCopyInto(out *SentinelSpec) {
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
 		**out = **in
 	}
 	if in.ProjectRef != nil {
@@ -7562,6 +7612,11 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	if in.Values != nil {
 		in, out := &in.Values, &out.Values
 		*out = new(runtime.RawExtension)
@@ -7719,7 +7774,17 @@ func (in *ServiceSpec) DeepCopyInto(out *ServiceSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
+		**out = **in
+	}
 	out.ClusterRef = in.ClusterRef
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	if in.ConfigurationRef != nil {
 		in, out := &in.ConfigurationRef, &out.ConfigurationRef
 		*out = new(v1.SecretReference)
@@ -7847,6 +7912,11 @@ func (in *ServiceTemplate) DeepCopyInto(out *ServiceTemplate) {
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
 		**out = **in
 	}
 	if in.Protect != nil {
@@ -7978,6 +8048,11 @@ func (in *Source) DeepCopyInto(out *Source) {
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.RepositoryUrl != nil {
+		in, out := &in.RepositoryUrl, &out.RepositoryUrl
+		*out = new(string)
 		**out = **in
 	}
 	if in.Git != nil {

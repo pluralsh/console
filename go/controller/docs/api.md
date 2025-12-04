@@ -1223,7 +1223,9 @@ _Appears in:_
 | `logging` _[LoggingSettings](#loggingsettings)_ | Logging settings for connections to log aggregation datastores |  | Optional: \{\} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Cost settings for managing Plural's cost management features |  | Optional: \{\} <br /> |
 | `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | DeploymentRepositoryRef is a pointer to the deployment GIT repository to use |  | Optional: \{\} <br /> |
+| `deploymentRepositoryUrl` _string_ | DeploymentRepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use |  | Optional: \{\} <br /> |
+| `scaffoldsRepositoryUrl` _string_ | ScaffoldsRepositoryUrl references the GitRepository URL containing the scaffold source code. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
@@ -1933,8 +1935,10 @@ _Appears in:_
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. |  | Required: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use RepositoryUrl instead. |  | Required: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Required: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references a project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git contains reference within the repository where the IaC manifests are located. |  |  |
 | `manageState` _boolean_ | ManageState indicates whether Plural should manage the Terraform state of this stack. |  | Optional: \{\} <br /> |
@@ -2539,6 +2543,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references the Git repository resource to monitor.<br />The repository must be configured in Plural Console with appropriate access credentials. |  | Required: \{\} <br /> |
+| `gitRepositoryUrl` _string_ | GitRepositoryUrl references the GitRepository URL containing the source code. |  | Optional: \{\} <br /> |
 | `type` _[ObserverGitTargetType](#observergittargettype)_ | Type specifies what Git resources to monitor within the repository.<br />Currently only TAGS is supported, which monitors for new Git tags. |  | Enum: [TAGS] <br />Required: \{\} <br />Type: string <br /> |
 | `filter` _[ObserverGitFilter](#observergitfilter)_ | Filter specifies a regex to filter the git repository tags for the observed value. |  | Optional: \{\} <br /> |
 
@@ -3019,6 +3024,7 @@ _Appears in:_
 | `name` _string_ | Name of this gate. |  | Required: \{\} <br />Type: string <br /> |
 | `type` _[GateType](#gatetype)_ | Type of gate.<br />One of:<br />- APPROVAL (requires human approval)<br />- WINDOW (time-based constraints),<br />- JOB (runs custom validation before allowing promotion).<br />- SENTINEL (runs a Plural Sentinel before allowing promotion). |  | Enum: [APPROVAL WINDOW JOB SENTINEL] <br />Required: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef specifies the target cluster where this gate will execute. |  | Optional: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef specifies the sentinel to execute for the SENTINEL gate. |  | Optional: \{\} <br /> |
 | `spec` _[GateSpec](#gatespec)_ | Spec contains detailed configuration for complex gate types like JOB gates. |  | Optional: \{\} <br /> |
 
@@ -3357,6 +3363,7 @@ _Appears in:_
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references a specific cluster that this PR operates on. |  | Optional: \{\} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef references the SCM connection to use for authentication when creating pull requests. |  | Required: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository resource this automation uses. |  | Optional: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the automation source code. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git location to source external files from.  If `creates.git` is also specified, the results will be merged. |  | Optional: \{\} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references a specific service that this PR automation acts upon. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this automation belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
@@ -3766,6 +3773,7 @@ _Appears in:_
 | `regex` _string_ | Regex specifies a regular expression pattern for filtering events based on content.<br />This can be used to filter events by URLs, resource names, error messages, or any<br />other textual content within the event data. Use standard regex syntax. |  | Optional: \{\} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef filters events to only those associated with a specific service deployment. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef filters events to only those associated with a specific cluster. |  | Optional: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef filters events to only those associated with a specific pipeline. |  | Optional: \{\} <br /> |
 
 
@@ -3922,6 +3930,7 @@ _Appears in:_
 | `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
 
 
@@ -3982,6 +3991,7 @@ _Appears in:_
 | `name` _string_ | Name of this Sentinel.<br />If not provided, the name from Sentinel.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the source code. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
@@ -4183,6 +4193,7 @@ _Appears in:_
 | `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: \{\} <br /> |
 | `release` _string_ | Release contains the name of the Helm release to use when applying this service. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef contains a reference to a GitRepository to source the Helm chart from.<br />This is useful for using a multi-source configuration for values files. |  | Optional: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `values` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Values contains arbitrary YAML values to overlay. |  | Optional: \{\} <br /> |
 | `valuesFiles` _string array_ |  ValuesFiles contains individual values files to overlay. |  | Optional: \{\} <br /> |
 | `chart` _string_ | Chart is the name of the Helm chart to use. |  | Optional: \{\} <br /> |
@@ -4253,7 +4264,9 @@ _Appears in:_
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm configuration for deploying Helm charts, including values and repository settings. |  | Optional: \{\} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig contains advanced configuration for how manifests are synchronized to the cluster. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository CRD containing the service source code. |  | Optional: \{\} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. |  | Required: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Required: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference containing service configuration for templating. |  | Optional: \{\} <br /> |
 | `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this service belongs within. |  | Optional: \{\} <br /> |
 | `configuration` _object (keys:string, values:string)_ | Configuration contains non-secret key-value pairs for lightweight templating of manifests. |  | Optional: \{\} <br /> |
@@ -4291,6 +4304,7 @@ _Appears in:_
 | `namespace` _string_ | Namespace specifies the namespace for the service deployment.<br />For managed namespaces, this is typically auto-populated with<br />the managed namespace name if not explicitly provided. |  | Optional: \{\} <br /> |
 | `templated` _boolean_ | Templated indicates whether to apply liquid templating to raw YAML files.<br />When enabled, allows for dynamic configuration injection and<br />environment-specific customization of service manifests. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a GitRepository resource containing the service manifests.<br />This provides the source location for Kubernetes YAML files, Helm charts,<br />or other deployment artifacts needed for the service. |  | Optional: \{\} <br /> |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `protect` _boolean_ | Protect indicates whether to protect this service from deletion.<br />Protected services are not automatically deleted during namespace cleanup<br />or cluster deletion operations, providing safety for critical workloads. |  | Optional: \{\} <br /> |
 | `contexts` _string array_ | Contexts specifies a list of context names to add to this service.<br />Contexts provide reusable configuration bundles that can be shared<br />across multiple services for consistent environment setup. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git defines Git-specific settings for sourcing service manifests.<br />This includes repository references, branch/tag specifications,<br />and subdirectory paths within the Git repository. |  | Optional: \{\} <br /> |
@@ -4357,6 +4371,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `path` _string_ | Path the subdirectory this source will live in the final tarball |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the Git repository to source from. |  |  |
+| `repositoryUrl` _string_ | RepositoryUrl references the GitRepository URL containing the source code. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git contains a location in a Git repository to use. |  |  |
 
 

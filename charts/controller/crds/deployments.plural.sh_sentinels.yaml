@@ -9747,6 +9747,10 @@ spec:
                                   type: string
                               type: object
                               x-kubernetes-map-type: atomic
+                            repositoryUrl:
+                              description: RepositoryUrl references the GitRepository
+                                URL containing the service source code.
+                              type: string
                             tags:
                               additionalProperties:
                                 type: string
@@ -10056,6 +10060,10 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              repositoryUrl:
+                description: RepositoryUrl references the GitRepository URL containing
+                  the source code.
+                type: string
             type: object
           status:
             properties:
