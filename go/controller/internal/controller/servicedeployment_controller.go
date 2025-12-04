@@ -108,23 +108,9 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		return *result, nil
 	}
 
-	clusterID := ""
-	if service.Spec.Cluster != nil {
-		clusterID, err = plural.Cache().GetClusterID(lo.FromPtr(service.Spec.Cluster))
-		if err != nil {
-			return common.HandleRequeue(nil, err, service.SetCondition)
-		}
-	} else {
-		cluster := &v1alpha1.Cluster{}
-		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-			return common.HandleRequeue(nil, err, service.SetCondition)
-		}
-
-		if !cluster.Status.HasID() {
-			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-			return common.Wait(), nil
-		}
-		clusterID = cluster.Status.GetID()
+	clusterID, err := r.getClusterID(ctx, service)
+	if err != nil {
+		return common.HandleRequeue(nil, err, service.SetCondition)
 	}
 
 	var repositoryID *string
@@ -233,6 +219,21 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return service.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *ServiceDeploymentReconciler) getClusterID(ctx context.Context, service *v1alpha1.ServiceDeployment) (string, error) {
+	if service.Spec.Cluster != nil {
+		return plural.Cache().GetClusterID(lo.FromPtr(service.Spec.Cluster))
+	}
+	cluster := &v1alpha1.Cluster{}
+	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
+		return "", err
+	}
+
+	if !cluster.Status.HasID() {
+		return "", fmt.Errorf("cluster is not ready")
+	}
+	return cluster.Status.GetID(), nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -351,63 +352,11 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 
 	if service.Spec.Helm != nil {
-		attr.Helm = &console.HelmConfigAttributes{
-			Release:     service.Spec.Helm.Release,
-			ValuesFiles: service.Spec.Helm.ValuesFiles,
-			Version:     service.Spec.Helm.Version,
-			Chart:       service.Spec.Helm.Chart,
-			URL:         service.Spec.Helm.URL,
-			IgnoreHooks: service.Spec.Helm.IgnoreHooks,
-			IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
-			LuaScript:   service.Spec.Helm.LuaScript,
-			LuaFile:     service.Spec.Helm.LuaFile,
-			LuaFolder:   service.Spec.Helm.LuaFolder,
-			Git:         service.Spec.Helm.Git.Attributes(),
+		helm, result, err := r.getHelmAttr(ctx, service)
+		if err != nil || result != nil {
+			return nil, result, err
 		}
-
-		if service.Spec.Helm.Repository != nil {
-			attr.Helm.Repository = &console.NamespacedName{
-				Name:      service.Spec.Helm.Repository.Name,
-				Namespace: service.Spec.Helm.Repository.Namespace,
-			}
-		}
-
-		if service.Spec.Helm.RepositoryRef != nil {
-			ref := service.Spec.Helm.RepositoryRef
-			var repo v1alpha1.GitRepository
-			if err = r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository: %s", err.Error())
-			}
-
-			if !repo.Status.HasID() {
-				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
-			}
-
-			attr.Helm.RepositoryID = repo.Status.ID
-		}
-		if service.Spec.Helm.RepositoryUrl != nil {
-			id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.RepositoryUrl))
-			if err != nil {
-				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
-			}
-			attr.Helm.RepositoryID = lo.ToPtr(id)
-		}
-
-		if service.Spec.Helm.ValuesConfigMapRef != nil {
-			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
-			if err != nil {
-				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting values config map: %s", err.Error())
-			}
-			attr.Helm.Values = &val
-		}
-
-		if service.Spec.Helm.ValuesFrom != nil || service.Spec.Helm.Values != nil {
-			values, err := r.MergeHelmValues(ctx, service.Spec.Helm.ValuesFrom, service.Spec.Helm.Values)
-			if err != nil {
-				return nil, nil, err
-			}
-			attr.Helm.Values = values
-		}
+		attr.Helm = helm
 	}
 
 	if err := r.setSources(ctx, service, attr); err != nil {
@@ -415,6 +364,67 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 	}
 	setRenderers(service, attr)
 
+	return attr, nil, nil
+}
+
+func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *v1alpha1.ServiceDeployment) (*console.HelmConfigAttributes, *ctrl.Result, error) {
+	attr := &console.HelmConfigAttributes{
+		Release:     service.Spec.Helm.Release,
+		ValuesFiles: service.Spec.Helm.ValuesFiles,
+		Version:     service.Spec.Helm.Version,
+		Chart:       service.Spec.Helm.Chart,
+		URL:         service.Spec.Helm.URL,
+		IgnoreHooks: service.Spec.Helm.IgnoreHooks,
+		IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
+		LuaScript:   service.Spec.Helm.LuaScript,
+		LuaFile:     service.Spec.Helm.LuaFile,
+		LuaFolder:   service.Spec.Helm.LuaFolder,
+		Git:         service.Spec.Helm.Git.Attributes(),
+	}
+
+	if service.Spec.Helm.Repository != nil {
+		attr.Repository = &console.NamespacedName{
+			Name:      service.Spec.Helm.Repository.Name,
+			Namespace: service.Spec.Helm.Repository.Namespace,
+		}
+	}
+
+	if service.Spec.Helm.RepositoryRef != nil {
+		ref := service.Spec.Helm.RepositoryRef
+		var repo v1alpha1.GitRepository
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
+			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository: %s", err.Error())
+		}
+
+		if !repo.Status.HasID() {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
+		}
+
+		attr.RepositoryID = repo.Status.ID
+	}
+	if service.Spec.Helm.RepositoryUrl != nil {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.RepositoryUrl))
+		if err != nil {
+			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
+		}
+		attr.RepositoryID = lo.ToPtr(id)
+	}
+
+	if service.Spec.Helm.ValuesConfigMapRef != nil {
+		val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
+		if err != nil {
+			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting values config map: %s", err.Error())
+		}
+		attr.Values = &val
+	}
+
+	if service.Spec.Helm.ValuesFrom != nil || service.Spec.Helm.Values != nil {
+		values, err := r.MergeHelmValues(ctx, service.Spec.Helm.ValuesFrom, service.Spec.Helm.Values)
+		if err != nil {
+			return nil, nil, err
+		}
+		attr.Values = values
+	}
 	return attr, nil, nil
 }
 
@@ -704,7 +714,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
