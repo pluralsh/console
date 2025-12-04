@@ -291,6 +291,10 @@ type ObserverGit struct {
 	// +kubebuilder:validation:Required
 	GitRepositoryRef v1.ObjectReference `json:"gitRepositoryRef"`
 
+	// GitRepositoryUrl references the GitRepository URL containing the source code.
+	// +kubebuilder:validation:Optional
+	GitRepositoryUrl *string `json:"gitRepositoryUrl,omitempty"`
+
 	// Type specifies what Git resources to monitor within the repository.
 	// Currently only TAGS is supported, which monitors for new Git tags.
 	// +kubebuilder:validation:Required

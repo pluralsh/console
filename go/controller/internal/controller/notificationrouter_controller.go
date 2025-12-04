@@ -230,7 +230,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 // SetupWithManager sets up the controller with the Manager.
 func (r *NotificationRouterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.NotificationRouterList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.NotificationRouter{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)

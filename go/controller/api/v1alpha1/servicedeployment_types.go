@@ -350,6 +350,10 @@ type Source struct {
 	// RepositoryRef the reference of the Git repository to source from.
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
+	// RepositoryUrl references the GitRepository URL containing the source code.
+	// +kubebuilder:validation:Optional
+	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
+
 	// Git contains a location in a Git repository to use.
 	Git *GitRef `json:"git,omitempty"`
 }

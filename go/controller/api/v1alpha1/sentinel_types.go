@@ -21,6 +21,10 @@ type SentinelSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
+	// RepositoryUrl references the GitRepository URL containing the source code.
+	// +kubebuilder:validation:Optional
+	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
+
 	// ProjectRef references the project this object belongs to, enabling
 	// project-scoped organization and access control.
 	// +kubebuilder:validation:Optional

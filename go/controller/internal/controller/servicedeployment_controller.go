@@ -432,7 +432,7 @@ func (r *ServiceDeploymentReconciler) setSources(ctx context.Context, service *v
 					Files:  source.Git.Files,
 				}
 			}
-			repositoryID, err := r.getRepository(ctx, source.RepositoryRef)
+			repositoryID, err := r.getRepository(ctx, source.RepositoryRef, source.RepositoryUrl)
 			if err != nil {
 				return err
 			}
@@ -463,8 +463,17 @@ func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDepl
 	}
 }
 
-func (r *ServiceDeploymentReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference) (*string, error) {
+func (r *ServiceDeploymentReconciler) getRepository(ctx context.Context, ref *corev1.ObjectReference, url *string) (*string, error) {
 	var repositoryID *string
+
+	if url != nil {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(url))
+		if err != nil {
+			return nil, err
+		}
+		repositoryID = lo.ToPtr(id)
+	}
+
 	if ref != nil {
 		repository := &v1alpha1.GitRepository{}
 		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, repository); err != nil {
