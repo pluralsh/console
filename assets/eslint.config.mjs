@@ -1,9 +1,7 @@
-import { fixupPluginRules } from '@eslint/compat'
 import importPlugin from 'eslint-plugin-import'
 import prettier from 'eslint-plugin-prettier/recommended'
 import react from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
-import reactCompiler from 'eslint-plugin-react-compiler'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -12,6 +10,7 @@ export default [
   ...tseslint.configs.recommendedTypeChecked,
   react.configs.flat.recommended,
   react.configs.flat['jsx-runtime'],
+  reactHooksPlugin.configs.flat['recommended-latest'],
   importPlugin.flatConfigs.recommended,
   prettier,
   {
@@ -27,17 +26,11 @@ export default [
       },
     },
 
-    plugins: {
-      react,
-      'react-hooks': fixupPluginRules(reactHooksPlugin),
-      'react-compiler': reactCompiler,
-    },
+    plugins: { react },
 
     settings: { react: { version: 'detect' } },
 
     rules: {
-      ...reactHooksPlugin.configs.recommended.rules,
-
       // Typescript
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-redundant-type-constituents': 'off',
@@ -76,8 +69,14 @@ export default [
       'react/prop-types': 'off',
       'react/display-name': 'off',
       'react/jsx-key': 'off',
-      // React Compiler
-      'react-compiler/react-compiler': 'warn',
+
+      // React Compiler rule overrides, these are set to error by the default react-hooks rules
+      // the scenarios causing these warnings should ultimately be fixed and then the warnings removed (so that they actually throw errors moving forward)
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/set-state-in-render': 'warn',
 
       // Prettier
       'prettier/prettier': 'error',

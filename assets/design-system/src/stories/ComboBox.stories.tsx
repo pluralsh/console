@@ -418,7 +418,7 @@ function TagsTemplate({
             dropdownFooter={
               newKey ? (
                 <ListBoxFooterPlus>
-                  Create new tag, '{newKey}'
+                  Create new tag, &apos;{newKey}&apos;
                 </ListBoxFooterPlus>
               ) : undefined
             }

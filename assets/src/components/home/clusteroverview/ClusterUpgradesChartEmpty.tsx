@@ -3,12 +3,6 @@ import { useTheme } from 'styled-components'
 
 export const ClusterUpgradesChartEmpty = () => {
   const { colors } = useTheme()
-  const CenterLabel = createCenteredMetric(
-    `0`,
-    `Clusters`,
-    'text-primary-disabled',
-    'text-primary-disabled'
-  )
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -41,3 +35,10 @@ export const ClusterUpgradesChartEmpty = () => {
     </svg>
   )
 }
+
+const CenterLabel = createCenteredMetric(
+  `0`,
+  `Clusters`,
+  'text-primary-disabled',
+  'text-primary-disabled'
+)
