@@ -583,7 +583,7 @@ defmodule Console.Deployments.Clusters do
         fix = AddOn.upgrade_version(addon, cluster)
         %{
           current: vsn,
-          fix: Map.put(fix, :release_url, release(addon, vsn.version)),
+          fix: Map.put(fix, :release_url, release(addon, fix.version)),
           addon: addon
         }
       end),
