@@ -3,6 +3,7 @@ import { createColumnHelper, Row } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { BoldTextSC } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
+import CopyButton from 'components/utils/CopyButton'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import {
@@ -94,7 +95,12 @@ export function UpgradesConsolidatedTable({
       getRowIsClickable={(row) => !isEmpty(row.original.images)}
       renderExpanded={({ row }: { row: Row<AddonOverview> }) => (
         <div>
-          <CaptionP $color="text-xlight">Images needed to procure:</CaptionP>
+          <CaptionP
+            $color="text-xlight"
+            css={{ userSelect: 'none' }}
+          >
+            Images needed to procure:
+          </CaptionP>
           {row.original.images?.map((image) => (
             <CaptionP key={image}>{image}</CaptionP>
           ))}
@@ -163,4 +169,32 @@ const cols = [
     header: 'Release notes',
     cell: ({ getValue }) => <InlineA href={getValue()}>{getValue()}</InlineA>,
   }),
+  columnHelper.accessor((row) => row, {
+    id: 'copy',
+    header: (ctx) => (
+      <CopyButton
+        type="tertiary"
+        tooltip="Copy table as markdown"
+        text={overviewDataToMarkdown(ctx.table.options.data)}
+      />
+    ),
+    cell: () => null,
+  }),
 ]
+
+const overviewDataToMarkdown = (data: AddonOverview[]) =>
+  isEmpty(data)
+    ? ''
+    : `\
+  | Add-on | Type | Recommendation | Release Notes | Images |
+  | ------ | ---- | -------------- | ------------- | ------ |
+  ${data
+    .map((addon) => {
+      const type = addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm'
+      const recommendation = addon.fixVersion
+        ? `${addon.currentVersion ?? '--'} → ${addon.fixVersion}`
+        : 'No available versions found'
+
+      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${addon.images?.join(', ') || '--'} |`
+    })
+    .join('\n')}`
