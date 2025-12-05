@@ -26,6 +26,40 @@ fragment ClusterUpgradeDeprecatedCustomResource on DeprecatedCustomResource {
   nextVersion
 }
 
+fragment RuntimeAddonVersion on AddonVersion {
+  version
+  images
+  releaseUrl
+}
+fragment CloudAddonVersion on CloudAddonVersionInformation {
+  version
+}
+
+fragment RuntimeAddonUpgrade on RuntimeAddonUpgrade {
+  addon {
+    name
+    icon
+  }
+  current {
+    ...RuntimeAddonVersion
+  }
+  fix {
+    ...RuntimeAddonVersion
+  }
+}
+fragment CloudAddonUpgrade on CloudAddonUpgrade {
+  addon {
+    name
+    distro
+  }
+  current {
+    ...CloudAddonVersion
+  }
+  fix {
+    ...CloudAddonVersion
+  }
+}
+
 fragment ClusterUpgrade on Cluster {
   ...ClusterRuntimeServices
   prAutomations {
@@ -33,6 +67,14 @@ fragment ClusterUpgrade on Cluster {
   }
   deprecatedCustomResources {
     ...ClusterUpgradeDeprecatedCustomResource
+  }
+  upgradePlanSummary {
+    blockingAddons {
+      ...RuntimeAddonUpgrade
+    }
+    blockingCloudAddons {
+      ...CloudAddonUpgrade
+    }
   }
 }
 

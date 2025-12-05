@@ -17,10 +17,5 @@ export default createIcon(({ size, color }) => (
       stroke={color}
       strokeMiterlimit="10"
     />
-    <path
-      d="M5.7998 6.80005V11.4H7.8998"
-      stroke={color}
-      strokeMiterlimit="10"
-    />
   </svg>
 ))

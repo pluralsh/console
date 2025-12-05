@@ -3,28 +3,25 @@ import {
   FillLevelProvider,
   Flex,
   Flyover,
-  GitPullIcon,
-  KubernetesIcon,
 } from '@pluralsh/design-system'
 import {
   ClustersRowFragment,
   useClusterOverviewDetailsQuery,
 } from 'generated/graphql'
 
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts.tsx'
 import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
-import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
 import { getClusterKubeVersion } from '../runtime/RuntimeServices.tsx'
 import { HealthScoreTab } from './health/HealthScoreTab.tsx'
 import { OverviewTab } from './overview/OverviewTab.tsx'
 import { UpgradeAccordionName, UpgradesTab } from './upgrades/UpgradesTab.tsx'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 
 const MIN_WIDTH = 920
 
@@ -71,19 +68,17 @@ export function ClusterInfoFlyover({
           <Flex gap="small">
             <Button
               small
-              secondary
+              tertiary
               as={Link}
               to={getKubernetesAbsPath(cluster?.id ?? '')}
-              startIcon={<KubernetesIcon />}
             >
               View in K8s Dashboard
             </Button>
             <Button
               small
-              secondary
+              tertiary
               as={Link}
               to={getClusterDetailsPath({ clusterId: cluster?.id })}
-              startIcon={<GitPullIcon />}
             >
               View in CD
             </Button>
@@ -132,8 +127,6 @@ function ClusterInfoFlyoverContent({
   if (!cluster) return loading ? <LoadingIndicator /> : null
   if (error) return <GqlError error={error} />
 
-  const { chipLabel } = getClusterUpgradeInfo(cluster)
-
   return (
     <FillLevelProvider value={0}>
       <Flex
@@ -145,7 +138,7 @@ function ClusterInfoFlyoverContent({
         <ButtonGroup
           directory={Object.values(ClusterInfoFlyoverTab).map((value) => ({
             path: value,
-            label: `${value}${value === ClusterInfoFlyoverTab.Upgrades ? ` (${chipLabel})` : value === ClusterInfoFlyoverTab.HealthScore ? ` (${cluster?.healthScore})` : ''}`,
+            label: value,
           }))}
           tab={tab}
           onClick={(path) => setTab(path as ClusterInfoFlyoverTab)}
