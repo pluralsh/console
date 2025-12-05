@@ -843,7 +843,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve fn
         %{release_url: release_url}, _, _ when is_binary(release_url) -> {:ok, release_url}
         %{addon: addon}, %{version: version}, _ when is_binary(version) -> Clusters.release(addon, version)
-        _, _, _ -> {:ok, nil}
+        addon, _, _ ->
+          IO.inspect(addon, label: "addon")
+          {:ok, nil}
       end
     end
 
