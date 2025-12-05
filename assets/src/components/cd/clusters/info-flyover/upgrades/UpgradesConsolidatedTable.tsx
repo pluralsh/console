@@ -92,7 +92,9 @@ export function UpgradesConsolidatedTable({
       getRowCanExpand={(row: Row<AddonOverview>) =>
         !isEmpty(row.original.images)
       }
-      getRowIsClickable={(row) => !isEmpty(row.original.images)}
+      getRowIsClickable={(row: Row<AddonOverview>) =>
+        !isEmpty(row.original?.images)
+      }
       renderExpanded={({ row }: { row: Row<AddonOverview> }) => (
         <div>
           <CaptionP
