@@ -75,7 +75,7 @@ RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.21
+ENV CLI_VERSION=v0.12.23
 
 COPY AGENT_VERSION AGENT_VERSION
 
