@@ -10575,6 +10575,8 @@ export type RuntimeAddon = {
   gitUrl?: Maybe<Scalars['String']['output']>;
   /** an icon to identify this runtime add-on */
   icon?: Maybe<Scalars['String']['output']>;
+  /** add-on name */
+  name: Scalars['String']['output'];
   /** the add-on's readme, this is a heavy operation that should not be performed w/in lists */
   readme?: Maybe<Scalars['String']['output']>;
   /** the release page for a runtime service at a version, this is a heavy operation not suitable for lists */

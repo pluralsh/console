@@ -6293,6 +6293,8 @@ type RunningState struct {
 
 // a full specification of a kubernetes runtime component's requirements
 type RuntimeAddon struct {
+	// add-on name
+	Name string `json:"name"`
 	// an icon to identify this runtime add-on
 	Icon *string `json:"icon,omitempty"`
 	// the url to the add-ons git repository
