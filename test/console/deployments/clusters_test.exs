@@ -1365,6 +1365,19 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#upgrade_plan/1" do
+    test "it can get the upgrade plan for a cluster" do
+      cluster = insert(:cluster, current_version: "1.33.1")
+      insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.13.0")
+
+      %{blocking_addons: [blocker]} = Clusters.upgrade_plan(cluster)
+
+      assert is_binary(blocker.fix.release_url)
+      assert blocker.fix.version
+      assert blocker.addon.name == "ingress-nginx"
+    end
+  end
+
   describe "#create_cluster_registration/2" do
     test "project writers can create registrations" do
       user = insert(:user)
