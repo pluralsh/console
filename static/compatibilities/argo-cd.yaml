@@ -3,62 +3,60 @@ git_url: https://github.com/argoproj/argo-cd
 release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
+- version: 3.2.1
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  chart_version: 9.1.6
+  images: []
 - version: 3.2.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   chart_version: 9.1.4
-  images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.2.0']
+  images: []
 - version: 3.1.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   chart_version: 8.3.3
-  images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.1.1']
+  images: []
 - version: 3.1.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 8.3.0
-  images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.43.1',
-    'quay.io/argoproj/argocd:v3.1.0']
+  images: []
 - version: 3.0.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 8.0.1
-  images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
-    'quay.io/argoproj/argocd:v3.0.0']
+  images: []
 - version: 2.14.11
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   chart_version: 7.9.1
-  images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
-    'quay.io/argoproj/argocd:v2.14.11']
+  images: []
 - version: 2.14.1
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   chart_version: 7.8.0
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
-    'quay.io/argoproj/argocd:v2.14.1']
+  images: []
 - version: 2.13.2
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   chart_version: 7.7.12
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-    'quay.io/argoproj/argocd:v2.13.2']
+  images: []
 - version: 2.13.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   chart_version: 7.7.3
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-    'quay.io/argoproj/argocd:v2.13.0']
+  images: []
 - version: 2.12.4
   kube: ['1.31', '1.30', '1.29']
   requirements: []
