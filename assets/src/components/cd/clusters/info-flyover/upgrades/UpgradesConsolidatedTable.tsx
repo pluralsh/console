@@ -197,6 +197,6 @@ const overviewDataToMarkdown = (data: AddonOverview[]) =>
         ? `${addon.currentVersion ?? '--'} → ${addon.fixVersion}`
         : 'No available versions found'
 
-      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${addon.images?.join(', ') || '--'} |`
+      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${addon.images?.join('<br>') || '--'} |`
     })
     .join('\n')}`
