@@ -81,6 +81,7 @@ function Table({
   reactTableOptions,
   highlightedRowId,
   onRowClick,
+  getRowIsClickable,
   getRowLink,
   emptyStateProps,
   hasNextPage,
@@ -372,13 +373,23 @@ function Table({
                               ? rowVirtualizer.measureElement
                               : undefined
                           }
-                          onClick={(e) => onRowClick?.(e, tableRow)}
+                          onClick={(e) => {
+                            if (
+                              !getRowIsClickable ||
+                              !!getRowIsClickable(tableRow)
+                            )
+                              onRowClick?.(e, tableRow)
+                          }}
                           $fillLevel={fillLevel}
                           $raised={isRaised(i)}
                           $highlighted={tableRow?.id === highlightedRowId}
                           $selectable={tableRow?.getCanSelect() ?? false}
                           $selected={tableRow?.getIsSelected() ?? false}
-                          $clickable={!!onRowClick || !!getRowLink}
+                          $clickable={
+                            !!getRowIsClickable
+                              ? getRowIsClickable(tableRow)
+                              : !!onRowClick || !!getRowLink
+                          }
                         >
                           {isNil(tableRow) && isLoaderRow ? (
                             <TdLoading
