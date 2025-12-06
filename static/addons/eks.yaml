@@ -7345,6 +7345,16 @@
   publisher: Uptycs
 - name: upwind-security_upwind-operator
   versions:
+  - version: v0.6.39-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.5.25-eksbuild.1
     compatibilities:
     - '1.31'
