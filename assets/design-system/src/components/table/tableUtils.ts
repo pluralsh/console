@@ -47,6 +47,7 @@ export type TableBaseProps = {
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
+  getRowIsClickable?: (row: Row<any>) => boolean
   getRowLink?: (row: Row<unknown>) => Nullable<string | ReactElement>
   emptyStateProps?: EmptyStateProps
   hasNextPage?: boolean

@@ -14,9 +14,10 @@ import styled, {
   useTheme,
 } from 'styled-components'
 
-import { DropdownArrowIcon } from '../icons'
+import { CaretDownIcon } from '../icons'
 
 import Card from './Card'
+import IconFrame from './IconFrame'
 
 export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
@@ -45,6 +46,7 @@ function AccordionItem({
   value,
   padding = 'relaxed',
   paddingArea = 'all',
+  paddedCaret = false,
   caret = 'right',
   trigger,
   additionalContentStyles,
@@ -54,6 +56,7 @@ function AccordionItem({
   value?: string
   padding?: 'none' | 'compact' | 'relaxed'
   paddingArea?: 'trigger-only' | 'all'
+  paddedCaret?: boolean
   caret?: 'none' | 'left' | 'right'
   trigger: ReactNode
   children: ReactNode
@@ -74,12 +77,15 @@ function AccordionItem({
           $padding={paddingSize}
         >
           {trigger}
-          {caret !== 'none' && (
-            <DropdownArrowIcon
-              className="icon"
-              size={14}
-            />
-          )}
+          {caret !== 'none' &&
+            (paddedCaret ? (
+              <IconFrame icon={<CaretDownIcon className="icon" />} />
+            ) : (
+              <CaretDownIcon
+                className="icon"
+                size={14}
+              />
+            ))}
         </TriggerSC>
       </RadixAccordion.Header>
       <ContentSC css={additionalContentStyles}>
@@ -133,26 +139,27 @@ const TriggerSC = styled(RadixAccordion.Trigger)<{
   ...($padding ? { padding: $padding } : {}),
   display: 'flex',
   flexDirection: $caret === 'left' ? 'row-reverse' : 'row',
-  justifyContent: 'space-between',
+  justifyContent: $caret === 'left' ? 'flex-end' : 'space-between',
+  gap: theme.spacing.small,
   alignItems: 'center',
   cursor: 'pointer',
   ...theme.partials.text.body2Bold,
   color: theme.colors.text,
+  '&:focus-visible': { ...theme.partials.focus.default },
+  // if the icon is on the left, it should rotate a quarter from -90deg to 0deg on open
+  // if it's on the right, it should act like a normal dropdown and flip from up to down
   '.icon': {
     color: theme.colors['icon-xlight'],
-    transform: 'scaleY(100%)',
-    transition: 'transform 0.3s ease',
+    rotate: $caret === 'left' ? '-90deg' : '0deg',
+    transition: 'rotate 0.3s ease, scale 0.3s ease',
   },
-  '&:hover': {
-    '.icon': {
-      transform: 'scale(115%)',
-    },
-  },
-  '&:focus-visible': {
-    ...theme.partials.focus.default,
-  },
+  '&:hover': { '.icon': { scale: '1.16' } },
   '&[data-state="open"] .icon': {
-    transform: 'scaleY(-100%)',
+    rotate: '0deg',
+    scale: $caret === 'right' ? '-1' : '1',
+  },
+  '&[data-state="open"]:hover .icon': {
+    scale: $caret === 'right' ? '-1.16' : '1.16',
   },
 }))
 

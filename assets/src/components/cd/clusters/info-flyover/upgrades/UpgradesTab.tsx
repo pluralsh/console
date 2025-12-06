@@ -2,12 +2,10 @@ import { ApolloError } from '@apollo/client'
 import {
   Accordion,
   AccordionItem,
-  AppIcon,
-  ChecklistIcon,
   Chip,
   ChipProps,
   ConfettiIcon,
-  IconProps,
+  Flex,
   SuccessIcon,
   Tab,
   Table,
@@ -23,28 +21,31 @@ import {
   UpgradeInsightStatus,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { ComponentType, useMemo, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useMemo, useRef, useState } from 'react'
+import { useTheme } from 'styled-components'
 
-import { GqlError } from '../../../utils/Alert.tsx'
+import { GqlError } from '../../../../utils/Alert.tsx'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { produce } from 'immer'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
-import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
-import { clusterDeprecatedCustomResourcesColumns } from '../clusterDeprecatedCustomResourcesColumns.tsx'
-import { getClusterUpgradeInfo } from '../ClusterUpgradeButton.tsx'
+import { ClusterDistroShortNames } from '../../../../utils/ClusterDistro.tsx'
+import { clusterDeprecatedCustomResourcesColumns } from '../../clusterDeprecatedCustomResourcesColumns.tsx'
+import { getClusterUpgradeInfo } from '../../ClusterUpgradeButton.tsx'
 import {
   clusterPreFlightCols,
   clusterUpgradeColumns,
   initialClusterPreFlightItems,
-} from '../clusterUpgradeColumns.tsx'
-import { deprecationsColumns } from '../deprecationsColumns.tsx'
-import CloudAddons from '../runtime/CloudAddons.tsx'
-import { RuntimeServices } from '../runtime/RuntimeServices.tsx'
+} from '../../clusterUpgradeColumns.tsx'
+import { deprecationsColumns } from '../../deprecationsColumns.tsx'
+import CloudAddons from '../../runtime/CloudAddons.tsx'
+import { RuntimeServices } from '../../runtime/RuntimeServices.tsx'
 import {
   UpgradeInsightExpansionPanel,
   upgradeInsightsColumns,
-} from '../UpgradeInsights.tsx'
+} from '../../UpgradeInsights.tsx'
+import { UpgradesConsolidatedTable } from './UpgradesConsolidatedTable.tsx'
 
 enum DeprecationType {
   GitOps = 'gitOps',
@@ -131,13 +132,19 @@ export function UpgradesTab({
   }
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.large,
-      }}
+    <Flex
+      direction="column"
+      gap="large"
     >
+      <StackedText
+        first="Recommended upgrades"
+        firstPartialType="subtitle1"
+        firstColor="text"
+        second="These add-ons are currently blocking your cluster upgrade"
+        secondPartialType="body2"
+        secondColor="text-xlight"
+      />
+      <UpgradesConsolidatedTable cluster={cluster} />
       {upgradeError && (
         <GqlError
           header="Could not upgrade cluster"
@@ -145,9 +152,11 @@ export function UpgradesTab({
         />
       )}
       <Table
+        hideHeader
         data={[cluster]}
         columns={clusterUpgradeColumns}
         reactTableOptions={{ meta: { refetch, setError } }}
+        padding={theme.spacing.medium}
       />
       <div css={{ ...theme.partials.text.body1Bold }}>
         Upgrade blockers ({numUpgradeBlockers})
@@ -162,11 +171,12 @@ export function UpgradesTab({
       >
         <AccordionItem
           value={UpgradeAccordionName.Preflight}
+          paddedCaret
+          caret="left"
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
               checked={preFlightChecklist.every((i) => i.value)}
-              icon={ChecklistIcon}
               title="Pre-flight checklist"
               subtitle="Ensure your K8s infrastructure is upgrade-ready"
             />
@@ -192,11 +202,12 @@ export function UpgradesTab({
       >
         <AccordionItem
           value={UpgradeAccordionName.Deprecations}
+          paddedCaret
+          caret="left"
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
               checked={!!cluster?.upgradePlan?.deprecations}
-              icon={ChecklistIcon}
               title="Check API deprecations"
               subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
             />
@@ -300,11 +311,12 @@ export function UpgradesTab({
       >
         <AccordionItem
           value={UpgradeAccordionName.AddOns}
+          paddedCaret
+          caret="left"
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
               checked={!!cluster?.upgradePlan?.compatibilities}
-              icon={ChecklistIcon}
               title="Check add-on compatibilities"
               subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
             />
@@ -390,11 +402,12 @@ export function UpgradesTab({
       >
         <AccordionItem
           value={UpgradeAccordionName.CustomResources}
+          paddedCaret
+          caret="left"
           paddingArea="trigger-only"
           trigger={
             <ClusterUpgradeAccordionTrigger
               checked={isEmpty(cluster?.deprecatedCustomResources)}
-              icon={ChecklistIcon}
               title="Deprecated custom resources"
               subtitle="Ensure all custom resources are updated to the version required for upgrade"
             />
@@ -415,7 +428,7 @@ export function UpgradesTab({
       </Accordion>
       {/* helpful spacer because bottom padding may get covered, can remove if the layout changes */}
       <div css={{ minHeight: 1 }} />
-    </div>
+    </Flex>
   )
 }
 
@@ -443,53 +456,38 @@ function EmptyState({ description }) {
 }
 
 function ClusterUpgradeAccordionTrigger({
-  icon: Icon,
   title,
   subtitle,
   checked,
 }: {
-  icon: ComponentType<IconProps>
   title: string
   subtitle?: string
   checked: boolean
 }) {
-  const theme = useTheme()
-
   return (
-    <TriggerWrapperSC>
-      <AppIcon
-        spacing="padding"
-        size="xxsmall"
-        icon={
-          checked ? (
-            <SuccessIcon color="icon-success" />
-          ) : (
-            <Icon color="icon-warning" />
-          )
-        }
+    <StretchedFlex>
+      <StackedText
+        first={title}
+        firstPartialType="body1Bold"
+        firstColor="text"
+        second={subtitle}
+        secondPartialType="body2"
+        secondColor="text-light"
       />
-      <div css={{ display: 'flex', flexDirection: 'column' }}>
-        <span css={theme.partials.text.body1Bold}>{title}</span>
-        <span
-          css={{
-            ...theme.partials.text.body2,
-            color: theme.colors['text-light'],
-          }}
-        >
-          {subtitle}
-        </span>
-      </div>
-    </TriggerWrapperSC>
+      {checked ? (
+        <SuccessIcon
+          size="18"
+          color="icon-success"
+        />
+      ) : (
+        <WarningIcon
+          size="18"
+          color="icon-warning"
+        />
+      )}
+    </StretchedFlex>
   )
 }
-
-const TriggerWrapperSC = styled.div(({ theme }) => ({
-  gap: theme.spacing.large,
-  cursor: 'pointer',
-  fontSize: '18px',
-  display: 'flex',
-  alignItems: 'center',
-}))
 
 export const getPreFlightChecklist = (
   upgradePlan: Nullable<ClusterUpgradePlanFragment>

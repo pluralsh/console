@@ -1,14 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  CheckIcon,
-  Chip,
-  ClusterIcon,
-  Flex,
-  IconFrame,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { CheckIcon, Chip, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
@@ -33,6 +25,7 @@ import { TabularNumbers } from '../../cluster/TableElements'
 
 import { ClusterUpgradePR } from './ClusterUpgradePR'
 
+import { StackedText } from 'components/utils/table/StackedText'
 import { ClustersUpgradeNow } from './ClustersUpgradeNow'
 
 type PreFlightChecklistItem = {
@@ -51,31 +44,34 @@ const columnHelperPreFlight = createColumnHelper<PreFlightChecklistItem>()
 export const clusterUpgradeColumns = [
   columnHelperUpgrade.accessor(({ name }) => name, {
     id: 'cluster',
-    header: 'Cluster',
     cell: ({ getValue }) => (
-      <Flex
-        gap="xsmall"
-        alignItems="center"
-      >
-        <IconFrame
-          type="floating"
-          icon={<ClusterIcon />}
-        />
-        <span css={{ whiteSpace: 'nowrap' }}>{getValue()}</span>
-      </Flex>
+      <StackedText
+        first="Cluster"
+        firstPartialType="caption"
+        firstColor="text-xlight"
+        second={getValue()}
+        secondPartialType="body2"
+        secondColor="text"
+      />
     ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
     id: 'version',
-    header: 'Current version',
-    cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
+    cell: ({ getValue }) => (
+      <StackedText
+        first="Current version"
+        firstPartialType="caption"
+        firstColor="text-xlight"
+        second={toNiceVersion(getValue())}
+        secondPartialType="body2"
+        secondColor="text"
+      />
+    ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
-    meta: {
-      gridTemplate: 'fit-content(500px)',
-    },
+    meta: { gridTemplate: 'fit-content(500px)' },
     cell: function Cell({ table, getValue, row: { original } }) {
       const theme = useTheme()
       const cluster = getValue()
@@ -96,19 +92,17 @@ export const clusterUpgradeColumns = [
       }
 
       useEffect(() => {
-        if (!upgrades.some((upgrade) => upgrade === targetVersion)) {
+        if (!upgrades.some((upgrade) => upgrade === targetVersion))
           setTargetVersion(undefined)
-        }
       }, [targetVersion, upgrades])
 
-      if (!!cluster.prAutomations && cluster.prAutomations.length > 0) {
+      if (!!cluster.prAutomations && cluster.prAutomations.length > 0)
         return (
           <ClusterUpgradePR
             prs={cluster.prAutomations}
             setError={setError}
           />
         )
-      }
 
       if (isEmpty(upgrades) || original.self) return null
 
@@ -122,6 +116,7 @@ export const clusterUpgradeColumns = [
         >
           <div css={{ minWidth: 170 }}>
             <Select
+              size="small"
               label="Select version"
               selectedKey={targetVersion}
               onSelectionChange={setTargetVersion as any}
