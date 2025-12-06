@@ -41,10 +41,16 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_pull_request_attributes do
-    field :title,      non_null(:string), description: "the title of the pull request"
-    field :body,       non_null(:string), description: "the body of the pull request"
-    field :base,       non_null(:string), description: "the base branch of the pull request"
-    field :head,       non_null(:string), description: "the head branch of the pull request"
+    field :title,       non_null(:string), description: "the title of the pull request"
+    field :body,        non_null(:string), description: "the body of the pull request"
+    field :base,        non_null(:string), description: "the base branch of the pull request"
+    field :head,        non_null(:string), description: "the head branch of the pull request"
+    field :commit_shas, list_of(:commit_sha_attributes), description: "the commit shas of the pull request"
+  end
+
+  input_object :commit_sha_attributes do
+    field :sha,    non_null(:string), description: "the sha of the commit"
+    field :branch, non_null(:string), description: "the branch of the commit"
   end
 
   input_object :agent_todo_attributes do

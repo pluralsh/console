@@ -1339,6 +1339,17 @@ input AgentPullRequestAttributes {
 
   "the head branch of the pull request"
   head: String!
+
+  "the commit shas of the pull request"
+  commitShas: [CommitShaAttributes]
+}
+
+input CommitShaAttributes {
+  "the sha of the commit"
+  sha: String!
+
+  "the branch of the commit"
+  branch: String!
 }
 
 input AgentTodoAttributes {

@@ -11,16 +11,17 @@ defmodule Console.Schema.ScmConnection do
     bitbucket_datacenter: 4
 
   schema "scm_connections" do
-    field :name,     :string
-    field :default,  :boolean
-    field :type,     Type
-    field :base_url, :string
-    field :api_url,  :string
-    field :username, :string
-    field :token,    EncryptedString
-    field :dir,      :string, virtual: true
-    field :author,   :map, virtual: true
-    field :branch,   :string, virtual: true
+    field :name,        :string
+    field :default,     :boolean
+    field :type,        Type
+    field :base_url,    :string
+    field :api_url,     :string
+    field :username,    :string
+    field :token,       EncryptedString
+    field :dir,         :string, virtual: true
+    field :author,      :map, virtual: true
+    field :branch,      :string, virtual: true
+    field :commit_shas, :map, virtual: true
 
     embeds_one :github, GithubApp, on_replace: :update do
       field :app_id,          :string

@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Git do
   alias Console.Jwt.Github
-  alias Console.Schema.{ScmConnection, User}
+  alias Console.Schema.{ScmConnection, User, PrAutomation}
 
   @type git_resp :: {:ok, binary} | Console.error
 
@@ -49,8 +49,12 @@ defmodule Console.Deployments.Pr.Git do
   def push(%ScmConnection{} = conn),
     do: git(conn, "push", [])
 
-  @spec sha(ScmConnection.t, binary) :: git_resp
+  @spec sha(ScmConnection.t | PrAutomation.t, binary) :: git_resp
+  def sha(%PrAutomation{connection: %ScmConnection{} = conn}, branch), do: sha(conn, branch)
+  def sha(%ScmConnection{commit_shas: %{} = shas}, branch) when map_size(shas) > 0,
+    do: {:ok, Map.get(shas, branch)}
   def sha(%ScmConnection{} = conn, branch), do: git(conn, "rev-parse", ["#{branch}"])
+  def sha(_, _), do: {:error, "no connection or pr automation provided"}
 
   def git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
     case System.cmd("git", [cmd | args], opts(conn)) do
