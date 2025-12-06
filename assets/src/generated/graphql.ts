@@ -378,6 +378,8 @@ export type AgentPullRequestAttributes = {
   base: Scalars['String']['input'];
   /** the body of the pull request */
   body: Scalars['String']['input'];
+  /** the commit shas of the pull request */
+  commitShas?: InputMaybe<Array<InputMaybe<CommitShaAttributes>>>;
   /** the head branch of the pull request */
   head: Scalars['String']['input'];
   /** the title of the pull request */
@@ -2737,6 +2739,13 @@ export type CommandAttributes = {
   args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cmd: Scalars['String']['input'];
   dir?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CommitShaAttributes = {
+  /** the branch of the commit */
+  branch: Scalars['String']['input'];
+  /** the sha of the commit */
+  sha: Scalars['String']['input'];
 };
 
 export enum ComplianceReportFormat {

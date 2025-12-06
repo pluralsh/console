@@ -9,7 +9,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   defmodule Connection do
     defstruct [:host, :password, :username]
 
-    def new(host, username, password), do: {:ok, %__MODULE__{host: host, username: username, password: password}}
+    def new(host, username, password), do: %__MODULE__{host: host, username: username, password: password}
 
     def headers(%__MODULE__{username: username, password: password}) do
       [
@@ -29,12 +29,12 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
         fromRef: %{
           displayId: branch,
           id: "refs/heads/#{branch}",
-          latestCommit: sha(conn, branch)
+          latestCommit: sha(pr, branch)
         },
         toRef: %{
           displayId: base_branch,
           id: "refs/heads/#{base_branch}",
-          latestCommit: sha(conn, base_branch)
+          latestCommit: sha(pr, base_branch)
         },
         title: title,
         description: body,
@@ -157,6 +157,6 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp to_url(%Connection{host: host}, project, slug, id) do
     host = String.trim_trailing(host, "/rest/api/latest")
-    Path.join([host, "projects", project, "repos", slug, "pull-requests", id])
+    Path.join([host, "projects", project, "repos", slug, "pull-requests", "#{id}"])
   end
 end

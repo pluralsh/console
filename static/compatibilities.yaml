@@ -862,6 +862,7 @@ addons:
 - icon: https://avatars.githubusercontent.com/u/21054566?s=48&v=4
   release_url: https://github.com/cilium/cilium/releases/tag/{vsn}
   helm_repository_url: https://helm.cilium.io/
+  helm_values: debug.verbose=null
   versions:
   - version: 1.18.4
     kube: ['1.34', '1.33', '1.32']
@@ -987,15 +988,8 @@ addons:
     chart_version: 1.15.8
     images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
       'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
-  - version: 1.15.5
-    kube: ['1.30', '1.29', '1.28']
-    requirements: []
-    incompatibilities: []
-    chart_version: 1.15.5
-    images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
-      'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
   - version: 1.15.0
-    kube: ['1.29', '1.28', '1.27']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 1.15.0
@@ -1022,15 +1016,8 @@ addons:
     chart_version: 1.14.14
     images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
       'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
-  - version: 1.14.11
-    kube: ['1.30', '1.29', '1.28']
-    requirements: []
-    incompatibilities: []
-    chart_version: 1.14.11
-    images: ['quay.io/cilium/cilium:v1.14.11@sha256:2b2118042dc6efe88dbc40c78909b6afd72b369896782ce38d132435724ee269',
-      'quay.io/cilium/operator-generic:v1.14.11@sha256:df76f71a06f1c681848bfa86fdd99243af593d33034c9e2057c6af969bc25109']
   - version: 1.14.6
-    kube: ['1.29', '1.28', '1.27']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 1.14.6
@@ -1043,15 +1030,8 @@ addons:
     chart_version: 1.14.0
     images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
       'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
-  - version: 1.13.16
-    kube: ['1.30', '1.29', '1.28']
-    requirements: []
-    incompatibilities: []
-    chart_version: 1.13.16
-    images: ['quay.io/cilium/cilium:v1.13.16@sha256:f1f26a973419ba449a47a08e8c4c8e280d8941bb4fd77d1e992e2721425c0629',
-      'quay.io/cilium/operator-generic:v1.13.16@sha256:a2711d5b891da9fd66c2116b77782b58a1a428eb4abdab2dd3ac1221937d846b']
   - version: 1.13.11
-    kube: ['1.29', '1.28', '1.27']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 1.13.11
@@ -1065,6 +1045,13 @@ addons:
     chart_version: 1.13.0
     images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
       'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
+  - version: 1.12.19
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 1.12.19
+    images: ['quay.io/cilium/cilium:v1.12.19@sha256:b997994ab759443d9fc9807eb39b4784bf03e13730a8132ffe5df3edef22a312',
+      'quay.io/cilium/operator-generic:v1.12.19@sha256:da4d72facecde862c88d08bf99c3f476845beb407052a0cc4c06b68cc93b7570']
   - version: 1.12.18
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -1738,15 +1725,13 @@ addons:
   helm_values: settings.clusterName=example
   versions:
   - version: 1.8.0
-    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-      '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 1.8.0
     images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
   - version: 1.5.0
-    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-      '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     chart_version: 1.5.0
@@ -1862,6 +1847,16 @@ addons:
   readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/README.md
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   versions:
+  - version: 79.12.0
+    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+      '1.25']
+    requirements: []
+    incompatibilities: []
+    chart_version: 79.12.0
+    images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
+      'quay.io/prometheus-operator/prometheus-operator:v0.86.2', 'quay.io/prometheus/alertmanager:v0.29.0',
+      'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 79.8.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
@@ -3182,6 +3177,13 @@ addons:
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
   versions:
+  - version: 3.2.1
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.1.6
+    images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
+      'quay.io/argoproj/argocd:v3.2.1']
   - version: 3.2.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []

@@ -49,10 +49,10 @@ def parse_table(table):
     return min_map
 
 
-def extract_table_data(target_tables):
-    if len(target_tables) < 2:
-        print_error("Insufficient data in target tables.")
-        return []
+def build_rows_from_table(table):
+    min_map = parse_table(table)
+    if not min_map:
+        return {}
 
     version_sets = {}
     versions = sorted({v for v in min_map.values()}, key=lambda s: validate_semver(s))
@@ -62,19 +62,25 @@ def extract_table_data(target_tables):
         if not ver_sem:
             continue
 
-        if kar_ver:
-            ver = str(kar_ver)
-            version_info = OrderedDict(
-                {
-                    "version": ver,
-                    "kube": expanded_k8s_ver,
-                    "chart_version": str(kar_ver),
-                    "images": [],
-                    "requirements": [],
-                    "incompatibilities": [],
-                }
-            )
-            rows.append(version_info)
+        kube_versions = []
+        for kube, required in min_map.items():
+            req_sem = validate_semver(required)
+            if req_sem and req_sem <= ver_sem:
+                kube_versions.append(kube)
+
+        if kube_versions:
+            version_sets.setdefault(ver, set()).update(kube_versions)
+
+    rows = {}
+    for ver, kube_set in version_sets.items():
+        kube_sorted = sorted(kube_set, key=lambda k: Version(k), reverse=True)
+        rows[ver] = OrderedDict([
+            ("version", ver),
+            ("chart_version", ver),
+            ("kube", kube_sorted),
+            ("requirements", []),
+            ("incompatibilities", []),
+        ])
 
     return rows
 
@@ -85,22 +91,13 @@ def scrape():
     if not page_content:
         return
 
-    sections = parse_page(page_content)
-    target_tables = find_target_tables(sections)
-    if len(target_tables) >= 1:
-        rows = extract_table_data(target_tables)
-        update_compatibility_info(
-            f"../../static/compatibilities/{app_name}.yaml", rows
-        )
-    else:
-        print_error("No compatibility information found.")
 
     table = find_compatibility_table(page_content)
     if table is None:
         print_error("No compatibility information found.")
         return
 
-    page_rows = build_rows_from_table(table, chart_versions)
+    page_rows = build_rows_from_table(table)
     if not page_rows:
         print_error("No compatibility information found.")
         return

@@ -311,6 +311,8 @@ type AgentPullRequestAttributes struct {
 	Base string `json:"base"`
 	// the head branch of the pull request
 	Head string `json:"head"`
+	// the commit shas of the pull request
+	CommitShas []*CommitShaAttributes `json:"commitShas,omitempty"`
 }
 
 type AgentRun struct {
@@ -2209,6 +2211,13 @@ type CommandAttributes struct {
 	Cmd  string    `json:"cmd"`
 	Args []*string `json:"args,omitempty"`
 	Dir  *string   `json:"dir,omitempty"`
+}
+
+type CommitShaAttributes struct {
+	// the sha of the commit
+	Sha string `json:"sha"`
+	// the branch of the commit
+	Branch string `json:"branch"`
 }
 
 type ComplianceReportGenerator struct {
