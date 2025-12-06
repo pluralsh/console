@@ -323,6 +323,7 @@ defmodule Console.Deployments.Cron do
     Logger.info "pruning dangling helm repositories"
     Service.helm_repos()
     |> Repo.all()
+    |> Enum.filter(&is_binary/1)
     |> Console.Schema.HelmRepository.without_urls()
     |> Repo.delete_all(timeout: 300_000)
   end
