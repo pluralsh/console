@@ -24,5 +24,8 @@ defmodule Console.AI.Vector.Content do
   def decode("catalog", data), do: %Response{type: :catalog, catalog: Catalog.Mini.new(data)}
   def decode(:catalog, data), do: %Response{type: :catalog, catalog: Catalog.Mini.new(data)}
 
+  def decode("cluster", data), do: %Response{type: :cluster, cluster: Cluster.Mini.new(data)}
+  def decode(:cluster, data), do: %Response{type: :cluster, cluster: Cluster.Mini.new(data)}
+
   def decode(_, _), do: nil
 end

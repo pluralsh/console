@@ -9,9 +9,9 @@ defmodule Console.AI.VectorStore do
   alias Console.Deployments.Settings
 
   defmodule Response do
-    alias Console.Schema.{AlertResolution, StackState, ServiceComponent}
+    alias Console.Schema.{AlertResolution, StackState, ServiceComponent, Cluster}
 
-    @type type :: :alert | :pr | :stack | :service | :pr_automation | :catalog
+    @type type :: :alert | :pr | :stack | :service | :pr_automation | :catalog | :cluster
 
     @type t :: %__MODULE__{
       type: type,
@@ -20,10 +20,11 @@ defmodule Console.AI.VectorStore do
       stack_state: StackState.Mini.t,
       service_component: ServiceComponent.Mini.t,
       pr_automation: PrAutomation.Mini.t,
-      catalog: Catalog.Mini.t
+      catalog: Catalog.Mini.t,
+      cluster: Cluster.Mini.t
     }
 
-    defstruct [:pr_file, :alert_resolution, :stack_state, :service_component, :pr_automation, :catalog, :type]
+    defstruct [:pr_file, :alert_resolution, :stack_state, :service_component, :pr_automation, :catalog, :cluster, :type]
   end
 
   @type store :: Console.AI.Vector.Elastic.t
