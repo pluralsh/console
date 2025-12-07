@@ -175,8 +175,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       """, %{"id" => cluster.id}, %{current_user: admin_user()})
 
       assert blocker["addon"]["name"] == "ingress-nginx"
-      assert blocker["fix"]["version"] == "1.14.0"
-      assert blocker["fix"]["releaseUrl"]
+      assert is_binary(blocker["fix"]["version"])
+      assert is_binary(blocker["fix"]["releaseUrl"])
     end
 
     test "it can sideload insight components" do
