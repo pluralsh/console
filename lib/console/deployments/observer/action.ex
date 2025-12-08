@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Observer.Action do
-  alias Console.Schema.{Observer, PrAutomation, Pipeline}
+  alias Console.Schema.{Observer, PrAutomation, Pipeline, User}
   alias Console.Deployments.{Git, Pipelines}
-  alias Console.Services.Users
+  alias Console.Services.{Users, Rbac}
 
   def act(observer, %Observer.ObserverAction{type: :pr, configuration: %{pr: %{} = pr}}, input) do
     tpl = pr.branch_template || "plrl/auto/#{observer.name}-$value-#{Console.rand_alphanum(6)}"
@@ -9,7 +9,7 @@ defmodule Console.Deployments.Observer.Action do
     ctx = replace_map(pr.context, input)
     case Git.get_pr_automation(pr.automation_id) do
       %PrAutomation{} = pra ->
-        Git.create_pull_request(%{}, ctx, pra.id, branch, pr.repository, bot())
+        Git.create_pull_request(%{}, ctx, pra.id, branch, pr.repository, actor(pr))
       nil -> {:error, "could not find automation #{pr.automation_id}"}
     end
   end
@@ -31,6 +31,14 @@ defmodule Console.Deployments.Observer.Action do
   defp replace_map(l, val) when is_list(l), do: Enum.map(l, &replace_map(&1, val))
   defp replace_map(s, val) when is_binary(s) and is_binary(val), do: String.replace(s, "$value", val)
   defp replace_map(v, _), do: v
+
+  defp actor(%{actor: actor}) when is_binary(actor) do
+    case Users.get_user_by_email(actor) do
+      %User{} = user -> Rbac.preload(user)
+      nil -> bot()
+    end
+  end
+  defp actor(_), do: bot()
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 end

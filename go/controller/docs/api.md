@@ -2638,6 +2638,7 @@ _Appears in:_
 | `repository` _string_ | Repository overrides the repository slug for the referenced PR automation.<br />Use this when you want to target a different repository than the one<br />configured in the PR automation template. |  | Optional: \{\} <br /> |
 | `branchTemplate` _string_ | BranchTemplate provides a template for generating branch names.<br />Use $value to inject the observed value into the branch name.<br />Example: "update-chart-to-$value" becomes "update-chart-to-1.2.3". |  | Optional: \{\} <br /> |
 | `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is a templated context that becomes the input for the PR automation.<br />Use $value to interpolate the observed value into the context data.<br />This context is passed to the PR automation for template rendering and file modifications. |  | Optional: \{\} <br /> |
+| `actor` _string_ | Actor specifies the actor to use for the created branch. Should be a user email in Plural. |  | Optional: \{\} <br /> |
 
 
 #### ObserverSpec

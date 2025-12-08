@@ -8092,6 +8092,7 @@ type CloudAddon {
 
 type CloudAddonInformation {
   name: String
+  distro: ClusterDistro
   publisher: String
   versions: [CloudAddonVersionInformation]
 }
@@ -8860,6 +8861,9 @@ input ObserverPrActionAttributes {
 
   repository: String
 
+  "the actor to use for the created branch, should be a user email in Plural"
+  actor: String
+
   "a template to use for the created branch, use $value to interject the observed value"
   branchTemplate: String
 
@@ -9428,6 +9432,9 @@ type ObserverPrAction {
   automationId: ID!
 
   repository: String
+
+  "the actor to use for the created branch, should be a user email in Plural"
+  actor: String
 
   "a template to use for the created branch, use $value to interject the observed value"
   branchTemplate: String

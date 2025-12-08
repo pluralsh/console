@@ -94,7 +94,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOn do
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
   alias Console.Schema.Cluster
 
-  defstruct [:name, :versions, :publisher]
+  defstruct [:name, :versions, :publisher, :distro]
 
   defmodule Version do
     alias Console.Deployments.Compatibilities.Utils

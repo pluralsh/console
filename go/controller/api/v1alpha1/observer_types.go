@@ -210,6 +210,10 @@ type ObserverPrAction struct {
 	// This context is passed to the PR automation for template rendering and file modifications.
 	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
+
+	// Actor specifies the actor to use for the created branch. Should be a user email in Plural.
+	// +kubebuilder:validation:Optional
+	Actor *string `json:"actor,omitempty"`
 }
 
 // ObserverPipelineAction defines configuration for triggering pipeline context updates.

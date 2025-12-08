@@ -246,6 +246,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
 					AutomationID:   prAutomation.Status.GetID(),
 					Repository:     pr.Repository,
+					Actor:          pr.Actor,
 					BranchTemplate: pr.BranchTemplate,
 				}
 				a.Configuration.Pr.Context = "{}"

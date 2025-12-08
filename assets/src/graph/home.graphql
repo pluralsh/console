@@ -35,6 +35,11 @@ fragment CloudAddonVersion on CloudAddonVersionInformation {
   version
 }
 
+fragment CloudAddonInformation on CloudAddonInformation {
+  name
+  publisher
+}
+
 fragment RuntimeAddonUpgrade on RuntimeAddonUpgrade {
   addon {
     name
@@ -47,10 +52,10 @@ fragment RuntimeAddonUpgrade on RuntimeAddonUpgrade {
     ...RuntimeAddonVersion
   }
 }
+
 fragment CloudAddonUpgrade on CloudAddonUpgrade {
   addon {
-    name
-    distro
+    ...CloudAddon
   }
   current {
     ...CloudAddonVersion

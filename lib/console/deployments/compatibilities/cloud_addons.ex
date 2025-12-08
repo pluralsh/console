@@ -79,11 +79,11 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
     end
   end
 
-  defp decode_cloud_addon(name, yaml) do
+  defp decode_cloud_addon(platform, yaml) do
     with {:ok, res} <- YamlElixir.read_from_string(yaml),
          {:ok, encoded} <- Jason.encode(res),
          {:ok, addons} <- Poison.decode(encoded, as: [CloudAddOn.spec()]),
-      do: {:ok, {name, addons}}
+      do: {:ok, {platform, Enum.map(addons, &Map.put(&1, :distro, String.to_existing_atom(platform)))}}
   end
 
   def static() do

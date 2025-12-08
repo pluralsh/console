@@ -1361,6 +1361,7 @@ type CloudAddonAttributes struct {
 
 type CloudAddonInformation struct {
 	Name      *string                         `json:"name,omitempty"`
+	Distro    *ClusterDistro                  `json:"distro,omitempty"`
 	Publisher *string                         `json:"publisher,omitempty"`
 	Versions  []*CloudAddonVersionInformation `json:"versions,omitempty"`
 }
@@ -4672,6 +4673,8 @@ type ObserverPipelineActionAttributes struct {
 type ObserverPrAction struct {
 	AutomationID string  `json:"automationId"`
 	Repository   *string `json:"repository,omitempty"`
+	// the actor to use for the created branch, should be a user email in Plural
+	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
@@ -4682,6 +4685,8 @@ type ObserverPrAction struct {
 type ObserverPrActionAttributes struct {
 	AutomationID string  `json:"automationId"`
 	Repository   *string `json:"repository,omitempty"`
+	// the actor to use for the created branch, should be a user email in Plural
+	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value

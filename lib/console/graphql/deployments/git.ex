@@ -390,6 +390,7 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_pr_action_attributes do
     field :automation_id,   non_null(:id)
     field :repository,      :string
+    field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
   end
@@ -804,6 +805,7 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_pr_action do
     field :automation_id,   non_null(:id)
     field :repository,      :string
+    field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
   end
