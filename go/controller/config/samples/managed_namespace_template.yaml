@@ -1,18 +1,4 @@
 apiVersion: deployments.plural.sh/v1alpha1
-kind: ServiceDeployment
-metadata:
-  name: k8saws
-  namespace: default
-spec:
-  version: 0.0.1
-  git:
-    folder: nginx
-    ref: master
-  repositoryUrl: https://github.com/zreigz/k8s-helm.git
-  clusterRef: {}
-  cluster: mgmt
----
-apiVersion: deployments.plural.sh/v1alpha1
 kind: ManagedNamespace
 metadata:
   labels:
@@ -27,6 +13,10 @@ spec:
   service:
     name: k8saws
     namespace: default
+    git:
+      folder: nginx
+      ref: master
+    repositoryUrl: https://github.com/zreigz/k8s-helm.git
   labels:
     name: test
   annotations:
@@ -34,6 +24,3 @@ spec:
     app.kubernetes.io/created-by: controller
   target:
     distro: EKS
-    tags:
-      abc: "123"
-      ads: "234"

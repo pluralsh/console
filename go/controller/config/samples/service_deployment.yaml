@@ -1,19 +1,3 @@
-apiVersion: deployments.plural.sh/v1alpha1
-kind: Cluster
-metadata:
-  name: mgmt
-  namespace: default
-spec:
-  handle: mgmt
----
-apiVersion: deployments.plural.sh/v1alpha1
-kind: GitRepository
-metadata:
-  name: test
-  namespace: default
-spec:
-  url: https://github.com/zreigz/tf-hello.git
----
 apiVersion: v1
 kind: Secret
 metadata:
@@ -33,12 +17,10 @@ spec:
   configuration:
     version: "sha-ae2663f-terraform-1.8.2"
     image: "ghcr.io/pluralsh/harness"
-  repositoryRef:
-    name: test
-    namespace: default
-  clusterRef:
-    name: mgmt
-    namespace: default
+  repositoryRef: {}
+  repositoryUrl: https://github.com/zreigz/tf-hello.git
+  clusterRef: {}
+  cluster: mgmt
   git:
     ref: main
     folder: terraform
@@ -53,14 +35,9 @@ spec:
   git:
     folder: nginx
     ref: master
-  repositoryRef:
-    kind: GitRepository
-    name: test
-    namespace: default
-  clusterRef:
-    kind: Cluster
-    name: mgmt
-    namespace: default
+  repositoryUrl: https://github.com/zreigz/tf-hello.git
+  clusterRef: {}
+  cluster: mgmt
   imports:
     - stackRef:
         kind: InfrastructureStack
