@@ -158,8 +158,8 @@ function Template() {
             gap="medium"
           >
             <Span>
-              If you'd prefer to use Plural on your local machine, get started
-              with the <A inline>Plural CLI</A>.
+              If you&apos;d prefer to use Plural on your local machine, get
+              started with the <A inline>Plural CLI</A>.
             </Span>
             <Flex gap="small">
               <Button

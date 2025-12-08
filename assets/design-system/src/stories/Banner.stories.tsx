@@ -112,8 +112,8 @@ function Template({ closeButton, ...args }: any) {
         Backwards compatibility only
       </H1>
       <Banner {...args}>
-        You really shouldn't have content here without a heading, but including
-        to make sure old usage still looks good.{' '}
+        You really shouldn&apos;t have content here without a heading, but
+        including to make sure old usage still looks good.{' '}
         <A color="action-link-inline">Now go do something</A>.
       </Banner>
 

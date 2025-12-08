@@ -204,11 +204,13 @@ defmodule Console.Deployments.Agents do
   Creates a pull request for an agent run, can only be performed by the user who initiated it
   """
   @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
-  def agent_pull_request(%{title: t, body: b, base: ba, head: he}, run_id, %User{} = user) do
+  def agent_pull_request(%{title: t, body: b, base: ba, head: he} = attrs, run_id, %User{} = user) do
     run = get_agent_run!(run_id)
+    shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
     with {:ok, run} <- allow(run, user, :creds),
          %ScmConnection{} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn),
+         conn = %{conn | commit_shas: shas},
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, run.repository, ba, he) do
       %PullRequest{}
       |> PullRequest.changeset(

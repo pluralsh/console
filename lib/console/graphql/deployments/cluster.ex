@@ -809,16 +809,20 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a full specification of a kubernetes runtime component's requirements"
   object :runtime_addon do
-    field :icon,        :string, description: "an icon to identify this runtime add-on"
-    field :git_url,     :string, description: "the url to the add-ons git repository"
-    field :readme,      :string,
+    field :name,              non_null(:string), description: "add-on name"
+    field :icon,              :string, description: "an icon to identify this runtime add-on"
+    field :git_url,           :string, description: "the url to the add-ons git repository"
+    field :readme,            :string,
       description: "the add-on's readme, this is a heavy operation that should not be performed w/in lists",
       resolve: fn addon, _, _ -> Clusters.readme(addon) end
 
     @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
     field :release_url, :string do
       arg :version, non_null(:string)
-      resolve fn addon, %{version: version}, _ -> Clusters.release(addon, version) end
+      resolve fn
+        %{release_url: release_url}, _, _ when is_binary(release_url) -> {:ok, release_url}
+        addon, %{version: version}, _ -> Clusters.release(addon, version)
+      end
     end
 
     field :versions, list_of(:addon_version)
@@ -835,9 +839,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
     field :release_url, :string do
-      arg :version, non_null(:string)
+      arg :version, :string
       resolve fn
-        %{addon: addon}, %{version: version}, _ -> Clusters.release(addon, version)
+        %{release_url: release_url}, _, _ when is_binary(release_url) -> {:ok, release_url}
+        %{addon: addon}, %{version: version}, _ when is_binary(version) -> Clusters.release(addon, version)
         _, _, _ -> {:ok, nil}
       end
     end
@@ -856,13 +861,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :runtime_addon_upgrade do
+    field :addon,   :runtime_addon
     field :current, :addon_version
-    field :fix, :addon_version
+    field :fix,     :addon_version
   end
 
   object :cloud_addon_upgrade do
+    field :addon,   :cloud_addon
     field :current, :cloud_addon_version_information
-    field :fix, :cloud_addon_version_information
+    field :fix,     :cloud_addon_version_information
   end
 
   @desc "a shortform reference to an addon by version"

@@ -157,6 +157,28 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["extendedSupport"]["extendedFrom"]
     end
 
+    test "it can fetch the upgrade plan summary for a cluster" do
+      cluster = insert(:cluster, current_version: "1.33.1")
+      insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.13.0")
+
+      {:ok, %{data: %{"cluster" => %{"upgradePlanSummary" => %{"blockingAddons" => [blocker]}}}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            upgradePlanSummary {
+              blockingAddons {
+                addon { name }
+                fix { version releaseUrl }
+              }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert blocker["addon"]["name"] == "ingress-nginx"
+      assert is_binary(blocker["fix"]["version"])
+      assert is_binary(blocker["fix"]["releaseUrl"])
+    end
+
     test "it can sideload insight components" do
       cluster = insert(:cluster)
       components = insert_list(3, :cluster_insight_component, cluster: cluster)

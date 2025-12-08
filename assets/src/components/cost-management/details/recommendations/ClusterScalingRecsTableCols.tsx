@@ -159,6 +159,6 @@ export const formatMemory = (memory: Nullable<number>) => {
   })
 }
 
-const BoldTextSC = styled.strong(({ theme }) => ({
+export const BoldTextSC = styled.strong(({ theme }) => ({
   color: theme.colors.text,
 }))

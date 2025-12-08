@@ -1,6 +1,7 @@
 {
   "eslint.workingDirectories": [
-    { "directory": "./assets", "changeProcessCWD": true }
+    { "directory": "./assets", "changeProcessCWD": true },
+    { "directory": "./assets/design-system", "changeProcessCWD": true }
   ],
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

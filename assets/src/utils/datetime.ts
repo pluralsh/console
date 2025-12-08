@@ -99,7 +99,7 @@ export const formatDateTime = (
 
 export const toISOStringOrUndef = (date: DateParam, isUtc: boolean = false) => {
   if (!date) return undefined
-  const dateObj = isUtc ? dayjs(date).utc(true) : dayjs(date)
+  const dateObj = isUtc ? dayjs.utc(date) : dayjs(date)
   return dateObj.isValid() ? dateObj.toISOString() : undefined
 }
 

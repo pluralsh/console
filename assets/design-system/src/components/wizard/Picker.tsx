@@ -148,7 +148,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
       {filtered.length === 0 && search?.length > 0 && (
         <div className="empty">
           <span className="empty-message">
-            No applications found for "{search}".
+            No applications found for &quot;{search}&quot;.
           </span>
           <Button
             secondary

@@ -7,6 +7,7 @@ import {
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
+import { useDateFormat } from 'components/hooks/useDateFormat'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
@@ -75,6 +76,7 @@ export function LogsDateDropdown({
   disabled?: boolean
 }) {
   const { colors, partials } = useTheme()
+  const dateOrder = useDateFormat()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   useOutsideClick(menuBtnRef, () => setDropdownOpen(false))
@@ -117,7 +119,14 @@ export function LogsDateDropdown({
         }}
       >
         {initialDate
-          ? formatDateTime(initialDate, 'Before MM/DD/YY - HH:mm:ss')
+          ? formatDateTime(
+              initialDate,
+              `Before ${dateOrder
+                .join('/')
+                .replace('M', 'MM')
+                .replace('D', 'DD')
+                .replace('Y', 'YYYY')} - HH:mm:ss`
+            )
           : 'Before now'}
       </Button>
       <DateFormSC

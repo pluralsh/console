@@ -311,6 +311,8 @@ type AgentPullRequestAttributes struct {
 	Base string `json:"base"`
 	// the head branch of the pull request
 	Head string `json:"head"`
+	// the commit shas of the pull request
+	CommitShas []*CommitShaAttributes `json:"commitShas,omitempty"`
 }
 
 type AgentRun struct {
@@ -1364,6 +1366,7 @@ type CloudAddonInformation struct {
 }
 
 type CloudAddonUpgrade struct {
+	Addon   *CloudAddon                   `json:"addon,omitempty"`
 	Current *CloudAddonVersionInformation `json:"current,omitempty"`
 	Fix     *CloudAddonVersionInformation `json:"fix,omitempty"`
 }
@@ -2208,6 +2211,13 @@ type CommandAttributes struct {
 	Cmd  string    `json:"cmd"`
 	Args []*string `json:"args,omitempty"`
 	Dir  *string   `json:"dir,omitempty"`
+}
+
+type CommitShaAttributes struct {
+	// the sha of the commit
+	Sha string `json:"sha"`
+	// the branch of the commit
+	Branch string `json:"branch"`
 }
 
 type ComplianceReportGenerator struct {
@@ -6292,6 +6302,8 @@ type RunningState struct {
 
 // a full specification of a kubernetes runtime component's requirements
 type RuntimeAddon struct {
+	// add-on name
+	Name string `json:"name"`
 	// an icon to identify this runtime add-on
 	Icon *string `json:"icon,omitempty"`
 	// the url to the add-ons git repository
@@ -6304,6 +6316,7 @@ type RuntimeAddon struct {
 }
 
 type RuntimeAddonUpgrade struct {
+	Addon   *RuntimeAddon `json:"addon,omitempty"`
 	Current *AddonVersion `json:"current,omitempty"`
 	Fix     *AddonVersion `json:"fix,omitempty"`
 }

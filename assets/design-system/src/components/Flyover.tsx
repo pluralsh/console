@@ -65,7 +65,6 @@ function Flyover({
               <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
               <IconFrame
                 clickable
-                type="secondary"
                 onClick={onClose}
                 icon={<CloseIcon />}
               />

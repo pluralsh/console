@@ -163,13 +163,13 @@ def get_chart_images(url, chart, version, values=None):
     """
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
-    if url not in IMPORTED_REPOS and not oci_repo:
+    if (chart, url) not in IMPORTED_REPOS and not oci_repo:
         subprocess.run(["helm", "repo", "add", chart, url], check=True)
         subprocess.run(["helm", "repo", "update"], check=True)
-        IMPORTED_REPOS.add(url)
-    cmd = ["helm", "template", f"{chart}/{chart}", "--version", version]
+        IMPORTED_REPOS.add((chart, url))
+    cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
     if oci_repo:
-        cmd = ["helm", "template", chart, url, "--version", version]
+        cmd = ["helm", "template", chart, url, "--version", version, "--kube-version", current_kube_version()]
 
     if values:
         cmd.append("--set")

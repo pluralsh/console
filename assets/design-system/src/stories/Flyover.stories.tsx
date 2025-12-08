@@ -62,9 +62,9 @@ function Template(args: any) {
               Uninstalling this application will disable all future upgrades.
             </P>
             <P>
-              If you'd also like to remove the running instance from your
-              cluster, be sure to run `plural destroy` from this application's
-              repository.
+              If you&apos;d also like to remove the running instance from your
+              cluster, be sure to run `plural destroy` from this
+              application&apos;s repository.
             </P>
           </>
         )}
