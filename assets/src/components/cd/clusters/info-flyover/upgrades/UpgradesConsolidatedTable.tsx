@@ -1,9 +1,9 @@
 import { AppIcon, Flex, Table } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
-import { BoldTextSC } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import CopyButton from 'components/utils/CopyButton'
+import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import {
@@ -27,8 +27,10 @@ type AddonOverview = {
   icon?: ReactNode
   type: 'cloud' | 'helm'
   distro?: string
-  currentVersion?: Nullable<string>
-  fixVersion?: Nullable<string>
+  currentAppVersion?: Nullable<string>
+  fixAppVersion?: Nullable<string>
+  currentChartVersion?: Nullable<string>
+  fixChartVersion?: Nullable<string>
   releaseUrl?: Nullable<string>
   images?: string[]
 }
@@ -60,15 +62,17 @@ export function UpgradesConsolidatedTable({
         .filter((addon): addon is CloudOrHelmAddon => !!addon.addon)
         .map((addon) => ({
           name: addon.addon.name,
-          currentVersion: addon.current?.version,
-          fixVersion: addon.fix?.version,
+          currentAppVersion: addon.current?.version,
+          fixAppVersion: addon.fix?.version,
           type: 'helm',
-          ...(addon.addon.__typename === 'CloudAddon' && {
+          ...(addon.__typename === 'CloudAddonUpgrade' && {
             type: 'cloud',
             icon: <DistroProviderIconFrame distro={addon.addon?.distro} />,
             distro: addon.addon?.distro,
           }),
-          ...(addon.addon.__typename === 'RuntimeAddon' && {
+          ...(addon.__typename === 'RuntimeAddonUpgrade' && {
+            currentChartVersion: addon.current?.chartVersion,
+            fixChartVersion: addon.fix?.chartVersion,
             icon: (
               <AppIcon
                 url={addon.addon?.icon}
@@ -145,9 +149,14 @@ const cols = [
     id: 'recommendation',
     header: 'Recommendation',
     cell: function Cell({ getValue, table: { options } }) {
-      const { currentVersion, fixVersion } = getValue()
+      const {
+        currentAppVersion,
+        fixAppVersion,
+        currentChartVersion,
+        fixChartVersion,
+      } = getValue()
       const clusterId = (options.meta as Nullable<TableMeta>)?.clusterId
-      if (!fixVersion)
+      if (!fixAppVersion && !fixChartVersion)
         return (
           <InlineLink
             as={Link}
@@ -159,17 +168,45 @@ const cols = [
           </InlineLink>
         )
       return (
-        <Body2P>
-          {`${currentVersion ?? '--'}  →  `}
-          <BoldTextSC>{`${fixVersion}`}</BoldTextSC>
-        </Body2P>
+        <Flex
+          gap="xsmall"
+          align="center"
+          width="100%"
+        >
+          <StackedText
+            first={`v ${currentAppVersion ?? '--'}`}
+            firstPartialType={!currentChartVersion ? 'body2' : 'caption'}
+            firstColor="text-xlight"
+            second={currentChartVersion && `c ${currentChartVersion}`}
+            secondPartialType="caption"
+            secondColor="text-xlight"
+            css={{ '& *': { whiteSpace: 'nowrap' } }}
+          />
+          <Body2P $color="text-xlight">→</Body2P>
+          <StackedText
+            first={fixAppVersion ?? '--'}
+            firstPartialType={!fixChartVersion ? 'body2' : 'caption'}
+            firstColor="text"
+            second={fixChartVersion}
+            secondPartialType="caption"
+            secondColor="text"
+            css={{ '& *': { fontWeight: 700, whiteSpace: 'nowrap' } }}
+          />
+        </Flex>
       )
     },
   }),
   columnHelper.accessor((row) => row.releaseUrl, {
     id: 'releaseNotes',
     header: 'Release notes',
-    cell: ({ getValue }) => <InlineA href={getValue()}>{getValue()}</InlineA>,
+    cell: ({ getValue }) => (
+      <InlineA
+        href={getValue()}
+        css={{ wordBreak: 'break-all' }}
+      >
+        {getValue()?.replace(/(^\w+:|^)\/\/(www\.)?/, '')}
+      </InlineA>
+    ),
   }),
   columnHelper.accessor((row) => row, {
     id: 'copy',
@@ -193,8 +230,8 @@ const overviewDataToMarkdown = (data: AddonOverview[]) =>
   ${data
     .map((addon) => {
       const type = addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm'
-      const recommendation = addon.fixVersion
-        ? `${addon.currentVersion ?? '--'} → ${addon.fixVersion}`
+      const recommendation = addon.fixAppVersion
+        ? `${addon.currentAppVersion ?? '--'} → ${addon.fixAppVersion}`
         : 'No available versions found'
 
       return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${addon.images?.join('<br>') || '--'} |`
