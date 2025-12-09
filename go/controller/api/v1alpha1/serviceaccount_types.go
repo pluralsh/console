@@ -113,12 +113,14 @@ type ServiceAccountSpec struct {
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
-func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttributes) {
-	for _, scope := range in.Scopes {
-		result = append(result, scope.Attributes())
+func (in *ServiceAccountSpec) ScopeAttributes() []*console.ScopeAttributes {
+	if in == nil {
+		return nil
 	}
 
-	return result
+	return lo.Map(in.Scopes, func(scope ServiceAccountScope, _ int) *console.ScopeAttributes {
+		return scope.Attributes()
+	})
 }
 
 // ServiceAccountScope defines access restrictions for a service account, allowing
@@ -126,9 +128,9 @@ func (in *ServiceAccountSpec) ScopeAttributes() (result []*console.ScopeAttribut
 // This enables implementing least-privilege principles for automated systems.
 type ServiceAccountScope struct {
 	// API specifies a single Console API endpoint name that this service account
-	// should be scoped to, such as 'updateServiceDeployment' or 'createCluster'.
+	// should be scoped to, such as 'service.write' or 'cluster.read'.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:example:=updateServiceDeployment
+	// +kubebuilder:example:=service.write
 	API *string `json:"api,omitempty"`
 
 	// Apis is a list of Console API endpoint names that this service account

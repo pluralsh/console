@@ -4066,7 +4066,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `api` _string_ | API specifies a single Console API endpoint name that this service account<br />should be scoped to, such as 'updateServiceDeployment' or 'createCluster'. |  | Optional: \{\} <br /> |
+| `api` _string_ | API specifies a single Console API endpoint name that this service account<br />should be scoped to, such as 'service.write' or 'cluster.read'. |  | Optional: \{\} <br /> |
 | `apis` _string array_ | Apis is a list of Console API endpoint names that this service account<br />should be scoped to. |  | Optional: \{\} <br /> |
 | `identifier` _string_ | Identifier specifies a resource ID in the Console API that this service<br />account should be scoped to. Leave blank or use '*' to scope to all resources<br />within the specified API endpoints. |  | Optional: \{\} <br /> |
 | `ids` _string array_ | Ids is a list of Console API resource IDs that this service account should<br />be scoped to. |  | Optional: \{\} <br /> |
