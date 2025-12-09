@@ -215,6 +215,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Lua *PrAutomationLuaConfiguration `json:"lua,omitempty"`
 
+	// Software vendoring logic to perform in this PR
+	// +kubebuilder:validation:Optional
+	Vendor *PrAutomationVendorConfiguration `json:"vendor,omitempty"`
+
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
@@ -664,5 +668,52 @@ func (in *PrAutomationLuaConfiguration) Attributes() *console.PrLuaSpecAttribute
 		Script:   in.Script,
 		Folder:   in.Folder,
 		External: in.External,
+	}
+}
+
+type PrAutomationVendorConfiguration struct {
+	// Specification for vendoring a helm chart
+	// +kubebuilder:validation:Optional
+	Helm *PrAutomationHelmVendorConfiguration `json:"helm,omitempty"`
+}
+
+func (in *PrAutomationVendorConfiguration) Attributes() *console.PrVendorSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrVendorSpecAttributes{
+		Helm: in.Helm.Attributes(),
+	}
+}
+
+type PrAutomationHelmVendorConfiguration struct {
+	// The url of the helm repository to use
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// The name of the chart to use
+	// +kubebuilder:validation:Required
+	Chart string `json:"chart"`
+
+	// The version of the chart to use
+	// +kubebuilder:validation:Required
+	Version string `json:"version"`
+
+	// The directory destination to place the chart in
+	// +kubebuilder:validation:Required
+	Destination string `json:"destination"`
+}
+
+func (in *PrAutomationHelmVendorConfiguration) Attributes() *console.PrHelmVendorSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrHelmVendorSpecAttributes{
+		URL:         in.URL,
+		Chart:       in.Chart,
+		Version:     in.Version,
+		Destination: in.Destination,
 	}
 }

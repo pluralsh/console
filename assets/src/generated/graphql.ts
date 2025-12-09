@@ -704,6 +704,19 @@ export type AiApprovalAttributes = {
   ignoreCancel: Scalars['Boolean']['input'];
 };
 
+/** Configuration for ai approval of a stack run */
+export type AiApprovalConfiguration = {
+  __typename?: 'AiApprovalConfiguration';
+  /** whether ai approval is enabled for this stack */
+  enabled: Scalars['Boolean']['output'];
+  /** the rules file to use alongside the git reference */
+  file: Scalars['String']['output'];
+  /** the git reference to use for the ai approval rules */
+  git: GitRef;
+  /** whether to ignore the cancellation of a stack run by ai, this allows human approval to override */
+  ignoreCancel?: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -6687,6 +6700,8 @@ export type PrAutomation = {
   title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   updates?: Maybe<PrUpdateSpec>;
+  /** software vendoring logic to perform in this PR */
+  vendor?: Maybe<PrVendorSpec>;
   /** write policy for this pr automation, also propagates to the notifications list for any created PRs */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -6738,6 +6753,8 @@ export type PrAutomationAttributes = {
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   updates?: InputMaybe<PrAutomationUpdateSpecAttributes>;
+  /** a specification for vendoring software in this PR */
+  vendor?: InputMaybe<PrVendorSpecAttributes>;
   /** users who can update this automation */
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -6928,6 +6945,29 @@ export type PrGovernanceConfigurationAttributes = {
   webhook?: InputMaybe<GovernanceWebhookAttributes>;
 };
 
+export type PrHelmVendorSpec = {
+  __typename?: 'PrHelmVendorSpec';
+  /** the name of the chart to use */
+  chart: Scalars['String']['output'];
+  /** the directory destination to place the chart in */
+  destination: Scalars['String']['output'];
+  /** the url of the helm repository to use */
+  url: Scalars['String']['output'];
+  /** the version of the chart to use */
+  version: Scalars['String']['output'];
+};
+
+export type PrHelmVendorSpecAttributes = {
+  /** the name of the chart to use */
+  chart: Scalars['String']['input'];
+  /** the directory destination to place the chart in */
+  destination: Scalars['String']['input'];
+  /** the url of the helm repository to use */
+  url: Scalars['String']['input'];
+  /** the version of the chart to use */
+  version: Scalars['String']['input'];
+};
+
 /** a specification for sourcing lua scripts to preprocess the PR automation */
 export type PrLuaSpec = {
   __typename?: 'PrLuaSpec';
@@ -7024,6 +7064,17 @@ export type PrUpdateSpec = {
   replaceTemplate?: Maybe<Scalars['String']['output']>;
   yamlOverlays?: Maybe<Array<Maybe<YamlOverlay>>>;
   yq?: Maybe<Scalars['String']['output']>;
+};
+
+export type PrVendorSpec = {
+  __typename?: 'PrVendorSpec';
+  helm?: Maybe<PrHelmVendorSpec>;
+};
+
+/** a specification for vendoring software in this PR */
+export type PrVendorSpecAttributes = {
+  /** a specification for vendoring a helm chart */
+  helm?: InputMaybe<PrHelmVendorSpecAttributes>;
 };
 
 /** An instance of a preview environment template */
@@ -11790,6 +11841,8 @@ export type StackCommand = {
 
 export type StackConfiguration = {
   __typename?: 'StackConfiguration';
+  /** the ai approval configuration for this stack */
+  aiApproval?: Maybe<AiApprovalConfiguration>;
   /** the ansible configuration for this stack */
   ansible?: Maybe<AnsibleConfiguration>;
   /** the hooks to customize execution for this stack */

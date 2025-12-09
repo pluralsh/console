@@ -3275,6 +3275,25 @@ _Appears in:_
 | `folders` _string array_ | Entire folders to delete. |  | Optional: \{\} <br /> |
 
 
+#### PrAutomationHelmVendorConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationVendorConfiguration](#prautomationvendorconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | The url of the helm repository to use |  | Required: \{\} <br /> |
+| `chart` _string_ | The name of the chart to use |  | Required: \{\} <br /> |
+| `version` _string_ | The version of the chart to use |  | Required: \{\} <br /> |
+| `destination` _string_ | The directory destination to place the chart in |  | Required: \{\} <br /> |
+
+
 #### PrAutomationLuaConfiguration
 
 
@@ -3370,6 +3389,7 @@ _Appears in:_
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
+| `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 | `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
@@ -3471,6 +3491,22 @@ _Appears in:_
 | `regexes` _string array_ | Regexes to apply on each file. |  | Optional: \{\} <br /> |
 | `replaceTemplate` _string_ | ReplaceTemplate is a template to use when replacing a regex. |  | Optional: \{\} <br /> |
 | `yq` _string_ | Yq (unused so far) |  | Optional: \{\} <br /> |
+
+
+#### PrAutomationVendorConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `helm` _[PrAutomationHelmVendorConfiguration](#prautomationhelmvendorconfiguration)_ | Specification for vendoring a helm chart |  | Optional: \{\} <br /> |
 
 
 #### PrConfirmationChecklist
