@@ -529,6 +529,18 @@ type AiApprovalAttributes struct {
 	File         string           `json:"file"`
 }
 
+// Configuration for ai approval of a stack run
+type AiApprovalConfiguration struct {
+	// whether ai approval is enabled for this stack
+	Enabled bool `json:"enabled"`
+	// whether to ignore the cancellation of a stack run by ai, this allows human approval to override
+	IgnoreCancel *bool `json:"ignoreCancel,omitempty"`
+	// the git reference to use for the ai approval rules
+	Git GitRef `json:"git"`
+	// the rules file to use alongside the git reference
+	File string `json:"file"`
+}
+
 type AiDelta struct {
 	Seq     int64      `json:"seq"`
 	Content string     `json:"content"`
@@ -1361,6 +1373,7 @@ type CloudAddonAttributes struct {
 
 type CloudAddonInformation struct {
 	Name      *string                         `json:"name,omitempty"`
+	Distro    *ClusterDistro                  `json:"distro,omitempty"`
 	Publisher *string                         `json:"publisher,omitempty"`
 	Versions  []*CloudAddonVersionInformation `json:"versions,omitempty"`
 }
@@ -4672,6 +4685,8 @@ type ObserverPipelineActionAttributes struct {
 type ObserverPrAction struct {
 	AutomationID string  `json:"automationId"`
 	Repository   *string `json:"repository,omitempty"`
+	// the actor to use for the created branch, should be a user email in Plural
+	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
@@ -4682,6 +4697,8 @@ type ObserverPrAction struct {
 type ObserverPrActionAttributes struct {
 	AutomationID string  `json:"automationId"`
 	Repository   *string `json:"repository,omitempty"`
+	// the actor to use for the created branch, should be a user email in Plural
+	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
@@ -5466,6 +5483,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// software vendoring logic to perform in this PR
+	Vendor *PrVendorSpec `json:"vendor,omitempty"`
 	// a set of lua scripts to use to preprocess the PR automation
 	Lua *PrLuaSpec `json:"lua,omitempty"`
 	// location in git for external templates and scripts
@@ -5521,6 +5540,8 @@ type PrAutomationAttributes struct {
 	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// a specification for vendoring software in this PR
+	Vendor *PrVendorSpecAttributes `json:"vendor,omitempty"`
 	// a specification for sourcing lua scripts to preprocess the PR automation
 	Lua *PrLuaSpecAttributes `json:"lua,omitempty"`
 	// location in git for external templates and scripts
@@ -5730,6 +5751,28 @@ type PrGovernanceConfigurationAttributes struct {
 	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
 }
 
+type PrHelmVendorSpec struct {
+	// the url of the helm repository to use
+	URL string `json:"url"`
+	// the name of the chart to use
+	Chart string `json:"chart"`
+	// the version of the chart to use
+	Version string `json:"version"`
+	// the directory destination to place the chart in
+	Destination string `json:"destination"`
+}
+
+type PrHelmVendorSpecAttributes struct {
+	// the url of the helm repository to use
+	URL string `json:"url"`
+	// the name of the chart to use
+	Chart string `json:"chart"`
+	// the version of the chart to use
+	Version string `json:"version"`
+	// the directory destination to place the chart in
+	Destination string `json:"destination"`
+}
+
 // a specification for sourcing lua scripts to preprocess the PR automation
 type PrLuaSpec struct {
 	// file of a flat script to use
@@ -5806,6 +5849,16 @@ type PrUpdateSpec struct {
 	ReplaceTemplate   *string             `json:"replaceTemplate,omitempty"`
 	Yq                *string             `json:"yq,omitempty"`
 	MatchStrategy     *MatchStrategy      `json:"matchStrategy,omitempty"`
+}
+
+type PrVendorSpec struct {
+	Helm *PrHelmVendorSpec `json:"helm,omitempty"`
+}
+
+// a specification for vendoring software in this PR
+type PrVendorSpecAttributes struct {
+	// a specification for vendoring a helm chart
+	Helm *PrHelmVendorSpecAttributes `json:"helm,omitempty"`
 }
 
 // An instance of a preview environment template
@@ -7313,6 +7366,8 @@ type StackConfiguration struct {
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
+	// the ai approval configuration for this stack
+	AiApproval *AiApprovalConfiguration `json:"aiApproval,omitempty"`
 }
 
 type StackConfigurationAttributes struct {

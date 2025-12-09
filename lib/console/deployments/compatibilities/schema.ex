@@ -41,9 +41,9 @@ defmodule Console.Deployments.Compatibilities.AddOn do
   def upgrade_version(%__MODULE__{versions: [_ | _] = vsns}, %Cluster{current_version: cv}) when is_binary(cv) do
     cleaned = clean_version(cv)
     with {:ok, %Version{major: maj, minor: min}} <- Version.parse(cleaned) do
-      Enum.find(vsns, fn
-        %Compatibilities.Version{kube: [_ | _] = kube} ->
-          Enum.member?(kube, "#{maj}.#{min + 1}")
+      Enum.reverse(vsns)
+      |> Enum.find(fn
+        %Compatibilities.Version{kube: [_ | _] = kube} -> Enum.member?(kube, "#{maj}.#{min + 1}")
         _ -> false
       end)
     else
@@ -94,7 +94,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOn do
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
   alias Console.Schema.Cluster
 
-  defstruct [:name, :versions, :publisher]
+  defstruct [:name, :versions, :publisher, :distro]
 
   defmodule Version do
     alias Console.Deployments.Compatibilities.Utils
@@ -115,9 +115,9 @@ defmodule Console.Deployments.Compatibilities.CloudAddOn do
   def upgrade_version(%__MODULE__{versions: [_ | _] = vsns}, %Cluster{current_version: cv}) when is_binary(cv) do
     cleaned = clean_version(cv)
     with {:ok, %Elixir.Version{major: maj, minor: min}} <- Elixir.Version.parse(cleaned) do
-      Enum.find(vsns, fn
-        %Version{compatibilities: [_ | _] = kube} ->
-          Enum.member?(kube, "#{maj}.#{min + 1}")
+      Enum.reverse(vsns)
+      |> Enum.find(fn
+        %Version{compatibilities: [_ | _] = kube} -> Enum.member?(kube, "#{maj}.#{min + 1}")
         _ -> false
       end)
     else

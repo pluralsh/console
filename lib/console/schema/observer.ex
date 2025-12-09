@@ -67,6 +67,7 @@ defmodule Console.Schema.Observer do
           field :repository,      :string
           field :branch_template, :string
           field :context,         :map
+          field :actor,           :string
         end
 
         embeds_one :pipeline, PipelineAction, on_replace: :update do
@@ -180,7 +181,7 @@ defmodule Console.Schema.Observer do
 
   defp pr_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(automation_id repository branch_template context)a)
+    |> cast(attrs, ~w(automation_id repository branch_template context actor)a)
     |> validate_required(~w(automation_id context)a)
   end
 

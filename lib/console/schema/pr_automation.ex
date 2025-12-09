@@ -80,6 +80,15 @@ defmodule Console.Schema.PrAutomation do
       field :folders, {:array, :string}
     end
 
+    embeds_one :vendor, Vendor, on_replace: :update do
+      embeds_one :helm, Helm, on_replace: :update do
+        field :url,         :string
+        field :chart,       :string
+        field :version,     :string
+        field :destination, :string
+      end
+    end
+
     embeds_one :confirmation, Confirmation, on_replace: :update do
       field :text, :string
       embeds_many :checklist, Checklist, on_replace: :delete do
@@ -181,6 +190,7 @@ defmodule Console.Schema.PrAutomation do
     |> cast_embed(:deletes, with: &delete_changeset/2)
     |> cast_embed(:confirmation, with: &confirmation_changeset/2)
     |> cast_embed(:secrets, with: &secret_changeset/2)
+    |> cast_embed(:vendor, with: &vendor_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
@@ -261,6 +271,18 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, [:name, :documentation, :autogenerate])
     |> validate_required([:name, :documentation])
+  end
+
+  defp vendor_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:helm, with: &helm_vendor_changeset/2)
+  end
+
+  defp helm_vendor_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:url, :chart, :version, :destination])
+    |> validate_required([:url, :chart, :version, :destination])
   end
 end
 

@@ -826,6 +826,32 @@ spec:
                     description: Yq (unused so far)
                     type: string
                 type: object
+              vendor:
+                description: Software vendoring logic to perform in this PR
+                properties:
+                  helm:
+                    description: Specification for vendoring a helm chart
+                    properties:
+                      chart:
+                        description: The name of the chart to use
+                        type: string
+                      destination:
+                        description: The directory destination to place the chart
+                          in
+                        type: string
+                      url:
+                        description: The url of the helm repository to use
+                        type: string
+                      version:
+                        description: The version of the chart to use
+                        type: string
+                    required:
+                    - chart
+                    - destination
+                    - url
+                    - version
+                    type: object
+                type: object
             required:
             - scmConnectionRef
             type: object
