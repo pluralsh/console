@@ -4,6 +4,7 @@ defmodule Console.Compliance.Datasource.Clusters do
   """
   @behaviour Console.Compliance.Datasource
   alias Console.Schema.{Cluster}
+  alias Console.Deployments.KubeVersions.Table, as: VersionTable
 
   @impl Console.Compliance.Datasource
   def stream do
@@ -22,6 +23,7 @@ defmodule Console.Compliance.Datasource.Clusters do
         cpu_total: c.cpu_total,
         memory_total: c.memory_total,
         availability_zones: c.availability_zones,
+        extended_support: VersionTable.extended?(c.distro, c.current_version),
         created_at: c.inserted_at
       }
     end)
