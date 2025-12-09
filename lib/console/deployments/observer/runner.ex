@@ -8,8 +8,8 @@ defmodule Console.Deployments.Observer.Runner do
   def run(%Observer{} = observer) do
     observer = Repo.preload(observer, [:errors])
     {:ok, observer} = mark(observer)
-    with {:poll, {:ok, val}} <- {:poll, Poller.poll(observer)},
-         {:act, {:ok, _}} <- {:act, actions(observer, val)} do
+    with {:poll, {:ok, val, attrs}} <- {:poll, Poller.poll(observer)},
+         {:act, {:ok, _}} <- {:act, actions(observer, val, attrs)} do
       finish(observer, val)
     else
       {:poll, {:error, err}} -> add_error(observer, "poll", err)
@@ -20,15 +20,15 @@ defmodule Console.Deployments.Observer.Runner do
     end
   end
 
-  defp actions(%Observer{actions: [_ | _] = actions} = obs, value) do
+  defp actions(%Observer{actions: [_ | _] = actions} = obs, value, attrs) do
     Enum.reduce_while(actions, {:ok, nil}, fn act, _ ->
-      case Action.act(obs, act, value) do
+      case Action.act(obs, act, value, attrs) do
         {:ok, _} = res -> {:cont, res}
         err -> {:halt, err}
       end
     end)
   end
-  defp actions(_, _), do: {:ok, nil}
+  defp actions(_, _, _), do: {:ok, nil}
 
   defp mark(%Observer{} = observer) do
     Observer.changeset(observer, %{last_run_at: Timex.now()})

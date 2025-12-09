@@ -73,6 +73,18 @@ defmodule Console.Deployments.KubeVersions.Table do
     end)
   end
 
+  @spec compliant_versions() :: %{distro => binary | nil}
+  def compliant_versions() do
+    Map.new(@distros, fn distro ->
+      with [_ | _] = versions <- fetch(distro),
+           %Version{version: v} <- Enum.find(Enum.reverse(versions), & !&1.extended) do
+        {distro, v}
+      else
+        _ -> {distro, nil}
+      end
+    end)
+  end
+
 
   def info(distro, version) do
     with [_ | _] = versions <- fetch_strict(distro),

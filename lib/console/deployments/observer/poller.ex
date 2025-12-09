@@ -32,7 +32,7 @@ defmodule Console.Deployments.Observer.Poller do
          {:chart, %{versions: [_ | _] = versions}} <- {:chart, Enum.find(idx.entries, & &1.name == helm.chart)},
          {:chart, [vsn | _]} <- {:chart, Enum.map(versions, & &1.version) |> sorted()},
          {:vsn, :gt} <- {:vsn, compare_versions(vsn, last)} do
-      {:ok, vsn}
+      {:ok, vsn, %{}}
     else
       {:chart, _} -> {:error, "could not find chart #{helm.chart}"}
       {:vsn, _} -> :ignore
@@ -46,7 +46,7 @@ defmodule Console.Deployments.Observer.Poller do
          {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci, &is_semver?/1),
          {:tag, [vsn | _]} <- {:tag, sorted(tags, target)},
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
-      {:ok, vsn}
+      {:ok, vsn, %{}}
     else
       {:tag, _} -> {:error, "could not fetch tag for oci repository #{url}"}
       {:vsn, _} -> :ignore
@@ -60,7 +60,7 @@ defmodule Console.Deployments.Observer.Poller do
          tags <- maybe_filter_tags(tags, git_target),
          [vsn | _] <- sorted(tags, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
-      {:ok, vsn}
+      {:ok, vsn, %{}}
     else
       {:vsn, _} -> :ignore
       {:tags, _} -> {:error, "no tags found for this repo"}
@@ -74,7 +74,7 @@ defmodule Console.Deployments.Observer.Poller do
          versions = Enum.map(filtered, & &1.chart_version) |> Enum.filter(& &1),
          [vsn | _] <- sorted(versions, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
-      {:ok, vsn}
+      {:ok, vsn, Enum.find(filtered, & &1.chart_version == vsn) || %{}}
     else
       {:vsn, _} -> :ignore
       nil -> {:error, "no CNCF add-on found with name #{name}"}
@@ -88,7 +88,7 @@ defmodule Console.Deployments.Observer.Poller do
          versions = Enum.map(filtered, & &1.version),
          [vsn | _] <- sorted(versions, target),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
-      {:ok, vsn}
+      {:ok, vsn, Enum.find(filtered, & &1.version == vsn) || %{}}
     else
       {:vsn, _} -> :ignore
       nil -> {:error, "no eks addon found with name #{name}"}
