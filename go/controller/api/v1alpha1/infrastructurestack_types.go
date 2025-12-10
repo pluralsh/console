@@ -73,7 +73,7 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Interval *string `json:"interval,omitempty"`
 
-	// RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use RepositoryUrl instead.
+	// RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead.
 	// +kubebuilder:validation:Required
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
 
