@@ -296,8 +296,8 @@ func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *GlobalServiceReconciler) getRepositoryID(ctx context.Context, ns *v1alpha1.GlobalService) (*string, error) {
-	if ns.Spec.Template.RepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(ns.Spec.Template.RepositoryUrl))
+	if ns.Spec.Template.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(ns.Spec.Template.Git.Url))
 		if err != nil {
 			return nil, err
 		}

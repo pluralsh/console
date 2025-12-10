@@ -35,8 +35,8 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 
-	if pra.Spec.RepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pra.Spec.RepositoryUrl))
+	if pra.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pra.Spec.Git.Url))
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("git repository is not ready")

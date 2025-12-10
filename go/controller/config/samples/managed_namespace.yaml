@@ -8,7 +8,7 @@ spec:
   git:
     folder: nginx
     ref: master
-  repositoryUrl: https://github.com/zreigz/k8s-helm.git
+    url: https://github.com/zreigz/k8s-helm.git
   clusterRef: {}
   cluster: mgmt
 ---
@@ -21,7 +21,7 @@ metadata:
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
-  name: managednamespace-sample
+  name: managednamespace-sample-test
 spec:
   name: test-sample
   service:

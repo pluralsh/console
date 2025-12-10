@@ -18,12 +18,12 @@ spec:
     version: "sha-ae2663f-terraform-1.8.2"
     image: "ghcr.io/pluralsh/harness"
   repositoryRef: {}
-  repositoryUrl: https://github.com/zreigz/tf-hello.git
   clusterRef: {}
   cluster: mgmt
   git:
     ref: main
     folder: terraform
+    url: https://github.com/zreigz/tf-hello.git
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: ServiceDeployment
@@ -35,7 +35,7 @@ spec:
   git:
     folder: nginx
     ref: master
-  repositoryUrl: https://github.com/zreigz/tf-hello.git
+    url: https://github.com/zreigz/k8s-helm.git
   clusterRef: {}
   cluster: mgmt
   imports:

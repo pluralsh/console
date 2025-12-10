@@ -11,12 +11,12 @@ metadata:
 spec:
   name: test-sample
   service:
-    name: k8saws
-    namespace: default
+    name: test-k8s-helm
+    namespace: test-sample
     git:
       folder: nginx
       ref: master
-    repositoryUrl: https://github.com/zreigz/k8s-helm.git
+      url: https://github.com/zreigz/k8s-helm.git
   labels:
     name: test
   annotations:

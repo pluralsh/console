@@ -519,8 +519,8 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 // ready before allowing main reconcile loop to continue. In case project ref is misconfigured, it will
 // return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
-	if stack.Spec.RepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(stack.Spec.RepositoryUrl))
+	if stack.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(stack.Spec.Git.Url))
 		if err != nil {
 			return "", nil, err
 		}

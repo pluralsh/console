@@ -21,10 +21,6 @@ type SentinelSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// RepositoryUrl references the GitRepository URL containing the source code.
-	// +kubebuilder:validation:Optional
-	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
-
 	// ProjectRef references the project this object belongs to, enabling
 	// project-scoped organization and access control.
 	// +kubebuilder:validation:Optional
@@ -86,10 +82,6 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	// RepositoryRef references a Git repository to use for this integration test.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
-
-	// RepositoryUrl references the GitRepository URL containing the service source code.
-	// +kubebuilder:validation:Optional
-	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
 
 	// The git location to use for this integration test.
 	Git *GitRef `json:"git,omitempty"`

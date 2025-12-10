@@ -82,8 +82,8 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	var repositoryID *string
-	if sentinel.Spec.RepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(sentinel.Spec.RepositoryUrl))
+	if sentinel.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(sentinel.Spec.Git.Url))
 		if err != nil {
 			return common.HandleRequeue(nil, err, sentinel.SetCondition)
 		}
@@ -280,8 +280,8 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					}
 					configuration.IntegrationTest.RepositoryID = repository.Status.ID
 				}
-				if check.Configuration.IntegrationTest.RepositoryUrl != nil {
-					id, err := plural.Cache().GetGitRepoID(lo.FromPtr(check.Configuration.IntegrationTest.RepositoryUrl))
+				if check.Configuration.IntegrationTest.Git.HasUrl() {
+					id, err := plural.Cache().GetGitRepoID(lo.FromPtr(check.Configuration.IntegrationTest.Git.Url))
 					if err != nil {
 						return nil, err
 					}

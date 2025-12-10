@@ -77,10 +77,6 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Required
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
 
-	// RepositoryUrl references the GitRepository URL containing the service source code.
-	// +kubebuilder:validation:Optional
-	RepositoryUrl *string `json:"repositoryUrl,omitempty"`
-
 	// ClusterRef references the target Cluster where this stack will be executed.
 	// +kubebuilder:validation:Required
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`

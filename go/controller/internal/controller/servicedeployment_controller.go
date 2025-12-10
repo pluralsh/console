@@ -138,8 +138,8 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		}
 		repositoryID = repository.Status.ID
 	}
-	if service.Spec.RepositoryUrl != nil {
-		repoID, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.RepositoryUrl))
+	if service.Spec.Git.HasUrl() {
+		repoID, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Git.Url))
 		if err != nil {
 			return common.HandleRequeue(nil, err, service.SetCondition)
 		}
@@ -402,8 +402,8 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 
 		attr.RepositoryID = repo.Status.ID
 	}
-	if service.Spec.Helm.RepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.RepositoryUrl))
+	if service.Spec.Helm.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.Git.Url))
 		if err != nil {
 			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
 		}
@@ -442,7 +442,8 @@ func (r *ServiceDeploymentReconciler) setSources(ctx context.Context, service *v
 					Files:  source.Git.Files,
 				}
 			}
-			repositoryID, err := r.getRepository(ctx, source.RepositoryRef, source.RepositoryUrl)
+
+			repositoryID, err := r.getRepository(ctx, source.RepositoryRef, lo.Ternary(source.Git.HasUrl(), source.Git.Url, nil))
 			if err != nil {
 				return err
 			}
@@ -714,7 +715,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).

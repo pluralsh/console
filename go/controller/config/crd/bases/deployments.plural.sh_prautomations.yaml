@@ -363,6 +363,9 @@ spec:
                         description: Ref is the Git reference (branch, tag, or commit)
                           to use.
                         type: string
+                      url:
+                        description: URL of the Git repository.
+                        type: string
                     required:
                     - folder
                     - ref
@@ -441,6 +444,9 @@ spec:
                   ref:
                     description: Ref is the Git reference (branch, tag, or commit)
                       to use.
+                    type: string
+                  url:
+                    description: URL of the Git repository.
                     type: string
                 required:
                 - folder
@@ -603,10 +609,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              repositoryUrl:
-                description: RepositoryUrl references the GitRepository URL containing
-                  the automation source code.
-                type: string
               role:
                 enum:
                 - CLUSTER

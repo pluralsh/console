@@ -170,8 +170,8 @@ func setSources(ctx context.Context, c runtimeclient.Client, attr *console.Servi
 
 				newSource.RepositoryID = repository.Status.ID
 			}
-			if source.RepositoryUrl != nil {
-				id, err := plural.Cache().GetGitRepoID(lo.FromPtr(source.RepositoryUrl))
+			if source.Git.HasUrl() {
+				id, err := plural.Cache().GetGitRepoID(lo.FromPtr(source.Git.Url))
 				if err != nil {
 					return err
 				}
