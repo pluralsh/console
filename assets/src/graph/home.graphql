@@ -28,6 +28,7 @@ fragment ClusterUpgradeDeprecatedCustomResource on DeprecatedCustomResource {
 
 fragment RuntimeAddonVersion on AddonVersion {
   version
+  chartVersion
   images
   releaseUrl
 }

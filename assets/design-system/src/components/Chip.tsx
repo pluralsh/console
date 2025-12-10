@@ -11,6 +11,7 @@ import Card, { type CardFillLevel, useDecideFillLevel } from './Card'
 import CloseIcon from './icons/CloseIcon'
 import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
+import { SemanticColorKey } from 'src/theme/colors'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 export type ChipSize = 'small' | 'medium' | 'large'
@@ -22,6 +23,7 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   severity?: ChipSeverity
   inactive?: boolean
   icon?: ReactElement<any>
+  iconColor?: SemanticColorKey
   loading?: boolean
   closeButton?: boolean
   closeButtonProps?: ComponentPropsWithRef<'div'>
@@ -173,6 +175,7 @@ function Chip({
   fillLevel,
   loading = false,
   icon,
+  iconColor,
   closeButton,
   closeButtonProps,
   clickable,
@@ -184,7 +187,7 @@ function Chip({
   fillLevel = useDecideFillLevel({ fillLevel })
   const theme = useTheme()
 
-  const iconCol = severityToIconColor[severity] || 'icon-default'
+  const iconCol = iconColor || severityToIconColor[severity] || 'icon-default'
 
   let content = (
     <ChipCardSC

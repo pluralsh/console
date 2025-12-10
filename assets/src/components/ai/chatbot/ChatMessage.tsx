@@ -282,9 +282,10 @@ const ActionsWrapperSC = styled.div<{
   alignItems: 'center',
   opacity: $show ? 1 : 0,
   transition: '0.3s opacity ease',
-  pointerEvents: $show ? 'auto' : 'none',
   justifyContent: $side === 'left' ? 'flex-start' : 'flex-end',
   padding: `${theme.spacing.xxxsmall}px 0`,
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
 }))
 
 const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
