@@ -69,6 +69,7 @@ defmodule Console.Deployments.Stacks do
   @spec latest_run(binary) :: StackRun.t | nil
   def latest_run(stack_id) do
     StackRun.for_stack(stack_id)
+    |> StackRun.wet()
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)
     |> Repo.one()

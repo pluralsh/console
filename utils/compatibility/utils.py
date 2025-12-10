@@ -4,6 +4,7 @@ import semantic_version
 import subprocess
 import os
 
+from functools import lru_cache
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
@@ -215,19 +216,28 @@ def get_github_releases(repo_owner, repo_name):
             f"Failed to fetch latest releases: {response.status_code}"
         )
 
+@lru_cache(maxsize=None)
 def get_kube_release_info():
-    kube_releases = list(reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))))
-    return [kube_release for kube_release in kube_releases if clean_kube_version(kube_release[0])]
+    seen = set()
+    result = []
+    for kube_release in reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))):
+        cleaned = clean_kube_version(kube_release[0])
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            result.append(kube_release)
+
+    return result
 
 def get_github_releases_timestamps(repo_owner, repo_name):
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases?per_page=100"
-    response = requests.get(url)
-    if response.status_code == 200:
-        releases = response.json()
-        for release in releases:
-            yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
-    else:
-        raise Exception(f"Failed to fetch releases timestamps: {response.status_code} {response.text}")
+    for page in range(1, 3):
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
+        response = requests.get(url, params={"page": page, "per_page": 100})
+        if response.status_code == 200:
+            releases = response.json()
+            for release in releases:
+                yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
+        else:
+            return
 
 def find_last_n_releases(releases, ts, n=3):
     for i in range(len(releases)):

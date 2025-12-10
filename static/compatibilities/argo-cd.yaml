@@ -66,10 +66,52 @@ versions:
   chart_version: 7.7.3
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
     'quay.io/argoproj/argocd:v2.13.0']
-- version: 2.12.4
+- version: 2.12.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  chart_version: 7.6.10
+  chart_version: 7.4.3
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
-    'quay.io/argoproj/argocd:v2.12.4']
+    'quay.io/argoproj/argocd:v2.12.0']
+- version: 2.11.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 6.9.3
+  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
+    'quay.io/argoproj/argocd:v2.11.0']
+- version: 2.10.7
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 6.7.15
+  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
+    'quay.io/argoproj/argocd:v2.10.7']
+- version: 2.10.0
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  chart_version: 6.0.13
+  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
+    'quay.io/argoproj/argocd:v2.10.0']
+- version: 2.9.4
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  chart_version: 5.53.1
+  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
+    'quay.io/argoproj/argocd:v2.9.4']
+- version: 2.9.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  chart_version: 5.51.1
+  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
+    'quay.io/argoproj/argocd:v2.9.0']
+- version: 2.8.3
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  chart_version: 5.46.2
+  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.11-alpine',
+    'quay.io/argoproj/argocd:v2.8.3']
