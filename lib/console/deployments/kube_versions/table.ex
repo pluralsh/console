@@ -73,6 +73,18 @@ defmodule Console.Deployments.KubeVersions.Table do
     end)
   end
 
+  @spec compliant_versions() :: %{distro => binary | nil}
+  def compliant_versions() do
+    Map.new(@distros, fn distro ->
+      with [_ | _] = versions <- fetch(distro),
+           %Version{version: v} <- Enum.find(Enum.reverse(versions), & !&1.extended) do
+        {distro, v}
+      else
+        _ -> {distro, nil}
+      end
+    end)
+  end
+
 
   def info(distro, version) do
     with [_ | _] = versions <- fetch_strict(distro),
@@ -84,7 +96,7 @@ defmodule Console.Deployments.KubeVersions.Table do
   end
 
   @spec extended?(distro, binary) :: boolean
-  def extended?(distro, version) do
+  def extended?(distro, version) when is_binary(version) do
     with [_ | _] = versions <- fetch(distro),
          %Version{extended: xt} <- Enum.find(versions, &later?(version, &1.version)) do
       !!xt
@@ -92,6 +104,8 @@ defmodule Console.Deployments.KubeVersions.Table do
       _ -> false
     end
   end
+  def extended?(_, _), do: false
+
 
   def start_link(opt \\ :ok) do
     GenServer.start_link(__MODULE__, opt, name: __MODULE__)

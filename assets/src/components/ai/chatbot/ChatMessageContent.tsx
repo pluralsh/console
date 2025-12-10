@@ -144,7 +144,7 @@ function FileMessageContent({
   return (
     <Accordion
       type="single"
-      css={{ border: theme.borders.default }}
+      css={{ border: theme.borders.default, maxWidth: '100%' }}
     >
       <AccordionItem
         padding="compact"
@@ -168,7 +168,7 @@ function FileMessageContent({
               show={showActions}
               side={role === AiRole.User ? 'right' : 'left'}
               iconFrameType="floating"
-              css={{ position: 'absolute', right: 16, top: 4 }}
+              css={{ position: 'absolute', right: 16, top: 4, zIndex: 1 }}
             />
           </Flex>
         }

@@ -321,31 +321,33 @@ function ServiceComponentTreeNode({
         />
       }
       actions={
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-          {componentDetailsUrl && (
+        data.uid ? (
+          <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+            {componentDetailsUrl && (
+              <IconFrame
+                clickable
+                as={Link}
+                to={componentDetailsUrl}
+                icon={<ArrowTopRightIcon />}
+                type="secondary"
+                tooltip={`Go to ${type === ServiceComponentNodeKey ? 'component' : 'resource'}`}
+              />
+            )}
             <IconFrame
               clickable
-              as={Link}
-              to={componentDetailsUrl}
-              icon={<ArrowTopRightIcon />}
+              onClick={() => setOpen(true)}
+              icon={<InfoOutlineIcon />}
               type="secondary"
-              tooltip={`Go to ${type === ServiceComponentNodeKey ? 'component' : 'resource'}`}
+              tooltip="View details"
             />
-          )}
-          <IconFrame
-            clickable
-            onClick={() => setOpen(true)}
-            icon={<InfoOutlineIcon />}
-            type="secondary"
-            tooltip="View details"
-          />
-          <ServiceComponentModal
-            component={data}
-            url={componentDetailsUrl}
-            open={open}
-            setOpen={setOpen}
-          />
-        </div>
+            <ServiceComponentModal
+              component={data}
+              url={componentDetailsUrl}
+              open={open}
+              setOpen={setOpen}
+            />
+          </div>
+        ) : undefined
       }
     />
   )
@@ -534,7 +536,7 @@ function getNodesAndEdges(
 
   components.forEach((component) => {
     nodes.push({
-      id: component.uid,
+      id: component?.uid ?? crypto.randomUUID(), // Randomly generate UIDs for components that do not exist yet.
       position: { x: 0, y: 0 },
       type: ServiceComponentNodeKey,
       data: { ...component },

@@ -135,6 +135,10 @@ spec:
                             Used when the action type is PR to automatically create pull requests
                             when new versions are detected by the observer.
                           properties:
+                            actor:
+                              description: Actor specifies the actor to use for the
+                                created branch. Should be a user email in Plural.
+                              type: string
                             branchTemplate:
                               description: |-
                                 BranchTemplate provides a template for generating branch names.

@@ -850,7 +850,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "checks if this is blocking a specific kubernetes upgrade"
     field :blocking, :boolean do
       arg :kube_version, non_null(:string)
-      resolve fn vsn, %{kube_version: kube}, _ -> {:ok, Compatibilities.Version.blocking?(vsn, kube)} end
+      resolve fn vsn, %{kube_version: kube}, _ ->
+        {:ok, Compatibilities.Version.blocking?(vsn, kube)}
+      end
     end
   end
 
@@ -1125,6 +1127,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   object :cloud_addon_information do
     field :name,      :string
+    field :distro,    :cluster_distro
     field :publisher, :string
     field :versions,  list_of(:cloud_addon_version_information)
   end

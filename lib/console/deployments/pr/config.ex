@@ -13,7 +13,7 @@ defmodule Console.Deployments.Pr.Config do
   end
 
   defp structure(pr, branch, ctx) do
-    spec = Map.take(pr, ~w(identifier deletes creates updates message lua)a)
+    spec = Map.take(pr, ~w(identifier deletes creates updates message lua vendor)a)
            |> Map.put(:branch, branch)
     %{
       apiVersion: "pr.plural.sh/v1alpha1",

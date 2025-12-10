@@ -2,10 +2,7 @@ import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  Maybe,
-  V1_PolicyRule as PolicyRuleT,
-} from '../../../generated/graphql-kubernetes'
+import { V1_PolicyRule as PolicyRuleT } from '../../../generated/graphql-kubernetes'
 
 const columnHelper = createColumnHelper<PolicyRuleT>()
 
@@ -44,13 +41,14 @@ const columns = [
 export default function PolicyRules({
   rules,
 }: {
-  rules: Array<Maybe<PolicyRuleT>>
+  rules: Nullable<Array<Nullable<PolicyRuleT>>>
 }): ReactElement<any> {
   return (
     <Table
       fullHeightWrap
-      data={rules}
+      data={rules ?? []}
       columns={columns}
+      emptyStateProps={{ message: 'No policy rules found.' }}
     />
   )
 }

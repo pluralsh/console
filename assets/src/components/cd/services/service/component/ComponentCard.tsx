@@ -69,7 +69,7 @@ export default function ComponentCard({
 
   return (
     <ComponentCardSC
-      {...(url
+      {...(url && component.uid // UID is needed to ensure the component exists.
         ? {
             clickable: true,
             forwardedAs: Link,

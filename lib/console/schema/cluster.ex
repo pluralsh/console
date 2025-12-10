@@ -324,7 +324,7 @@ defmodule Console.Schema.Cluster do
   end
 
   def upgrade_statistics(query \\ __MODULE__) do
-    extended = KubeVersions.Table.extended_versions()
+    extended = KubeVersions.Table.compliant_versions()
     from(c in query,
       select: %{
         count: count(c.id),

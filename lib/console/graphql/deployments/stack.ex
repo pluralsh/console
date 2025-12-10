@@ -296,12 +296,21 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_configuration do
-    field :image,     :string, description: "optional custom image you might want to use"
-    field :version,   :string, description: "the semver of the tool you wish to use"
-    field :tag,       :string, description: "the docker image tag you wish to use if you're customizing the version"
-    field :hooks,     list_of(:stack_hook), description: "the hooks to customize execution for this stack"
-    field :terraform, :terraform_configuration, description: "the terraform configuration for this stack"
-    field :ansible,   :ansible_configuration, description: "the ansible configuration for this stack"
+    field :image,       :string, description: "optional custom image you might want to use"
+    field :version,     :string, description: "the semver of the tool you wish to use"
+    field :tag,         :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,       list_of(:stack_hook), description: "the hooks to customize execution for this stack"
+    field :terraform,   :terraform_configuration, description: "the terraform configuration for this stack"
+    field :ansible,     :ansible_configuration, description: "the ansible configuration for this stack"
+    field :ai_approval, :ai_approval_configuration, description: "the ai approval configuration for this stack"
+  end
+
+  @desc "Configuration for ai approval of a stack run"
+  object :ai_approval_configuration do
+    field :enabled,       non_null(:boolean), description: "whether ai approval is enabled for this stack"
+    field :ignore_cancel, :boolean, description: "whether to ignore the cancellation of a stack run by ai, this allows human approval to override"
+    field :git,           non_null(:git_ref), description: "the git reference to use for the ai approval rules"
+    field :file,          non_null(:string), description: "the rules file to use alongside the git reference"
   end
 
   @desc "Configuration for applying policy enforcement to a stack"
@@ -325,13 +334,6 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :playbook,  :string, description: "The playbook to run"
     field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
     field :additional_args, list_of(:string), description: "Additional args for the playbook"
-  end
-
-  object :ai_approval_configuration do
-    field :enabled,       :boolean
-    field :ignore_cancel, :boolean
-    field :git,           :git_ref
-    field :file,          :string
   end
 
   object :stack_run do
