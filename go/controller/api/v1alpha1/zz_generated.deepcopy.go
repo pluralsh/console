@@ -2058,19 +2058,9 @@ func (in *DeploymentSettingsSpec) DeepCopyInto(out *DeploymentSettingsSpec) {
 		*out = new(NamespacedName)
 		**out = **in
 	}
-	if in.DeploymentRepositoryUrl != nil {
-		in, out := &in.DeploymentRepositoryUrl, &out.DeploymentRepositoryUrl
-		*out = new(string)
-		**out = **in
-	}
 	if in.ScaffoldsRepositoryRef != nil {
 		in, out := &in.ScaffoldsRepositoryRef, &out.ScaffoldsRepositoryRef
 		*out = new(NamespacedName)
-		**out = **in
-	}
-	if in.ScaffoldsRepositoryUrl != nil {
-		in, out := &in.ScaffoldsRepositoryUrl, &out.ScaffoldsRepositoryUrl
-		*out = new(string)
 		**out = **in
 	}
 	if in.Reconciliation != nil {
@@ -4603,11 +4593,6 @@ func (in *ObserverConfiguration) DeepCopy() *ObserverConfiguration {
 func (in *ObserverGit) DeepCopyInto(out *ObserverGit) {
 	*out = *in
 	out.GitRepositoryRef = in.GitRepositoryRef
-	if in.GitRepositoryUrl != nil {
-		in, out := &in.GitRepositoryUrl, &out.GitRepositoryUrl
-		*out = new(string)
-		**out = **in
-	}
 	if in.Filter != nil {
 		in, out := &in.Filter, &out.Filter
 		*out = new(ObserverGitFilter)

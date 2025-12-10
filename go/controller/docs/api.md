@@ -1223,9 +1223,7 @@ _Appears in:_
 | `logging` _[LoggingSettings](#loggingsettings)_ | Logging settings for connections to log aggregation datastores |  | Optional: \{\} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Cost settings for managing Plural's cost management features |  | Optional: \{\} <br /> |
 | `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | DeploymentRepositoryRef is a pointer to the deployment GIT repository to use |  | Optional: \{\} <br /> |
-| `deploymentRepositoryUrl` _string_ | DeploymentRepositoryUrl references the GitRepository URL containing the service source code. |  | Optional: \{\} <br /> |
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use |  | Optional: \{\} <br /> |
-| `scaffoldsRepositoryUrl` _string_ | ScaffoldsRepositoryUrl references the GitRepository URL containing the scaffold source code. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
@@ -2543,7 +2541,6 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references the Git repository resource to monitor.<br />The repository must be configured in Plural Console with appropriate access credentials. |  | Required: \{\} <br /> |
-| `gitRepositoryUrl` _string_ | GitRepositoryUrl references the GitRepository URL containing the source code. |  | Optional: \{\} <br /> |
 | `type` _[ObserverGitTargetType](#observergittargettype)_ | Type specifies what Git resources to monitor within the repository.<br />Currently only TAGS is supported, which monitors for new Git tags. |  | Enum: [TAGS] <br />Required: \{\} <br />Type: string <br /> |
 | `filter` _[ObserverGitFilter](#observergitfilter)_ | Filter specifies a regex to filter the git repository tags for the observed value. |  | Optional: \{\} <br /> |
 

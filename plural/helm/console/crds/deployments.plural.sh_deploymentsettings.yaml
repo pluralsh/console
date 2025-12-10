@@ -762,10 +762,6 @@ spec:
                 - name
                 - namespace
                 type: object
-              deploymentRepositoryUrl:
-                description: DeploymentRepositoryUrl references the GitRepository
-                  URL containing the service source code.
-                type: string
               logging:
                 description: Logging settings for connections to log aggregation datastores
                 properties:
@@ -1032,10 +1028,6 @@ spec:
                 - name
                 - namespace
                 type: object
-              scaffoldsRepositoryUrl:
-                description: ScaffoldsRepositoryUrl references the GitRepository URL
-                  containing the scaffold source code.
-                type: string
               stacks:
                 description: Stacks global configuration for stack execution.
                 properties:

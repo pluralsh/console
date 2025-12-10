@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
-	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -168,31 +167,19 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 	}
 	if git := observer.Spec.Target.Git; git != nil {
-		repositoryID := ""
-		if git.GitRepositoryUrl != nil {
-			id, err := plural.Cache().GetGitRepoID(lo.FromPtr(git.GitRepositoryUrl))
-			if err != nil {
-				if errors.IsNotFound(err) {
-					return target, actions, lo.ToPtr(common.Wait()), err
-				}
 
-				return target, actions, nil, err
+		gitRepo := &v1alpha1.GitRepository{}
+		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
+			if errors.IsNotFound(err) {
+				return target, actions, lo.ToPtr(common.Wait()), err
 			}
-			repositoryID = id
-		} else {
-			gitRepo := &v1alpha1.GitRepository{}
-			if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
-				if errors.IsNotFound(err) {
-					return target, actions, lo.ToPtr(common.Wait()), err
-				}
 
-				return target, actions, nil, err
-			}
-			if !gitRepo.Status.HasID() {
-				return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
-			}
-			repositoryID = gitRepo.Status.GetID()
+			return target, actions, nil, err
 		}
+		if !gitRepo.Status.HasID() {
+			return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
+		}
+		repositoryID := gitRepo.Status.GetID()
 
 		var filter *console.ObserverGitFilterAttributes
 		if git.Filter != nil {

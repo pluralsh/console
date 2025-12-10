@@ -436,10 +436,6 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      gitRepositoryUrl:
-                        description: GitRepositoryUrl references the GitRepository
-                          URL containing the source code.
-                        type: string
                       type:
                         description: |-
                           Type specifies what Git resources to monitor within the repository.

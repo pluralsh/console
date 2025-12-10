@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
-	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -238,28 +237,12 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		attr.DeployerRepositoryID = id
 	}
 
-	if settings.Spec.DeploymentRepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(settings.Spec.DeploymentRepositoryUrl))
-		if err != nil {
-			return nil, err
-		}
-		attr.DeployerRepositoryID = lo.ToPtr(id)
-	}
-
 	if settings.Spec.ScaffoldsRepositoryRef != nil {
 		id, err := getGitRepoID(ctx, r.Client, *settings.Spec.ScaffoldsRepositoryRef)
 		if err != nil {
 			return nil, err
 		}
 		attr.ArtifactRepositoryID = id
-	}
-
-	if settings.Spec.ScaffoldsRepositoryUrl != nil {
-		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(settings.Spec.ScaffoldsRepositoryUrl))
-		if err != nil {
-			return nil, err
-		}
-		attr.ArtifactRepositoryID = lo.ToPtr(id)
 	}
 
 	return attr, nil
