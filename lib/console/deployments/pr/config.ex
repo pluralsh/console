@@ -18,7 +18,8 @@ defmodule Console.Deployments.Pr.Config do
     %{
       apiVersion: "pr.plural.sh/v1alpha1",
       kind: "PrTemplate",
-      spec: Console.mapify(spec),
+      spec: Console.mapify(spec)
+            |> Caramelize.camelize(),
       context: ctx
     }
   end
