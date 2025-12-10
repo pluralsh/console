@@ -159,6 +159,10 @@ fragment StackRunDetails on StackRun {
   approver {
     ...User
   }
+  approvalResult {
+    reason
+    result
+  }
   cancellationReason
   stack {
     name
@@ -238,6 +242,16 @@ fragment StackConfiguration on StackConfiguration {
   terraform {
     parallelism
     refresh
+  }
+  aiApproval {
+    enabled
+    file
+    ignoreCancel
+    git {
+      files
+      folder
+      ref
+    }
   }
 }
 
