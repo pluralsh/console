@@ -25,6 +25,14 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 
+	if pra.Spec.Cluster != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(pra.Spec.Cluster))
+		if err != nil {
+			return nil, nil, err
+		}
+		clusterID = lo.ToPtr(id)
+	}
+
 	serviceID, err := helper.IDFromRef(pra.Spec.ServiceRef, &v1alpha1.ServiceDeployment{})
 	if err != nil {
 		return nil, nil, err

@@ -151,6 +151,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
+	// Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead.
+	// +kubebuilder:validation:Optional
+	Cluster *string `json:"cluster,omitempty"`
+
 	// ScmConnectionRef references the SCM connection to use for authentication when creating pull requests.
 	// +kubebuilder:validation:Required
 	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef"`

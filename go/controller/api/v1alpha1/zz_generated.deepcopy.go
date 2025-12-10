@@ -6079,6 +6079,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	out.ScmConnectionRef = in.ScmConnectionRef
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
