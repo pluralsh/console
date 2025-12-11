@@ -4,6 +4,7 @@ import { useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
+  CLUSTER_ADDONS_COMPATIBILITY_PATH,
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
@@ -21,7 +22,9 @@ export type ClusterCloudAddOnOutletContextT = {
   kubeVersion: Nullable<string>
 }
 
-const directory = [{ path: 'compatibility', label: 'Compatibility' }]
+const directory = [
+  { path: CLUSTER_ADDONS_COMPATIBILITY_PATH, label: 'Compatibility' },
+]
 
 export default function ClusterCloudAddon() {
   const theme = useTheme()
