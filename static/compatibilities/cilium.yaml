@@ -127,8 +127,15 @@ versions:
   chart_version: 1.15.8
   images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
     'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
-- version: 1.15.0
+- version: 1.15.7
   kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.15.7
+  images: ['quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0',
+    'quay.io/cilium/operator-generic:v1.15.7@sha256:6840a6dde703b3e73dd31e03390327a9184fcb888efbad9d9d098d65b9035b54']
+- version: 1.15.0
+  kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   chart_version: 1.15.0
@@ -155,8 +162,15 @@ versions:
   chart_version: 1.14.14
   images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
     'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
-- version: 1.14.6
+- version: 1.14.13
   kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.14.13
+  images: ['quay.io/cilium/cilium:v1.14.13@sha256:9cbbbaf0697756cb8ca2e2f67b8d3421918869e60e206b9309fb0689c101432f',
+    'quay.io/cilium/operator-generic:v1.14.13@sha256:04730b89598c886524356226e11cffb69f39ade35b0379ace10fe74e386b067d']
+- version: 1.14.6
+  kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   chart_version: 1.14.6
@@ -169,8 +183,15 @@ versions:
   chart_version: 1.14.0
   images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
     'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
-- version: 1.13.11
+- version: 1.13.18
   kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.13.18
+  images: ['quay.io/cilium/cilium:v1.13.18@sha256:9dc74ba5321c999e498b5f05202c7e27015360dd19278f19b15a25bee79d22f1',
+    'quay.io/cilium/operator-generic:v1.13.18@sha256:6a6332840d4df6eef48bb81ced12af8d860438aa2974b39b875cd6c234302b69']
+- version: 1.13.11
+  kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   chart_version: 1.13.11
@@ -184,13 +205,6 @@ versions:
   chart_version: 1.13.0
   images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
     'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
-- version: 1.12.19
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  chart_version: 1.12.19
-  images: ['quay.io/cilium/cilium:v1.12.19@sha256:b997994ab759443d9fc9807eb39b4784bf03e13730a8132ffe5df3edef22a312',
-    'quay.io/cilium/operator-generic:v1.12.19@sha256:da4d72facecde862c88d08bf99c3f476845beb407052a0cc4c06b68cc93b7570']
 - version: 1.12.18
   kube: ['1.29', '1.28', '1.27']
   requirements: []
