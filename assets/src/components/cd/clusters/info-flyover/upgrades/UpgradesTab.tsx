@@ -84,13 +84,9 @@ const statesWithIssues = [
   UpgradeInsightStatus.Failed,
 ]
 
-function hasBlockingAddons(cluster: ClusterOverviewDetailsFragment) {
-  const { blockingAddons, blockingCloudAddons } =
-    cluster?.upgradePlanSummary ?? {}
-  return (
-    (blockingAddons ?? []).length > 0 || (blockingCloudAddons ?? []).length > 0
-  )
-}
+const hasBlockingAddons = (cluster: ClusterOverviewDetailsFragment) =>
+  !isEmpty(cluster?.upgradePlanSummary?.blockingAddons) ||
+  !isEmpty(cluster?.upgradePlanSummary?.blockingCloudAddons)
 
 export function UpgradesTab({
   cluster,

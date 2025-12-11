@@ -8,6 +8,8 @@ import { useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
+  CLUSTER_ADDONS_COMPATIBILITY_PATH,
+  CLUSTER_ADDONS_RELEASES_PATH,
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
@@ -29,8 +31,8 @@ export type ClusterAddOnOutletContextT = {
 export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 const directory = [
-  { path: 'compatibility', label: 'Compatibility' },
-  { path: 'releases', label: 'Releases' },
+  { path: CLUSTER_ADDONS_COMPATIBILITY_PATH, label: 'Compatibility' },
+  { path: CLUSTER_ADDONS_RELEASES_PATH, label: 'Releases' },
   // { path: 'readme', label: 'README' },
 ]
 
