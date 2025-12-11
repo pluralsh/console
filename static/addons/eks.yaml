@@ -805,6 +805,12 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.0.3-eksbuild.1
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.2-eksbuild.1
     compatibilities:
     - '1.33'
@@ -951,6 +957,13 @@
   publisher: sagemaker
 - name: amazon-sagemaker-spaces
   versions:
+  - version: v0.1.2-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v0.1.1-eksbuild.1
     compatibilities:
     - '1.34'
@@ -6988,6 +7001,16 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.140.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.138.0-eksbuild.1
     compatibilities:
     - '1.33'
