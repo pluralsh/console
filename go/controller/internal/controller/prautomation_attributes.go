@@ -30,7 +30,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		if err != nil {
 			return nil, nil, err
 		}
-		clusterID = lo.ToPtr(id)
+		clusterID = id
 	}
 
 	serviceID, err := helper.IDFromRef(pra.Spec.ServiceRef, &v1alpha1.ServiceDeployment{})
@@ -51,7 +51,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 			}
 			return nil, nil, err
 		}
-		repositoryID = lo.ToPtr(id)
+		repositoryID = id
 	}
 
 	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})

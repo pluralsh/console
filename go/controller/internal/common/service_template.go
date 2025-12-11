@@ -175,7 +175,7 @@ func setSources(ctx context.Context, c runtimeclient.Client, attr *console.Servi
 				if err != nil {
 					return err
 				}
-				newSource.RepositoryID = lo.ToPtr(id)
+				newSource.RepositoryID = id
 			}
 
 			attr.Sources = append(attr.Sources, newSource)

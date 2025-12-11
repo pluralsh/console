@@ -500,7 +500,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 		if err != nil {
 			return "", nil, err
 		}
-		return id, nil, nil
+		return lo.FromPtr(id), nil, nil
 	}
 
 	cluster := &v1alpha1.Cluster{}
@@ -524,7 +524,7 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 		if err != nil {
 			return "", nil, err
 		}
-		return id, nil, nil
+		return lo.FromPtr(id), nil, nil
 	}
 
 	repository := &v1alpha1.GitRepository{}

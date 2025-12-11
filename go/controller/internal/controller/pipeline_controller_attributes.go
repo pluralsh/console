@@ -185,7 +185,7 @@ func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gat
 		if err != nil {
 			return nil, nil, err
 		}
-		clusterId = lo.ToPtr(id)
+		clusterId = id
 	}
 
 	var sentinelID *string

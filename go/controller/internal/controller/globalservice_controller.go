@@ -301,7 +301,7 @@ func (r *GlobalServiceReconciler) getRepositoryID(ctx context.Context, ns *v1alp
 		if err != nil {
 			return nil, err
 		}
-		return lo.ToPtr(id), nil
+		return id, nil
 	}
 
 	repository := &v1alpha1.GitRepository{}

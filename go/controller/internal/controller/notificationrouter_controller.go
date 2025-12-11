@@ -186,7 +186,7 @@ func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *co
 		if err != nil {
 			return nil, err
 		}
-		return lo.ToPtr(id), nil
+		return id, nil
 	}
 
 	cluster := &v1alpha1.Cluster{}

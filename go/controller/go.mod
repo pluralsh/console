@@ -12,9 +12,10 @@ require (
 	github.com/onsi/gomega v1.36.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pluralsh/console/go/client v1.48.0
-	github.com/pluralsh/polly v0.3.4
+	github.com/pluralsh/polly v0.3.6
 	github.com/samber/lo v1.50.0
 	github.com/stretchr/testify v1.10.0
+	github.com/vektah/gqlparser/v2 v2.5.26
 	golang.org/x/time v0.11.0
 	k8s.io/api v0.33.3
 	k8s.io/apimachinery v0.33.3
@@ -115,7 +116,6 @@ require (
 	github.com/tinylib/msgp v1.2.5 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.26 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect

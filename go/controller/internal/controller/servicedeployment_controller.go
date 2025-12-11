@@ -143,7 +143,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 		if err != nil {
 			return common.HandleRequeue(nil, err, service.SetCondition)
 		}
-		repositoryID = &repoID
+		repositoryID = repoID
 	}
 
 	attr, result, err := r.genServiceAttributes(ctx, service, repositoryID)
@@ -223,7 +223,11 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 
 func (r *ServiceDeploymentReconciler) getClusterID(ctx context.Context, service *v1alpha1.ServiceDeployment) (string, error) {
 	if service.Spec.Cluster != nil {
-		return plural.Cache().GetClusterID(lo.FromPtr(service.Spec.Cluster))
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(service.Spec.Cluster))
+		if err != nil {
+			return "", err
+		}
+		return lo.FromPtr(id), nil
 	}
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
@@ -407,7 +411,7 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 		if err != nil {
 			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
 		}
-		attr.RepositoryID = lo.ToPtr(id)
+		attr.RepositoryID = id
 	}
 
 	if service.Spec.Helm.ValuesConfigMapRef != nil {
@@ -482,7 +486,7 @@ func (r *ServiceDeploymentReconciler) getRepository(ctx context.Context, ref *co
 		if err != nil {
 			return nil, err
 		}
-		repositoryID = lo.ToPtr(id)
+		repositoryID = id
 	}
 
 	if ref != nil {
@@ -715,7 +719,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).

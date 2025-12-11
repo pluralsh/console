@@ -87,7 +87,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		if err != nil {
 			return common.HandleRequeue(nil, err, sentinel.SetCondition)
 		}
-		repositoryID = lo.ToPtr(id)
+		repositoryID = id
 	}
 
 	if sentinel.Spec.RepositoryRef != nil {
@@ -285,7 +285,7 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					if err != nil {
 						return nil, err
 					}
-					configuration.IntegrationTest.RepositoryID = lo.ToPtr(id)
+					configuration.IntegrationTest.RepositoryID = id
 				}
 				if check.Configuration.IntegrationTest.Git != nil {
 					configuration.IntegrationTest.Git = &console.GitRefAttributes{

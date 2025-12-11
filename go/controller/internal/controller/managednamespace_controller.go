@@ -287,7 +287,7 @@ func (r *ManagedNamespaceReconciler) getRepositoryId(ctx context.Context, ns *v1
 		if err != nil {
 			return nil, nil, err
 		}
-		return lo.ToPtr(id), nil, nil
+		return id, nil, nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
