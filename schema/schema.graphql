@@ -8306,6 +8306,7 @@ enum ConfigurationType {
   GROUP
   USER
   FLOW
+  JSON
 }
 
 enum Operation {

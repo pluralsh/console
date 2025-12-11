@@ -104,7 +104,8 @@ defmodule Console.Schema.Configuration do
     project: 10,
     group: 11,
     user: 12,
-    flow: 13
+    flow: 13,
+    json: 14
 
   defenum UniqScope, project: 0, cluster: 1
 

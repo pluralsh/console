@@ -2924,6 +2924,7 @@ export enum ConfigurationType {
   Function = 'FUNCTION',
   Group = 'GROUP',
   Int = 'INT',
+  Json = 'JSON',
   Password = 'PASSWORD',
   Project = 'PROJECT',
   String = 'STRING',

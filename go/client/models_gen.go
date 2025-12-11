@@ -9236,6 +9236,7 @@ const (
 	ConfigurationTypeGroup    ConfigurationType = "GROUP"
 	ConfigurationTypeUser     ConfigurationType = "USER"
 	ConfigurationTypeFlow     ConfigurationType = "FLOW"
+	ConfigurationTypeJSON     ConfigurationType = "JSON"
 )
 
 var AllConfigurationType = []ConfigurationType{
@@ -9253,11 +9254,12 @@ var AllConfigurationType = []ConfigurationType{
 	ConfigurationTypeGroup,
 	ConfigurationTypeUser,
 	ConfigurationTypeFlow,
+	ConfigurationTypeJSON,
 }
 
 func (e ConfigurationType) IsValid() bool {
 	switch e {
-	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum, ConfigurationTypeCluster, ConfigurationTypeProject, ConfigurationTypeGroup, ConfigurationTypeUser, ConfigurationTypeFlow:
+	case ConfigurationTypeString, ConfigurationTypeInt, ConfigurationTypeBool, ConfigurationTypeDomain, ConfigurationTypeBucket, ConfigurationTypeFile, ConfigurationTypeFunction, ConfigurationTypePassword, ConfigurationTypeEnum, ConfigurationTypeCluster, ConfigurationTypeProject, ConfigurationTypeGroup, ConfigurationTypeUser, ConfigurationTypeFlow, ConfigurationTypeJSON:
 		return true
 	}
 	return false

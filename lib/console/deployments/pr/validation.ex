@@ -5,14 +5,19 @@ defmodule Console.Deployments.Pr.Validation do
   alias Console.Schema.Configuration.{Validation}
 
   def validate(%PrAutomation{configuration: [_ | _] = config}, ctx) do
-    Enum.reduce_while(config, :ok, fn %Configuration{name: name} = conf, _ ->
+    Enum.reduce_while(config, ctx, fn %Configuration{name: name} = conf, ctx ->
       case do_validate(conf, ctx[name]) do
-        :ok -> {:cont, :ok}
+        :ok -> {:cont, ctx}
+        {:ok, v} -> {:cont, Map.put(ctx, name, v)}
         {:error, _} = err -> {:halt, err}
       end
     end)
+    |> case do
+      {:error, _} = err -> err
+      ctx -> {:ok, ctx}
+    end
   end
-  def validate(_, _), do: :ok
+  def validate(_, ctx), do: {:ok, ctx}
 
   defp do_validate(%Configuration{optional: true}, nil), do: :ok
   defp do_validate(%Configuration{optional: true}, ""), do: :ok
@@ -38,6 +43,13 @@ defmodule Console.Deployments.Pr.Validation do
     case val in vals do
       true -> :ok
       false -> {:error, ~s(field "#{n}" with value "#{inspect(val)}" is not a member of {#{Enum.join(vals, ",")}})}
+    end
+  end
+
+  defp do_validate(%Configuration{type: :json, name: n}, val) when is_binary(val) do
+    case Jason.decode(val) do
+      {:ok, v} -> {:ok, v}
+      _ -> {:error, ~s(field "#{n}" with value "#{val}" is not a json-encoded string)}
     end
   end
 

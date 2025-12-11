@@ -3196,7 +3196,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is the identifier for this configuration field, used as a template variable<br />and as the form field name in the UI. |  | Required: \{\} <br /> |
-| `type` _[ConfigurationType](#configurationtype)_ | Type specifies the input type for this field, determining how it's rendered<br />in the UI and what validation is applied. |  | Enum: [STRING INT BOOL PASSWORD ENUM CLUSTER PROJECT GROUP USER FLOW] <br />Required: \{\} <br /> |
+| `type` _[ConfigurationType](#configurationtype)_ | Type specifies the input type for this field, determining how it's rendered<br />in the UI and what validation is applied. |  | Enum: [STRING INT BOOL JSON PASSWORD ENUM CLUSTER PROJECT GROUP USER FLOW] <br />Required: \{\} <br /> |
 | `condition` _[Condition](#condition)_ | Condition defines when this field should be displayed based on the values<br />of other fields, enabling dynamic forms that adapt to user input. |  | Optional: \{\} <br /> |
 | `default` _string_ | Default provides a default value for this field. |  | Optional: \{\} <br /> |
 | `documentation` _string_ | Documentation provides help text or description for this field to guide users in providing the correct input. |  | Optional: \{\} <br /> |
