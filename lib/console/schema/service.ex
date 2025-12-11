@@ -315,6 +315,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.owner_id == ^owner_id)
   end
 
+  def for_reference(query \\ __MODULE__, ref) do
+    from(s in query, where: ilike(s.git["ref"], ^"%#{ref}%"))
+  end
+
   def globalized(query \\ __MODULE__) do
     from(s in query, where: not is_nil(s.owner_id))
   end

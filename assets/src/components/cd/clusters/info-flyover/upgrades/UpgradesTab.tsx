@@ -84,6 +84,14 @@ const statesWithIssues = [
   UpgradeInsightStatus.Failed,
 ]
 
+function hasBlockingAddons(cluster: ClusterOverviewDetailsFragment) {
+  const { blockingAddons, blockingCloudAddons } =
+    cluster?.upgradePlanSummary ?? {}
+  return (
+    (blockingAddons ?? []).length > 0 || (blockingCloudAddons ?? []).length > 0
+  )
+}
+
 export function UpgradesTab({
   cluster,
   refetch,
@@ -136,15 +144,19 @@ export function UpgradesTab({
       direction="column"
       gap="large"
     >
-      <StackedText
-        first="Recommended upgrades"
-        firstPartialType="subtitle1"
-        firstColor="text"
-        second="These add-ons are currently blocking your cluster upgrade"
-        secondPartialType="body2"
-        secondColor="text-xlight"
-      />
-      <UpgradesConsolidatedTable cluster={cluster} />
+      {hasBlockingAddons(cluster) && (
+        <StackedText
+          first="Recommended upgrades"
+          firstPartialType="subtitle1"
+          firstColor="text"
+          second="These add-ons are currently blocking your cluster upgrade"
+          secondPartialType="body2"
+          secondColor="text-xlight"
+        />
+      )}
+      {hasBlockingAddons(cluster) && (
+        <UpgradesConsolidatedTable cluster={cluster} />
+      )}
       {upgradeError && (
         <GqlError
           header="Could not upgrade cluster"

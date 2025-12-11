@@ -10398,6 +10398,7 @@ export type RootQueryTypeServiceDeploymentsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   errored?: InputMaybe<Scalars['Boolean']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  gitRef?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;

@@ -87,6 +87,7 @@ export function UpgradesConsolidatedTable({
         })),
     [blockingAddons, blockingCloudAddons]
   )
+
   return (
     <Table
       fullHeightWrap
