@@ -1,10 +1,10 @@
 import {
   CloseIcon,
-  ComposeIcon,
   Flex,
   HamburgerMenuCollapseIcon,
   HistoryIcon,
   IconFrame,
+  PlusIconAlt,
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
@@ -80,7 +80,7 @@ export function ChatbotHeader() {
           {!cloudConnectionsLoading && (
             <IconFrame
               clickable
-              icon={mutationLoading ? <Spinner /> : <ComposeIcon />}
+              icon={mutationLoading ? <Spinner /> : <PlusIconAlt />}
               type="tertiary"
               tooltip="Start a new chat"
               onClick={() =>
