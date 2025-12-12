@@ -102,9 +102,15 @@ spec:
                       type: object
                     type: array
                 type: object
+              cluster:
+                description: Cluster is the handle of the target Cluster where this
+                  service will be deployed. Leave it empty to use the clusterRef field
+                  instead.
+                type: string
               clusterRef:
                 description: ClusterRef references the target Cluster where this service
-                  will be deployed.
+                  will be deployed. Leave it as an empty struct to use the cluster
+                  field instead.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -254,6 +260,9 @@ spec:
                     description: Ref is the Git reference (branch, tag, or commit)
                       to use.
                     type: string
+                  url:
+                    description: URL of the Git repository.
+                    type: string
                 required:
                 - folder
                 - ref
@@ -282,6 +291,9 @@ spec:
                       ref:
                         description: Ref is the Git reference (branch, tag, or commit)
                           to use.
+                        type: string
+                      url:
+                        description: URL of the Git repository.
                         type: string
                     required:
                     - folder
@@ -638,6 +650,9 @@ spec:
                         ref:
                           description: Ref is the Git reference (branch, tag, or commit)
                             to use.
+                          type: string
+                        url:
+                          description: URL of the Git repository.
                           type: string
                       required:
                       - folder

@@ -18,6 +18,9 @@ func (in *ConsoleHelper) IDFromRef(ref *v1.ObjectReference, resource v1alpha1.Pl
 	if ref == nil {
 		return nil, nil
 	}
+	if ref.Name == "" {
+		return nil, nil
+	}
 
 	err := in.reader.Get(in.ctx, k8sclient.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, resource)
 	return resource.ConsoleID(), err

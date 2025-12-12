@@ -123,6 +123,11 @@ spec:
                           Three gate types are supported: APPROVAL (human sign-off), WINDOW (time-based constraints),
                           and JOB (custom validation jobs like tests or security scans).
                         properties:
+                          cluster:
+                            description: Cluster is the handle of the target Cluster
+                              where this service will be deployed. Leave it empty
+                              to use the clusterRef field instead.
+                            type: string
                           clusterRef:
                             description: ClusterRef specifies the target cluster where
                               this gate will execute.

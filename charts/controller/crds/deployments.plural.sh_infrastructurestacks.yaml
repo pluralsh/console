@@ -111,6 +111,11 @@ spec:
                       type: object
                     type: array
                 type: object
+              cluster:
+                description: Cluster is the handle of the target Cluster where this
+                  service will be deployed. Leave it empty to use the clusterRef field
+                  instead.
+                type: string
               clusterRef:
                 description: ClusterRef references the target Cluster where this stack
                   will be executed.
@@ -188,6 +193,9 @@ spec:
                           ref:
                             description: Ref is the Git reference (branch, tag, or
                               commit) to use.
+                            type: string
+                          url:
+                            description: URL of the Git repository.
                             type: string
                         required:
                         - folder
@@ -427,6 +435,9 @@ spec:
                   ref:
                     description: Ref is the Git reference (branch, tag, or commit)
                       to use.
+                    type: string
+                  url:
+                    description: URL of the Git repository.
                     type: string
                 required:
                 - folder
@@ -9723,7 +9734,7 @@ spec:
                 type: object
               repositoryRef:
                 description: RepositoryRef references the GitRepository containing
-                  the IaC source code.
+                  the IaC source code. Leave empty to use git:url instead.
                 properties:
                   apiVersion:
                     description: API version of the referent.

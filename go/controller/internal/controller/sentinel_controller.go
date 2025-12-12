@@ -10,6 +10,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -80,8 +81,17 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return *result, nil
 	}
 
-	repository := &v1alpha1.GitRepository{}
+	var repositoryID *string
+	if sentinel.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(sentinel.Spec.Git.Url))
+		if err != nil {
+			return common.HandleRequeue(nil, err, sentinel.SetCondition)
+		}
+		repositoryID = id
+	}
+
 	if sentinel.Spec.RepositoryRef != nil {
+		repository := &v1alpha1.GitRepository{}
 		if err := r.Get(ctx, client.ObjectKey{Name: sentinel.Spec.RepositoryRef.Name, Namespace: sentinel.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			return common.HandleRequeue(nil, err, sentinel.SetCondition)
 		}
@@ -93,6 +103,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
 			return common.Wait(), nil
 		}
+		repositoryID = repository.Status.ID
 	}
 	project := &v1alpha1.Project{}
 	if sentinel.Spec.ProjectRef != nil {
@@ -103,7 +114,7 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		}
 	}
 
-	attr, err := r.attributes(ctx, sentinel, repository, project)
+	attr, err := r.attributes(ctx, sentinel, repositoryID, project)
 	if err != nil {
 		if errors.Is(err, ErrWaitRepository) {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready or healthy")
@@ -152,13 +163,13 @@ func (r *SentinelReconciler) sync(ctx context.Context, sentinel *v1alpha1.Sentin
 	return r.ConsoleClient.CreateSentinel(ctx, attr)
 }
 
-func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.Sentinel, repository *v1alpha1.GitRepository, project *v1alpha1.Project) (*console.SentinelAttributes, error) {
+func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.Sentinel, repositoryId *string, project *v1alpha1.Project) (*console.SentinelAttributes, error) {
 	attr := &console.SentinelAttributes{
 		Name:        lo.ToPtr(sentinel.ConsoleName()),
 		Description: sentinel.Spec.Description,
 	}
-	if repository.Status.HasID() {
-		attr.RepositoryID = lo.ToPtr(repository.Status.GetID())
+	if repositoryId != nil {
+		attr.RepositoryID = repositoryId
 	}
 	if project.Status.HasID() {
 		attr.ProjectID = lo.ToPtr(project.Status.GetID())
@@ -268,6 +279,13 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 						return nil, ErrWaitRepository
 					}
 					configuration.IntegrationTest.RepositoryID = repository.Status.ID
+				}
+				if check.Configuration.IntegrationTest.Git.HasUrl() {
+					id, err := plural.Cache().GetGitRepoID(lo.FromPtr(check.Configuration.IntegrationTest.Git.Url))
+					if err != nil {
+						return nil, err
+					}
+					configuration.IntegrationTest.RepositoryID = id
 				}
 				if check.Configuration.IntegrationTest.Git != nil {
 					configuration.IntegrationTest.Git = &console.GitRefAttributes{

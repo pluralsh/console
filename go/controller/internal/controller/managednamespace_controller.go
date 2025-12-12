@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -249,13 +250,13 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	}
 	if ns.Spec.Service != nil {
 		srv := ns.Spec.Service
-		repository, result, err := r.getRepository(ctx, ns)
+		repository, result, err := r.getRepositoryId(ctx, ns)
 		if result != nil || err != nil {
 			return nil, result, err
 		}
 
 		namespace := ns.GetNamespace()
-		st, err := common.ServiceTemplateAttributes(ctx, r.Client, namespace, srv, repository.Status.ID)
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, namespace, srv, repository)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -280,7 +281,15 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	return attr, nil, nil
 }
 
-func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.GitRepository, *ctrl.Result, error) {
+func (r *ManagedNamespaceReconciler) getRepositoryId(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*string, *ctrl.Result, error) {
+	if ns.Spec.Service.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(ns.Spec.Service.Git.Url))
+		if err != nil {
+			return nil, nil, err
+		}
+		return id, nil, nil
+	}
+
 	repository := &v1alpha1.GitRepository{}
 	if ns.Spec.Service.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Service.RepositoryRef.Name, Namespace: ns.Spec.Service.RepositoryRef.Namespace}, repository); err != nil {
@@ -295,5 +304,5 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 			return nil, nil, fmt.Errorf("repository %s is not healthy", repository.Name)
 		}
 	}
-	return repository, nil, nil
+	return repository.Status.ID, nil, nil
 }

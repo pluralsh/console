@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -131,11 +132,11 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	}
 
 	if globalService.Spec.Template != nil {
-		repository, err := r.getRepository(ctx, globalService)
+		repositoryID, err := r.getRepositoryID(ctx, globalService)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repositoryID)
 		if err != nil {
 			return common.HandleRequeue(nil, err, globalService.SetCondition)
 		}
@@ -294,7 +295,15 @@ func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *GlobalServiceReconciler) getRepository(ctx context.Context, ns *v1alpha1.GlobalService) (*v1alpha1.GitRepository, error) {
+func (r *GlobalServiceReconciler) getRepositoryID(ctx context.Context, ns *v1alpha1.GlobalService) (*string, error) {
+	if ns.Spec.Template.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(ns.Spec.Template.Git.Url))
+		if err != nil {
+			return nil, err
+		}
+		return id, nil
+	}
+
 	repository := &v1alpha1.GitRepository{}
 	if ns.Spec.Template.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Template.RepositoryRef.Name, Namespace: ns.Spec.Template.RepositoryRef.Namespace}, repository); err != nil {
@@ -307,5 +316,5 @@ func (r *GlobalServiceReconciler) getRepository(ctx context.Context, ns *v1alpha
 			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
 		}
 	}
-	return repository, nil
+	return repository.Status.ID, nil
 }

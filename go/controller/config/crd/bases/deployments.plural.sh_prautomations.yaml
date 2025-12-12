@@ -156,6 +156,11 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              cluster:
+                description: Cluster is the handle of the target Cluster where this
+                  service will be deployed. Leave it empty to use the clusterRef field
+                  instead.
+                type: string
               clusterRef:
                 description: ClusterRef references a specific cluster that this PR
                   operates on.
@@ -363,6 +368,9 @@ spec:
                         description: Ref is the Git reference (branch, tag, or commit)
                           to use.
                         type: string
+                      url:
+                        description: URL of the Git repository.
+                        type: string
                     required:
                     - folder
                     - ref
@@ -441,6 +449,9 @@ spec:
                   ref:
                     description: Ref is the Git reference (branch, tag, or commit)
                       to use.
+                    type: string
+                  url:
+                    description: URL of the Git repository.
                     type: string
                 required:
                 - folder

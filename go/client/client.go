@@ -137,6 +137,7 @@ type ConsoleClient interface {
 	DeleteGitRepository(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteGitRepository, error)
 	ListGitRepositories(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListGitRepositories, error)
 	GetGitRepository(ctx context.Context, id *string, url *string, interceptors ...clientv2.RequestInterceptor) (*GetGitRepository, error)
+	GetGitRepositoryID(ctx context.Context, url *string, interceptors ...clientv2.RequestInterceptor) (*GetGitRepositoryID, error)
 	GetScmConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnection, error)
 	GetScmConnectionByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnectionByName, error)
 	GetScmConnectionTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetScmConnectionTiny, error)
@@ -17506,6 +17507,17 @@ func (t *ListGitRepositories_GitRepositories) GetEdges() []*GitRepositoryEdgeFra
 	return t.Edges
 }
 
+type GetGitRepositoryID_GitRepository_ struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetGitRepositoryID_GitRepository_) GetID() string {
+	if t == nil {
+		t = &GetGitRepositoryID_GitRepository_{}
+	}
+	return t.ID
+}
+
 type GetScmConnectionTiny_ScmConnection struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -23008,6 +23020,17 @@ type GetGitRepository struct {
 func (t *GetGitRepository) GetGitRepository() *GitRepositoryFragment {
 	if t == nil {
 		t = &GetGitRepository{}
+	}
+	return t.GitRepository
+}
+
+type GetGitRepositoryID struct {
+	GitRepository *GetGitRepositoryID_GitRepository_ "json:\"gitRepository,omitempty\" graphql:\"gitRepository\""
+}
+
+func (t *GetGitRepositoryID) GetGitRepository() *GetGitRepositoryID_GitRepository_ {
+	if t == nil {
+		t = &GetGitRepositoryID{}
 	}
 	return t.GitRepository
 }
@@ -35212,6 +35235,32 @@ func (c *Client) GetGitRepository(ctx context.Context, id *string, url *string, 
 	return &res, nil
 }
 
+const GetGitRepositoryIDDocument = `query GetGitRepositoryID ($url: String) {
+	gitRepository(url: $url) {
+		... {
+			id
+		}
+	}
+}
+`
+
+func (c *Client) GetGitRepositoryID(ctx context.Context, url *string, interceptors ...clientv2.RequestInterceptor) (*GetGitRepositoryID, error) {
+	vars := map[string]any{
+		"url": url,
+	}
+
+	var res GetGitRepositoryID
+	if err := c.Client.Post(ctx, "GetGitRepositoryID", GetGitRepositoryIDDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetScmConnectionDocument = `query GetScmConnection ($id: ID!) {
 	scmConnection(id: $id) {
 		... ScmConnectionFragment
@@ -45013,6 +45062,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteGitRepositoryDocument:                       "DeleteGitRepository",
 	ListGitRepositoriesDocument:                       "ListGitRepositories",
 	GetGitRepositoryDocument:                          "GetGitRepository",
+	GetGitRepositoryIDDocument:                        "GetGitRepositoryID",
 	GetScmConnectionDocument:                          "GetScmConnection",
 	GetScmConnectionByNameDocument:                    "GetScmConnectionByName",
 	GetScmConnectionTinyDocument:                      "GetScmConnectionTiny",

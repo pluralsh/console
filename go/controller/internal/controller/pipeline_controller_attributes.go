@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -178,6 +179,13 @@ func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gat
 	clusterId, result, err := r.pipelineEdgeGateClusterIDAttribute(ctx, gate.ClusterRef)
 	if result != nil || err != nil {
 		return nil, result, err
+	}
+	if gate.Cluster != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(gate.Cluster))
+		if err != nil {
+			return nil, nil, err
+		}
+		clusterId = id
 	}
 
 	var sentinelID *string

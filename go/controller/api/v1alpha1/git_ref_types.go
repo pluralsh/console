@@ -15,6 +15,9 @@ type GitRef struct {
 	// Optional files to add to the manifests for this service
 	// +kubebuilder:validation:Optional
 	Files []string `json:"files,omitempty"`
+
+	// URL of the Git repository.
+	Url *string `json:"url,omitempty"`
 }
 
 func (in *GitRef) Attributes() *console.GitRefAttributes {
@@ -27,4 +30,14 @@ func (in *GitRef) Attributes() *console.GitRefAttributes {
 		Folder: in.Folder,
 		Files:  in.Files,
 	}
+}
+
+func (in *GitRef) HasUrl() bool {
+	if in == nil {
+		return false
+	}
+	if in.Url == nil {
+		return false
+	}
+	return len(*in.Url) > 0
 }

@@ -7,6 +7,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -168,6 +169,13 @@ func setSources(ctx context.Context, c runtimeclient.Client, attr *console.Servi
 				}
 
 				newSource.RepositoryID = repository.Status.ID
+			}
+			if source.Git.HasUrl() {
+				id, err := plural.Cache().GetGitRepoID(lo.FromPtr(source.Git.Url))
+				if err != nil {
+					return err
+				}
+				newSource.RepositoryID = id
 			}
 
 			attr.Sources = append(attr.Sources, newSource)

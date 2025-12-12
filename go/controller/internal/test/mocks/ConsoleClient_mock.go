@@ -5090,6 +5090,62 @@ func (_c *ConsoleClientMock_GetRepository_Call) RunAndReturn(run func(*string) (
 	return _c
 }
 
+// GetRepositoryID provides a mock function with given fields: url
+func (_m *ConsoleClientMock) GetRepositoryID(url string) (string, error) {
+	ret := _m.Called(url)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRepositoryID")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(url)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(url)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(url)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetRepositoryID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRepositoryID'
+type ConsoleClientMock_GetRepositoryID_Call struct {
+	*mock.Call
+}
+
+// GetRepositoryID is a helper method to define mock.On call
+//   - url string
+func (_e *ConsoleClientMock_Expecter) GetRepositoryID(url interface{}) *ConsoleClientMock_GetRepositoryID_Call {
+	return &ConsoleClientMock_GetRepositoryID_Call{Call: _e.mock.On("GetRepositoryID", url)}
+}
+
+func (_c *ConsoleClientMock_GetRepositoryID_Call) Run(run func(url string)) *ConsoleClientMock_GetRepositoryID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetRepositoryID_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetRepositoryID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetRepositoryID_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetRepositoryID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetScmConnection provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetScmConnection(ctx context.Context, id string) (*client.ScmConnectionFragment, error) {
 	ret := _m.Called(ctx, id)

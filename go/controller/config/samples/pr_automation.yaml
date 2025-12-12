@@ -24,9 +24,8 @@ spec:
   name: pr-test
   scmConnectionRef:
     name: github
-  clusterRef:
-    name: existing
-    namespace: default
+  clusterRef: {}
+  cluster: mgmt
   title: "Updating cluster to {{ context.version }}"
   message: "Updating cluster to {{ context.version }}, please run terraform plan to confirm all changes look good before merging"
   identifier: "floreks/cd-renovate"

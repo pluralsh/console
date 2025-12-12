@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	console "github.com/pluralsh/console/go/client"
@@ -23,6 +25,14 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		return nil, nil, err
 	}
 
+	if pra.Spec.Cluster != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(pra.Spec.Cluster))
+		if err != nil {
+			return nil, nil, err
+		}
+		clusterID = id
+	}
+
 	serviceID, err := helper.IDFromRef(pra.Spec.ServiceRef, &v1alpha1.ServiceDeployment{})
 	if err != nil {
 		return nil, nil, err
@@ -31,6 +41,17 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 	repositoryID, err := helper.IDFromRef(pra.Spec.RepositoryRef, &v1alpha1.GitRepository{})
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if pra.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pra.Spec.Git.Url))
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("git repository is not ready")
+			}
+			return nil, nil, err
+		}
+		repositoryID = id
 	}
 
 	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})

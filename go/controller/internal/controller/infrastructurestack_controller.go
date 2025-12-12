@@ -23,6 +23,7 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -494,6 +495,14 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 // ready before allowing main reconcile loop to continue. In case cluster reference is misconfigured,
 // it will return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
+	if stack.Spec.Cluster != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(stack.Spec.Cluster))
+		if err != nil {
+			return "", nil, err
+		}
+		return lo.FromPtr(id), nil, nil
+	}
+
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.ClusterRef.Name, Namespace: stack.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return "", nil, err
@@ -510,6 +519,14 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 // ready before allowing main reconcile loop to continue. In case project ref is misconfigured, it will
 // return with error and block the reconcile process from continuing.
 func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (string, *ctrl.Result, error) {
+	if stack.Spec.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(stack.Spec.Git.Url))
+		if err != nil {
+			return "", nil, err
+		}
+		return lo.FromPtr(id), nil, nil
+	}
+
 	repository := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.RepositoryRef.Name, Namespace: stack.Spec.RepositoryRef.Namespace}, repository); err != nil {
 		return "", nil, err
