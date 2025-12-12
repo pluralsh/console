@@ -1,9 +1,9 @@
-import { Chip, TestTubeIcon } from '@pluralsh/design-system'
+import { TestTubeIcon } from '@pluralsh/design-system'
 import { GateState } from 'generated/graphql'
 
+import { GateNodeHeaderChip } from './ApprovalNode'
 import {
   gateStateToCardStatus,
-  gateStateToSeverity,
   IconHeading,
   NodeCardList,
   PipelineBaseNode,
@@ -23,19 +23,11 @@ export function TestsNode({ id, data }: PipelineGateNodeProps) {
   const gates = edge?.gates
 
   return (
-    <PipelineBaseNode id={id}>
-      {meta.state && (
-        <div className="headerArea">
-          <h2 className="heading">Action</h2>
-          <Chip
-            fillLevel={0}
-            size="small"
-            severity={gateStateToSeverity[meta.state]}
-          >
-            {gateStateToTestText[meta.state]}
-          </Chip>
-        </div>
-      )}
+    <PipelineBaseNode
+      id={id}
+      headerText="action"
+      headerChip={<GateNodeHeaderChip state={meta.state} />}
+    >
       <IconHeading icon={<TestTubeIcon />}>Run test group</IconHeading>
       <NodeCardList>
         {gates?.map(

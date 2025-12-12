@@ -59,6 +59,16 @@ fragment PipelineGate on PipelineGate {
       ...JobGateSpec
     }
   }
+  sentinel {
+    id
+    name
+  }
+  sentinelRun {
+    id
+    status
+    insertedAt
+    completedAt
+  }
   insertedAt
   updatedAt
 }

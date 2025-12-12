@@ -367,7 +367,10 @@ export const sentinelsCols = [
   ColActions,
 ]
 
-const statusToIcon = (status: SentinelRunStatus, spinner: boolean = false) => {
+export const statusToIcon = (
+  status: SentinelRunStatus,
+  spinner: boolean = false
+) => {
   switch (status) {
     case SentinelRunStatus.Success:
       return <CheckRoundedIcon size={12} />

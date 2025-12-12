@@ -15,16 +15,17 @@ import { Entries } from 'type-fest'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
 
-import { EdgeType } from '../../../utils/reactflow/edges'
+import { EdgeType } from 'components/utils/reactflow/edges'
 
 import { reduceGateStates } from './reduceGateStatuses'
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
 
 export enum NodeType {
   Stage = 'stage',
-  Tests = 'tests',
   Approval = 'approval',
   Job = 'job',
+  Tests = 'tests',
+  Sentinel = 'sentinel',
 }
 
 const baseEdgeProps = {
@@ -33,9 +34,7 @@ const baseEdgeProps = {
 }
 
 const TYPE_SORT_VALS = Object.fromEntries(
-  [NodeType.Stage, NodeType.Approval, NodeType.Job, NodeType.Tests].map(
-    (val, i) => [val, i]
-  )
+  Object.values(NodeType).map((val, i) => [val, i])
 )
 
 function createNodeEdges(nodeId: string, toId: string, fromId: string) {
@@ -100,6 +99,8 @@ function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
           return NodeType.Approval
         case GateType.Job:
           return NodeType.Job
+        case GateType.Sentinel:
+          return NodeType.Sentinel
         case GateType.Window:
         default:
           return NodeType.Tests
@@ -114,11 +115,15 @@ function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
         )
         .flatMap(([type, gates]) => {
           // Don't add unsupported gate types
-          if (type !== NodeType.Job && type !== NodeType.Approval) {
+          if (
+            type !== NodeType.Job &&
+            type !== NodeType.Approval &&
+            type !== NodeType.Sentinel
+          ) {
             return []
           }
           // Gate types that get their own node
-          if (type === NodeType.Job) {
+          if (type === NodeType.Job || type === NodeType.Sentinel) {
             const { edges, nodes } = getFlatGateNodesAndEdges(gates, edge, type)
 
             allEdges.push(...edges)

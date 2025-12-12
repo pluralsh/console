@@ -57,6 +57,7 @@ export const StackedText = memo(
     gap,
     loading = false,
     icon,
+    iconGap,
     ...props
   }: {
     first: ReactNode
@@ -69,10 +70,16 @@ export const StackedText = memo(
     gap?: SpacingType
     loading?: boolean
     icon?: ReactNode
+    iconGap?: SpacingType
   } & ComponentProps<typeof StackedTextSC>) => (
     <WrapWithIf
       condition={!!icon}
-      wrapper={<IconWrapper icon={icon} />}
+      wrapper={
+        <IconWrapper
+          icon={icon}
+          gap={iconGap}
+        />
+      }
     >
       <StackedTextSC
         $truncate={truncate}
@@ -103,13 +110,15 @@ export const StackedText = memo(
 function IconWrapper({
   icon,
   children,
+  gap,
 }: {
   icon: ReactNode
   children?: ReactNode
+  gap?: SpacingType
 }) {
   return (
     <Flex
-      gap="small"
+      gap={gap ?? 'small'}
       align="center"
     >
       {icon}

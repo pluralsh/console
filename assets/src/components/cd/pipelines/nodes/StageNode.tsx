@@ -233,16 +233,18 @@ export function StageNode({ id, data }: PipelineStageNodeProps) {
   )
 
   return (
-    <StageNodeSC id={id}>
-      <div className="headerArea">
-        <h2 className="heading">STAGE</h2>
+    <StageNodeSC
+      id={id}
+      headerText="stage"
+      headerChip={
         <HeaderChip
           stage={stage}
           status={status}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
         />
-      </div>
+      }
+    >
       <IconHeading icon={<GitPullIcon />}>
         <IconHeadingInnerSC>Deploy to {stage.name}</IconHeadingInnerSC>
       </IconHeading>
@@ -259,7 +261,7 @@ export function StageNode({ id, data }: PipelineStageNodeProps) {
               return (
                 <li key={serviceId}>
                   <ServiceCardSC
-                    fillLevel={0}
+                    fillLevel={2}
                     clickable
                     onClick={() => {
                       navigate(

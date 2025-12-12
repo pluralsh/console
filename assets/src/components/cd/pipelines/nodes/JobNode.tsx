@@ -2,14 +2,9 @@ import {
   ArrowTopRightIcon,
   BriefcaseIcon,
   Card,
-  Chip,
   IconFrame,
 } from '@pluralsh/design-system'
-import {
-  ContainerSpecFragment,
-  GateState,
-  PipelineGateFragment,
-} from 'generated/graphql'
+import { ContainerSpecFragment, GateState } from 'generated/graphql'
 
 import { ComponentPropsWithoutRef } from 'react'
 
@@ -19,13 +14,12 @@ import { Link } from 'react-router-dom'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { StackedText } from 'components/utils/table/StackedText'
+import { GateNodeHeaderChip } from './ApprovalNode'
 import {
-  PipelineBaseNode,
-  IconHeading,
   NodeCardList,
-  StatusCard,
-  gateStateToCardStatus,
-  gateStateToSeverity,
+  PipelineBaseNode,
   PipelineGateNodeProps,
 } from './PipelineBaseNode'
 
@@ -35,50 +29,6 @@ export const gateStateToJobText = {
   [GateState.Closed]: 'Blocked',
   [GateState.Running]: 'Running',
 } as const satisfies Record<GateState, string>
-
-const JobInfoCardSC = styled(StatusCard)(({ theme }) => ({
-  '.contentArea': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.small,
-  },
-  '.primary': {
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-  },
-  '.secondary': {
-    ...theme.partials.text.caption,
-    color: theme.colors['text-xlight'],
-    marginTop: -theme.spacing.xxxsmall,
-  },
-}))
-
-export function JobInfoCard({
-  gate,
-  container: _c,
-  ...props
-}: {
-  gate: PipelineGateFragment
-  container?: Nullable<ContainerSpecFragment>
-} & Omit<
-  ComponentPropsWithoutRef<typeof JobInfoCardSC>,
-  'status' | 'statusLabel'
->) {
-  return (
-    <JobInfoCardSC
-      status={gate.state ? gateStateToCardStatus[gate.state] : undefined}
-      statusLabel={gate.state ? gateStateToJobText[gate.state] : undefined}
-      {...props}
-    >
-      <div>
-        {gate.name && <p className="primary">{gate.name}</p>}
-        {gate.spec?.job?.namespace && (
-          <p className="secondary">{gate.spec?.job?.namespace}</p>
-        )}
-      </div>
-    </JobInfoCardSC>
-  )
-}
 
 const ContainerCardSC = styled(Card)(({ theme }) => ({
   '&&': { padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px ` },
@@ -104,7 +54,7 @@ export function ContainerCard({
   ...props
 }: {
   container?: Nullable<ContainerSpecFragment>
-} & ComponentPropsWithoutRef<typeof JobInfoCardSC>) {
+} & ComponentPropsWithoutRef<typeof ContainerCardSC>) {
   if (!container?.image) {
     return null
   }
@@ -118,10 +68,6 @@ export function ContainerCard({
   )
 }
 
-const JobNodeSC = styled(PipelineBaseNode)(({ theme }) => ({
-  '.headerArea2': { display: 'flex', columnGap: theme.spacing.medium },
-}))
-
 export function JobNode({ id, data }: PipelineGateNodeProps) {
   const { meta, ...edge } = data
 
@@ -131,46 +77,37 @@ export function JobNode({ id, data }: PipelineGateNodeProps) {
   if (!gate) return null
 
   return (
-    <JobNodeSC id={id}>
-      <div className="headerArea">
-        <h2 className="heading">Action</h2>
-        {meta.state && (
-          <Chip
-            fillLevel={0}
-            size="small"
-            severity={gateStateToSeverity[meta.state]}
-          >
-            {gateStateToJobText[meta.state]}
-          </Chip>
-        )}
-      </div>
-      <div className="headerArea2">
-        <IconHeading icon={<BriefcaseIcon />}>Job – {gate.name}</IconHeading>
+    <PipelineBaseNode
+      id={id}
+      headerText="action"
+      headerChip={<GateNodeHeaderChip state={meta.state} />}
+    >
+      <StretchedFlex>
+        <StackedText
+          icon={<IconFrame icon={<BriefcaseIcon />} />}
+          iconGap="xsmall"
+          first="Job"
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second={gate.name ?? 'Unknown name'}
+        />
         <IconFrame
           type="secondary"
           icon={<ArrowTopRightIcon />}
           clickable
           as={Link}
           to={`${PIPELINES_ABS_PATH}/jobs/${gate.id}`}
+          tooltip="View job details"
         />
-      </div>
-      {/* <NodeCardList>
-        <li>
-          <JobInfoCard
-            container={containers?.[0]}
-            gate={gate}
-          />
-        </li>
-      </NodeCardList> */}
+      </StretchedFlex>
       <NodeCardList>
         <li>
           <ContainerCard
             container={containers?.[0]}
             gate={gate}
-            fillLevel={0}
           />
         </li>
       </NodeCardList>
-    </JobNodeSC>
+    </PipelineBaseNode>
   )
 }
