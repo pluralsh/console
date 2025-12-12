@@ -48,12 +48,12 @@ defmodule Console.AI.Azure do
   @doc """
   Generate a openai completion from the azure openai credentials chain
   """
-  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{api_version: vsn, model: model} = azure, messages, tools) do
+  @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{api_version: vsn, model: model} = azure, messages, tools, opts) do
     OpenAI.new(%{azure | base_url: Path.join(azure.base_url, model || OpenAI.default_model())})
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:model, model || OpenAI.default_model())
-    |> OpenAI.tool_call(messages, tools)
+    |> OpenAI.tool_call(messages, tools, opts)
   end
 
   @doc """

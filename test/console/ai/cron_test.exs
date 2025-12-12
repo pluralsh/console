@@ -99,7 +99,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: true}}]}
       end)
 
@@ -261,7 +261,7 @@ defmodule Console.AI.CronTest do
       end)
 
       expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
       end)
 
@@ -340,7 +340,7 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
       expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
       end)
 
@@ -439,7 +439,7 @@ defmodule Console.AI.CronTest do
       svc = insert(:service, flow: flow)
 
       expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)
       expect(Console.AI.VectorStore, :fetch, fn "some query", [filters: [flow_id: ^flow_id, datatype: {:raw, :pr_file}]] ->

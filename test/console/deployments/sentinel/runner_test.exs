@@ -43,7 +43,7 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
         }]}
       end)
 
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _ ->
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
         {:ok, [%Console.AI.Tool{name: "sentinel_check", arguments: %{passing: true, reason: "lgtm"}}]}
       end)
 

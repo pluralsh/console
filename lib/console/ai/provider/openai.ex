@@ -118,9 +118,9 @@ defmodule Console.AI.OpenAI do
   @doc """
   Calls an openai tool call interface w/ strict mode
   """
-  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = openai, messages, tools) do
-    model = tool_model(openai)
+  @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{} = openai, messages, tools, opts) do
+    model = tool_model(openai, opts[:default_model])
     case chat(%{openai | stream: nil, model: model}, msg_history(model, messages), plural: tools, require_tools: true) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, gen_tools(calls)}
@@ -274,7 +274,8 @@ defmodule Console.AI.OpenAI do
   end
   defp tool_role(r, _), do: r
 
-  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || @model
+  defp tool_model(%__MODULE__{model: m}, true), do: m || @model
+  defp tool_model(%__MODULE__{model: m, tool_model: tm}, _), do: tm || m || @model
 
   defp tool_args(%Console.AI.MCP.Tool{name: name, description: description, input_schema: schema}) do
     %{

@@ -62,7 +62,7 @@ defmodule Console.AI.Ollama do
 
   def context_window(_), do: 128_000 * 4
 
-  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
+  def tool_call(_, _, _, _), do: {:error, "tool calling not implemented for this provider"}
 
   def embeddings(_, _), do: {:error, "embedding not implemented for this provider"}
 

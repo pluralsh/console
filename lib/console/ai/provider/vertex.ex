@@ -78,9 +78,9 @@ defmodule Console.AI.Vertex do
   @doc """
   Generate a openai completion from the azure openai credentials chain
   """
-  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = vertex, messages, tools) do
-    case completion(vertex, messages, plural: tools, require_tools: true, client: :tool) do
+  @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{} = vertex, messages, tools, opts) do
+    case completion(vertex, messages, [plural: tools, require_tools: true, client: :tool] ++ opts) do
       {:ok, _, [_ | _] = tools} -> {:ok, tools}
       {:ok, content, _} -> {:error, "Tool call failed: #{content}"}
       {:ok, content}    -> {:error, "Tool call failed: #{content}"}

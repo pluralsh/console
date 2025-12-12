@@ -57,9 +57,8 @@ defmodule Console.AI.Evidence.Vector do
   end
 
   defp use_vector(history) do
-    case Provider.tool_call(history, [Vector], preface: @preface) do
-      {:ok, [%{vector: %{result: %Vector{required: true} = vector}} | _]} ->
-        {:ok, vector}
+    case Provider.simple_tool_call(history, Vector, preface: @preface, default_model: true) do
+      {:ok, %Vector{required: true} = vector} -> {:ok, vector}
       _ -> false
     end
   end
