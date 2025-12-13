@@ -486,7 +486,8 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       bot("console")
 
       sentinel = insert(:sentinel)
-      gate = insert(:pipeline_gate, type: :sentinel, sentinel: sentinel)
+      context = insert(:pipeline_context)
+      gate = insert(:pipeline_gate, type: :sentinel, sentinel: sentinel, context: context)
 
       event = %PubSub.PipelineGateUpdated{item: gate}
       {:ok, updated} = Recurse.handle_event(event)

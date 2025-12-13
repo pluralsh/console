@@ -28,6 +28,7 @@ defmodule Console.Schema.PipelineGate do
     belongs_to :edge,         PipelineEdge
     belongs_to :approver,     User
     belongs_to :context,      PipelineContext
+    belongs_to :last_context, PipelineContext
 
     timestamps()
   end
@@ -78,7 +79,7 @@ defmodule Console.Schema.PipelineGate do
   def valid_transition?(nil, _), do: true
   def valid_transition?(_, _), do: false
 
-  @valid ~w(name state type edge_id cluster_id approver_id sentinel_id sentinel_run_id force)a
+  @valid ~w(name state type edge_id cluster_id approver_id sentinel_id sentinel_run_id force context_id last_context_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

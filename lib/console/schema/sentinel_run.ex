@@ -45,6 +45,11 @@ defmodule Console.Schema.SentinelRun do
     from(s in query, where: s.inserted_at < ^expiry)
   end
 
+  def stalled(query \\ __MODULE__) do
+    old = Timex.now() |> Timex.shift(hours: -1)
+    from(s in query, where: s.status not in ^[:success, :failed] and s.inserted_at <= ^old)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(s in query, order_by: ^order)
   end

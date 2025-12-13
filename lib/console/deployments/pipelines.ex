@@ -294,9 +294,11 @@ defmodule Console.Deployments.Pipelines do
   """
   @spec approve_gate(binary, User.t) :: gate_resp
   def approve_gate(id, %User{} = user) do
-    get_gate!(id)
+    gate = get_gate!(id)
+
+    gate
     |> Repo.preload([edge: :pipeline])
-    |> PipelineGate.changeset(%{state: :open, approver_id: user.id})
+    |> PipelineGate.changeset(%{state: :open, last_context_id: gate.context_id, approver_id: user.id})
     |> allow(user, :approve)
     |> when_ok(:update)
     |> notify(:approve, user)
@@ -307,8 +309,10 @@ defmodule Console.Deployments.Pipelines do
   """
   @spec update_gate(map, binary, Cluster.t) :: gate_resp
   def update_gate(attrs, id, %Cluster{} = cluster) do
-    get_gate!(id)
-    |> PipelineGate.update_changeset(attrs)
+    gate = get_gate!(id)
+
+    gate
+    |> PipelineGate.update_changeset(Map.put(attrs, :last_context_id, gate.context_id))
     |> allow(cluster, :update)
     |> when_ok(:update)
     |> notify(:update)
@@ -319,9 +323,11 @@ defmodule Console.Deployments.Pipelines do
   """
   @spec force_gate(atom, binary, User.t) :: gate_resp
   def force_gate(state \\ :open, id, %User{} = user) do
-    get_gate!(id)
+    gate = get_gate!(id)
+
+    gate
     |> Repo.preload([edge: :pipeline])
-    |> PipelineGate.changeset(%{state: state})
+    |> PipelineGate.changeset(%{state: state, last_context_id: gate.context_id})
     |> allow(user, :write)
     |> when_ok(:update)
     |> notify(:approve, user)
@@ -393,7 +399,10 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.update()
     end)
     |> add_operation(:gates, fn
-      %{stage: %{id: id}, revised: %PipelinePromotion{revised: true, context_id: ctx_id}} ->
+      %{
+        stage: %PipelineStage{id: id},
+        revised: %PipelinePromotion{revised: true, context_id: ctx_id}
+      } when is_binary(ctx_id) ->
         PipelineGate.for_stage(id)
         |> PipelineGate.selected()
         |> Repo.update_all(set: [state: :pending, context_id: ctx_id, approver_id: nil, updated_at: Timex.now()])
@@ -454,17 +463,20 @@ defmodule Console.Deployments.Pipelines do
   Runs an associated sentinel for a gate and records the run id
   """
   @spec run_sentinel(PipelineGate.t) :: gate_resp
-  def run_sentinel(%PipelineGate{sentinel_id: id} = gate) when is_binary(id) do
+  def run_sentinel(%PipelineGate{sentinel_id: id, context_id: cid, last_context_id: lid} = gate)
+    when is_binary(id) and is_binary(cid) and cid != lid do
     start_transaction()
     |> add_operation(:run, fn _ ->
       Sentinels.run_sentinel(id, Users.admin_bot())
     end)
     |> add_operation(:update, fn %{run: run} ->
-      PipelineGate.changeset(gate, %{sentinel_run_id: run.id})
+      PipelineGate.changeset(gate, %{sentinel_run_id: run.id, last_context_id: cid})
       |> Repo.update()
     end)
     |> execute(extract: :update)
   end
+  def run_sentinel(%PipelineGate{sentinel_id: id}) when is_binary(id),
+    do: {:error, "this gate has already been run"}
   def run_sentinel(_, _), do: {:error, "this gate has no sentinel"}
 
   @spec broadcast_gate(SentinelRun.t) :: gate_resp | :ok

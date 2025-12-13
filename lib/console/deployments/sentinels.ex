@@ -10,6 +10,7 @@ defmodule Console.Deployments.Sentinels do
     SentinelRunJob,
     Sentinel.SentinelCheck
   }
+  alias Console.PubSub
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Deployments.{Settings, Clusters}
   alias Console.Deployments.Git.Discovery
@@ -163,4 +164,20 @@ defmodule Console.Deployments.Sentinels do
     |> Kube.Utils.run()
   end
   def run_job(_), do: {:ok, nil}
+
+  def autokill() do
+    SentinelRun.stalled()
+    |> SentinelRun.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Enum.each(fn run ->
+      run
+      |> SentinelRun.changeset(%{status: :failed})
+      |> Repo.update()
+      |> notify(:update)
+    end)
+  end
+
+  defp notify({:ok, %SentinelRun{} = sentinel}, :update),
+    do: handle_notify(PubSub.SentinelRunUpdated, sentinel)
+  defp notify(pass, _), do: pass
 end

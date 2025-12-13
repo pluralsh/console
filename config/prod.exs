@@ -83,6 +83,7 @@ config :console, Console.Cron.Scheduler,
     {"0 3 * * *",      {Console.Cost.Cron, :prune, []}},
     {"15 3 * * *",     {Console.AI.Cron, :trim_sentinel_runs, []}},
     {"0 0 * * 0",      {Console.AI.Cron, :chats, []}},
+    {"45 * * * *",     {Console.AI.Cron, :autokill_sentinel_runs, []}},
   ]
 
 config :ex_aws,
