@@ -2,6 +2,7 @@ defmodule Console.AI.Provider do
   use Nebulex.Caching
   import Console.Services.Base, only: [ok: 1]
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
+  alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
   alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
 
@@ -51,8 +52,15 @@ defmodule Console.AI.Provider do
 
   @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
 
+  def enabled?() do
+    case Settings.cached() do
+      %DeploymentSettings{ai: %{enabled: true}} -> true
+      _ -> false
+    end
+  end
+
   def tools?() do
-    Console.Deployments.Settings.cached()
+    Settings.cached()
     |> tool_client()
     |> case do
       {:ok, %mod{}} -> mod.tools?()
@@ -62,27 +70,28 @@ defmodule Console.AI.Provider do
 
   @decorate cacheable(cache: @local_cache, key: :context_window, ttl: :timer.minutes(30))
   def context_window() do
-    settings = Console.Deployments.Settings.cached()
-    case client(settings) do
+    Settings.cached()
+    |> client()
+    |> case do
       {:ok, %mod{} = client} -> mod.context_window(client)
       _ -> @default_context_window
     end
   end
 
   def proxy() do
-    settings = Console.Deployments.Settings.cached()
+    settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),
       do: mod.proxy(client)
   end
 
   def completion([_ | _] = history, opts \\ []) do
-    settings = Console.Deployments.Settings.cached()
+    settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client]),
       do: mod.completion(client, add_preface(history, opts), opts)
   end
 
   def tool_call([_ | _] = history, tools, opts \\ []) do
-    settings = Console.Deployments.Settings.cached()
+    settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client] || :tool),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools, opts),
       do: handle_tool_calls(result, tools)
@@ -99,7 +108,7 @@ defmodule Console.AI.Provider do
   end
 
   def embeddings(text, opts \\ []) do
-    settings = Console.Deployments.Settings.cached()
+    settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client] || :embedding),
       do: mod.embeddings(client, text)
   end
