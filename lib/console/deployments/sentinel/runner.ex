@@ -21,19 +21,19 @@ defmodule Console.Deployments.Sentinel.Runner do
   alias Console.Deployments.Sentinel.Impl
   require Logger
 
-  defmodule State, do: defstruct [:run, checks: %{}, results: %{}]
+  defmodule State, do: defstruct [:source_pid, :run, checks: %{}, results: %{}]
 
-  def start(%SentinelRun{} = run) do
-    GenServer.start(__MODULE__, run)
+  def start(%SentinelRun{} = run, source_pid \\ nil) do
+    GenServer.start(__MODULE__, {run, source_pid})
   end
 
-  def init(%SentinelRun{} = run) do
+  def init({%SentinelRun{} = run, source_pid}) do
     Process.flag(:trap_exit, true)
     Process.send_after(self(), :timeout, :timer.minutes(30))
-    {:ok, %State{run: run}, {:continue, :boot}}
+    {:ok, %State{run: run, source_pid: source_pid}, {:continue, :boot}}
   end
 
-  def handle_continue(:boot, %State{run: run} = state) do
+  def handle_continue(:boot, %State{run: run, source_pid: source_pid} = state) do
     run = Repo.preload(run, [sentinel: :repository])
     Logger.info "booting sentinel run #{run.id}"
     with %SentinelRun{checks: [_ | _] = checks} <- run,
@@ -48,10 +48,10 @@ defmodule Console.Deployments.Sentinel.Runner do
       {:noreply, %{state | run: run, checks: check_runners}}
     else
       {:error, _} ->
-        do_update(%{status: :failed}, run)
+        do_update(%{status: :failed}, run, source_pid)
         {:stop, :normal, state}
       _ ->
-        do_update(%{status: :success}, run)
+        do_update(%{status: :success}, run, source_pid)
         {:stop, :normal, state}
     end
   end
@@ -90,15 +90,15 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
   def handle_info(_, state), do: {:noreply, state}
 
-  def terminate(_, %State{run: run, checks: checks}) when map_size(checks) > 0,
-    do: do_update(%{status: :failed}, run)
+  def terminate(_, %State{run: run, checks: checks, source_pid: source_pid}) when map_size(checks) > 0,
+    do: do_update(%{status: :failed}, run, source_pid)
   def terminate(_, _), do: :ok
 
-  defp save_results(%State{run: run, results: results, checks: checks} = state) do
+  defp save_results(%State{run: run, results: results, checks: checks, source_pid: source_pid} = state) do
     do_update(%{
       status: status(checks, results),
       results: Enum.map(results, fn {name, result} -> to_status(name, result) end)
-    }, run)
+    }, run, source_pid)
     |> case do
       {:ok, %SentinelRun{status: s} = run} when s in ~w(success failed)a ->
         {:stop, :normal, %{state | run: run}}
@@ -108,7 +108,7 @@ defmodule Console.Deployments.Sentinel.Runner do
     end
   end
 
-  defp do_update(attrs, %SentinelRun{} = run) do
+  defp do_update(attrs, %SentinelRun{} = run, source_pid) do
     start_transaction()
     |> add_operation(:sentinel, fn _ ->
       Sentinel.changeset(run.sentinel, Map.take(attrs, [:status]))
@@ -119,7 +119,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       |> Repo.update()
     end)
     |> execute(extract: :run)
-    |> notify(:update)
+    |> notify(:update, source_pid)
   end
 
   defp rule_files(%SentinelRun{sentinel: %Sentinel{repository: %GitRepository{} = repo, git: git}}) do
@@ -149,7 +149,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   defp start_check(%Sentinel.SentinelCheck{type: :kubernetes} = check, _, rules),
     do: Impl.Kubernetes.start(check, self(), rules)
 
-  defp notify({:ok, %SentinelRun{} = run}, :update),
-    do: handle_notify(Console.PubSub.SentinelRunUpdated, run)
-  defp notify(pass, _), do: pass
+  defp notify({:ok, %SentinelRun{} = run}, :update, source_pid),
+    do: handle_notify(Console.PubSub.SentinelRunUpdated, run, source_pid: source_pid || self())
+  defp notify(pass, _, _), do: pass
 end

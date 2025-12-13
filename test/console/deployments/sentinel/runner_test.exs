@@ -49,7 +49,7 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
 
       run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
 
-      {:ok, pid} = Runner.start(refetch(run))
+      {:ok, pid} = Runner.start(refetch(run), self())
 
       case Console.await(pid, :timer.seconds(30)) do
         :ok -> :ok
@@ -65,6 +65,9 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
       assert status.reason == "lgtm"
 
       assert refetch(sentinel).status == :success
+
+      assert_receive {:event, %Console.PubSub.SentinelRunUpdated{item: event_run}}
+      assert event_run.id == run.id
     end
 
     test "it can handle integration test sentinels appropriately" do

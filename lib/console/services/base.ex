@@ -108,10 +108,12 @@ defmodule Console.Services.Base do
   end
 
   defp build_event(event, resource, additional) do
-    Map.new(additional)
+    attrs = Map.new(additional)
+
+    attrs
     |> Map.put(:item, resource)
     |> Map.put(:context, Console.Services.Audits.context())
-    |> Map.put(:source_pid, self())
+    |> Map.put(:source_pid, attrs[:source_pid] || self())
     |> event.__struct__()
   end
 
