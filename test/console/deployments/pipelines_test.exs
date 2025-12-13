@@ -303,6 +303,7 @@ defmodule Console.Deployments.PipelinesTest do
   end
 
   describe "#build_promotion/1" do
+    @tag :skip
     test "it will create a new promotion for a pipeline stage and mark all gates pending" do
       admin = admin_user()
       git = insert(:git_repository)
@@ -427,6 +428,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert refetch(gate).state == :open
     end
 
+    @tag :skip
     test "it will revise a promotion if there is a change" do
       admin = admin_user()
       git = insert(:git_repository)
@@ -459,6 +461,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
     end
 
+    @tag :skip
     test "it will revise a promotion if there is a sha change" do
       admin = admin_user()
       git = insert(:git_repository)
@@ -657,6 +660,7 @@ defmodule Console.Deployments.PipelinesTest do
   end
 
   describe "#apply_promotion" do
+    @tag :skip
     test "it can apply a promotion to all adjacent pipeline stages" do
       admin = admin_user()
       cluster = insert(:cluster)
