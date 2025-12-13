@@ -473,6 +473,7 @@ defmodule Console.Deployments.Pipelines do
       PipelineGate.changeset(gate, %{state: run_to_gate_status(status)})
       |> Repo.update()
       |> notify(:update)
+      |> IO.inspect(label: "broadcast gate result")
     else
       _ -> :ok
     end
