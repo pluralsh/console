@@ -235,7 +235,7 @@ defmodule Console.AI.Chat.Engine do
   defp persist?(%{persist: false}), do: false
   defp persist?(_), do: true
 
-  defp fit_context_window(msgs, preface) do
+  def fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
     |> trim_messages(msgs, Provider.context_window())
   end

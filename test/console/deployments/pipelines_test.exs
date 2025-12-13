@@ -406,7 +406,7 @@ defmodule Console.Deployments.PipelinesTest do
       gate = insert(:pipeline_gate,
         edge: edge,
         state: :open,
-        updated_at: Timex.now()
+        context: ctx
       )
       promo = insert(:pipeline_promotion,
         stage: stage,

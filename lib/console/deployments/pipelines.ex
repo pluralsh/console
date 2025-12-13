@@ -356,7 +356,7 @@ defmodule Console.Deployments.Pipelines do
   """
   @spec build_promotion(PipelineStage.t) :: promotion_resp
   def build_promotion(%PipelineStage{id: id} = stage) do
-    preloads = [:context, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]
+    preloads = [context: :pull_requests, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]
     start_transaction()
     |> add_operation(:stage, fn _ ->
       case Repo.preload(stage, preloads) do
@@ -393,10 +393,10 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.update()
     end)
     |> add_operation(:gates, fn
-      %{stage: %{id: id}, revised: %{revised: true}} ->
+      %{stage: %{id: id}, revised: %PipelinePromotion{revised: true, context_id: ctx_id}} ->
         PipelineGate.for_stage(id)
         |> PipelineGate.selected()
-        |> Repo.update_all(set: [state: :pending, approver_id: nil, updated_at: Timex.now()])
+        |> Repo.update_all(set: [state: :pending, context_id: ctx_id, approver_id: nil, updated_at: Timex.now()])
         |> elem(1)
         |> send_updates()
         |> ok()
@@ -470,10 +470,9 @@ defmodule Console.Deployments.Pipelines do
   @spec broadcast_gate(SentinelRun.t) :: gate_resp | :ok
   def broadcast_gate(%SentinelRun{status: status} = run) when status in ~w(success failed)a do
     with %SentinelRun{gate: %PipelineGate{} = gate} <- Repo.preload(run, :gate) do
-      PipelineGate.changeset(gate, %{state: run_to_gate_status(status)})
+      PipelineGate.changeset(gate, %{state: run_to_gate_status(status), force: true})
       |> Repo.update()
       |> notify(:update)
-      |> IO.inspect(label: "broadcast gate result")
     else
       _ -> :ok
     end
@@ -513,16 +512,18 @@ defmodule Console.Deployments.Pipelines do
   defp diff?(_, [], _), do: false
   defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
     when is_binary(id), do: false
-  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at}} = promos, _, %PipelinePromotion{} = next) do
-    Repo.preload(next, [services: :revision], force: true)
-    |> Map.get(:services)
-    |> Enum.all?(&Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) && gates_stale?(promos)
+  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at} = ctx} = stage, _, %PipelinePromotion{} = next) do
+    svcs = Repo.preload(next, [services: :revision], force: true)
+           |> Map.get(:services)
+    (Enum.all?(svcs, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) &&
+      gates_stale?(stage) && Enum.all?(stage.services, & &1.service.status == :healthy) &&
+      Enum.all?(ctx.pull_requests, & &1.status == :merged))
   end
   defp diff?(_, _, _), do: false
 
-  defp gates_stale?(%PipelineStage{context: %{inserted_at: at}, from_edges: edges}) do
+  defp gates_stale?(%PipelineStage{context: %PipelineContext{id: id}, from_edges: edges}) do
     Enum.flat_map(edges, & &1.gates)
-    |> Enum.any?(&Timex.before?(coalesce(&1.updated_at, &1.inserted_at), at))
+    |> Enum.any?(& &1.context_id != id)
   end
   defp gates_stale?(_), do: true
 

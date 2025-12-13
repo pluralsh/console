@@ -5,8 +5,7 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
   1. Creates all the jobs for a run en-mass on init
   2. Polls for the status of the jobs every 30 seconds and either updates the runner or stops if all finished
   """
-  use GenServer
-  import Console.Deployments.Sentinel.Impl.Base
+  use Console.Deployments.Sentinel.Impl.Base
   alias Console.Deployments.Sentinels
   alias Console.Repo
   alias Console.Schema.{SentinelRun, SentinelRunJob, Sentinel.SentinelCheck}

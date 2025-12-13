@@ -1,6 +1,5 @@
 defmodule Console.Deployments.Sentinel.Impl.Log do
-  use GenServer
-  import Console.Deployments.Sentinel.Impl.Base
+  use Console.Deployments.Sentinel.Impl.Base
   import Console.Schema.Base, only: [parse_duration: 1, seconds: 1]
   alias Console.Schema.Sentinel.SentinelCheck
   alias Console.Schema.Sentinel.SentinelCheck.CheckConfiguration
@@ -48,6 +47,7 @@ defmodule Console.Deployments.Sentinel.Impl.Log do
     |> maybe_add_rule(state)
     |> prepend("Here are all the logs that were found, I'll list them in json format:")
     |> user_msgs()
+    |> fit_context_window(@preface)
     |> ai_call(@preface)
     |> case do
       {:ok, %{} = status} ->

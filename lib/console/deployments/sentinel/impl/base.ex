@@ -1,6 +1,14 @@
 defmodule Console.Deployments.Sentinel.Impl.Base do
   alias Console.AI.{Provider, Tools.Sentinel}
 
+  defmacro __using__(_) do
+    quote do
+      use GenServer
+      import Console.Deployments.Sentinel.Impl.Base
+      import Console.AI.Chat.Engine, only: [fit_context_window: 2]
+    end
+  end
+
   @type status :: %{status: :success | :failed, reason: String.t}
 
   def post_status(pid, status) do
