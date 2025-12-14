@@ -64,7 +64,7 @@ export function SentinelNode({ id, data }: PipelineGateNodeProps) {
           <Body2P $color="text-xlight">No runs yet</Body2P>
         )}
       </Card>
-      {meta.state === GateState.Pending && (
+      {[GateState.Pending, GateState.Closed].includes(meta.state) && (
         <ForceGateButton id={gateId ?? ''} />
       )}
     </PipelineBaseNode>
