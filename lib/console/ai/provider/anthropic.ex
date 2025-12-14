@@ -73,7 +73,7 @@ defmodule Console.AI.Anthropic do
     end
   end
 
-  def tool_call(anthropic, messages, tools) do
+  def tool_call(anthropic, messages, tools, _opts) do
     case completion(%{anthropic | stream: nil}, messages, plural: tools, require_tools: true) do
       {:ok, _, [_ | _] = tools} -> {:ok, tools}
       {:ok, content, _} -> {:error, "Tool call failed: #{content}"}

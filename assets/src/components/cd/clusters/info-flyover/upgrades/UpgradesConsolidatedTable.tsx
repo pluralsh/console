@@ -5,7 +5,7 @@ import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import CopyButton from 'components/utils/CopyButton'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   CloudAddon,
   CloudAddonUpgrade,
@@ -17,12 +17,13 @@ import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  CLUSTER_ADDONS_REL_PATH,
-  getClusterDetailsPath,
+  CLUSTER_ADDONS_COMPATIBILITY_PATH,
+  getClusterAddOnDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 
 type AddonOverview = {
+  id?: Nullable<string>
   name: string
   icon?: ReactNode
   type: 'cloud' | 'helm'
@@ -49,10 +50,12 @@ export function UpgradesConsolidatedTable({
 }) {
   const { blockingAddons, blockingCloudAddons } =
     cluster?.upgradePlanSummary ?? {}
-  const reactTableOptions = useMemo(
+
+  const reactTableOptions: { meta: TableMeta } = useMemo(
     () => ({ meta: { clusterId: cluster.id } }),
     [cluster.id]
   )
+
   const data: AddonOverview[] = useMemo(
     () =>
       [
@@ -69,8 +72,12 @@ export function UpgradesConsolidatedTable({
             type: 'cloud',
             icon: <DistroProviderIconFrame distro={addon.addon?.distro} />,
             distro: addon.addon?.distro,
+            id: addon.addon?.id,
           }),
           ...(addon.__typename === 'RuntimeAddonUpgrade' && {
+            id: cluster.runtimeServices?.find(
+              (service) => service?.name === addon.addon.name
+            )?.id,
             currentChartVersion: addon.current?.chartVersion,
             fixChartVersion: addon.fix?.chartVersion,
             icon: (
@@ -85,8 +92,9 @@ export function UpgradesConsolidatedTable({
             images: addon.fix?.images?.filter(isNonNullable) ?? [],
           }),
         })),
-    [blockingAddons, blockingCloudAddons]
+    [blockingAddons, blockingCloudAddons, cluster.runtimeServices]
   )
+
   return (
     <Table
       fullHeightWrap
@@ -150,19 +158,24 @@ const cols = [
     header: 'Recommendation',
     cell: function Cell({ getValue, table: { options } }) {
       const {
+        id,
+        type,
         currentAppVersion,
         fixAppVersion,
         currentChartVersion,
         fixChartVersion,
       } = getValue()
-      const clusterId = (options.meta as Nullable<TableMeta>)?.clusterId
+      const { clusterId } = (options.meta as Nullable<TableMeta>) ?? {}
+
       if (!fixAppVersion && !fixChartVersion)
         return (
           <InlineLink
             as={Link}
-            to={`${getClusterDetailsPath({
+            to={`${getClusterAddOnDetailsPath({
               clusterId,
-            })}/${CLUSTER_ADDONS_REL_PATH}`}
+              addOnId: id,
+              isCloudAddon: type === 'cloud',
+            })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`}
           >
             No available versions found
           </InlineLink>
@@ -196,17 +209,25 @@ const cols = [
       )
     },
   }),
-  columnHelper.accessor((row) => row.releaseUrl, {
-    id: 'releaseNotes',
-    header: 'Release notes',
-    cell: ({ getValue }) => (
-      <InlineA
-        href={getValue()}
-        css={{ wordBreak: 'break-all' }}
-      >
-        {getValue()?.replace(/(^\w+:|^)\/\/(www\.)?/, '')}
-      </InlineA>
-    ),
+  columnHelper.accessor((row) => row, {
+    id: 'compatibilityTable',
+    header: 'Compatibility Table',
+    cell: function Cell({ getValue, table: { options } }) {
+      const { id, type } = getValue()
+      const { clusterId } = (options.meta as Nullable<TableMeta>) ?? {}
+      return (
+        <InlineLink
+          as={Link}
+          to={`${getClusterAddOnDetailsPath({
+            clusterId,
+            addOnId: id,
+            isCloudAddon: type === 'cloud',
+          })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`}
+        >
+          View compatibility table
+        </InlineLink>
+      )
+    },
   }),
   columnHelper.accessor((row) => row, {
     id: 'copy',
@@ -214,19 +235,22 @@ const cols = [
       <CopyButton
         type="tertiary"
         tooltip="Copy table as markdown"
-        text={overviewDataToMarkdown(ctx.table.options.data)}
+        text={overviewDataToMarkdown(
+          ctx.table.options.data,
+          (ctx.table.options.meta as Nullable<TableMeta>)?.clusterId ?? ''
+        )}
       />
     ),
     cell: () => null,
   }),
 ]
 
-const overviewDataToMarkdown = (data: AddonOverview[]) =>
+const overviewDataToMarkdown = (data: AddonOverview[], clusterId: string) =>
   isEmpty(data)
     ? ''
     : `\
-  | Add-on | Type | Recommendation | Release Notes | Images |
-  | ------ | ---- | -------------- | ------------- | ------ |
+  | Add-on | Type | Recommendation | Release Notes | Compatibility Table | Images |
+  | ------ | ---- | -------------- | ------------- | --------------------- | ------ |
   ${data
     .map((addon) => {
       const type = addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm'
@@ -234,6 +258,14 @@ const overviewDataToMarkdown = (data: AddonOverview[]) =>
         ? `${addon.currentAppVersion ?? '--'} → ${addon.fixAppVersion}`
         : 'No available versions found'
 
-      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${addon.images?.join('<br>') || '--'} |`
+      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${
+        addon.id
+          ? `${window.location.origin}${getClusterAddOnDetailsPath({
+              clusterId,
+              addOnId: addon.id,
+              isCloudAddon: addon.type === 'cloud',
+            })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`
+          : '--'
+      } | ${addon.images?.join('<br>') || '--'} |`
     })
     .join('\n')}`

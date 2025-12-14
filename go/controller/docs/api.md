@@ -3196,7 +3196,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is the identifier for this configuration field, used as a template variable<br />and as the form field name in the UI. |  | Required: \{\} <br /> |
-| `type` _[ConfigurationType](#configurationtype)_ | Type specifies the input type for this field, determining how it's rendered<br />in the UI and what validation is applied. |  | Enum: [STRING INT BOOL PASSWORD ENUM CLUSTER PROJECT GROUP USER FLOW] <br />Required: \{\} <br /> |
+| `type` _[ConfigurationType](#configurationtype)_ | Type specifies the input type for this field, determining how it's rendered<br />in the UI and what validation is applied. |  | Enum: [STRING INT BOOL JSON PASSWORD ENUM CLUSTER PROJECT GROUP USER FLOW] <br />Required: \{\} <br /> |
 | `condition` _[Condition](#condition)_ | Condition defines when this field should be displayed based on the values<br />of other fields, enabling dynamic forms that adapt to user input. |  | Optional: \{\} <br /> |
 | `default` _string_ | Default provides a default value for this field. |  | Optional: \{\} <br /> |
 | `documentation` _string_ | Documentation provides help text or description for this field to guide users in providing the correct input. |  | Optional: \{\} <br /> |
@@ -4066,7 +4066,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `api` _string_ | API specifies a single Console API endpoint name that this service account<br />should be scoped to, such as 'updateServiceDeployment' or 'createCluster'. |  | Optional: \{\} <br /> |
+| `api` _string_ | API specifies a single Console API endpoint name that this service account<br />should be scoped to, such as 'service.write' or 'cluster.read'. |  | Optional: \{\} <br /> |
 | `apis` _string array_ | Apis is a list of Console API endpoint names that this service account<br />should be scoped to. |  | Optional: \{\} <br /> |
 | `identifier` _string_ | Identifier specifies a resource ID in the Console API that this service<br />account should be scoped to. Leave blank or use '*' to scope to all resources<br />within the specified API endpoints. |  | Optional: \{\} <br /> |
 | `ids` _string array_ | Ids is a list of Console API resource IDs that this service account should<br />be scoped to. |  | Optional: \{\} <br /> |

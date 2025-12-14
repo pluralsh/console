@@ -1,20 +1,29 @@
 import { PipelineFragment } from 'generated/graphql'
-import { useMemo } from 'react'
+import { ComponentType, useMemo } from 'react'
 
 import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
 import { LayoutOptions } from 'elkjs'
 import { ApprovalNode } from './nodes/ApprovalNode'
 import { JobNode } from './nodes/JobNode'
+import {
+  PipelineGateNodeProps,
+  PipelineStageNodeProps,
+} from './nodes/PipelineBaseNode'
+import { SentinelNode } from './nodes/SentinelNode'
 import { StageNode } from './nodes/StageNode'
 import { TestsNode } from './nodes/TestsNode'
 import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
 
-const nodeTypes = {
+const nodeTypes: Record<
+  NodeType,
+  ComponentType<PipelineStageNodeProps> | ComponentType<PipelineGateNodeProps>
+> = {
   [NodeType.Stage]: StageNode,
   [NodeType.Approval]: ApprovalNode,
   [NodeType.Job]: JobNode,
   [NodeType.Tests]: TestsNode,
+  [NodeType.Sentinel]: SentinelNode,
 }
 
 export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {

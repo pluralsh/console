@@ -4,7 +4,7 @@ import {
   ProjectFragment,
   ProjectsDocument,
   useDeleteProjectMutation,
-} from '../../../generated/graphql'
+} from 'generated/graphql'
 import { Confirm } from '../../utils/Confirm'
 
 import { PROJECTS_QUERY_PAGE_SIZE } from './ProjectsList'
@@ -42,6 +42,8 @@ export function ProjectDeleteModal({
       error={error}
       submit={() => mutation()}
       title="Delete project"
+      confirmationEnabled
+      confirmationText={project.name}
       text={
         <>
           Are you sure you want to delete <b>{project.name}</b>?

@@ -69,6 +69,7 @@ defmodule Console.Deployments.Stacks do
   @spec latest_run(binary) :: StackRun.t | nil
   def latest_run(stack_id) do
     StackRun.for_stack(stack_id)
+    |> StackRun.wet()
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)
     |> Repo.one()
@@ -457,7 +458,8 @@ defmodule Console.Deployments.Stacks do
       }
     }
   } = run) do
-    with %{repository: %GitRepository{} = repo, state: %StackState{plan: p}} = run = Repo.preload(run, [:repository, :state]),
+    with true <- Provider.enabled?(),
+         %{repository: %GitRepository{} = repo, state: %StackState{plan: p}} = run = Repo.preload(run, [:repository, :state]),
          {:ok, f} <- Discovery.fetch(repo, git),
          {:ok, files} <- Tar.tar_stream(f),
          {_, rules} <- Enum.find(files, fn {k, _} -> k == file end) do

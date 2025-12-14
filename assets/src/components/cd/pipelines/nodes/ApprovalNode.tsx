@@ -86,28 +86,17 @@ export function ApprovalNode({ id, data }: PipelineGateNodeProps) {
   const gates = edge?.gates
 
   return (
-    <PipelineBaseNode id={id}>
-      <div className="headerArea">
-        <h2 className="heading">Action</h2>
-        {meta.state && (
-          <Chip
-            fillLevel={0}
-            size="small"
-            severity={gateStateToSeverity[meta.state]}
-          >
-            {gateStateToApprovalText[meta.state]}
-          </Chip>
-        )}
-      </div>
+    <PipelineBaseNode
+      id={id}
+      headerText="action"
+      headerChip={<GateNodeHeaderChip state={meta.state} />}
+    >
       <IconHeading icon={<ThumbsUpIcon />}>Approval</IconHeading>
       <NodeCardList>
         {gates?.map((gate) =>
           gate?.approver ? (
             <li key={gate.id}>
-              <ApproverCard
-                gate={gate}
-                fillLevel={0}
-              />
+              <ApproverCard gate={gate} />
             </li>
           ) : (
             gate && (
@@ -146,6 +135,7 @@ function ApproveButton({
       <Button
         small
         secondary
+        width="100%"
         onClick={() => {
           setConfirmIsOpen(true)
         }}
@@ -165,5 +155,18 @@ function ApproveButton({
         close={() => setConfirmIsOpen(false)}
       />
     </>
+  )
+}
+
+export function GateNodeHeaderChip({ state }: { state: Nullable<GateState> }) {
+  if (!state) return null
+  return (
+    <Chip
+      fillLevel={0}
+      size="small"
+      severity={gateStateToSeverity[state]}
+    >
+      {gateStateToApprovalText[state]}
+    </Chip>
   )
 }

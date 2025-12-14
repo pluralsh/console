@@ -2,7 +2,7 @@ defmodule Console.AI.Cron do
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.{Repo, PubSub}
   alias Console.AI.{Worker, Chat, VectorStore}
-  alias Console.Deployments.Settings
+  alias Console.Deployments.{Settings, Sentinels}
   alias Console.Schema.{
     Alert,
     AiInsight,
@@ -45,6 +45,10 @@ defmodule Console.AI.Cron do
   def trim_sentinel_runs() do
     SentinelRun.expired()
     |> Repo.delete_all()
+  end
+
+  def autokill_sentinel_runs() do
+    Sentinels.autokill()
   end
 
   def services() do

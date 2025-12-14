@@ -45,16 +45,18 @@ defmodule Console.AI.Bedrock do
 
   def context_window(_), do: 250_000 * 4
 
-  def tool_call(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, tools) do
+  @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, tools, opts) do
     OpenAI.new(%{
       base_url: openai_url(bedrock),
       access_token: token,
       model: model,
       tool_model: bedrock.tool_model_id
     })
-    |> OpenAI.tool_call(messages, tools)
+    |> OpenAI.tool_call(messages, tools, opts)
   end
 
+  @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
   def embeddings(%__MODULE__{model_id: model, access_token: token} = bedrock, text) do
     OpenAI.new(%{
       base_url: openai_url(bedrock),

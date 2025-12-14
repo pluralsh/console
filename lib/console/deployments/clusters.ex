@@ -579,8 +579,8 @@ defmodule Console.Deployments.Clusters do
 
     %{
       failed_insights: Enum.filter(cluster.upgrade_insights, & &1.status == :failed),
-      blocking_addons: Enum.map(blocking_addons, fn %RuntimeService{addon_version: vsn, addon: addon} ->
-        with %{} = fix <- AddOn.upgrade_version(addon, cluster),
+      blocking_addons: Enum.map(blocking_addons, fn %RuntimeService{addon_version: vsn, addon: addon, version: current} ->
+        with %{} = fix <- AddOn.upgrade_version(addon, cluster, current),
               {{:ok, release_url}, fix} <- {release(addon, fix.version), fix} do
           %{
             current: vsn,
@@ -592,10 +592,10 @@ defmodule Console.Deployments.Clusters do
           {_, fix} -> %{current: vsn, fix: fix, addon: addon}
         end
       end),
-      blocking_cloud_addons: Enum.map(blocking_cloud_addons, fn %CloudAddon{info: ca, version_info: vsn} = addon ->
+      blocking_cloud_addons: Enum.map(blocking_cloud_addons, fn %CloudAddon{info: ca, version_info: vsn, version: current} = addon ->
         %{
           current: vsn,
-          fix: CloudAddOnSpec.upgrade_version(ca, cluster),
+          fix: CloudAddOnSpec.upgrade_version(ca, cluster, current),
           addon: addon
         }
       end),

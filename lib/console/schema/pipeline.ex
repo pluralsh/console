@@ -7,6 +7,8 @@ defmodule Console.Schema.Pipeline do
     field :name,            :string
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
+    field :interval,        :string
+    field :next_poll_at,    :utc_datetime_usec
 
     belongs_to :project, Project
     belongs_to :flow,    Flow

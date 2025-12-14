@@ -469,7 +469,7 @@ type PrAutomationConfiguration struct {
 	// Type specifies the input type for this field, determining how it's rendered
 	// in the UI and what validation is applied.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=STRING;INT;BOOL;PASSWORD;ENUM;CLUSTER;PROJECT;GROUP;USER;FLOW
+	// +kubebuilder:validation:Enum=STRING;INT;BOOL;JSON;PASSWORD;ENUM;CLUSTER;PROJECT;GROUP;USER;FLOW
 	Type console.ConfigurationType `json:"type"`
 
 	// Condition defines when this field should be displayed based on the values

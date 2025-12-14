@@ -156,6 +156,9 @@ defmodule Console.Schema.PullRequest do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> truncate_fields([:title], 510)
+    |> validate_length(:title, max: 255)
+    |> validate_length(:url, max: 255)
     |> cast_assoc(:notifications_bindings)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)

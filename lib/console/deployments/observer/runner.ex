@@ -46,7 +46,10 @@ defmodule Console.Deployments.Observer.Runner do
   end
 
   defp add_error(%Observer{} = observer, source, err) do
-    Observer.changeset(observer, %{errors: [%{source: source, message: "observer error: #{inspect(err)}"}]})
+    Observer.changeset(observer, %{errors: [%{source: source, message: "observer error: #{handle_error(err)}"}]})
     |> Repo.update()
   end
+
+  defp handle_error(%Console.Commands.Tee{stdo: lines}) when is_list(lines), do: IO.iodata_to_binary(lines)
+  defp handle_error(err), do: inspect(err)
 end

@@ -1,6 +1,6 @@
 defmodule Console.Schema.PipelineGate do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec, Sentinel, SentinelRun}
+  alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec, Sentinel, SentinelRun, PipelineContext}
 
   defenum Type, approval: 0, window: 1, job: 2, sentinel: 3
   defenum State, pending: 0, open: 1, closed: 2, running: 3
@@ -9,6 +9,7 @@ defmodule Console.Schema.PipelineGate do
     field :name,  :string
     field :state, State, default: :closed
     field :type,  Type
+    field :force, :boolean, default: false, virtual: true
 
     embeds_one :spec, Spec, on_replace: :update do
       embeds_one :job, JobSpec, on_replace: :update
@@ -26,6 +27,8 @@ defmodule Console.Schema.PipelineGate do
     belongs_to :sentinel_run, SentinelRun
     belongs_to :edge,         PipelineEdge
     belongs_to :approver,     User
+    belongs_to :context,      PipelineContext
+    belongs_to :last_context, PipelineContext
 
     timestamps()
   end
@@ -76,7 +79,7 @@ defmodule Console.Schema.PipelineGate do
   def valid_transition?(nil, _), do: true
   def valid_transition?(_, _), do: false
 
-  @valid ~w(name state type edge_id cluster_id approver_id sentinel_id sentinel_run_id)a
+  @valid ~w(name state type edge_id cluster_id approver_id sentinel_id sentinel_run_id force context_id last_context_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -115,8 +118,9 @@ defmodule Console.Schema.PipelineGate do
 
   defp validate_state(cs) do
     current = cs.data.state
+    force = get_field(cs, :force)
     validate_change(cs, :state, fn _, val ->
-      case valid_transition?(current, val) do
+      case valid_transition?(current, val) || force do
         true -> []
         false -> [state: "cannot transition gate state from #{current} to #{val}"]
       end

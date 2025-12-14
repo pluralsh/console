@@ -353,7 +353,7 @@ defmodule Console.Deployments.Git do
   def create_pull_request(attrs, ctx, %PrAutomation{} = pr, branch, identifier, %User{} = user) do
     pr = Repo.preload(pr, [:write_bindings, :create_bindings, :connection])
     {secrets, ctx} = Map.pop(ctx, :secrets)
-    with :ok <- Validation.validate(pr, ctx),
+    with {:ok, ctx} <- Validation.validate(pr, ctx),
          {:ok, pr} <- allow(pr, user, :create),
          {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do
       Logger.info "creating pr #{pr_attrs[:url]}"

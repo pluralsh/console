@@ -139,6 +139,7 @@ spec:
                       - STRING
                       - INT
                       - BOOL
+                      - JSON
                       - PASSWORD
                       - ENUM
                       - CLUSTER

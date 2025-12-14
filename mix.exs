@@ -171,6 +171,7 @@ defmodule Console.MixProject do
       {:oidcc, "~> 3.3"},
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
+      {:caramelize, "~> 1.2"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

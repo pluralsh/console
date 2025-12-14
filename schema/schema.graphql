@@ -244,6 +244,9 @@ type RootQueryType {
 
     status: ServiceDeploymentStatus
 
+    "a git reference to filter services by"
+    gitRef: String
+
     errored: Boolean
 
     "a project to filter services w\/in"
@@ -8306,6 +8309,7 @@ enum ConfigurationType {
   GROUP
   USER
   FLOW
+  JSON
 }
 
 enum Operation {

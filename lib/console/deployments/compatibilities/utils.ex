@@ -1,6 +1,22 @@
 defmodule Console.Deployments.Compatibilities.Utils do
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
 
+  def versions_greater([_ | _] = versions, from) when is_binary(from) do
+    clean_version(from)
+    |> Version.parse()
+    |> case do
+      {:ok, %Version{} = vsn} ->
+        Enum.filter(versions, fn next ->
+          case Version.parse(next.version) do
+            {:ok, %Version{} = next} -> :lt == Version.compare(vsn, next)
+            _ -> false
+          end
+        end)
+      _ -> versions
+    end
+  end
+  def versions_greater(versions, _), do: versions
+
   def later?(vsn1, vsn2) do
     with {:ok, vsn1} <- Version.parse(clean_version(vsn1)),
          {:ok, vsn2} <- Version.parse(clean_version(vsn2)) do

@@ -184,6 +184,31 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
     end
 
+    test "it will trigger the latest run if there's a meaningful change" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack, git: %{ref: "new-sha"}, dry_run: false)
+      insert(:stack_run, stack: stack, git: %{ref: "other-sha"}, dry_run: true)
+
+      {:ok, stack} = Stacks.update_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        git: %{ref: "main", folder: "new-folder"},
+      }, stack.id, user)
+
+      assert stack.name == "my-stack"
+      assert stack.type == :terraform
+      assert stack.approval
+      assert stack.git.ref == "main"
+      assert stack.git.folder == "new-folder"
+
+      created = Stacks.latest_run(stack.id)
+      refute created.id == run.id
+      assert created.git.ref == "new-sha"
+      assert created.git.folder == stack.git.folder
+    end
+
     test "you can update bindings" do
       user = admin_user()
       stack = insert(:stack)

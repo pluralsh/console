@@ -10,8 +10,7 @@ defmodule Console.Deployments.Observer.Action do
     branch = String.replace(tpl, "$value", input)
     ctx = replace_map(pr.context, input, attrs)
     case Git.get_pr_automation(pr.automation_id) do
-      %PrAutomation{} = pra ->
-        Git.create_pull_request(%{}, ctx, pra.id, branch, pr.repository, actor(pr))
+      %PrAutomation{} = pra -> Git.create_pull_request(%{}, ctx, pra.id, branch, pr.repository, actor(pr))
       nil -> {:error, "could not find automation #{pr.automation_id}"}
     end
   end

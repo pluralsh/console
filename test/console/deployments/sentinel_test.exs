@@ -1,5 +1,6 @@
 defmodule Console.Deployments.SentinelTest do
   use Console.DataCase, async: true
+  alias Console.PubSub
   alias Console.Deployments.Sentinels
   alias Console.Schema.SentinelRunJob
 
@@ -156,6 +157,21 @@ defmodule Console.Deployments.SentinelTest do
       assert updated.id == job.id
 
       {:error, _} = Sentinels.update_sentinel_job(%{status: :success}, job.id, insert(:cluster))
+    end
+  end
+
+  describe "#autokill/0" do
+    test "it can autokill stalled sentinel runs" do
+      run = insert(:sentinel_run, status: :pending, inserted_at: Timex.now() |> Timex.shift(hours: -2))
+      fine = insert(:sentinel_run, status: :pending)
+
+      Sentinels.autokill()
+
+      assert refetch(run).status == :failed
+      assert refetch(fine).status == :pending
+
+      assert_receive {:event, %PubSub.SentinelRunUpdated{item: updated}}
+      assert updated.id == run.id
     end
   end
 end

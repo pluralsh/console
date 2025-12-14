@@ -1,6 +1,5 @@
 defmodule Console.Deployments.Sentinel.Impl.Kubernetes do
-  use GenServer
-  import Console.Deployments.Sentinel.Impl.Base
+  use Console.Deployments.Sentinel.Impl.Base
   alias Console.Deployments.Clusters
   alias Console.Schema.Sentinel.SentinelCheck
   alias Console.Schema.Sentinel.SentinelCheck.CheckConfiguration
@@ -28,6 +27,7 @@ defmodule Console.Deployments.Sentinel.Impl.Kubernetes do
       prompt
       |> maybe_add_rule(check, rules)
       |> prepend({:user, "Here is the current state of the kubernetes object:"})
+      |> fit_context_window(@preface)
       |> ai_call(@preface)
       |> case do
         {:ok, %{} = status} ->

@@ -50,6 +50,15 @@ defmodule Console.Schema.Base do
     Console.jitter(floor(seconds(duration) / 2))
   end
 
+  def truncate_fields(cs, fields, len \\ 255) do
+    Enum.reduce(fields, cs, fn field, cs ->
+      case get_change(cs, field) do
+        v when is_binary(v) -> put_change(cs, field, Console.truncate(v, len))
+        _ -> cs
+      end
+    end)
+  end
+
   def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)

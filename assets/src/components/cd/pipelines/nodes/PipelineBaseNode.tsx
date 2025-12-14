@@ -1,7 +1,9 @@
 import {
+  CancelledFilledIcon,
   Card,
   Chip,
-  CancelledFilledIcon,
+  Flex,
+  IconFrame,
   Spinner,
   StatusOkIcon,
   Tooltip,
@@ -25,6 +27,8 @@ import styled, { useTheme } from 'styled-components'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { OverlineH1 } from 'components/utils/typography/Text'
 import { NodeBaseCardSC, NodeHandleSC } from '../../../utils/reactflow/nodes'
 import { StageStatus } from './StageNode'
 
@@ -55,10 +59,10 @@ export const NodeCardList = styled.ul(({ theme }) => ({
 export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
   '&&': {
     position: 'relative',
-    padding: theme.spacing.small,
+    minWidth: 180,
+    background: theme.colors['fill-one'],
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.small,
     ul: {
       ...theme.partials.reset.list,
     },
@@ -75,6 +79,7 @@ export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    padding: theme.spacing.small,
 
     gap: theme.spacing.small,
     minHeight: 22,
@@ -82,7 +87,8 @@ export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
   },
   '.heading': {
     ...theme.partials.text.overline,
-    color: theme.colors['text-light'],
+    lineHeight: '1px',
+    color: theme.colors['text-xlight'],
   },
   '.subhead': {
     ...theme.partials.text.caption,
@@ -93,9 +99,15 @@ export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
 export function PipelineBaseNode({
   id,
   children,
+  headerText,
+  headerChip,
   ...props
 }: Pick<PipelineStageNodeProps | PipelineGateNodeProps, 'id'> &
-  ComponentPropsWithRef<typeof BaseNodeSC>) {
+  ComponentPropsWithRef<typeof BaseNodeSC> & {
+    headerText?: string
+    headerChip?: ReactNode
+  }) {
+  const { borders } = useTheme()
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
@@ -106,7 +118,27 @@ export function PipelineBaseNode({
         $isConnected={!isEmpty(incomers)}
         position={Position.Left}
       />
-      {children}
+      <StretchedFlex
+        gap="small"
+        minHeight={22}
+        padding="small"
+        borderBottom={borders['fill-two']}
+      >
+        <OverlineH1
+          as="h2"
+          $color="text-xlight"
+        >
+          {headerText}
+        </OverlineH1>
+        {headerChip}
+      </StretchedFlex>
+      <Flex
+        direction="column"
+        gap="small"
+        padding="small"
+      >
+        {children}
+      </Flex>
       <NodeHandleSC
         type="source"
         isConnectable={false}
@@ -140,13 +172,16 @@ export function IconHeading({
 }) {
   const theme = useTheme()
   const clonedIcon = cloneElement(icon, {
-    size: 12,
+    size: 14,
     color: theme.colors['icon-light'],
   })
 
   return (
     <IconHeadingSC>
-      {clonedIcon}
+      <IconFrame
+        icon={clonedIcon}
+        css={{ flexShrink: 0 }}
+      />
       {children}
     </IconHeadingSC>
   )

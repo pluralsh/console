@@ -239,6 +239,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
       {:status, status}, q -> Service.for_status(q, status)
       {:errored, true}, q -> Service.errored(q)
       {:project_id, id}, q -> Service.for_project(q, id)
+      {:git_ref, ref}, q -> Service.for_reference(q, ref)
       _, q -> q
     end)
   end
