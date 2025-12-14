@@ -126,7 +126,7 @@ defmodule Console.AI.Cron do
   def vector_expire() do
     with true <- VectorStore.enabled?() do
       VectorStore.expire(
-        filters: [datatype: {:raw, :service_component}],
+        filters: [datatype: {:raw, :service_component, :cluster}],
         expiry: Timex.now() |> Timex.shift(hours: -10)
       )
     end
