@@ -86,10 +86,16 @@ export { dayjs as dayjsExtended }
 export const formatDateTime = (
   date: DateParam,
   pattern?: string,
-  isUtc: boolean = false
+  isInputUtc: boolean = false, // converts input date to UTC if timezone not specified
+  outputUtc: boolean = false
 ) => {
   if (!date) return ''
-  const dateObj = isUtc ? dayjs(date).utc(true) : dayjs(date)
+
+  let dateObj = dayjs(date)
+  if (isInputUtc && !hasTimezoneInfo(date)) dateObj = dateObj.utc(true)
+
+  dateObj = outputUtc ? dateObj.utc() : dateObj.local()
+
   if (pattern) return dateObj.format(pattern)
 
   if (isSameDay(date)) return dateObj.format('h:mm a')
@@ -164,3 +170,7 @@ export function addDays(date: DateParam, days: number): Date | undefined {
   const result = dayjs(date).add(days, 'day')
   return result.isValid() ? result.toDate() : undefined
 }
+
+// checks if the string ends with a 'Z' (UTC timezone) or with an explicit timezone offset (+HH:MM, -HHMM, etc.).
+const hasTimezoneInfo = (date: DateParam): boolean =>
+  typeof date !== 'string' ? false : /Z$|[+-]\d{2}:?\d{2}$/.test(date.trim())

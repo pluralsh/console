@@ -4,7 +4,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { SemanticColorKey } from '@pluralsh/design-system'
 import { LogLineFragment } from 'generated/graphql'
-import { dayjsExtended } from 'utils/datetime'
+import { formatDateTime } from 'utils/datetime'
 
 export enum LogLevel {
   SUCCESS = 'Success',
@@ -56,7 +56,7 @@ export function LogLine({
       $highlighted={highlighted}
       onClick={onClick}
     >
-      {dayjsExtended(timestamp).utc().format('MM/DD/YYYY-HH:mm:ss[[UTC]] ')}
+      {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
       {(log || '').split('\n').map((line, index) => (
         <span key={index}>{line}</span>
       ))}

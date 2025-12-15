@@ -121,11 +121,13 @@ export function LogsDateDropdown({
         {initialDate
           ? formatDateTime(
               initialDate,
-              `Before ${dateOrder
+              `[Before ]${dateOrder
                 .join('/')
                 .replace('M', 'MM')
                 .replace('D', 'DD')
-                .replace('Y', 'YYYY')} - HH:mm:ss`
+                .replace('Y', 'YYYY')}[ - ]HH:mm:ss[ [UTC]]`,
+              true,
+              true
             )
           : 'Before now'}
       </Button>

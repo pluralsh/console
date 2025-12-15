@@ -50,9 +50,10 @@ export function DateTimeFormInput({
   const dateOrder = useDateFormat()
   const { label: dateLabel, format: dateFormat } =
     DATE_FORMATS[dateOrder.join('') as DateOrderString]
-
-  const initDateStr = formatDateTime(initialDate, dateFormat) || EMPTY_DATE_STR
-  const initTimeStr = formatDateTime(initialDate, TIME_FORMAT) || EMPTY_TIME_STR
+  const initDateStr =
+    formatDateTime(initialDate, dateFormat, true, true) || EMPTY_DATE_STR
+  const initTimeStr =
+    formatDateTime(initialDate, TIME_FORMAT, true, true) || EMPTY_TIME_STR
   const [initDateA, initDateB, initDateC] = initDateStr.split('/')
   const [initTimeH, initTimeM, initTimeS] = initTimeStr.split(':')
 
@@ -95,8 +96,8 @@ export function DateTimeFormInput({
       setTimestampError(true)
       return
     }
-    const date = formatDateTime(timestamp, dateFormat, true)
-    const time = formatDateTime(timestamp, TIME_FORMAT, true)
+    const date = formatDateTime(timestamp, dateFormat, true, true)
+    const time = formatDateTime(timestamp, TIME_FORMAT, true, true)
     runAfterBrowserLayout(() => {
       dateInputRef.current?.setValue(date)
       timeInputRef.current?.setValue(time)
