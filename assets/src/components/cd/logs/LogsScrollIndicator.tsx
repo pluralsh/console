@@ -21,7 +21,7 @@ export function LogsScrollIndicator({
   const theme = useTheme()
   return (
     <Tooltip
-      label="Note: enabling live logs will ignore any specified end date/time filters"
+      label="Note: enabling live logs will clear any specified end date/time filter"
       placement="top"
     >
       <Button

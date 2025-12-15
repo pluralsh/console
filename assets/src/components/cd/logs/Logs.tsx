@@ -39,7 +39,14 @@ export function Logs({
   const throttledQ = useThrottle(q, 1000)
   const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
 
-  const [live, setLive] = useState(true)
+  const [live, setLiveState] = useState(true)
+  const setLive = useCallback(
+    (live: boolean) => {
+      setLiveState(live)
+      if (live) setFilters({ ...filters, date: null })
+    },
+    [filters, setFilters]
+  )
 
   const { data, loading, error, fetchMore } = useLogAggregationQuery({
     variables: {
@@ -112,13 +119,11 @@ export function Logs({
                       setSinceSeconds={(sinceSeconds) =>
                         setFilters({ ...filters, sinceSeconds })
                       }
-                      disabled={live}
                     />
                     <LogsDateDropdown
                       initialDate={filters.date}
                       setDate={(date) => setFilters({ ...filters, date })}
                       setLive={setLive}
-                      disabled={live}
                     />
                   </Flex>
                   <LogsScrollIndicator
