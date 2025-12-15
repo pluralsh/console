@@ -870,7 +870,7 @@ defmodule Console.Deployments.Services do
     old_children = Map.new(old_children, fn %ServiceComponentChild{id: id, uid: uid} -> {uid, id} end)
     Map.put(component, :children, Enum.map(children, &Map.put(&1, :id, old_children[&1.uid])))
   end
-  defp maybe_stabilize_children(component, _), do: component
+  defp maybe_stabilize_children(component, _), do: Map.put(component, :children, [])
 
   defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {nilify(g), v, k, nilify(ns), n}
   defp component_key(_), do: nil
