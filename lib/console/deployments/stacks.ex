@@ -151,7 +151,12 @@ defmodule Console.Deployments.Stacks do
         trigger_run(stack.id, user)
       _ -> {:ok, nil}
     end)
-    |> execute(extract: :stack)
+    |> add_operation(:refetch, fn _ ->
+      get_stack!(id)
+      |> preloaded()
+      |> ok()
+    end)
+    |> execute(extract: :refetch)
     |> notify(:update, user)
   end
 
@@ -733,7 +738,7 @@ defmodule Console.Deployments.Stacks do
       |> Repo.insert()
     end)
     |> add_operation(:stack, fn %{run: run} ->
-      Ecto.Changeset.change(stack, sha_attrs(run, sha))
+      Stack.sha_changeset(stack, sha_attrs(run, sha))
       |> Stack.delete_changeset(delete_run(stack, run))
       |> Repo.update()
     end)
