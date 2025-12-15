@@ -209,7 +209,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(common.Wait()), nil
+			return lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

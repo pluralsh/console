@@ -254,14 +254,14 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 	}
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The repository is not pullable yet")
+	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkReadOnly(repo)
 	if existingRepo.Health != nil && *existingRepo.Health == console.GitHealthPullable {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		return repo.Spec.Reconciliation.Requeue(), nil
 	}
 
-	utils.MarkReadOnly(repo)
-	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
-	return repo.Spec.Reconciliation.Requeue(), nil
+	return common.Wait(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

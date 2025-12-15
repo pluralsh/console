@@ -14,6 +14,10 @@ func Wait() ctrl.Result {
 	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(v1alpha1.WaitDefault)}
 }
 
+func WaitForResources() ctrl.Result {
+	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(v1alpha1.WaitForResources)}
+}
+
 // HandleRequeue allows avoiding rate limiting when some errors occur, i.e., when a resource is not created yet,
 // or when it is waiting for an ID. If the result is set, then any potential error will be saved in a condition
 // and ignored in the return to avoid rate limiting. If not found error is detected, then the result is automatically

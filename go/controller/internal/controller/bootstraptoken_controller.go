@@ -67,8 +67,8 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(token.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "")
 
 	// Handle resource deletion via finalizer.
-	if result := in.addOrRemoveFinalizer(ctx, token); result != nil {
-		return *result, nil
+	if result, err := in.addOrRemoveFinalizer(ctx, token); result != nil {
+		return *result, err
 	}
 
 	// Check if the token already exists and return early.
@@ -97,7 +97,7 @@ func (in *BootstrapTokenReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	return token.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, token *v1alpha1.BootstrapToken) *ctrl.Result {
+func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, token *v1alpha1.BootstrapToken) (*ctrl.Result, error) {
 	// If the object is not being deleted and if it does not have our finalizer, then let's add the finalizer.
 	// This is equivalent to registering our finalizer.
 	if token.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(token, BootstrapTokenProtectionFinalizerName) {
@@ -106,7 +106,7 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, to
 
 	// If the object is not being deleted, do nothing.
 	if token.GetDeletionTimestamp().IsZero() {
-		return nil
+		return nil, nil
 	}
 
 	// If the object is being deleted, but there is no console ID available to delete the resource,
@@ -114,19 +114,19 @@ func (in *BootstrapTokenReconciler) addOrRemoveFinalizer(ctx context.Context, to
 	if !token.Status.HasID() {
 		// stop reconciliation as there is no console ID available to delete the resource
 		controllerutil.RemoveFinalizer(token, BootstrapTokenProtectionFinalizerName)
-		return &ctrl.Result{}
+		return &ctrl.Result{}, nil
 	}
 
 	// Try to delete the resource.
 	if err := in.ConsoleClient.DeleteBootstrapToken(ctx, token.Status.GetID()); err != nil {
 		// If it fails to delete the external dependency here, return with an error so that it can be retried.
 		utils.MarkCondition(token.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return lo.ToPtr(token.Spec.Reconciliation.Requeue())
+		return &ctrl.Result{}, err
 	}
 
 	// Stop reconciliation as the item has been deleted.
 	controllerutil.RemoveFinalizer(token, BootstrapTokenProtectionFinalizerName)
-	return &ctrl.Result{}
+	return &ctrl.Result{}, nil
 }
 
 func (in *BootstrapTokenReconciler) sync(ctx context.Context, token *v1alpha1.BootstrapToken, project v1alpha1.Project) (*consoleapi.BootstrapTokenBase, error) {
