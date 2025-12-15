@@ -2000,6 +2000,9 @@ type SentinelRun {
   "the results of the run"
   results: [SentinelRunResult]
 
+  "the errors of the run"
+  errors: [ServiceError]
+
   "the checks that were run"
   checks: [SentinelCheck]
 

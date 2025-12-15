@@ -6717,6 +6717,8 @@ type SentinelRun struct {
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
 	Results []*SentinelRunResult `json:"results,omitempty"`
+	// the errors of the run
+	Errors []*ServiceError `json:"errors,omitempty"`
 	// the checks that were run
 	Checks     []*SentinelCheck          `json:"checks,omitempty"`
 	Jobs       *SentinelRunJobConnection `json:"jobs,omitempty"`

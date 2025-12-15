@@ -11050,6 +11050,8 @@ export type SentinelRun = {
   checks?: Maybe<Array<Maybe<SentinelCheck>>>;
   /** the time the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the errors of the run */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;

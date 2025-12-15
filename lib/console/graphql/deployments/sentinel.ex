@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :completed_at,     :datetime, description: "the time the run completed"
     field :sentinel,         :sentinel, resolve: dataloader(Deployments), description: "the sentinel that was run"
     field :results,          list_of(:sentinel_run_result), description: "the results of the run"
+    field :errors,           list_of(:service_error), description: "the errors of the run", resolve: dataloader(Deployments)
 
     field :checks, list_of(:sentinel_check), description: "the checks that were run"
 
