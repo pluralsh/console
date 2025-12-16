@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,6 +24,12 @@ func (in *ConsoleHelper) IDFromRef(ref *v1.ObjectReference, resource v1alpha1.Pl
 	}
 
 	err := in.reader.Get(in.ctx, k8sclient.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, resource)
+	if err != nil {
+		return nil, err
+	}
+	if resource.ConsoleID() == nil {
+		return nil, fmt.Errorf("resource %s/%s is not ready", ref.Namespace, ref.Name)
+	}
 	return resource.ConsoleID(), err
 }
 

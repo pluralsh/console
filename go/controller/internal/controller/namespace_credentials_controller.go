@@ -80,11 +80,10 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 
 	// Try to add namespace credentials to cache.
 	token, err := r.CredentialsCache.AddNamespaceCredentials(nc)
-	nc.Status.TokenSHA = lo.ToPtr(utils.HashString(token))
 	if err != nil {
-		utils.MarkFalse(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return nc.Spec.Reconciliation.Requeue(), nil
+		return common.HandleRequeue(nil, err, nc.SetCondition)
 	}
+	nc.Status.TokenSHA = lo.ToPtr(utils.HashString(token))
 
 	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")

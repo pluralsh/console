@@ -118,7 +118,7 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 			// If deletion process started requeue so that we can make sure prAutomation
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(prAutomation.Spec.Reconciliation.Requeue()), nil
+			return lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

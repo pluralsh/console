@@ -158,7 +158,7 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 					return ctrl.Result{}, err
 				}
 				logger.Info("waiting for the services")
-				return repo.Spec.Reconciliation.Requeue(), nil
+				return common.WaitForResources(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(repo, RepoFinalizer)
@@ -244,7 +244,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 		repo.Status.Message = &msg
 		repo.Status.Health = v1alpha1.GitHealthFailed
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, msg)
-		return repo.Spec.Reconciliation.Requeue(), nil
+		return common.Wait(), nil
 	}
 
 	repo.Status.Message = existingRepo.Error
@@ -254,14 +254,14 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 	}
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The repository is not pullable yet")
+	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkReadOnly(repo)
 	if existingRepo.Health != nil && *existingRepo.Health == console.GitHealthPullable {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		return repo.Spec.Reconciliation.Requeue(), nil
 	}
 
-	utils.MarkReadOnly(repo)
-	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
-	return repo.Spec.Reconciliation.Requeue(), nil
+	return common.WaitForResources(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
