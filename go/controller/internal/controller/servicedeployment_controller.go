@@ -302,7 +302,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		for _, imp := range service.Spec.Imports {
 			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
-				return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
+				return nil, lo.ToPtr(common.WaitForResources()), fmt.Errorf("error while getting stack ID: %s", imp.StackRef.Name)
 			}
 			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
@@ -316,7 +316,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 		}
 		nsn := types.NamespacedName{Name: service.Spec.FlowRef.Name, Namespace: ns}
 		if err = r.Get(ctx, nsn, flow); err != nil {
-			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting flow: %s", err.Error())
+			return nil, lo.ToPtr(common.WaitForResources()), fmt.Errorf("error while getting flow: %s", err.Error())
 		}
 		if !flow.Status.HasID() {
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("flow is not ready")
@@ -326,7 +326,7 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 
 	configuration, hasConfig, err := r.svcConfiguration(ctx, service)
 	if err != nil {
-		return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), err
+		return nil, lo.ToPtr(common.WaitForResources()), err
 	}
 
 	// we only want to explicitly set the configuration field in attr if the user specified it via
@@ -397,7 +397,7 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 		ref := service.Spec.Helm.RepositoryRef
 		var repo v1alpha1.GitRepository
 		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
-			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository: %s", err.Error())
+			return nil, lo.ToPtr(common.WaitForResources()), fmt.Errorf("error while getting repository: %s", err.Error())
 		}
 
 		if !repo.Status.HasID() {
@@ -409,7 +409,7 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 	if service.Spec.Helm.Git.HasUrl() {
 		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(service.Spec.Helm.Git.Url))
 		if err != nil {
-			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting repository ID: %s", err.Error())
+			return nil, lo.ToPtr(common.WaitForResources()), fmt.Errorf("error while getting repository ID: %s", err.Error())
 		}
 		attr.RepositoryID = id
 	}
@@ -417,7 +417,7 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 	if service.Spec.Helm.ValuesConfigMapRef != nil {
 		val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 		if err != nil {
-			return nil, lo.ToPtr(service.Spec.Reconciliation.Requeue()), fmt.Errorf("error while getting values config map: %s", err.Error())
+			return nil, lo.ToPtr(common.WaitForResources()), fmt.Errorf("error while getting values config map: %s", err.Error())
 		}
 		attr.Values = &val
 	}
@@ -679,7 +679,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(common.Wait())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// If our finalizer is present, remove it.
