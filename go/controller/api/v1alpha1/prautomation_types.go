@@ -228,6 +228,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 
+	// Configures usage of an HTTP proxy for all requests involving this PR automation, usually needed for the vendoring to external repositories.
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Labels to apply to all created PRs from this pr automation
 	// +kubebuilder:validation:Optional
 	Labels []*string `json:"labels,omitempty"`

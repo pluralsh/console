@@ -34,6 +34,7 @@ defmodule Console.Schema.PrAutomation do
     field :labels,           {:array, :string}
 
     embeds_one :git, Service.Git, on_replace: :update
+    embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
 
     embeds_one :lua, LuaSpec, on_replace: :update do
       field :external, :boolean, default: false
@@ -131,6 +132,17 @@ defmodule Console.Schema.PrAutomation do
     timestamps()
   end
 
+  def proxy_env(%__MODULE__{proxy: %ScmConnection.Proxy{url: url} = proxy}) when is_binary(url) do
+    Enum.concat([
+      {"HTTP_PROXY", url},
+      {"HTTPS_PROXY", url}
+    ], noproxy(proxy))
+  end
+  def proxy_env(_), do: []
+
+  defp noproxy(%ScmConnection.Proxy{noproxy: noproxy}) when is_binary(noproxy), do: [{"NOPROXY", noproxy}]
+  defp noproxy(_), do: []
+
   def for_catalog(query \\ __MODULE__, catalog_id) do
     from(p in query, where: p.catalog_id == ^catalog_id)
   end
@@ -191,6 +203,7 @@ defmodule Console.Schema.PrAutomation do
     |> cast_embed(:confirmation, with: &confirmation_changeset/2)
     |> cast_embed(:secrets, with: &secret_changeset/2)
     |> cast_embed(:vendor, with: &vendor_changeset/2)
+    |> cast_embed(:proxy, with: &ScmConnection.proxy_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)

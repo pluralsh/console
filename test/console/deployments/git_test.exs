@@ -320,7 +320,7 @@ defmodule Console.Deployments.GitTest do
           %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
         ]
       )
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -355,7 +355,7 @@ defmodule Console.Deployments.GitTest do
           %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
         ]
       )
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -387,7 +387,7 @@ defmodule Console.Deployments.GitTest do
         updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
         configuration: [%{name: "first", type: :project}]
       )
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -527,7 +527,7 @@ defmodule Console.Deployments.GitTest do
         write_bindings: [%{user_id: user.id}],
         create_bindings: [%{user_id: user.id}]
       )
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(Tentacat.App.Installations, :token, fn _, "234" ->
         {:ok, %{"token" => "some-pat"}, %HTTPoison.Response{}}
       end)
@@ -562,7 +562,7 @@ defmodule Console.Deployments.GitTest do
           %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
         ]
       )
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(HTTPoison, :post, fn "https://bitbucket.example.com/rest/api/latest/projects/pluralsh/repos/console/pull-requests", _, _ ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"id" => 1})}}
       end)
@@ -954,7 +954,7 @@ defmodule Console.Deployments.GitSyncTest do
         create_bindings: [%{user_id: user.id}]
       )
 
-      expect(Console.Commands.Plural, :template, fn f, _, ext ->
+      expect(Console.Commands.Plural, :template, fn f, _, ext, _ ->
         with true <- File.dir?(ext),
           do: File.read(f)
       end)

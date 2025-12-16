@@ -177,4 +177,19 @@ type HttpProxyConfiguration struct {
 	// The url of your HTTP proxy.
 	// +kubebuilder:validation:Required
 	URL string `json:"url"`
+
+	// The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var.
+	// +kubebuilder:validation:Optional
+	NoProxy *string `json:"noproxy,omitempty"`
+}
+
+func (in *HttpProxyConfiguration) Attributes() *console.HTTPProxyAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.HTTPProxyAttributes{
+		URL:     in.URL,
+		Noproxy: in.NoProxy,
+	}
 }

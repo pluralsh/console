@@ -4306,12 +4306,14 @@ export type HttpIngressRule = {
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyAttributes = {
+  noproxy?: InputMaybe<Scalars['String']['input']>;
   url: Scalars['String']['input'];
 };
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyConfiguration = {
   __typename?: 'HttpProxyConfiguration';
+  noproxy?: Maybe<Scalars['String']['output']>;
   url: Scalars['String']['output'];
 };
 
@@ -6690,6 +6692,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the project this automation lives w/in */
   project?: Maybe<Project>;
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
@@ -6746,6 +6750,8 @@ export type PrAutomationAttributes = {
   patch?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project this automation lives in */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** a proxy to use for external vendoring */
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;

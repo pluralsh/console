@@ -3514,12 +3514,14 @@ type HTTPIngressRule struct {
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyAttributes struct {
-	URL string `json:"url"`
+	URL     string  `json:"url"`
+	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyConfiguration struct {
-	URL string `json:"url"`
+	URL     string  `json:"url"`
+	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // A representation of an AI generated deep investigation of your infrastructure
@@ -5483,6 +5485,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// a proxy to use for git requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// software vendoring logic to perform in this PR
 	Vendor *PrVendorSpec `json:"vendor,omitempty"`
 	// a set of lua scripts to use to preprocess the PR automation
@@ -5535,11 +5539,13 @@ type PrAutomationAttributes struct {
 	Message       *string `json:"message,omitempty"`
 	Branch        *string `json:"branch,omitempty"`
 	// whether to generate a patch for this pr instead of a full pr
-	Patch        *bool                             `json:"patch,omitempty"`
-	BranchPrefix *string                           `json:"branchPrefix,omitempty"`
-	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
-	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
-	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	Patch        *bool   `json:"patch,omitempty"`
+	BranchPrefix *string `json:"branchPrefix,omitempty"`
+	// a proxy to use for external vendoring
+	Proxy   *HTTPProxyAttributes              `json:"proxy,omitempty"`
+	Updates *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
+	Creates *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
+	Deletes *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
 	// a specification for vendoring software in this PR
 	Vendor *PrVendorSpecAttributes `json:"vendor,omitempty"`
 	// a specification for sourcing lua scripts to preprocess the PR automation

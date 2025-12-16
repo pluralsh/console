@@ -297,3 +297,7 @@ end
 if get_env("CONSOLE_OIDC_SYNC") == "full" do
   config :console, :oidc_sync, :full
 end
+
+if get_env("CONSOLE_ASSETS_PROXY_URL") do
+  config :console, :assets_proxy_url, get_env("CONSOLE_ASSETS_PROXY_URL")
+end

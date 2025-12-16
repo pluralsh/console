@@ -1,4 +1,4 @@
-icon: https://raw.githubusercontent.com/projectcontour/contour/main/assets/logo.png
+icon: https://avatars.githubusercontent.com/u/54918165?s=48&v=4
 git_url: https://github.com/projectcontour/contour
 release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
 helm_repository_url: https://charts.bitnami.com/bitnami

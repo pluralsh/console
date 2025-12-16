@@ -8487,6 +8487,7 @@ input ScmConnectionAttributes {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
   url: String!
+  noproxy: String
 }
 
 "Requirements to perform Github App authentication"
@@ -8534,6 +8535,9 @@ input PrAutomationAttributes {
   patch: Boolean
 
   branchPrefix: String
+
+  "a proxy to use for external vendoring"
+  proxy: HttpProxyAttributes
 
   updates: PrAutomationUpdateSpecAttributes
 
@@ -9113,6 +9117,9 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a proxy to use for git requests"
+  proxy: HttpProxyConfiguration
+
   "software vendoring logic to perform in this PR"
   vendor: PrVendorSpec
 
@@ -9523,6 +9530,7 @@ type ObserverPipelineAction {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
   url: String!
+  noproxy: String
 }
 
 "A catalog is an organized collection of PR Automations used for permissioning and discovery"

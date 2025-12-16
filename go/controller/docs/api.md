@@ -1890,11 +1890,13 @@ _Appears in:_
 
 
 _Appears in:_
+- [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ | The url of your HTTP proxy. |  | Required: \{\} <br /> |
+| `noproxy` _string_ | The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var. |  | Optional: \{\} <br /> |
 
 
 #### InfrastructureStack
@@ -3395,6 +3397,7 @@ _Appears in:_
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this PR automation, usually needed for the vendoring to external repositories. |  | Optional: \{\} <br /> |
 | `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
 
