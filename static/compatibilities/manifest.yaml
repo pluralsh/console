@@ -19,6 +19,7 @@ names:
 - kube-prometheus-stack
 - kyverno
 - linkerd
+- longhorn
 - opentelemetry-operator
 - rook
 - strimzi-kafka
