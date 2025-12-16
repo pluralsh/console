@@ -129,8 +129,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if !managedNamespace.Status.HasID() {
 			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
 			if err != nil {
-				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return managedNamespace.Spec.Reconciliation.Requeue(), err
+				return common.HandleRequeue(nil, err, managedNamespace.SetCondition)
 			}
 			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
 		}
@@ -147,7 +146,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return managedNamespace.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

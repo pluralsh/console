@@ -665,7 +665,7 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(service.Spec.Reconciliation.Requeue())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// Remove service from Console API if it exists and is not read-only.

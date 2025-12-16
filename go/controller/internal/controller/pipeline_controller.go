@@ -159,7 +159,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 		if pipeline.Status.GetID() != "" {
 			exists, err = r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 			if err != nil {
-				return lo.ToPtr(pipeline.Spec.Reconciliation.Requeue())
+				return lo.ToPtr(common.WaitForResources())
 			}
 		}
 
@@ -174,7 +174,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(pipeline.Spec.Reconciliation.Requeue())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// If our finalizer is present, remove it.

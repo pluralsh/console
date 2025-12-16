@@ -137,7 +137,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(sink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return sink.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notificationSink *v1alpha1.NotificationSink) (ctrl.Result, error) {

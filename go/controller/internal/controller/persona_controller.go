@@ -124,7 +124,7 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 
 		exists, err := in.ConsoleClient.IsPersonaExists(ctx, persona.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(persona.Spec.Reconciliation.Requeue())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// Remove persona from Console API if it exists.
@@ -133,7 +133,7 @@ func (in *PersonaReconciler) addOrRemoveFinalizer(ctx context.Context, persona *
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(persona.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(persona.Spec.Reconciliation.Requeue())
+				return lo.ToPtr(common.WaitForResources())
 			}
 		}
 

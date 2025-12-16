@@ -168,8 +168,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	if existingGlobalService == nil {
 		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
 		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return common.HandleRequeue(nil, err, globalService.SetCondition)
 		}
 		existingGlobalService, err = r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 		if err != nil {
@@ -181,8 +180,7 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	if !globalService.Status.IsSHAEqual(sha) {
 		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
 		if err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return globalService.Spec.Reconciliation.Requeue(), err
+			return common.HandleRequeue(nil, err, globalService.SetCondition)
 		}
 	}
 

@@ -216,7 +216,7 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 
 			// If deletion process started requeue so that we can make sure scm
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(scm.Spec.Reconciliation.Requeue()), nil
+			return lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

@@ -158,7 +158,7 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 					return ctrl.Result{}, err
 				}
 				logger.Info("waiting for the services")
-				return repo.Spec.Reconciliation.Requeue(), nil
+				return common.WaitForResources(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(repo, RepoFinalizer)
@@ -244,7 +244,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 		repo.Status.Message = &msg
 		repo.Status.Health = v1alpha1.GitHealthFailed
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, msg)
-		return repo.Spec.Reconciliation.Requeue(), nil
+		return common.Wait(), nil
 	}
 
 	repo.Status.Message = existingRepo.Error
@@ -261,7 +261,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(repo *v1alpha1.GitRepositor
 		return repo.Spec.Reconciliation.Requeue(), nil
 	}
 
-	return common.Wait(), nil
+	return common.WaitForResources(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
