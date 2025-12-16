@@ -21,7 +21,9 @@ kind: PrAutomation
 metadata:
   name: github-automation
 spec:
-  name: pr-test
+  name: pr-automation-test-catalog
+  catalogRef:
+    name: catalog-test
   scmConnectionRef:
     name: github
   clusterRef: {}
@@ -46,3 +48,12 @@ spec:
         - "yes"
         - "no"
 
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  name: catalog-test
+spec:
+  author: Plural
+  category: Data
+  description: Test catalog for PR automation.

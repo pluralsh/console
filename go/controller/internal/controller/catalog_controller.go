@@ -63,9 +63,9 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
-	result := r.addOrRemoveFinalizer(ctx, catalog)
+	result, err := r.addOrRemoveFinalizer(ctx, catalog)
 	if result != nil {
-		return *result, reterr
+		return *result, err
 	}
 
 	// Check if the resource already exists in the API and only sync the ID.
@@ -197,7 +197,7 @@ func (r *CatalogReconciler) isAlreadyExists(ctx context.Context, catalog *v1alph
 	return false, nil
 }
 
-func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v1alpha1.Catalog) *ctrl.Result {
+func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v1alpha1.Catalog) (*ctrl.Result, error) {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if catalog.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(catalog, CatalogProtectionFinalizerName) {
@@ -210,32 +210,30 @@ func (r *CatalogReconciler) addOrRemoveFinalizer(ctx context.Context, catalog *v
 	if !catalog.DeletionTimestamp.IsZero() {
 		exists, err := r.ConsoleClient.IsCatalogExists(ctx, catalog.CatalogName())
 		if err != nil {
-			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
-		}
-
-		apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
-		if err != nil {
-			return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
+			return &ctrl.Result{}, err
 		}
 
 		// Remove Pipeline from Console API if it exists.
 		if exists && !catalog.Status.IsReadonly() {
+			apiCatalog, err := r.ConsoleClient.GetCatalog(ctx, nil, lo.ToPtr(catalog.CatalogName()))
+			if err != nil {
+				return &ctrl.Result{}, err
+			}
 			if err := r.ConsoleClient.DeleteCatalog(ctx, apiCatalog.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(catalog.Spec.Reconciliation.Requeue())
+				return &ctrl.Result{}, err
 			}
-
 			// catalog deletion is synchronous so can just fall back to removing the finalizer and reconciling
 		}
 
 		// Stop reconciliation as the item is being deleted
 		controllerutil.RemoveFinalizer(catalog, CatalogProtectionFinalizerName)
-		return &ctrl.Result{}
+		return &ctrl.Result{}, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

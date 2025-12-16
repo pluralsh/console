@@ -274,7 +274,7 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 						return ctrl.Result{}, err
 					}
 				}
-				return common.Wait(), nil
+				return common.WaitForResources(), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)

@@ -117,7 +117,7 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{}, reterr
+	return provider.Spec.Reconciliation.Requeue(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -155,7 +155,7 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 
 			// If deletion process started requeue so that we can make sure observability provider
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(provider.Spec.Reconciliation.Requeue()), nil
+			return lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted

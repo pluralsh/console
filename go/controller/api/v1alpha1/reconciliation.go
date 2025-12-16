@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	RequeueDefault = 30 * time.Minute
-	WaitDefault    = 30 * time.Second
+	RequeueDefault   = 30 * time.Minute
+	WaitDefault      = 30 * time.Second
+	WaitForResources = 15 * time.Second
 )
 
 // Jitter adds a random jitter to the given duration.
