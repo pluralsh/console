@@ -1,0 +1,138 @@
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
+image:
+  # See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kubernetes-agent.
+  repository: ghcr.io/pluralsh/kubernetes-agent
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+  pullSecrets: []
+
+consoleUrl: ""
+
+nameOverride: ""
+
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsUser: 65532
+
+securityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+priorityClassName: ""
+
+extraEnv: []
+
+extraArgs: []
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []
+
+initContainers: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+service:
+  agentPort: 8150
+  agentProxyPort: 8180
+  apiInternalPort: 8153
+  kubernetesApiPort: 8154
+  privateApiPort: 8155
+  observabilityPort: 8151
+  type: ClusterIP
+
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+  # Annotations to add to the service account.
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+metrics:
+  enabled: false
+  path: /metrics
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
+    endpointConfig: {}
+
+replicCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUAverageValue: 100m
+  # targetCPUUtilizationPercentage: 75
+  # targetMemoryUtilizationPercentage: 75
+
+secrets:
+  create: true
+  api: ""
+  privateapi: ""
+  redis: ""
+
+agent:
+  path: /ext/kas
+
+api:
+  path: /api
+  port: 8000
+
+ingress:
+#  enabled: true
+  ingressClass: nginx
+#  kubernetesApiPath: /k8s-proxy
+  tlsSecretName: kas-tls
+
+  tls:
+    enabled: true
+
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+redis:
+  enabled: true
+  architecture: standalone
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: ghcr.io
+    repository: pluralsh/registry/bitnami/redis
+    tag: 7.4.2-debian-12-r5
+  auth:
+    enabled: true
+    sentinel: false
+  sentinel:
+    enabled: false
+  master:
+    count: 1
+  commonConfiguration: |-
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+    # Enable idle client connection timeout (5 minutes)
+    timeout 300
+    
