@@ -3003,6 +3003,14 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.19.1-eksbuild.3
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.19.1-eksbuild.2
     compatibilities:
     - '1.34'
@@ -4515,6 +4523,14 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.20.0-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v0.20.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -4763,6 +4779,14 @@
   publisher: FriendliAI
 - name: friendliai_friendli-container-eks
   versions:
+  - version: v1.12.6-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.21-eksbuild.1
     compatibilities:
     - '1.33'
@@ -5999,6 +6023,14 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.17.0-eksbuild.5
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v2.17.0-eksbuild.4
     compatibilities:
     - '1.34'
@@ -6184,6 +6216,12 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.8.0-eksbuild.6
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.0-eksbuild.5
     compatibilities:
     - '1.34'
@@ -6218,6 +6256,14 @@
     - '1.29'
     - '1.28'
     - '1.27'
+  - version: v0.7.2-eksbuild.7
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v0.7.2-eksbuild.6
     compatibilities:
     - '1.34'
@@ -6431,6 +6477,14 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.10.2-eksbuild.5
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.10.2-eksbuild.4
     compatibilities:
     - '1.34'
@@ -7418,6 +7472,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.21.0-eksbuild.4
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.20.5-eksbuild.1
     compatibilities:
     - '1.34'
