@@ -3678,6 +3678,7 @@ addons:
 - git_url: https://github.com/VictoriaMetrics/operator
   release_url: https://github.com/VictoriaMetrics/operator/releases/tag/v{vsn}
   helm_repository_url: https://victoriametrics.github.io/helm-charts
+  readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
   versions:
   - version: 0.66.1
     kube: ['1.34', '1.33', '1.32']
@@ -4086,6 +4087,7 @@ addons:
   git_url: https://github.com/NVIDIA/gpu-operator
   release_url: https://github.com/NVIDIA/gpu-operator/releases/tag/{vsn}
   helm_repository_url: https://nvidia.github.io/gpu-operator
+  readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
   - version: 25.10.1
     kube: ['1.34', '1.33', '1.32']
