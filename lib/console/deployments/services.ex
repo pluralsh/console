@@ -843,14 +843,14 @@ defmodule Console.Deployments.Services do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
     new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
-    |> Map.put(:errors, stabilize_errors(attrs[:errors], svc.errors))
+    |> stabilize_errors(attrs[:errors], svc.errors)
   end
   def stabilize(attrs, _), do: attrs
 
-  defp stabilize_errors(nil, _), do: []
-  defp stabilize_errors([], _), do: []
-  defp stabilize_errors(errors, old_errors) when is_list(errors) and is_list(old_errors),
-    do: _stabilize_errors(errors, old_errors, [])
+  defp stabilize_errors(attrs, [], _), do: Map.put(attrs, :errors, [])
+  defp stabilize_errors(attrs, errors, old_errors) when is_list(errors) and is_list(old_errors),
+    do: Map.put(attrs, :errors, _stabilize_errors(errors, old_errors, []))
+  defp stabilize_errors(attrs, _, _), do: attrs
 
   defp _stabilize_errors([], _, acc), do: acc
   defp _stabilize_errors(res, [], acc), do: acc ++ res
