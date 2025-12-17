@@ -12,12 +12,15 @@ export function SentinelRunJobOutput() {
   if (!job.output)
     return <EmptyState message="No output available yet for this job." />
   if (job.format === SentinelRunJobFormat.Junit) {
-    const parsedJunit = parseJunit(job.output.substring(100))
+    const parsedJunit = parseJunit(job.output)
+
     if (!parsedJunit) return <GqlError error="Failed to parse JUnit output" />
     return (
       <Flex
         direction="column"
         gap="large"
+        height="100%"
+        overflow="auto"
       >
         <JUnitSuitesMetadata testSuites={parsedJunit} />
         <JUnitTable testSuites={parsedJunit} />

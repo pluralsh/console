@@ -1,15 +1,16 @@
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
+import styled from 'styled-components'
 import { Property, TestSuite, TestSuites } from 'utils/junitParse'
 import { StackedText } from '../table/StackedText'
 import { JUnitTableExpanderRow } from './JUnitTableExpanderRow'
-import styled from 'styled-components'
 
 export function JUnitTable({ testSuites }: { testSuites: TestSuites }) {
   return (
     <Table
       hideHeader
+      fullHeightWrap
       rowBg="base"
       fillLevel={1}
       data={testSuites.testsuite ?? []}
@@ -18,6 +19,7 @@ export function JUnitTable({ testSuites }: { testSuites: TestSuites }) {
       renderExpanded={JUnitTableExpanderRow}
       onRowClick={(_, row) => row.getToggleExpandedHandler()()}
       expandedBgColor="fill-zero"
+      emptyStateProps={{ message: 'No tests found.' }}
     />
   )
 }

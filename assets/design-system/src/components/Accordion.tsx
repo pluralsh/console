@@ -145,6 +145,7 @@ const TriggerSC = styled(RadixAccordion.Trigger)<{
   cursor: 'pointer',
   ...theme.partials.text.body2Bold,
   color: theme.colors.text,
+  '&[data-disabled]': { cursor: 'auto', '.icon': { display: 'none' } },
   '&:focus-visible': { ...theme.partials.focus.default },
   // if the icon is on the left, it should rotate a quarter from -90deg to 0deg on open
   // if it's on the right, it should act like a normal dropdown and flip from up to down
@@ -153,7 +154,7 @@ const TriggerSC = styled(RadixAccordion.Trigger)<{
     rotate: $caret === 'left' ? '-90deg' : '0deg',
     transition: 'rotate 0.3s ease, scale 0.3s ease',
   },
-  '&:hover': { '.icon': { scale: '1.16' } },
+  '&:not([data-disabled]):hover': { '.icon': { scale: '1.16' } },
   '&[data-state="open"] .icon': {
     rotate: '0deg',
     scale: $caret === 'right' ? '-1' : '1',

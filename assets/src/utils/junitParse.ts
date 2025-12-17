@@ -1,50 +1,35 @@
-// based on https://github.com/Kesin11/ts-junit2json/blob/master/src/index.ts
+// loosely adapted from https://github.com/Kesin11/ts-junit2json/blob/master/src/index.ts
+// also referenced https://github.com/testmoapp/junitxml/blob/main/examples/junit-complete.xml for typing
 // but ported to use fast-xml-parser instead of xml2js
 import { XMLParser, type X2jOptions } from 'fast-xml-parser'
 
-type ObjOrArray =
-  | Record<string, any>
-  | Array<ObjOrArray>
-  | string
-  | number
-  | boolean
-  | null
+type ParsedObject = Record<string, unknown>
 
-/** represents a `<testsuites>` tag.  */
-export type TestSuites = {
-  testsuite?: TestSuite[]
-  time?: number
+const isPlainObject = (value: unknown): value is Record<string, any> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+/** Aggregate test statistics shared by `<testsuites>` and `<testsuite>` */
+type TestStats = {
+  name?: string
   tests?: number
   failures?: number
   errors?: number
-  disabled?: number
-}
-
-/** represents a `<testcase>` tag.  */
-export type TestCase = {
-  name?: string
-  classname?: string
+  skipped?: number
   assertions?: number
   time?: number
-  status?: string
-  skipped?: Skipped[]
-  error?: Details[]
-  failure?: Details[]
-  'system-out'?: string[]
-  'system-err'?: string[]
+  timestamp?: string
+}
+
+/** represents a `<testsuites>` tag.  */
+export type TestSuites = TestStats & {
+  testsuite?: TestSuite[]
 }
 
 /** represents a `<testsuite>` tag.  */
-export type TestSuite = {
+export type TestSuite = TestStats & {
   testcase?: TestCase[]
-  name?: string
-  tests?: number
-  failures?: number
-  errors?: number
-  time?: number
+  file?: string
   disabled?: number
-  skipped?: number
-  timestamp?: string
   hostname?: string
   id?: string
   package?: string
@@ -53,8 +38,24 @@ export type TestSuite = {
   'system-err'?: string[]
 }
 
-/** represents a `<properties>` tag.  */
-export type Property = { name?: string; value?: string }
+/** represents a `<testcase>` tag.  */
+export type TestCase = {
+  name?: string
+  classname?: string
+  assertions?: number
+  time?: number
+  file?: string
+  line?: number
+  skipped?: Skipped[]
+  error?: Details[]
+  failure?: Details[]
+  'system-out'?: string[]
+  'system-err'?: string[]
+  properties?: Property[]
+}
+
+/** represents a `<property>` tag.  */
+export type Property = { name?: string; value?: string; inner?: string }
 /** represents a `<skipped>` tag.  */
 export type Skipped = { message?: string }
 /** represents a `<failure> and <error>` tag.  */
@@ -86,35 +87,25 @@ export const parseJunit = (
   const result = parser.parse(xmlString)
   if (result == null) return null
 
-  if ('testsuites' in result) return _parse(result.testsuites) as TestSuites
+  if ('testsuites' in result)
+    return _parseObject(result.testsuites) as TestSuites
 
   // Wrap standalone <testsuite> in a TestSuites container with aggregate values
   if ('testsuite' in result) {
-    const parsedSuite = _parse(result.testsuite) as TestSuite
-    const testsuite = [parsedSuite]
-    const { time, tests, failures, errors, disabled } = parsedSuite
-    return { testsuite, time, tests, failures, errors, disabled }
+    const parsedSuite = _parseObject(result.testsuite) as TestSuite
+    // spreading the object so TestStats are on the parent
+    // technically will add extra testsuite-only properties to the parent but these will be ignored in practice
+    return { ...parsedSuite, testsuite: [parsedSuite] }
   }
 
   return null
 }
 
-const _parse = (objOrArray: ObjOrArray): ObjOrArray => {
-  // Arrays: recurse each element, normalize primitives to { inner: ... } like original
-  if (Array.isArray(objOrArray))
-    return objOrArray.map((_obj: ObjOrArray) => {
-      if (Array.isArray(_obj) || (typeof _obj === 'object' && _obj !== null)) {
-        return _parse(_obj)
-      }
-      // primitive -> { inner: primitive }
-      return { inner: _obj }
-    })
-
-  // Primitives not in an array: wrap as { inner: value }
-  if (objOrArray === null || typeof objOrArray !== 'object')
-    return { inner: objOrArray }
-
-  const input = objOrArray as Record<string, any>
+/**
+ * Parses a plain object from XML, normalizing nested structures.
+ * Always returns a ParsedObject (not an array or primitive).
+ */
+const _parseObject = (input: Record<string, any>): ParsedObject => {
   const output: Record<string, any> = {}
 
   Object.keys(input).forEach((key) => {
@@ -147,13 +138,32 @@ const _parse = (objOrArray: ObjOrArray): ObjOrArray => {
       const propRaw = propsNode?.property ?? []
 
       const propArray = Array.isArray(propRaw) ? propRaw : [propRaw]
-      output[key] = propArray.map((p: any) => _parse(p))
+      output[key] = propArray.map((p: any) =>
+        isPlainObject(p) ? _parseObject(p) : { inner: p }
+      )
       return
     }
 
-    // Objects / arrays: recurse
-    if (Array.isArray(nested) || (nested && typeof nested === 'object')) {
-      output[key] = _parse(nested)
+    // <testsuite> / <testcase>: ensure they always end up as arrays
+    if (key === 'testsuite' || key === 'testcase') {
+      const asArray = Array.isArray(nested) ? nested : [nested]
+      output[key] = asArray.map((item: any) =>
+        isPlainObject(item) ? _parseObject(item) : { inner: item }
+      )
+      return
+    }
+
+    // Arrays: recurse into each element
+    if (Array.isArray(nested)) {
+      output[key] = nested.map((item: any) =>
+        isPlainObject(item) ? _parseObject(item) : { inner: item }
+      )
+      return
+    }
+
+    // Objects: recurse
+    if (isPlainObject(nested)) {
+      output[key] = _parseObject(nested)
       return
     }
 
