@@ -24,7 +24,7 @@ def print_success(message):
 def print_warning(message):
     print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
-
+@lru_cache(maxsize=None)
 def fetch_page(url):
     response = requests.get(url)
     if response.status_code != 200:
@@ -226,7 +226,11 @@ def get_kube_release_info():
             seen.add(cleaned)
             result.append(kube_release)
 
-    return result
+    def sorter(tupe):
+        validated = validate_semver(tupe[0])
+        return (validated.major, validated.minor, validated.patch, tupe[1])
+
+    return sorted(result, key=sorter, reverse=True)
 
 def get_github_releases_timestamps(repo_owner, repo_name):
     for page in range(1, 3):
