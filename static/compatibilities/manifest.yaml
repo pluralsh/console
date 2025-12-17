@@ -31,3 +31,4 @@ names:
 - argo-cd
 - vector
 - victoria-metrics-operator
+- gpu-operator
