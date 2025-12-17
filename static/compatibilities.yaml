@@ -3675,3 +3675,410 @@ addons:
     chart_version: 0.1.0-alpha.4
     images: ['timberio/vector:0.16.1-distroless-libc']
   name: vector
+- git_url: https://github.com/VictoriaMetrics/operator
+  release_url: https://github.com/VictoriaMetrics/operator/releases/tag/v{vsn}
+  helm_repository_url: https://victoriametrics.github.io/helm-charts
+  versions:
+  - version: 0.66.1
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.57.1
+    images: ['victoriametrics/operator:v0.66.1']
+  - version: 0.66.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.57.0
+    images: ['victoriametrics/operator:v0.66.0']
+  - version: 0.65.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.56.4
+    images: ['victoriametrics/operator:v0.65.0']
+  - version: 0.64.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.55.2
+    images: ['victoriametrics/operator:v0.64.0']
+  - version: 0.63.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.54.1
+    images: ['victoriametrics/operator:v0.63.0']
+  - version: 0.62.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.52.1
+    images: ['victoriametrics/operator:v0.62.0']
+  - version: 0.61.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.51.2
+    images: ['victoriametrics/operator:v0.61.0']
+  - version: 0.60.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.52.0
+    images: ['victoriametrics/operator:v0.60.0']
+  - version: 0.59.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.49.0-rc1
+    images: ['victoriametrics/operator:v0.59.0']
+  - version: 0.58.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.47.0
+    images: ['victoriametrics/operator:v0.58.0']
+  - version: 0.57.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.46.0
+    images: ['victoriametrics/operator:v0.57.0']
+  - version: 0.56.0
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.45.0
+    images: ['victoriametrics/operator:v0.56.0']
+  - version: 0.55.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.44.0
+    images: ['victoriametrics/operator:v0.55.0']
+  - version: 0.54.1
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.43.1
+    images: ['victoriametrics/operator:v0.54.1']
+  - version: 0.53.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.42.5
+    images: ['victoriametrics/operator:v0.53.0']
+  - version: 0.52.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.41.2
+    images: ['victoriametrics/operator:v0.52.0']
+  - version: 0.51.1
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.40.1
+    images: ['victoriametrics/operator:v0.51.1']
+  - version: 0.50.0
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.39.1
+    images: ['victoriametrics/operator:v0.50.0']
+  - version: 0.49.0
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.37.0
+    images: ['victoriametrics/operator:v0.49.0']
+  - version: 0.48.0
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.35.0
+    images: ['victoriametrics/operator:v0.48.0']
+  - version: 0.47.0
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.34.0
+    images: ['victoriametrics/operator:v0.47.0']
+  - version: 0.46.4
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.33.6
+    images: ['victoriametrics/operator:v0.46.4']
+  - version: 0.46.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.33.1
+    images: ['victoriametrics/operator:v0.46.0']
+  - version: 0.45.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.32.3
+    images: ['victoriametrics/operator:v0.45.0']
+  - version: 0.44.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.31.2
+    images: ['victoriametrics/operator:v0.44.0']
+  - version: 0.43.0
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.30.0
+    images: ['victoriametrics/operator:v0.43.0']
+  - version: 0.42.4
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.29.6
+    images: ['victoriametrics/operator:v0.42.4']
+  - version: 0.42.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.29.0
+    images: ['victoriametrics/operator:v0.42.0']
+  - version: 0.41.1
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.28.0
+    images: ['victoriametrics/operator:v0.41.1']
+  - version: 0.40.0
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.27.10
+    images: ['victoriametrics/operator:v0.40.0']
+  - version: 0.39.4
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.27.9
+    images: ['victoriametrics/operator:v0.39.3']
+  - version: 0.39.0
+    kube: ['1.28', '1.27', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.27.3
+    images: ['victoriametrics/operator:v0.39.0']
+  - version: 0.38.0
+    kube: ['1.28', '1.27', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.27.1
+    images: ['victoriametrics/operator:v0.38.0']
+  - version: 0.37.0
+    kube: ['1.28', '1.27', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.26.0
+    images: ['victoriametrics/operator:v0.37.0']
+  - version: 0.36.0
+    kube: ['1.28', '1.27', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.25.0
+    images: ['victoriametrics/operator:v0.36.0']
+  - version: 0.35.0
+    kube: ['1.27', '1.26', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.24.0
+    images: ['victoriametrics/operator:v0.35.0']
+  - version: 0.34.0
+    kube: ['1.27', '1.26', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.23.0
+    images: ['victoriametrics/operator:v0.34.0']
+  - version: 0.33.0
+    kube: ['1.27', '1.26', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.21.0
+    images: ['victoriametrics/operator:v0.33.0']
+  - version: 0.32.1
+    kube: ['1.27', '1.26', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.20.1
+    images: ['victoriametrics/operator:v0.32.1']
+  - version: 0.32.0
+    kube: ['1.26', '1.25', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.20.0
+    images: ['victoriametrics/operator:v0.32.0']
+  - version: 0.31.0
+    kube: ['1.26', '1.25', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.19.0
+    images: ['victoriametrics/operator:v0.31.0']
+  - version: 0.30.3
+    kube: ['1.26', '1.25', '1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.17.2
+    images: ['victoriametrics/operator:v0.30.3']
+  - version: 0.30.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.17.0
+    images: ['victoriametrics/operator:v0.30.0']
+  - version: 0.29.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.15.0
+    images: ['victoriametrics/operator:v0.29.0']
+  - version: 0.28.3
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.14.0
+    images: ['victoriametrics/operator:v0.28.3']
+  - version: 0.27.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.12.0
+    images: ['victoriametrics/operator:v0.27.0']
+  - version: 0.26.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.11.1
+    images: ['victoriametrics/operator:v0.26.0']
+  - version: 0.25.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.10.0
+    images: ['victoriametrics/operator:v0.25.0']
+  - version: 0.24.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.9.0
+    images: ['victoriametrics/operator:v0.24.0']
+  - version: 0.23.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.7.1
+    images: ['victoriametrics/operator:v0.23.0']
+  - version: 0.22.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.6.0
+    images: ['victoriametrics/operator:v0.22.0']
+  - version: 0.21.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.5.1
+    images: ['victoriametrics/operator:v0.21.0']
+  - version: 0.20.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.4.0
+    images: ['victoriametrics/operator:v0.20.0']
+  - version: 0.19.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.3.0
+    images: ['victoriametrics/operator:v0.19.0']
+  - version: 0.18.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.2.0
+    images: ['victoriametrics/operator:v0.18.0']
+  - version: 0.17.1
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.18
+    images: ['victoriametrics/operator:v0.17.1']
+  - version: 0.16.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.17
+    images: ['victoriametrics/operator:v0.16.0']
+  - version: 0.15.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.14
+    images: ['victoriametrics/operator:v0.15.0']
+  - version: 0.14.2
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.13
+    images: ['victoriametrics/operator:v0.14.2']
+  - version: 0.13.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.12
+    images: ['victoriametrics/operator:v0.13.0']
+  - version: 0.12.2
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.10
+    images: ['victoriametrics/operator:v0.12.2']
+  - version: 0.11.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.9
+    images: ['victoriametrics/operator:v0.11.0']
+  - version: 0.9.1
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.8
+    images: ['victoriametrics/operator:v0.9.1']
+  - version: 0.8.0
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.7
+    images: ['victoriametrics/operator:v0.8.0']
+  - version: 0.7.3
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.5
+    images: ['victoriametrics/operator:v0.7.3']
+  - version: 0.6.1
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.4
+    images: ['victoriametrics/operator:v0.6.1']
+  - version: 0.2.1
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 0.1.1
+    images: ['victoriametrics/operator:v0.2.1']
+  name: victoria-metrics-operator
