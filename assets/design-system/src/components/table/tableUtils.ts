@@ -15,8 +15,9 @@ import {
   type UIEventHandler,
 } from 'react'
 
-import { type FillLevel } from '../../index'
 import { type EmptyStateProps } from '../EmptyState'
+import { SemanticColorKey } from 'src/theme/colors'
+import { FillLevel } from '../contexts/FillLevelContext'
 
 export type TableProps = Omit<CSSProperties, keyof TableBaseProps> &
   TableBaseProps
@@ -30,6 +31,7 @@ export type TableBaseProps = {
   hideHeader?: boolean
   padCells?: boolean
   expandedRowType?: 'default' | 'custom'
+  expandedBgColor?: SemanticColorKey
   fullHeightWrap?: boolean
   fillLevel?: TableFillLevel
   rowBg?: 'base' | 'raised' | 'stripes'
