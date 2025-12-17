@@ -3,6 +3,16 @@ git_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver
 release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
 versions:
+- version: 1.54.0
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+    '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  chart_version: 2.54.1
+  images: ['public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
+    'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.0.0-eksbuild.3',
+    'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.54.0',
+    'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20251209-855adc2699-master']
 - version: 1.53.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
     '1.24', '1.23', '1.22', '1.21', '1.20']
