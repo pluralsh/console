@@ -32,3 +32,4 @@ names:
 - vector
 - victoria-metrics-operator
 - gpu-operator
+- elasticsearch
