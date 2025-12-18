@@ -3,12 +3,15 @@ import requests
 import semantic_version
 import subprocess
 import os
+import traceback
+
 
 from functools import lru_cache
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
+from summarizer import helm_summary
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -227,7 +230,7 @@ def get_kube_release_info():
             result.append(kube_release)
 
     def sorter(tupe):
-        validated = validate_semver(tupe[0])
+        validated = validate_semver(tupe[0].lstrip("v"))
         return (validated.major, validated.minor, validated.patch, tupe[1])
 
     return sorted(result, key=sorter, reverse=True)
@@ -422,6 +425,7 @@ def reduce_versions(versions):
                     ("kube", kube),
                     ("requirements", data.get("requirements", [])),
                     ("incompatibilities", data.get("incompatibilities", [])),
+                    ("summary", data.get("summary")),
                 ]
             )
 
@@ -469,14 +473,16 @@ def update_compatibility_info(filepath, new_versions):
                 )
             }
         
-        i = 0
-        while i < len(data["versions"]) - 1:
-            from_vsn = data["versions"][i]
-            to_vsn = data["versions"][i+1]
+        for i in range(len(data["versions"]) - 1):
+            to_vsn = data["versions"][i] # in reverse order
+            from_vsn = data["versions"][i+1]
+            if to_vsn.get('summary'):
+                continue
+
+            print(f"summarizing application updates for {app_name} from {from_vsn['version']} to {to_vsn['version']}")
             summary = helm_summary(app_name, data, from_vsn, to_vsn)
             if summary:
                 data["versions"][i]["summary"] = summary
-            i += 1
         
         if write_yaml(filepath, data):
             print_success(
@@ -485,4 +491,4 @@ def update_compatibility_info(filepath, new_versions):
         else:
             print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")
+        traceback.print_exc()

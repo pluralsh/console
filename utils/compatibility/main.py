@@ -4,7 +4,7 @@ import time
 import importlib
 from colorama import Fore, Style
 from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
-from version_scraper import generate_kube_changelog
+from kube_versions import generate_kube_changelog
 
 def call_scraper(scraper):
     try:

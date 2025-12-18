@@ -34,6 +34,7 @@ fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
     namespaces
     query
     clusterId
+    duration
     facets {
       ...LogFacet
     }

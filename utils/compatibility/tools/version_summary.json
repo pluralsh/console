@@ -1,13 +1,17 @@
 {
     "type": "object",
     "properties": {
+        "confident": {
+            "type": "boolean",
+            "description": "Whether you're confident in the accuracy of the summary"
+        },
         "helm_changes": {
             "type": "string",
-            "description": "A description of any helm values changes required for updating the chart to this version.  Should be in markdown format, and is sourced from the helm changelog."
+            "description": "A description of any helm values changes required for updating the chart to this version.  Should be in markdown format, and is sourced from the helm changelog.  *If there are no notes, leave this blank.*"
         },
         "chart_updates": {
             "type": "array",
-            "description": "A description of any updates to the chart itself.  Should be in markdown format, and is sourced from the helm changelog.",
+            "description": "A description of any updates to the chart itself.  Should be in markdown format, and is sourced from the helm changelog. *If there are no notes, leave this empty.*",
             "items": {
                 "type": "string"
             }
