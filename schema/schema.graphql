@@ -229,6 +229,8 @@ type RootQueryType {
 
   kubernetesVersionInfo(distro: ClusterDistro): [KubernetesVersionInfo]
 
+  kubernetesChangelog(version: String!): KubernetesChangelog
+
   serviceDeployments(
     after: String
 
@@ -8183,6 +8185,33 @@ type KubernetesVersionInfo {
 
   "whether this version is on extended support"
   extended: Boolean
+}
+
+"the changelog for a given kubernetes version"
+type KubernetesChangelog {
+  "the kubernetes version"
+  version: String
+
+  "the major changes in this version"
+  majorChanges: [String]
+
+  "the breaking changes in this version"
+  breakingChanges: [String]
+
+  "the deprecations in this version"
+  deprecations: [String]
+
+  "the removals in this version"
+  removals: [String]
+
+  "the features in this version"
+  features: [String]
+
+  "the bug fixes in this version"
+  bugFixes: [String]
+
+  "the api updates in this version"
+  apiUpdates: [String]
 }
 
 type ClusterConnection {

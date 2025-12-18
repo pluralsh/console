@@ -3816,6 +3816,26 @@ type KubeconfigAttributes struct {
 	Raw *string `json:"raw,omitempty"`
 }
 
+// the changelog for a given kubernetes version
+type KubernetesChangelog struct {
+	// the kubernetes version
+	Version *string `json:"version,omitempty"`
+	// the major changes in this version
+	MajorChanges []*string `json:"majorChanges,omitempty"`
+	// the breaking changes in this version
+	BreakingChanges []*string `json:"breakingChanges,omitempty"`
+	// the deprecations in this version
+	Deprecations []*string `json:"deprecations,omitempty"`
+	// the removals in this version
+	Removals []*string `json:"removals,omitempty"`
+	// the features in this version
+	Features []*string `json:"features,omitempty"`
+	// the bug fixes in this version
+	BugFixes []*string `json:"bugFixes,omitempty"`
+	// the api updates in this version
+	APIUpdates []*string `json:"apiUpdates,omitempty"`
+}
+
 type KubernetesUnstructured struct {
 	Group    *string        `json:"group,omitempty"`
 	Version  string         `json:"version"`

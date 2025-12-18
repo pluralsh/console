@@ -2,12 +2,14 @@ defmodule Console.Deployments.KubeVersions.Table do
   use GenServer
   import Console.Deployments.Compatibilities.Utils, only: [later?: 2]
   alias Console.Deployments.Static
+  alias Console.Deployments.KubeVersions.Changelog
   alias ETS.KeyValueSet
   require Logger
 
   @distros ~w(eks aks gke)a
 
   @table :extended_kube_versions
+  @changelog_url "/matrices/compatability/static/kube_changelog.yaml"
   @poll :timer.minutes(60)
 
   defmodule State do
@@ -44,6 +46,15 @@ defmodule Console.Deployments.KubeVersions.Table do
 
   @type distro :: :eks | :aks | :gke
   @type entry :: %Entry{distro: distro, versions: [Version.t]}
+
+  @doc """
+  Fetch the changelog for a given kubernetesversion.
+  """
+  @spec changelog(binary) :: Changelog.t | nil
+  def changelog(version) do
+    with {:ok, set} <- KeyValueSet.wrap_existing(@table),
+      do: set[{:changelog, version}]
+  end
 
   @spec fetch(distro) :: [Version.t]
   def fetch(distro) when distro in @distros do
@@ -116,10 +127,25 @@ defmodule Console.Deployments.KubeVersions.Table do
     # send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     table = Enum.reduce(Static.versions(), table, &KeyValueSet.put!(&2, &1.distro, &1))
-    {:ok, %State{table: table, static: Console.conf(:airgap)}}
+    table = Enum.reduce(Static.changelog(), table, &KeyValueSet.put!(&2, {:changelog, &1.version}, &1))
+    {:ok, %State{table: table, static: Console.conf(:airgap), url: Console.plrl_assets_url(@changelog_url)}}
   end
 
-  def handle_info(:poll, %State{} = state), do: {:noreply, state}
+  def handle_info(:poll, %State{table: table, static: false, url: url} = state) do
+    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+         {:ok, %{"kube_changelog" => changelog}} <- YamlElixir.read_from_string(body) do
+      table = Enum.reduce(changelog, table, fn change, table ->
+        changelog = Changelog.new(change)
+        KeyValueSet.put!(table, {:changelog, changelog.version}, changelog)
+      end)
+      {:noreply, %{state | table: table}}
+    else
+      err ->
+        Logger.error "failed to fetch kubernetes changelog: #{inspect(err)}"
+        {:noreply, state}
+    end
+  end
+  def handle_info(:poll, state), do: {:noreply, state}
 
   defp to_entry(distro, versions) do
     %Entry{
@@ -134,5 +160,11 @@ defmodule Console.Deployments.KubeVersions.Table do
       {:ok, versions} = YamlElixir.read_from_string(yaml)
       to_entry(distro, versions)
     end)
+  end
+
+  def static_changelog() do
+    {:ok, yaml} = File.read("static/kube_changelog.yaml")
+    {:ok, %{"kube_changelog" => changelog}} = YamlElixir.read_from_string(yaml)
+    Enum.map(changelog, &Changelog.new/1)
   end
 end

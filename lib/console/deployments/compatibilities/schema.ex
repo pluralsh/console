@@ -4,12 +4,17 @@ defmodule Console.Deployments.Compatibilities.Reference do
   defstruct [:name, :version]
 end
 
+defmodule Console.Deployments.Compatibilities.VersionSummary do
+  @type t :: %__MODULE__{helm_changes: binary, features: [binary], breaking_changes: [binary]}
+  defstruct [:helm_changes, :features, :breaking_changes]
+end
+
 defmodule Console.Deployments.Compatibilities.Version do
-  alias Console.Deployments.Compatibilities.{Reference, Utils}
+  alias Console.Deployments.Compatibilities.{Reference, Utils, VersionSummary}
 
-  @type t :: %__MODULE__{requirements: [%Reference{}], incompatibilities: [%Reference{}]}
+  @type t :: %__MODULE__{requirements: [%Reference{}], incompatibilities: [%Reference{}], summary: VersionSummary.t}
 
-  defstruct [:version, :kube, :chart_version, :requirements, :incompatibilities, :images]
+  defstruct [:version, :kube, :chart_version, :requirements, :incompatibilities, :images, :summary]
 
   def blocking?(%__MODULE__{kube: kube_vsns}, kube_version, inc \\ 1),
     do: Utils.blocking?(kube_vsns, kube_version, inc)
@@ -17,7 +22,8 @@ defmodule Console.Deployments.Compatibilities.Version do
   def spec() do
     %__MODULE__{
       requirements: [%Reference{}],
-      incompatibilities: [%Reference{}]
+      incompatibilities: [%Reference{}],
+      summary: %VersionSummary{}
     }
   end
 end

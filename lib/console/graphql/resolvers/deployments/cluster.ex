@@ -222,6 +222,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def kubernetes_version_info(%{distro: distro}, _), do: {:ok, KubeVersions.Table.fetch(distro)}
 
+  def kubernetes_changelog(%{version: version}, _), do: {:ok, KubeVersions.Table.changelog(version)}
+
   defp cores(val) when is_integer(val), do: val / 1000
   defp cores(_), do: nil
 

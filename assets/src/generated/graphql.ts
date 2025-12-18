@@ -4687,6 +4687,27 @@ export type KubeconfigAttributes = {
   raw?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** the changelog for a given kubernetes version */
+export type KubernetesChangelog = {
+  __typename?: 'KubernetesChangelog';
+  /** the api updates in this version */
+  apiUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the bug fixes in this version */
+  bugFixes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the deprecations in this version */
+  deprecations?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the features in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the major changes in this version */
+  majorChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the removals in this version */
+  removals?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the kubernetes version */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
 export type KubernetesUnstructured = {
   __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -9181,6 +9202,7 @@ export type RootQueryType = {
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesChangelog?: Maybe<KubernetesChangelog>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
@@ -9862,6 +9884,11 @@ export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeKubernetesChangelogArgs = {
+  version: Scalars['String']['input'];
 };
 
 

@@ -1,0 +1,24 @@
+{
+    "type": "object",
+    "properties": {
+        "helm_changes": {
+            "type": "string",
+            "description": "A description of any helm values changes required for updating the chart to this version.  Should be in markdown format."
+        },
+        "features": {
+            "type": "array",
+            "description": "A list of features that were added in this version.  Each should be at most two sentences.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "breaking_changes": {
+            "type": "array",
+            "description": "A list of breaking changes that were introduced in this version, each should be at most two sentences.",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": ["features"]
+}

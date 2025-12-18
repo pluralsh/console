@@ -1194,6 +1194,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :extended, :boolean, description: "whether this version is on extended support"
   end
 
+  @desc "the changelog for a given kubernetes version"
+  object :kubernetes_changelog do
+    field :version,  :string, description: "the kubernetes version"
+    field :major_changes, list_of(:string), description: "the major changes in this version"
+    field :breaking_changes, list_of(:string), description: "the breaking changes in this version"
+    field :deprecations, list_of(:string), description: "the deprecations in this version"
+    field :removals, list_of(:string), description: "the removals in this version"
+    field :features, list_of(:string), description: "the features in this version"
+    field :bug_fixes, list_of(:string), description: "the bug fixes in this version"
+    field :api_updates, list_of(:string), description: "the api updates in this version"
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1459,6 +1471,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :distro, :cluster_distro
 
       resolve &Deployments.kubernetes_version_info/2
+    end
+
+    field :kubernetes_changelog, :kubernetes_changelog do
+      middleware Authenticated
+      arg :version, non_null(:string)
+
+      resolve &Deployments.kubernetes_changelog/2
     end
   end
 
