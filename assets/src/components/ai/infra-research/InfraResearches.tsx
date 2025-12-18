@@ -3,20 +3,21 @@ import {
   CaretRightIcon,
   Chip,
   ChipProps,
+  Divider,
   Flex,
   FormField,
   IconFrame,
   Modal,
-  PlusIcon,
   Table,
+  TelescopeIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { Title2H1 } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
   InfraResearchStatus,
@@ -30,6 +31,7 @@ import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { PromptInputSC } from '../agent-runs/CreateAgentRun'
 import { getAIBreadcrumbs } from '../AI'
+import { ChatInputSimple } from '../chatbot/input/ChatInput'
 import { getInfraResearchDefaultTab } from './InfraResearch'
 
 export const getInfraResearchesBreadcrumbs = () =>
@@ -53,19 +55,36 @@ export function InfraResearches() {
   return (
     <Flex
       direction="column"
-      gap="xsmall"
+      gap="large"
       overflow="hidden"
     >
-      <StretchedFlex>
-        <Subtitle1H1>Infra research</Subtitle1H1>
-        <Button
-          startIcon={<PlusIcon />}
-          alignSelf="flex-end"
-          onClick={() => setShowCreateModal(true)}
-        >
-          Start a run
-        </Button>
-      </StretchedFlex>
+      <StackedText
+        first={
+          <Flex
+            gap="xxsmall"
+            align="center"
+          >
+            <IconFrame
+              size="small"
+              icon={<TelescopeIcon />}
+            />
+            <span>Infrastructure research</span>
+          </Flex>
+        }
+        firstPartialType="body2Bold"
+        firstColor="text"
+        second="AI-assisted workspace for investigating infrastructure. It connects to your existing environments and lets you query configurations, dependencies, and patterns, surfacing relevant insights and visualizations in seconds."
+        secondPartialType="body2"
+        secondColor="text-light"
+        gap="xsmall"
+      />
+      <Divider backgroundColor="border" />
+      <Title2H1>What is your investigation question?</Title2H1>
+      <ChatInputSimple
+        onClick={() => setShowCreateModal(true)}
+        setValue={() => {}}
+        onEnter={() => {}}
+      />
       {error ? (
         <GqlError error={error} />
       ) : (
