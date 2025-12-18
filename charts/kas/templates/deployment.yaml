@@ -92,20 +92,30 @@ spec:
           - name: etc-kas
             mountPath: /etc/kas
             readOnly: true
-          - name: tls
-            mountPath: /etc/kas/tls
-            readOnly: true
         - name: api
           image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/api"]
           args:
-            - --metrics-provider=none
             - --act-as-proxy
-            - --apiserver-host=https://localhost:8154
+            - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
             - --apiserver-skip-tls-verify
+            - --metrics-provider=none
             - --disable-csrf-protection
+            - --cluster-context-enabled=true
             - --insecure-bind-address=0.0.0.0
+            - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
+          env:
+            - name: KAS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: console-env
+                  key: KAS_HOST
+            - name: CONSOLE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: console-env
+                  key: CONSOLE_HOST
           ports:
             - containerPort: 8000
       terminationGracePeriodSeconds: 300
@@ -131,10 +141,6 @@ spec:
                 items:
                   - key: redis-password
                     path: redis_server_secret
-      - name: tls
-        secret:
-          secretName: {{ .Values.ingress.tlsSecretName }}
-          defaultMode: 0440
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

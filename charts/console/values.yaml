@@ -447,9 +447,8 @@ kas:
     port: 8000
 
   ingress:
-    #  enabled: true
     ingressClass: nginx
-    #  kubernetesApiPath: /k8s-proxy
+    kubernetesApiPath: /k8s-proxy
     tlsSecretName: kas-tls
 
     tls:

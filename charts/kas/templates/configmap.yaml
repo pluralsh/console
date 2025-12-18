@@ -13,8 +13,7 @@ data:
       kubernetes_api:
         listen:
           address: ":{{ .Values.service.kubernetesApiPort }}"
-          certificate_file: "/etc/kas/tls/tls.crt"
-          key_file: "/etc/kas/tls/tls.key"
+        url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
     observability:
       listen:
         address: ":{{ .Values.service.observabilityPort }}"
