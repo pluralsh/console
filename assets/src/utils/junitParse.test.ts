@@ -204,11 +204,64 @@ describe('junitParse', () => {
         const testcases = getTestCases(suite)
         const testcase = testcases[0]
 
-        expect(testcase.skipped).toBeDefined()
+        // Must be an array even for single element
+        expect(Array.isArray(testcase.skipped)).toBe(true)
+        expect(testcase.skipped).toHaveLength(1)
       })
     })
 
-    describe('system-out and system-err parsing', () => {
+    describe('single elements should always be arrays', () => {
+      it('should parse single skipped as array', () => {
+        const xml = `
+          <testsuite name="Suite">
+            <testcase name="test1">
+              <skipped message="Skipped reason"/>
+            </testcase>
+          </testsuite>
+        `
+        const result = parseJunit(xml) as TestSuites
+        const testcase = getTestCases(getTestSuites(result)[0])[0]
+
+        expect(Array.isArray(testcase.skipped)).toBe(true)
+        expect(testcase.skipped![0].message).toBe('Skipped reason')
+      })
+
+      it('should parse single failure as array', () => {
+        const xml = `
+          <testsuite name="Suite">
+            <testcase name="test1">
+              <failure message="Failed" type="AssertionError">Stack trace here</failure>
+            </testcase>
+          </testsuite>
+        `
+        const result = parseJunit(xml) as TestSuites
+        const testcase = getTestCases(getTestSuites(result)[0])[0]
+
+        expect(Array.isArray(testcase.failure)).toBe(true)
+        expect(testcase.failure![0].message).toBe('Failed')
+        expect(testcase.failure![0].type).toBe('AssertionError')
+        expect(testcase.failure![0].inner).toBe('Stack trace here')
+      })
+
+      it('should parse single error as array', () => {
+        const xml = `
+          <testsuite name="Suite">
+            <testcase name="test1">
+              <error message="Crashed" type="RuntimeError">Error details</error>
+            </testcase>
+          </testsuite>
+        `
+        const result = parseJunit(xml) as TestSuites
+        const testcase = getTestCases(getTestSuites(result)[0])[0]
+
+        expect(Array.isArray(testcase.error)).toBe(true)
+        expect(testcase.error![0].message).toBe('Crashed')
+        expect(testcase.error![0].type).toBe('RuntimeError')
+        expect(testcase.error![0].inner).toBe('Error details')
+      })
+    })
+
+    describe('systemOut and systemErr parsing', () => {
       it('should parse multiple system-out elements as array', () => {
         const xml = `
           <testsuite name="Suite">
@@ -225,10 +278,7 @@ describe('junitParse', () => {
         const testcases = getTestCases(suite)
         const testcase = testcases[0]
 
-        expect(testcase['system-out']).toEqual([
-          'First output',
-          'Second output',
-        ])
+        expect(testcase.systemOut).toEqual(['First output', 'Second output'])
       })
     })
 
@@ -478,8 +528,8 @@ describe('junitParse', () => {
         expect(suite.name).toBe('Tests.Registration')
         expect(suite.file).toBe('tests/registration.code')
         expect(suite.assertions).toBe(20)
-        expect(suite['system-out']).toEqual(['Data written to standard out.'])
-        expect(suite['system-err']).toEqual(['Data written to standard error.'])
+        expect(suite.systemOut).toEqual(['Data written to standard out.'])
+        expect(suite.systemErr).toEqual(['Data written to standard error.'])
 
         // Suite properties (including multiline)
         expect(suite.properties).toHaveLength(3)
@@ -499,36 +549,29 @@ describe('junitParse', () => {
         expect(passingTest.line).toBe(24)
         expect(passingTest.assertions).toBe(2)
 
-        // Skipped test
+        // Skipped test - must be an array
         const skippedTest = testcases[2]
-        expect(skippedTest.skipped).toBeDefined()
-        const skipped = Array.isArray(skippedTest.skipped)
-          ? skippedTest.skipped
-          : [skippedTest.skipped]
-        expect(skipped[0]!.message).toBe('Test was skipped.')
+        expect(Array.isArray(skippedTest.skipped)).toBe(true)
+        expect(skippedTest.skipped![0].message).toBe('Test was skipped.')
 
-        // Failed test
+        // Failed test - must be an array
         const failedTest = testcases[3]
-        expect(failedTest.failure).toBeDefined()
-        const failures = Array.isArray(failedTest.failure)
-          ? failedTest.failure
-          : [failedTest.failure]
-        expect(failures[0]!.message).toBe('Expected value did not match.')
-        expect(failures[0]!.type).toBe('AssertionError')
+        expect(Array.isArray(failedTest.failure)).toBe(true)
+        expect(failedTest.failure![0].message).toBe(
+          'Expected value did not match.'
+        )
+        expect(failedTest.failure![0].type).toBe('AssertionError')
 
-        // Error test
+        // Error test - must be an array
         const errorTest = testcases[4]
-        expect(errorTest.error).toBeDefined()
-        const errors = Array.isArray(errorTest.error)
-          ? errorTest.error
-          : [errorTest.error]
-        expect(errors[0]!.message).toBe('Division by zero.')
-        expect(errors[0]!.type).toBe('ArithmeticError')
+        expect(Array.isArray(errorTest.error)).toBe(true)
+        expect(errorTest.error![0].message).toBe('Division by zero.')
+        expect(errorTest.error![0].type).toBe('ArithmeticError')
 
-        // Test with system-out/system-err
+        // Test with systemOut/systemErr
         const outputTest = testcases[5]
-        expect(outputTest['system-out']).toEqual(['Test case output.'])
-        expect(outputTest['system-err']).toEqual(['Test case error.'])
+        expect(outputTest.systemOut).toEqual(['Test case output.'])
+        expect(outputTest.systemErr).toEqual(['Test case error.'])
 
         // Test with properties
         const propsTest = testcases[6]

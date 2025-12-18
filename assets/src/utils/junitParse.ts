@@ -1,6 +1,6 @@
 // loosely adapted from https://github.com/Kesin11/ts-junit2json/blob/master/src/index.ts
-// also referenced https://github.com/testmoapp/junitxml/blob/main/examples/junit-complete.xml for typing
 // but ported to use fast-xml-parser instead of xml2js
+// also using https://github.com/testmoapp/junitxml/blob/main/examples/junit-complete.xml as a partial reference for typing
 import { XMLParser, type X2jOptions } from 'fast-xml-parser'
 
 type ParsedObject = Record<string, unknown>
@@ -9,7 +9,7 @@ const isPlainObject = (value: unknown): value is Record<string, any> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 /** Aggregate test statistics shared by `<testsuites>` and `<testsuite>` */
-type TestStats = {
+export type TestsuiteStats = {
   name?: string
   tests?: number
   failures?: number
@@ -21,12 +21,12 @@ type TestStats = {
 }
 
 /** represents a `<testsuites>` tag.  */
-export type TestSuites = TestStats & {
+export type TestSuites = TestsuiteStats & {
   testsuite?: TestSuite[]
 }
 
 /** represents a `<testsuite>` tag.  */
-export type TestSuite = TestStats & {
+export type TestSuite = TestsuiteStats & {
   testcase?: TestCase[]
   file?: string
   disabled?: number
@@ -34,8 +34,8 @@ export type TestSuite = TestStats & {
   id?: string
   package?: string
   properties?: Property[]
-  'system-out'?: string[]
-  'system-err'?: string[]
+  systemOut?: string[]
+  systemErr?: string[]
 }
 
 /** represents a `<testcase>` tag.  */
@@ -46,20 +46,21 @@ export type TestCase = {
   time?: number
   file?: string
   line?: number
-  skipped?: Skipped[]
-  error?: Details[]
-  failure?: Details[]
-  'system-out'?: string[]
-  'system-err'?: string[]
+  skipped?: TestcaseResult[]
+  error?: TestcaseResult[]
+  failure?: TestcaseResult[]
+  systemOut?: string[]
+  systemErr?: string[]
   properties?: Property[]
 }
 
+const OBJ_ARRAY_TYPES: (keyof TestCase | keyof TestSuite | keyof TestSuites)[] =
+  ['skipped', 'error', 'failure', 'properties', 'testsuite', 'testcase']
+
 /** represents a `<property>` tag.  */
 export type Property = { name?: string; value?: string; inner?: string }
-/** represents a `<skipped>` tag.  */
-export type Skipped = { message?: string }
-/** represents a `<failure> and <error>` tag.  */
-export type Details = { message?: string; type?: string; inner?: string }
+/** represents `<skipped>`, `<failure>`, or `<error>` tags */
+export type TestcaseResult = { message?: string; type?: string; inner?: string }
 
 export type FastXmlOptions = Partial<X2jOptions>
 
@@ -117,39 +118,36 @@ const _parseObject = (input: Record<string, any>): ParsedObject => {
       return
     }
 
-    // <system-out> / <system-err>: ensure they always end up as string[]
+    // <system-out> / <system-err>: ensure they always end up as string[], output as camelCase
     if (key === 'system-out' || key === 'system-err') {
+      const camelKey = key === 'system-out' ? 'systemOut' : 'systemErr'
       if (Array.isArray(nested))
-        output[key] = nested.map((n: any) =>
+        output[camelKey] = nested.map((n: any) =>
           n && typeof n === 'object' && '_' in n ? n._ : String(n)
         )
       else if (nested && typeof nested === 'object' && '_' in nested)
-        output[key] = [String(nested._)]
-      else output[key] = [String(nested)]
+        output[camelKey] = [String(nested._)]
+      else output[camelKey] = [String(nested)]
 
       return
     }
 
-    // <properties><property ... /></properties>
+    // <properties><property ... /></properties>: unwrap container, normalize property array
     if (key === 'properties') {
-      // Depending on XML, this can be:
-      // { property: {...} } or { property: [...] } or [ { property: ... } ]
       const propsNode = Array.isArray(nested) ? nested[0] : nested
-      const propRaw = propsNode?.property ?? []
-
-      const propArray = Array.isArray(propRaw) ? propRaw : [propRaw]
-      output[key] = propArray.map((p: any) =>
-        isPlainObject(p) ? _parseObject(p) : { inner: p }
-      )
+      const propRaw = propsNode?.property
+      output[key] = propRaw ? normalizeToArray(propRaw) : []
       return
     }
 
-    // <testsuite> / <testcase>: ensure they always end up as arrays
-    if (key === 'testsuite' || key === 'testcase') {
-      const asArray = Array.isArray(nested) ? nested : [nested]
-      output[key] = asArray.map((item: any) =>
-        isPlainObject(item) ? _parseObject(item) : { inner: item }
-      )
+    // <testsuite> / <testcase> /<skipped> / <error> / <failure>: ensure they always end up as arrays
+    // unless they're numeric attributes like skipped="1" (like when the attributes are on a testsuite rather than testcase)
+    if (OBJ_ARRAY_TYPES.includes(key as (typeof OBJ_ARRAY_TYPES)[number])) {
+      if (typeof nested === 'number') {
+        output[key] = nested
+        return
+      }
+      output[key] = normalizeToArray(nested)
       return
     }
 
@@ -173,3 +171,8 @@ const _parseObject = (input: Record<string, any>): ParsedObject => {
 
   return output
 }
+
+const normalizeToArray = (value: any): ParsedObject[] =>
+  (Array.isArray(value) ? value : [value]).map((item) =>
+    isPlainObject(item) ? _parseObject(item) : { inner: item }
+  )

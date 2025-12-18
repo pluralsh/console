@@ -5,6 +5,12 @@ export const comprehensiveMockJunitXml = `<?xml version="1.0" encoding="UTF-8"?>
       <property name="go.version" value="go1.25.5 linux/amd64"/>
       <property name="os" value="linux"/>
       <property name="arch" value="amd64"/>
+      <property name="ci" value="https://github.com/pluralsh/deployment-operator/actions/runs/12345"/>
+      <property name="config">
+terraform_version: 1.5.0
+kubernetes_provider: 2.23.0
+helm_provider: 2.11.0
+      </property>
     </properties>
     <testcase classname="github.com/pluralsh/deployment-operator/dockerfiles/sentinel-harness/terratest" name="TestKubernetesHealthSuite/HelloWorldPod" time="5.130"/>
     <testcase classname="github.com/pluralsh/deployment-operator/dockerfiles/sentinel-harness/terratest" name="TestKubernetesHealthSuite/NginxDeploymentAndService" time="0.020"/>
@@ -53,10 +59,25 @@ Suite teardown: Cleaning up resources...</system-out>
       <properties>
         <property name="category" value="validation"/>
         <property name="priority" value="high"/>
+        <property name="author" value="platform-team"/>
+        <property name="description">
+Validates that ServiceAccount tokens are properly mounted
+and have the correct permissions for API access.
+        </property>
       </properties>
     </testcase>
     <testcase classname="api/v1alpha1" name="TestCustomResourceDefinition" time="1.230" file="api_test.go" line="89"/>
     <testcase classname="api/v1alpha1" name="TestWebhookConfiguration" time="3.560" file="api_test.go" line="145">
+      <properties>
+        <property name="attachment" value="screenshots/webhook-timeout.png"/>
+        <property name="attachment" value="logs/webhook-server.log"/>
+        <property name="url:trace" value="https://jaeger.example.com/trace/abc123"/>
+              <property name="config">
+terraform_version: 1.5.0
+kubernetes_provider: 2.23.0
+helm_provider: 2.11.0
+      </property>
+      </properties>
       <failure message="webhook response timeout" type="TimeoutError">Expected webhook to respond within 5s
 Actual response time: 8.234s
 
@@ -74,6 +95,13 @@ Processing admission review...</system-out>
     </testcase>
     <testcase classname="api/v1alpha1" name="TestStatusConditions" time="2.100" file="api_test.go" line="267"/>
     <testcase classname="api/v1alpha1" name="TestFinalizers" time="4.500" file="api_test.go" line="312">
+      <properties>
+        <property name="step[passed]" value="Create resource with finalizer"/>
+        <property name="step[passed]" value="Verify finalizer is present"/>
+        <property name="step[passed]" value="Delete resource"/>
+        <property name="step[passed]" value="Verify finalizer cleanup triggered"/>
+        <property name="step[passed]" value="Verify resource fully deleted"/>
+      </properties>
       <system-out>Adding finalizer: plural.sh/cleanup
 Removing finalizer: plural.sh/cleanup
 Finalizer removed successfully</system-out>
@@ -82,6 +110,13 @@ Finalizer removed successfully</system-out>
 
   <testsuite name="github.com/pluralsh/console/internal/controller" tests="5" failures="1" errors="1" skipped="0" time="33.335" timestamp="2025-12-14T01:34:35Z">
     <testcase classname="internal/controller" name="TestReconcileCreate" time="8.200">
+      <properties>
+        <property name="console:kubectl-output">
+$ kubectl get pods -n default
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-6b474476c4-abcde   1/1     Running   0          5s
+        </property>
+      </properties>
       <system-out>Reconciling ServiceDeployment/default/nginx
 Creating deployment nginx in namespace default
 Deployment created successfully
