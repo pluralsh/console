@@ -468,7 +468,15 @@ def update_compatibility_info(filepath, new_versions):
                     [ensure_keys(v) for v in new_versions]
                 )
             }
-
+        
+        i = 0
+        while i < len(data["versions"]) - 1:
+            from_vsn = data["versions"][i]
+            to_vsn = data["versions"][i+1]
+            summary = helm_summary(app_name, data, from_vsn, to_vsn)
+            if summary:
+                data["versions"][i]["summary"] = summary
+            i += 1
         
         if write_yaml(filepath, data):
             print_success(

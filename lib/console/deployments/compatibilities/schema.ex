@@ -5,8 +5,8 @@ defmodule Console.Deployments.Compatibilities.Reference do
 end
 
 defmodule Console.Deployments.Compatibilities.VersionSummary do
-  @type t :: %__MODULE__{helm_changes: binary, features: [binary], breaking_changes: [binary]}
-  defstruct [:helm_changes, :features, :breaking_changes]
+  @type t :: %__MODULE__{helm_changes: binary, features: [binary], breaking_changes: [binary], chart_updates: [binary]}
+  defstruct [:helm_changes, :features, :breaking_changes, :chart_updates]
 end
 
 defmodule Console.Deployments.Compatibilities.Version do

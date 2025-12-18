@@ -836,6 +836,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :incompatibilities, list_of(:version_reference), description: "any add-ons this might break"
     field :images,            list_of(:string), description: "the images used by this add-on's helm chart"
     field :chart_version,     :string, description: "the version of the helm chart to install for this version"
+    field :summary,           :addon_version_summary, description: "a summary of what changed in this version of the addon"
 
     @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
     field :release_url, :string do
@@ -854,6 +855,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
         {:ok, Compatibilities.Version.blocking?(vsn, kube)}
       end
     end
+  end
+
+  object :addon_version_summary do
+    field :helm_changes,     :string, description: "a summary of any helm changes required for this version"
+    field :chart_updates,    list_of(:string), description: "a summary of any chart updates involved in updating to this version"
+    field :features,         list_of(:string), description: "a summary of any features added in this version"
+    field :breaking_changes, list_of(:string), description: "a summary of any application-level breaking changes in this version"
   end
 
   object :upgrade_plan_summary do

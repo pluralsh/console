@@ -143,6 +143,8 @@ export type AddonVersion = {
   releaseUrl?: Maybe<Scalars['String']['output']>;
   /** any other add-ons this might require */
   requirements?: Maybe<Array<Maybe<VersionReference>>>;
+  /** a summary of what changed in this version of the addon */
+  summary?: Maybe<AddonVersionSummary>;
   /** add-on version, semver formatted */
   version?: Maybe<Scalars['String']['output']>;
 };
@@ -157,6 +159,18 @@ export type AddonVersionBlockingArgs = {
 /** the specification of a runtime service at a specific version */
 export type AddonVersionReleaseUrlArgs = {
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AddonVersionSummary = {
+  __typename?: 'AddonVersionSummary';
+  /** a summary of any application-level breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any chart updates involved in updating to this version */
+  chartUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any features added in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any helm changes required for this version */
+  helmChanges?: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentAnalysis = {

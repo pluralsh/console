@@ -7753,11 +7753,28 @@ type AddonVersion {
   "the version of the helm chart to install for this version"
   chartVersion: String
 
+  "a summary of what changed in this version of the addon"
+  summary: AddonVersionSummary
+
   "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
   releaseUrl(version: String): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+type AddonVersionSummary {
+  "a summary of any helm changes required for this version"
+  helmChanges: String
+
+  "a summary of any chart updates involved in updating to this version"
+  chartUpdates: [String]
+
+  "a summary of any features added in this version"
+  features: [String]
+
+  "a summary of any application-level breaking changes in this version"
+  breakingChanges: [String]
 }
 
 type UpgradePlanSummary {

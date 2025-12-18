@@ -101,10 +101,23 @@ type AddonVersion struct {
 	Images []*string `json:"images,omitempty"`
 	// the version of the helm chart to install for this version
 	ChartVersion *string `json:"chartVersion,omitempty"`
+	// a summary of what changed in this version of the addon
+	Summary *AddonVersionSummary `json:"summary,omitempty"`
 	// the release page for a runtime service at a version, this is a heavy operation not suitable for lists
 	ReleaseURL *string `json:"releaseUrl,omitempty"`
 	// checks if this is blocking a specific kubernetes upgrade
 	Blocking *bool `json:"blocking,omitempty"`
+}
+
+type AddonVersionSummary struct {
+	// a summary of any helm changes required for this version
+	HelmChanges *string `json:"helmChanges,omitempty"`
+	// a summary of any chart updates involved in updating to this version
+	ChartUpdates []*string `json:"chartUpdates,omitempty"`
+	// a summary of any features added in this version
+	Features []*string `json:"features,omitempty"`
+	// a summary of any application-level breaking changes in this version
+	BreakingChanges []*string `json:"breakingChanges,omitempty"`
 }
 
 type AgentAnalysis struct {
