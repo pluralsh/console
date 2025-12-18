@@ -55,7 +55,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
     with {:ok, conn} <- setup(%{conn | branch: template_branch(pr.branch, ctx)}, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, ext} <- external_git(pr),
-         {:ok, _} <- Plural.template(f, conn.dir, ext),
+         {:ok, _} <- Plural.template(f, conn.dir, ext, PrAutomation.proxy_env(pr)),
          {:ok, msg} <- render_solid(pr.message, ctx),
          {:ok, _} <- commit(conn, msg),
       do: handle_create(pr, conn, branch, ctx)

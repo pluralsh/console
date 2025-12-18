@@ -1890,11 +1890,13 @@ _Appears in:_
 
 
 _Appears in:_
+- [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ | The url of your HTTP proxy. |  | Required: \{\} <br /> |
+| `noproxy` _string_ | The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var. |  | Optional: \{\} <br /> |
 
 
 #### InfrastructureStack
@@ -3395,6 +3397,7 @@ _Appears in:_
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this PR automation, usually needed for the vendoring to external repositories. |  | Optional: \{\} <br /> |
 | `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
 
@@ -4295,7 +4298,7 @@ _Appears in:_
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm configuration for deploying Helm charts, including values and repository settings. |  | Optional: \{\} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig contains advanced configuration for how manifests are synchronized to the cluster. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository CRD containing the service source code. |  | Optional: \{\} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Required: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Optional: \{\} <br /> |
 | `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference containing service configuration for templating. |  | Optional: \{\} <br /> |
 | `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this service belongs within. |  | Optional: \{\} <br /> |

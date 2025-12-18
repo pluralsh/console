@@ -4,7 +4,7 @@ import time
 import importlib
 from colorama import Fore, Style
 from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
-
+from kube_versions import generate_kube_changelog
 
 def call_scraper(scraper):
     try:
@@ -60,3 +60,5 @@ for name in manifest["names"]:
     addons.append(addon)
 
 write_yaml("../../static/compatibilities.yaml", {"addons": addons})
+
+generate_kube_changelog()

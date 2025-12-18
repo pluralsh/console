@@ -186,7 +186,7 @@ defmodule Console.Deployments.StacksTest do
 
     test "it will trigger the latest run if there's a meaningful change" do
       user = insert(:user)
-      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], status: :successful)
       run = insert(:stack_run, stack: stack, git: %{ref: "new-sha"}, dry_run: false)
       insert(:stack_run, stack: stack, git: %{ref: "other-sha"}, dry_run: true)
 
@@ -199,6 +199,7 @@ defmodule Console.Deployments.StacksTest do
 
       assert stack.name == "my-stack"
       assert stack.type == :terraform
+      assert stack.status == :queued
       assert stack.approval
       assert stack.git.ref == "main"
       assert stack.git.folder == "new-folder"

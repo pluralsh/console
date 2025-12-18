@@ -1072,6 +1072,35 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     end
   end
 
+
+  describe "kubernetesChangelog" do
+    test "it can fetch the changelog for a given kubernetes version" do
+      {:ok, %{data: %{"kubernetesChangelog" => found}}} = run_query("""
+        query {
+          kubernetesChangelog(version: "1.34") {
+            version
+            majorChanges
+            breakingChanges
+            deprecations
+            removals
+            features
+            bugFixes
+            apiUpdates
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert found["version"] == "1.34"
+      refute Enum.empty?(found["majorChanges"])
+      refute Enum.empty?(found["breakingChanges"])
+      refute Enum.empty?(found["deprecations"])
+      refute Enum.empty?(found["removals"])
+      refute Enum.empty?(found["features"])
+      refute Enum.empty?(found["bugFixes"])
+      refute found["apiUpdates"]
+    end
+  end
+
   describe "projectUsageHistory" do
     test "it can list aggregated usage history for a project" do
       user = admin_user()

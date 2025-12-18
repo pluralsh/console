@@ -548,6 +548,21 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              proxy:
+                description: Configures usage of an HTTP proxy for all requests involving
+                  this PR automation, usually needed for the vendoring to external
+                  repositories.
+                properties:
+                  noproxy:
+                    description: The comma-separated list of hosts that should not
+                      be proxied, will behave equivalently to a NOPROXY env var.
+                    type: string
+                  url:
+                    description: The url of your HTTP proxy.
+                    type: string
+                required:
+                - url
+                type: object
               reconciliation:
                 description: |-
                   Reconciliation settings for this resource.

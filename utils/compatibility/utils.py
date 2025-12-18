@@ -3,12 +3,15 @@ import requests
 import semantic_version
 import subprocess
 import os
+import traceback
+
 
 from functools import lru_cache
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
+from summarizer import helm_summary
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -24,7 +27,7 @@ def print_success(message):
 def print_warning(message):
     print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
-
+@lru_cache(maxsize=None)
 def fetch_page(url):
     response = requests.get(url)
     if response.status_code != 200:
@@ -226,7 +229,11 @@ def get_kube_release_info():
             seen.add(cleaned)
             result.append(kube_release)
 
-    return result
+    def sorter(tupe):
+        validated = validate_semver(tupe[0].lstrip("v"))
+        return (validated.major, validated.minor, validated.patch, tupe[1])
+
+    return sorted(result, key=sorter, reverse=True)
 
 def get_github_releases_timestamps(repo_owner, repo_name):
     for page in range(1, 3):
@@ -418,6 +425,7 @@ def reduce_versions(versions):
                     ("kube", kube),
                     ("requirements", data.get("requirements", [])),
                     ("incompatibilities", data.get("incompatibilities", [])),
+                    ("summary", data.get("summary")),
                 ]
             )
 
@@ -464,7 +472,17 @@ def update_compatibility_info(filepath, new_versions):
                     [ensure_keys(v) for v in new_versions]
                 )
             }
+        
+        for i in range(len(data["versions"]) - 1):
+            to_vsn = data["versions"][i] # in reverse order
+            from_vsn = data["versions"][i+1]
+            if to_vsn.get('summary'):
+                continue
 
+            print(f"summarizing application updates for {app_name} from {from_vsn['version']} to {to_vsn['version']}")
+            summary = helm_summary(app_name, data, from_vsn, to_vsn)
+            if summary:
+                data["versions"][i]["summary"] = summary
         
         if write_yaml(filepath, data):
             print_success(
@@ -473,4 +491,4 @@ def update_compatibility_info(filepath, new_versions):
         else:
             print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")
+        traceback.print_exc()

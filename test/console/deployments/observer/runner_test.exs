@@ -103,7 +103,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
         create_bindings: [%{user_id: user.id}]
       )
 
-      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: _, body: "pr message"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)

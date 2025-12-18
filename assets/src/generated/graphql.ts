@@ -143,6 +143,8 @@ export type AddonVersion = {
   releaseUrl?: Maybe<Scalars['String']['output']>;
   /** any other add-ons this might require */
   requirements?: Maybe<Array<Maybe<VersionReference>>>;
+  /** a summary of what changed in this version of the addon */
+  summary?: Maybe<AddonVersionSummary>;
   /** add-on version, semver formatted */
   version?: Maybe<Scalars['String']['output']>;
 };
@@ -157,6 +159,18 @@ export type AddonVersionBlockingArgs = {
 /** the specification of a runtime service at a specific version */
 export type AddonVersionReleaseUrlArgs = {
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AddonVersionSummary = {
+  __typename?: 'AddonVersionSummary';
+  /** a summary of any application-level breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any chart updates involved in updating to this version */
+  chartUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any features added in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any helm changes required for this version */
+  helmChanges?: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentAnalysis = {
@@ -4306,12 +4320,14 @@ export type HttpIngressRule = {
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyAttributes = {
+  noproxy?: InputMaybe<Scalars['String']['input']>;
   url: Scalars['String']['input'];
 };
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyConfiguration = {
   __typename?: 'HttpProxyConfiguration';
+  noproxy?: Maybe<Scalars['String']['output']>;
   url: Scalars['String']['output'];
 };
 
@@ -4683,6 +4699,27 @@ export type KnowledgeEvidence = {
 
 export type KubeconfigAttributes = {
   raw?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** the changelog for a given kubernetes version */
+export type KubernetesChangelog = {
+  __typename?: 'KubernetesChangelog';
+  /** the api updates in this version */
+  apiUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the bug fixes in this version */
+  bugFixes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the deprecations in this version */
+  deprecations?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the features in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the major changes in this version */
+  majorChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the removals in this version */
+  removals?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the kubernetes version */
+  version?: Maybe<Scalars['String']['output']>;
 };
 
 export type KubernetesUnstructured = {
@@ -6690,6 +6727,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the project this automation lives w/in */
   project?: Maybe<Project>;
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
@@ -6746,6 +6785,8 @@ export type PrAutomationAttributes = {
   patch?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project this automation lives in */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** a proxy to use for external vendoring */
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
@@ -9175,6 +9216,7 @@ export type RootQueryType = {
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesChangelog?: Maybe<KubernetesChangelog>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
@@ -9856,6 +9898,11 @@ export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeKubernetesChangelogArgs = {
+  version: Scalars['String']['input'];
 };
 
 
@@ -11050,6 +11097,8 @@ export type SentinelRun = {
   checks?: Maybe<Array<Maybe<SentinelCheck>>>;
   /** the time the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the errors of the run */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -13376,15 +13425,15 @@ export type DeleteMcpServerMutationVariables = Exact<{
 
 export type DeleteMcpServerMutation = { __typename?: 'RootMutationType', deleteMcpServer?: { __typename?: 'McpServer', id: string } | null };
 
-export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null };
+export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null };
 
-export type SentinelCheckFragment = { __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
+export type SentinelCheckFragment = { __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
 
-export type SentinelCheckConfigurationFragment = { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null };
+export type SentinelCheckConfigurationFragment = { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null };
 
 export type SentinelRunTinyFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null };
 
-export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
+export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
 
 export type SentinelRunResultFragment = { __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null };
 
@@ -13402,7 +13451,7 @@ export type SentinelsQueryVariables = Exact<{
 }>;
 
 
-export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null } | null> | null } | null };
+export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null } | null> | null } | null };
 
 export type SentinelQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -13410,7 +13459,7 @@ export type SentinelQueryVariables = Exact<{
 }>;
 
 
-export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null };
+export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null };
 
 export type SentinelRunsQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -13427,7 +13476,7 @@ export type SentinelRunQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
+export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
 
 export type SentinelStatisticsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -17166,6 +17215,7 @@ export const SentinelCheckConfigurationFragmentDoc = gql`
     namespaces
     query
     clusterId
+    duration
     facets {
       ...LogFacet
     }
