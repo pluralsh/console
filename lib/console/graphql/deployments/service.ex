@@ -570,6 +570,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :to,   non_null(:string)
   end
 
+  @desc "a file in a service's fully realized gitops tarball"
+  object :service_file do
+    field :path, non_null(:string)
+    field :content, non_null(:string)
+  end
+
   connection node_type: :service_deployment
   connection node_type: :revision
 
@@ -697,6 +703,13 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
 
       resolve &Deployments.fetch_manifests/2
+    end
+
+    field :service_tarball, list_of(:service_file) do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.service_files/2
     end
   end
 

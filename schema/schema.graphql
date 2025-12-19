@@ -296,6 +296,8 @@ type RootQueryType {
   "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
   fetchManifests(id: ID!): [String]
 
+  serviceTarball(id: ID!): [ServiceFile]
+
   pipelines(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): PipelineConnection
 
   pipeline(id: ID!): Pipeline
@@ -3440,6 +3442,9 @@ input TerraformConfigurationAttributes {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -3838,6 +3843,9 @@ type TerraformConfiguration {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 type AnsibleConfiguration {
@@ -6562,6 +6570,12 @@ type ComponentTree {
 type ResourceEdge {
   from: String!
   to: String!
+}
+
+"a file in a service's fully realized gitops tarball"
+type ServiceFile {
+  path: String!
+  content: String!
 }
 
 type ServiceDeploymentConnection {

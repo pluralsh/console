@@ -7125,6 +7125,12 @@ type ServiceErrorAttributes struct {
 	Warning *bool  `json:"warning,omitempty"`
 }
 
+// a file in a service's fully realized gitops tarball
+type ServiceFile struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
 // Import of stack data into a service's context
 type ServiceImport struct {
 	ID string `json:"id"`
@@ -7905,6 +7911,8 @@ type TerraformConfiguration struct {
 	Parallelism *int64 `json:"parallelism,omitempty"`
 	// equivalent to the -refresh flag in terraform
 	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 type TerraformConfigurationAttributes struct {
@@ -7912,6 +7920,8 @@ type TerraformConfigurationAttributes struct {
 	Parallelism *int64 `json:"parallelism,omitempty"`
 	// equivalent to the -refresh flag in terraform
 	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state

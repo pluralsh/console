@@ -52,8 +52,9 @@ defmodule Console.Schema.Stack do
       end
 
       embeds_one :terraform, Terraform, on_replace: :update do
-        field :parallelism, :integer
-        field :refresh,     :boolean
+        field :parallelism,   :integer
+        field :refresh,       :boolean
+        field :approve_empty, :boolean
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
@@ -87,7 +88,7 @@ defmodule Console.Schema.Stack do
 
     def terraform_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallelism refresh)a)
+      |> cast(attrs, ~w(parallelism refresh approve_empty)a)
     end
 
     def ansible_changeset(model, attrs) do

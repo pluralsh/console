@@ -9300,6 +9300,7 @@ export type RootQueryType = {
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
+  serviceTarball?: Maybe<Array<Maybe<ServiceFile>>>;
   /** Renders a filtered list of services and all their descendents returned as a paginated connection */
   serviceTree?: Maybe<ServiceDeploymentConnection>;
   sharedAgentRun?: Maybe<AgentRun>;
@@ -10461,6 +10462,11 @@ export type RootQueryTypeServiceStatusesArgs = {
 };
 
 
+export type RootQueryTypeServiceTarballArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeServiceTreeArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -11581,6 +11587,13 @@ export type ServiceErrorAttributes = {
   warning?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** a file in a service's fully realized gitops tarball */
+export type ServiceFile = {
+  __typename?: 'ServiceFile';
+  content: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+};
+
 /** Import of stack data into a service's context */
 export type ServiceImport = {
   __typename?: 'ServiceImport';
@@ -12468,6 +12481,8 @@ export type TerminatedState = {
 
 export type TerraformConfiguration = {
   __typename?: 'TerraformConfiguration';
+  /** whether to auto-approve a plan if there are no changes, preventing a stack from being blocked */
+  approveEmpty?: Maybe<Scalars['Boolean']['output']>;
   /** equivalent to the -parallelism flag in terraform */
   parallelism?: Maybe<Scalars['Int']['output']>;
   /** equivalent to the -refresh flag in terraform */
@@ -12475,6 +12490,8 @@ export type TerraformConfiguration = {
 };
 
 export type TerraformConfigurationAttributes = {
+  /** whether to auto-approve a plan if there are no changes, preventing a stack from being blocked */
+  approveEmpty?: InputMaybe<Scalars['Boolean']['input']>;
   /** equivalent to the -parallelism flag in terraform */
   parallelism?: InputMaybe<Scalars['Int']['input']>;
   /** equivalent to the -refresh flag in terraform */
