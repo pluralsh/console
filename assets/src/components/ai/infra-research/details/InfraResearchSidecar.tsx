@@ -19,7 +19,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import {
   ActionItemHeaderSC,
   ActionItemSC,
-} from '../chatbot/actions-panel/ChatbotActionsPanel'
+} from '../../chatbot/actions-panel/ChatbotActionsPanel'
 import { isEmpty } from 'lodash'
 
 export function InfraResearchSidecar({
