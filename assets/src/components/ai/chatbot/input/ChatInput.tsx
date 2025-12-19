@@ -9,6 +9,7 @@ import {
   SemanticColorKey,
   SendMessageIcon,
   ServersIcon,
+  SpinnerAlt,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -207,16 +208,22 @@ export function ChatInput({
 }
 
 export function ChatInputSimple({
-  placeholder = 'Start typing your prompt here...',
-  onClick,
+  onSubmit,
+  allowSubmit = true,
+  loading = false,
+  disabled = false,
   bgColor = 'fill-zero-selected',
   ...props
 }: {
-  placeholder?: string
-  onClick: () => void
+  onSubmit: () => void
+  allowSubmit?: boolean
+  loading?: boolean
   bgColor?: SemanticColorKey
-} & ComponentPropsWithRef<typeof EditableDiv>) {
+} & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
+
+  const handleSubmit = () => allowSubmit && onSubmit()
+
   return (
     <EditableContentWrapperSC
       $agent={false}
@@ -224,11 +231,15 @@ export function ChatInputSimple({
       css={{ position: 'relative', minHeight: 130 }}
     >
       <EditableDiv
-        placeholder={placeholder}
         {...props}
+        onEnter={handleSubmit}
+        disabled={loading || disabled}
       />
       <ChatSubmitButton
-        onClick={onClick}
+        loading={loading}
+        loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+        disabled={!allowSubmit || loading || disabled}
+        onClick={handleSubmit}
         css={{
           position: 'absolute',
           bottom: spacing.small,
@@ -243,8 +254,8 @@ export function ChatSubmitButton({
   bgColor = 'fill-primary',
   ...props
 }: { bgColor?: SemanticColorKey } & Omit<
-  ComponentPropsWithRef<typeof Button>,
-  'children'
+  ComponentPropsWithRef<typeof ChatSubmitButtonSC>,
+  'children' | '$bgColor'
 >) {
   return (
     <ChatSubmitButtonSC
@@ -292,6 +303,9 @@ const EditableContentWrapperSC = styled.div<{
 const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
   ({ theme, $bgColor }) => ({
     ...theme.partials.reset.button,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: 28,
     width: 28,
     minHeight: 0,
