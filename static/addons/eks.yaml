@@ -2302,6 +2302,15 @@
   publisher: eks
 - name: aws-fsx-csi-driver
   versions:
+  - version: v1.7.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.6.0-eksbuild.1
     compatibilities:
     - '1.34'
@@ -4217,6 +4226,14 @@
   publisher: eks
 - name: eks-pod-identity-agent
   versions:
+  - version: v1.3.10-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.3.10-eksbuild.1
     compatibilities:
     - '1.34'
