@@ -264,6 +264,10 @@ spec:
                   terraform:
                     description: Terraform configuration for this stack.
                     properties:
+                      approveEmpty:
+                        description: ApproveEmpty is whether to auto-approve a plan
+                          if there are no changes, preventing a stack from being blocked.
+                        type: boolean
                       parallelism:
                         description: |-
                           Parallelism is the number of concurrent operations to run,
@@ -297,6 +301,11 @@ spec:
                         description: Terraform is the terraform configuration for
                           this stack
                         properties:
+                          approveEmpty:
+                            description: ApproveEmpty is whether to auto-approve a
+                              plan if there are no changes, preventing a stack from
+                              being blocked.
+                            type: boolean
                           parallelism:
                             description: |-
                               Parallelism is the number of concurrent operations to run,

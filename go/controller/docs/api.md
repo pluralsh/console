@@ -4711,6 +4711,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag in Terraform. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag in Terraform. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 
 
 #### Tools

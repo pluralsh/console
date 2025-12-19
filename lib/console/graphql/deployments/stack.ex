@@ -63,8 +63,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :terraform_configuration_attributes do
-    field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
-    field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
+    field :parallelism,   :integer, description: "equivalent to the -parallelism flag in terraform"
+    field :refresh,       :boolean, description: "equivalent to the -refresh flag in terraform"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   end
 
   input_object :ansible_configuration_attributes do
@@ -326,8 +327,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :terraform_configuration do
-    field :parallelism, :integer, description: "equivalent to the -parallelism flag in terraform"
-    field :refresh,     :boolean, description: "equivalent to the -refresh flag in terraform"
+    field :parallelism,   :integer, description: "equivalent to the -parallelism flag in terraform"
+    field :refresh,       :boolean, description: "equivalent to the -refresh flag in terraform"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   end
 
   object :ansible_configuration do

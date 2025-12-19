@@ -173,6 +173,21 @@ defmodule Console.Deployments.Services do
     |> Console.sha()
   end
 
+
+  @doc """
+  Fetches the files in the tarball for a service that will be delivered to the deployment operator
+
+  Only allowed if the user has write access to the service
+  """
+  @spec service_files(binary, User.t) :: {:ok, [%{path: binary, content: binary}]} | Console.error
+  def service_files(id, %User{} = user) do
+    svc = get_service!(id)
+    with {:ok, svc} <- allow(svc, user, :write),
+         {:ok, f} <- tarstream(svc),
+         {:ok, contents} <- Tar.tar_stream(f),
+      do: {:ok, Enum.map(contents, fn {k, v} -> %{path: k, content: v} end)}
+  end
+
   @doc """
   Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
   before sending it upstream to the given client.
