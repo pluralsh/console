@@ -7,79 +7,289 @@ versions:
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Envoy dependency bumped from v1.34.1 to v1.34.4, bringing in upstream
+        fixes and changes from Envoy 1.34.4.', Go toolchain/runtime bumped from v1.24.3
+        to v1.24.6.]
+    breaking_changes: []
   chart_version: 21.1.4
   images: ['docker.io/bitnami/contour:1.32.1-debian-12-r0', 'docker.io/bitnami/envoy:1.34.5-debian-12-r0']
 - version: 1.32.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Improved performance in clusters with many endpoints by switching EDS
+        caching to go-control-plane LinearCache., "Bumped supported/tested Kubernetes\
+        \ versions to 1.31\u20131.33 and updated CI/e2e kind node image accordingly.",
+      'Updated bundled dependencies: Envoy to v1.34.1 and Go to 1.24.3.', 'Fixed the
+        `contour` CLI xDS discovery behavior so subsequent DiscoveryRequests include
+        the requested resource names, not only the first request.']
+    breaking_changes: []
   chart_version: 21.1.2
   images: ['docker.io/bitnami/contour:1.32.0-debian-12-r8', 'docker.io/bitnami/envoy:1.34.4-debian-12-r0']
 - version: 1.31.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["External authorization enhancements: you can now disable Global ExtAuth\
+        \ by default and selectively re-enable it at vhost/route level; additionally,\
+        \ ExtAuth is no longer enforced on HTTP\u2192HTTPS redirect responses (avoids\
+        \ 401s on redirect).", "Envoy overload protections: new bootstrap flag `overload-downstream-max-conn`\
+        \ enables Envoy\u2019s global downstream connection limit; admin listeners\
+        \ ignore the global limit so stats/admin remain reachable, and there\u2019\
+        s a new health-check config option to make readiness/liveness respect overload\
+        \ rejection behavior.", Gateway API compatibility bumped to v1.2.1., 'Operational/config
+        additions: configurable HTTP compression algorithm (gzip/brotli/zstd/disabled),
+        new `strip-trailing-host-dot` request handling option, support for Service
+        `appProtocol` http/https, expanded retryOn conditions, and more redirect status
+        codes (303/307/308) for requestRedirectPolicy.', "Dependency/platform updates:\
+        \ Envoy updated to v1.34.0; Go updated to 1.24.2; tested Kubernetes versions\
+        \ now 1.30\u20131.32; plus bugfixes for follower readiness and memory leak."]
+    breaking_changes: ["Removal: legacy `contour` xDS server implementation removed;\
+        \ go-control-plane xDS server is now the only supported option. Corresponding\
+        \ config fields that selected xDS server type have been removed\u2014configs\
+        \ referencing them must be cleaned up before/while upgrading.", 'Removal:
+        `useEndpointSlices` feature flag and remaining Endpoints-path code removed.
+        Any setups that explicitly forced Endpoints API (or relied on disabling EndpointSlice
+        mirroring) must be updated; Contour now always uses EndpointSlices.']
   chart_version: 20.0.1
   images: ['docker.io/bitnami/contour:1.31.0-debian-12-r2', 'docker.io/bitnami/envoy:1.34.1-debian-12-r0']
 - version: 1.30.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Gateway API: Implement Listener/Route hostname isolation so requests
+        are routed to the most specific matching Listener and its attached routes.',
+      Monitoring examples updated to expose Envoy metrics on port 8002 and to use
+        Prometheus Operator `PodMonitor` resources (instead of `prometheus.io/*` annotations).,
+      Gateway API compatibility updated to v1.1.0 (includes GRPCRoute now GA/v1).,
+      'Circuit breaker configuration added for Extension Services, with PerHostMaxConnections
+        also configurable globally.', Fallback certificate handling now applies global
+        external auth (Global ExtAuth) filters., 'Gateway API: GRPCRoute match conflict
+        handling now mirrors HTTPRoute behavior (oldest wins, then alphabetical; sets
+        Accepted/PartiallyInvalid conditions).']
+    breaking_changes: ['Gateway API v1.1.0 includes breaking changes to `BackendTLSPolicy`,
+        moving it to `v1alpha3`; users must uninstall v1alpha2 CRD before installing
+        the new one.', 'Deprecated: sample manifests and Gateway provisioner no longer
+        add `prometheus.io/*` scrape annotations; monitoring should move to `PodMonitor`/Prometheus
+        Operator flow.', 'Deprecated: xDS server type fields in the config file and
+        ContourConfiguration CRD are now deprecated and planned for removal in 1.31
+        (along with the legacy `contour` xDS implementation).']
   chart_version: 19.2.1
   images: ['docker.io/bitnami/contour:1.30.0-debian-12-r6', 'docker.io/bitnami/envoy:1.31.2-debian-12-r0']
 - version: 1.29.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 18.2.3
   images: ['docker.io/bitnami/contour:1.29.0-debian-12-r1', 'docker.io/bitnami/envoy:1.29.5-debian-12-r0']
 - version: 1.28.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.27.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Fixes path match sorting for Prefix/Regex routes so longer patterns
+        are ordered first (then lexicographic for ties), improving match specificity
+        consistency across HTTPProxy inclusion, Ingress, and Gateway API.', 'Routes
+        can disable an inherited virtualhost global rate limit policy via `rateLimitPolicy.global.disabled:
+        true` at the route level.', 'Contour waits for informer cache sync *and* handler
+        processing before starting DAG rebuild and serving XDS, improving startup
+        correctness.', HTTPProxy supports dynamic Host header rewrites using request
+        header variables (route-level only)., Optional EndpointSlice support added
+        behind `useEndpointSlices` feature flag (off by default)., 'Adds listener
+        config knobs for HTTP/2 DoS mitigation/tuning: `listener.max-requests-per-io-cycle`
+        and `listener.http2-max-concurrent-streams`.', Gateway provisioner can run
+        in/out of cluster via `--incluster`/`--kubeconfig` flags and supports `overloadMaxHeapSize`
+        for Envoy overload manager bootstrap config., Gateway API listener `ResolvedRefs`
+        condition now defaults to true; webhook removed from example manifests since
+        Gateway API validation uses CEL., 'Build/runtime dependency bumps: Go 1.21.3
+        and Envoy 1.28.0.']
+    breaking_changes: [Route ordering may change for some combinations of Prefix/Regex
+        path matches due to the new sorting algorithm; this can alter which route
+        matches first in large/complex routing tables. Validate route order and behavior
+        before/after upgrade.]
   chart_version: 15.4.0
   images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
 - version: 1.26.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Gateway API: Gateway listeners can now be configured on more than
+        two ports (multiple HTTP and multiple HTTPS/TLS listeners). If using the Contour
+        Gateway Provisioner, the Envoy Service will automatically expose ports for
+        all valid listeners.', 'Gateway API: TCPRoute is now supported for simple
+        TCP forwarding on a listener port, and TLS termination is supported with TLSRoute
+        (SNI-based routing) or TCPRoute (single backend).', 'Gateway API: Updated
+        support to Gateway API v0.8.0, including status/conformance refinements and
+        CRD validation changes.', 'HTTPProxy: New regex-based path matching and regex
+        header matching conditions are supported in routes/includes.', 'Rate limiting:
+        You can define a default global rate limit policy in Contour config that applies
+        to all HTTPProxies unless they opt out.', "Observability/ops: New xDS metrics\
+        \ about status update count/duration and additional controller-runtime metrics\
+        \ are exposed; access logs can now include route source (kind/namespace/name)\
+        \ and have a new \u201Ccritical\u201D level (>=500 only)."]
+    breaking_changes: ['Routing behavior change: Contour no longer strips the port
+        from the downstream Host header before proxying to backends; backends will
+        now see the Host header including the port if one was present.', 'Gateway/HTTP
+        route precedence change: routes that match HTTP method now take precedence
+        over routes with header/query matches (aligns with Gateway API v0.7.1+), which
+        can change which backend receives requests in overlapping-rule scenarios.',
+      'If you use static provisioning for Gateway (manually managed Envoy Service),
+        you must now keep the Service ports in sync with all Gateway listeners because
+        Contour supports many listener ports; previously some configurations may have
+        assumed only one HTTP and one HTTPS port.']
   chart_version: 13.1.4
   images: ['docker.io/bitnami/contour:1.26.0-debian-11-r17', 'docker.io/bitnami/envoy:1.26.5-debian-11-r0']
 - version: 1.25.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 12.2.2
   images: ['docker.io/bitnami/contour:1.25.0-debian-11-r73', 'docker.io/bitnami/envoy:1.26.3-debian-11-r10']
 - version: 1.24.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.23.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Overload Manager can be enabled to protect Envoy from OOM-related\
+        \ disruptions by shedding load when heap usage is too high; it\u2019s off\
+        \ by default and must be explicitly configured.", "HTTPProxy now supports\
+        \ JWT verification via Envoy\u2019s jwt_authn filter, with JWTProviders defined\
+        \ on the root HTTPProxy and applied per-route (with optional defaults and\
+        \ opt-outs).", 'Slow start mode is available to gradually ramp traffic to
+        newly added/upscaled endpoints, reducing cold-start overload (useful for JVM
+        apps).', 'HTTPProxy CORS policy can now use regex matching for Allowed Origins,
+        enabling more flexible Origin header handling.', "Gateway API updates: conformance/behavior\
+        \ improvements (e.g., rule precedence is list order), more efficient status\
+        \ handling (status-only changes don\u2019t trigger xDS), and version bump\
+        \ to Gateway API v0.5.1.", 'Operational configurability via ContourDeployment:
+        configurable Contour and Kubernetes client log levels, pod annotations/labels,
+        resource requirements, and extra volumes/volumeMounts for Envoy pods.']
+    breaking_changes: ["Supported Kubernetes versions shift: v1.23.x is tested against\
+        \ Kubernetes 1.23\u20131.25 (drops 1.22). Ensure your cluster version is within\
+        \ this range before upgrading.", Envoy version moves forward (v1.22 used Envoy
+        1.23; v1.23 uses Envoy 1.24). Validate any Envoy-specific config/custom filters
+        and observe for behavior/log-format changes tied to the new Envoy release.,
+      'Gateway API behavior is more strictly conformant (e.g., HTTPRoute rule precedence
+        by list order); if you relied on previous non-conformant matching/attachment
+        quirks, re-test routing outcomes after upgrade.']
   chart_version: 10.1.1
   images: ['docker.io/bitnami/contour:1.23.0-debian-11-r10', 'docker.io/bitnami/envoy:1.24.0-debian-11-r11']
 - version: 1.22.0
   kube: ['1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Upgrade Contour from v1.21.x to v1.22.0 (includes Envoy bump to
+        1.23.0 and Gateway API bump to v0.5.0)., 'Gateway API resources/conformance
+        behavior changes: stricter TLS mode enforcement for HTTPS vs TLS listeners,
+        updated route/backend error handling and status conditions to match upstream
+        spec, and new support for ReferenceGrant alongside deprecated ReferencePolicy.',
+      "ContourConfiguration schema change: field rename `spec.envoy.logging.jsonFields`\
+        \ \u2192 `spec.envoy.logging.accessLogJSONFields`; removes unused `DebugLogLevel`/`KubernetesDebugLogLevel`\
+        \ fields (must be configured via CLI flags).", 'Behavioral defaults/operational
+        tweaks: `contour envoy shutdown --check-delay` default is now 0s (faster termination
+        when idle).', "Compatibility window changes: supported/tested Kubernetes versions\
+        \ now 1.22\u20131.24 (1.21 dropped)."]
+    features: [Gateway API updated to v0.5.0 (v1alpha2 and v1beta1) with full v0.5.0
+        conformance test pass., 'HTTPProxy routes can now return direct responses
+        via `directResponsePolicy` (requires `statusCode`, optional `body`) as an
+        alternative to service/redirect.', Client certificate validation can optionally
+        check revocation via CRL provided in an Opaque Secret referenced by `httpproxy.spec.virtualhost.tls.clientValidation.crlSecret`.,
+      'Gateway API now supports exact HTTP query parameter matching, plus rule-level
+        RequestMirror filter support (Gateway API mode).', 'Envoy upgraded to 1.23.0,
+        enabling newer access log operators and related logging template keywords.']
+    breaking_changes: ['If you use the ContourConfiguration CRD field `spec.envoy.logging.jsonFields`,
+        it has been renamed to `spec.envoy.logging.accessLogJSONFields` and must be
+        updated before/with the upgrade.', "Gateway API: ReferencePolicy is deprecated\
+        \ (ReferenceGrant preferred) and will be removed in the next Contour release\u2014\
+        plan migration now to avoid a future breaking upgrade.", 'Gateway API: stricter
+        enforcement of TLS modes for listener protocols (HTTPS must be Terminate;
+        TLS must be Passthrough) may cause previously-accepted configs to become invalid/unready.',
+      "Kubernetes version support shifted to 1.22\u20131.24; clusters on 1.21 are\
+        \ no longer in the tested/supported window for v1.22.0."]
   chart_version: 9.1.1
   images: ['docker.io/bitnami/contour:1.22.0-debian-11-r4', 'docker.io/bitnami/envoy:1.23.0-debian-11-r8']
 - version: 1.21.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Leader election RBAC in the example manifests was refactored:
+        rules for leader-election resources moved from a ClusterRole to a namespace-scoped
+        Role plus RoleBinding (and now also needs access to Events and Leases). If
+        your Helm chart templates or values override RBAC, review and align them with
+        v1.21.0 expectations (especially if Contour runs outside the default namespace
+        or you set a custom leader-election namespace).', Contour leader election
+        now uses only Lease objects; any chart flags/args or RBAC must include coordination.k8s.io
+        Lease permissions and related Events access as per updated manifests., Container
+        images are now published exclusively on GHCR; Helm values that reference image
+        repositories must switch from Docker Hub to ghcr.io/projectcontour/contour
+        (and ghcr.io/projectcontour/envoy for Envoy where applicable)., Leader-election
+        configuration via configuration file was removed; charts that mount a config
+        file and previously set leader election there must move those settings to
+        command-line flags/args., 'Gateway API ecosystem updates: Gateway API bumped
+        to v0.4.3 and example YAML includes the validating webhook; if your chart
+        installs Gateway API resources/webhook, reconcile versions and webhook deployment
+        expectations.', 'If you use/ship certgen jobs/manifests, note the new optional
+        --name-prefix flag for contour certgen and that gateway-provisioner no longer
+        relies on a certgen job (generates xDS certs directly).']
+    features: [Configurable HTTP/HTTPS access log verbosity via accesslog-level /
+        spec.envoy.logging.accessLogLevel (info/error/disabled)., New optional Contour
+        Gateway provisioner (contour gateway-provisioner) to dynamically provision
+        Contour+Envoy per Gateway for Gateway API conformance., 'Gateway API enhancements:
+        can target a specific Gateway via gatewayRef; better listener/route condition
+        handling; support requested addresses via spec.addresses.', 'New load-balancing
+        option: hash based on a query parameter for HTTPProxy backends.', 'Operational/config
+        additions: upstream TCP connection timeout configurable; option to disable
+        Envoy merge_slashes; JSON log format via --log-format=json; new HTTPProxy
+        idleConnection timeout field.']
+    breaking_changes: [Leader election config in the configuration file has been removed;
+        must be configured via CLI flags now., Leader election coordination now uses
+        only Lease objects and upgrading to v1.21.0 explicitly requires having upgraded
+        to v1.20.0 first for migration., Default deployment RBAC for leader election
+        resources changed from ClusterRole to namespace-scoped Role/RoleBinding; installs
+        that relied on cluster-wide ConfigMap permissions must be updated accordingly.,
+      Contour images are no longer pushed to Docker Hub; image pulls must be updated
+        to GHCR.]
   chart_version: 8.0.0
   images: ['docker.io/bitnami/contour:1.21.0-debian-11-r0', 'docker.io/bitnami/envoy:1.22.1-debian-11-r0']
 - version: 1.20.1
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 7.10.2
   images: ['docker.io/bitnami/contour:1.20.1-debian-11-r0', 'docker.io/bitnami/envoy:1.21.2-debian-11-r0']

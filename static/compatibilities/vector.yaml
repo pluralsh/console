@@ -4,242 +4,303 @@ release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
 - version: 0.52.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.49.0
   images: ['timberio/vector:0.52.0-distroless-libc']
 - version: 0.51.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['New `otlp` codec for bidirectional conversion between Vector events
+        and OTLP, improving interoperability with OpenTelemetry collectors/instrumentation.',
+      'Improved internal telemetry/metrics correctness: fixes negative utilization
+        metrics and buffer counter underflows.', Memory enrichment tables now support
+        an `expired` output to export expired cache items; enrichment table outputs
+        are also visible via `vector tap`., "(From 0.50.0 context) The `opentelemetry`\
+        \ source can decode standard OTLP for logs/metrics/traces, simplifying OTEL\u2192\
+        Vector\u2192OTEL pipelines."]
+    breaking_changes: ['Upstream release notes for 0.51.0 mention breaking changes
+        exist, but the provided excerpt does not list them; review the full changelog
+        before upgrading.', "Note from 0.50.0: `azure_blob` sink now requires `connection_string`\
+        \ authentication (relevant if you\u2019re coming from <0.50.0).", 0.51.0 was
+        superseded and maintainers recommend upgrading to 0.51.1 instead of 0.51.0.]
   chart_version: 0.47.0
   images: ['timberio/vector:0.51.0-distroless-libc']
 - version: 0.50.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["OpenTelemetry source can now decode standard OTLP for logs, metrics,\
+        \ and traces, reducing the need for remap transforms in OTEL\u2192Vector\u2192\
+        OTEL or forwarding pipelines.", Added `varint_length_delimited` framing for
+        compatibility with protobuf streaming tools/implementations such as ClickHouse.,
+      'New `incremental_to_absolute` transform to convert incremental metrics into
+        absolute values, helpful when data loss is possible or for historical recording.',
+      New `okta` source to ingest Okta System Log events via the Okta Management API.,
+      Exec secrets option now supports protocol version v1.1 (compatible with Datadog
+        Secret Backend).]
+    breaking_changes: ['`azure_blob` sink authentication changed: it now requires
+        `connection_string` and this is currently the only supported auth method;
+        existing configs using other auth options must be updated.']
   chart_version: 0.46.0
   images: ['timberio/vector:0.50.0-distroless-libc']
 - version: 0.49.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Introduced a new `websocket` source to ingest real-time data from services
+        exposing WebSocket APIs., 'HTTP sink now supports templating in `uri` and
+        `request.headers`, enabling dynamic request construction based on event data.',
+      '`--watch-config` now also watches enrichment table files for changes and reload
+        triggers.', '`prometheus_remote_write` sink adds a TTL-based cache for metrics
+        sets plus an `expire_metrics_secs` option to prevent unbounded memory growth.',
+      Fixed a race condition that could cause negative values in `vector_buffer_byte_size`
+        and `vector_buffer_events` gauges.]
+    breaking_changes: [Some VRL functions have breaking changes in v0.49.0; review
+        and test VRL transforms/conditions against the 0.49.0 upgrade guide before
+        deploying.]
   chart_version: 0.45.0
   images: ['timberio/vector:0.49.0-distroless-libc']
 - version: 0.48.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.44.0
   images: ['timberio/vector:0.48.0-distroless-libc']
 - version: 0.47.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.43.0
   images: ['timberio/vector:0.47.0-distroless-libc']
 - version: 0.46.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.42.0
   images: ['timberio/vector:0.46.0-distroless-libc']
 - version: 0.45.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.41.0
   images: ['timberio/vector:0.45.0-distroless-libc']
 - version: 0.44.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.40.0
   images: ['timberio/vector:0.44.0-distroless-libc']
 - version: 0.43.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.38.0
   images: ['timberio/vector:0.43.0-distroless-libc']
 - version: 0.42.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.37.0
   images: ['timberio/vector:0.42.0-distroless-libc']
 - version: 0.41.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.36.0
   images: ['timberio/vector:0.41.0-distroless-libc']
-- version: 0.40.1
-  kube: ['1.31', '1.30', '1.29']
-  requirements: []
-  incompatibilities: []
-  chart_version: 0.35.2
-  images: ['timberio/vector:0.40.1-distroless-libc']
 - version: 0.40.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.35.0
   images: ['timberio/vector:0.40.0-distroless-libc']
 - version: 0.39.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.34.0
   images: ['timberio/vector:0.39.0-distroless-libc']
 - version: 0.38.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.33.0
   images: ['timberio/vector:0.38.0-distroless-libc']
 - version: 0.37.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.32.0
   images: ['timberio/vector:0.37.0-distroless-libc']
 - version: 0.36.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.31.0
   images: ['timberio/vector:0.36.0-distroless-libc']
 - version: 0.35.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.30.0
   images: ['timberio/vector:0.35.0-distroless-libc']
-- version: 0.34.2
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  chart_version: 0.29.1
-  images: ['timberio/vector:0.34.2-distroless-libc']
 - version: 0.34.0
-  kube: ['1.28', '1.27', '1.24']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.28.0
   images: ['timberio/vector:0.34.0-distroless-libc']
 - version: 0.33.0
-  kube: ['1.28', '1.27', '1.24']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.26.0
   images: ['timberio/vector:0.33.0-distroless-libc']
 - version: 0.32.0
-  kube: ['1.28', '1.27', '1.24']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.24.0
   images: ['timberio/vector:0.32.0-distroless-libc']
 - version: 0.31.0
-  kube: ['1.27', '1.24', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.23.0
   images: ['timberio/vector:0.31.0-distroless-libc']
 - version: 0.30.0
-  kube: ['1.27', '1.24', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.22.1
   images: ['timberio/vector:0.30.0-distroless-libc']
 - version: 0.29.0
-  kube: ['1.27', '1.24', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.21.0
   images: ['timberio/vector:0.29.0-distroless-libc']
 - version: 0.28.0
-  kube: ['1.26', '1.24', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.20.0
   images: ['timberio/vector:0.28.0-distroless-libc']
-- version: 0.27.1
-  kube: ['1.26', '1.24', '1.23']
-  requirements: []
-  incompatibilities: []
-  chart_version: 0.19.2
-  images: ['timberio/vector:0.27.1-distroless-libc']
 - version: 0.27.0
-  kube: ['1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.19.0
   images: ['timberio/vector:0.27.0-distroless-libc']
 - version: 0.26.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.18.0
   images: ['timberio/vector:0.26.0-distroless-libc']
 - version: 0.25.1
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.17.0
   images: ['timberio/vector:0.25.1-distroless-libc']
 - version: 0.24.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.16.0
   images: ['timberio/vector:0.24.0-distroless-libc']
 - version: 0.23.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.15.0
   images: ['timberio/vector:0.23.0-distroless-libc']
 - version: 0.22.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.13.0
   images: ['timberio/vector:0.22.0-distroless-libc']
 - version: 0.21.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.10.0
   images: ['timberio/vector:0.21.0-distroless-libc']
 - version: 0.20.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.7.0
   images: ['timberio/vector:0.20.0-distroless-libc']
 - version: 0.19.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.4.0
   images: ['timberio/vector:0.19.0-distroless-libc']
 - version: 0.18.0
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.2.1
   images: ['timberio/vector:0.18.0-distroless-libc']
 - version: 0.17.3
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.1.1
   images: ['timberio/vector:0.17.3-distroless-libc']
 - version: 0.16.1
-  kube: ['1.26', '1.25', '1.23']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.1.0-alpha.4
   images: ['timberio/vector:0.16.1-distroless-libc']

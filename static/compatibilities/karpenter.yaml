@@ -8,55 +8,102 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.8.0
   images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
 - version: 1.6.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/values changes to check before upgrading\n- **`settings.clusterName`\
+      \ is now required**: the chart will **fail to install/upgrade** if this value\
+      \ is not set. Ensure your `values.yaml` (or `--set`) includes it.\n- **ServiceMonitor\
+      \ enhancements**: if you use the chart\u2019s `ServiceMonitor`, you can now\
+      \ configure **`relabelings`** and **`metricRelabelings`**. No change required\
+      \ unless you want to use these new fields.\n- **Default security context updated**:\
+      \ the chart improved the **default pod/container security context**. If you\
+      \ have strict Pod Security Admission / PSP-style policies, verify the rendered\
+      \ manifests still comply with your cluster\u2019s requirements.\n- **runAsNonRoot\
+      \ removed in chart**: the chart **removed `runAsNonRoot`** to support more restricted\
+      \ pod security profiles. If you relied on `runAsNonRoot: true`, you may need\
+      \ to explicitly set your own security context via values.\n"
+    chart_updates: [Improved default security context in the Helm chart., Chart now
+        validates configuration and fails installation if `settings.clusterName` is
+        missing., ServiceMonitor template extended to support `relabelings` and `metricRelabelings`.,
+      Chart securityContext defaults adjusted (including removal of `runAsNonRoot`).]
+    features: ['Support for AWS KWOK, including delayed registration support for simulated
+        nodes.', Capacity Block support (useful for reserving/using pre-purchased
+        EC2 capacity blocks)., "Automatically \u201CICE\u201D (temporarily exclude)\
+        \ AZs when subnets in that AZ run out of available IPs, improving resilience\
+        \ during IP exhaustion events.", 'Additional Bottlerocket configuration options,
+        including more log settings and soft eviction support.', '`volumeInitializationRate`
+        support for EBS `blockDeviceMappings`, allowing control of EBS initialization
+        performance.', "Support for automatically relaxing minimum values in certain\
+        \ scheduling/validation paths (reduces unnecessary failures when strict mins\
+        \ can\u2019t be met)."]
+    breaking_changes: [Kubernetes **1.25 support is dropped**. Clusters on 1.25 must
+        upgrade Kubernetes before upgrading Karpenter provider to v1.6.0., Helm chart
+        now **requires `settings.clusterName`**; upgrades/installs will fail if it
+        is not provided.]
   chart_version: 1.6.0
   images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
 - version: 1.5.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.5.0
   images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
 - version: 1.2.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Supports IAM role paths (useful if your org creates roles like /team/role-name
+        instead of flat names)., CRDs can now be installed with optional custom annotations.,
+      Adds support for a Node Monitoring Agent feature area (node health/repair related
+        integrations).]
+    breaking_changes: []
   chart_version: 1.2.0
   images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
 - version: 1.0.5
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.0.5
   images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
 - version: 0.37.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.37.0
   images: ['public.ecr.aws/karpenter/controller:0.37.0@sha256:157f478f5db1fe999f5e2d27badcc742bf51cc470508b3cebe78224d0947674f']
 - version: 0.34.0
   kube: ['1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.34.0
   images: []
 - version: 0.31.0
   kube: ['1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.31.0
   images: []
 - version: 0.28.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 0.25.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null

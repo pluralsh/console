@@ -8,6 +8,37 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart configuration changes to review\n- **New\
+      \ Helm value for annotation filtering**: chart adds a **dedicated value to configure\
+      \ `annotationFilter`** (instead of only via `extraArgs`). If you already set\
+      \ annotation filtering via `extraArgs`, you can keep it, but consider migrating\
+      \ to the new value for clarity/validation.\n- **`extraContainers` type change**:\
+      \ `.extraContainers` changed to be an **array/list**. If you previously provided\
+      \ it as an object/map, update your `values.yaml` accordingly.\n- **Gateway /\
+      \ EndpointSlice RBAC adjustments in chart**:\n  - Ensure the chart version you\
+      \ deploy includes the RBAC updates for **EndpointSlices** access (introduced\
+      \ with the move from Endpoints\u2192EndpointSlices).\n  - Chart also fixes/adjusts\
+      \ **RBAC for namespaced Gateway sources** and makes EndpointSlice permissions\
+      \ more conditional. If you use Gateway API sources, double-check RBAC after\
+      \ upgrade.\n- **Schema update**: Helm values schema updated to accept **`policy:\
+      \ create-only`** as a valid type (useful if you want to prevent deletions).\n"
+    chart_updates: ['Adds a dedicated Helm value to configure `annotationFilter` (PR
+        #5737).', 'Fixes `.extraContainers` values schema/type to be an array (PR
+        #5564).', 'RBAC fixes for namespaced Gateway sources (PR #5578).', 'Makes
+        EndpointSlice RBAC permissions conditional (PR #5746).', 'Helm values schema
+        updated to allow `policy: create-only` (PR #5627).']
+    features: ['~10x lower average memory usage for pod/node sources by using informer
+        transformers (PR #5596).', 'Adds `build_info` Prometheus metric for easier
+        version/build visibility (PR #5643).', 'Adds AWS Route53 support for ap-east-2
+        and geoproximity routing policies (PRs #5638, #5347).', 'Adds pod source support
+        for annotation and label filters (PR #5583).', 'Chart: easier configuration
+        of `annotationFilter` via a dedicated Helm value (PR #5737).']
+    breaking_changes: ['Nodes source now exposes external IPv6 by default, which can
+        change which AAAA records are published unless you override with flags (PR
+        #5575).', 'Traefik legacy listeners on the `traefik.containo.us` API group
+        are disabled, so older Traefik CRDs/listeners may stop being watched unless
+        you switch to the supported API group/config (PR #5565).']
   chart_version: 1.19.0
   images: ['registry.k8s.io/external-dns/external-dns:v0.19.0']
 - version: 0.18.0
@@ -15,6 +46,43 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/values changes to plan for\n\n- **RBAC must be updated\
+      \ to allow `endpointslices` access** (new default Service discovery path uses\
+      \ EndpointSlices). If you use the Helm chart, ensure your chart version includes\
+      \ this RBAC rule; the v0.18.0 app notes say it lands in the *next* chart release.\
+      \ If you manage RBAC yourself, add permissions for EndpointSlices (typically\
+      \ `discovery.k8s.io` API group).\n\n- **`--txt-new-format-only` flag removed**.\
+      \ If your Helm values/extraArgs still set it, remove it; the \u201Cnew\u201D\
+      \ TXT registry format is now the only supported format.\n\n- **Metrics changed\
+      \ significantly**. Expect to adjust Helm chart settings and downstream monitoring\
+      \ (ServiceMonitor/Prometheus rules/dashboards/alerts). Even if no values changed,\
+      \ your observability config likely will.\n\n- **`default-targets` behavior changed\
+      \ with an optional mitigation flag `--force-default-targets`**. If you rely\
+      \ on previous default-target logic, review and (if needed) set this flag via\
+      \ chart `extraArgs`.\n\n- **Provider removals**: if you were using in-tree `ibmcloud`,\
+      \ `tencentcloud`, or `ultradns`, you must pin older versions or migrate to a\
+      \ webhook provider. This may require chart values updates to the `provider`\
+      \ setting and any provider-specific config.\n"
+    chart_updates: [RBAC updates are required for EndpointSlices; note that the v0.18.0
+        app release says this is included in the *next* Helm chart release (so upgrading
+        the app image without upgrading the chart/RBAC can break Service source).,
+      'Helm chart release workflow/process fixes mentioned upstream (not functional
+        changes, but suggests chart version selection matters).']
+    features: ['Cloudflare: support for MX records and DNS record comments; improved
+        regional hostnames behavior.', Service source now uses EndpointSlices (more
+        scalable than Endpoints)., FQDN templating improvements (ExecTemplate functions;
+        pod/node/service-related enhancements)., New/updated metrics including `consecutiveSoftErrors`
+        and metrics for all supported endpoint types., Optional `--force-default-targets`
+        mitigation flag to control default-target behavior.]
+    breaking_changes: ['RBAC: Service source now uses EndpointSlices; without EndpointSlice
+        permissions, ExternalDNS may fail to read service endpoints.', Metrics output
+        was significantly reworked; existing dashboards/alerts scraping specific series/labels
+        will likely break., Removed `--txt-new-format-only` flag and deprecated legacy
+        TXT registry format; only the new TXT format is supported now., 'Removed in-tree
+        providers: ibmcloud, tencentcloud, and ultradns; must migrate (webhook) or
+        stay on an older version.', Default-targets behavior changed; may affect record
+        targets unless you opt into the mitigation flag (`--force-default-targets`).]
   chart_version: 1.18.0
   images: ['registry.k8s.io/external-dns/external-dns:v0.18.0']
 - version: 0.17.0
@@ -22,6 +90,42 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **`extraArgs` value type change/expansion**: the Helm chart now
+      allows `extraArgs` to be **either a list or a map** (PR #5293). If you currently
+      set `extraArgs` as a list, it should still work, but you can migrate to a map
+      if you need to override individual args cleanly.
+
+      - **Helm schema/validation updates**: the chart schema was updated and missing
+      schema values were added (PRs #5228, #5297). This may cause `helm install/upgrade`
+      to start failing on previously "accepted" but invalid values; run `helm lint`
+      and validate your values.
+
+      - No other explicit required values changes were called out in these notes;
+      the main operator-facing changes are provider/flag related (see breaking/risks).'
+    chart_updates: [Helm chart schema and validation improvements (added missing schema
+        values; updated schema)., 'Chart supports `extraArgs` as a map in addition
+        to a list, enabling per-arg overrides.', 'Minor chart typing fix: add missing
+        types for empty values.']
+    features: ['Helm chart: `extraArgs` can now be a map as well as a list to make
+        overriding individual arguments easier.', 'Cloudflare: support multiple custom
+        hostnames (plus fixes for duplicates/regional hostnames edge cases).', 'Pi-hole:
+        added optional v6 support and IPv6 dual format support.', 'Node source: can
+        optionally exclude unschedulable nodes.', 'Node source: optional exposure/handling
+        of internal IPv6 addresses (`expose-internal-ipv6`) per IPv6 proposal 002.',
+      Zone finder is IDNA-aware; also improved handling of underscores in DNS records.,
+      OVH provider was heavily rewritten (functional and behavioral improvements).]
+    breaking_changes: ['OpenStack Designate **in-tree provider removed** (`chore(openstack
+        designate)!` #5126). If you used `--provider=designate`, you must move to
+        the OpenStack webhook provider before upgrading.', 'OVH provider rewrite may
+        require **new/updated ACLs/credentials/permissions**; treat as a potentially
+        breaking behavioral change and follow the provider docs/PR #5143.', 'Known
+        issue: Active Directory provider has a **severe regression since v0.16.0**
+        (#5240) and is not fixed in v0.17.0 per notes; avoid upgrading or plan mitigation
+        if you rely on AD.', 'Deprecation heads-up: Pi-hole v5 is deprecated (v6 support
+        added) and will be removed in a future release.', 'Deprecation heads-up: legacy
+        TXT registry format is planned to be removed in the next minor version; no
+        migration script is provided, so plan record cleanup/migration now.']
   chart_version: 1.17.0
   images: ['registry.k8s.io/external-dns/external-dns:v0.17.0']
 - version: 0.16.1
@@ -29,6 +133,7 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.16.1
   images: ['registry.k8s.io/external-dns/external-dns:v0.16.1']
 - version: 0.15.0
@@ -36,6 +141,32 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **No explicit Helm values breaking changes called out in the\
+      \ provided notes.**\n- If you use the Helm chart\u2019s **webhook provider**\
+      \ subchart/config, note it received fixes:\n  - Webhook resources now correctly\
+      \ honor configured `resources` values.\n  - General \u201Cwebhook provider helm\
+      \ chart fixes\u201D landed (review your rendered manifests after upgrade).\n\
+      \n> Practical action: run `helm diff upgrade` and pay extra attention to the\
+      \ webhook Deployment/Service/SA resources and any values under webhook-related\
+      \ keys you use.\n"
+    chart_updates: ['Helm chart webhook integration fixes: webhook workload now uses
+        the configured resource values; additional chart fixes for webhook provider
+        support (verify rendered manifests).']
+    features: [Provider cache added to reduce repeated provider lookups and improve
+        performance/efficiency., 'CoreDNS provider: added etcd authentication support
+        (and accompanying docs for etcd HTTPS).', 'AWS provider: can use AWS profiles
+        via a `.credentials` file (useful when not relying on IRSA/ambient credentials).',
+      'RFC2136 provider: optional PTR record support.', 'Webhook provider improvements:
+        passes `webhook-*` annotations through to webhook providers; webhook flags
+        are no longer marked experimental.', 'Gateway API: dual-stack support added.',
+      'Ambassador Host source: supports annotation/label filters.']
+    breaking_changes: ['Unmaintained providers were removed in v0.15.0; if you rely
+        on one of the dropped in-tree providers, you must stay on an older ExternalDNS
+        version or migrate to a webhook provider implementation.', Infoblox **in-tree**
+        provider was removed; use the new **Infoblox webhook provider** instead.,
+      'GRPCRoute client updated from `v1alpha2` to stable `v1`; if you use GRPCRoute-related
+        features, validate your Gateway API CRDs/versions and manifests accordingly.']
   chart_version: 1.15.0
   images: ['registry.k8s.io/external-dns/external-dns:v0.15.0']
 - version: 0.14.0
@@ -43,6 +174,36 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Helm chart release referenced as \u201CReleased chart for v0.13.6\u201D\
+        \ (PR #3917). No explicit values schema changes were included in the provided\
+        \ notes, so assume chart defaults may have shifted with image/tag bump; verify\
+        \ with `helm diff` and the chart\u2019s `values.yaml` between your chart versions.",
+      'Container image continues to be published as `registry.k8s.io/external-dns/external-dns:<tag>`;
+        v0.13.1 and v0.14.0 both use registry.k8s.io (align your image repository
+        overrides if you still use k8s.gcr.io).', "(From the v0.13.1 notes you included)\
+        \ the Helm chart added support for configuring `dnsPolicy` for the Deployment\
+        \ and changed Deployment update strategy to `Recreate` to avoid multiple external-dns\
+        \ pods conflicting\u2014ensure this matches your availability expectations\
+        \ during upgrades."]
+    features: ['Webhook provider is officially supported in v0.14.0, enabling out-of-tree
+        provider implementations and a mode to run external-dns as a webhook server
+        (`--webhook-server`).', 'New CLI flags: `--exclude-record-types` to prevent
+        managing specific DNS record types, and `--label-filter` support for the node
+        source.', 'Provider/source enhancements: Azure AAAA (IPv6) record support;
+        Linode NS record support; target-annotation support expanded across more sources;
+        Gateway/Gateway API improvements including annotation target override on Gateway.',
+      'Operational/observability: new metric `external_dns_controller_last_reconcile_timestamp_seconds`
+        for tracking last reconcile time.']
+    breaking_changes: ['`--run-aws-provider-as-webhook` flag was removed in v0.14.0;
+        if you used it, migrate to the new webhook provider model and/or `--webhook-server`
+        as appropriate.', 'Build/runtime environment change: external-dns is now built
+        with Go 1.21; if you depend on custom builds/plugins or strict base-image
+        compliance scanning, re-validate.', 'Behavioral changes worth validating:
+        AWS Alias records are represented as record type A; ClusterIP services with
+        `internal-hostname` annotation now use ServiceIP; these may affect record
+        outputs in some setups.']
   chart_version: 1.14.3
   images: ['registry.k8s.io/external-dns/external-dns:v0.14.0']
 - version: 0.13.1
@@ -50,6 +211,34 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to check\n- **Deployment\
+      \ strategy changed to `Recreate`** (chart change). If you previously relied\
+      \ on rolling updates, note that upgrades will now terminate the old pod before\
+      \ starting the new one to avoid multiple external-dns instances conflicting.\n\
+      - **New chart value to set `dnsPolicy`** on the Deployment (added in the Helm\
+      \ chart). Review whether you need a non-default policy (e.g., `ClusterFirstWithHostNet`\
+      \ when using `hostNetwork: true`).\n- **Image registry moved toward `registry.k8s.io`**\
+      \ (manifests mention this). Ensure any private registry mirroring / image policies\
+      \ allow `registry.k8s.io/external-dns/external-dns:v0.13.1`.\n\n### Upgrade\
+      \ notes (operational)\n- If upgrading from **v0.12.0\u2013v0.12.2**, be aware\
+      \ of the known bug where deletions could incorrectly trigger TXT record deletions;\
+      \ ensure you are not running an affected build before/while upgrading or validate\
+      \ TXT ownership records after the upgrade."
+    chart_updates: [Helm chart supports configuring `dnsPolicy` on the Deployment.,
+      Deployment update strategy set to `Recreate` to prevent multiple pods conflicting
+        during upgrades., Chart/manifests updated to newer ExternalDNS image versions
+        and to use `registry.k8s.io` image registry in deployment YAML.]
+    features: ['Target filtering can be based on network, improving control over which
+        endpoints are considered.', 'AWS provider supports ExternalID when assuming
+        a role, improving compatibility with stricter IAM setups.', 'New DNS providers
+        added: Tencent Cloud and Plural DNS.', 'Gateway API dependency upgraded (v0.5.0),
+        improving Gateway API route source support compatibility.']
+    breaking_changes: [Deployment strategy change to `Recreate` alters rollout behavior;
+        expect brief downtime during upgrades and ensure only one replica is used
+        to avoid provider conflicts., Image registry change to `registry.k8s.io` may
+        break clusters with strict image allowlists or mirroring configurations unless
+        updated.]
   chart_version: 1.12.0
   images: ['k8s.gcr.io/external-dns/external-dns:v0.13.1']
 - version: 0.12.0
@@ -57,6 +246,31 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Helm chart release:** the ExternalDNS chart was published as\
+      \ **v1.8.0** during this app release cycle.\n- **New chart value/field:** `shareProcessNamespace`\
+      \ was added to the Deployment spec (allows setting `spec.template.spec.shareProcessNamespace`).\
+      \ If you don\u2019t need it, you can ignore it; if you do, set it explicitly.\n\
+      - No other Helm values changes are clearly called out in the provided notes\
+      \ (the rest are docs/CI fixes or app/provider changes)."
+    chart_updates: [Helm chart published/released as **v1.8.0**., Deployment template
+        now supports setting `shareProcessNamespace`., 'Minor chart/documentation
+        fixes (e.g., installation command line correction).']
+    features: [New **Gateway API route sources** support (can generate DNS records
+        from Gateway API routes)., New **IBM Cloud DNS provider**., New **registry
+        record type** support (enhances record ownership/registry behavior)., 'Headless
+        Service enhancements: can set target to `NodeExternalIP` or via annotation.',
+      'RFC2136 security improvement: Kerberos password is no longer exposed in logs.',
+      OpenShift Route source improved by using Route status more effectively., 'Istio
+        improvements: reuse existing VirtualService informer and add debug logging
+        when endpoints are missing.']
+    breaking_changes: ['**Known critical bug in v0.12.0:** deletions of Kubernetes
+        resources may incorrectly trigger deletion of TXT records (affects deletions,
+        not additions) when upgrading from earlier versions. Mitigate by postponing
+        upgrade, being ready to manually recreate records, or downgrading; fix tracked
+        in PR #2811.', "Potential behavior changes for specific providers due to dependency/client\
+        \ migrations (e.g., Infoblox client v2) \u2014 validate in staging if you\
+        \ use these providers."]
   chart_version: 1.10.1
   images: ['k8s.gcr.io/external-dns/external-dns:v0.12.0']
 - version: 0.11.0
@@ -64,6 +278,41 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to consider\n- **New value:\
+      \ `txtSuffix`** (PR #2488). If you need a non-default TXT ownership record name\
+      \ (e.g., to avoid collisions across clusters), set this explicitly; otherwise\
+      \ defaults apply.\n- **New scheduling option: `topologySpreadConstraints` support**\
+      \ (PR #2484). No action required unless you want to enforce zone/host spreading.\n\
+      - **Deployment annotations supported** (PR #2477). If you need to add custom\
+      \ annotations (e.g., for Prometheus scraping, Vault injection, etc.), use the\
+      \ new values fields.\n- **RBAC expands for additional sources** (PR #2468) and\
+      \ restores service read perms when Istio sources are enabled (PR #2415) plus\
+      \ **Istio gateway permissions** (PR #2564). If you previously had to add custom\
+      \ RBAC to make certain sources work, you may be able to remove those overrides.\n\
+      - **Chart documentation fix for `logLevel` valid options** (PR #2626). Double-check\
+      \ your configured `logLevel` matches the documented/accepted values.\n\n> Note:\
+      \ The app release notes include a \u201Cfeat(chart): Update chart to use v0.10.2\u201D\
+      \ entry; ensure your helm chart version actually targets external-dns **v0.11.0**\
+      \ when doing the upgrade."
+    chart_updates: ['RBAC updates: added cluster role permissions for other sources;
+        restored/added permissions needed for Istio-related sources (services + istio-gateway).',
+      Helm chart gained `txtSuffix` value for TXT registry ownership records., Helm
+        chart gained support for `topologySpreadConstraints` on the Deployment., Helm
+        chart allows adding annotations to the Deployment., Helm chart docs corrected
+        the list of valid `logLevel` options.]
+    features: [RFC2136 provider now supports creating/updating NS records (useful
+        for delegations managed via RFC2136)., 'OpenShift Route source now has an
+        event handler, improving responsiveness/updates when Routes change.', New
+        SafeDNS provider added., 'BlueCat provider enhancements: supports proxy env
+        vars and adds new CLI options including full deploy functionality.', 'AWS
+        improvements: CloudFront canonical hosted zone added and additional tests/behavior
+        around routing policies; AWS SD provider cleanup improvements.']
+    breaking_changes: ['No explicit breaking changes are called out in the provided
+        v0.11.0 notes; most changes are additive (RBAC, providers, chart values) plus
+        dependency bumps.', 'Potential operational change: image base updated (Alpine
+        3.15) and Go version bumped to 1.17; if you have strict runtime/compliance
+        constraints, re-validate the image and behavior in your environment.']
   chart_version: 1.9.0
   images: ['k8s.gcr.io/external-dns/external-dns:v0.11.0']
 - version: 0.10.0
@@ -71,6 +320,25 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['External-DNS upstream added an official Helm chart in v0.10.0
+        (PR #2208). If you were previously deploying via raw manifests/kustomize or
+        a third-party chart, decide whether to migrate to the new chart and reconcile
+        values/RBAC/serviceAccount naming accordingly.', "Kustomize tooling in the\
+        \ repo was bumped (kustomize v0.9.0) and the repo includes various CI/security\
+        \ tooling additions (CodeQL, Trivy, Dependabot). These don\u2019t affect runtime\
+        \ directly but may change how you consume/build manifests if you vendor them."]
+    features: [Official Helm chart added upstream (new supported install path)., Controller
+        updated for Kubernetes v1.22 to use networking.k8s.io/v1 Ingress API (improves
+        compatibility on newer clusters)., Security posture improvements via dependency
+        bumps and base image fixes (alpine vulnerabilities) which may reduce CVE findings.]
+    breaking_changes: ['Ingress handling updated toward networking.k8s.io/v1; if your
+        cluster is <1.19 or you still rely on extensions/v1beta1 or networking.k8s.io/v1beta1
+        Ingress, validate API availability and your Ingress manifests before upgrading.',
+      'If switching to the newly introduced official Helm chart, treat it as a deployment/migration
+        change: flags/args mapping, resource names, and RBAC may differ from your
+        current installation method.']
   chart_version: 1.3.2
   images: ['k8s.gcr.io/external-dns/external-dns:v0.10.0']
 - version: 0.9.0
@@ -78,5 +346,6 @@ versions:
     '1.11', '1.10']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.2.0
   images: ['k8s.gcr.io/external-dns/external-dns:v0.9.0']
