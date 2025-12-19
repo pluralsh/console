@@ -1,7 +1,7 @@
 defmodule Console.AI.Memoizer do
   import Console.AI.Evidence.Base, only: [append: 2]
   alias Console.Repo
-  alias Console.AI.{Evidence, Provider, Tool}
+  alias Console.AI.{Evidence, Provider, Tool, Chat.Engine}
   alias Console.Schema.{Service, AiInsight, Stack, Cluster, ClusterInsightComponent, ServiceComponent}
 
   @format {:user, """
@@ -72,6 +72,7 @@ defmodule Console.AI.Memoizer do
 
   defp insight_attrs(%{insight_id: id} = model, history, attrs, sha) do
     history = if Evidence.custom(model), do: history, else: append(history, @format)
+    history = Engine.fit_context_window(history, Provider.system())
     with {:ok, insight} <- Provider.completion(history),
          {:ok, summary} <- Provider.summary(insight) do
       %{
@@ -81,7 +82,7 @@ defmodule Console.AI.Memoizer do
     else
       {:error, error} ->
         %{
-          insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha},
+          insight: %{id: id, errors: [%{source: "ai", error: fmt_error(error)}], sha: sha},
           ai_poll_at: next_poll_at()
         }
     end
@@ -90,7 +91,7 @@ defmodule Console.AI.Memoizer do
   defp gen_error(%schema{} = model, error) do
     schema.changeset(model, %{
       ai_poll_at: next_poll_at(),
-      insight: %{errors: [%{source: "evidence", message: error}]}
+      insight: %{errors: [%{source: "evidence", message: fmt_error(error)}]}
     })
     |> Repo.update()
   end
@@ -107,4 +108,7 @@ defmodule Console.AI.Memoizer do
     duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
     DateTime.shift(DateTime.utc_now(), duration)
   end
+
+  defp fmt_error(error) when is_binary(error), do: error
+  defp fmt_error(error), do: inspect(error)
 end
