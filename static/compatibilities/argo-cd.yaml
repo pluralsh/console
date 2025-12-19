@@ -3,115 +3,282 @@ git_url: https://github.com/argoproj/argo-cd
 release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
-- version: 3.2.1
-  kube: ['1.34', '1.33', '1.32']
+- version: 3.2.2
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped bundled Kubernetes dependency from v1.34.0 to v1.34.2 (via
+        Argo CD and gitops-engine dependency updates)., Updated gitops-engine to a
+        build that includes Kubernetes 1.34.2 and a nil pointer fix (internal dependency
+        change).]
+    features: []
+    breaking_changes: []
+  chart_version: 9.1.9
+  images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
+    'quay.io/argoproj/argocd:v3.2.2']
+- version: 3.2.1
+  kube: ['1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Repo Server: fixes a concurrency issue when processing detached git
+        states, reducing chance of stuck/failed refreshes in busy repos.', 'UI: multiple
+        small fixes (null-safe status panel rendering, prevent overlapping elements,
+        add resource units in tooltips, avoid rendering ApplicationSelector when panel
+        hidden).']
+    breaking_changes: []
   chart_version: 9.1.8
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.1']
 - version: 3.2.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Internal tooling bumps: embedded Helm upgraded to 3.18.4 (via
+        3.18.3) and embedded Kustomize upgraded to 5.7.0.', 'New/updated health check
+        scripts and resource_customizations shipped with the release (CronJob actions/health
+        changes, plus additional CRD health checks such as Coralogix, DatadogMetric,
+        ClickHouse operator, ExtensionService, GitOps Promoter, 3scale, etc.).', 'Security
+        fix included: repository.GetDetailedProject no longer exposes repository secrets.',
+      'Performance/behavioral fixes around auto-sync loops and controller CPU (reduced
+        settings DB calls), plus webhook handler hardening (panic recovery; informer
+        usage to reduce memory).', 'Source Hydrator enhancements: commit message templating,
+        credential templates, preserve non-hydrated files, repo URL normalization,
+        parallelized repo-server calls.']
+    features: ['ApplicationSet: pprof endpoints added; progressive sync deletion can
+        happen in order; improved status/debug logging; concurrency ceiling effectively
+        removed.', 'CLI: server-side diff is supported; new `argocd get-resource`
+        command; password can be read from stdin / prompted for bcrypt operations.',
+      'Controller: when retrying a failed sync, Argo CD can sync a newer revision
+        than the original failed revision.', 'Observability: OpenTelemetry trace context
+        propagation added for HTTP requests; new metrics to track number of users.',
+      'Server/UI: gRPC health check endpoint for argocd-server; UI improvements like
+        sortable columns and prune option during rollback, plus richer repo connection
+        status messages.']
+    breaking_changes: []
   chart_version: 9.1.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.0']
-- version: 3.1.1
-  kube: ['1.34', '1.33', '1.32']
-  requirements: []
-  incompatibilities: []
-  chart_version: 8.3.3
-  images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.1.1']
 - version: 3.1.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Application version bump from v3.0.x to v3.1.0 (new images/manifests).,
+      'Tooling bundled with Argo CD updated: Helm upgraded to 3.18.x; Kustomize upgraded
+        to 5.7.0.', 'Various health-check/resource customization additions (Karpenter,
+        Crossplane/Upbound, Kyverno, Logstash, RabbitMQ topology, OpenTelemetryCollector,
+        Grafana Operator, Gateway API, Contour HTTPProxy, etc.).', Security hardening
+        around static assets/commit-server traversal protection and other fixes.,
+      UI enhancements including Progressive Sync integration and improved repo/pod
+        views., CLI improvements including plugin support and additional commands/aliases.]
+    features: ['CLI: adds official plugin support and a new whoami alias.', 'UI: Progressive
+        Sync feature integrated and additional usability improvements (sorting, resource
+        display toggles, autosync enabled field).', 'ApplicationSet: enhancements
+        such as Bitbucket Cloud PR generator target-branch support and git file generator
+        file-exclusion support.', 'Repo/OCI: OCI support continues (beta) plus related
+        UI polish and OCI client fixes; also adds GitHub API rate limit metrics.',
+      'Operations/Health: many new built-in health checks/resource customizations
+        for popular CRDs (Crossplane, Kyverno, KEDA, Grafana Operator, OpenTelemetryCollector,
+        etc.).']
+    breaking_changes: ['Potential API/schema change around SyncPolicy automated sync:
+        field is `enabled` (and a UI field was added); ensure any manifests/automation
+        referencing older field names are updated.', 'Toolchain bumps (Helm 3.18.x,
+        Kustomize 5.7.0) can change rendering/diff behavior compared to 3.0.x; validate
+        any edge-case charts/kustomize builds in staging.']
   chart_version: 8.3.0
   images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.43.1',
     'quay.io/argoproj/argocd:v3.1.0']
 - version: 3.0.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Argo CD 3.0.0 is a major release with multiple default-behavior
+        changes (RBAC, diffing/compare, tracking method, logging, controller processing)
+        that can affect existing installations during upgrade.', 'Repo-server tooling
+        bumped (Helm 3.17.0, kubectl 1.32.1) and Kubernetes support updated (supports
+        Kubernetes 1.32; older versions removed from e2e).', 'Redis usage changed:
+        application health status is stored in Redis by default; Redis image upgraded
+        (7.0.15-alpine -> 7.2.7-alpine).', 'Security posture and supply chain: images
+        signed with cosign and SLSA3 provenance; some dependency CVE bumps included.',
+      Legacy repo support removed; behavior of ApplicationSet selectors and diff ignore
+        defaults changed; some deprecated metrics removed.]
+    features: [Azure Workload Identity support added for Git/OCI repositories and
+        for Microsoft Entra (Azure AD) SSO flows., 'Application controller now stores
+        application health status in Redis by default, improving performance/scalability
+        for large installs.', Batch event processing enabled by default in the controller
+        to reduce event storm impact., 'Helm tooling upgraded to Helm v3.17.0 and
+        kubectl upgraded to 1.32.x, improving compatibility with newer clusters.',
+      Bearer token authentication support added (including UI/Helm repo connect flows).,
+      'Kustomize enhancements: ignore missing components and support --include-templates
+        for label processing.', 'UI improvements: better log search (match case),
+        log highlighting, sync-wave display, repo filtering, and various UX fixes.',
+      More metrics exposed (including additional kubectl metrics and cluster name/labels
+        in cluster metrics).]
+    breaking_changes: [RBAC enforcement for logs is enabled by default; users/roles
+        that previously could view logs may be denied until RBAC is updated., 'Fine-grained
+        RBAC inheritance is disabled by default, which can change effective permissions
+        for inherited roles/policies.', "Compare/diff defaults changed: compare options\
+        \ default values updated, known interim resources excluded by default, and\
+        \ Argo CD now ignores .status updates and other high-churn diffs by default\u2014\
+        this can change sync/diff outcomes.", 'Default resource tracking method changed
+        to annotation, which can affect how existing resources are associated with
+        applications if you relied on the prior default.', 'Default logging switched
+        to JSON, which can break log parsers/alerts expecting text logs.', Legacy
+        repo support removed; any clusters/repos relying on legacy repository handling
+        must be migrated., Deprecated metrics removed; dashboards/alerts referencing
+        old metric names will break., 'ApplicationSet behavior change: nested selectors
+        are always applied, potentially altering generated ApplicationSets/app selection.',
+      Default jitter added (60s) which can change timing/behavior of periodic operations
+        and reconciliation cadence.]
   chart_version: 8.0.1
   images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
     'quay.io/argoproj/argocd:v3.0.0']
-- version: 2.14.11
-  kube: ['1.33', '1.32', '1.31']
-  requirements: []
-  incompatibilities: []
-  chart_version: 7.9.1
-  images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
-    'quay.io/argoproj/argocd:v2.14.11']
 - version: 2.14.1
-  kube: ['1.32', '1.31', '1.30']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 7.8.0
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
     'quay.io/argoproj/argocd:v2.14.1']
-- version: 2.13.2
-  kube: ['1.32', '1.31', '1.30']
-  requirements: []
-  incompatibilities: []
-  chart_version: 7.7.12
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-    'quay.io/argoproj/argocd:v2.13.2']
 - version: 2.13.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v2.13.0: UI extensions can now be configured individually, allowing
+        more granular extension setup per extension rather than a single shared config.',
+      'v2.13.0: Self-heal can use exponential backoff between attempts, reducing thrash
+        on frequently-drifting resources and smoothing controller load.', 'v2.12.0:
+        Added a custom health check for Cluster API AWSManagedControlPlane resources
+        (useful if you manage CAPI AWS clusters via Argo CD).']
+    breaking_changes: []
   chart_version: 7.7.3
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
     'quay.io/argoproj/argocd:v2.13.0']
 - version: 2.12.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Adds a custom health check for Cluster API\u2019s AWSManagedControlPlane\
+        \ resource, improving health reporting for that CRD when managed by Argo CD."]
+    breaking_changes: ['Known issue in 2.12.0: ApplicationSets using git generators
+        with a templated `spec.template.spec.project` can fail to reconcile due to
+        a bug in the new git signature verification feature (fixed in 2.12.2). Consider
+        upgrading to >=2.12.2 or avoiding that pattern during the upgrade.']
   chart_version: 7.4.3
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.12.0']
 - version: 2.11.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 6.9.3
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.11.0']
-- version: 2.10.7
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  chart_version: 6.7.15
-  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
-    'quay.io/argoproj/argocd:v2.10.7']
 - version: 2.10.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['No Helm chart changelog was provided in the notes you pasted
+        (these are Argo CD application release notes), so there are no chart-specific
+        template/RBAC/Service changes I can accurately call out from this input alone.']
+    features: ['Server-Side Diff: Argo CD can compute diffs using Kubernetes server-side
+        apply semantics, improving diff accuracy for SSA-managed fields.', 'PostDelete
+        hook support: adds a new hook type so you can run cleanup jobs after an app
+        is deleted.', 'Controller sync jitter: introduces jitter to reconciliation
+        timing to reduce thundering-herd behavior across many apps/controllers.',
+      'UI status panel extensions: allows adding/using UI extensions in the application
+        status panel without modifying core UI.', 'OIDC UserInfo group claims (optional):
+        can query the OIDC UserInfo endpoint to populate group claims when they are
+        not present in the ID token.', "Kustomize Components support: supports Kustomize\
+        \ \u201Ccomponents\u201D for more modular overlays.", 'Notifications self-service:
+        adds functionality enabling users to manage certain notifications behavior
+        via Argo CD.', 'Improved observability and networking options: supports secured
+        OTLP endpoints/headers for OpenTelemetry and adds support for ALL_PROXY.']
+    breaking_changes: ['Known issue (operationally impactful): Argo CD 2.10.0 has
+        a major issue with the application-controller when running in HA mode; upstream
+        indicates the fix is in 2.10.1, so upgrading straight to 2.10.0 in HA is risky
+        and may be effectively a breaking change for HA deployments.', "API hardening\
+        \ change: content-type enforcement for API requests was introduced (with an\
+        \ option to disable the check); clients/proxies that don\u2019t set Content-Type\
+        \ correctly may start failing until adjusted."]
   chart_version: 6.0.13
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
     'quay.io/argoproj/argocd:v2.10.0']
-- version: 2.9.4
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  chart_version: 5.53.1
-  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
-    'quay.io/argoproj/argocd:v2.9.4']
 - version: 2.9.0
-  kube: ['1.28', '1.27', '1.24']
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Upgrade Argo CD components from v2.8.4 to v2.9.0 (new container
+        images/manifests)., 'Redis image bumped to 7.0.14; various dependency bumps
+        (k8s/client-go, kustomize, helm, Go 1.21) that may change runtime behavior
+        and manifest generation edge cases.', Notifications engine upgraded (may affect
+        notification templates/triggers behavior)., 'Extensions: extension configs
+        can now be applied without restarting the API server (operational behavior
+        change).', ApplicationSet controller and generators received multiple functional
+        updates and bug fixes (behavior changes noted below).]
+    features: [PKCE authentication flow for web logins (OIDC) to improve security
+        and compatibility with providers requiring PKCE., 'ApplicationSet enhancements:
+        new template functions (fromYaml/fromYamlArray/toYaml), ignoreApplicationDifferences
+        support, label preservation options, and expanded SCM/webhook support (Azure
+        DevOps, GitLab improvements).', 'Git and repo behavior improvements: configurable
+        git requests and a grace period for repo errors to reduce flapping to Unknown
+        sync state.', Dynamic cluster sharding/rebalancing support to distribute clusters
+        across controller shards more evenly (must be explicitly enabled)., 'UI/CLI
+        improvements: Helm values files detected recursively; tree-view output for
+        several CLI commands; better log viewer (line wrap toggle).', 'Observability
+        improvements: new reconciliation timing fields in logs; extra OpenTelemetry
+        attributes support; new/extended metrics (e.g., autosync_enabled gauge).']
+    breaking_changes: []
   chart_version: 5.51.1
   images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
     'quay.io/argoproj/argocd:v2.9.0']
+- version: 2.8.4
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Includes several bugfixes in Argo CD 2.8.4: reverts ApplicationSet
+        application-name labels behavior; fixes handling of annotations for resources
+        with '':'' in the name; prevents ApplicationSet GoTemplate nil dereference
+        panics; stops appending '':443'' to server address when using grpc-web; allows
+        retrieving UI badges across namespaces; fixes GitLab SCM provider transport
+        creation; makes managed namespaces more resistant to being pruned; expands
+        the controller ClusterRole to permit cronjob and Argo Workflows triggers.',
+      Argo CD 2.8.3 (current) was a security patch release addressing CVE-2023-40029
+        and CVE-2023-40584.]
+    breaking_changes: []
+  chart_version: 5.47.0
+  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
+    'quay.io/argoproj/argocd:v2.8.4']
 - version: 2.8.3
   kube: ['1.28', '1.27', '1.24']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 5.46.2
   images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.11-alpine',
     'quay.io/argoproj/argocd:v2.8.3']

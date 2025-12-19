@@ -10,37 +10,25 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Bumps the kube-prometheus-stack chart\u2019s dependencies with\
+        \ non-major updates (Renovate PR #6425). No chart template/logic changes called\
+        \ out in the release notes beyond dependency updates."]
+    features: [No new end-user features are mentioned in the 80.5.0 chart release
+        notes; this appears to be a dependency refresh.]
+    breaking_changes: [No breaking changes are mentioned in the 80.5.0 chart release
+        notes.]
   chart_version: 80.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
     'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
     'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
     'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
-  summary:
-    helm_changes: "- No Helm values changes called out between **kube-prometheus-stack\
-      \ 80.4.2 \u2192 80.5.0** in the provided changelog.\n- Note: 80.x series as\
-      \ a whole upgrades **prometheus-operator to v0.87.0**; ensure CRDs are up to\
-      \ date either via:\n  - `crds.upgradeJob.enabled=true` (available since 68.4.0),\
-      \ or\n  - manual `kubectl apply --server-side` of the prometheus-operator CRDs\
-      \ for v0.87.0 before running `helm upgrade` (traditional approach).\n"
-    chart_updates: [Dependency bumps only (non-major updates) via Renovate; no functional
-        chart template changes described in the provided 80.4.2/80.5.0 release notes.,
-      '80.5.0: "Update kube-prometheus-stack dependency non-major updates" (PR #6425).',
-      '80.4.2: CI linter action bump (PR #6416) and dependency non-major updates (PR
-        #6421).']
-    features: [No new user-facing features were called out; this is primarily a dependency
-        update release.]
-    breaking_changes: [No breaking changes were called out between 80.4.2 and 80.5.0
-        in the provided notes.]
 - version: 80.4.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
-  chart_version: 80.4.2
-  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
-    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
-    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
-    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   summary:
     helm_changes: "- No Helm values changes are called out for the **80.4.1 \u2192\
       \ 80.4.2** patch upgrade.\n- (Context only) If you are upgrading from much older\
@@ -55,15 +43,15 @@ versions:
         \ on the Prometheus Service (useful if you don\u2019t want that port exposed/allocated)."]
     breaking_changes: ["None mentioned for 80.4.1 \u2192 80.4.2; this is a patch-level\
         \ release with CI and dependency non-major updates."]
+  chart_version: 80.4.2
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.4.1
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  chart_version: 80.4.1
-  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
-    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
-    'quay.io/prometheus/alertmanager:v0.29.0', 'quay.io/prometheus/node-exporter:v1.10.2',
-    'quay.io/prometheus/prometheus:v3.8.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   summary:
     helm_changes: "### Helm values / upgrade actions (80.2.0 \u2192 80.4.1)\n\n- **No\
       \ explicit value renames/deprecations called out** in the provided changelog\
@@ -94,15 +82,15 @@ versions:
     breaking_changes: ["No breaking changes were explicitly listed for 80.2.0\u2013\
         80.4.1 in the provided notes. The main operational risk is **CRD mismatch**\
         \ if you upgrade the operator to v0.87.0 without upgrading the CRDs first."]
+  chart_version: 80.4.1
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.29.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.2.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  chart_version: 80.2.0
-  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
-    'quay.io/prometheus-operator/prometheus-operator:v0.87.0', 'quay.io/prometheus/alertmanager:v0.29.0',
-    'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   summary:
     helm_changes: "## Helm values / upgrade actions (79.12.0 \u2192 80.2.0)\n\n- **Prometheus\
       \ Operator CRDs must be upgraded to v0.87.0 before the Helm upgrade** (Helm\
@@ -134,34 +122,33 @@ versions:
         \ behavior changes from **kube-state-metrics chart v7** (dependency bump);\
         \ if you have custom kube-state-metrics values, review that subchart\u2019\
         s changelog for any renamed/removed settings."]
+  chart_version: 80.2.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
+    'quay.io/prometheus-operator/prometheus-operator:v0.87.0', 'quay.io/prometheus/alertmanager:v0.29.0',
+    'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 79.12.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['kube-prometheus-stack: updated etcd image digest to `cf5a571`
+        (PR #6381).', 'kube-prometheus-stack 79.8.2: bumped `prometheus-node-exporter`
+        chart dependency to `v4.49.2` (PR #6358).']
+    features: []
+    breaking_changes: []
   chart_version: 79.12.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.2', 'quay.io/prometheus/alertmanager:v0.29.0',
     'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
-  summary:
-    helm_changes: "- No Helm values changes are called out for upgrades within **79.8.2\
-      \ \u2192 79.12.0**.\n- The only explicitly documented Helm value/behavior change\
-      \ near this range is for **79.x \u2192 80.x** (not part of your target range):\
-      \ consider using `crds.upgradeJob.enabled` / `crds.upgradeJob.enabled` and ensure\
-      \ CRDs are upgraded for Prometheus-Operator v0.87.0 when moving to 80.x.\n"
-    chart_updates: ["Patch-level updates only across 79.8.2 \u2192 79.12.0 (no chart-level\
-        \ breaking changes documented in the provided notes).", 79.8.2 updates the
-        prometheus-node-exporter subchart to v4.49.2., 79.12.0 updates the etcd image
-        digest to cf5a571.]
-    features: [No new end-user features were listed in the provided release notes
-        for 79.8.2 or 79.12.0; changes are dependency/image bumps.]
-    breaking_changes: ["No breaking changes are indicated for upgrades within 79.8.2\
-        \ \u2192 79.12.0."]
 - version: 79.8.2
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 79.8.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.2', 'quay.io/prometheus/alertmanager:v0.29.0',
@@ -171,922 +158,388 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 78.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 78.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.7.2',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (77.14.0 \u2192 78.5.0)\n\n- **Prometheus\
-      \ Operator bump (78.x)**: The **77.x \u2192 78.x** chart upgrade **updates Prometheus\
-      \ Operator to v0.86.0**.\n  - Helm will **not** upgrade CRDs automatically.\
-      \ You must **upgrade the monitoring.coreos.com CRDs before** running `helm upgrade`.\n\
-      \  - Options:\n    - **Recommended (chart-supported):** enable the CRD upgrade\
-      \ job:\n      - `crds.upgradeJob.enabled: true` (available since chart 68.4.0)\n\
-      \    - **Manual (traditional):** run `kubectl apply --server-side` for the v0.86.0\
-      \ CRDs **before** upgrading the Helm release.\n\n- No other values changes are\
-      \ documented specifically between **77.14.0 and 78.5.0** in the provided upgrade\
-      \ notes.\n"
-    chart_updates: ["Prometheus Operator updated to **v0.86.0** as part of the 77.x\
-        \ \u2192 78.x chart line.", 'CRD handling guidance reiterated: CRDs must be
-        updated out-of-band (manual apply) unless using `crds.upgradeJob.enabled`.',
-      No other chart-level breaking template/value refactors are mentioned for this
-        specific version range in the provided notes.]
-    features: ["Incremental dependency updates within the chart (release notes show\
-        \ \u201Cdependency non-major updates\u201D for both 77.14.0 and 78.5.0).",
-      Ongoing maintenance updates to bundled components/dashboards/rules via dependency
-        bumps (no specific new user-facing features called out in the provided release
-        snippets).]
-    breaking_changes: ['**CRDs must be upgraded** when moving from 77.x to 78.x due
-        to the Prometheus Operator upgrade; failing to do so can cause Helm upgrade
-        failures or broken reconciliation of `ServiceMonitor`/`PrometheusRule`/etc.']
 - version: 77.14.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 77.14.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.85.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.6.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (76.5.1 \u279C 77.14.0)\n\n###\
-      \ 1) Prometheus Operator & CRDs (required)\n* Chart line **76.x \u279C 77.x**\
-      \ upgrades **prometheus-operator to v0.85.0**.\n* **CRDs must be updated before**\
-      \ running `helm upgrade` (unless you use the optional CRD upgrade job).\n  *\
-      \ Option A (recommended if you want Helm to handle it): enable the built-in\
-      \ job:\n    * `crds.upgradeJob.enabled: true`\n  * Option B (manual, traditional):\
-      \ apply the v0.85.0 CRDs server-side:\n\n```bash\nkubectl apply --server-side\
-      \ -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n\n### 2) No other value key migrations called out in this range\n* The\
-      \ provided changelog section between 76.x and 77.x contains **only** the operator\
-      \ bump + CRD update guidance; no renamed/removed Helm values were mentioned.\n"
-    chart_updates: [Prometheus Operator upgraded to v0.85.0 in the 77.x series (from
-        76.x)., 'CRD upgrade workflow: chart supports `crds.upgradeJob.enabled` (available
-        since 68.4.0) as an alternative to manual CRD application.', 'Within patch
-        releases shown (76.5.1 and 77.14.0), changes are dependency non-major updates
-        via Renovate (no specific functional chart behavior changes described in the
-        pasted release notes).']
-    features: [Optional CRD upgrade automation via `crds.upgradeJob.enabled` can be
-        used to manage CRD updates during upgrades (if you choose to enable it).]
-    breaking_changes: [CRDs must be updated to match the new Prometheus Operator (v0.85.0)
-        before upgrading the release; failing to do so commonly results in webhook/CRD
-        schema errors during `helm upgrade`.]
 - version: 76.5.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 76.5.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.84.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (75.18.1 \u2192 76.5.1)\n\n- **Prometheus\
-      \ Operator bump (75.x \u2192 76.x):** chart 76.x upgrades **Prometheus-Operator\
-      \ to v0.84.1**.\n  - **CRDs must be upgraded** *before* running `helm upgrade`,\
-      \ because Helm does not upgrade CRDs automatically.\n  - You can either:\n \
-      \   - enable the built-in CRD upgrade job: `crds.upgradeJob.enabled=true` (available\
-      \ since 68.4.0), **or**\n    - run the traditional manual CRD apply (server-side)\
-      \ against v0.84.1 CRDs.\n\n- **Naming change for additional rules (74.x \u2192\
-      \ 75.x):** object names created from:\n  - `additionalPrometheusRules`\n  -\
-      \ `additionalPrometheusRulesMap`\n\n  changed their prefix from `kube-prometheus-stack.name`\
-      \ to `kube-prometheus-stack.fullname`.\n  - If you reference these objects by\
-      \ name (or have RBAC/Policies pointing at them), update those references.\n\
-      \  - Expect old objects to potentially remain; consider cleaning up any orphaned\
-      \ rule resources after upgrade.\n"
-    chart_updates: [Prometheus-Operator upgraded to **v0.84.1** in the 76.x line (requires
-        CRD update)., Rule resources generated via `additionalPrometheusRules`/`additionalPrometheusRulesMap`
-        now use the chart **fullname** for uniqueness across multiple releases (introduced
-        in 75.x)., Patch-level updates between 75.18.1 and 76.5.1 are primarily maintenance/dependency
-        updates; no additional upgrade steps called out beyond the above.]
-    features: [Uniqueness improvement for generated PrometheusRule objects when using
-        `additionalPrometheusRules`/`additionalPrometheusRulesMap` by switching to
-        the release fullname prefix (helps when multiple releases exist in the same
-        cluster)., 76.5.1 includes non-major dependency updates (routine chart maintenance).]
-    breaking_changes: [Potentially breaking if you **depend on the old PrometheusRule
-        names** generated from `additionalPrometheusRules`/`additionalPrometheusRulesMap`
-        (names changed in 75.x)., Operationally breaking if you **do not upgrade Prometheus-Operator
-        CRDs** before moving to 76.x; the operator/chart may fail or behave unpredictably
-        with mismatched CRDs.]
 - version: 75.18.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 75.18.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
-  summary:
-    helm_changes: "## Helm values / upgrade-relevant changes (74.2.2 \u2192 75.18.1)\n\
-      \n- **74.x \u2192 75.x**: Object names created by `additionalPrometheusRules`\
-      \ and `additionalPrometheusRulesMap` changed.\n  - **Old prefix**: `{{ template\
-      \ \"kube-prometheus-stack.name\" $ }}`\n  - **New prefix**: `{{ template \"\
-      kube-prometheus-stack.fullname\" $ }}`\n  - **Why it matters**: Names become\
-      \ unique across multiple releases, but **Kubernetes objects will be renamed**\
-      \ on upgrade (effectively delete+create).\n"
-    chart_updates: ['Rule objects created from `additionalPrometheusRules` / `additionalPrometheusRulesMap`
-        are now rendered with the chart *fullname* prefix instead of the short *name*
-        prefix, to prevent naming collisions across releases.', "No other explicit\
-        \ chart-level upgrade steps were provided in the supplied notes for 74.2.2\
-        \ \u2192 75.18.1; remaining changes shown in the 74.2.2 and 75.18.1 release\
-        \ pages appear to be minor fixes/maintenance."]
-    features: []
-    breaking_changes: ["**Renamed resources for additional rules**: PrometheusRule\
-        \ objects created via `additionalPrometheusRules` / `additionalPrometheusRulesMap`\
-        \ will change names due to prefix change (`name` \u2192 `fullname`). This\
-        \ can cause resources to be recreated and may briefly remove the old objects\
-        \ (and any manual references to the old names will break)."]
 - version: 74.2.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Chart includes maintenance-level updates: updated etcd image
+        digest; refreshed kube-prometheus-stack dependency versions (non-major updates);
+        CI/packaging change to bump Chart.yaml when only subdirectories change.',
+      'From 73.2.3: changed default behavior to ignore EROFS (read-only filesystem)
+        errors by default (likely affects node-exporter/collector error handling).']
+    features: [Improved robustness by ignoring EROFS errors by default (reduces noisy
+        scrape/collector errors on read-only filesystems).]
+    breaking_changes: []
   chart_version: 74.2.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "### Helm values / behavior changes to account for (73.2.3 \u2192\
-      \ 74.2.2)\n\n- **Required CRD upgrade (Prometheus Operator v0.83.0)**\n  - Chart\
-      \ **74.x** upgrades **prometheus-operator to v0.83.0**.\n  - Helm does not auto-upgrade\
-      \ CRDs; you must **upgrade the CRDs before `helm upgrade`** (or use the chart\u2019\
-      s CRD upgrade job feature).\n  - Optionally (available since 68.4.0): enable\
-      \ the built-in job: `crds.upgradeJob.enabled: true`.\n  - If doing it manually,\
-      \ apply the v0.83.0 CRDs with server-side apply:\n\n    ```console\n    kubectl\
-      \ apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.83.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      \    ```\n\n- **No other explicit values changes called out between 73.x and\
-      \ 74.x in the provided notes.**\n  - The 74.x line is primarily the operator\
-      \ bump + corresponding CRDs; patch-level changes in 74.2.2 are dependency/digest\
-      \ updates.\n"
-    chart_updates: ['74.x: Upgrades prometheus-operator to **v0.83.0** (requires CRDs
-        updated before upgrade).', '74.2.2: Maintenance updates only (dependency non-major
-        updates, updated etcd digest, CI version bump behavior).', '73.2.3: Small
-        fix: **ignore EROFS (read-only filesystem) by default**.']
-    features: [CRD upgrade job is supported (already available since 68.4.0) and remains
-        a recommended way to manage CRD upgrades during chart upgrades., Operator
-        upgrade to v0.83.0 brings in upstream improvements and fixes from prometheus-operator
-        (no specific new user-facing features called out in the provided notes).]
-    breaking_changes: ['**CRDs must be upgraded** when moving to 74.x (because prometheus-operator
-        is upgraded to v0.83.0). Failing to update CRDs first commonly causes failed
-        reconciliations or API validation errors on Prometheus/Alertmanager/ServiceMonitor
-        resources.', "No additional breaking changes were called out in the provided\
-        \ 73.x \u2192 74.x notes beyond the CRD/operator bump."]
 - version: 73.2.3
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Admission webhook match conditions**: Chart now supports setting\
+      \ `matchConditions` for `admissionWebhooks` objects (added in 72.9.1). If you\
+      \ need fine-grained webhook matching, add the corresponding values under the\
+      \ chart\u2019s `admissionWebhooks` configuration.\n- **Node-exporter filesystem\
+      \ collector tweak**: Chart now **ignores `erofs` by default** (73.2.3). If you\
+      \ previously relied on `erofs` metrics, you may need to override the node-exporter\
+      \ filesystem ignore/mount filtering values to re-include it.\n"
+    chart_updates: [Added ability to specify `matchConditions` for admission webhooks
+        objects., Adjusted node-exporter defaults to ignore `erofs` filesystem type
+        by default (bugfix/defaults change).]
+    features: ['Configurable `matchConditions` for admission webhooks, enabling more
+        precise selection of which API requests the webhook should evaluate.']
+    breaking_changes: ['Potential behavior change: node-exporter will no longer report
+        filesystem metrics for `erofs` by default; environments using EROFS (e.g.,
+        some container/image setups) may see those metrics disappear unless you override
+        the ignore settings.']
   chart_version: 73.2.3
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.82.2', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "### Helm values / upgrade actions (72.9.1 \u2192 73.2.3)\n- **73.0.0\
-      \ (\"From 72.x to 73.x\") introduces breaking chart-level requirements/cleanup:**\n\
-      \  - **Kubernetes minimum version is now `1.25`**.\n  - **Removed deprecated\
-      \ Ingress API versions/fields** (anything relying on pre-networking.k8s.io/v1\
-      \ Ingress needs updating).\n  - **Removed all PodSecurityPolicy (PSP) resources**\
-      \ and removed the values:\n    - `global.pspEnabled`\n    - `global.pspAnnotations`\n\
-      \  - If you previously depended on PSPs being created by the chart, you must\
-      \ replace that with Pod Security Admission (PSA) / policy tooling (OPA/Gatekeeper/Kyverno)\
-      \ or cluster-specific security configuration.\n- **No other helm values changes\
-      \ are called out for 73.1.x/73.2.x in the provided upgrade notes.**\n- **CRDs:**\
-      \ the provided changelog does not explicitly mention a Prometheus Operator version\
-      \ bump at 73.x \u2192 74.x (that happens at 74.x). So for 72.9.1 \u2192 73.2.3,\
-      \ CRD update steps are not explicitly mandated by these notes; still, follow\
-      \ your org\u2019s standard Prometheus Operator CRD management process (or enable\
-      \ `crds.upgradeJob.enabled` if you already use that pattern in your environment)."
-    chart_updates: [Minimum supported Kubernetes version bumped to **1.25** (chart
-        enforces this)., Removed support for **deprecated Ingress API versions/fields**
-        (expect template/output changes for any Ingress resources the chart renders).,
-      Removed **PodSecurityPolicy** manifests from the chart and removed related `global.*`
-        PSP values., '72.9.1: Added ability to set **`matchConditions`** for `prometheusOperator.admissionWebhooks`
-        objects.', '73.2.3: Default behavior change/fix to **ignore `erofs`** (read-only
-        filesystem) by default (affects alerting/rules/recording related to filesystem
-        state).']
-    features: [Admission webhook objects can now be configured with `matchConditions`
-        (useful to scope webhook invocation more precisely)., 'Filesystem checks/rules
-        now ignore `erofs` by default, reducing noise from read-only filesystem mounts.']
-    breaking_changes: [Kubernetes **< 1.25** is no longer supported by the chart.,
-      'PodSecurityPolicies and the related values (`global.pspEnabled`, `global.pspAnnotations`)
-        are removed; any PSP-based workflow must be replaced with PSA/policy tooling.',
-      Deprecated Ingress API versions/fields are removed; any existing values/templates
-        expecting older Ingress APIs must be updated to `networking.k8s.io/v1` semantics.]
 - version: 72.9.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 72.9.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.0-security-01',
     'quay.io/kiwigrid/k8s-sidecar:1.30.0', 'quay.io/prometheus-operator/prometheus-operator:v0.82.2',
     'quay.io/prometheus/alertmanager:v0.28.1', 'quay.io/prometheus/node-exporter:v1.9.1',
     'quay.io/prometheus/prometheus:v3.4.1', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "## Helm values / upgrade-impacting changes (71.2.0 \u2192 72.9.1)\n\
-      \n### **71.x \u2192 72.x (breaking-ish)**\n- **New flag required for PDB creation**\
-      \ for the Prometheus Operator admission webhook deployment:\n  - Previously,\
-      \ configuring `prometheusOperator.admissionWebhooks.deployment.podDisruptionBudget`\
-      \ was enough.\n  - Now you must explicitly set **`prometheusOperator.admissionWebhooks.deployment.podDisruptionBudget.enabled:\
-      \ true`** (and similarly for each PDB resource you expect the chart to create).\n\
-      \n### **72.x \u2192 73.x (next major, not in your target but worth noting if\
-      \ you later go further)**\n- Removed deprecated Kubernetes APIs for Ingress\
-      \ + removed all PodSecurityPolicy resources and values; **minimum Kubernetes\
-      \ becomes 1.25**.\n\n### **CRDs (Prometheus Operator CRDs)**\n- Within 71.x\
-      \ \u2192 72.x there is **no Prometheus Operator version bump callout** in the\
-      \ provided changelog (CRD update steps only appear on operator bumps like 70\u2192\
-      71, 73\u219274, etc.).\n- If you are upgrading from a version where the operator\
-      \ changed previously (e.g., 70\u219271), ensure CRDs are already up to date,\
-      \ or use the chart\u2019s CRD upgrade mechanism: **`crds.upgradeJob.enabled`**\
-      \ (available since 68.4.0)."
-    chart_updates: ['72.9.1: Adds ability to specify `matchConditions` for admissionWebhook
-        objects (useful for fine-grained admission webhook applicability).']
-    features: [Ability to configure `matchConditions` on Prometheus Operator admissionWebhook
-        objects (lets you restrict webhook activation based on request attributes).]
-    breaking_changes: [Admission webhook Deployment PDB objects are no longer created
-        unless `prometheusOperator.admissionWebhooks.deployment.podDisruptionBudget.enabled`
-        is set to true (even if other PDB settings are configured).]
 - version: 71.2.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["The 70.10.0 \u2192 71.2.0 chart bump is primarily dependency\
+        \ refreshes (non\u2011major) and CI workflow updates; no functional chart\
+        \ template changes are called out in the provided release snippets."]
+    features: [No user-facing features are described in the provided 70.10.0 and 71.2.0
+        release notes; changes are dependency/automation related.]
+    breaking_changes: [No breaking changes are mentioned in the provided release notes.]
   chart_version: 71.2.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.6.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.82.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "### Helm values / upgrade-impacting changes (70.10.0 \u2192 71.2.0)\n\
-      \n* **70.x \u2192 71.x (Prometheus Operator bump):** Chart upgrades **Prometheus\
-      \ Operator to v0.82.0**.\n  * **Action required:** Ensure CRDs are upgraded\
-      \ **before** `helm upgrade` (unless you already use `crds.upgradeJob.enabled`,\
-      \ available since 68.4.0).\n  * Traditional/manual CRD upgrade uses `kubectl\
-      \ apply --server-side` for the Prometheus Operator v0.82.0 CRDs.\n\n* **71.x\
-      \ \u2192 72.x (not in your requested target range, but relevant if you go past\
-      \ 71.2.0):** Adds an `enabled` flag for `prometheusOperator.admissionWebhooks.deployment.podDisruptionBudget`.\
-      \ If you later upgrade to 72+, you must explicitly set `podDisruptionBudget.enabled:\
-      \ true` to create that PDB.\n\nNo other Helm values changes are called out between\
-      \ **71.0.0 and 71.2.0** in the provided upgrade notes."
-    chart_updates: ["Prometheus Operator upgraded to v0.82.0 as part of 70.x \u2192\
-        \ 71.x.", CRDs may need to be updated to the Prometheus Operator v0.82.0 set
-        prior to Helm upgrade (or use `crds.upgradeJob.enabled`)., '71.2.0 appears
-        to be primarily dependency/CI non-major updates (Renovate-driven), with no
-        functional chart template changes called out in the release snippet you provided.']
-    features: ['Operationally, the main change is the Prometheus Operator version
-        bump to v0.82.0, which typically includes fixes and improvements in the operator
-        and its CRDs.', '71.2.0 is mainly dependency refreshes (non-major) per the
-        release notes snippet, so expect low user-visible feature changes in the chart
-        itself.']
-    breaking_changes: ["No explicit breaking changes are listed for 70.10.0 \u2192\
-        \ 71.2.0 in the provided upgrade notes.", The only mandatory action is CRD
-        alignment with the new Prometheus Operator version; failing to update CRDs
-        can cause the operator/webhooks to fail or CRD validation errors during/after
-        the Helm upgrade.]
 - version: 70.10.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 70.10.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.6.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.81.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "## Helm values changes to review (69.8.2 \u279C 70.10.0)\n\n- **CRDs\
-      \ must be updated when moving 69.x \u279C 70.x** because the chart bumps **Prometheus\
-      \ Operator to v0.81.0**.\n  - Recommended: enable the built-in CRD upgrade job:\
-      \ `crds.upgradeJob.enabled=true` (available since 68.4.0).\n  - If you *don\u2019\
-      t* use the job, you must apply the Operator CRDs manually **before** `helm upgrade`.\n\
-      \n- **New/updated capability in CRDs:** Prometheus/Alertmanager/ThanosRuler\
-      \ CRDs now support `serviceName`.\n  - If `serviceName` is empty: behavior unchanged.\n\
-      \  - If set: the operator **will not create** the usual \u201Coperated\u201D\
-      \ Service and will instead use the provided Service name as the governing Service.\n\
-      \  - Action: only relevant if you plan to adopt `serviceName`; otherwise no\
-      \ values change required.\n"
-    chart_updates: ["Chart moves from **69.8.2 to 70.10.0** within the 70.x line (no\
-        \ additional 70.x \u279C 71.x upgrade notes included in the provided changelog).",
-      Primary structural change for this range is the dependency bump to **Prometheus
-        Operator v0.81.0** (chart 70.x)., 70.10.0 release notes indicate mostly **dependency
-        non-major updates** and CI maintenance; no chart-breaking templating changes
-        are called out in the provided notes.]
-    features: ['Prometheus Operator upgraded to **v0.81.0**, adding support for `serviceName`
-        in Prometheus/Alertmanager/ThanosRuler CRDs to let you bring your own governing
-        Service name.', 'Option to use `crds.upgradeJob.enabled` (introduced earlier,
-        but still relevant) provides a safer, automated CRD upgrade path during chart
-        upgrades.']
-    breaking_changes: ['Potential behavioral change **only if you set `serviceName`**
-        in the Prometheus/Alertmanager/ThanosRuler specs: the operator stops creating
-        the operated Service and expects the named Service to exist/serve as governing
-        Service.', 'Operationally breaking if CRDs are not upgraded ahead of time:
-        upgrading the Helm release without updating CRDs can leave the operator/components
-        failing due to CRD schema/version mismatch.']
 - version: 69.8.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 69.8.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.5.2', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.80.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.0', 'quay.io/prometheus/prometheus:v3.2.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
-  summary:
-    helm_changes: "## Helm/values changes to be aware of (68.5.0 \u2192 69.8.2)\n\n\
-      ### **Major step: 68.x \u2192 69.x**\n- **Prometheus Operator upgraded to v0.80.0**.\n\
-      - **CRDs must be upgraded** prior to (or as part of) the Helm upgrade.\n  -\
-      \ Recommended: enable the chart\u2019s CRD upgrade job (available since 68.4.0):\n\
-      \    - `crds.upgradeJob.enabled=true`\n  - Traditional/manual method: `kubectl\
-      \ apply --server-side` the CRDs from the prometheus-operator release v0.80.0\
-      \ before running `helm upgrade`.\n\n### Operational note\n- If you previously\
-      \ upgraded CRDs manually, continue to do so consistently (don\u2019t mix approaches\
-      \ mid-upgrade unless you understand ownership/SSA implications).\n"
-    chart_updates: ["Bumps Prometheus Operator as part of the 68.x \u2192 69.x chart\
-        \ upgrade (to v0.80.0), requiring CRD updates.", 'Contains internal maintenance/regeneration
-        work (e.g., mixin script regeneration fix around 68.5.0).', 'Subsequent patch
-        releases in this range include component image bumps (e.g., Alertmanager bump
-        in 69.8.2).']
-    features: ['Prometheus Operator v0.80.0 included with chart 69.x, bringing updated
-        monitoring.coreos.com CRDs aligned with that operator version.', Ongoing chart
-        maintenance updates (mixin regeneration and component version bumps) improve
-        compatibility and keep bundled manifests current.]
-    breaking_changes: [CRDs must be updated when moving from chart 68.x to 69.x due
-        to the Prometheus Operator version bump; failure to do so can cause reconciliation
-        failures or missing CRD fields., "If adopting `crds.upgradeJob.enabled` for\
-        \ CRD management, ensure this aligns with your cluster\u2019s CRD management\
-        \ policy and avoids conflicts with any external CRD tooling."]
 - version: 68.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 68.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.2', 'quay.io/prometheus/alertmanager:v0.28.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v3.1.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
-  summary:
-    helm_changes: "## Helm values / upgrade considerations (67.11.0 \u2192 68.5.0)\n\
-      \n- **67.x \u2192 68.x:** The chart **drops several metrics by default** to\
-      \ reduce cardinality.\n  - API server (`{job=\"apiserver\"}`): drops excessive\
-      \ histogram buckets for:\n    - `apiserver_request_sli_duration_seconds_bucket`\n\
-      \    - `apiserver_request_slo_duration_seconds_bucket`\n    - `etcd_request_duration_seconds_bucket`\n\
-      \  - Kubelet (`{job=\"kubelet\",metrics_path=\"/metrics\"}`): reduces bucket\
-      \ cardinality for:\n    - `csi_operations_seconds_bucket`\n    - `storage_operation_duration_seconds_bucket`\n\
-      \  - cAdvisor (`{job=\"kubelet\",metrics_path=\"/metrics/cadvisor\"}`):\n  \
-      \  - Drops `container_memory_failures_total{scope=\"hierarchy\"}` (keeps container\
-      \ scope).\n    - Drops `container_network_...` metrics for various CNI/virtual\
-      \ interfaces.\n\n- **CRDs:** No CRD manual apply steps are mentioned specifically\
-      \ for 67\u219268 in the provided changelog; later major bumps (68\u219269 and\
-      \ beyond) do include Prometheus Operator CRD updates and the optional `crds.upgradeJob.enabled`\
-      \ mechanism, but that\u2019s outside this requested version window.\n"
-    chart_updates: [Introduces **default metric relabeling changes** (drops/filters)
-        intended to reduce metric cardinality and Prometheus load., Fixes **histogram
-        bucket matching** behavior for **Prometheus 3.x**., Regenerates/updates mixins
-        via a fix to the mixin update script (68.5.0).]
-    features: ['Adds a **kubelet scrape flag** (67.11.0), giving more control over
-        kubelet scraping behavior via chart configuration.', Improves compatibility
-        with **Prometheus 3.x** by fixing histogram bucket matching in defaults.]
-    breaking_changes: ['**Potentially breaking for dashboards/alerts:** Several metrics/histogram
-        buckets are **dropped by default** starting in 68.x, which can cause existing
-        dashboards/recording rules/alerts to show missing data or change time series
-        counts.', 'If you relied on cAdvisor `container_network_*` metrics for CNI/virtual
-        interfaces or `container_memory_failures_total{scope="hierarchy"}`, those
-        series will no longer be collected by default.']
 - version: 67.11.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['66.7.1: Chore/maintenance change to the kubelet ServiceMonitor
+        (PR #5061) to improve it (e.g., scraping/labels/endpoints behavior may be
+        adjusted).', '67.11.0: Add a configurable kubelet scrape flag (PR #5136),
+        enabling/disabling kubelet scraping via values without needing to patch templates.']
+    features: [New kubelet scrape flag/option so you can explicitly enable or disable
+        kubelet scraping from the chart values.]
+    breaking_changes: []
   chart_version: 67.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.2', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v3.1.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
-  summary:
-    helm_changes: "## Helm values / upgrade considerations (66.7.1 \u2192 67.11.0)\n\
-      \n- **CRDs must be updated before upgrading the chart** because this range includes\
-      \ the **Prometheus Operator bump to v0.79.0** (notably when moving to the 67.x\
-      \ chart line). Helm won\u2019t auto-upgrade CRDs.\n  - **Option A (recommended):**\
-      \ enable the built-in CRD upgrade job (available since 68.4.0, so **not available\
-      \ for 67.x**).\n  - **Option B (for 67.x):** run the `kubectl apply --server-side\
-      \ -f ...` commands for operator **v0.79.0** CRDs (AlertmanagerConfigs, Alertmanagers,\
-      \ PodMonitors, Probes, PrometheusAgents, Prometheuses, PrometheusRules, ScrapeConfigs,\
-      \ ServiceMonitors, ThanosRulers) *before* `helm upgrade`.\n\n- **Prometheus\
-      \ default image version changes**: 67.x upgrades Prometheus image default to\
-      \ **v3.0.1** (because operator v0.79.0 uses Prometheus 3 by default). If you\
-      \ have compatibility concerns, pin `prometheus.prometheusSpec.image.tag` explicitly.\n\
-      \n- **Metrics relabeling / cardinality changes when going 67.x \u2192 68.x**\
-      \ (not strictly required to reach 67.11.0, but relevant if you continue): default\
-      \ relabelings drop histogram buckets and some kubelet/cAdvisor metrics, which\
-      \ may affect dashboards/alerts expecting those series.\n"
-    chart_updates: [Chart 67.x upgrades the Prometheus Operator stack such that Prometheus
-        defaults to **v3.0.1**; this is primarily a component version bump plus associated
-        CRD updates., Ongoing improvements to the kubelet ServiceMonitor in 66.7.1
-        and addition of a kubelet scrape flag in 67.11.0 (small chart behavior/config
-        additions).]
-    features: [Adds a **kubelet scrape flag** (67.11.0) to allow more control over
-        kubelet scraping behavior., 'Improves the **kubelet ServiceMonitor** configuration
-        (66.7.1), likely refining scraping config/labels/paths for kubelet targets.']
-    breaking_changes: ['Operational breaking change: **CRDs must be updated** to the
-        Prometheus Operator **v0.79.0** set before upgrading into the 67.x line; otherwise
-        the operator may fail to reconcile resources or upgrades may error.', 'Potential
-        behavioral change: Prometheus defaulting to **v3.0.1** can impact query/alert
-        behavior and histogram handling compared to Prometheus 2.x; pin the Prometheus
-        image if you need to stay on 2.x during transition.']
 - version: 66.7.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 66.7.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.0', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.55.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (65.8.1 \u2192 66.7.1)\n\n- **CRDs\
-      \ must be updated before upgrading the chart** because the chart moves from\
-      \ Prometheus Operator **v0.77.1 \u2192 v0.78.1** (chart **64.x\u219265.x** and\
-      \ **65.x\u219266.x** upgrade guidance).\n  - Apply the CRDs for the target operator\
-      \ version (v0.78.1) using server-side apply:\n\n```bash\nkubectl apply --server-side\
-      \ -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.78.1/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n\n- **Prometheus image defaults change later (66.x\u219267.x)**, but note\
-      \ this is *outside* 66.7.1. Within 66.x you are still pre-67 behavior; just\
-      \ be aware Prometheus 3.x becomes default starting at chart 67.x.\n\n- No other\
-      \ explicit values migrations are called out in the provided changelog sections\
-      \ for the 65.8.1\u219266.7.1 window."
-    chart_updates: ["Prometheus Operator bumped across this window (via chart major\
-        \ boundaries): **v0.77.1 \u2192 v0.78.1** (requires CRD updates).", 'Release
-        note items in this range indicate small chart-level tweaks rather than major
-        feature shifts: e.g., selector metadata improvements for `additionalPodMonitors`/`additionalServiceMonitors`,
-        and kubelet `ServiceMonitor` improvements.']
-    features: ['Improved selector information/metadata for `additionalPodMonitors`
-        and `additionalServiceMonitors`, making their selectors more explicit and
-        easier to reason about during troubleshooting.', 'Kubelet `ServiceMonitor`
-        improvements (refinements to scraping configuration/behavior), which may improve
-        reliability/consistency of kubelet metrics collection.']
-    breaking_changes: ['Operational requirement: when moving across the chart boundary
-        into **66.x**, you must **update Prometheus Operator CRDs** first; skipping
-        this commonly results in reconciliation/upgrade failures.', "No other breaking\
-        \ changes were stated in the supplied changelog entries for the specific **65.8.1\
-        \ \u2192 66.7.1** range."]
 - version: 65.8.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 65.8.1
-  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.3.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
-    'quay.io/prometheus-operator/prometheus-operator:v0.77.2', 'quay.io/prometheus/alertmanager:v0.27.0',
-    'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.55.0',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
-    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
-  summary:
-    helm_changes: "### Helm values / configuration changes (64.x \u2192 65.8.1)\n\n\
-      - **CRD upgrade required (Prometheus Operator bump)**: 64\u219265 upgrades Prometheus\
-      \ Operator to **v0.77.1**. Helm does not automatically upgrade CRDs, so you\
-      \ must update the CRDs **before** running `helm upgrade`.\n  - If you are on\
-      \ a newer chart series, you can alternatively enable the chart\u2019s CRD upgrade\
-      \ job (`crds.upgradeJob.enabled`), but for 64\u219265 the changelog explicitly\
-      \ documents the manual `kubectl apply --server-side` approach.\n\nNo other explicit\
-      \ values migrations are called out within 64.0.0 \u2192 65.8.1 in the provided\
-      \ notes."
-    chart_updates: ["Prometheus Operator upgraded to v0.77.1 as part of 64.x \u2192\
-        \ 65.x.", 'Requires applying updated `monitoring.coreos.com` CRDs (AlertmanagerConfigs,
-        Alertmanagers, PodMonitors, Probes, PrometheusAgents, Prometheuses, PrometheusRules,
-        ScrapeConfigs, ServiceMonitors, ThanosRulers) prior to upgrade.', '65.8.1:
-        Improves selector information for `additionalPodMonitors` and `additionalServiceMonitors`
-        (likely more labels/fields included to make selection behavior clearer/safer).']
-    features: ['65.8.1 includes enhancements to the selector metadata for `additionalPodMonitors`
-        and `additionalServiceMonitors`, improving how these extra monitors are described/selected.',
-      65.x line brings the Prometheus Operator to v0.77.1 (feature set and fixes from
-        that operator release become available once CRDs/operator are updated).]
-    breaking_changes: ["The primary operational breaking point is the **CRD update\
-        \ requirement**: if you don\u2019t apply the v0.77.1 CRDs first, the Helm\
-        \ upgrade can fail or the operator may misbehave due to schema mismatches.",
-      "No other explicit breaking changes are listed for 64.0.0 \u2192 65.8.1 in the\
-        \ provided changelog/release notes."]
+  images: []
 - version: 64.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Reverted the prior change that added \u201Cdownward compatibility\u201D\
+        \ for Prometheus CRDs (PR #4883 reverting PR #4818). This means the chart\
+        \ is no longer attempting to accommodate older/newer Prometheus Operator CRD\
+        \ schemas automatically; you must ensure your cluster CRDs match the operator/chart\
+        \ expectations before/when upgrading."]
+    features: ['(From 63.1.0) Added support for configuring `alertmanager.cluster.label`
+        via the chart, enabling better labeling/identification of Alertmanager clusters
+        in HA setups.']
+    breaking_changes: ['Potential CRD compatibility impact due to reverting the Prometheus
+        CRD downward-compatibility logic; if you relied on that behavior for smoother
+        upgrades/downgrades across CRD versions, you may need to manage CRD upgrades
+        explicitly and validate Prometheus Operator/CRD versions during this chart
+        upgrade.']
   chart_version: 64.0.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.1', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.54.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
-  summary:
-    helm_changes: "### Helm values changes (63.1.0 \u2192 64.0.0)\n- **v64.0.0 is\
-      \ a full revert of v63.x**. Any values/config changes you applied specifically\
-      \ to accommodate **v63** should be undone.\n- No additional new values changes\
-      \ are called out for 64.0.0 beyond \u201Crevert v63 release notes\u201D.\n\n\
-      > Practical takeaway: if you upgraded to 63.x and changed selectors/CRD compatibility\
-      \ settings per its notes, roll those changes back before/when moving to 64.0.0."
-    chart_updates: ["v64.x explicitly **reverts the v63 release** (63 \u2192 64).",
-      "Release note for 64.0.0: **Revert** \u201CAdd downward compat for Prom CRD\u201D\
-        \ PR (#4818) via PR #4883.", 63.1.0 added support for **Alertmanager `cluster.label`**
-        configuration (feature in chart templates/values).]
-    features: ['63.1.0: Adds support for configuring Alertmanager `cluster.label`
-        (used to label/identify Alertmanager cluster instances).']
-    breaking_changes: ["64.0.0: Not a new breaking change itself, but it **undoes**\
-        \ v63 behavior; if you depended on v63\u2019s \u201Cdownward compatibility\
-        \ for Prometheus CRD\u201D behavior, that dependency will break when moving\
-        \ to 64.0.0.", 'Operational breaking change risk: any workaround/config you
-        introduced for v63 must be reverted; otherwise you may end up with unexpected
-        selectors/CRD handling after upgrading to 64.0.0.']
 - version: 63.1.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- No explicit Helm values changes were called out in the provided\
+      \ release notes for 62.7.0 or 63.1.0.\n- New/updated values to consider based\
+      \ on features:\n  - **Prometheus Operator ServiceAccount annotations**: ensure\
+      \ you set/retain `prometheusOperator.serviceAccount.annotations` if you need\
+      \ cloud IAM/workload-identity style bindings.\n  - **Alertmanager cluster label\
+      \ support**: review any new value(s) related to enabling/configuring an Alertmanager\
+      \ `cluster.label` (exact key not shown in the provided notes; confirm against\
+      \ the chart\u2019s `values.yaml` or PR #4877 if you plan to use it)."
+    chart_updates: ['62.7.0: Added the ability to set ServiceAccount annotations for
+        the Prometheus Operator (PR #4820).', '63.1.0: Added support for Alertmanager
+        `cluster.label` (PR #4877).']
+    features: [Ability to add annotations to the Prometheus Operator ServiceAccount
+        (useful for workload identity/IAM bindings)., Support for configuring an Alertmanager
+        `cluster.label` to label cluster identity in Alertmanager setups.]
+    breaking_changes: []
   chart_version: 63.1.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.54.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
-  summary:
-    helm_changes: "### Values / Helm behavior changes (62.7.0 \u279C 63.1.0)\n\n-\
-      \ **Selector semantics change (breaking-ish if you customized selectors):**\n\
-      \  - The chart **deprecates** `*SelectorNilUsesHelmValues` flags.\n  - New behavior:\
-      \ to get an *empty selector* you now set `*.Selector.matchLabels: null`.\n \
-      \ - Affected values (convert if you previously set them to `false`):\n    -\
-      \ `prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues`\n    - `prometheus.prometheusSpec.probeSelectorNilUsesHelmValues`\n\
-      \    - `prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues`\n    - `prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues`\n\
-      \    - `prometheus.prometheusSpec.scrapeConfigSelectorNilUsesHelmValues`\n \
-      \   - `thanosRuler.thanosRulerSpec.ruleSelectorNilUsesHelmValues`\n\nExample\
-      \ conversion:\n\n```yaml\n# OLD\nprometheus:\n  prometheusSpec:\n    scrapeConfigSelectorNilUsesHelmValues:\
-      \ false\n\n# NEW\nprometheus:\n  prometheusSpec:\n    scrapeConfigSelector:\n\
-      \      matchLabels: null\n```\n\n- **No other Helm values changes were called\
-      \ out** in the provided notes between 62.7.0 and 63.1.0.\n"
-    chart_updates: ["**v63 series introduced a selector-handling change** (see above)\
-        \ and **v64 reverted v63** in later major versions, but within 62.7.0\u2192\
-        63.1.0 you are staying on the v63 behavior.", No Prometheus Operator version
-        bump or CRD update instructions were listed for this jump in the provided
-        upgrade notes.]
-    features: [Ability to set **serviceAccount annotations for Prometheus Operator**
-        (helps when integrating with IAM roles / workload identity tooling)., Support
-        for **Alertmanager `cluster.label`** configuration (useful for HA/clustered
-        Alertmanager setups and labelling/identifying clusters).]
-    breaking_changes: ['If you previously relied on `*SelectorNilUsesHelmValues: false`
-        to produce empty selectors, you must convert those settings to `*.Selector.matchLabels:
-        null` or your selection behavior will change.', 'This is a deprecation-driven
-        behavior change; expect old `*SelectorNilUsesHelmValues` knobs to be removed
-        in a later release, so updating now avoids future upgrade failures.']
 - version: 62.7.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 62.7.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.54.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
-  summary:
-    helm_changes: "### Helm values / upgrade-impacting changes (61.9.0 \u2192 62.7.0)\n\
-      \n* **61.x \u2192 62.x:** Prometheus Operator is upgraded to **v0.76.0**.\n\
-      \  * **You must upgrade the Prometheus Operator CRDs before upgrading the Helm\
-      \ release** (Helm won\u2019t upgrade CRDs automatically).\n  * Alternatively,\
-      \ if your chart version supports it (noted since 68.4.0 in later notes), you\
-      \ can use a CRD upgrade job (`crds.upgradeJob.enabled`) instead of manual `kubectl\
-      \ apply`.\n\n* **62.x \u2192 63.x (FYI for later):** selector behavior changes\
-      \ (`*SelectorNilUsesHelmValues` deprecations) \u2014 not in 62.7.0, but relevant\
-      \ if you later continue upgrading past 62.\n"
-    chart_updates: [Grafana subchart dependency bumped to **8.4.x** (seen in 61.9.0
-        release notes)., Added ability to set **ServiceAccount annotations for the
-        Prometheus Operator** (seen in 62.7.0 release notes)., "General stack refresh\
-        \ via Prometheus Operator bump to v0.76.0 (from 61.x \u2192 62.x upgrade notes),\
-        \ which implies updated CRDs for monitoring.coreos.com resources."]
-    features: [Grafana dependency updated to the 8.4.x series (chart-level dependency
-        bump)., 'You can now configure ServiceAccount annotations for the Prometheus
-        Operator (useful for IAM/OIDC integrations, workload identity, etc.).']
-    breaking_changes: [CRDs must be updated prior to the Helm upgrade when moving
-        from 61.x to 62.x due to the Prometheus Operator v0.76.0 bump; failing to
-        do so can cause reconciliation failures or resource schema mismatches.]
 - version: 61.9.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 61.9.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.1.3', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.75.2', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.54.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (60.5.0 \u279C 61.9.0)\n\n- **CRDs\
-      \ must be updated for Prometheus Operator v0.75.0 (chart 61.x)** before running\
-      \ the Helm upgrade (Helm does not upgrade CRDs automatically).\n  - Either:\n\
-      \    - **Manual CRD apply (traditional):**\n      ```bash\n      kubectl apply\
-      \ --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      \      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.75.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      \      ```\n    - Or (if you\u2019re already using it since chart 68.4.0, not\
-      \ required for this range): **`crds.upgradeJob.enabled`** can manage CRD upgrades.\n\
-      \n- No other explicit values migrations are described in the provided notes\
-      \ for **60.x \u279C 61.x** beyond the CRD/operator bump.\n"
-    chart_updates: ['**Chart 61.x upgrades Prometheus Operator to v0.75.0** (requires
-        CRD update).', No additional chart-level breaking template/value changes are
-        called out in the provided upgrade notes between 60.5.0 and 61.9.0.]
-    features: ['Grafana: added support for dual-stack clusters (present by 60.5.0).',
-      Grafana dependency bump within 61.x series (61.9.0 bumps Grafana chart deps
-        to 8.4.*).]
-    breaking_changes: ['Operational requirement: you must update Prometheus Operator
-        CRDs to match the operator version (v0.75.0) before upgrading the Helm release;
-        otherwise the upgrade can fail or the operator can misbehave.']
 - version: 60.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **New value added:** Prometheus Operator now supports configuring
+      **PVC claim retention** via a new field exposed by the chart (from PR #4570).
+      If you manage Prometheus/Alertmanager volumes, review your values for the new
+      retention/cleanup behavior and set it explicitly to match your desired lifecycle.
+
+      - **Grafana in dual-stack clusters:** Chart adds support for **dual-stack (IPv4/IPv6)
+      clusters** in Grafana-related configuration (PR #4638). If you run dual-stack,
+      validate/adjust Grafana service/network settings accordingly; otherwise no values
+      change is typically required.'
+    chart_updates: [Prometheus Operator integration updated to expose a PVC claim
+        retention configuration option (adds corresponding chart templating/values
+        wiring)., Grafana templates updated to better support dual-stack Kubernetes
+        clusters.]
+    features: [Ability to configure PVC claim retention behavior through Prometheus
+        Operator settings (more control over whether PVCs are retained or deleted
+        on resource removal)., Improved Grafana support for dual-stack Kubernetes
+        clusters (better compatibility in IPv4/IPv6 environments).]
+    breaking_changes: []
   chart_version: 60.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.0.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.74.0', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.1', 'quay.io/prometheus/prometheus:v2.53.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
-  summary:
-    helm_changes: "## Helm values / upgrade actions (59.1.0 \u279C 60.5.0)\n\n- **Upgrade\
-      \ crosses a major Grafana jump**: chart **60.x** upgrades the **Grafana subchart\
-      \ to 8.0.x (Grafana 11)**.\n  - Review Grafana\u2019s breaking changes: https://grafana.com/docs/grafana/latest/breaking-changes/breaking-changes-v11-0/\n\
-      \  - Expect potential impacts to dashboards/plugins/auth settings depending\
-      \ on your setup.\n\n- **No other values migrations called out** in the provided\
-      \ 59.x\u219260.x notes (e.g., no renamed keys), but you should still run a `helm\
-      \ diff` against your values to catch any schema/deprecation changes introduced\
-      \ by the Grafana subchart bump.\n"
-    chart_updates: ['Grafana subchart bumped to **8.0.x**, which pulls in **Grafana
-        11** (major version change).', '60.5.0: Grafana templates updated to **support
-        dual-stack clusters** (IPv4/IPv6) for Grafana-related resources.', '59.1.0:
-        Added support for **PVC claim retention field** in Prometheus Operator-related
-        configuration (exposes/uses a new operator field).']
-    features: ['Grafana: Added support for **dual-stack (IPv4/IPv6) clusters** in
-        the Grafana deployment/service configuration (60.5.0).', 'Prometheus Operator
-        integration: Exposed/introduced **PVC claim retention** capability so you
-        can control what happens to PVCs on scale-down/deletion (59.1.0).']
-    breaking_changes: ['Grafana upgrade to **Grafana 11** (via Grafana chart 8.0.x)
-        can introduce **breaking behavior changes**; validate dashboards, auth, plugins,
-        and provisioning per Grafana v11 breaking-changes docs.', "No other breaking\
-        \ changes were explicitly listed in the provided notes for 59.1.0 \u2192 60.5.0."]
 - version: 59.1.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds support for setting the Prometheus Operator PVC claim retention
+        field via chart values (new option exposed by the chart)., Fixes chart templating
+        so `alertmanager.alertmanagerSpec.version` is set correctly from values.]
+    features: ['Prometheus Operator: chart now exposes a PVC claim retention setting
+        so you can control how Prometheus persistent volume claims are retained during
+        scale-down/deletion scenarios.']
+    breaking_changes: []
   chart_version: 59.1.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.74.0', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.0', 'quay.io/prometheus/prometheus:v2.52.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
-  summary:
-    helm_changes: "## Helm values / config changes (58.7.2 \u2192 59.1.0)\n\n- **CRDs\
-      \ must be upgraded for 59.x (Prometheus Operator v0.74.0)** before running `helm\
-      \ upgrade`, because Helm won\u2019t automatically update CRDs.\n  - Either use\
-      \ the chart\u2019s CRD upgrade mechanism (available since 68.4.0):\n    - `crds.upgradeJob.enabled:\
-      \ true`\n  - Or do it \u201Cmanually\u201D (traditional approach) with server-side\
-      \ apply (recommended):\n\n```sh\nkubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n"
-    chart_updates: ["Prometheus Operator bumped to **v0.74.0** as part of the 58.x\
-        \ \u2192 59.x chart major upgrade (drives the CRD update requirement).", 58.7.2
-        includes a fix to **correctly set `alertManagerSpec.version`** (chart behavior/templating
-        correction).]
-    features: [Introduces support for a **PVC claim retention** field (exposed from
-        Prometheus Operator capabilities) to control how Prometheus PVCs are retained
-        under certain lifecycle operations.]
-    breaking_changes: ["No explicit breaking changes are called out in the provided\
-        \ notes for 58.7.2 \u2192 59.1.0, but **CRD upgrades are mandatory** when\
-        \ moving to 59.x due to the Prometheus Operator bump (failure to update CRDs\
-        \ commonly results in apply/validation errors during the Helm upgrade)."]
 - version: 58.7.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['57.2.1: Fixes an issue when using kube-state-metrics 2.11.0 (chart
+        change to restore compatibility).', '58.7.2: Fixes Alertmanager version wiring
+        by correctly setting `alertManagerSpec.version`.']
+    features: []
+    breaking_changes: []
   chart_version: 58.7.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.73.2', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.8.0', 'quay.io/prometheus/prometheus:v2.52.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
-  summary:
-    helm_changes: "### Helm values / operational changes to account for (57.2.1 \u2192\
-      \ 58.7.2)\n\n- **CRDs must be upgraded (Prometheus Operator bump in 58.x):**\n\
-      \  - The 57.x \u2192 58.x upgrade upgrades **prometheus-operator to v0.73.0**.\n\
-      \  - Helm does **not** automatically update CRDs on upgrade, so you must update\
-      \ the `monitoring.coreos.com/*` CRDs **before** running `helm upgrade`, _or_\
-      \ (if you already use it) rely on the chart\u2019s `crds.upgradeJob.enabled`\
-      \ mechanism (noted as available since later chart versions).\n  - Use the exact\
-      \ CRD apply commands from the changelog for **v0.73.0** (the `kubectl apply\
-      \ --server-side -f ...` list).\n\n- **No other values migrations called out\
-      \ between 57.x and 58.x in the provided notes.**\n  - Your existing values should\
-      \ generally continue to work after CRD upgrade and chart upgrade.\n"
-    chart_updates: ["Prometheus Operator upgraded to **v0.73.0** when moving from\
-        \ **57.x \u2192 58.x**, which requires a **manual CRD update** (or CRD upgrade\
-        \ job if you\u2019re using it).", 57.2.1 includes a chart fix related to **kube-state-metrics
-        2.11.0** compatibility/behavior (bugfix release)., 58.7.2 includes a chart
-        fix to **correctly set `version` into `alertManagerSpec.version`** (bugfix
-        release).]
-    features: []
-    breaking_changes: ["**CRD upgrade required** due to Prometheus Operator version\
-        \ bump (57.x \u2192 58.x). If you don\u2019t upgrade CRDs first, the operator/chart\
-        \ may fail to reconcile resources or the Helm upgrade may not behave as expected."]
 - version: 57.2.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 57.2.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.72.0', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.7.0', 'quay.io/prometheus/prometheus:v2.51.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
-  summary:
-    helm_changes: "## Helm / values changes to handle in the 56.21.4 \u2192 57.2.1\
-      \ upgrade\n\n- **Prometheus Operator bumped to v0.72.0 (chart 57.x)**\n  - Helm\
-      \ will not upgrade CRDs automatically; you must **upgrade the Prometheus Operator\
-      \ CRDs** before running `helm upgrade`, or enable the chart\u2019s CRD upgrade\
-      \ job (available since 68.4.0, *not applicable in 57.x*).\n  - Manual CRD upgrade\
-      \ commands (from the changelog):\n\n```bash\nkubectl apply --server-side -f\
-      \ https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n\n- **No other values migrations are called out in the provided notes between\
-      \ 56.x and 57.x.**\n  - Still, treat this as an operator/CRD upgrade: validate\
-      \ any custom `Prometheus`, `Alertmanager`, `ServiceMonitor`, `PodMonitor`, `PrometheusRule`\
-      \ manifests against the new CRDs after upgrade.\n"
-    chart_updates: ["Chart major bump **56.x \u2192 57.x** primarily for **Prometheus\
-        \ Operator v0.72.0** (includes CRD set covering: AlertmanagerConfig, Alertmanager,\
-        \ PodMonitor, Probe, PrometheusAgent, Prometheus, PrometheusRule, ScrapeConfig,\
-        \ ServiceMonitor, ThanosRuler).", Patch releases within the range include
-        small fixes (dashboards / subchart compatibility).]
-    features: [Prometheus Operator v0.72.0 upgrade (brings newer operator functionality
-        and CRD schema updates compared to 56.x).]
-    breaking_changes: ["Operationally breaking: **CRDs must be upgraded manually**\
-        \ (or the upgrade will fail / operator may crashloop) because Helm doesn\u2019\
-        t auto-update CRDs in this chart version."]
 - version: 56.21.4
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 56.21.4
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.3.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.71.2', 'quay.io/prometheus/alertmanager:v0.27.0',
     'quay.io/prometheus/node-exporter:v1.7.0', 'quay.io/prometheus/prometheus:v2.50.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
-  summary:
-    helm_changes: "## Helm values / config changes to apply during the upgrade (55.11.0\
-      \ \u279C 56.21.4)\n\n- **CRDs must be upgraded to Prometheus Operator v0.72.0\
-      \ before upgrading the chart** (this is the key step moving from chart `55.x`\
-      \ to `56.x`).\n  - Either enable the CRD upgrade job (available since chart\
-      \ 68.4.0; *not available in 55/56*) **or** do a manual CRD apply.\n  - Manual\
-      \ CRD upgrade commands (run **before** `helm upgrade`):\n\n```bash\nkubectl\
-      \ apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.72.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n\n- No other explicit helm-values migrations are called out in the provided\
-      \ changelog for the `55.x \u279C 56.x` jump.\n\n"
-    chart_updates: [Upgrades kube-prometheus-stack from `55.11.0` to `56.21.4`., 'Main
-        upgrade impact: Prometheus Operator is upgraded from **v0.71.0** (55.x) to
-        **v0.72.0** (56.x), which requires CRD updates prior to the Helm upgrade.',
-      'Release-level change noted at 55.11.0: Grafana subchart updated to **7.2.x**.',
-      'Release-level change noted at 56.21.4: CoreDNS dashboard fix (variable filtering
-        / refresh behavior).']
-    features: ['Grafana subchart update to 7.2.x (from the 55.11.0 release notes),
-        which may include new chart capabilities and bugfixes depending on Grafana
-        chart changelog.', 'Dashboard improvement: CoreDNS dashboard variable behavior
-        fixed (56.21.4).']
-    breaking_changes: ['Operational breaking change: **Helm will not automatically
-        upgrade CRDs**, so you must apply the Prometheus Operator **v0.72.0** CRDs
-        before upgrading to chart 56.x, otherwise the operator may fail or CRDs may
-        be incompatible.', 'Potential downstream breakage risk: Grafana chart bump
-        (55.11.0) could affect any custom Grafana values/overrides you maintain; validate
-        against the Grafana chart 7.2.x changes if heavily customized.']
 - version: 55.11.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 55.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.2.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.70.0', 'quay.io/prometheus/alertmanager:v0.26.0',
     'quay.io/prometheus/node-exporter:v1.7.0', 'quay.io/prometheus/prometheus:v2.48.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
-  summary:
-    helm_changes: "### Helm values / configuration changes (54.2.2 \u279C 55.11.0)\n\
-      \n- **CRDs must be updated before upgrading the chart** because **55.x upgrades\
-      \ Prometheus Operator to v0.70.0** and Helm won\u2019t automatically upgrade\
-      \ CRDs.\n  - Apply the operator CRDs **server-side** (recommended) before `helm\
-      \ upgrade`:\n\n```bash\nkubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
-      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
-      ```\n\n- No other values-breaking changes are called out in the provided material\
-      \ specifically between **54.x and 55.x**, but note that **Grafana-related changes\
-      \ exist within the 54.x patch you\u2019re coming from** (see features below).\n"
-    chart_updates: ['**55.x**: Prometheus Operator dependency updated to **v0.70.0**
-        (requires CRD updates before the Helm upgrade).', '**55.11.0**: Grafana subchart
-        updated to **7.2.x**.']
-    features: [Grafana datasource ConfigMap improvements plus support for setting
-        Prometheus replica-related config and exemplar trace destinations (introduced
-        in 54.2.2)., "Grafana subchart bump to 7.2.x (in 55.11.0), bringing in the\
-        \ subchart\u2019s fixes and enhancements."]
-    breaking_changes: ['Operationally breaking: upgrading to 55.x requires **manual
-        CRD upgrade** for Prometheus Operator v0.70.0 before running `helm upgrade`,
-        otherwise the upgrade can fail or the operator can misbehave.']
 - version: 54.2.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 54.2.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.1.5', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.69.1', 'quay.io/prometheus/alertmanager:v0.26.0',

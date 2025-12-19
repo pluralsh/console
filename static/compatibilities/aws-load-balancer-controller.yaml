@@ -10,11 +10,57 @@ versions:
     '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 2.9.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/CRD changes you must account for\n- **CRDs must be updated\
+      \ manually as part of the Helm upgrade** (Helm won\u2019t automatically upgrade\
+      \ CRDs):\n  ```bash\n  kubectl apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
+      \n  ```\n- **New/changed CRD fields (introduced across 2.8.x\u21922.9.0)**\n\
+      \  - `IngressClassParams.spec.certificateArn` (new in 2.8.0)\n  - `IngressClassParams.spec.ipAddressType`\
+      \ updated to include `dualstack-without-public-ipv4` (2.8.0)\n  - `TargetGroupBinding.spec.vpcID`\
+      \ (new in 2.8.0; validation updated in 2.9.0 to allow `vpc-...`)\n  - `IngressClassParams.spec.listenerAttributes`\
+      \ (new in 2.9.0; currently unused for ALB but required for forward compatibility)\n\
+      \n## Helm chart value changes / knobs mentioned in notes\n- **Ingress validation\
+      \ can be disabled via Helm flag** (new in 2.9.0 chart).\n- Chart enhancements\
+      \ from 2.8.x line that may affect your values if you use them:\n  - Additional\
+      \ ServiceMonitor functionality.\n  - Templated values support for `clusterName`,\
+      \ `region`, `vpcId`.\n  - `runtimeClassName` support.\n  - `--load-balancer-class`\
+      \ support in chart.\n  - More customization options for the service mutator\
+      \ webhook."
+    chart_updates: ['Chart: allow disabling ingress validation via Helm flag (2.9.0).',
+      'Chart: HPA template uses `.Capabilities.KubeVersion.Version` (compat/templating
+        change).', (From 2.8.0 line) Additional ServiceMonitor functionality., '(From
+        2.8.0 line) Allow templating for `clusterName`, `region`, `vpcId` values.',
+      (From 2.8.0 line) Add `runtimeClassName` support., (From 2.8.0 line) Support
+        `--load-balancer-class` in Helm chart., (From 2.8.0 line) More customization
+        options for the service mutator webhook.]
+    features: ['Controller migrates to **AWS SDK for Go v2**, improving API efficiency
+        and retry/backoff behavior (2.9.0).', Adds `listenerAttributes` plumbing (via
+        `IngressClassParams`) to support listener attributes on load balancers; ALB
+        has none yet (2.9.0)., NLB now supports configurable **TCP idle timeout**
+        (2.9.0)., 'Fix/feature: allow resolving/attaching **multiple security groups
+        with the same Name tag** (2.9.0).', New runtime option to **identify VPC by
+        tags** when metadata is blocked / VPC ID unknown at deploy time (2.9.0).,
+      (From 2.8.0 line) IngressClass-level `certificateArn` defaults for ingresses.,
+      (From 2.8.0 line) New IP address type `dualstack-without-public-ipv4` to disable
+        public IPv4 on dualstack LBs., (From 2.8.0 line) Optional enforcement of NLB
+        security groups on PrivateLink traffic via annotation., (From 2.8.0 line)
+        TargetGroupBinding can target resources outside cluster VPC via `vpcID`.,
+      (From 2.8.0 line) Managed Prefix List annotations for SG-based access control.]
+    breaking_changes: ['**Do not deploy v2.9.0 if AWS Shield Advanced is enabled**:
+        it can crash the controller; use **v2.9.2+** if Shield Advanced is subscribed
+        and Shield is enabled on the controller (action-required note).', CRD schema
+        changes require **manual CRD apply** during Helm upgrade; skipping can break
+        reconciliation or future compatibility (2.8.0 and 2.9.0 action-required notes).,
+      'IAM policy updates may be required depending on features used: China mTLS needs
+        `elasticloadbalancing:DescribeTrustStores` (2.8.0); NLB TCP idle timeout/listener
+        attribute management needs `DescribeListenerAttributes`/`ModifyListenerAttributes`
+        (2.9.0).']
   chart_version: 1.9.0
   images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.9.0']
 - version: 2.8.0
@@ -22,6 +68,47 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/CRD upgrade notes (read before `helm upgrade`)\n\n- **Manual\
+      \ CRD update required for v2.8.0**: v2.8.0 adds/updates fields in CRDs (IngressClassParams\
+      \ and TargetGroupBinding). If you upgrade with Helm, **apply the CRDs yourself\
+      \ first**:\n  ```sh\n  kubectl apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
+      \n  ```\n- **Controller image**: `public.ecr.aws/eks/aws-load-balancer-controller:v2.8.0`\n\
+      - **Kubernetes compatibility**: v2.8.0 requires **Kubernetes 1.22+** (same baseline\
+      \ as v2.7.0).\n- **China partition IAM policy** (only if you use ALB mTLS in\
+      \ China regions): update the reference IAM policy to include `elasticloadbalancing:DescribeTrustStores`.\n\
+      \n## Chart-related enhancements you may want to configure\n\n- **ServiceMonitor\
+      \ improvements**: chart adds additional ServiceMonitor functionality (review\
+      \ your `serviceMonitor` values if you scrape metrics via Prometheus Operator).\n\
+      - **Templated values support**: chart allows passing **templated** values for\
+      \ `clusterName`, `region`, and `vpcId`.\n- **RuntimeClassName**: chart supports\
+      \ setting `runtimeClassName` for the controller pod.\n- **loadBalancerClass\
+      \ support**: chart supports `--load-balancer-class`.\n- **Service mutator webhook\
+      \ customization**: more knobs to tune webhook behavior (review webhook-related\
+      \ values if you previously customized it).\n"
+    chart_updates: ['CRDs changed in v2.8.0: IngressClassParams adds `certificateArn`
+        and updates `ipAddressType`; TargetGroupBinding adds `vpcID` (manual CRD apply
+        required when upgrading via Helm).', 'Chart enhancements: additional ServiceMonitor
+        functionality.', 'Chart enhancements: allow templated values for `clusterName`,
+        `region`, `vpcId`.', 'Chart enhancements: add `runtimeClassName` support.',
+      'Chart enhancements: add support for `--load-balancer-class`.', 'Controller/webhook:
+        more customization options for the service mutator webhook.', 'Controller
+        behavior: preserve `loadBalancerClass` on Service updates.']
+    features: ['IngressClass-level default certificate configuration: `certificateArn`
+        can be set in IngressClassParams to apply certificates across ingresses in
+        that class.', New ALB `ipAddressType` option `dualstack-without-public-ipv4`
+        to create dualstack LBs without public IPv4 addresses (IPv6-only public clients).
+        Can be set via ingress annotation or at IngressClassParams., Optional enforcement
+        of NLB security groups on AWS PrivateLink traffic via annotation `aws-load-balancer-inbound-sg-rules-on-private-link-traffic`.,
+      TargetGroupBinding can register targets in a different VPC by setting `spec.vpcID`
+        (defaults to the cluster VPC if omitted)., Allow access control via AWS Managed
+        Prefix Lists using new annotations for ALB ingresses and NLB services; ignored
+        if explicit security groups are set.]
+    breaking_changes: [CRD schema changes in v2.8.0 mean you must update CRDs before/alongside
+        the Helm upgrade; otherwise the controller may fail to reconcile resources
+        or validation may reject new fields., '(Regional/IAM) Using ALB mTLS in China
+        now requires IAM policy permission `elasticloadbalancing:DescribeTrustStores`;
+        without it, mTLS-related reconciliation will fail.']
   chart_version: 1.8.0
   images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.8.0']
 - version: 2.7.0
@@ -29,6 +116,33 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **IAM policy update required (action required):** add `elasticloadbalancing:DescribeTrustStores`\
+      \ to the controller IAM policy to support the new **Ingress mTLS** capability.\n\
+      - **New controller flag:** `--service-target-eni-security-group-tags` (Helm\
+      \ values/args need to be updated if you want to use it) to control which Security\
+      \ Group tags are considered when adding ingress rules for NLB targets.\n- **Readiness\
+      \ probe added by default (chart >= 1.7.0):** running an **older controller image**\
+      \ with the **newer Helm chart** may fail because the old image doesn\u2019t\
+      \ expose the readiness endpoint expected by the chart.\n- **Chart knobs added:**\n\
+      \  - Webhook readiness check enabled in the chart.\n  - `revisionHistoryLimit`\
+      \ override.\n  - Field to **enable HPA** for the controller (intended to help\
+      \ during load spikes on `aws-load-balancer-webhook-service`)."
+    chart_updates: [Introduced chart-level webhook readiness check and default controller
+        readiness probe wiring., Added `revisionHistoryLimit` configurability for
+        controller Deployment., Added an option to enable HorizontalPodAutoscaler
+        (HPA) for the controller., General Helm chart and documentation enhancements.]
+    features: [Ingress mTLS support via integration with ELBv2 trust stores; configure
+        mTLS mode and trust store name/ARN via new Ingress annotations (requires new
+        IAM permission)., EKS Pod Identity support (enables using EKS Pod Identity
+        for AWS auth instead of/alongside IRSA depending on cluster setup)., NLB target
+        security-group discovery can now consider additional tags via `--service-target-eni-security-group-tags`
+        for more flexible environments.]
+    breaking_changes: ['If you upgrade the Helm chart (>=1.7.0) but keep an older
+        controller image, installation may fail due to the newly added readiness probe
+        expecting endpoints not present in older images.', 'IAM permissions must be
+        updated to include `elasticloadbalancing:DescribeTrustStores` if you want
+        to use (or avoid errors when enabling) the new Ingress mTLS feature.']
   chart_version: 1.7.0
   images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.7.0']
 - version: 2.6.0
@@ -36,6 +150,16 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['NLB security group support: controller can now create/attach a frontend
+        SG to NLBs and manage a backend SG to control NLB->node/ENI traffic, enabling
+        tighter instance exposure controls. You can optionally attach existing frontend
+        SGs via annotation and optionally enable/disable backend rule management via
+        a new annotation.', Improved ACM certificate auto-discovery for Ingress to
+        recognize more key algorithms (RSA 1024/2048/3072/4096 and multiple EC curves).]
+    breaking_changes: []
   chart_version: 1.6.0
   images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.6.0']
 - version: 2.5.0
@@ -43,6 +167,41 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm / manifest changes you must account for\n\n- **Do not just\
+      \ bump the controller image tag on the existing Deployment.** v2.5.0 image is\
+      \ **not compatible with older manifests**; upgrade via **`helm upgrade`** or\
+      \ apply the full updated manifests.\n- New helm value: **`enableServiceMutatorWebhook`**\
+      \ (renamed in this release). Set to `false` to disable the new Service mutator\
+      \ webhook and keep the in-tree CCM/default behavior.\n- New helm value: **`defaultTargetType`**\
+      \ to set the default target type for created target groups.\n- **CRDs are not\
+      \ fully updated by helm upgrade:** `IngressClassParams` gained new fields (`subnets`,\
+      \ `InboundCIDRs`, `SSLPolicy`). You must **manually apply updated CRDs**:\n\
+      \  ```bash\n  kubectl apply -k \"http://github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master\"\
+      \n  ```\n"
+    chart_updates: [Controller is now intended to be upgraded via updated manifests/helm
+        because of webhook/mutating webhook additions; old manifests are considered
+        incompatible., Adds a mutating webhook so the controller can claim/own Service
+        type LoadBalancer by default (sets `spec.loadBalancerClass`)., Helm chart
+        supports setting default target type (`defaultTargetType`)., 'IngressClassParams
+        CRD schema expanded with `subnets`, `InboundCIDRs`, and `SSLPolicy`.', Leader
+        election moved/migrated toward ConfigMap leases., Ingress/service annotation
+        validation tightened (notably ssl-ports and ingress condition annotations).]
+    features: ['Controller provides a **Service mutator webhook** that sets `spec.loadBalancerClass`
+        on newly created Services of type `LoadBalancer`, making AWS LBC the default
+        controller for them (can be disabled via `enableServiceMutatorWebhook=false`).',
+      You can configure a **default target type** for target groups (via helm `defaultTargetType`
+        or controller flag)., '`IngressClassParams` supports new configuration fields:
+        **`subnets`**, **`InboundCIDRs`**, and **`SSLPolicy`**.']
+    breaking_changes: ['**Kubernetes 1.22+ required** in v2.5.0 due to reliance on
+        `spec.loadBalancerClass` support when making LBC the default Service controller.',
+      'Behavior change: controller now **creates an internal NLB by default** for
+        Service type `LoadBalancer`; to get internet-facing you must set `service.beta.kubernetes.io/aws-load-balancer-scheme:
+        internet-facing`.', 'If you leave the Service mutator webhook enabled, you
+        **cannot provision new Classic Load Balancers (CLB)** from Kubernetes Services
+        (existing CLBs continue to work).', 'Known issue/action required: v2.5.0 ingress
+        validator has a bug handling ingress rules without an HTTP path (issue #3158);
+        **do not upgrade** if you have such ingresses.']
   chart_version: 1.5.0
   images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.5.0']
 - version: 2.4.0
@@ -50,18 +209,139 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / install behavior changes to review
+
+      - **Kubernetes version requirement raised:** v2.4.0 requires **Kubernetes 1.19+**
+      because it moves Ingress examples/objects to `networking.k8s.io/v1`.
+
+      - **Upgrade method:** if upgrading from a prior version, **re-apply the full
+      manifest or use Helm** because of **webhook changes**.
+
+      - **New default resources (Helm):** the chart now **creates an `IngressClass`
+      named `alb` by default** and also creates **`IngressClassParams` by default**.
+
+      - **Default name change:** `IngressClassParams` default name is now **`alb`**.
+
+      - **New chart feature:** **ServiceMonitor** support added (for Prometheus Operator
+      environments).
+
+      - **Default value change:** `keepTLSSecret` is now **`true` by default** (previously
+      you may have relied on it being false to allow rotation/recreation).
+
+      '
+    chart_updates: [Chart now creates `IngressClass` and `IngressClassParams` resources
+        by default (including default naming of `alb`)., Chart adds optional `ServiceMonitor`
+        resource for metrics scraping via Prometheus Operator., Chart defaults `keepTLSSecret=true`
+        (TLS secret reuse behavior changes)., Chart removed use of `admissionregistration.k8s.io/v1beta1`
+        (aligns with newer Kubernetes APIs).]
+    features: [Ingress objects now use/support the stable `networking.k8s.io/v1` Ingress
+        API (Kubernetes 1.19+)., Supports `Service.spec.loadBalancerClass` to bind
+        Services to a specific load balancer implementation., Adds an option to disable
+        security group rule management for NLBs (useful if rules are managed externally).,
+      Merges tags defined on Kubernetes Ingress/Service with controller-managed AWS
+        resource tags for more consistent tagging., Introduces feature gate `ServiceTypeLoadBalancerOnly`
+        to optionally limit reconciliation to `Service` objects of type `LoadBalancer`.,
+      Helm chart can create `IngressClass`/`IngressClassParams` and a `ServiceMonitor`
+        out of the box.]
+    breaking_changes: ['**Kubernetes 1.18 and older are no longer supported** starting
+        with v2.4.0 due to the move to `networking.k8s.io/v1` Ingress.', '**Webhook
+        resources changed**; upgrades require applying the complete updated manifest
+        or performing the upgrade via Helm to ensure webhook configuration/CA bundles
+        are correct.', 'Helm now creates `IngressClass`/`IngressClassParams` by default,
+        which can conflict with pre-existing resources or other controllers if you
+        were managing these manually.']
   chart_version: 1.4.0
   images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.4.0']
 - version: 2.3.0
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / install notes (2.2.0 \u2192 2.3.0)\n\n- **Helm\
+      \ v3 chart**: v2.3.0 ships as a Helm v3 chart. Ensure your tooling/pipeline\
+      \ uses Helm 3.\n- **cert-manager API v1**: chart/manifests move to `cert-manager.io/v1`.\
+      \ If you enable cert-manager integration (or install via YAML that uses cert-manager),\
+      \ **upgrade cert-manager to v1.5.3+**.\n- **Webhook TLS handling improvements**:\n\
+      \  - Chart can **reuse existing TLS secrets**.\n  - Chart supports **supplying\
+      \ your own webhook TLS cert/key**.\n- **New/changed Helm values** (as referenced\
+      \ in notes):\n  - `enableBackendSecurityGroup` (to revert to previous SG behavior\
+      \ by setting `false`).\n  - `backendSecurityGroup` (to provide an explicit backend\
+      \ SG instead of controller-managed shared SG).\n  - `serviceAnnotations` is\
+      \ **optional** (new value to annotate the controller Service).\n- **PDB apiVersion**:\
+      \ chart will use `policy/v1` PodDisruptionBudget if available.\n- **IngressClass\
+      \ creation parameter**: chart adds an option/parameter to create the `IngressClass`\
+      \ resource (verify and set if you rely on chart-managed IngressClass)."
+    chart_updates: [Helm chart moved to **Helm v3** packaging/structure., Manifests/chart
+        updated to use `admissionregistration.k8s.io/v1` (webhooks) and cert-manager
+        `v1` resources., Chart now prefers `policy/v1` PodDisruptionBudget when the
+        cluster supports it., Chart supports reusing existing webhook TLS secrets
+        and optionally providing custom TLS cert/key., Chart adds optional `serviceAnnotations`
+        and a parameter to create an `IngressClass` resource.]
+    features: ['Optimized/improved security group management for ALBs (shared backend
+        SG model, with port-range restriction options).', 'Support for **ALB IPv6
+        target groups** (notably for IPv6 clusters, plus new IAM perms).', Support
+        for **EndpointSlice** as a backend discovery source for IP target groups.,
+      'Ability to specify NLB attributes via annotations, including **NLB deletion
+        protection**.', 'Improved subnet discovery behavior (only on new LB creation;
+        can consider available IP addresses) and additional filtering (e.g., by VPC
+        ID).']
+    breaking_changes: ["Controller upgrade can **reconfigure existing ALBs' security\
+        \ groups** due to the new shared backend SG behavior; there may be a brief\
+        \ traffic impact window during reconciliation\u2014plan a maintenance window\
+        \ or pin behavior via `enableBackendSecurityGroup=false` / `--enable-backend-security-group=false`\
+        \ or set an explicit backend SG.", 'If you use cert-manager integration/manifests,
+        you must be on **cert-manager v1.5.3+** because resources now use the `cert-manager.io/v1`
+        API.', New IAM permissions are required for **IPv6 clusters**; failing to
+        update policy may break reconciliation for IPv6-related features.]
   chart_version: 1.3.2
   images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.3.0']
 - version: 2.2.0
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm / manifests changes to plan for\n- **Update IAM policy**\
+      \ attached to the controller (IRSA role/instance profile) to the **v2.2.0 sample\
+      \ policy**. This release explicitly requires **new IAM permissions**.\n- **RBAC\
+      \ changes required**: new permissions are needed; the **latest chart/manifests\
+      \ include them**, but ensure your cluster role is updated if you manage RBAC\
+      \ separately.\n- **CRD + webhook updates required**: apply the updated CRDs\
+      \ and webhook configurations (the latest chart/manifests include them). If you\
+      \ install CRDs out-of-band, update them before/with the controller.\n- If you\
+      \ use controller flags, note new/changed behavior around tagging:\n  - `--default-tags`\
+      \ now has **highest priority** (can override tags coming from other sources).\n\
+      \  - New flags to **opt out** of managing specific tags (\"external-managed-tags\"\
+      ).\n  - New flags to customize **webhook certificate locations** and **default\
+      \ SSL policy**.\n\n> No specific Helm values keys were provided in the notes\
+      \ you pasted; treat the above as **behavioral/manifest requirements** rather\
+      \ than guaranteed `values.yaml` key changes."
+    chart_updates: ['Controller image moves to `docker.io/amazon/aws-alb-ingress-controller:v2.2.0`
+        (and corresponding ECR mirrors).', 'Manifests updated to newer Kubernetes
+        APIs: webhook + CRDs upgraded to `v1` APIs; deprecated apiVersions removed.',
+      'Admission webhooks improved: pod mutator webhook now uses `objectSelector`;
+        webhook cert/key locations are configurable via flags.', 'New CRD introduced:
+        **IngressClassParams** (plus validating webhook) and RBAC added to read it.']
+    features: [Adds **NLB instance mode** support., 'Adds annotation to set **private
+        static IPv4 addresses** for internal NLBs: `service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses`.',
+      Introduces **IngressClassParams** to constrain/standardize LB settings across
+        multiple Ingresses., "Adds `alb.ingress.kubernetes.io/ssl-redirect` to simplify\
+        \ HTTP\u2192HTTPS redirects.", Supports Ingress **PathType**., Supports resource
+        tagging for **ALB listeners and listener rules**., Allows specifying a **custom
+        load balancer name** for ALB/NLB., Allows selecting backend nodes by **node
+        labels** for Ingress/Service/TargetGroupBinding., Supports provisioning ALB
+        on **Local Zones**., Adds ability to opt out management for certain tags via
+        controller flags., Adds ability to customize webhook certificate locations
+        via controller flags., Adds ability to specify a default **SSL policy** via
+        controller flags.]
+    breaking_changes: ['**NLB scheme default changed**: new NLBs are **internal by
+        default**. To create an internet-facing NLB you must set `service.beta.kubernetes.io/aws-load-balancer-scheme:
+        internet-facing` on the Service (existing NLBs are not affected).', Ingress
+        rules that reference a **non-existent Service/Action** no longer block reconcile;
+        they will be replaced with **fixed 503 responses** (changes failure mode/traffic
+        behavior)., 'Tag precedence change: tags specified via the controller flag
+        `--default-tags` now take **highest priority**, which can override tags set
+        elsewhere.']
   chart_version: 1.2.2
   images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.2.0']
 - version: 2.1.0
@@ -70,6 +350,30 @@ versions:
     '1.15']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **RBAC update required if you use `IngressClass`:** v2.1.0 needs
+      permission to **read `IngressClass`** resources. The upstream helm chart/manifests
+      include this; ensure your rendered RBAC includes `get/list/watch` on `networking.k8s.io/ingressclasses`
+      (or equivalent).
+
+      - No other helm values changes were called out in the provided notes. (You may
+      still want to diff your chart values between versions to catch defaults changes,
+      but nothing is explicitly mentioned here.)'
+    chart_updates: [RBAC roles/manifests updated to include permissions for `IngressClass`
+        (required when using `IngressClass`).]
+    features: [IngressClass support (Kubernetes 1.18+) so the controller can select/manage
+        ingresses via `IngressClass` instead of only the legacy `kubernetes.io/ingress.class`
+        annotation., 'gRPC end-to-end HTTP/2 support for ALB workloads, improving
+        compatibility for gRPC services behind ALB.', Customer Owned IP (COIP) pool
+        configuration support for ALB on AWS Outposts., NLB IPv6 support for dual-stack/IPv6-facing
+        services., NLB ALPN policy configuration support (useful for TLS negotiation
+        behavior)., 'NLB target group attributes can be configured via annotations,
+        allowing tuning of target group behavior.', 'Ability to explicitly configure
+        subnets for NLB, rather than relying solely on discovery.', Default AWS tags
+        support so all AWS resources created/managed by the controller can receive
+        a standard tag set.]
+    breaking_changes: ['If you use `IngressClass`, the controller will fail to watch/operate
+        correctly until RBAC is updated to allow reading `IngressClass` resources.']
   chart_version: 1.1.1
   images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.1.0']
 - version: 2.0.0
@@ -78,5 +382,6 @@ versions:
     '1.15']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.0.6
   images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.0.0']
