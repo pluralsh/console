@@ -224,6 +224,8 @@ def get_kube_release_info():
     seen = set()
     result = []
     for kube_release in reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))):
+        if "-" in kube_release[0]:
+            continue
         cleaned = clean_kube_version(kube_release[0])
         if cleaned and cleaned not in seen:
             seen.add(cleaned)
@@ -233,7 +235,7 @@ def get_kube_release_info():
         validated = validate_semver(tupe[0].lstrip("v"))
         return (validated.major, validated.minor, validated.patch, tupe[1])
 
-    return sorted(result, key=sorter, reverse=True)
+    return sorted(result, key=sorter, reverse=False)
 
 def get_github_releases_timestamps(repo_owner, repo_name):
     for page in range(1, 3):
@@ -374,6 +376,8 @@ def sort_versions(versions):
 def merge_versions(existing_versions, new_versions):
     for new_version in new_versions:
         version_num = new_version["version"]
+        if existing_versions.get(version_num):
+            new_version["summary"] = existing_versions[version_num].get("summary")
         existing_versions[version_num] = new_version
     return existing_versions
 
@@ -440,8 +444,7 @@ def reduce_versions(versions):
 
 
 def clean_kube_version(vsn):
-    if vsn.startswith("v"):
-        vsn = vsn[1:]
+    vsn = vsn.lstrip("v")
     as_semver = validate_semver(vsn)
     if not as_semver:
         return None

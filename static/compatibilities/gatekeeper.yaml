@@ -5,7 +5,7 @@ helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
 chart_name: gatekeeper
 versions:
 - version: 3.21.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
@@ -47,8 +47,22 @@ versions:
         then be removed).']
   chart_version: 3.21.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0', 'openpolicyagent/gatekeeper:v3.21.0']
+- version: 3.20.1
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Patch/minor app release update from Gatekeeper v3.20.0 to v3.20.1;
+        no functional chart behavior changes called out in the provided notes., 'Component/toolchain
+        refresh: kubectl and Go versions bumped via cherry-picks; internal frameworks
+        dependency bumped to v0.18.1.']
+    features: []
+    breaking_changes: []
+  chart_version: 3.20.1
+  images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.1', 'openpolicyagent/gatekeeper:v3.20.1']
 - version: 3.20.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -94,8 +108,37 @@ versions:
         \ VAP."]
   chart_version: 3.20.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.0', 'openpolicyagent/gatekeeper:v3.20.0']
+- version: 3.19.1
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New required flag for generation:** Starting with **v3.19.0**\
+      \ (and therefore still required in **v3.19.1**), Gatekeeper requires `--operation=generate`\
+      \ for CRD and VAP/VAPB generation. Update your singleton deployment (typically\
+      \ `gatekeeper-audit`) to include `--operation=generate`. If you **do not run\
+      \ audit**, add `--operation=generate` to the **controller-manager** deployment\
+      \ instead.\n  - Reference: https://open-policy-agent.github.io/gatekeeper/website/docs/operations/#generation\n\
+      \n- **Optional behavior toggle:** A flag was added to enable/disable **referential\
+      \ constraints** (introduced in v3.19.0). If you rely on referential constraints,\
+      \ confirm the default behavior in your current values/manifests and set the\
+      \ flag explicitly if needed."
+    chart_updates: [v3.19.1 is a patch release with no user-facing feature additions;
+        it primarily contains a bug fix related to deleting Gatekeeper resources when
+        the delete operation is enabled., 'CI/test updates only: v3.19.1 bumps Kubernetes
+        versions used in testing/CRD Dockerfile; no direct runtime impact expected.']
+    features: [(v3.19.0) Gatekeeper ConstraintTemplates can use OPA **Rego v1** syntax
+        via the updated Rego driver., '(v3.19.0) Pub/Sub was generalized into an **export
+        mechanism**, enabling additional violation export backends (e.g., disk).',
+      (v3.19.0) `gator test` gained a `--deny-only` flag to focus on deny results.]
+    breaking_changes: ['(v3.19.0) **Breaking/behavioral change:** `--operation=generate`
+        is now required for CRD and VAP/VAPB generation. Missing this flag can prevent
+        expected generation behavior and may impact upgrades/installations that depended
+        on implicit generation.']
+  chart_version: 3.19.1
+  images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1', 'openpolicyagent/gatekeeper:v3.19.1']
 - version: 3.19.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary:
@@ -115,8 +158,37 @@ versions:
         \ add it to the controller-manager deployment."]
   chart_version: 3.19.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0', 'openpolicyagent/gatekeeper:v3.19.0']
+- version: 3.18.3
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Required flag change:** Ensure at least one Gatekeeper Pod\
+      \ that performs *generation* is started with `--operation=generate`.\n  - If\
+      \ you run the singleton `gatekeeper-audit` deployment, add `--operation=generate`\
+      \ there.\n  - If you **do not** run audit, add `--operation=generate` to the\
+      \ `gatekeeper-controller-manager` deployment.\n  - This is required to guard\
+      \ **CRD generation** and **ValidatingAdmissionPolicy / ValidatingAdmissionPolicyBinding\
+      \ (VAP/VAPB) generation**.\n- **Values that exist since 3.18.0:** Helm chart\
+      \ supports `logStatsAdmission` and `logStatsAudit` values (new in 3.18.0). No\
+      \ additional values changes were called out in the 3.18.3 notes you provided."
+    chart_updates: ['3.18.0 chart: added Helm values for `logStatsAdmission` and `logStatsAudit`.',
+      '3.18.x: no chart template changes were explicitly listed in the 3.18.3 snippet
+        beyond cherry-picked bugfixes; treat as patch-level maintenance update.']
+    features: [(3.18.0) CEL-based policies enforced through Gatekeeper (ValidatingAdmissionPolicy
+        support) reached GA., (3.18.0) Added support for `generate` operation and
+        waiting for VAPB generation (generation controller behavior)., (3.18.0) Added
+        config pod status reporting (observability/status improvements)., (3.18.0)
+        Helm chart gained `logStatsAdmission` / `logStatsAudit` toggles for stats
+        logging.]
+    breaking_changes: ['`--operation=generate` is now required on a singleton deployment
+        to handle CRD and VAP/VAPB generation; without it, generated artifacts may
+        not be created/guarded as expected. This impacts deployments that previously
+        relied on default operations behavior.']
+  chart_version: 3.18.3
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.3', 'openpolicyagent/gatekeeper:v3.18.3']
 - version: 3.18.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary:
@@ -161,8 +233,47 @@ versions:
         \ in ConstraintTemplates/Constraints; annotations are no longer the mechanism."]
   chart_version: 3.18.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.0', 'openpolicyagent/gatekeeper:v3.18.0']
+- version: 3.17.2
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Gatekeeper 3.17 introduces/solidifies Kubernetes-native validation
+        (CEL/VAP) support and related manifest/chart wiring: CEL-based policies via
+        ValidatingAdmissionPolicy are beta; VAP/VAPBinding generation moved from annotations
+        to explicit fields in ConstraintTemplate/Constraint; and constraint enforcement
+        can now be scoped per enforcement point via `spec.scopedEnforcementActions`.',
+      Helm chart gains knobs to make the ServiceAccount name configurable and optionally
+        disable SA creation (useful when binding to pre-created RBAC/IRSA/GSA)., 'Helm
+        chart adds optional RollingUpdate strategy parameters for the controller-manager/audit
+        deployments, enabling finer control of maxUnavailable/maxSurge during upgrades.',
+      'Controller-manager and audit deployments can now receive separate podLabels,
+        improving labeling/selection and observability alignment.', 'Various CEL/VAP
+        wiring fixes: include CEL flags on audit deployment; only set webhook matchConditions
+        when non-empty; updated VAP/VAPBinding API generation behavior (0.30 API;
+        create v1 or v1beta1 VAP/VAPB) and avoid setting alpha flags unless explicitly
+        enabled via Helm.', '3.17.2 is a patch release with a key bugfix: fixes a
+        nil-pointer when converting VAPBinding from v1beta1 to v1, plus security/library
+        updates (crypto/net).']
+    features: ["CEL-based policies enforced via Gatekeeper\u2019s ValidatingAdmissionPolicy\
+        \ integration (beta in 3.17.0).", 'Constraints can now specify different enforcement
+        actions per enforcement point (webhook, audit, gator, VAP) using `spec.scopedEnforcementActions`.',
+      Support for Kubernetes CONNECT operations in request matching., 'More flexible
+        Helm operations: configurable ServiceAccount (and ability to opt out of creating
+        it), plus optional RollingUpdate strategy tuning, and separate podLabels for
+        controller-manager vs audit.']
+    breaking_changes: ['If you previously generated VAP/VAPBinding via annotations,
+        3.17.0 changes this to use explicit fields in ConstraintTemplate and Constraint;
+        you must update those resources or VAP generation may stop working/behave
+        differently.', 'VAP/VAPBinding generation behavior and API versions are more
+        strict/explicit in 3.17.x (v1 vs v1beta1 selection and alpha flags only when
+        configured), so clusters/templates relying on prior implicit defaults may
+        need review.']
+  chart_version: 3.17.2
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.2', 'openpolicyagent/gatekeeper:v3.17.2']
 - version: 3.17.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -206,7 +317,7 @@ versions:
   chart_version: 3.17.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.0', 'openpolicyagent/gatekeeper:v3.17.0']
 - version: 3.16.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary:
@@ -252,7 +363,7 @@ versions:
   chart_version: 3.16.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.0', 'openpolicyagent/gatekeeper:v3.16.0']
 - version: 3.15.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   summary:
@@ -288,8 +399,70 @@ versions:
         ll need an alternative architecture or image strategy after upgrading."]
   chart_version: 3.15.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.15.0', 'openpolicyagent/gatekeeper:v3.15.0']
+- version: 3.14.2
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v3.14.1: Audit and controller-manager pods gained updated labels,
+        which may affect label selectors used by monitoring/NetworkPolicies.', 'v3.14.2:
+        No new functional features; this patch release is primarily security dependency
+        updates addressing multiple CVEs/advisories.']
+    breaking_changes: []
+  chart_version: 3.14.2
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.2', 'openpolicyagent/gatekeeper:v3.14.2']
+- version: 3.14.1
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to consider
+
+      - **New pod labels added by default** in `v3.14.1`: audit and controller-manager
+      pods get additional labels (PRs #3240/#3284). If you have tooling that matches
+      on exact labels/selectors (e.g., NetworkPolicies, PodMonitors, log/metric relabeling),
+      verify it still works.
+
+      - **Recommended Helm/Kubernetes labels introduced** in `v3.14.0` (PR #2788).
+      Expect more standardized `app.kubernetes.io/*` labels on Gatekeeper resources;
+      adjust any custom label-based automation if it assumes older labels.
+
+      - **Revision history limit configurable** in `v3.14.0` (PR #2920): a new chart
+      value likely controls `revisionHistoryLimit` for Deployments. Set explicitly
+      if you need to constrain ReplicaSet history.
+
+      - **External data provider cache TTL exposed** in `v3.14.0` (PR #2978) and **TTL=0
+      disables cache** (PR #3028 + fix #3134). Review/set the new value if you use
+      external data providers and need deterministic behavior.
+
+      - **Webhook name flag handling fixed** in `v3.14.0` (PR #2879). If you override
+      webhook names via values/flags, re-test after upgrade.
+
+      - **Audit cert rotation enabled by default** in `v3.14.0` (PR #2875). If your
+      environment has strict cert/secret management expectations, confirm the generated/rotated
+      cert behavior is acceptable.'
+    chart_updates: ['`v3.14.1` is a patch release with a small surface area: adds
+        pod labels and includes a panic-logging fix.', '`v3.14.0` contains the bulk
+        of chart/app changes for this upgrade path, including label standardization
+        and new/changed flags exposed via Helm.', 'Default behaviors to note from
+        `v3.14.0`: audit cert rotation enabled by default; external data provider
+        caching behavior clarified/fixed.']
+    features: [(v3.14.1) Audit and controller-manager pods updated to include additional
+        pod labels; mainly affects observability/selection/label-based policies.,
+      (v3.14.0) Improved experimental Validating Admission Policy (VAP) support and
+        updated bundled OPA to v0.57.1., (v3.14.0) Support multiple sync sources and
+        enhancements to replay/testing output., (v3.14.0) External data provider response
+        cache TTL configurable; TTL=0 disables caching.]
+    breaking_changes: ['No explicit breaking changes are called out in the provided
+        notes for v3.14.0 or v3.14.1. However, label changes (recommended labels +
+        new pod labels) can be *operationally breaking* if you rely on exact label
+        matches/selectors in policies, monitoring, or automation.']
+  chart_version: 3.14.1
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.1', 'openpolicyagent/gatekeeper:v3.14.1']
 - version: 3.14.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
@@ -324,8 +497,34 @@ versions:
     breaking_changes: []
   chart_version: 3.14.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0', 'openpolicyagent/gatekeeper:v3.14.0']
+- version: 3.13.2
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **v3.13.2 is the first 3.13.x tag that ships a Helm chart**;\
+      \ v3.13.1 did not include one.\n- **No Helm values changes were called out**\
+      \ in the v3.13.2 application release notes; expect the same behavior as v3.13.1.\n\
+      - For the 3.13.0 jump, note the new/updated Helm-facing knobs implied by the\
+      \ release notes:\n  - `webhookURL` Helm option added.\n  - Ability to choose\
+      \ **deployment strategy** for `controller-manager`.\n  - Support adding **PriorityClass**\
+      \ to Jobs.\n  - Pre-upgrade hook job: retries configured (helps reliability\
+      \ during upgrades).\n"
+    chart_updates: ['v3.13.2 release is functionally identical to v3.13.1, but **adds/publishes
+        the Helm chart artifact** for the release tag.', 'In 3.13.0 line, chart-related
+        fixes/robustness improvements mentioned include webhook retry logic for Helm
+        probes and retry configuration on the pre-upgrade hook job.']
+    features: ['Audit: added PubSub support for audit eventing/integration.', ExpansionTemplates
+        graduated to **beta** (more stable API/behavior expectations)., Added an experimental
+        **ValidatingAdmissionPolicy (VAP) driver** prototype., Added support for **External
+        Data Provider audit response cache** (performance/availability improvement).,
+      'Added **observability statistics/metrics** for admission, audit, and gator
+        CLI.']
+    breaking_changes: []
+  chart_version: 3.13.2
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2', 'openpolicyagent/gatekeeper:v3.13.2']
 - version: 3.13.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -366,7 +565,7 @@ versions:
   chart_version: 3.13.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0', 'openpolicyagent/gatekeeper:v3.13.0']
 - version: 3.12.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -401,8 +600,36 @@ versions:
     breaking_changes: []
   chart_version: 3.12.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.12.0', 'openpolicyagent/gatekeeper:v3.12.0']
+- version: 3.11.1
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart / values changes\n- No explicit **values.yaml**\
+      \ changes are called out in the provided notes for `v3.11.1`.\n- For `v3.11.0`,\
+      \ two Helm-related fixes may affect installs/upgrades:\n  - Post-install/post-upgrade\
+      \ jobs are allowed again (fix for Helm hook/job behavior).\n  - Chart avoids\
+      \ mixing `pod-security.kubernetes.io/*` labels with `ignore` labels (may change\
+      \ rendered namespace labels if you set either).\n\n### Upgrade implications\n\
+      - If you rely on Helm hooks/jobs (CRD install jobs, certgen jobs, etc.), `v3.11.0`\
+      \ includes a fix that may change whether those run as expected during upgrade.\n\
+      - If you set Pod Security Admission (PSA) labels on the Gatekeeper namespace\
+      \ via values, verify the resulting labels after upgrade to ensure you\u2019\
+      re not depending on the previously mixed/invalid combination.\n"
+    chart_updates: ['Helm: allow installation of post-install and post-upgrade jobs
+        (fixes hook/job install behavior).', 'Helm: avoid mixing Pod Security `ignore`
+        labels with PSA podSecurity labels (label rendering/validation fix).', 'Chart
+        metadata: adds an icon to Chart.yaml (cosmetic).']
+    features: [External Data is promoted to beta; external data providers now require
+        TLS/mTLS., 'Gator CLI is promoted to beta and now supports tracing, AdmissionReview
+        input, and specifying an OCI image.', Audit logs can include resource labels
+        to improve log context and filtering.]
+    breaking_changes: [External Data providers must be accessed over TLS/mTLS starting
+        in v3.11.0; plaintext providers will stop working until updated.]
+  chart_version: 3.11.1
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.1', 'openpolicyagent/gatekeeper:v3.11.1']
 - version: 3.11.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -451,7 +678,7 @@ versions:
   chart_version: 3.11.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.0', 'openpolicyagent/gatekeeper:v3.11.0']
 - version: 3.10.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -501,7 +728,7 @@ versions:
   chart_version: 3.10.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.10.0', 'openpolicyagent/gatekeeper:v3.10.0']
 - version: 3.9.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -549,7 +776,7 @@ versions:
   chart_version: 3.9.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.9.0', 'openpolicyagent/gatekeeper:v3.9.0']
 - version: 3.8.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -610,7 +837,7 @@ versions:
   chart_version: 3.8.0
   images: ['openpolicyagent/gatekeeper-crds:v3.8.0', 'openpolicyagent/gatekeeper:v3.8.0']
 - version: 3.7.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -651,7 +878,7 @@ versions:
   chart_version: 3.7.0
   images: ['openpolicyagent/gatekeeper-crds:v3.7.0', 'openpolicyagent/gatekeeper:v3.7.0']
 - version: 3.6.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -690,7 +917,7 @@ versions:
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper-crds:v3.6.0',
     'openpolicyagent/gatekeeper:v3.6.0']
 - version: 3.5.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -723,7 +950,7 @@ versions:
   chart_version: 3.5.0
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.5.0']
 - version: 3.4.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -760,7 +987,7 @@ versions:
   chart_version: 3.4.0
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.4.0']
 - version: 3.3.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -810,7 +1037,7 @@ versions:
   chart_version: 3.3.0
   images: ['openpolicyagent/gatekeeper:v3.3.0']
 - version: 3.2.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -825,7 +1052,7 @@ versions:
   chart_version: 3.2.0
   images: ['openpolicyagent/gatekeeper:v3.2.0']
 - version: 3.1.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
