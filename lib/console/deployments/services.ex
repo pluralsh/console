@@ -850,7 +850,7 @@ defmodule Console.Deployments.Services do
   defp stabilize_errors(attrs, [], _), do: Map.put(attrs, :errors, [])
   defp stabilize_errors(attrs, errors, old_errors) when is_list(errors) and is_list(old_errors),
     do: Map.put(attrs, :errors, _stabilize_errors(errors, old_errors, []))
-  defp stabilize_errors(attrs, _, _), do: attrs
+  defp stabilize_errors(attrs, _, _), do: Map.delete(attrs, :errors)
 
   defp _stabilize_errors([], _, acc), do: acc
   defp _stabilize_errors(res, [], acc), do: acc ++ res

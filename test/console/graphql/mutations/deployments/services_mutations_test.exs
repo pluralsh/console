@@ -552,6 +552,35 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert error["message"] == "wtf"
     end
 
+    test "it can support nil errors" do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      attrs = %{
+        "name" => "name",
+        "namespace" => "namespace",
+        "group" => "networking.k8s.io",
+        "version" => "v1",
+        "kind" => "ingress",
+        "synced" => true,
+        "state" => "RUNNING"
+      }
+
+      {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
+        mutation Update($components: [ComponentAttributes], $errors: [ServiceErrorAttributes], $id: ID!) {
+          updateServiceComponents(id: $id, components: $components, errors: $errors) {
+            id
+            components { name kind namespace group version kind synced state }
+            errors { source message }
+          }
+        }
+      """, %{"id" => service.id, "components" => [attrs], "errors" => nil}, %{cluster: cluster})
+
+      assert svc["id"] == service.id
+      [component] = svc["components"]
+      for {k, v} <- attrs,
+        do: assert component[k] == v
+    end
+
     test "it can persist service metadata" do
       cluster = insert(:cluster)
       service = insert(:service, cluster: cluster)
