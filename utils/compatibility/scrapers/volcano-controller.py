@@ -9,7 +9,7 @@ from utils import (
     validate_semver,
 )
 
-APP_NAME = "volcano"
+APP_NAME = "volcano-controller"
 README_URL = "https://raw.githubusercontent.com/volcano-sh/volcano/master/README.md"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 
@@ -105,7 +105,7 @@ def scrape():
 
     markdown = content.decode("utf-8", errors="replace")
 
-    chart_versions = get_chart_versions(APP_NAME)
+    chart_versions = get_chart_versions(APP_NAME, chart_name="volcano")
 
     # Use the latest stable appVersion from the chart index for the HEAD row.
     latest_chart_version = None
