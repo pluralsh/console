@@ -133,7 +133,34 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm chart fixes for webhook provider resources and general webhook
+        provider chart fixes landed around v0.15.0 (#4560, #4643). If you deploy webhook
+        providers via the chart, re-check your rendered manifests after the upgrade
+        to ensure resource requests/limits and webhook deployment settings still match
+        expectations.']
+    features: ['Webhook: passes `webhook-*` annotations through to webhook providers,
+        and webhook flags are no longer marked experimental (v0.15.0).', 'CoreDNS
+        provider: added etcd authentication support (v0.15.0).', 'AWS: can use AWS
+        profiles from a `.credentials` file (v0.15.0).', 'RFC2136: optional PTR record
+        support (v0.15.0).', 'Gateway API: dual-stack support and GRPCRoute client
+        updated to stable v1 (v0.15.0), plus later fixes to pass GatewayName into
+        config (v0.16.1).', 'Ambassador Host source: added annotation and label filters
+        (v0.15.0).', Provider cache introduced to improve performance/reduce provider
+        API calls (v0.15.0).]
+    breaking_changes: ['Several unmaintained/in-tree providers were removed in v0.15.0
+        (including the in-tree Infoblox provider); if you relied on any of these,
+        you must stay on an older version or migrate to a webhook provider.', 'GRPCRoute
+        support updated from v1alpha2 to stable v1 (v0.15.0); if you use GRPCRoute,
+        ensure your Gateway API CRDs/manifests match the supported API version.',
+      'Cloudflare had a breaking change in v0.16.0 that is fixed in v0.16.1; if upgrading
+        through 0.16.0, ensure you land on 0.16.1 to avoid custom-hostname issues.',
+      "TXT Registry format is transitioning: v0.16.0 adds an option to use only the\
+        \ new format, and the old format is planned for removal in the next release\u2014\
+        plan a migration if you rely on the legacy TXT format.", OpenStack Designate
+        in-tree provider is deprecated and will be removed in the next version; migrate
+        to the OpenStack webhook provider.]
   chart_version: 1.16.1
   images: ['registry.k8s.io/external-dns/external-dns:v0.16.1']
 - version: 0.15.0

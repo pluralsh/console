@@ -21,13 +21,29 @@ versions:
     breaking_changes: ['Access logs will now also be printed for rejected requests;
         the release note explicitly warns about this new behavior, so log volume/content
         may change and could affect log-based alerts/costs.']
-  chart_version: 38.0.0
+  chart_version: 38.0.1
   images: []
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['New load-balancing options: "least time" strategy (file/K8s CRD/service)
+        and "HighestRandomWeight" algorithm (service + K8s CRD support for highest
+        random weight).', 'New health check capabilities: TCP health checks plus passive
+        health checks in addition to existing active checks.', 'Kubernetes-related
+        expansions: Knative provider, Gateway API bumped to v1.4.0, and Ingress can
+        publish ExternalName Services.', 'ACME enhancements: additional certificatesResolvers
+        options (v3.6) building on v3.5 additions like OCSP stapling and new httpChallenge
+        delay/timeout knobs.', 'Platform/provider improvements: ECS IPv6 support,
+        Docker can optionally discover non-running containers, and Consul/ConsulCatalog/Nomad
+        logs provider namespace on startup.', 'Routing/proxy improvements: multi-layer
+        routing and additional HTTP/2 HPACK table size tunables; plugins now support
+        syscalls.', 'Dashboard/UI tweaks: Hub demo tile plus more compact table row
+        padding (v3.6) after the larger React dashboard migration in v3.5.']
+    breaking_changes: []
   chart_version: 37.3.0
   images: ['docker.io/traefik:v3.6.0']
 - version: 3.5.0

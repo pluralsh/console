@@ -5,6 +5,25 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 80.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [kube-prometheus-stack chart release 80.6.0 is primarily a dependency
+        refresh (non-major updates) via Renovate (#6426)., Prior release 80.5.0 was
+        also only non-major dependency updates via Renovate (#6425).]
+    features: [No user-facing features called out; this release is a routine dependency
+        bump of subcharts/images.]
+    breaking_changes: [No breaking changes mentioned in the provided release notes;
+        expected to be low-risk but validate dependency version impacts in your environment.]
+  chart_version: 80.6.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
@@ -164,7 +183,17 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["Chart release notes for both 77.14.0 and 78.5.0 only state: \u201C\
+        Update kube-prometheus-stack dependency non-major updates\u201D (Renovate\
+        \ bot PRs #6193 and #6262). No chart template/behavior changes or value key\
+        \ changes are called out in the provided notes."]
+    features: [Primarily dependency patch/minor bumps within the kube-prometheus-stack
+        dependency set; no user-facing feature additions are listed in the provided
+        release notes.]
+    breaking_changes: [None mentioned in the provided release notes; no breaking changes
+        are called out between 77.14.0 and 78.5.0 based on the text you shared.]
   chart_version: 78.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.1', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -197,7 +226,13 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['74.2.2: Bumps etcd image digest and updates kube-prometheus-stack
+        chart dependencies (non-major).', '75.18.1: Fixes the example for Prometheus
+        `additionalScrapeConfigs` in the chart.']
+    features: []
+    breaking_changes: []
   chart_version: 75.18.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -411,7 +446,15 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana chart dependency bumped to the 8.4.x series (from the
+        prior dependency version in 61.9.0)., 'Prometheus Operator chart: added support
+        to set annotations on the PrometheusOperator ServiceAccount.']
+    features: ["You can now configure annotations on the Prometheus Operator\u2019\
+        s ServiceAccount (useful for IRSA/workload identity, admission controllers,\
+        \ or external tooling that relies on SA annotations)."]
+    breaking_changes: []
   chart_version: 62.7.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -423,7 +466,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana subchart/dependencies were bumped to the 8.4.* series
+        (kube-prometheus-stack 61.9.0)., Grafana gained support for dual-stack clusters
+        in the 60.5.0 release (already present in your starting version).]
+    features: [Grafana chart dependencies updated to 8.4.* (may bring Grafana chart
+        fixes/changes).]
+    breaking_changes: []
   chart_version: 61.9.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.1.3', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.75.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -503,7 +553,13 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fix issue with kube-state-metrics 2.11.0 (included in kube-prometheus-stack
+        57.2.1)., 'CoreDNS Grafana dashboard fix (56.21.4): remove circular label
+        filtering in variables and refresh variable values on time range change.']
+    features: []
+    breaking_changes: []
   chart_version: 57.2.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.72.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -527,7 +583,18 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Updated the Grafana subchart to the 7.2.x series (as of kube-prometheus-stack
+        55.11.0)., 'Earlier in the range (54.2.2) added support/templating for managing
+        Grafana datasource ConfigMaps, configuring Prometheus replicas, and specifying
+        exemplar trace destinations.']
+    features: ['Grafana subchart updated to 7.2.x, which may include new Grafana chart
+        capabilities/fixes depending on your existing overrides.', "Added chart options/templates\
+        \ for Grafana Datasource ConfigMap management, Prometheus replica configuration,\
+        \ and exemplar trace destination wiring (useful for exemplars \u2192 tracing\
+        \ correlation)."]
+    breaking_changes: []
   chart_version: 55.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.2.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.70.0', 'quay.io/prometheus/alertmanager:v0.26.0',

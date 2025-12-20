@@ -348,7 +348,24 @@ versions:
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Controller image updates (v1.9.0 -> v1.9.6) including updated
+        webhook certificate generator component (v20231226-1a7112e06)., Enhanced/stricter
+        annotation validation (regex validation for common-name annotation; SSL cipher
+        list validation now includes SECLEVEL and STRENGTH)., ModSecurity library
+        version set to 3.0.11 (and ModSecurity internal processing disabled in 1.9.0
+        to avoid large-ingress impact)., 'Dependency security bump: runc updated to
+        1.1.11 (from earlier 1.1.8/1.1.9 in 1.9.0 notes).']
+    features: [Annotation validation introduced in 1.9.0 and tightened further by
+        1.9.6 (regex + ssl-cipher list validation)., Controller now defaults to disabling
+        user-provided configuration snippets (improves security posture)., Optional
+        auth access logs support was added (can reduce log volume).]
+    breaking_changes: [User snippets are disabled by default starting in 1.9.0; any
+        Ingress relying on snippet annotations will stop working unless explicitly
+        re-enabled., 'Annotation validation is enforced and is stricter by 1.9.6;
+        previously accepted but malformed annotations may now be rejected or ignored,
+        causing config changes/failures during reload.']
   chart_version: 4.9.1
   images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']

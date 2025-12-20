@@ -985,6 +985,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.21.1
   - version: 1.21.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -1129,19 +1130,13 @@ addons:
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
   versions:
-  - version: 3.31.2
+  - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: [v3.31.2 is functionally identical to v3.31.1 except for a Docker
-          image label fix on one image to satisfy Red Hat OpenShift Container Platform
-          certification requirements.]
-      features: []
-      breaking_changes: []
-    chart_version: 3.31.2
-    images: ['quay.io/tigera/operator:v1.40.2']
+    summary: null
+    chart_version: 3.31.3
+    images: ['quay.io/tigera/operator:v1.40.3']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -2495,7 +2490,25 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **Helm value behavior change (already in 1.17.4 but relevant
+        if you were on an older patch):** `kafka.apiKey` is set to `true` (per 1.17.4
+        notes). If you rely on older Kafka L7 policy behavior, confirm this value
+        in your existing `values.yaml` and keep/override as needed.
+
+        - No other explicit Helm values changes are called out in the provided 1.17.8
+        notes.
+
+        '
+      chart_updates: [No Helm chart structural changes were explicitly called out
+          in the provided notes for 1.17.8; most listed items are CI/build/dependency
+          updates., "Docs note (1.17.8): portmap binary requirements were documented\u2014\
+          useful if you rely on CNI portmap chaining or downstream packaging."]
+      features: [GAMMA reconciler supports attaching multiple HTTPRoutes to the same
+          Service (Gateway API behavior improvement)., Envoy starts serving listeners
+          only after clusters have been ACKed (improves correctness/readiness of L7/Gateway
+          programming).]
+      breaking_changes: []
     chart_version: 1.17.8
     images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
       'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636',
@@ -3344,7 +3357,24 @@ addons:
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- **Helm chart version**: When upgrading to v1.12.9+ you **must\
+        \ use the matching newer Cilium Helm chart version** (called out explicitly\
+        \ in the 1.12.9 notes).\n- **cert-manager users**: If you use cert-manager\
+        \ to generate Cilium certificates, Helm now **requires an explicit issuer\
+        \ configuration** (issuer must be set; relying on implicit defaults can fail\
+        \ the upgrade).\n\n> I don\u2019t have the Cilium *Helm chart* changelog for\
+        \ 1.12.10\u20131.12.14 in what you pasted, so I can\u2019t list additional\
+        \ value renames/deprecations beyond the cert-manager note above."
+      chart_updates: [Envoy bumps in the 1.12 line (1.23.7/1.23.8 noted around 1.12.9).,
+        "Certificate generation tooling updated: `cilium-certgen` bumped (v0.1.8 \u2192\
+          \ v0.1.9 by 1.12.14)."]
+      features: [Security advisory addressed in v1.12.9 (GHSA-pg5p-wwp8-97g8)., "Improved\
+          \ support for certain service hairpin/loopback scenarios: Pod \u2192 Service\
+          \ \u2192 same Pod hairpinning with endpoint routes (v1.12.14 fix)."]
+      breaking_changes: ['If you use cert-manager-managed certs, upgrades may break
+          unless you set/confirm the required issuer configuration in Helm values
+          (enforced starting in the 1.12.9-era chart changes).']
     chart_version: 1.12.14
     images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
       'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
@@ -4425,7 +4455,34 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Helm chart fixes for webhook provider resources and general
+          webhook provider chart fixes landed around v0.15.0 (#4560, #4643). If you
+          deploy webhook providers via the chart, re-check your rendered manifests
+          after the upgrade to ensure resource requests/limits and webhook deployment
+          settings still match expectations.']
+      features: ['Webhook: passes `webhook-*` annotations through to webhook providers,
+          and webhook flags are no longer marked experimental (v0.15.0).', 'CoreDNS
+          provider: added etcd authentication support (v0.15.0).', 'AWS: can use AWS
+          profiles from a `.credentials` file (v0.15.0).', 'RFC2136: optional PTR
+          record support (v0.15.0).', 'Gateway API: dual-stack support and GRPCRoute
+          client updated to stable v1 (v0.15.0), plus later fixes to pass GatewayName
+          into config (v0.16.1).', 'Ambassador Host source: added annotation and label
+          filters (v0.15.0).', Provider cache introduced to improve performance/reduce
+          provider API calls (v0.15.0).]
+      breaking_changes: ['Several unmaintained/in-tree providers were removed in v0.15.0
+          (including the in-tree Infoblox provider); if you relied on any of these,
+          you must stay on an older version or migrate to a webhook provider.', 'GRPCRoute
+          support updated from v1alpha2 to stable v1 (v0.15.0); if you use GRPCRoute,
+          ensure your Gateway API CRDs/manifests match the supported API version.',
+        'Cloudflare had a breaking change in v0.16.0 that is fixed in v0.16.1; if
+          upgrading through 0.16.0, ensure you land on 0.16.1 to avoid custom-hostname
+          issues.', "TXT Registry format is transitioning: v0.16.0 adds an option\
+          \ to use only the new format, and the old format is planned for removal\
+          \ in the next release\u2014plan a migration if you rely on the legacy TXT\
+          \ format.", OpenStack Designate in-tree provider is deprecated and will
+          be removed in the next version; migrate to the OpenStack webhook provider.]
     chart_version: 1.16.1
     images: ['registry.k8s.io/external-dns/external-dns:v0.16.1']
   - version: 0.15.0
@@ -5023,7 +5080,24 @@ addons:
     kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Controller image updates (v1.9.0 -> v1.9.6) including updated
+          webhook certificate generator component (v20231226-1a7112e06)., Enhanced/stricter
+          annotation validation (regex validation for common-name annotation; SSL
+          cipher list validation now includes SECLEVEL and STRENGTH)., ModSecurity
+          library version set to 3.0.11 (and ModSecurity internal processing disabled
+          in 1.9.0 to avoid large-ingress impact)., 'Dependency security bump: runc
+          updated to 1.1.11 (from earlier 1.1.8/1.1.9 in 1.9.0 notes).']
+      features: [Annotation validation introduced in 1.9.0 and tightened further by
+          1.9.6 (regex + ssl-cipher list validation)., Controller now defaults to
+          disabling user-provided configuration snippets (improves security posture).,
+        Optional auth access logs support was added (can reduce log volume).]
+      breaking_changes: [User snippets are disabled by default starting in 1.9.0;
+          any Ingress relying on snippet annotations will stop working unless explicitly
+          re-enabled., 'Annotation validation is enforced and is stricter by 1.9.6;
+          previously accepted but malformed annotations may now be rejected or ignored,
+          causing config changes/failures during reload.']
     chart_version: 4.9.1
     images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']
@@ -5684,6 +5758,26 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 80.6.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [kube-prometheus-stack chart release 80.6.0 is primarily a dependency
+          refresh (non-major updates) via Renovate (#6426)., Prior release 80.5.0
+          was also only non-major dependency updates via Renovate (#6425).]
+      features: [No user-facing features called out; this release is a routine dependency
+          bump of subcharts/images.]
+      breaking_changes: [No breaking changes mentioned in the provided release notes;
+          expected to be low-risk but validate dependency version impacts in your
+          environment.]
+    chart_version: 80.6.0
+    images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+      'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+      'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+      'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 80.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -5849,7 +5943,18 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ["Chart release notes for both 77.14.0 and 78.5.0 only state:\
+          \ \u201CUpdate kube-prometheus-stack dependency non-major updates\u201D\
+          \ (Renovate bot PRs #6193 and #6262). No chart template/behavior changes\
+          \ or value key changes are called out in the provided notes."]
+      features: [Primarily dependency patch/minor bumps within the kube-prometheus-stack
+          dependency set; no user-facing feature additions are listed in the provided
+          release notes.]
+      breaking_changes: [None mentioned in the provided release notes; no breaking
+          changes are called out between 77.14.0 and 78.5.0 based on the text you
+          shared.]
     chart_version: 78.5.0
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
       'quay.io/prometheus-operator/prometheus-operator:v0.86.1', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -5882,7 +5987,13 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['74.2.2: Bumps etcd image digest and updates kube-prometheus-stack
+          chart dependencies (non-major).', '75.18.1: Fixes the example for Prometheus
+          `additionalScrapeConfigs` in the chart.']
+      features: []
+      breaking_changes: []
     chart_version: 75.18.1
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
       'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -6099,7 +6210,15 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana chart dependency bumped to the 8.4.x series (from the
+          prior dependency version in 61.9.0)., 'Prometheus Operator chart: added
+          support to set annotations on the PrometheusOperator ServiceAccount.']
+      features: ["You can now configure annotations on the Prometheus Operator\u2019\
+          s ServiceAccount (useful for IRSA/workload identity, admission controllers,\
+          \ or external tooling that relies on SA annotations)."]
+      breaking_changes: []
     chart_version: 62.7.0
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
       'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -6111,7 +6230,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana subchart/dependencies were bumped to the 8.4.* series
+          (kube-prometheus-stack 61.9.0)., Grafana gained support for dual-stack clusters
+          in the 60.5.0 release (already present in your starting version).]
+      features: [Grafana chart dependencies updated to 8.4.* (may bring Grafana chart
+          fixes/changes).]
+      breaking_changes: []
     chart_version: 61.9.0
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.1.3', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
       'quay.io/prometheus-operator/prometheus-operator:v0.75.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -6192,7 +6318,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Fix issue with kube-state-metrics 2.11.0 (included in kube-prometheus-stack
+          57.2.1)., 'CoreDNS Grafana dashboard fix (56.21.4): remove circular label
+          filtering in variables and refresh variable values on time range change.']
+      features: []
+      breaking_changes: []
     chart_version: 57.2.1
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
       'quay.io/prometheus-operator/prometheus-operator:v0.72.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -6216,7 +6348,18 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Updated the Grafana subchart to the 7.2.x series (as of kube-prometheus-stack
+          55.11.0)., 'Earlier in the range (54.2.2) added support/templating for managing
+          Grafana datasource ConfigMaps, configuring Prometheus replicas, and specifying
+          exemplar trace destinations.']
+      features: ['Grafana subchart updated to 7.2.x, which may include new Grafana
+          chart capabilities/fixes depending on your existing overrides.', "Added\
+          \ chart options/templates for Grafana Datasource ConfigMap management, Prometheus\
+          \ replica configuration, and exemplar trace destination wiring (useful for\
+          \ exemplars \u2192 tracing correlation)."]
+      breaking_changes: []
     chart_version: 55.11.0
     images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.2.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
       'quay.io/prometheus-operator/prometheus-operator:v0.70.0', 'quay.io/prometheus/alertmanager:v0.26.0',
@@ -6905,6 +7048,45 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / chart-impacting changes to note
+
+        - **Hotfix image override (strongly recommended):** The upstream `longhorn-manager:v1.10.1`
+        image has known regressions/day-one issues. For Helm installs, **override
+        the manager image tag to `v1.10.1-hotfix-2`** in `values.yaml` (wherever your
+        chart exposes the manager image tag override).
+
+        - **Temporarily disable upgrade version check when using hotfix images:**
+        set **`preUpgradeChecker.upgradeVersionCheck=false`** (the release notes sometimes
+        mention `upgradeVersionCheck=false`; in Helm this is typically under `preUpgradeChecker`).
+
+        - **CRD storage version migration requirement (if coming from 1.9.x and you
+        might still have v1beta1 stored versions):** no Helm value, but it *will*
+        impact the upgrade. You may need to temporarily disable the validation webhook
+        (kubectl patch) as documented before proceeding.
+
+        - **Default settings handling improved in 1.10.1:** Helm chart now has better
+        quoting/multi-type support for `defaultSettings`. This can change how values
+        render if you previously relied on implicit YAML typing (e.g., booleans/ints
+        vs strings). Review your `defaultSettings` overrides after upgrade.'
+      chart_updates: [Longhorn `longhorn-manager` images for v1.10.0 and v1.10.1 have
+          upstream hotfix tags; plan to deploy `v1.10.1-hotfix-2` rather than the
+          plain `v1.10.1` manager image., 'Longhorn 1.10 removes the `longhorn.io/v1beta1`
+          API; clusters that still have CRDs with `status.storedVersions` including
+          `v1beta1` must be migrated to `v1beta2` before upgrading, otherwise the
+          manager may fail and you may need to downgrade.', 'Helm chart behavior change:
+          improved `defaultSettings` rendering (automatic quoting + multi-type support)
+          may alter manifests compared to 1.10.0; validate rendered output in staging.']
+      features: ['(From 1.10.0) V2 Data Engine adds interrupt mode (CPU-saving), volume/snapshot
+          cloning (full copy and linked clone), replica rebuild QoS limits, and volume
+          expansion; 1.10.1 extends interrupt mode support to NVMe (1.10.0 was AIO-only).',
+        (From 1.10.0) V1 Data Engine adds single-stack IPv6 support (dual-stack and
+          V2+IPv6 not supported in 1.10)., (From 1.10.0) CSIStorageCapacity support
+          enables capacity-aware scheduling for WaitForFirstConsumer StorageClasses.]
+      breaking_changes: [(From 1.10.0) `longhorn.io/v1beta1` CRD/API version is removed;
+          any remaining v1beta1 stored objects must be migrated to `v1beta2` before
+          upgrading from 1.9.x to 1.10.x., (From 1.10.0) Deprecated `replica.status.evictionRequested`
+          field removed; any tooling relying on it must be updated.]
     chart_version: 1.10.1
     images: ['longhornio/longhorn-manager:v1.10.1', 'longhornio/longhorn-share-manager:v1.10.1',
       'longhornio/longhorn-ui:v1.10.1']
@@ -6913,6 +7095,49 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "- **Work around known manager image regressions during upgrade**\n\
+        \  - v1.9.0: use `longhorn-manager:v1.9.0-hotfix-1` (recurring jobs regression),\
+        \ and temporarily set `upgradeVersionCheck: false` during the image swap/upgrade.\n\
+        \  - v1.10.0: use `longhorn-manager:v1.10.0-hotfix-1` (share-manager backoff\
+        \ regression causing manager panics), and temporarily set `upgradeVersionCheck:\
+        \ false` during the image swap/upgrade.\n- **StorageClass/Chart knobs you\
+        \ may want to revisit**\n  - v1.9.x added the ability to set `volumeBindingMode`\
+        \ via Helm values (if you previously patched StorageClasses manually).\n \
+        \ - v1.10 introduces *data-engine specific* settings values using a JSON format\
+        \ (see below). If you manage Longhorn `Setting` CRs via Helm `defaultSettings`,\
+        \ be prepared to update values to the new format when you need per-engine\
+        \ differences.\n- **Downgrade escape hatch (Helm)**\n  - If an upgrade to\
+        \ v1.10 fails due to CRD storedVersions issues, Helm-based downgrade is possible\
+        \ by disabling `preUpgradeChecker.upgradeVersionCheck` (as documented in the\
+        \ v1.10 notes)."
+      chart_updates: ['v1.9.x: chart supports `extraObjects` and allows `volumeBindingMode`
+          to be set from values; fixes for backupTargetName reference and backup execution
+          timeout setting in chart values.', 'v1.10.x: chart aligns with v1beta1 API
+          removal and new settings model; includes standardized mechanisms for overriding
+          image registry and specifying imagePullSecrets (noted as features in v1.10).']
+      features: ['V2 Data Engine: interrupt mode (CPU-saving; AIO disks only), cloning
+          (full-copy and linked/fast clones), rebuild QoS bandwidth limiting, and
+          volume expansion support.', V2 Data Engine can run without hugepages (more
+          flexible on low-spec nodes; may reduce performance)., V1 Data Engine gains
+          single-stack IPv6 support (dual-stack and V2 IPv6 not supported in this
+          release)., Settings are consolidated across V1/V2 with a new JSON format
+          allowing global or per-data-engine values., CSIStorageCapacity support improves
+          scheduling for `WaitForFirstConsumer` StorageClasses by making capacity-aware
+          placement decisions., 'Configurable backup block size when creating volumes
+          (tuning for performance/efficiency), plus UI enhancements like attachment
+          ticket summaries.']
+      breaking_changes: ['`longhorn.io/v1beta1` API is removed in v1.10.0; any leftover
+          v1beta1 stored data in CRDs can break the upgrade unless you migrate CRD
+          storedVersions to v1beta2 first.', 'If your cluster ever stored v1beta1
+          CRs (common for installs originally < v1.3.0, or after etcd/CRD restore),
+          you must run the documented manual CRD storage-version migration and verify
+          all Longhorn CRDs have only `v1beta2` in `status.storedVersions` before
+          upgrading to v1.10.', '`replica.status.evictionRequested` field is removed
+          in v1.10.0 (deprecated field removal; impacts only tooling/automation reading
+          it).', 'V2 backing images became incompatible starting v1.9.0; volumes using
+          V2 backing images must be backed up, deleted, backing images deleted, then
+          recreated and volumes restored during the upgrade.']
     chart_version: 1.10.0
     images: ['longhornio/longhorn-manager:v1.10.0', 'longhornio/longhorn-share-manager:v1.10.0',
       'longhornio/longhorn-ui:v1.10.0']
@@ -6921,6 +7146,50 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "- **Work around v1.9.0 recurring job regression:** Longhorn v1.9.0\
+        \ has a regression that breaks recurring jobs. For Helm upgrades:\n  - Set\
+        \ `upgradeVersionCheck: false` (temporarily) to allow the upgrade.\n  - Override\
+        \ the manager image to `longhorn-manager:v1.9.0-hotfix-1` instead of `v1.9.0`.\n\
+        - **Setting rename:** `orphan-auto-deletion` was replaced by `orphan-resource-auto-deletion`\
+        \ (auto-migrated during upgrade). If you previously relied on replica-data\
+        \ cleanup, ensure the new setting includes `replica-data`.\n- **New/changed\
+        \ Helm value options referenced in notes/issues:**\n  - `volumeBindingMode`\
+        \ can be set via Helm values (new).\n  - Chart supports `extraObjects` (new)\
+        \ to install additional manifests alongside Longhorn.\n  - Fix: `persistence.backupTargetName`\
+        \ was not referenced in the StorageClass template in early v1.9.0 chart content\u2014\
+        double-check your resulting StorageClass settings after upgrade if you depend\
+        \ on this.\n\n> Note: The release notes you provided are mostly app-focused;\
+        \ there may be additional chart-specific changes in the chart changelog not\
+        \ included here."
+      chart_updates: ['Kubernetes requirement: Longhorn v1.9.0 requires Kubernetes
+          **v1.25+** (same floor as v1.8.0, but critical to re-check before upgrade).',
+        Removed deprecated `environment_check.sh` script; environment validation is
+          now expected via `longhornctl` preflight checks., "CRDs: deprecated fields\
+          \ were removed from `longhorn.io/v1beta2` CRDs (ensure any automation/manifests\
+          \ aren\u2019t still writing removed fields).", 'API lifecycle: `longhorn.io/v1beta1`
+          is now unserved/unsupported in v1.9.0 (planned removal in v1.10.0).', 'Orphan
+          resource handling: introduces orphaned instance tracking/cleanup and replaces
+          the older orphan auto-deletion setting with a more granular one.', 'Observability:
+          adds/extends Prometheus metrics for engine/replica CR identity/status and
+          rebuild activity.']
+      features: [Recurring **system** backup can now be scheduled as a recurring job
+          (separate from volume backups)., Offline replica rebuilding (v1 and v2)
+          allows a degraded volume to rebuild replicas while **detached** (disabled
+          by default; opt-in via setting)., Orphaned instance deletion can track and
+          clean up leftover engine/replica runtime resources (disabled by default;
+          opt-in via setting)., V2 Data Engine enhancements include UBLK frontend
+          support and storage network support (still experimental)., Improved Prometheus
+          metrics provide better visibility into replica/engine status and rebuild
+          progress across the cluster.]
+      breaking_changes: ['**V2 backing images are incompatible with earlier versions**
+          due to xattr naming conflicts; you must delete and recreate V2 backing images
+          during the upgrade (requires backing up, deleting volumes using them, then
+          restoring after upgrade).', Deprecated fields were removed from `v1beta2`
+          CRDs; any tooling applying those fields may fail server-side validation.,
+        '`longhorn.io/v1beta1` API is no longer served in v1.9.0; any clients/scripts
+          using v1beta1 endpoints will break and must move to v1beta2.', '`environment_check.sh`
+          was removed; any runbooks relying on it must switch to `longhornctl` preflight.']
     chart_version: 1.9.0
     images: ['longhornio/longhorn-manager:v1.9.0', 'longhornio/longhorn-share-manager:v1.9.0',
       'longhornio/longhorn-ui:v1.9.0']
@@ -6929,6 +7198,50 @@ addons:
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "## Helm / chart value changes to plan for (1.7.0 \u279C 1.8.0)\n\
+        \n- **Use the official Longhorn Helm repo** (`https://charts.longhorn.io`)\
+        \ for the upgrade when possible. The upstream `longhorn/longhorn` repo\u2019\
+        s `deploy/longhorn.yaml` and in-repo chart had a **bad default image tag**\
+        \ (`v1.8.x-head`) in v1.8.0. If you must use those manifests, **override all\
+        \ Longhorn component image tags to `v1.8.0`**.\n\n- **Kubernetes minimum version\
+        \ increases to v1.25+** (due to CSI external-snapshotter v8.2.0). Confirm\
+        \ your cluster version before upgrading; if you are <1.25, upgrade Kubernetes\
+        \ first.\n\n- **Default Backup Target behavior changes**: v1.8.0 creates a\
+        \ `default` backup target during install/upgrade and uses it for system backups\
+        \ and volumes without an assigned backup target name. Review any Helm values\
+        \ that set backup target defaults or assumptions around a single backupstore.\n\
+        \n- **V2 Data Engine (block-type disk) default block size changes to 512 bytes**\
+        \ (was 4096). This is not just a value toggle: it impacts how you define/add\
+        \ V2 block-type disks and how you migrate existing V2 volumes (see breaking\
+        \ changes). If you templated disk definitions via GitOps/Helm, ensure they\
+        \ match the new expectation.\n\n- If you rely on **the deprecated `environment_check.sh`**\
+        \ workflow introduced earlier, note it was scheduled for removal by v1.8.0.\
+        \ Prefer the **Longhorn CLI (`longhornctl`)** for preflight checks/ops.\n"
+      chart_updates: [Kubernetes minimum supported version for Longhorn v1.8.0 is
+          **v1.25+** (release note calls this out explicitly)., Upstream in-repo Helm
+          chart/manifests for v1.8.0 referenced an **incorrect default image tag (`v1.8.x-head`)**;
+          ensure your chart source and overrides prevent deploying head images., Installation/upgrade
+          can be done via **Helm Controller** (HelmChart CRD) on RKE2/K3s; this changes
+          how you supply Helm values (CRD spec instead of CLI flags).]
+      features: ['V2 Data Engine enhancements: configurable CPU cores (global and
+          per-node), live migration, auto-salvage, DR volumes, volume encryption,
+          delta replica rebuild using snapshot checksum, and backing image update/download
+          support.', Multiple backupstores support plus creation of a default backup
+          target (`default`) used by system backups and volumes without an assigned
+          backup target., Automatic online RWX volume expansion (no workload scale-down/manual
+          resize steps) when all components are on v1.8.0., Support installing/upgrading
+          Longhorn using the built-in Helm Controller on RKE2/K3s., V2 Data Engine
+          support for Talos Linux (nodes must meet V2 prerequisites).]
+      breaking_changes: ['**Kubernetes requirement change**: you must be on **Kubernetes
+          v1.25+** before upgrading to Longhorn v1.8.0 (driven by CSI external-snapshotter
+          v8.2.0).', '**V2 block-type disk default block size changes from 4096 to
+          512**. Existing V2 volumes created on 4096-byte block disks require a migration
+          procedure (backup, remove volumes, remove disk definition, wipe disk, re-add
+          with new config, restore).', "**Manifest/chart image tag pitfall**: if you\
+          \ deploy from the main Longhorn repo\u2019s manifest/chart for v1.8.0 without\
+          \ overrides, you may accidentally run `v1.8.x-head` images; pin/override\
+          \ to `v1.8.0`."]
     chart_version: 1.8.0
     images: ['longhornio/longhorn-manager:v1.8.0', 'longhornio/longhorn-share-manager:v1.8.0',
       'longhornio/longhorn-ui:v1.8.0']
@@ -6937,6 +7250,37 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Kubernetes minimum supported version remains **v1.21+** for
+          the 1.6.x -> 1.7.0 upgrade, but validate your actual cluster version before
+          upgrading.', Helm chart values.yaml was simplified/cleaned up in the 1.7.0
+          timeframe (expect some values to have moved/been reorganized; diff your
+          current values against the 1.7.0 chart defaults)., Helm chart adds/improves
+          **Ingress** support and introduces **Gateway API** support (review any existing
+          UI/API exposure configuration)., 'ServiceMonitor got additional monitoring
+          settings options (if you deploy Prometheus Operator resources via the chart,
+          review/adjust).', VolumeSnapshotClass for backing images adds a **nodeSelector**
+          parameter (only relevant if you use backing image snapshots/classes via
+          the chart).]
+      features: ['New/expanded **V2 Data Engine** (still preview): online replica
+          rebuild, filesystem trim, broader SPDK block-disk driver support (AIO/NVMe/VirtIO),
+          and data-plane live upgrade for V2 volumes.', 'Better **platform/OS compatibility**,
+          including support for Google Container-Optimized OS (COS).', 'New **high
+          availability** capabilities: HA backing images and faster RWX failover (Share
+          Manager failure detection/response).', 'Improved **data protection**: support
+          for periodic and on-demand **full backups** to reduce backup corruption
+          risk.', New official **Longhorn CLI (longhornctl)** for install/ops/troubleshooting
+          via CR creation and in-cluster/host operations.]
+      breaking_changes: ["**Critical upgrade warning for v1.7.0**: clusters that still\
+          \ have old-format Engine CR names (created before v1.5.2/v1.4.4) can hit\
+          \ a volume attachment issue; if affected, **do not upgrade to v1.7.0\u2014\
+          wait for v1.7.1**.", The legacy **environment_check.sh** script is **deprecated**
+          in v1.7.0 (scheduled for removal in v1.8.0); move any runbooks/automation
+          toward the new Longhorn CLI and docs-based checks., 'If you rely on RWX
+          behavior, note significant changes around **Share Manager HA/fast failover**
+          and storage network support; test RWX workloads because failure modes and
+          scheduling behavior changed.']
     chart_version: 1.7.0
     images: ['longhornio/longhorn-manager:v1.7.0', 'longhornio/longhorn-share-manager:v1.7.0',
       'longhornio/longhorn-ui:v1.7.0']
@@ -6945,6 +7289,48 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "## Helm chart / values changes to review\n\n- **GitOps/Argo CD\
+        \ compatibility:** the chart removed or changed a **Helm `pre-upgrade` hook**\
+        \ to better support Argo CD/Flux/Fleet-style reconciliation. If you previously\
+        \ relied on that hook behavior, re-test upgrades in GitOps flows. (Ref: \u201C\
+        Remove or Change Helm pre-upgrade hook to support ArgoCD\u201D).\n- **StorageClass\
+        \ mount options now configurable via values.yaml:** you can set **StorageClass\
+        \ mount options** from Helm values rather than manually editing the StorageClass\
+        \ post-install. (Ref: \u201CAllow to set mount options for storageclass via\
+        \ values.yaml in helm chart\u201D).\n- **Log level configurable in chart:**\
+        \ Helm values can now control Longhorn component log level. (Ref: \u201CHelm\
+        \ Chart make loglevel configurable\u201D).\n- **Reserve storage percentage\
+        \ exposed in chart:** there is a Helm setting to configure **node reserved\
+        \ storage percentage**. (Ref: \u201CAdd reserve storage percentage of nodes\
+        \ setting in helm chart\u201D).\n- **Prometheus Operator integration:** chart\
+        \ can deploy a **ServiceMonitor** for Longhorn metrics (requires Prometheus\
+        \ Operator CRDs). (Ref: \u201CAllow deployment of Prometheus ServiceMonitor\
+        \ with the Longhorn helm chart\u201D).\n\n## Upgrade prerequisites (operational)\n\
+        \n- **Kubernetes >= 1.21 is required** to upgrade from **Longhorn 1.5.x to\
+        \ 1.6.0**.\n"
+      chart_updates: [Longhorn validates/advertises GitOps-friendliness (Flux/Argo
+          CD/Fleet) and includes chart adjustments to avoid upgrade-hook pitfalls
+          in GitOps reconciliations., 'Chart includes new/updated settings surfaced
+          in values for logging, storage reservation, StorageClass mountOptions, and
+          optional ServiceMonitor deployment.', 'Internal chart maintenance/cleanup:
+          removed an unnecessary Kubernetes version check in chart manifests (does
+          not change the stated minimum supported K8s version).']
+      features: ['V2 Data Engine (preview) gained major capabilities: snapshots/revert
+          plus backup/restore interoperability between V1 and V2, and separate data
+          planes with selective V2 activation.', 'Platform support expanded: Talos
+          support added and OKD (OpenShift Origin) support included.', 'Snapshot space
+          management: you can cap max snapshot count and max aggregate snapshot size
+          globally or per-volume to improve space predictability.', Block-mode volume
+          encryption is supported (notably useful for virtualization stacks like Harvester/KubeVirt).,
+        'Node maintenance improvements: new node drain policy options can automatically
+          evict/relocate healthy replicas during planned drains.', Backing image backups/restore
+          added to simplify moving backing images across clusters.]
+      breaking_changes: ['Minimum Kubernetes version support is **Kubernetes v1.21+**
+          (unchanged from 1.5.0, but it remains a hard prerequisite for this upgrade).',
+        "Behavioral change for GitOps users: if you depended on Helm pre-upgrade hooks,\
+          \ the chart\u2019s hook behavior changed/was removed to support Argo CD;\
+          \ validate your existing upgrade automation."]
     chart_version: 1.6.0
     images: ['longhornio/longhorn-manager:v1.6.0', 'longhornio/longhorn-ui:v1.6.0']
   - version: 1.5.0
@@ -6952,6 +7338,41 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['**Upgrade path enforcement:** v1.5.0 only supports upgrading
+          from **v1.4.x** (not directly from v1.3.x or older).', "**Instance Manager\
+          \ consolidation:** engine/replica instance managers are merged, so you should\
+          \ expect pod/name/behavior changes during and after upgrade and ensure node\
+          \ resources/pod disruption budgets don\u2019t block rollout.", '**New CRD
+          for attachment:** introduces a Longhorn **VolumeAttachment** CR to handle
+          exclusive attachment and headless operations; expect additional CRDs/objects
+          and controller behavior changes.', '**New maintenance/drain behavior:**
+          adds a Kubernetes upgrade **Node Drain Policy** and uses PDBs to protect
+          Longhorn components during drains; this can change how node maintenance
+          behaves.', '**Backup ecosystem updates:** adds CIFS and Azure backup stores
+          and backup compression options; may require new configuration and credential/secret
+          setup depending on target.']
+      features: ['SPDK-based v2 data engine (preview, disabled by default) enabling
+          new volume lifecycle and offline replica rebuild capabilities.', New Longhorn
+          VolumeAttachment CR for exclusive attach/detach and enabling headless operations
+          like cloning and recurring jobs., Cluster Autoscaler support is now GA after
+          validation across cloud distributions., Consolidated instance manager reduces
+          resource usage by merging engine and replica managers., Backup compression
+          method selection (lz4/gzip/none) plus multi-thread improvements for backup/restore.,
+        'Automatic filesystem trim via recurring jobs, including support for RWX volume
+          trim.', New recurring job types for snapshot cleanup and delete to improve
+          space efficiency., 'New backup targets: CIFS and Azure Blob Storage.', Node
+          Drain Policy to protect volume data during Kubernetes upgrades/maintenance.]
+      breaking_changes: [Upgrade path is enforced and downgrades are prevented; you
+          must follow the supported version hops and cannot roll back casually once
+          upgraded., Global setting `mkfs-ext4-parameters` is removed; any automation
+          relying on it must move to per-StorageClass/format options., System-managed
+          component image settings are removed; you can no longer pin/override those
+          images via the old settings/values., 'Several deprecated fields/features
+          are removed (e.g., volume/spec recurringJobs fields, `disable-replica-rebuild`,
+          and `allow-node-drain-with-last-healthy-replica`), which may affect older
+          manifests/automation/scripts.']
     chart_version: 1.5.0
     images: ['longhornio/longhorn-manager:v1.5.0', 'longhornio/longhorn-ui:v1.5.0']
   - version: 1.4.0
@@ -6959,12 +7380,77 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "- **Kubernetes version requirement changes:**\n  - Target Longhorn\
+        \ **v1.4.0 requires Kubernetes >= 1.21**.\n  - Longhorn **v1.3.2 supported\
+        \ Kubernetes >= 1.18 and <= 1.24**; v1.4.0 adds **Kubernetes 1.25 support**.\n\
+        - **PodSecurityPolicy (PSP) behavior change:**\n  - With Kubernetes 1.25 removing\
+        \ PSP, **Longhorn v1.4.0 makes PSP opt-in**. If you rely on PSP (older clusters/policies),\
+        \ you must **explicitly enable PSP support** during install/upgrade.\n- **CSI\
+        \ Snapshotter sidecar upgrade:**\n  - Built-in CSI snapshotter updated to\
+        \ **v5.0.1**.\n  - **v1beta1 VolumeSnapshot CRDs are deprecated** (still supported\
+        \ for now); start migrating to **snapshot.storage.k8s.io/v1**.\n- **Helm chart\
+        \ tuning options mentioned in release notes:**\n  - Ability to configure **successfulJobsHistoryLimit**\
+        \ for CronJobs.\n  - Support customizing **replica counts for webhook and\
+        \ recovery-backend**.\n  - **Affinity** options for the longhorn-ui deployment.\n\
+        \  - StorageClass enhancements: **nodeSelector** support and **configurable\
+        \ filesystem format options**."
+      chart_updates: [Support K8s 1.25 by handling removed/deprecated resources (notably
+          PSP removal) and moving to PSA compatibility., Helm chart includes additional
+          scheduling/config knobs (UI affinity; StorageClass nodeSelector; FS format
+          options; CronJob history limits; configurable replicas for webhook and recovery-backend).,
+        Updates bundled CSI snapshotter sidecar to v5.0.1 and related snapshot API
+          deprecation messaging.]
+      features: ['Kubernetes 1.25 support via PSA compatibility, with optional PSP
+          enablement for older clusters.', RWX (ReadWriteMany) volumes promoted to
+          GA with improved share-manager failover behavior using a recovery backend.,
+        ARM64 promoted from experimental to GA (supported/qualified like amd64).,
+        Snapshot checksum and periodic verification (bit-rot detection) to improve
+          snapshot data integrity., Replica rebuild speedups using snapshot checksums/metadata
+          to reduce unnecessary data transfer., Volume TRIM/UNMAP support to reclaim
+          space on block volumes., Online volume expansion support through engine/CSI
+          integration., Strict data locality mode to keep a local replica and use
+          local socket for better performance., System Backup & Restore to back up/restore
+          Longhorn system state to/from a backup target.]
+      breaking_changes: ['Kubernetes compatibility window changes: upgrading to v1.4.0
+          requires Kubernetes **>= 1.21**, and introduces behavior changes around
+          PSP due to Kubernetes 1.25 removing it.', 'PodSecurityPolicy is no longer
+          assumed/enabled by default: clusters that depended on PSP must explicitly
+          opt in (or use PSA).', 'VolumeSnapshot API direction: v1beta1 is deprecated;
+          plan migration to v1 before future snapshotter upgrades remove v1beta1 support.']
     chart_version: 1.4.0
     images: ['longhornio/longhorn-manager:v1.4.0', 'longhornio/longhorn-ui:v1.4.0']
   - version: 1.3.2
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: '- **Kubernetes version guardrail**: v1.3.2 upgrade notes add
+        an upper bound: Kubernetes **>= 1.18 and <= 1.24** (i.e., **< 1.25**) when
+        upgrading to Longhorn v1.3.2.
+
+        - **Chart maintenance**: v1.3.2 mentions cleaning up `values.yaml` entries
+        that were not used and updating `questions.yaml` CSI image tags; expect **no
+        required values changes**, but re-check any overrides that reference CSI image
+        tags or values that may have been removed/ignored.
+
+        - **If you use Rancher questions.yaml** (Rancher UI deployments): verify CSI
+        sidecar image tags are correct after upgrade (fix included in 1.3.2).
+
+        '
+      chart_updates: [Chart/packaging includes a Kubernetes version upper limitation
+          (<1.25) for <1.4 Longhorn charts., 'Helm chart housekeeping: remove/ignore
+          unused `values.yaml` entries (bug fix) and update outdated CSI image tags
+          in `questions.yaml`.', 'CRD manifest maintenance: updates around `preserveUnknownFields`
+          generation/fields (internal CRD packaging change).']
+      features: [Data Alignment Correction for existing volumes when filesystem block
+          size is <4096 to prevent rare replica-rebuild corruption (1.3.2)., 'Use
+          a specific filesystem block size to reduce unnecessary read-modify-write
+          between volume head and snapshots, improving write performance (1.3.2).',
+        Support cleanup of failed/obsolete orphaned backups (1.3.2 improvement).]
+      breaking_changes: ['Kubernetes compatibility tightened in docs/packaging: Longhorn
+          1.3.2 targets Kubernetes <=1.24 (<1.25). Upgrading on 1.25+ is not supported
+          for this line.']
     chart_version: 1.3.2
     images: []
   - version: 1.3.0
@@ -6972,12 +7458,81 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Kubernetes requirement changes between the two versions: v1.2.6
+          upgrade note states K8s must be >=1.18 and <=1.24; v1.3.0 requires K8s >=1.18
+          (no upper bound mentioned in the release note provided).', 'Longhorn API/CRD
+          changes: v1.3.0 introduces v1beta2 CRDs with structural schema + schema
+          validation; v1beta2 becomes the default. A conversion webhook is included
+          to keep v1beta1 resources accessible and to convert existing resources on
+          upgrade.', Admission webhooks added in v1.3.0 (mutating/validating) and
+          conversion webhook; expect new webhook server components and RBAC/NetworkPolicy
+          objects to appear in manifests., "Internal architecture change in v1.3.0:\
+          \ manager\u2194engine communication is proxied via instance-manager to enable\
+          \ storage network segregation; operationally intended to be transparent\
+          \ but affects networking assumptions/troubleshooting.", 'Security/policy
+          additions in v1.3.0: NetworkPolicies included to secure intra-Longhorn communication;
+          mTLS between longhorn-manager and instance-manager is available as an opt-in
+          feature.', 'Operational behavior defaults change: replica auto-balance default
+          for existing volumes becomes disabled (per release note item 3524); verify
+          your environment if you relied on previous behavior.', 'CSI/sidecar ecosystem
+          and snapshots: v1.3.0 extends CSI VolumeSnapshot support to map to Longhorn
+          snapshots and adds a Snapshot CRD to manage snapshots without the UI; verify
+          your cluster snapshot CRDs/controllers compatibility.', 'Storage/network
+          features: v1.3.0 adds optional ''storage network'' support via Multus NAD
+          for control-plane/data-plane segregation; this requires cluster Multus setup
+          and additional Longhorn config if enabled.', 'Maintenance features: v1.3.0
+          adds orphaned replica detection/cleanup (opt-in automatic cleanup available).']
+      features: ['Storage network support for multi-network clusters via Multus, enabling
+          segregation of control plane and data plane traffic.', Managed Kubernetes
+          compatibility improvements (EKS/GKE/AKS) to better support node pool replacement
+          and cluster upgrades., New v1beta2 Longhorn CRDs with structural schema
+          validation; v1beta2 becomes the default API version., Snapshot CRD plus
+          extended CSI VolumeSnapshot integration to create/restore Longhorn snapshots
+          through the Kubernetes snapshot APIs., Orphaned/unused replica detection
+          and optional automatic cleanup to reduce manual host maintenance., "Snapshot\
+          \ purge improvements (\u201Csnapshot prune\u201D) to free space by deleting\
+          \ snapshots directly behind the volume head.", "Optional mTLS for longhorn-manager\
+          \ \u2194 instance-manager communication.", Experimental support for Kubernetes
+          Cluster Autoscaler via instance-manager PDB management (opt-in).]
+      breaking_changes: ['API surface change: v1beta2 becomes the default CRD/API
+          version. A conversion webhook keeps v1beta1 accessible, but any custom tooling
+          that assumes v1beta1-only resources should be validated against v1beta2.',
+        Additional webhook components (mutating/validating + conversion) mean clusters
+          with restrictive admission/network policies or hardened settings may require
+          allowing the webhook service to function; otherwise install/upgrade can
+          fail.]
     chart_version: 1.3.0
     images: ['longhornio/longhorn-manager:v1.3.0', 'longhornio/longhorn-ui:v1.3.0']
   - version: 1.2.6
     kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart values changes to check\n- **Chart cleanup:**\
+        \ `values.yaml` previously contained some **unused values** (fixed in v1.2.6,\
+        \ issue #4601). If you were setting any \u201Cmystery\u201D/no-op values in\
+        \ v1.2.0, re-validate them after upgrade\u2014some keys may have been removed\
+        \ or may still be ignored.\n- **CSI image tags in chart questions:** `questions.yaml`\
+        \ had **outdated CSI image tags** (fixed in v1.2.6, issue #4669). If you rely\
+        \ on Rancher UI/`questions.yaml` overrides for CSI images, confirm the rendered\
+        \ images match your intended versions.\n\n> No explicit new required values\
+        \ are called out in the provided notes; treat this as a patch upgrade with\
+        \ minor chart hygiene fixes.\n"
+      chart_updates: [Fix Helm chart `values.yaml` to remove/stop shipping unused
+          values (#4601)., Update chart `questions.yaml` to correct outdated CSI image
+          tags (#4669).]
+      features: ['Data alignment correction to prevent rare potential data corruption
+          during replica rebuilds when filesystem block size < 4096 (issues #4354).',
+        'Use a specific filesystem block size to avoid unnecessary Read-Modify-Write
+          operations between volume head and snapshots, improving write performance
+          (issue #4594).']
+      breaking_changes: ['Kubernetes version support guardrail is enforced for this
+          line: ensure the cluster is **>= 1.18 and <= 1.24** before upgrading to
+          v1.2.6 (same requirement stated in the v1.2.6 notes).', 'From v1.2.0 onward,
+          Kubernetes minimum supported version is **1.18**; if any clusters were <1.18,
+          upgrading is not supported.']
     chart_version: 1.2.6
     images: []
   - version: 1.2.0
@@ -6985,12 +7540,76 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "## Helm/values changes to plan for\n- No Helm chart changelog\
+        \ was provided in your notes, so **no specific `values.yaml` changes can be\
+        \ asserted from this input**.\n- **Action for the upgrade:** diff your current\
+        \ values against the Longhorn chart version that matches `appVersion: v1.2.0`\
+        \ (e.g., `helm show values longhorn/longhorn --version <chartVersion>`), then\
+        \ re-apply only intentional overrides.\n\n## Known post-upgrade operational\
+        \ gotcha (often requires a StorageClass tweak)\n- **CSI `fsType` default removal\
+        \ impacts `fsGroup`:** After upgrading to **v1.2.0**, any StorageClass using\
+        \ the Longhorn provisioner **without an explicit `parameters.fsType`** may\
+        \ see **`fsGroup` not being applied** on newly created filesystem volumes.\n\
+        \  - **Mitigation:** explicitly set `parameters.fsType` in affected StorageClasses\
+        \ (commonly `ext4`), or upgrade to **v1.2.1+** where this is addressed per\
+        \ the release note."
+      chart_updates: ['Kubernetes compatibility updates: Longhorn v1.2.0 raises the
+          **minimum supported Kubernetes version to v1.18** and adds support up to
+          **v1.22** by migrating deprecated APIs and bumping CSI sidecar versions.',
+        'Recurring jobs architecture change: existing per-volume recurring job settings
+          are **migrated to new RecurringJob custom resources**, and the `Volume.spec.RecurringJobs`
+          field is deprecated.', 'Backup subsystem refactor: introduces **BackupTarget
+          / BackupVolume / Backup** CRDs and controllers, enabling asynchronous backup
+          operations and improved backup performance/scale.']
+      features: [Kubernetes v1.22 support (with CSI component version bumps) while
+          setting minimum supported Kubernetes to v1.18., 'Volume encryption and backup
+          encryption using kernel modules with keys stored in Kubernetes Secrets;
+          data is encrypted at rest and in transit, and backups from encrypted volumes
+          are encrypted.', CSI volume cloning support for creating new PVCs from existing
+          volumes., Automatic replica rebalancing based on node/zone soft anti-affinity
+          when node status changes., 'Backing image improvements: upload backing images
+          from local files and create backing images from existing volumes.', Recurring
+          Job and Group resources enabling reusable job definitions and grouping to
+          apply to volumes more cleanly., Asynchronous backup operations via new backup
+          CRDs/controllers to improve backup performance and reduce previous bottlenecks.,
+        Read-only PVC/PV and mount support; plus XFS support for RWX volumes and encrypted
+          RWX volumes (feature expansion for workloads needing RWX)., 'Troubleshooting
+          improvements such as enabling pprof endpoints in longhorn-manager and UI
+          enhancements (e.g., exact timestamps, websocket updates).']
+      breaking_changes: ['Kubernetes version support change: you **must be on Kubernetes
+          >= v1.18** before upgrading to Longhorn v1.2.0; older clusters are unsupported.',
+        'Recurring jobs migration: per-volume `RecurringJobs` in the Volume spec is
+          **deprecated** and settings are migrated to new RecurringJob CRs; automation
+          that edits Volume specs directly may need to be updated.', 'Potential workload
+          permission change for new filesystem volumes: StorageClasses without an
+          explicit `fsType` may cause **`fsGroup` to be ineffective** after install/upgrade
+          (known issue in v1.2.0; mitigated by setting `fsType` or upgrading to 1.2.1+).']
     chart_version: 1.2.0
     images: ['longhornio/longhorn-manager:v1.2.0', 'longhornio/longhorn-ui:v1.2.0']
   - version: 1.1.3
     kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["No Helm chart-specific changes were provided in the notes you\
+          \ pasted (these are primarily application release notes). If you have the\
+          \ Longhorn Helm chart changelog for the chart versions matching 1.1.0\u2192\
+          1.1.3, share it and we can extract exact `values.yaml` diffs."]
+      features: ['v1.1.0 introduces several major capabilities you may already be
+          running by 1.1.0: experimental native RWX volumes, experimental ARM64 support,
+          CSI Snapshotter support (CSI snapshots map to Longhorn backups), and Prometheus
+          metrics endpoints plus a sample Grafana dashboard.', 'v1.1.3 focuses on
+          hardening: security fixes, stability improvements, and data-plane performance
+          improvements for low-performance environments (spinning disks, 1Gbps networks,
+          low CPU).']
+      breaking_changes: ['Kubernetes version requirements introduced in v1.1.0: minimum
+          Kubernetes is v1.16 for Longhorn; CSI Snapshotter requires Kubernetes v1.17+.
+          Ensure your cluster meets these before proceeding.', Security fixes in v1.1.3
+          may change assumptions about what privileged Longhorn-managed pods/instance
+          manager pods can do; treat as a behavior change and validate any custom
+          debugging/host-operation workflows.]
     chart_version: 1.1.3
     images: []
   - version: 1.1.0
@@ -6999,6 +7618,28 @@ addons:
       '1.16']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Native RWX (ReadWriteMany) support (experimental), with documentation
+          for RWX workloads.', 'Experimental ARM64 support in addition to AMD64, deployable
+          without special changes.', CSI Snapshotter support (beta upstream feature)
+          enabling kubectl-managed VolumeSnapshots mapped to Longhorn backups/restores.,
+        Prometheus metrics endpoints plus an example Grafana dashboard for monitoring
+          and alerting., 'Improved node-failure recovery: automatic recovery behavior
+          for StatefulSets, better handling of volume failure, and rebuilding from
+          existing replicas after temporary node disconnects.', 'Better node maintenance
+          workflows: handle node removal, recognize disks reattached to different
+          nodes (e.g., EBS moved), support kubectl drain, allow pausing replica rebuild,
+          and support replica eviction.', Data Locality option to prefer keeping a
+          replica local to the engine/workload for resilience to network interruptions.,
+        New setting to allow volume creation with degraded availability (default true;
+          recommended false in production)., Experimental performance improvement
+          by removing the revision counter.]
+      breaking_changes: [Minimum supported Kubernetes version is now v1.16 for Longhorn
+          v1.1.0 (clusters below this must upgrade Kubernetes first)., CSI Snapshotter
+          feature requires Kubernetes v1.17+ and installing the CSI snapshot controller
+          components; without that you cannot use CSI VolumeSnapshot functionality.]
     chart_version: 1.1.0
     images: ['longhornio/longhorn-manager:v1.1.0', 'longhornio/longhorn-ui:v1.1.0']
   - version: 1.0.0
@@ -7007,6 +7648,7 @@ addons:
       '1.16', '1.15', '1.14']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.0.0
     images: ['longhornio/longhorn-manager:v1.0.0', 'longhornio/longhorn-ui:v1.0.0']
   name: longhorn
@@ -7841,13 +8483,29 @@ addons:
       breaking_changes: ['Access logs will now also be printed for rejected requests;
           the release note explicitly warns about this new behavior, so log volume/content
           may change and could affect log-based alerts/costs.']
-    chart_version: 38.0.0
+    chart_version: 38.0.1
     images: []
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['New load-balancing options: "least time" strategy (file/K8s CRD/service)
+          and "HighestRandomWeight" algorithm (service + K8s CRD support for highest
+          random weight).', 'New health check capabilities: TCP health checks plus
+          passive health checks in addition to existing active checks.', 'Kubernetes-related
+          expansions: Knative provider, Gateway API bumped to v1.4.0, and Ingress
+          can publish ExternalName Services.', 'ACME enhancements: additional certificatesResolvers
+          options (v3.6) building on v3.5 additions like OCSP stapling and new httpChallenge
+          delay/timeout knobs.', 'Platform/provider improvements: ECS IPv6 support,
+          Docker can optionally discover non-running containers, and Consul/ConsulCatalog/Nomad
+          logs provider namespace on startup.', 'Routing/proxy improvements: multi-layer
+          routing and additional HTTP/2 HPACK table size tunables; plugins now support
+          syscalls.', 'Dashboard/UI tweaks: Hub demo tile plus more compact table
+          row padding (v3.6) after the larger React dashboard migration in v3.5.']
+      breaking_changes: []
     chart_version: 37.3.0
     images: ['docker.io/traefik:v3.6.0']
   - version: 3.5.0
@@ -7988,47 +8646,6 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Modernized file-system backup (fs-backup) to a micro-service architecture,
-          enabling concurrency control, cancel/resume, better robustness across node-agent
-          restarts, and steadier resource usage.', 'fs-backup now supports Windows
-          workloads by running data mover pods on Windows nodes; together with earlier
-          CSI snapshot data movement for Windows, this enables end-to-end Windows
-          backup/restore scenarios.', 'Added support for Kubernetes Volume Group Snapshots
-          (beta upstream) for both CSI snapshot backups and CSI snapshot data movement,
-          improving write-order consistency across multiple related volumes.', 'Added
-          PriorityClass support across Velero components (server, node-agent, data
-          mover pods, and backup repository maintenance jobs) so you can control scheduling/eviction
-          priority per module.', 'Improved scalability/resiliency for data movers:
-          added node-agent PrepareQueueLength to limit pending data mover pod creation
-          until datapath quota is available, and improved resume/cancel behavior across
-          node-agent/server restarts.', "Enhanced CSI snapshot data movement restore\
-          \ to support node selection like backups, including per\u2013storage class\
-          \ node selection for environments where not all nodes can use a given storage\
-          \ class.", Resource policy now supports reusable include/exclude filtering
-          via includeExcludePolicy in addition to volumePolicy., 'Added/updated operational
-          improvements: BSL availability metric, better BSL status checks for backup/restore,
-          imagePullSecrets inheritance for data mover/maintenance jobs, kubelet mount
-          path parameterization for node-agent, improved toleration/affinity behavior,
-          and s390x binary support.']
-      breaking_changes: ['Restic-based fs-backup is removed: --uploader-type=restic
-          is no longer a valid install/config option; you can still restore from existing
-          restic-path backups until v1.19.', 'Repository maintenance job settings
-          were removed from Velero server flags (e.g., --keep-latest-maintenance-jobs
-          and maintenance job CPU/memory request/limit flags) and must be managed
-          via the repository maintenance job ConfigMap instead.', 'PVC restore behavior
-          changed: Velero now always removes the selected-node annotation during PVC
-          restore when no node mapping exists (previously it could be preserved if
-          the node existed).']
-    chart_version: 11.2.0
-    images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
-  - version: 1.17.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
       features: ['Modernized fs-backup to a micro-service architecture, adding concurrency
           control, cancel/resume, and better isolation/resource usage; operations
           can survive node-agent restarts.', 'fs-backup now supports Windows workloads,
@@ -8056,6 +8673,42 @@ addons:
           if the node existed).']
     chart_version: 11.2.0
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
+  - version: 1.17.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["No Helm chart changelog was provided in the notes you pasted\
+          \ (only Velero application release notes). Treat Helm values/templating\
+          \ changes as **unknown** until you review the `vmware-tanzu/helm-charts`\
+          \ (or your vendor) velero chart CHANGELOG between the chart versions you\u2019\
+          re upgrading."]
+      features: ['Modernized fs-backup to a micro-service architecture, enabling concurrency
+          controls, cancel/resume, and better resiliency/resource isolation for file-system
+          backups.', 'fs-backup now supports Windows workloads, allowing data mover
+          pods to run on Windows nodes for fs-backup/restore scenarios.', 'Adds Kubernetes
+          VolumeGroupSnapshot (beta upstream) support for coordinated point-in-time
+          snapshots across multiple volumes, for both CSI snapshot backups and CSI
+          snapshot data movement.', 'Adds PriorityClass configuration across Velero
+          components (server, node-agent, data mover pods, and repo maintenance jobs)
+          to influence scheduling/eviction.', 'Scalability/resiliency improvements
+          for data movers: queue-based throttling (`PrepareQueueLength`), better restart/resume
+          behavior, and improved node-selection (including per-storage-class) for
+          CSI snapshot data movement restore.', Resource policies gain reusable include/exclude
+          filtering via `includeExcludePolicy` in addition to existing `volumePolicy`.]
+      breaking_changes: ['Restic-based fs-backup is removed: `--uploader-type=restic`
+          is no longer valid for installs/backups (restores from existing restic backups
+          remain supported until v1.19).', 'Repository maintenance job settings were
+          removed from Velero server flags (`--keep-latest-maintenance-jobs`, `--maintenance-job-*-request/limit`)
+          and must now be configured via the repository maintenance job ConfigMap
+          instead.', 'PVC restore behavior change: Velero now always removes the `selected-node`
+          annotation during PVC restore when no node mapping exists (previously it
+          could be preserved if the node existed), which may change scheduling/binding
+          behavior for restored PVCs.']
+    chart_version: 11.2.0
+    images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
   - version: 1.16.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
@@ -8064,34 +8717,28 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Windows cluster support: Velero components (node-agent, data mover
-          pods, maintenance jobs) can run on Windows nodes and backup/restore Windows
-          workloads; built includes hybrid/multi-arch and Windows builds.', 'Parallel
-          ItemBlock backups: Velero can now back up ItemBlocks in parallel; configure
-          with the new server flag `--item-block-worker-count` (default 1).', "Data\
-          \ mover restore scalability for WaitForFirstConsumer volumes: new node-agent\
-          \ config flag `ignoreDelayBinding` allows restore work to spread across\
-          \ nodes instead of being constrained to the volume\u2019s attach node.",
-        'Improved observability for data mover operations: more status/error details
-          for intermediate objects and cleanup failures are logged automatically in
-          node-agent logs.', 'CSI snapshot usability improvement: VolumeSnapshotContent
-          objects retained previously are no longer included in backups, reducing
-          unwanted syncing/restoring of CSI artifacts across clusters.', "Backup repository\
-          \ maintenance resiliency/observability: BackupRepository CR gains `RecentMaintenance`\
-          \ history; running jobs are recaptured after server restarts; maintenance/init\
-          \ won\u2019t run for readOnly BSLs; maintenance intervals configurable via\
-          \ `fullMaintenanceInterval` (normalGC/fastGC/eagerGC).", 'Volume Policy
-          enhancement: can filter volumes by PVC labels (and additional CSI PV VolumeAttributes
-          filtering improvements).', 'Object-level resource status restore control:
-          per-object annotation `velero.io/restore-status` lets you decide whether
-          to restore status for that object.', 'Velero images consolidated: `velero`,
-          `velero-helper`, and `velero-restore-helper` binaries are now shipped in
-          the single `velero/velero:v1.16.0` image.']
-      breaking_changes: ['No explicit breaking changes were called out in the provided
-          v1.16.0 notes; however, Windows support has limitations (no fs-backup on
-          Windows; no Security Descriptor/NTFS extended attribute backup/restore),
-          which can effectively be a functional breaking constraint if you expected
-          those features on Windows.']
+      features: ['Windows cluster support (hybrid Linux/Windows deployment) including
+          node-agent, data mover pods, and maintenance jobs scheduling on Windows
+          nodes; can back up/restore Windows workloads with the built-in data mover.',
+        Parallel ItemBlock backup processing with a configurable worker pool via the
+          new server flag `--item-block-worker-count` to significantly improve backup
+          throughput; hooks run as part of ItemBlocks and thus can run in parallel.,
+        Data mover restore scaling improvement for WaitForFirstConsumer volumes via
+          new node-agent setting `ignoreDelayBinding` to spread restores across nodes
+          instead of pinning to the attached node., 'Improved data mover observability:
+          additional status/error logging for intermediate objects and cleanup failures
+          is emitted automatically in node-agent logs.', 'CSI snapshot usability improvement:
+          removes retained `VolumeSnapshotContent` from backups so it is no longer
+          synced/restored unnecessarily across clusters sharing a BSL.', 'BackupRepository
+          maintenance enhancements: new `RecentMaintenance` history section on BackupRepository
+          CRs, maintenance jobs are recaptured after server restart, maintenance/init
+          is skipped for readOnly BSLs, and configurable maintenance cadence via `fullMaintenanceInterval`
+          (normalGC/fastGC/eagerGC).', 'Volume Policy enhancement: can now filter
+          volumes by PVC labels (in addition to other criteria).', Per-object resource
+          status restore control via annotation `velero.io/restore-status` on individual
+          objects., 'Velero helper binaries (`velero-helper` and `velero-restore-helper`)
+          are now merged into the main `velero/velero` image, simplifying image management.']
+      breaking_changes: []
     chart_version: 10.1.3
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.16.2']
   - version: 1.15.0
@@ -8102,34 +8749,33 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Data mover microservice: CSI Snapshot Data Movement transfers move
-          from node-agent pods into dedicated per-backup/restore pods (backupPods/restorePods),
-          improving security (no hostPath access), isolation, resilience, and enabling
-          per-operation resource tuning.', Item Block concepts and new ItemBlockAction
-          (IBA) plugin type are introduced to categorize correlated resources into
-          blocks; this lays groundwork for future multithreaded backup processing
-          (v1.15 supports the model/plugins but still processes single-threaded).,
-        Repository maintenance jobs gain node selection via a new repository maintenance
-          configuration ConfigMap so you can schedule maintenance onto specific/idle
-          nodes., 'Data mover backupPVC behavior is configurable via a new backup
-          PVC configuration ConfigMap, including optional read-only mounts (can accelerate
-          expose on some storage such as Ceph) and selecting a different storageClass
-          for backupPVCs.', Backup repository cache sizing is configurable via a new
-          backup repository configuration ConfigMap to limit ephemeral storage usage
-          and avoid pod eviction during repo operations., 'Performance improvements:
-          fixes a server memory leak after plugin calls; passes client QPS/burst settings
-          through to plugins; includes Kopia upstream improvements to reduce memory
-          usage during maintenance in large repos.']
-      breaking_changes: [Restic-based filesystem backup/restore path is now deprecated
-          (still works in 1.15 but emits warnings when restic is configured/used);
-          plan migration away from restic uploader type., 'Node-agent configuration
-          ConfigMap name is no longer fixed; if you customize it, you must pass it
-          explicitly via the node-agent server parameter `node-agent-configmap`.',
-        'Repository maintenance job settings are moving from Velero server flags to
-          a repository maintenance job configuration ConfigMap (flags still work for
-          backward compatibility, but ConfigMap takes precedence if both are set).',
-        Changing PVC selected-node feature is deprecated and will be removed in a
-          future release; avoid relying on it going forward.]
+      features: ['Data mover micro service: CSI Snapshot Data Movement transfers run
+          in dedicated backup/restore pods instead of node-agent, improving isolation,
+          security posture (no hostPath), and resilience.', Item Block concepts +
+          ItemBlockAction (IBA) plugin type introduced to group related resources
+          for future multi-threaded backups; v1.15 includes the model and IBAs (pods/PVCs)
+          but does not yet run item blocks in parallel., Repository maintenance jobs
+          can be scheduled/targeted to specific nodes via a new repository maintenance
+          configuration ConfigMap to control resource placement., 'Data mover backupPods
+          can mount backup PVCs read-only to speed up expose on some storage backends
+          (e.g., Ceph), configurable via a new backup PVC configuration ConfigMap.',
+        'Backup PVC configuration can now specify the StorageClass used for backupPVCs,
+          allowing different durability/performance profiles than workload PVCs.',
+        Backup repository cache sizing is configurable per repository via a new backup
+          repository configuration ConfigMap to avoid pod eviction due to ephemeral
+          storage usage., 'Performance and stability improvements: plugin memory leak
+          fixed; client QPS/burst automatically passed to plugins; Kopia maintenance
+          memory use improved by upstream fixes.']
+      breaking_changes: [Restic-based fs-backup path is deprecated starting in 1.15;
+          backups/restores still succeed but warnings are emitted when restic uploader
+          is used or restic path is exercised., Node-agent configuration ConfigMap
+          name is no longer fixed; you must set the server parameter `--node-agent-configmap`
+          if you use a non-default name., 'Repository maintenance job tuning flags
+          are effectively superseded by a repository maintenance job configuration
+          ConfigMap; if both are set, the ConfigMap takes precedence (flags retained
+          for backward compatibility).', "The \u201CChanging PVC selected-node\u201D\
+          \ restore feature is deprecated and will be removed in a future release;\
+          \ continued use is not recommended."]
     chart_version: 8.7.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.15.2']
   - version: 1.14.0
@@ -8140,34 +8786,31 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [Kopia/restic repository maintenance now runs in a separate Kubernetes
-          Job to reduce Velero server pod memory pressure and avoid OOM kills; resource
-          requests for the job can be configured during install., 'VolumePolicies
-          are enhanced to support explicit volume backup actions (e.g., force `fs-backup`
-          or `snapshot`) for fine-grained opt-in/opt-out behavior without changing
-          workloads.', Data movement backups can now be constrained to run datamover
-          pods only on eligible nodes via a ConfigMap-based node selection mechanism.,
-        'Restore operations now persist VolumeInfo metadata (similar to backup VolumeInfo
-          added in v1.13), and `velero restore describe` surfaces more details including
-          CSI snapshot restores.', Restore workflow adds a new `Finalizing` phase
-          to ensure PV labeling and post-restore hooks occur after data movement completes.,
-        'Azure gains certificate-based service principal authentication in addition
-          to secret-based auth, aligning with phishing-resistant recommendations.',
-        'Runtime/dependencies updated: Go 1.22.2 and Kopia 0.17.0, plus Azure SDK
-          library migrations and other dependency bumps.']
-      breaking_changes: [CSI plugin is merged into the Velero repo and installed by
-          default as an internal plugin; do not also install it via `--plugins` during
-          install/upgrade or you may get duplicate/incorrect plugin behavior., Default
-          CPU/memory requests/limits for the node-agent are removed (node-agent becomes
-          BestEffort QoS). Clusters that relied on those defaults should set explicit
-          resources in Helm values or expect different scheduling/eviction behavior.,
-        'Namespace filtering behavior changes when `includedNamespaces`/`excludedNamespaces`
-          are unset but `labelSelector`/`orLabelSelectors` are set: backups will now
-          include only namespaces containing matching resources (previously all namespaces
-          were included). This can unexpectedly shrink backup scope.', "PV patching\
-          \ in the new `Finalizing` phase can cause restores to end in `PartiallyFailed`\
-          \ when a PV is blocked in `Pending`, whereas earlier versions might report\
-          \ `Completed`\u2014monitor restores and investigate Pending PVs accordingly."]
+      features: [Repository maintenance for kopia/restic backup repositories is offloaded
+          into separate Kubernetes Jobs to reduce Velero server OOM risk; lets you
+          set job resource requests at install time., 'VolumePolicies now support
+          actions (e.g., force "fs-backup" vs "snapshot") for finer per-volume control
+          without changing workloads.', 'Data mover pods now support node selection
+          via a ConfigMap, allowing you to constrain heavy backup/move workloads to
+          specific nodes.', 'Restore VolumeInfo metadata is now persisted and shown
+          in `velero restore describe`, improving visibility into how each restored
+          volume was handled.', 'A new Restore phase "Finalizing" improves correctness/ordering:
+          PV label restoration occurs after volume data restore, and post-restore
+          hooks run after data movement completes.', 'Azure plugin adds certificate-based
+          service principal authentication (phishing-resistant, supports conditional
+          access).']
+      breaking_changes: [CSI plugin is now merged into the Velero repo and installed
+          by default as an internal plugin; you must stop installing it via the `--plugins`
+          flag or you may get duplicate/conflicting plugin behavior., 'Node-agent
+          default CPU/memory requests/limits are removed, changing pods to BestEffort
+          QoS; clusters that relied on the old defaults may need explicit resources
+          set to avoid throttling/eviction.', 'Backup namespace filtering changes
+          when `includedNamespaces`/`excludedNamespaces` are empty but label selectors
+          are used: only namespaces containing matching resources are included (previously
+          all namespaces were included). This can unexpectedly shrink backup scope
+          unless you explicitly set namespaces.', 'Restore PV patching during the
+          new Finalizing phase can cause restores to end as PartiallyFailed if PVs
+          are stuck Pending, where they previously might have been reported Complete.']
     chart_version: 7.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.14.1']
   - version: 1.13.0
@@ -8176,45 +8819,45 @@ addons:
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
-      chart_updates: ["Velero v1.13 notes mention an `install` CLI flag change (informer\
-          \ cache enabled by default); for Helm-based installs, verify the chart version\
-          \ you\u2019re upgrading to and whether it now enables informer cache by\
-          \ default and/or exposes a value to disable it (equivalent to `--disable-informer-cache`).",
-        "If you are also upgrading from the Velero Helm chart that paired with app\
-          \ 1.12 to the one that pairs with 1.13, re-check your values for BSL/VSL\
-          \ definitions: chart v4.0.0+ expects `configuration.backupStorageLocation`\
-          \ and `configuration.volumeSnapshotLocation` as *lists* (slices), not maps\
-          \ (this was introduced with the 1.12-era chart and remains relevant if you\
-          \ haven\u2019t already migrated)."]
+      helm_changes: '- **Helm values impact not covered in the notes you provided
+        for v1.13.0.**
+
+        - From the v1.12.0 notes: Helm chart **v4.0.0** changed **BackupStorageLocation
+        (BSL)** and **VolumeSnapshotLocation (VSL)** values from **map -> list/slice**
+        to support multiple BSL/VSL. This is **not backward compatible**, so ensure
+        your Helm values already use lists before upgrading (or you will break your
+        release on upgrade).
+
+        '
+      chart_updates: []
       features: ['Resource Modifiers now support JSON Merge Patch and Strategic Merge
-          Patch in addition to JSON Patch, enabling more flexible restore-time object
-          edits.', 'Node-agent concurrency controls let you limit/shape how many filesystem
-          backups and CSI snapshot data-mover tasks run per node (globally and/or
-          per-node), helping manage CPU/memory/network usage.', Kopia parallel file
-          upload is now configurable to speed up filesystem backups and CSI snapshot
-          data movement., 'Restore can write sparse files for fs-restore and CSI snapshot
-          data movement, potentially reducing time and storage for sparse data patterns.',
-        "`velero backup describe` gains a new \u201CBackup Volumes\u201D section and\
-          \ can show CSI snapshot data movement details; it no longer hides CSI info\
-          \ based on the client-side EnableCSI gate.", 'Backups now write a `VolumeInfo`
-          metadata file describing PV/PVC volume handling and snapshot/mover status,
-          improving restore decisioning and enabling downstream tooling.', 'Improved
-          resilience for CSI snapshot data movement when the Velero server pod or
-          node-agent restarts, reducing chances of stuck operations.', Backup/restore
-          CRs now include hook execution status counters (attempted/failed) and `describe`
-          surfaces those details., 'AWS SDK for Go is upgraded to v2, improving CPU/memory
-          performance for AWS interactions.', 'Azure AD/Workload Identity is now supported
-          for Kopia-based operations (filesystem backup/data mover), expanding beyond
-          native snapshot scenarios.']
-      breaking_changes: ["`velero backup describe` output format changed: some existing\
-          \ snapshot/fs-backup info moved into the new \u201CBackup Volumes\u201D\
-          \ section; any scripts parsing output need updates.", 'API change in the
-          data mover CRD: `DataUploadSpec.DataMoverConfig` changes from `*map[string]string`
-          to `map[string]string`; custom tooling/controllers depending on the old
-          type may break.', Informer cache is now enabled by default (install behavior
-          change); this can increase memory usage and may require higher Velero pod
-          memory limits or explicitly disabling the cache if OOM occurs.]
+          Patch in addition to JSON Patch, allowing more flexible restore-time mutations.',
+        Configurable per-node (and global) node-agent concurrency for data-movement
+          workloads (fs-backups and CSI snapshot data movement) to control CPU/memory/network
+          impact., Kopia parallel file upload tunables to speed up fs-backups and
+          CSI snapshot data movement., Option to write sparse files during restore
+          for fs-restore and CSI snapshot data movement restores., '`velero backup
+          describe` now includes a Backup Volumes section covering native snapshots,
+          fs-backups, CSI snapshots, and CSI snapshot data movement (including the
+          latter, which v1.12 did not show).', 'New `VolumeInfo` metadata file stored
+          with each backup that records PVC/PV backup method, snapshot info, and status
+          to drive PV restore decisions and support downstream tooling.', 'Improved
+          resiliency for CSI snapshot data movement when Velero server pods or node-agents
+          restart, reducing the chance of stuck/incomplete operations.', Backup/Restore
+          CRDs now include hook execution status (HooksAttempted/HooksFailed) and
+          `describe` output surfaces it., AWS SDK for Go upgraded to v2 for improved
+          CPU/memory performance., Azure AD/Workload Identity now supported for Kopia
+          operations (filesystem backup/data mover/etc.) in addition to prior Azure
+          plugin support., 'Runtime bumps: Go 1.21.6 and Kopia 0.15.0 (plus various
+          dependency upgrades for CVE fixes).']
+      breaking_changes: ['CLI output change: `velero backup describe` output format
+          changed; volume-related information moved into the new Backup Volumes section
+          (may break scripts/parsers).', 'API type change: `DataUploadSpec.DataMoverConfig`
+          changed from `*map[string][string]` to `map[string]string` (clients/controllers
+          depending on the old type must be updated).', '`velero install` behavior
+          change: informer cache is now **enabled by default** (previously effectively
+          disabled); can increase memory usage and may require adjusting pod memory
+          limits or explicitly disabling it.']
     chart_version: 6.7.0
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.13.2']
   - version: 1.12.0
@@ -8223,40 +8866,49 @@ addons:
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "### Helm chart / values changes (Velero chart v4.0.0+)\n- **BackupStorageLocation\
-        \ (BSL) and VolumeSnapshotLocation (VSL) values format changed**: `configuration.backupStorageLocation`\
-        \ and `configuration.volumeSnapshotLocation` moved from a **map/object** to\
-        \ a **list/slice** to support **multiple BSLs/VSLs**.\n  - This is **not backward\
-        \ compatible**; update your `values.yaml` **before** upgrading.\n  - Practical\
-        \ impact: if you previously had:\n    - `configuration.backupStorageLocation:\
-        \ { name: default, provider: aws, bucket: ... }`\n    - you now need:\n  \
-        \    - `configuration.backupStorageLocation: [ { name: default, provider:\
-        \ aws, bucket: ... } ]`\n\n### Related behavior changes to be aware of during\
-        \ Helm upgrades\n- New/expanded finalizers on Velero CRs (not Helm-specific\
-        \ but impacts uninstall/namespace deletion): avoid deleting the namespace\
-        \ directly; prefer `velero uninstall` or remove finalizers safely."
-      chart_updates: [Velero Helm chart v4.0.0+ supports configuring **multiple BackupStorageLocations
-          (BSL)** and **multiple VolumeSnapshotLocations (VSL)**., "Due to the above,\
-          \ the chart introduces a **breaking values schema change** (map \0\u2192\
-          \ slice) for BSL/VSL configuration."]
-      features: ['CSI Snapshot Data Movement: move CSI snapshot data into durable
-          backup storage and restore across environments/clouds (data mover workflow).',
-        'Resource Modifiers (JSON substitutions): apply JSON patches to selected resources
-          during restore without writing a custom RestoreItemAction plugin.', 'Multiple
-          VolumeSnapshotClasses support in the CSI plugin: choose a specific VolumeSnapshotClass
-          per backup rather than relying on a single labeled class.', 'Restore finalizer:
-          `velero restore delete` now also cleans up associated restore data in the
-          backup storage location.', 'Dependency/runtime updates: Go 1.20.7 and Kopia
-          bumped to 0.13.x (security/compatibility improvements).']
-      breaking_changes: [Default `uploader-type` changed from **restic** to **kopia**;
-          filesystem backups will use Kopia unless you explicitly set otherwise.,
-        'CSI snapshot timeout behavior changed: snapshot handle creation wait is now
-          `backup.spec.csiSnapshotTimeout` (was fixed 10m), and async readiness waits
-          use the operation timeout (default 4h).', Helm chart v4.0.0+ changes BSL/VSL
-          configuration from map to slice; existing `values.yaml` will break unless
-          migrated., Finalizers on Velero CRs (restore/dataupload/datadownload) can
-          cause **namespace deletion to hang** if you delete the Velero namespace
-          directly; use `velero uninstall` or manage finalizers first.]
+      helm_changes: "### Helm chart / values changes to make before upgrading\n- **Chart\
+        \ v4.0.0+ changes `configuration.backupStorageLocation` and `configuration.volumeSnapshotLocation`\
+        \ from a _map_ to a _list (slice)_**. This is **not backward compatible**.\n\
+        \  - **Action:** convert your existing values to list form *before* running\
+        \ `helm upgrade`, especially if you have custom `values.yaml`.\n  - This change\
+        \ is called out in the Velero v1.12.0 breaking changes and links to helm-charts\
+        \ v4.0.0 / PR #413.\n\n### Other upgrade-impacting defaults (often set via\
+        \ Helm values)\n- **Default `uploader-type` changes from `restic` \u2192 `kopia`**\
+        \ in v1.12.\n  - **Action:** if you rely on Restic behavior or have operational\
+        \ tooling around Restic, explicitly set `uploaderType: restic` (or the chart\u2019\
+        s equivalent value) to preserve behavior; otherwise validate Kopia in lower\
+        \ env first.\n- **CSI snapshot timing knobs changed** (some may be exposed\
+        \ via Helm values depending on chart):\n  - snapshot \u201Csync wait\u201D\
+        \ is now `backup.spec.csiSnapshotTimeout` (was fixed 10m)\n  - async wait\
+        \ uses **operation timeout** (default **4h**)\n  - **Action:** review any\
+        \ existing expectations/alerts around snapshot durations and adjust timeouts\
+        \ accordingly.\n- **Finalizers added to Velero CRs (`restore`, `dataupload`,\
+        \ `datadownload`)** can affect lifecycle operations.\n  - **Action:** avoid\
+        \ deleting the Velero namespace directly; prefer `velero uninstall` or ensure\
+        \ finalizers are handled."
+      chart_updates: [Helm chart v4.0.0+ supports multiple BackupStorageLocations
+          (BSL) and VolumeSnapshotLocations (VSL)., "As part of that, BSL/VSL configuration\
+          \ schema changed from map \u2192 list/slice (breaking, requires values migration)."]
+      features: ['CSI Snapshot Data Movement: can move CSI snapshot data from the
+          source environment into durable backup storage and restore to same or different
+          environments (supports on-prem and multi-cloud use cases).', 'Resource Modifiers
+          (JSON Substitutions): apply JSON patches to selected resources during restore
+          without writing a custom RestoreItemAction plugin.', 'Multiple VolumeSnapshotClasses
+          support: select a specific VolumeSnapshotClass per backup instead of relying
+          on label/driver matching.', 'Restore finalizer: `velero restore delete`
+          now cleans up associated external data in the backup storage location, not
+          just Kubernetes restore objects.']
+      breaking_changes: ['Default filesystem backup uploader changed from Restic to
+          Kopia (`uploader-type` default is now `kopia`), which can change behavior/performance
+          and may require new operational validation.', 'CSI snapshot timeout behavior
+          changed (sync wait uses `backup.spec.csiSnapshotTimeout`; async wait uses
+          operation timeout with a 4h default), impacting long snapshot operations
+          and how timeouts are tuned.', Helm chart v4.0.0+ changes BSL/VSL values
+          from map to list/slice; old values files will not apply cleanly and must
+          be migrated before upgrade., "Velero CRs now use finalizers; deleting the\
+          \ Velero namespace directly can hang because finalizer-handling pods may\
+          \ be removed first\u2014use `velero uninstall` or remove/finalize resources\
+          \ safely."]
     chart_version: 5.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.12.3']
   - version: 1.11.0
@@ -9479,13 +10131,13 @@ addons:
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
   versions:
-  - version: 3.31.2
+  - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 3.31.2
-    images: ['quay.io/tigera/operator:v1.40.2']
+    chart_version: 3.31.3
+    images: ['quay.io/tigera/operator:v1.40.3']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -9570,7 +10222,7 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   versions:
   - version: 3.2.2
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
@@ -9585,7 +10237,7 @@ addons:
     images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
       'quay.io/argoproj/argocd:v3.2.2']
   - version: 3.2.1
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
@@ -9601,7 +10253,7 @@ addons:
     images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
       'quay.io/argoproj/argocd:v3.2.1']
   - version: 3.2.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
@@ -9631,8 +10283,27 @@ addons:
     chart_version: 9.1.4
     images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
       'quay.io/argoproj/argocd:v3.2.0']
+  - version: 3.1.1
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['No Helm chart changelog was provided in the notes you pasted,
+          so I can''t confirm any chart/values changes between the Helm chart versions
+          for 3.1.0 -> 3.1.1.', The only manifest-level change explicitly called out
+          for 3.1.1 is adding OCI environment variables to the upstream manifests
+          (may affect the helm chart if it templates similar env vars).]
+      features: [No new user-facing features were called out for v3.1.1; it is primarily
+          a bugfix patch release., 'Operationally relevant: upstream manifests now
+          include OCI-related environment variables, which may make OCI/registry behavior
+          more consistent if you use OCI support.']
+      breaking_changes: []
+    chart_version: 8.3.3
+    images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
+      'quay.io/argoproj/argocd:v3.1.1']
   - version: 3.1.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -9663,7 +10334,7 @@ addons:
     images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.43.1',
       'quay.io/argoproj/argocd:v3.1.0']
   - version: 3.0.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -9709,16 +10380,51 @@ addons:
     chart_version: 8.0.1
     images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
       'quay.io/argoproj/argocd:v3.0.0']
-  - version: 2.14.1
-    kube: ['1.35', '1.34', '1.33']
+  - version: 2.14.11
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Hydrator: webhook handling now correctly processes `sourceHydrator`
+          fields, improving GitOps hydration workflows and reducing missed webhook-triggered
+          updates.']
+      breaking_changes: []
+    chart_version: 7.9.1
+    images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
+      'quay.io/argoproj/argocd:v2.14.11']
+  - version: 2.14.1
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Mostly bugfix/stability improvements between 2.13.2 and 2.14.1 based\
+          \ on the notes you provided (2.13.2 details; 2.14.1 page doesn\u2019t list\
+          \ individual items here)."]
+      breaking_changes: []
     chart_version: 7.8.0
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
       'quay.io/argoproj/argocd:v2.14.1']
+  - version: 2.13.2
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['v2.13.0: Allows configuring Argo CD UI extensions with individual
+          per-extension configs, rather than a single shared config.', 'v2.13.0: Adds
+          exponential backoff between self-heal attempts to reduce thrashing during
+          repeated drift corrections.']
+      breaking_changes: []
+    chart_version: 7.7.12
+    images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
+      'quay.io/argoproj/argocd:v2.13.2']
   - version: 2.13.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary:
@@ -9735,7 +10441,7 @@ addons:
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
       'quay.io/argoproj/argocd:v2.13.0']
   - version: 2.12.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary:
@@ -9752,15 +10458,23 @@ addons:
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.12.0']
   - version: 2.11.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 6.9.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.11.0']
+  - version: 2.10.7
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 6.7.15
+    images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
+      'quay.io/argoproj/argocd:v2.10.7']
   - version: 2.10.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary:
@@ -9793,8 +10507,35 @@ addons:
     chart_version: 6.0.13
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
       'quay.io/argoproj/argocd:v2.10.0']
+  - version: 2.9.4
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Argo CD 2.9.0 \u2192 2.9.4 is a patch-level upgrade within\
+          \ the 2.9 minor line; focus is on bug fixes plus a security fix in 2.9.4.",
+        v2.9.4 includes a security advisory fix (GHSA-92mw-q256-5vwg) and explicitly
+          notes a *breaking API change* tied to that fix., 'v2.9.4 has a known issue:
+          the security patch causes major UI problems; upstream says the fix will
+          be in 2.9.5.', 'Additional notable changes in 2.9.x included updates to
+          k8s client-go, git libraries, Redis image version, kustomize/helm toolchain
+          bumps, and various controller/appset behavioral fixes.']
+      features: ['PKCE authentication flow for web logins (OIDC) was added in 2.9.x,
+          which may affect/benefit SSO setups.', 'ApplicationSet gained enhancements
+          such as ignoreApplicationDifferences, additional generators/webhook support
+          (e.g., Azure DevOps/GitLab SCM improvements), and various reconciliation
+          behavior improvements.', Operational improvements include retry logic in
+          Kubernetes client usage and less aggressive sync state behavior during repo
+          errors.]
+      breaking_changes: [2.9.4 security fix (GHSA-92mw-q256-5vwg) includes a breaking
+          API change; you must read the advisory and validate any API clients/automations
+          before upgrading.]
+    chart_version: 5.53.1
+    images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
+      'quay.io/argoproj/argocd:v2.9.4']
   - version: 2.9.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
@@ -9824,7 +10565,7 @@ addons:
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.9.0']
   - version: 2.8.4
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
@@ -9858,14 +10599,14 @@ addons:
   helm_repository_url: https://helm.vector.dev/
   versions:
   - version: 0.52.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.49.0
     images: ['timberio/vector:0.52.0-distroless-libc']
   - version: 0.51.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
@@ -9888,7 +10629,7 @@ addons:
     chart_version: 0.47.0
     images: ['timberio/vector:0.51.0-distroless-libc']
   - version: 0.50.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
@@ -9909,7 +10650,7 @@ addons:
     chart_version: 0.46.0
     images: ['timberio/vector:0.50.0-distroless-libc']
   - version: 0.49.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -9930,231 +10671,252 @@ addons:
     chart_version: 0.45.0
     images: ['timberio/vector:0.49.0-distroless-libc']
   - version: 0.48.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.44.0
     images: ['timberio/vector:0.48.0-distroless-libc']
   - version: 0.47.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.43.0
     images: ['timberio/vector:0.47.0-distroless-libc']
   - version: 0.46.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.42.0
     images: ['timberio/vector:0.46.0-distroless-libc']
   - version: 0.45.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.41.0
     images: ['timberio/vector:0.45.0-distroless-libc']
   - version: 0.44.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.40.0
     images: ['timberio/vector:0.44.0-distroless-libc']
   - version: 0.43.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.38.0
     images: ['timberio/vector:0.43.0-distroless-libc']
   - version: 0.42.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.37.0
     images: ['timberio/vector:0.42.0-distroless-libc']
   - version: 0.41.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.36.0
     images: ['timberio/vector:0.41.0-distroless-libc']
+  - version: 0.40.1
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.35.2
+    images: ['timberio/vector:0.40.1-distroless-libc']
   - version: 0.40.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.35.0
     images: ['timberio/vector:0.40.0-distroless-libc']
   - version: 0.39.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.34.0
     images: ['timberio/vector:0.39.0-distroless-libc']
   - version: 0.38.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.33.0
     images: ['timberio/vector:0.38.0-distroless-libc']
   - version: 0.37.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.32.0
     images: ['timberio/vector:0.37.0-distroless-libc']
   - version: 0.36.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.31.0
     images: ['timberio/vector:0.36.0-distroless-libc']
   - version: 0.35.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.30.0
     images: ['timberio/vector:0.35.0-distroless-libc']
+  - version: 0.34.2
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.29.1
+    images: ['timberio/vector:0.34.2-distroless-libc']
   - version: 0.34.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.28.0
     images: ['timberio/vector:0.34.0-distroless-libc']
   - version: 0.33.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.26.0
     images: ['timberio/vector:0.33.0-distroless-libc']
   - version: 0.32.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.24.0
     images: ['timberio/vector:0.32.0-distroless-libc']
   - version: 0.31.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.23.0
     images: ['timberio/vector:0.31.0-distroless-libc']
   - version: 0.30.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.22.1
     images: ['timberio/vector:0.30.0-distroless-libc']
   - version: 0.29.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.21.0
     images: ['timberio/vector:0.29.0-distroless-libc']
   - version: 0.28.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.20.0
     images: ['timberio/vector:0.28.0-distroless-libc']
+  - version: 0.27.1
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.19.2
+    images: ['timberio/vector:0.27.1-distroless-libc']
   - version: 0.27.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.19.0
     images: ['timberio/vector:0.27.0-distroless-libc']
   - version: 0.26.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.18.0
     images: ['timberio/vector:0.26.0-distroless-libc']
   - version: 0.25.1
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.17.0
     images: ['timberio/vector:0.25.1-distroless-libc']
   - version: 0.24.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.16.0
     images: ['timberio/vector:0.24.0-distroless-libc']
   - version: 0.23.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.15.0
     images: ['timberio/vector:0.23.0-distroless-libc']
   - version: 0.22.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.13.0
     images: ['timberio/vector:0.22.0-distroless-libc']
   - version: 0.21.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.10.0
     images: ['timberio/vector:0.21.0-distroless-libc']
   - version: 0.20.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.7.0
     images: ['timberio/vector:0.20.0-distroless-libc']
   - version: 0.19.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.4.0
     images: ['timberio/vector:0.19.0-distroless-libc']
   - version: 0.18.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.2.1
     images: ['timberio/vector:0.18.0-distroless-libc']
   - version: 0.17.3
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.1.1
     images: ['timberio/vector:0.17.3-distroless-libc']
   - version: 0.16.1
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null

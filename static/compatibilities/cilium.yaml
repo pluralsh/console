@@ -111,7 +111,25 @@ versions:
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **Helm value behavior change (already in 1.17.4 but relevant
+      if you were on an older patch):** `kafka.apiKey` is set to `true` (per 1.17.4
+      notes). If you rely on older Kafka L7 policy behavior, confirm this value in
+      your existing `values.yaml` and keep/override as needed.
+
+      - No other explicit Helm values changes are called out in the provided 1.17.8
+      notes.
+
+      '
+    chart_updates: [No Helm chart structural changes were explicitly called out in
+        the provided notes for 1.17.8; most listed items are CI/build/dependency updates.,
+      "Docs note (1.17.8): portmap binary requirements were documented\u2014useful\
+        \ if you rely on CNI portmap chaining or downstream packaging."]
+    features: [GAMMA reconciler supports attaching multiple HTTPRoutes to the same
+        Service (Gateway API behavior improvement)., Envoy starts serving listeners
+        only after clusters have been ACKed (improves correctness/readiness of L7/Gateway
+        programming).]
+    breaking_changes: []
   chart_version: 1.17.8
   images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
     'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636',
@@ -949,7 +967,24 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Helm chart version**: When upgrading to v1.12.9+ you **must\
+      \ use the matching newer Cilium Helm chart version** (called out explicitly\
+      \ in the 1.12.9 notes).\n- **cert-manager users**: If you use cert-manager to\
+      \ generate Cilium certificates, Helm now **requires an explicit issuer configuration**\
+      \ (issuer must be set; relying on implicit defaults can fail the upgrade).\n\
+      \n> I don\u2019t have the Cilium *Helm chart* changelog for 1.12.10\u20131.12.14\
+      \ in what you pasted, so I can\u2019t list additional value renames/deprecations\
+      \ beyond the cert-manager note above."
+    chart_updates: [Envoy bumps in the 1.12 line (1.23.7/1.23.8 noted around 1.12.9).,
+      "Certificate generation tooling updated: `cilium-certgen` bumped (v0.1.8 \u2192\
+        \ v0.1.9 by 1.12.14)."]
+    features: [Security advisory addressed in v1.12.9 (GHSA-pg5p-wwp8-97g8)., "Improved\
+        \ support for certain service hairpin/loopback scenarios: Pod \u2192 Service\
+        \ \u2192 same Pod hairpinning with endpoint routes (v1.12.14 fix)."]
+    breaking_changes: ['If you use cert-manager-managed certs, upgrades may break
+        unless you set/confirm the required issuer configuration in Helm values (enforced
+        starting in the 1.12.9-era chart changes).']
   chart_version: 1.12.14
   images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
     'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
