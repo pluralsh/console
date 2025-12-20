@@ -133,7 +133,26 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Webhook provider improvements (webhook-* annotations forwarded to
+        webhooks) and additional webhook provider options documented (e.g., Infoblox,
+        Unifi).', CoreDNS provider gains etcd authentication support (and related
+        HTTPS doc updates)., AWS provider can use local AWS credential profiles from
+        a .credentials file., RFC2136 provider adds optional PTR record support.,
+      'Gateway API support evolves: GRPCRoute client updated to stable v1 and Gateway
+        API gains dual-stack support, plus a follow-up revert to v1beta1 objects in
+        v0.15.0 notes.']
+    breaking_changes: [v0.15.0 drops several unmaintained in-tree providers; users
+        must stay on older versions or migrate to webhook providers for those DNS
+        providers., Infoblox in-tree provider is removed (use the Infoblox webhook
+        provider instead)., Cloudflare had a breaking change in v0.16.0 that is fixed
+        in v0.16.1; still treat Cloudflare upgrades cautiously., 'TXT registry now
+        has an option to use only the new TXT format; the old format is planned for
+        removal in the next release, so plan a migration if you rely on legacy TXT
+        ownership records.', OpenStack Designate in-tree provider is slated for removal
+        next version; migrate to the external webhook provider.]
   chart_version: 1.16.1
   images: ['registry.k8s.io/external-dns/external-dns:v0.16.1']
 - version: 0.15.0

@@ -348,7 +348,28 @@ versions:
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Controller image changed from v1.9.0 to v1.9.6 (and corresponding
+        chroot image digest)., Admission webhook cert generator updated to a newer
+        release (v20231226-1a7112e06)., 'Annotation validation tightened: regex validation
+        added for the common-name annotation; SSL cipher list validation expanded
+        to include SECLEVEL and STRENGTH.', ModSecurity library version updated to
+        3.0.11., "Dependency bump: runc 1.1.10 \u2192 1.1.11.", 'From 1.9.0 baseline:
+        user snippets are disabled by default; controller base image no longer includes
+        curl; annotation validation framework introduced. These are the main behavior-impacting
+        changes to be aware of when moving off 1.9.0.']
+    features: ['Stricter and more complete validation for annotations (including regex
+        checks and SSL cipher list fields), reducing risk of invalid config reaching
+        NGINX.', 'Updated admission webhook cert generation tooling, improving compatibility
+        and maintenance.', Updated ModSecurity library version (3.0.11) for security/stability
+        fixes.]
+    breaking_changes: [User-provided NGINX snippets are disabled by default starting
+        in 1.9.0; any Ingress relying on snippet annotations will stop working unless
+        you explicitly re-enable snippets via controller configuration/values., 'The
+        controller image no longer includes curl (since 1.9.0); any custom scripts,
+        sidecars, or debug workflows that exec into the controller pod expecting curl
+        will fail.']
   chart_version: 4.9.1
   images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']
@@ -442,7 +463,48 @@ versions:
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- No full Helm chart changelog was provided in the notes you pasted,\
+      \ so treat Helm-side changes below as **\u201Cverify in chart changelog for\
+      \ v4.5.x\u201D**.\n- From the provided notes, the following **values/schema\
+      \ additions** are likely relevant when upgrading the Helm release (review your\
+      \ `values.yaml` for collisions with defaults):\n  - `controller.metrics.service.labels`\
+      \ was added (you may want to set it if you rely on service discovery labels).\n\
+      \  - `controller.autoscaling.annotations` was added (if you use HPA and need\
+      \ annotations).\n  - PDB gained `maxUnavailable` support.\n  - defaultBackend\
+      \ got `updateStrategy` and `minReadySeconds` knobs.\n  - `controller.ingressClass`\
+      \ value was added/fixed (ensure you set this if you rely on a non-default class).\n\
+      \  - Helm can **optionally use cert-manager** instead of the admission patch\
+      \ job for webhook certs (new option; choose one approach).\n  - Admission webhook\
+      \ job got `NetworkPolicy` support; admission webhook job securityContext became\
+      \ configurable.\n  - There was work around pathType validation toggles; check\
+      \ whether the chart exposes a value to disable/enable strict validation in your\
+      \ version.\n"
+    chart_updates: ['Controller image update to `registry.k8s.io/ingress-nginx/controller:v1.6.4`
+        (and chroot variant) from `v1.5.1`.', CI/release pipeline and chart linting
+        were added/adjusted (no runtime impact but indicates chart packaging changes).,
+      Grafana dashboard templates were adjusted to remove hardcoded namespaces/datasources
+        (may affect how you import/use dashboards)., HPA API version was bumped to
+        `autoscaling/v2` (cluster must support it; Kubernetes 1.23+ generally OK).,
+      RBAC was tightened by removing some ConfigMap-related permissions (may matter
+        if you had custom workflows expecting those permissions).]
+    features: [Support for Kubernetes topology-aware hints (can improve client-side
+        load distribution when using services that honor hints)., New Prometheus metric
+        for orphaned Ingress objects (`orphan_ingress`) to help detect stale/unused
+        Ingress resources., ConfigMap option exposed to disable gzip (`gzip-disable`)
+        for easier response compression control., New `ipdenylist` annotation to deny
+        traffic from specified IP ranges at the Ingress level., Ability to disable
+        creation of sync events (reduces event noise in large clusters)., Stream module
+        gained `buildResolvers` (helps with DNS resolution behavior for TCP/UDP stream
+        configs)., Profiler address became configurable (helps with debugging/performance
+        profiling when needed).]
+    breaking_changes: ['If you are on an older Kubernetes version, HPA switching to
+        `autoscaling/v2` can break installs/updates (verify your cluster supports
+        it).', 'Stricter/changed behavior around Ingress `pathType` validation was
+        introduced and then partially reverted/toggled; if you relied on invalid/missing
+        `pathType` or regex path edge-cases, re-test your Ingress rules after upgrade.',
+      RBAC reduction (removal of some ConfigMap permissions) can break custom automation
+        that expected the controller service account to have broader access.]
   chart_version: 4.5.2
   images: ['registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
