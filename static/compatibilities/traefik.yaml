@@ -21,13 +21,34 @@ versions:
     breaking_changes: ['Access logs will now also be printed for rejected requests;
         the release note explicitly warns about this new behavior, so log volume/content
         may change and could affect log-based alerts/costs.']
-  chart_version: 38.0.0
+  chart_version: 38.0.1
   images: []
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ACME: new certificate resolver options, following earlier v3.5 OCSP
+        stapling and HTTP challenge delay/timeout improvements.', 'Health checks:
+        adds TCP health checks and passive health checks (in addition to v3.5 healthcheck
+        improvements).', 'Load balancing: adds "least time" strategy and HighestRandomWeight
+        algorithm (plus CRD support for HighestRandomWeight).', 'Kubernetes: Gateway
+        API bumped to v1.4.0; Ingress can publish ExternalName services; adds a Knative
+        provider.', 'Docker/ECS: can discover non-running Docker containers; ECS gains
+        IPv6 support.', "Middleware/server: multi-layer routing; warning when maxBodySize\
+        \ isn\u2019t set.", 'Plugins: adds syscall support; earlier v3.5 allowed enabling
+        unsafe yaegi via plugin manifest.', 'HTTP/2: adds HPACK table size tuning
+        options.', 'Web UI: dashboard continues React migration and adds Hub demo
+        plus layout tweaks.']
+    breaking_changes: ['Potential behavior change risk: multi-layer routing and new
+        load-balancing/healthcheck features may alter request routing/traffic patterns
+        if enabled.', Gateway API bump may expose/require updated CRDs or behavior
+        differences depending on cluster/controller versions., 'Ingress prefix-matching
+        behavior was made consistent with Kubernetes docs in v3.5; if you rely on
+        the old behavior, routes may match differently after upgrading to >=3.5 (including
+        3.6).']
   chart_version: 37.3.0
   images: ['docker.io/traefik:v3.6.0']
 - version: 3.5.0

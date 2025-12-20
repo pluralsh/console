@@ -4,19 +4,13 @@ release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
 helm_repository_url: https://docs.tigera.io/calico/charts
 chart_name: tigera-operator
 versions:
-- version: 3.31.2
+- version: 3.31.3
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [v3.31.2 is functionally identical to v3.31.1 except for a Docker
-        image label fix on one image to satisfy Red Hat OpenShift Container Platform
-        certification requirements.]
-    features: []
-    breaking_changes: []
-  chart_version: 3.31.2
-  images: ['quay.io/tigera/operator:v1.40.2']
+  summary: null
+  chart_version: 3.31.3
+  images: ['quay.io/tigera/operator:v1.40.3']
 - version: 3.31.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []

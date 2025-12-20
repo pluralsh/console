@@ -5,6 +5,23 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 80.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Chart release 80.6.0 only includes non-major dependency updates
+        via Renovate (PR #6426).']
+    features: [No user-facing features called out in the release notes; this is a
+        dependency refresh.]
+    breaking_changes: [No breaking changes mentioned in the provided release notes.]
+  chart_version: 80.6.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
@@ -411,7 +428,21 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **New option:** You can now set annotations on the Prometheus\
+      \ Operator service account.\n  - Look for/enable a value similar to: `prometheusOperator.serviceAccount.annotations`\
+      \ (name inferred from the release note; verify exact key in `values.yaml` for\
+      \ 62.7.0).\n- **Grafana dependency bump (already present at 61.9.0):** 61.9.0\
+      \ notes mention bumping Grafana chart dependencies to `8.4.*`. If your cluster\
+      \ pins/overrides Grafana chart versions, re-check that your overrides still\
+      \ apply cleanly after upgrading."
+    chart_updates: ['Added ability to set ServiceAccount annotations for the Prometheus
+        Operator (PR #4820).', Grafana chart dependency bumped to 8.4.* (noted in
+        61.9.0).]
+    features: ['Can configure annotations on the Prometheus Operator ServiceAccount
+        (useful for IAM roles for service accounts, workload identity, custom auditing
+        labels, etc.).']
+    breaking_changes: []
   chart_version: 62.7.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -527,7 +558,13 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped the Grafana subchart dependency to the 7.2.x series (kube-prometheus-stack
+        55.11.0).]
+    features: [Grafana subchart updated to 7.2.x (new Grafana chart defaults/features
+        may apply).]
+    breaking_changes: []
   chart_version: 55.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.2.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.70.0', 'quay.io/prometheus/alertmanager:v0.26.0',

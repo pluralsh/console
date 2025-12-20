@@ -111,7 +111,39 @@ versions:
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Helm value default change:** `kafka.apiKey` is now set to `true`\
+      \ by default (noted in v1.17.4 release notes). If you previously relied on the\
+      \ old default/explicitly set this to `false`, review Kafka/L7 policy behavior\
+      \ and set it explicitly in your `values.yaml` to preserve intent.\n- **Helm\
+      \ bugfix:** Fix for a **Hubble dynamic metrics config conflict** (v1.17.4 notes).\
+      \ If you have custom `hubble.metrics.dynamic` (or equivalent) configuration,\
+      \ re-test after upgrade; the chart behavior is intended to be more consistent.\n\
+      - **Packaging/templating:** v1.17.8 includes support for downstream packagers\
+      \ to **extend `cilium-agent` `dnsPolicy`**. This is primarily relevant if you\
+      \ vendor/patch the chart; most users won\u2019t change values for this."
+    chart_updates: ['Cilium Agent liveness probe behavior changed: it no longer fails
+        solely due to Kubernetes API server unreachability (helps avoid agent restarts
+        during apiserver downtime).', 'Gateway API robustness: reconciler handles
+        missing TLSRoute CRD more gracefully and fixes parentRef matching logic.',
+      'Envoy/xDS reliability: fixes cases where updated resources were not sent to
+        Envoy; in v1.17.8, Envoy starts serving listeners only after clusters are
+        ACKed (reduces race conditions on rollout).', 'Kernel compatibility: fix for
+        pre-v5.7 kernels where LocalRedirectPolicy could trigger BPF verifier rejection.',
+      'NAT/masquerade robustness: improvements to NAT LRU fallback paths; addresses
+        flakes and should reduce edge-case failures under pressure.', 'Various datapath
+        fixes: NodePort NAT46x64 clash avoidance, ipip MTU fix, device controller
+        netfilter dependency fix, WireGuard overlay cleanup, IPSec key derivation
+        hardening, and deadlock/panic fixes around missing IPv4 and ipset reconciliation.',
+      'Policy correctness: fixes for invalid CNP/CCNP status reporting and an important
+        fix where L7 rules could override `enableDefaultDeny: false` and incorrectly
+        drop traffic.']
+    features: ['Adds new WireGuard observability points (`TRACE_FROM/TO_CRYPTO`) and
+        BPF metrics for packets to/from WireGuard, improving troubleshooting/monitoring.',
+      'GAMMA (Gateway API for Mesh Management and Administration) reconciler can now
+        attach multiple HTTPRoutes to the same Service, expanding Gateway API routing
+        flexibility.']
+    breaking_changes: []
   chart_version: 1.17.8
   images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
     'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636',
@@ -949,7 +981,16 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog was provided in the notes you pasted,\
+        \ so I can\u2019t list exact chart/values changes for 1.12.9\u21921.12.14\
+        \ from source material here.", 'From the v1.12.9 release notes: when updating
+        to 1.12.9 you must also use the corresponding new Helm chart version (implies
+        chart/version coupling; verify chart version for 1.12.14 in the Cilium Helm
+        chart release notes).']
+    features: []
+    breaking_changes: []
   chart_version: 1.12.14
   images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
     'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
