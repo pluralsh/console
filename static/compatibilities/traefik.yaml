@@ -55,7 +55,27 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ACME improvements: OCSP stapling support plus new tuning options for
+        HTTP-01 challenge delay and ACME HTTP client timeout.', 'Kubernetes-related
+        additions: new NGINX Ingress provider and Gateway API dependency bumped to
+        v1.3.0.', 'Ingress behavior change: Prefix path matching is now consistent
+        with Kubernetes documentation (may affect which Ingress rules match).', 'Observability
+        improvements for OpenTelemetry: more resource attribute detectors, automatic
+        k8s resource attributes, new resourceAttributes option for OTel metrics, and
+        reduced default tracing span volume with trace verbosity control.', 'Dashboard
+        updates: UI migrated to React and improved visualization for Errors middleware
+        StatusRewrites.', 'TLS enhancement: adds X25519MLKEM768 (post-quantum) key
+        exchange option.', 'Plugin system: plugin manifests can now allow enabling
+        unsafe mode in Yaegi.', 'ForwardAuth middleware: better handling of context-canceled
+        scenarios.']
+    breaking_changes: ['Potential behavioral change for Kubernetes Ingress Prefix
+        matching; verify your Ingress rules/routes still match as expected after upgrade,
+        especially for overlapping prefixes.', Trace output may change because Traefik
+        produces fewer spans by default due to new trace verbosity behavior; dashboards/alerts
+        based on span counts may need adjustment.]
   chart_version: 37.0.0
   images: ['docker.io/traefik:v3.5.0']
 - version: 3.4.0

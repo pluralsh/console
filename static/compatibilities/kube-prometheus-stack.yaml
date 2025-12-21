@@ -302,7 +302,16 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [No chart template/value changes called out in the provided release
+        notes for this version jump., 70.10.0 notes indicate CI maintenance (actions/setup-python
+        bump) and routine dependency non-major updates via Renovate., 69.8.2 notes
+        indicate an Alertmanager image/version bump to 0.28.1.]
+    features: [Alertmanager version updated to 0.28.1 (from the 69.8.2 notes in your
+        snippets)., Ongoing dependency refreshes in 70.10.0 (non-major) which may
+        include patch/minor updates of subcharts/images.]
+    breaking_changes: []
   chart_version: 70.10.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.6.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.81.0', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -534,7 +543,11 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Fix issue with kube-state-metrics 2.11.0 (PR #4419).']
+    features: []
+    breaking_changes: []
   chart_version: 57.2.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.72.0', 'quay.io/prometheus/alertmanager:v0.27.0',

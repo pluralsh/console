@@ -284,7 +284,24 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['No Helm chart changelog was provided in the notes you pasted,
+        so there are no chart-specific changes I can summarize from source data.']
+    features: ['**v2.9.0** introduced a large set of new capabilities across Argo
+        CD and ApplicationSet, including PKCE auth flow for web logins, dynamic cluster
+        sharding/rebalancing (must be explicitly enabled), improved UI features (e.g.,
+        recursive Helm values file detection), and multiple new/expanded health checks
+        for additional CRDs.', 'Operational/observability additions in **v2.9.0**
+        include more reconciliation timing metrics/log fields, additional OpenTelemetry
+        attributes support, and new knobs like `ARGOCD_CLUSTER_CACHE_LIST_PAGE_BUFFER_SIZE`
+        and GRPC keepalive configuration.']
+    breaking_changes: ['**v2.9.4 includes a security fix (GHSA-92mw-q256-5vwg) that
+        introduces a breaking API change**; you must read the advisory and validate
+        any custom clients/integrations against the new API behavior before upgrading.',
+      '**v2.9.4 has a known issue causing major UI breakage** (many UI actions fail).
+        The upstream note says a fix will be available in 2.9.5, so consider skipping
+        2.9.4 if the UI is critical.']
   chart_version: 5.53.1
   images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
     'quay.io/argoproj/argocd:v2.9.4']
