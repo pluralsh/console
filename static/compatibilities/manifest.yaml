@@ -31,3 +31,4 @@ names:
 - tigera-operator
 - argo-cd
 - vector
+- volcano-controller
