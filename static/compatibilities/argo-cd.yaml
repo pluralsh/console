@@ -244,7 +244,28 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['2.10.0 is the base for this patch-line upgrade; it introduced
+        multiple controller/server/repo-server features and fixes, plus a known HA
+        controller issue in 2.10.0 that is fixed in 2.10.1+.', v2.10.7 is a patch
+        release; the GitHub release page primarily points to the compare view (v2.10.6...v2.10.7)
+        rather than listing highlights on the page itself.]
+    features: ['In 2.10.0, Application Controller added sync jitter (to reduce sync
+        thundering herd) and a grace period for repo errors to avoid overly aggressive
+        Unknown sync states.', 'In 2.10.0, Argo CD added Server-Side Diff and improved
+        support for Server-Side Apply scenarios (notably around auto-creating namespaces).',
+      'In 2.10.0, ApplicationSets gained advanced templating via templatePatch and
+        additional sprig functions (e.g., slugify).', 'In 2.10.0, Argo CD added PostDelete
+        hook support and improved UI capabilities (e.g., status panel extensions,
+        better prompts around pruning, recursive Helm values file detection).', 'In
+        2.10.0, security/SSO improvements included PKCE web login flow and optional
+        OIDC UserInfo group-claim retrieval, plus better security logging when access
+        is blocked.']
+    breaking_changes: [No explicit breaking changes are shown in the provided notes
+        for 2.10.0 or 2.10.7; treat this as 'none called out' rather than 'none exist'
+        and still follow the upstream upgrading guide when jumping minor versions
+        (not applicable here since it's a patch upgrade within 2.10).]
   chart_version: 6.7.15
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.10.7']

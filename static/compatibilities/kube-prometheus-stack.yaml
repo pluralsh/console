@@ -333,7 +333,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['68.5.0: Fix the mixin update/regeneration script and regenerate
+        mixins (dashboards/rules artifacts).', '67.11.0: Add a configurable kubelet
+        scrape flag (new chart option affecting kubelet scraping configuration).']
+    features: [New kubelet scrape flag option added (lets you control how/if kubelet
+        is scraped).]
+    breaking_changes: []
   chart_version: 68.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.2', 'quay.io/prometheus/alertmanager:v0.28.0',
@@ -463,7 +470,15 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana dependency chart bumped to the 8.4.* series (as pulled
+        in by kube-prometheus-stack chart)., Grafana subchart/templates updated to
+        support dual-stack clusters (IPv4/IPv6) in Grafana-related resources.]
+    features: [Grafana components now support dual-stack Kubernetes clusters (IPv4/IPv6)
+        via updated chart handling., 'Grafana dependency updated to 8.4.*, bringing
+        in upstream fixes and improvements from the Grafana Helm chart.']
+    breaking_changes: []
   chart_version: 61.9.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.1.3', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.75.2', 'quay.io/prometheus/alertmanager:v0.27.0',
