@@ -4557,11 +4557,26 @@ input ViolationAttributes {
 
 input VulnerabilityReportAttributes {
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
   os: VulnOsAttributes
+
   summary: VulnSummaryAttributes
+
   artifact: VulnArtifactAttributes
+
   vulnerabilities: [VulnerabilityAttributes]
+
   services: [ServiceVulnAttributes]
+
   namespaces: [NamespaceVulnAttributes]
 }
 
@@ -4712,15 +4727,36 @@ type Violation {
 
 type VulnerabilityReport {
   id: ID!
+
+  "the URL of the artifact"
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
   os: VulnOs
+
   summary: VulnSummary
+
   artifact: VulnArtifact
+
+  "the grade of the vulnerability report"
   grade: VulnReportGrade
+
   vulnerabilities: [Vulnerability]
+
   services: [ServiceVuln]
+
   namespaces: [NamespaceVuln]
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

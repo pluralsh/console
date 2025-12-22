@@ -8307,11 +8307,19 @@ type VulnerabilityAttributes struct {
 }
 
 type VulnerabilityReport struct {
-	ID              string           `json:"id"`
-	ArtifactURL     *string          `json:"artifactUrl,omitempty"`
-	Os              *VulnOs          `json:"os,omitempty"`
-	Summary         *VulnSummary     `json:"summary,omitempty"`
-	Artifact        *VulnArtifact    `json:"artifact,omitempty"`
+	ID string `json:"id"`
+	// the URL of the artifact
+	ArtifactURL *string `json:"artifactUrl,omitempty"`
+	// the Git URL of the codebase defining this artifact
+	ArtifactRepoURL *string `json:"artifactRepoUrl,omitempty"`
+	// the language the artifact is written in
+	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
+	// the language version of the artifact, if applicable
+	ArtifactLanguageVersion *string       `json:"artifactLanguageVersion,omitempty"`
+	Os                      *VulnOs       `json:"os,omitempty"`
+	Summary                 *VulnSummary  `json:"summary,omitempty"`
+	Artifact                *VulnArtifact `json:"artifact,omitempty"`
+	// the grade of the vulnerability report
 	Grade           *VulnReportGrade `json:"grade,omitempty"`
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
 	Services        []*ServiceVuln   `json:"services,omitempty"`
@@ -8321,13 +8329,19 @@ type VulnerabilityReport struct {
 }
 
 type VulnerabilityReportAttributes struct {
-	ArtifactURL     *string                    `json:"artifactUrl,omitempty"`
-	Os              *VulnOsAttributes          `json:"os,omitempty"`
-	Summary         *VulnSummaryAttributes     `json:"summary,omitempty"`
-	Artifact        *VulnArtifactAttributes    `json:"artifact,omitempty"`
-	Vulnerabilities []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
-	Services        []*ServiceVulnAttributes   `json:"services,omitempty"`
-	Namespaces      []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
+	ArtifactURL *string `json:"artifactUrl,omitempty"`
+	// the Git URL of the codebase defining this artifact
+	ArtifactRepoURL *string `json:"artifactRepoUrl,omitempty"`
+	// the language the artifact is written in
+	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
+	// the language version of the artifact, if applicable
+	ArtifactLanguageVersion *string                    `json:"artifactLanguageVersion,omitempty"`
+	Os                      *VulnOsAttributes          `json:"os,omitempty"`
+	Summary                 *VulnSummaryAttributes     `json:"summary,omitempty"`
+	Artifact                *VulnArtifactAttributes    `json:"artifact,omitempty"`
+	Vulnerabilities         []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
+	Services                []*ServiceVulnAttributes   `json:"services,omitempty"`
+	Namespaces              []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
 }
 
 type VulnerabilityReportConnection struct {
