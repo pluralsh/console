@@ -339,7 +339,47 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **(From 1.15.17)** Helm value change noted: `kafka.apiKey` was\
+      \ updated/expected to be `true` (the release note says \u201CUpdate kafka apiKey\
+      \ helm chart value to true\u201D). Verify your `values.yaml` doesn\u2019t override\
+      \ this back to `false`.\n\n- **(For 1.16.0)** The provided application release\
+      \ notes don\u2019t include Helm-chart-specific value changes. Before upgrading,\
+      \ review the **Cilium Helm chart changelog** for 1.16.0 and compare your rendered\
+      \ manifests (`helm template`) against current to catch any renamed/removed values\
+      \ (especially around Envoy, Gateway API, and ClusterMesh/KVStoreMesh defaults)."
+    chart_updates: ['Cilium 1.16.0 introduces/expands features across networking,
+        BGP, Gateway API/Ingress, policy, operations, and Hubble observability.',
+      'No chart-structure changes are explicitly called out in the supplied notes,
+        but behavior may change due to new defaults (notably Envoy deployment model
+        for new installs, and ClusterMesh KVStoreMesh default).']
+    features: [Cilium NetKit to improve container-network throughput/latency closer
+        to host networking performance., 'BGPv2 with a new API, plus BGP advertisement
+        support for ExternalIP and ClusterIP services.', Kubernetes 1.30 Service Traffic
+        Distribution can be configured via Service spec (not annotations)., 'Local
+        Redirect Policy is promoted to Stable for redirecting service traffic to local
+        backends (e.g., node-local DNS).', Multicast datapath support for defining
+        multicast groups in Cilium., Per-pod fixed MAC address support., 'Gateway
+        API enhancements: GAMMA support (east-west), Gateway API 1.1 support, and
+        ExternalTrafficPolicy support for Ingress/Gateway API.', Envoy proxy can run
+        as a dedicated DaemonSet (separate lifecycle); enabled by default for new
+        installs., CiliumEnvoyConfig now supports nodeSelector to target specific
+        nodes., 'Network policy improvements: port ranges, validation status in `kubectl
+        describe`, per-policy control of default-deny behavior, CIDRGroups in egress/deny,
+        loading default policies from filesystem, and node-based selectors (ToNodes/FromNodes).',
+      'Operational improvements: new ELF loader logic reduces median memory usage;
+        improved DNS-based policy performance; KVStoreMesh becomes the default ClusterMesh
+        deployment option.', 'Hubble/observability improvements: CEL flow filters,
+        improved HTTP metrics, improved BPF map pressure metrics, more egress-path
+        observability metrics, k8s event generation on packet drops, and filtering
+        flows by node labels.']
+    breaking_changes: ['The supplied 1.16.0 release-notes excerpt does not explicitly
+        list breaking changes. Treat the following as **potential behavior changes
+        to validate** during upgrade testing: KVStoreMesh becoming the default for
+        ClusterMesh deployments, and the move to a dedicated Envoy DaemonSet being
+        default for new installs (may affect how you manage/upgrade Envoy if you adopt
+        it). Review the full v1.16.0 CHANGELOG.md for any explicit breaking changes
+        that apply to your deployment.']
   chart_version: 1.16.0
   images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
     'quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058',

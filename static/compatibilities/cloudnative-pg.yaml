@@ -8,91 +8,332 @@ versions:
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Quorum-based failover is now a stable API (`spec.postgresql.synchronous.failoverQuorum`),
+        replacing the previous alpha annotation approach.', New declarative Foreign
+        Data Wrapper management via the `Database` CRD (`.spec.fdws` and `.spec.servers`)
+        to manage FDW extensions and foreign servers., 'Security and ops improvements:
+        pod-level `securityContext`/`containerSecurityContext`, optional TLS for operator
+        metrics, fine-grained custom TLS for PgBouncer, and a caching layer for user-defined
+        monitoring queries.', 'Operational resilience improvements: better probe behavior
+        during transient API-server issues and faster replica network drop detection
+        via a reduced default `tcp_user_timeout`.']
+    breaking_changes: [Default PostgreSQL image version changes (to PostgreSQL 18.1
+        system-trixie by default); upgrading may change the default major version
+        if you were relying on defaults rather than pinning images., "Kubernetes/PostgreSQL\
+        \ support matrix changes: Kubernetes 1.31 and PostgreSQL 13 are no longer\
+        \ listed as supported in 1.28 (ensure you\u2019re on K8s 1.32+ and PG 14+).",
+      Quorum-based failover configuration moved from `alpha.cnpg.io/failoverQuorum`
+        annotation to the stable `spec.postgresql.synchronous.failoverQuorum` field
+        (update manifests accordingly if you used the alpha feature).]
   chart_version: 0.27.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.28.0']
 - version: 1.27.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Dynamic loading of PostgreSQL extensions via `.spec.postgresql.extensions`,
+        mounting extension images as read-only volumes in instance pods.', HA logical
+        decoding slot sync via `spec.replicationSlots.highAvailability.synchronizeLogicalDecoding`
+        so logical subscribers keep working after failover., Primary Isolation Check
+        promoted to stable; adds `.spec.probes.liveness.isolationCheck` and updates
+        liveness behavior to shut down an isolated primary within `livenessProbeTimeout`.,
+      Experimental failover quorum (quorum-based failover) available via `alpha.cnpg.io/failoverQuorum`
+        annotation., New `fqdn-uri` and `fqdn-jdbc-uri` entries in user secrets for
+        FQDN-based connection strings., 'CNPG-I: adds Postgres interface support and
+        instance webserver metrics capabilities.']
+    breaking_changes: ['Liveness probe default behavior changed: an isolated primary
+        is now forcibly shut down within `livenessProbeTimeout` (default 30s). This
+        can change failure modes and may cause quicker primary pod termination in
+        certain network-partition scenarios.', "`Backup.spec` is now immutable after\
+        \ creation; any workflows that \u201Cedit\u201D existing Backup objects must\
+        \ switch to creating new Backup resources instead."]
   chart_version: 0.26.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.27.0']
 - version: 1.26.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Offline, declarative in-place major PostgreSQL upgrades using pg_upgrade
+        (cluster pods shut down; precheck job; declarative rollback).', Improved replica
+        startup/readiness probe behavior with better control tied to streaming lag.,
+      Database CRD expanded with declarative management of extensions and schemas.]
+    breaking_changes: ['Native Barman Cloud support is deprecated (still works in
+        1.26, removed in 1.28); start migrating clusters to the Barman Cloud Plugin,
+        and expect webhook warnings when using in-tree barmanObjectStore/retentionPolicy
+        fields.', 'Operator drops support for Barman <=3.4 capability detection; if
+        your operand image is very old (pre-Apr 2023), upgrade the operand before
+        upgrading the operator.', "kubectl cnpg hibernate commands switched from imperative\
+        \ to declarative shortcuts; hibernate status removed\u2014do not upgrade plugin/operator\
+        \ unless you\u2019re ready to adopt declarative hibernation."]
   chart_version: 0.24.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.26.0']
 - version: 1.25.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Declarative database management via new `Database` CRD to create/manage
+        PostgreSQL databases within a Cluster., 'Declarative logical replication via
+        new `Publication` and `Subscription` CRDs, easing replication setup and online
+        migrations.', 'Experimental CNPG-I plugin interface to extend CloudNativePG
+        via third-party plugins (e.g., Barman Cloud plugin) without modifying the
+        operator.']
+    breaking_changes: ['Support matrix changes: PostgreSQL 12 is dropped; PostgreSQL
+        17 is now supported and the default image is PostgreSQL 17.2. Plan upgrades
+        accordingly (major PG upgrade procedures apply).', "Kubernetes support window\
+        \ shifts (now 1.32\u20131.29); Kubernetes 1.28 is no longer listed as supported."]
   chart_version: 0.23.1
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0']
 - version: 1.24.0
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator release 1.24.0 includes important resource/labeling behavior
+        changes (Service/PDB selector label deprecation) and scheduling/anti-affinity
+        default fix that can trigger a full instance rollout on operator upgrade.,
+      'Security hardening and connectivity changes: TLS added between operator and
+        instance manager; optional TLS for metrics exporter; operator service account
+        permissions reduced.', 'Behavioral changes around readiness checks, pod spec
+        reconciliation control, and pooler rollout behavior on operator image upgrades.']
+    features: [Distributed PostgreSQL topologies (enhanced replica clusters) enabling
+        multi-cluster/hybrid deployments with declarative primary control and seamless
+        switchover without rebuilding the former primary., Managed services configuration
+        (`managed.services`) to disable default read/read-only services and to template
+        custom Services (including LoadBalancers) for external access/DBaaS use cases.,
+      New synchronous replication API supporting quorum-based and priority-list strategies
+        with full customization of `synchronous_standby_names`., Safety mechanism
+        to stop the cluster on WAL disk space exhaustion to simplify recovery by resizing
+        storage., Delayed replicas via `.spec.replica.minApplyDelay` using PostgreSQL
+        `recovery_min_apply_delay`., Post-init SQL can now be provided via multiple
+        ConfigMaps/Secrets using `postInitSQLRefs` and `postInitTemplateSQLRefs`.,
+      PostgreSQL 17 support for `allow_alter_system` via `.spec.postgresql.enableAlterSystem`.,
+      'Metrics/query improvements: customizable metric/column names and predicate
+        queries; PgBouncer 1.23 metrics support in Pooler collector.', New annotation
+        `reconcilePodSpec` on Cluster/Pooler to control pod restarts after pod spec
+        changes., '`cnpg` plugin improvements including control-plane node install
+        option and enhanced status output for distributed topology tokens.']
+    breaking_changes: ['`role` label in Service and PodDisruptionBudget selectors
+        is deprecated in favor of `cnpg.io/instanceRole`; any tooling or custom resources
+        depending on the old selector/label should be updated.', Default PodAntiAffinity
+        fix for PostgreSQL pods will trigger a rollout of all instances when upgrading
+        the operator (even with online upgrades enabled); plan for controlled disruption/capacity
+        during the upgrade., 'Readiness behavior tightened: streaming replicas that
+        never connected to primary now fail readiness, which may change rollout/alerting
+        behavior in misconfigured or partitioned environments.']
   chart_version: 0.22.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.24.0']
 - version: 1.23.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Introduced PostgreSQL Image Catalogs via new `ClusterImageCatalog`
+        and `ImageCatalog` CRDs; clusters can reference them with `.spec.imageCatalogRef`
+        as an alternative to `imageName` and a future default., Added synchronization
+        of user-defined physical replication slots from primary to replicas using
+        `replicationSlots.synchronizeReplicas`., Added `.spec.enablePDB` to control/disable
+        PodDisruptionBudgets (notably helpful for single-instance clusters and maintenance
+        evictions)., Allows transitioning an existing cluster into replica mode to
+        simplify cross-datacenter switchover operations., Connection pooler Service
+        is now customizable (type/labels/annotations)., Supports configuring PostgreSQL
+        `wal_log_hints` parameter., Automatically generated connection URI secrets
+        can use FQDNs., Improved restore behavior by cleaning up instance Pods not
+        owned by the Cluster and adding better error detection for `barman-cloud-wal-restore`.,
+      '`kubectl cnpg` plugin improvements: better argument handling, status output
+        includes PDBs, backup progress handling, and `sync-sequences` robustness.']
+    breaking_changes: ['Support policy change: CloudNativePG now focuses on one supported
+        minor release at a time (instead of two), with 3 months supplementary support
+        for the previous minor. Plan upgrades accordingly.']
   chart_version: 0.21.1
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.23.0']
 - version: 1.22.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['**Declarative tablespaces**: new `.spec.tablespaces` stanza in the
+        `Cluster` CRD to create/manage tablespaces through the operator lifecycle.',
+      '**Temporary tablespaces**: `.spec.tablespaces[*].temporary` lets you designate
+        a tablespace for temp operations by wiring it into Postgres `temp_tablespaces`.',
+      '**Prometheus relabeling support**: you can now set `podMonitorRelabelings`
+        and `podMonitorMetricRelabelings` under `.spec.monitoring` for both `Cluster`
+        and `Pooler`.', '**Connection pooler scaling to zero**: `Pooler` resources
+        can now be scaled down to 0 instances, useful for pausing traffic without
+        deleting the resource.', '**Red Hat UBI 8 operator images**: new UBI-based
+        images are available, mainly for OLM-style deployments.']
+    breaking_changes: ['**`ALTER SYSTEM` is now disabled by default**: if you relied
+        on the operator using `ALTER SYSTEM` to apply configuration, you must explicitly
+        re-enable it following the upgrade documentation.', '**PostgreSQL default
+        image bumped to 16.1**: new clusters (and any clusters that track the default
+        operand image) will move from 16.0 to 16.1; validate extension/compatibility
+        expectations before rollout.', '**TLS defaults tightened for Postgres 12+**:
+        TLSv1.3 is enforced by default, which can break older clients or environments
+        that require lower protocol versions unless you override the relevant `ssl_*`
+        GUCs.']
   chart_version: 0.20.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.22.0']
 - version: 1.21.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Kubernetes VolumeSnapshot support for backup and recovery (initially
+        cold backups from a standby), enabling incremental/differential snapshot-based
+        workflows.', OLM/OperatorHub installation support via a stable channel for
+        the latest patch of the latest minor release., Managed role lifecycle improvements
+        (from 1.20) and new cnpg kubectl plugin enhancements (status includes primary
+        timestamp/uptime; logs include previous logs)., 'Recovery/replica bootstrap
+        enhancements using consistent sets of volume snapshots, including full and
+        PITR recovery.']
+    breaking_changes: ['Default operational timeouts changed significantly: stopDelay
+        now 1800s (was 30s), startDelay now 3600s (was 30s), switchoverDelay now 3600s;
+        plus new smartShutdownTimeout affecting shutdown behavior.', 'Liveness probe
+        behavior changed: initial delay replaced with a Kubernetes startupProbe, which
+        can affect readiness/liveness timing assumptions.', 'Superuser access is disabled
+        by default (security hardening), which may break workflows expecting direct
+        superuser access.', 'Replication slots for HA are enabled by default, which
+        can change WAL retention behavior and storage requirements.', The legacy `postgresql`
+        label is no longer supported; use `cnpg.io/cluster` instead., 'kubectl plugin
+        command change: `cnpg snapshot` replaced by `cnpg backup -m volumeSnapshot`;
+        label `role` is being deprecated in favor of `cnpg.io/instanceRole` (and new
+        `cnpg.io/instanceRole` added).']
   chart_version: 0.19.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.21.0']
 - version: 1.20.0
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Declarative role management via `managed.roles` in the Cluster spec
+        to manage PostgreSQL roles lifecycle (create/alter) from Kubernetes., 'Declarative
+        cluster hibernation via the `cnpg.io/hibernation` annotation to scale a cluster
+        down to zero pods while retaining PVCs, with an inverse restore procedure.']
+    breaking_changes: ['Default behavior changes for newly created Clusters with replicas:
+        backup-from-standby is enabled by default unless `.spec.backup.target` is
+        explicitly set to `primary`.', 'Default behavior changes for newly created
+        Clusters: `primaryUpdateMethod` now defaults to `restart` (unsupervised rolling
+        update completes by restarting the primary) unless explicitly set to `switchover`.',
+      'The `-any` Service is now disabled by default, which may affect clients relying
+        on that Service name/type.']
   chart_version: 0.18.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.20.0']
 - version: 1.19.0
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Cluster-managed physical replication slots for HA, automatically creating
+        and managing slots for each hot-standby replica.', 'Cluster hibernation via
+        `kubectl cnpg hibernate on/off/status`, which removes cluster-generated resources
+        except the primary PVCs.', Backup from a standby using `.spec.backup.target=prefer-standby`
+        to take a base backup from the most aligned replica., Delayed failover via
+        `failoverDelay` to postpone failover after the primary is detected unhealthy.,
+      Support for Kubernetes projected volumes in pod specs., Support for custom environment
+        variables to control the PostgreSQL server process., New `kubectl cnpg backup`
+        plugin command to trigger a base backup., 'Improved separate WAL volume support,
+        including moving WAL to a dedicated volume on existing clusters and added
+        WAL-related Prometheus metrics.']
+    breaking_changes: ['PostgreSQL 10 is no longer supported; CloudNativePG now supports
+        PostgreSQL 11+ (plan migrations accordingly, ideally toward PostgreSQL 15).']
   chart_version: 0.17.0
   images: ['busybox:latest', 'ghcr.io/cloudnative-pg/cloudnative-pg:1.19.0']
 - version: 1.18.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Cluster-managed physical replication slots for HA: the operator can
+        automatically create/manage physical replication slots for each hot-standby
+        replica on both primary and standby clusters.', 'Postgres cluster hibernation
+        (via cnpg kubectl plugin): you can hibernate a cluster (destroy operator-managed
+        resources but keep the primary PVCs) and resume it later.', 'New cnpg plugin
+        subcommands: `hibernate`, `pgbench` (generate a benchmarking Job), and `install`
+        (generate operator install manifests).', PostgreSQL 15.0 becomes the default
+        PostgreSQL major/minor version for new clusters., 'Security hardening: add
+        `SeccompProfile` to pods and containers.']
+    breaking_changes: ['Default PostgreSQL version changes to 15.0 for newly created
+        clusters; if you rely on implicit defaults, you may get a different major
+        version than before (explicitly set `.spec.imageName`/`.spec.postgresql` version
+        to avoid surprises).', Cluster-managed replication slots may change replication/slot
+        behavior and resource usage compared to manual slot management; review settings/monitoring
+        if you previously managed physical slots yourself.]
   chart_version: 0.16.0
   images: ['busybox:latest', 'ghcr.io/cloudnative-pg/cloudnative-pg:1.18.0']
 - version: 1.17.0
   kube: ['1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['**v1.16.0:** Adds `bootstrap.initdb.import` to import schemas/data
+        over the network from an existing PostgreSQL (including outside Kubernetes)
+        using logical backup/restore; can also be used for major PostgreSQL upgrades
+        on a new cluster (supports `microservice` and `monolith` import modes).',
+      '**v1.16.0:** Adds label-based anti-affinity rules for synchronous replicas
+        so they can be scheduled on nodes with different characteristics (e.g., different
+        AZ than the primary).', '**v1.17.0:** Adds optional `walStorage` to place
+        `pg_wal` on a dedicated volume separate from the main `storage`/`PGDATA` volume
+        to improve write-heavy performance (must be decided at cluster creation).',
+      '**v1.17.0:** Improves PgBouncer by allowing configuration of low-level TCP
+        network settings.', '**v1.17.0:** Improves UX/ops with `kubectl cnpg destroy`
+        to delete an instance and its associated PVCs.']
+    breaking_changes: ['**v1.17.0:** `walStorage` cannot be added/removed on an existing
+        running cluster; enabling it requires creating a new cluster (or recreating)
+        with the setting present from day 1.', '**v1.16.0:** Backup tooling requirement
+        bump: Barman >= 3.0.0 is required for future PostgreSQL 15 support; verify
+        your backup image/tooling versions are compatible before upgrading.']
   chart_version: 0.15.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.17.0']
 - version: 1.16.0
   kube: ['1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["Operator now defaults operand/PostgreSQL image to 14.4 (was earlier\
+        \ in 1.15.x); verify your clusters\u2019 `.spec.imageName`/operand image pinning\
+        \ if you rely on a specific minor version.", 'Backup/WAL archiving conditions
+        now use Kubernetes built-in Condition types; if you have tooling that parses
+        old custom condition fields, validate it against the new status output.',
+      Kubernetes 1.24 is supported (and Barman >= 3.0.0 is required for future PostgreSQL
+        15 support).]
+    features: ["Offline logical import/major upgrade workflow via `bootstrap.initdb.import`,\
+        \ supporting \u201Cmicroservice\u201D (single DB) and \u201Cmonolith\u201D\
+        \ (multiple DBs + roles) import from an external or in-cluster PostgreSQL\
+        \ using pg_dump/pg_restore.", 'Label-based anti-affinity for synchronous replicas
+        to ensure sync standbys land on nodes with different characteristics (e.g.,
+        different AZ) than the primary.', Azure AD Workload Identity support for Barman
+        Cloud backups via `inheritFromAzureAD`., New `barmanObjectStore.s3Credentials.region`
+        value to set AWS region for backup and recovery object stores., Recovery/cloning
+        can now redefine app DB name/owner/secret when restoring from object store
+        or cloning via pg_basebackup (previously only initdb bootstrap).]
+    breaking_changes: []
   chart_version: 0.14.0
   images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.16.0']
 - version: 1.15.0
