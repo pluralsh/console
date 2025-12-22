@@ -12962,7 +12962,15 @@ export type VulnerabilityAttributes = {
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
   artifact?: Maybe<VulnArtifact>;
+  /** the language the artifact is written in */
+  artifactLanguage?: Maybe<AgentRunLanguage>;
+  /** the language version of the artifact, if applicable */
+  artifactLanguageVersion?: Maybe<Scalars['String']['output']>;
+  /** the Git URL of the codebase defining this artifact */
+  artifactRepoUrl?: Maybe<Scalars['String']['output']>;
+  /** the URL of the artifact */
   artifactUrl?: Maybe<Scalars['String']['output']>;
+  /** the grade of the vulnerability report */
   grade?: Maybe<VulnReportGrade>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -12976,6 +12984,12 @@ export type VulnerabilityReport = {
 
 export type VulnerabilityReportAttributes = {
   artifact?: InputMaybe<VulnArtifactAttributes>;
+  /** the language the artifact is written in */
+  artifactLanguage?: InputMaybe<AgentRunLanguage>;
+  /** the language version of the artifact, if applicable */
+  artifactLanguageVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the Git URL of the codebase defining this artifact */
+  artifactRepoUrl?: InputMaybe<Scalars['String']['input']>;
   artifactUrl?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<NamespaceVulnAttributes>>>;
   os?: InputMaybe<VulnOsAttributes>;
