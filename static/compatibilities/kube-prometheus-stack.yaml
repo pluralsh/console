@@ -181,7 +181,18 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["No chart-specific changes are called out in the provided release\
+        \ notes for either endpoint version; both releases are described only as \u201C\
+        Update kube-prometheus-stack dependency non-major updates\u201D.", Plan for
+        routine dependency bumps across subcharts/images/dashboards/rules; validate
+        rendered manifests diff and run a canary upgrade in a non-prod cluster.]
+    features: [No explicit new features are listed in the provided notes; changes
+        appear to be dependency non-major updates only.]
+    breaking_changes: [No breaking changes are mentioned in the provided notes; treat
+        as low-risk but still verify CRDs and component compatibility after dependency
+        bumps.]
   chart_version: 78.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.1', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -272,7 +283,19 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **New optional value for webhooks:** You can now specify `matchConditions`\
+      \ for `admissionWebhooks` objects (added in chart **72.9.1**). If you customize\
+      \ the chart\u2019s admission webhooks, review/extend your values to include\
+      \ this field where needed.\n\n_No other Helm values changes are called out in\
+      \ the provided notes._"
+    chart_updates: ['Chart **72.9.1**: adds support for configuring `matchConditions`
+        on admission webhook objects.', 'Chart **71.2.0**: CI tooling change (GitHub
+        action version bump) and routine non-major dependency updates (no functional
+        chart behavior called out).']
+    features: ['Ability to set `matchConditions` for admission webhooks, allowing
+        more granular control over when the webhook is invoked.']
+    breaking_changes: []
   chart_version: 72.9.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.0-security-01',
     'quay.io/kiwigrid/k8s-sidecar:1.30.0', 'quay.io/prometheus-operator/prometheus-operator:v0.82.2',
