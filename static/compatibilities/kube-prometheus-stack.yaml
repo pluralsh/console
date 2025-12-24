@@ -345,7 +345,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Regenerated kube-prometheus mixins as part of the chart content
+        (dashboards/rules) to fix the mixin update script and ensure generated artifacts
+        are up to date (68.5.0)., Bumped bundled Alertmanager version to v0.28.1 (69.8.2).]
+    features: [Alertmanager updated to v0.28.1 as shipped with the chart (may include
+        upstream bugfixes and minor improvements from Alertmanager).]
+    breaking_changes: []
   chart_version: 69.8.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.5.2', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.80.1', 'quay.io/prometheus/alertmanager:v0.28.1',
