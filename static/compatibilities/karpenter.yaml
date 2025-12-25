@@ -80,7 +80,45 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "## Helm / chart-related notes (what to watch during the upgrade)\n\
+      \n- **CRD upgrade required (v0.37.0)**: v0.37.0 explicitly notes it **adds a\
+      \ readiness condition to `EC2NodeClass`**, which means the **`EC2NodeClass`\
+      \ CRD changes** and you must ensure CRDs are upgraded before/with the controller.\n\
+      \  - In practice: apply the new CRDs first (or use the chart\u2019s CRD mechanism\
+      \ if you manage them that way), then upgrade the Helm release.\n- **ServiceMonitor\
+      \ template fix (v0.37.0)**: a chart bug fix corrects **ServiceMonitor indentation**.\
+      \ If you use Prometheus Operator/ServiceMonitors, re-check that the rendered\
+      \ YAML is valid and that metrics scraping works post-upgrade.\n- **Avoid duplicated\
+      \ \u201CAH\u201D config (v0.37.0)**: chart bug fix notes an update to avoid\
+      \ duplicating **AH config** (exact setting name not shown in your snippet).\
+      \ If you\u2019ve set related values, compare rendered manifests before/after.\n\
+      - **Helm generation bugs existed earlier (v0.34.0)**: v0.34.0 includes fixes\
+      \ where Helm chart generation didn\u2019t run correctly for v0.33.0. This is\
+      \ mainly historical, but it\u2019s a reminder to rely on the **version-matched\
+      \ chart** for your target controller.\n\n> You didn\u2019t include the intermediate\
+      \ v0.35.x/v0.36.x Helm changelog text, so double-check Helm values diffs for\
+      \ those versions as well when you run the upgrade."
+    chart_updates: ['v0.37.0: Adds a readiness condition to `EC2NodeClass` (CRD update
+        required).', 'v0.37.0: Chart bug fix for ServiceMonitor indentation (Prometheus
+        Operator users should validate rendered manifests).', 'v0.37.0: Chart change
+        to avoid duplicating AH config in the rendered release (verify related values/templating
+        in your environment).', 'v0.34.0: Release includes fixes related to Helm chart
+        generation issues present in v0.33.0 (mostly historical but emphasizes using
+        the correct chart/version).']
+    features: ['`build_info` Prometheus metric added (version/sha/golang_version labels)
+        to help with observability and troubleshooting.', Support for mounted instance-store
+        ephemeral storage (useful for workloads needing local ephemeral disks)., Ability
+        to select instance types by **EBS maximum bandwidth** (more precise performance-based
+        scheduling)., Interruption action metric now includes a **nodepool label**
+        (better attribution of interruption handling)., Additional Bottlerocket Kubernetes
+        configuration fields supported (more flexibility for Bottlerocket nodes).]
+    breaking_changes: [v0.37.0 requires a **CRD upgrade** because `EC2NodeClass` gains
+        a **readiness condition**; upgrading the controller without updating CRDs
+        can break reconciliation or leave resources in an unexpected state., 'Release
+        notes mention a **BREAKING CHANGE: Refactor NodeClass controller** (internal
+        behavior around NodeClass reconciliation may change; validate NodeClass/NodePool
+        lifecycle in a staging cluster and watch logs/events after upgrade).']
   chart_version: 0.37.0
   images: ['public.ecr.aws/karpenter/controller:0.37.0@sha256:157f478f5db1fe999f5e2d27badcc742bf51cc470508b3cebe78224d0947674f']
 - version: 0.34.0
