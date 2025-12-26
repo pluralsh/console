@@ -401,7 +401,16 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['65.8.1: Adds more information to selectors for `additionalPodMonitors`
+        and `additionalServiceMonitors` (PR #4974).', '66.7.1: Improves the kubelet
+        `ServiceMonitor` (PR #5061).']
+    features: ['More detailed selector information for additional PodMonitors and
+        ServiceMonitors, improving clarity/behavior when defining extra scrape targets.',
+      'Improved kubelet ServiceMonitor configuration, which may enhance kubelet scraping
+        reliability/labels.']
+    breaking_changes: []
   chart_version: 66.7.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.0', 'quay.io/prometheus/alertmanager:v0.27.0',
