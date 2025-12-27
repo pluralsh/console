@@ -335,7 +335,8 @@ defmodule Console.AI.Chat do
       user: user,
       flow: thread.flow,
       insight: thread.insight,
-      session: thread.session
+      session: thread.session,
+      thread: thread
     })
 
     start_transaction()
