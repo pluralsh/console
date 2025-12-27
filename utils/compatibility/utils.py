@@ -244,7 +244,11 @@ def get_github_releases_timestamps(repo_owner, repo_name):
         if response.status_code == 200:
             releases = response.json()
             for release in releases:
-                yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
+                created_at = release.get("created_at")
+                if not created_at:
+                    continue
+                created_at = created_at.replace("Z", "+00:00")
+                yield (release["tag_name"], datetime.fromisoformat(created_at))
         else:
             return
 
