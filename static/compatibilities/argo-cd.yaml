@@ -19,7 +19,7 @@ versions:
         Health assessment tweak for ISVC resources: allow healthy when the Stopped
         condition is False.']
     breaking_changes: []
-  chart_version: 9.2.2
+  chart_version: 9.2.3
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.3']
 - version: 3.2.1
