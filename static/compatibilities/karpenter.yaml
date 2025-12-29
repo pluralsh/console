@@ -52,7 +52,33 @@ versions:
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **Helm install now requires `settings.clusterName`:** the chart
+      will fail to install/upgrade if `settings.clusterName` is not set. Ensure your
+      `values.yaml` (or `--set`) includes it.
+
+      - **ServiceMonitor enhancements (if you use Prometheus Operator):** the chart
+      added support for `relabeling` and `metricRelabeling` on the ServiceMonitor.
+      No action required unless you want to use these fields.
+
+      - **Default security context changed:** chart defaults were tightened/improved.
+      If you previously relied on running as root or looser permissions, verify pod
+      security settings/PSA/PSP compatibility and override `securityContext`/`podSecurityContext`
+      only if needed.'
+    chart_updates: [Improved/tightened default controller pod security context., Chart
+        validates presence of `settings.clusterName` and fails installation if missing.,
+      ServiceMonitor template updated to support `relabelings` and `metricRelabelings`
+        fields (Prometheus Operator users).]
+    features: [Stricter/safer Helm chart defaults (security context) and better chart
+        validation (requires `settings.clusterName`)., 'Bottlerocket support improvements:
+        soft eviction support and a new `single-process-oom-kill` setting, plus additional
+        kubelet configuration test coverage.', 'New NodeClass storage option: `volumeInitializationRate`
+        on EBS `blockDeviceMappings`, enabling more control over EBS volume initialization
+        performance.']
+    breaking_changes: [Kubernetes 1.25 support was dropped; clusters running 1.25
+        must be upgraded before moving to these versions., Helm chart installation/upgrade
+        can fail if `settings.clusterName` is not set; this is an intentional enforcement
+        change.]
   chart_version: 1.5.0
   images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
 - version: 1.2.0
