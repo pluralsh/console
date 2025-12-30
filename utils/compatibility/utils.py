@@ -247,7 +247,8 @@ def get_github_releases_timestamps(repo_owner, repo_name):
                 created_at = release.get("created_at")
                 if not created_at:
                     continue
-                created_at = created_at.replace("Z", "+00:00")
+                print(created_at)
+                # created_at = created_at.replace("Z", "+00:00")
                 yield (release["tag_name"], datetime.fromisoformat(created_at))
         else:
             return
