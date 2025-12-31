@@ -4,7 +4,7 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
 - version: 3.2.3
-  kube: ['1.35', '1.34', '1.33']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -22,24 +22,8 @@ versions:
   chart_version: 9.2.3
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.3']
-- version: 3.2.1
-  kube: ['1.35', '1.34', '1.33']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Repo Server: fixes a concurrency issue when processing detached git
-        states, reducing chance of stuck/failed refreshes in busy repos.', 'UI: multiple
-        small fixes (null-safe status panel rendering, prevent overlapping elements,
-        add resource units in tooltips, avoid rendering ApplicationSelector when panel
-        hidden).']
-    breaking_changes: []
-  chart_version: 9.1.8
-  images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.2.1']
 - version: 3.2.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -69,27 +53,8 @@ versions:
   chart_version: 9.1.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.0']
-- version: 3.1.1
-  kube: ['1.34', '1.33', '1.32']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [No Helm chart-specific changelog was provided in the notes you
-        pasted; the v3.1.1 notes are application release notes only., "If you are\
-        \ upgrading via Helm, verify the argo-cd Helm chart version that corresponds\
-        \ to app v3.1.1 and review that chart\u2019s CHANGELOG for values/schema changes,\
-        \ hook/job changes, and CRD handling."]
-    features: [No new user-facing features called out for v3.1.1; this is a patch
-        release focused on fixes and small manifest tweaks., Manifests add OCI-related
-        environment variables (helps OCI/registry integrations when using upstream
-        install manifests).]
-    breaking_changes: []
-  chart_version: 8.3.3
-  images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.1.1']
 - version: 3.1.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -120,7 +85,7 @@ versions:
   images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.43.1',
     'quay.io/argoproj/argocd:v3.1.0']
 - version: 3.0.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -166,45 +131,16 @@ versions:
   chart_version: 8.0.1
   images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
     'quay.io/argoproj/argocd:v3.0.0']
-- version: 2.14.11
-  kube: ['1.33', '1.32', '1.31']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Hydrator: webhook handling now understands `sourceHydrator` fields,
-        improving support for hydration workflows triggered via webhooks.']
-    breaking_changes: []
-  chart_version: 7.9.1
-  images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
-    'quay.io/argoproj/argocd:v2.14.11']
 - version: 2.14.1
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 7.8.0
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
     'quay.io/argoproj/argocd:v2.14.1']
-- version: 2.13.2
-  kube: ['1.32', '1.31', '1.30']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['(v2.13.0) UI extensions: Argo CD now supports configuring extensions
-        individually, allowing per-extension settings rather than a single shared
-        config.', '(v2.13.0) Self-heal exponential backoff: self-heal retries can
-        use an exponential backoff between attempts to reduce thrash during repeated
-        drift.']
-    breaking_changes: []
-  chart_version: 7.7.12
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-    'quay.io/argoproj/argocd:v2.13.2']
 - version: 2.13.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -221,7 +157,7 @@ versions:
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
     'quay.io/argoproj/argocd:v2.13.0']
 - version: 2.12.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -237,44 +173,15 @@ versions:
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.12.0']
 - version: 2.11.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 6.9.3
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.11.0']
-- version: 2.10.7
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ['2.10.0 is the base for this patch-line upgrade; it introduced
-        multiple controller/server/repo-server features and fixes, plus a known HA
-        controller issue in 2.10.0 that is fixed in 2.10.1+.', v2.10.7 is a patch
-        release; the GitHub release page primarily points to the compare view (v2.10.6...v2.10.7)
-        rather than listing highlights on the page itself.]
-    features: ['In 2.10.0, Application Controller added sync jitter (to reduce sync
-        thundering herd) and a grace period for repo errors to avoid overly aggressive
-        Unknown sync states.', 'In 2.10.0, Argo CD added Server-Side Diff and improved
-        support for Server-Side Apply scenarios (notably around auto-creating namespaces).',
-      'In 2.10.0, ApplicationSets gained advanced templating via templatePatch and
-        additional sprig functions (e.g., slugify).', 'In 2.10.0, Argo CD added PostDelete
-        hook support and improved UI capabilities (e.g., status panel extensions,
-        better prompts around pruning, recursive Helm values file detection).', 'In
-        2.10.0, security/SSO improvements included PKCE web login flow and optional
-        OIDC UserInfo group-claim retrieval, plus better security logging when access
-        is blocked.']
-    breaking_changes: [No explicit breaking changes are shown in the provided notes
-        for 2.10.0 or 2.10.7; treat this as 'none called out' rather than 'none exist'
-        and still follow the upstream upgrading guide when jumping minor versions
-        (not applicable here since it's a patch upgrade within 2.10).]
-  chart_version: 6.7.15
-  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
-    'quay.io/argoproj/argocd:v2.10.7']
 - version: 2.10.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -305,33 +212,8 @@ versions:
   chart_version: 6.0.13
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
     'quay.io/argoproj/argocd:v2.10.0']
-- version: 2.9.4
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ['No Helm chart changelog was provided in the notes you pasted,
-        so there are no chart-specific changes I can summarize from source data.']
-    features: ['**v2.9.0** introduced a large set of new capabilities across Argo
-        CD and ApplicationSet, including PKCE auth flow for web logins, dynamic cluster
-        sharding/rebalancing (must be explicitly enabled), improved UI features (e.g.,
-        recursive Helm values file detection), and multiple new/expanded health checks
-        for additional CRDs.', 'Operational/observability additions in **v2.9.0**
-        include more reconciliation timing metrics/log fields, additional OpenTelemetry
-        attributes support, and new knobs like `ARGOCD_CLUSTER_CACHE_LIST_PAGE_BUFFER_SIZE`
-        and GRPC keepalive configuration.']
-    breaking_changes: ['**v2.9.4 includes a security fix (GHSA-92mw-q256-5vwg) that
-        introduces a breaking API change**; you must read the advisory and validate
-        any custom clients/integrations against the new API behavior before upgrading.',
-      '**v2.9.4 has a known issue causing major UI breakage** (many UI actions fail).
-        The upstream note says a fix will be available in 2.9.5, so consider skipping
-        2.9.4 if the UI is critical.']
-  chart_version: 5.53.1
-  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
-    'quay.io/argoproj/argocd:v2.9.4']
 - version: 2.9.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -360,6 +242,14 @@ versions:
   chart_version: 5.51.1
   images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
     'quay.io/argoproj/argocd:v2.9.0']
+- version: 2.8.5
+  kube: []
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 5.49.0
+  images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
+    'quay.io/argoproj/argocd:v2.8.5']
 - version: 2.8.4
   kube: ['1.28', '1.27', '1.26']
   requirements: []
