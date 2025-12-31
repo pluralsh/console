@@ -10,6 +10,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/polly/containers"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -578,14 +579,9 @@ func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secre
 
 func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	logger := log.FromContext(ctx)
-	if service.Spec.ConfigurationRef != nil {
-		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
-		if err != nil {
-			return err
-		}
-		if err := utils.TryAddOwnerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
-			return err
-		}
+
+	if err := r.addConfigurationSecretRefs(ctx, service); err != nil {
+		return err
 	}
 
 	if service.Spec.Helm != nil && service.Spec.Helm.ValuesFrom != nil {
@@ -638,6 +634,48 @@ func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, se
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func (r *ServiceDeploymentReconciler) addConfigurationSecretRefs(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+	if service.Spec.ConfigurationRef == nil {
+		return nil
+	}
+
+	configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
+	if err != nil {
+		return err
+	}
+
+	// Remove existing owner references from configuration secrets.
+	// It's for the backward compatibility.
+	if err = controllerutil.RemoveOwnerReference(service, configurationSecret, r.Scheme); err != nil {
+		log.FromContext(ctx).V(5).Info(err.Error())
+	}
+
+	// Ensure that the service owner annotation is set on the configuration secret.
+	if configurationSecret.Annotations == nil {
+		configurationSecret.Annotations = map[string]string{}
+	}
+
+	serviceRef := fmt.Sprintf("%s/%s", service.GetNamespace(), service.GetName())
+	secretOwnersAnnotation := configurationSecret.Annotations[ServiceOwnerAnnotation]
+	secretOwners := containers.NewSet[string]()
+	for _, s := range strings.Split(strings.ReplaceAll(secretOwnersAnnotation, " ", ""), ",") {
+		if strings.Contains(s, "/") {
+			secretOwners.Add(s)
+		}
+	}
+
+	if !secretOwners.Has(serviceRef) {
+		secretOwners.Add(serviceRef)
+		configurationSecret.Annotations[ServiceOwnerAnnotation] = strings.Join(secretOwners.List(), ",")
+
+		if err = utils.TryToUpdate(ctx, r.Client, configurationSecret); err != nil {
+			return err
 		}
 	}
 
@@ -722,6 +760,7 @@ func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
+		Watches(&corev1.Secret{}, OnSecretChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
@@ -747,6 +786,35 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 
 		if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
 			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
+		}
+
+		return requests
+	})
+}
+
+func OnSecretChange[T client.Object](c client.Client, obj T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, service client.Object) []reconcile.Request {
+		requests := make([]reconcile.Request, 0)
+
+		if service.GetAnnotations() == nil {
+			return requests
+		}
+
+		owners, ok := service.GetAnnotations()[ServiceOwnerAnnotation]
+		if !ok {
+			return requests
+		}
+
+		for _, owner := range strings.Split(owners, ",") {
+			s := strings.Split(owner, "/")
+			if len(s) != 2 {
+				continue
+			}
+
+			namespace, name := s[0], s[1]
+			if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
+			}
 		}
 
 		return requests
