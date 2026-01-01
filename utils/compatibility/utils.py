@@ -247,7 +247,8 @@ def get_github_releases_timestamps(repo_owner, repo_name):
                 created_at = release.get("created_at")
                 if not created_at:
                     continue
-                created_at = created_at.replace("Z", "+00:00")
+                print(created_at)
+                # created_at = created_at.replace("Z", "+00:00")
                 yield (release["tag_name"], datetime.fromisoformat(created_at))
         else:
             return
@@ -374,7 +375,9 @@ def sort_versions(versions):
     # Ensure all versions are strings before sorting
     for v in versions:
         v["version"] = str(v["version"])
-    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
+        if v.get("chart_version"):
+            v["chart_version"] = str(v["chart_version"])
+    return sorted(versions, key=lambda v: (Version(v["version"]), Version(v["chart_version"]) if v.get("chart_version") else None), reverse=True)
 
 
 def merge_versions(existing_versions, new_versions):
