@@ -5,6 +5,25 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 80.9.2
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Grafana Operator YAML dashboards: add `folderRef` and `folderUID`
+        fields (80.8.0).', Dependency bumps / non-major dependency updates via Renovate
+        (80.9.2).]
+    features: ['Grafana Operator dashboard manifests now support `folderRef`/`folderUID`,
+        enabling dashboards to be organized into specific Grafana folders when using
+        the Grafana Operator.']
+    breaking_changes: []
+  chart_version: 80.9.2
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.8.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
@@ -649,7 +668,22 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- No Helm values changes were called out in the provided release
+      notes for the target version (56.21.4) or the starting version (55.11.0).
+
+      - Based on the snippets you provided, this upgrade looks safe to run as a standard
+      `helm upgrade` with your existing values, but you should still run `helm diff
+      upgrade` to detect any indirect changes coming from dependency bumps.
+
+      '
+    chart_updates: ['55.11.0: Bumped the Grafana subchart to the 7.2.x series.', '56.21.4:
+        Fixed the CoreDNS Grafana dashboard variables (removed circular label filtering;
+        refresh values on time range change).']
+    features: [Grafana dependency updated to 7.2.x (via the kube-prometheus-stack
+        chart)., 'Improved CoreDNS Grafana dashboard behavior: variables no longer
+        have circular label filtering and refresh when the time range changes.']
+    breaking_changes: []
   chart_version: 56.21.4
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.3.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.71.2', 'quay.io/prometheus/alertmanager:v0.27.0',
