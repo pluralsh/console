@@ -10,7 +10,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/polly/algorithms"
-	"github.com/pluralsh/polly/containers"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -656,30 +655,8 @@ func (r *ServiceDeploymentReconciler) addConfigurationSecretRefs(ctx context.Con
 		log.FromContext(ctx).V(5).Info(err.Error())
 	}
 
-	// Ensure that the service owner annotation is set on the configuration secret.
-	if configurationSecret.Annotations == nil {
-		configurationSecret.Annotations = map[string]string{}
-	}
-
-	serviceRef := fmt.Sprintf("%s/%s", service.GetNamespace(), service.GetName())
-	secretOwnersAnnotation := configurationSecret.Annotations[ServiceOwnerAnnotation]
-	secretOwners := containers.NewSet[string]()
-	for _, s := range strings.Split(strings.ReplaceAll(secretOwnersAnnotation, " ", ""), ",") {
-		if strings.Contains(s, "/") {
-			secretOwners.Add(s)
-		}
-	}
-
-	if !secretOwners.Has(serviceRef) {
-		secretOwners.Add(serviceRef)
-		configurationSecret.Annotations[ServiceOwnerAnnotation] = strings.Join(secretOwners.List(), ",")
-
-		if err = utils.TryToUpdate(ctx, r.Client, configurationSecret); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	// Ensure that the owner ref annotation is set on the configuration secret.
+	return utils.AddOwnerRefAnnotation(ctx, r.Client, service, configurationSecret)
 }
 
 func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
@@ -793,30 +770,7 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 }
 
 func OnSecretChange[T client.Object](c client.Client, obj T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, service client.Object) []reconcile.Request {
-		requests := make([]reconcile.Request, 0)
-
-		if service.GetAnnotations() == nil {
-			return requests
-		}
-
-		owners, ok := service.GetAnnotations()[ServiceOwnerAnnotation]
-		if !ok {
-			return requests
-		}
-
-		for _, owner := range strings.Split(owners, ",") {
-			s := strings.Split(owner, "/")
-			if len(s) != 2 {
-				continue
-			}
-
-			namespace, name := s[0], s[1]
-			if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
-			}
-		}
-
-		return requests
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, secret client.Object) []reconcile.Request {
+		return utils.GetOwnerRefsAnnotationRequests(ctx, c, secret, obj)
 	})
 }

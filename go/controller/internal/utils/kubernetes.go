@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pluralsh/polly/containers"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,10 +17,70 @@ import (
 	"k8s.io/klog/v2"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/log"
 )
+
+const OwnerRefAnnotation = "deployments.plural.sh/owner-ref"
+
+func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client, owner, object ctrlruntimeclient.Object) error {
+	objectAnnotations := object.GetAnnotations()
+	if objectAnnotations == nil {
+		objectAnnotations = map[string]string{}
+	}
+
+	objectOwnersAnnotation := objectAnnotations[OwnerRefAnnotation]
+	objectOwners := containers.NewSet[string]()
+	for _, s := range strings.Split(strings.ReplaceAll(objectOwnersAnnotation, " ", ""), ",") {
+		if strings.Contains(s, "/") {
+			objectOwners.Add(s)
+		}
+	}
+
+	ownerRef := fmt.Sprintf("%s/%s", owner.GetNamespace(), owner.GetName())
+	if !objectOwners.Has(ownerRef) {
+		objectOwners.Add(ownerRef)
+		objectAnnotations[OwnerRefAnnotation] = strings.Join(objectOwners.List(), ",")
+		object.SetAnnotations(objectAnnotations)
+
+		if err := TryToUpdate(ctx, client, object); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, obj ctrlruntimeclient.Object) []reconcile.Request {
+	requests := make([]reconcile.Request, 0)
+
+	objectAnnotations := object.GetAnnotations()
+	if objectAnnotations == nil {
+		return requests
+	}
+
+	owners, ok := object.GetAnnotations()[OwnerRefAnnotation]
+	if !ok {
+		return requests
+	}
+
+	for _, owner := range strings.Split(owners, ",") {
+		s := strings.Split(owner, "/")
+		if len(s) != 2 {
+			continue
+		}
+
+		namespace, name := s[0], s[1]
+		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
+		}
+	}
+
+	return requests
+
+}
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
 	key := ctrlruntimeclient.ObjectKeyFromObject(object)
