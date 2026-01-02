@@ -79,7 +79,6 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 	}
 
 	return requests
-
 }
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
