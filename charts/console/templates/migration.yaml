@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: console-migration-v5-{{ .Values.image.tag | default .Chart.AppVersion | sha256sum | trunc 8 }}
-  annotation:
+  annotations:
     deployment.plural.sh/sync-options: Force=true
   labels:
     platform.plural.sh/ignore: 'true'
