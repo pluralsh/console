@@ -4641,6 +4641,37 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.11.59
+    created: "2026-01-03T16:36:41.538952361Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.3.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.163
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.14.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 5caca72ad97db788a3afb7d7bb8f6439ccf8dbdedfb88b1c162280ced5580439
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.167/console-rapid-0.3.167.tgz
+    version: 0.3.167
+  - apiVersion: v2
     appVersion: 0.11.58
     created: "2025-12-20T01:32:55.75600698Z"
     dependencies:
@@ -8034,6 +8065,16 @@ entries:
     version: 0.3.40
   controller:
   - apiVersion: v2
+    appVersion: 0.11.59
+    created: "2026-01-03T16:36:41.709541373Z"
+    description: deploys the deployment operator for plural cd
+    digest: 082056dcbcbb52e6dcbef06b7e4ef6e1e8c1a9777eb66ea6c8d1313b637a2f84
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.163/controller-0.0.163.tgz
+    version: 0.0.163
+  - apiVersion: v2
     appVersion: 0.11.58
     created: "2025-12-20T01:32:56.000737752Z"
     description: deploys the deployment operator for plural cd
@@ -10202,4 +10243,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-20T01:43:52.62170297Z"
+generated: "2026-01-03T16:36:41.710438995Z"
