@@ -4,7 +4,7 @@ dependencies:
   version: 0.3.0
 - name: controller
   repository: file://../controller
-  version: 0.0.162
+  version: 0.0.163
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard
   version: 7.14.0
@@ -14,5 +14,5 @@ dependencies:
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:8c40abcc54519646519de1d717c614e3bd54f8bce97551f7f27d4bd2423f1a88
-generated: "2025-12-20T01:25:59.474630168Z"
+digest: sha256:93aabe71b1cfb529ff7c35bc939a763748f3f33e7f1ba7f6b6907d9071065da4
+generated: "2026-01-03T12:04:42.128655-05:00"
