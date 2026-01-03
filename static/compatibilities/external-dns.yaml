@@ -3,6 +3,34 @@ git_url: https://github.com/kubernetes-sigs/external-dns
 release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/external-dns
 versions:
+- version: 0.20.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['CLI parsing/flag handling was migrated from kingpin to cobra
+        (dual-parity), which can subtly affect how flags are parsed/aliased in manifests
+        and Helm values -> args; review your configured args carefully.', 'Chart release
+        aligns with app v0.20.0 image tag; no explicit Helm values deprecations were
+        called out in the provided notes, but validate against your current values.yaml
+        due to the CLI migration.', 'If you rely on the `--min-ttl` flag, be aware
+        it was unintentionally removed in v0.20.0 and is expected to be restored in
+        the next release.']
+    features: ['New flags to support OwnerID migration, making it easier to move between
+        ownership identifiers without recreating all records.', 'Custom annotation
+        prefix support for split-horizon DNS, enabling multiple DNS views using different
+        annotation namespaces.', 'Cloudflare provider now supports tags for records
+        (where supported), improving record organization and filtering.', CoreDNS
+        provider gained new annotations for groups and improved etcd client usage
+        with context support., 'Additional provider/source enhancements: AWS adds
+        ap-southeast-6 region; F5 Virtual Server source adds host aliases support.']
+    breaking_changes: ['`--min-ttl` was unintentionally removed in v0.20.0; any deployment
+        depending on it will fail to start or will ignore the setting until the flag
+        is restored in a later version.']
+  chart_version: 1.20.0
+  images: ['registry.k8s.io/external-dns/external-dns:v0.20.0']
 - version: 0.19.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

@@ -421,7 +421,25 @@ versions:
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Controller image updated from v1.7.1 to v1.8.4 (and chroot variant),
+        including intermediary 1.8.x patch releases.', Go toolchain updated in the
+        1.8.x line (notably to Go 1.21.1)., Auth access logging made optional (newer
+        controller behavior/config surface)., ModSecurity internal processing disabled
+        in a way intended to improve handling of large Ingress objects., OpenTelemetry
+        init image promoted to distroless; image tagging/metadata process updated.,
+      AJP module re-added as a dynamic module (affects those using AJP)., 'Dependency
+        bumps (e.g., golang.org/x/net) and assorted image bumps.']
+    features: ["Optional auth access logs, allowing you to reduce log volume/cost\
+        \ if you don\u2019t need per-request auth logging.", Improved behavior for
+        large Ingress resources by changing how ModSecurity is handled internally.,
+      'Distroless OpenTelemetry init image promotion, which can improve security posture
+        and reduce image surface area.', AJP support available again via a dynamic
+        module for environments that still rely on AJP upstreams.]
+    breaking_changes: ['No explicit breaking changes are called out in the provided
+        notes; however, expect behavioral differences due to ModSecurity handling
+        changes and auth log defaults if you relied on previous implicit behavior.']
   chart_version: 4.7.3
   images: ['registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80']
