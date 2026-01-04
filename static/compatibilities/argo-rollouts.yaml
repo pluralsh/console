@@ -75,7 +75,26 @@ versions:
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog/values information was provided in the\
+        \ notes you pasted (these are Argo Rollouts *application* release notes).\
+        \ Treat the Helm upgrade as potentially requiring chart value review (RBAC,\
+        \ container args, extraVolumes/extraArgs, dashboard/service) but confirm against\
+        \ the chart\u2019s own CHANGELOG/values.yaml for the versions you\u2019re\
+        \ moving between."]
+    features: [Dashboard UI refresh in v1.6.0 improves Rollouts dashboard look/UX.,
+      'AnalysisRun supports custom metadata, plus additional context/merge behavior
+        (e.g., merge key) to help manage metric/analysis configuration.', 'Prometheus
+        metric provider enhancements: configurable timeout, optional insecure TLS,
+        and support for custom HTTP headers.', 'Traffic routing/ingress improvements:
+        support multiple ALB ingresses and retain TLS config for NGINX canary ingresses;
+        additional docs/plugins for routers like Contour and guidance for other ingress
+        controllers.', 'Operational/observability improvements: controller emits additional
+        Kubernetes events and logging improvements (klog/logrus bridge).']
+    breaking_changes: ['Traffic router plugin naming pattern was standardized/changed;
+        if you use trafficrouter plugins (or custom plugins), verify plugin names/identifiers
+        and update any references accordingly.']
   chart_version: 2.32.0
   images: ['quay.io/argoproj/argo-rollouts:v1.6.0']
 - version: 1.2.0

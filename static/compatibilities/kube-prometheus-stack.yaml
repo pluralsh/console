@@ -295,7 +295,16 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['75.18.1: Fixes the `prometheus.additionalScrapeConfigs` example
+        in chart documentation/templates (no functional behavior change unless you
+        were copying the broken example).', "76.5.1: Updates kube-prometheus-stack\
+        \ chart dependencies with non-major version bumps (via Renovate). This can\
+        \ change the rendered manifests due to upstream chart changes even if this\
+        \ chart\u2019s own values schema is unchanged."]
+    features: []
+    breaking_changes: []
   chart_version: 76.5.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.84.1', 'quay.io/prometheus/alertmanager:v0.28.1',
@@ -482,7 +491,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['65.8.1: Adds more information to the selector fields for `additionalPodMonitors`
+        and `additionalServiceMonitors` (PR #4974).', '66.7.1: Chore/change to improve
+        the kubelet `ServiceMonitor` (PR #5061).']
+    features: ['Richer selector metadata/fields for `additionalPodMonitors` and `additionalServiceMonitors`,
+        which can make targeting and debugging custom monitors clearer.']
+    breaking_changes: []
   chart_version: 66.7.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.0', 'quay.io/prometheus/alertmanager:v0.27.0',
