@@ -6,6 +6,7 @@ import {
   styledThemeLight,
   useThemeColorMode,
 } from '@pluralsh/design-system'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from '@sentry/react'
 import { ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
@@ -32,14 +33,17 @@ const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
 const router = sentryCreateBrowserRouter(rootRoutes)
+const queryClient = new QueryClient()
 
 export default function App() {
   return (
-    <ApolloProvider client={client}>
-      <ThemeProviders>
-        <RouterProvider router={router} />
-      </ThemeProviders>
-    </ApolloProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={client}>
+        <ThemeProviders>
+          <RouterProvider router={router} />
+        </ThemeProviders>
+      </ApolloProvider>
+    </QueryClientProvider>
   )
 }
 
