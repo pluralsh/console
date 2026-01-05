@@ -64,6 +64,9 @@ console:
     # artifactsUrl is used to configure the default artifacts url, uses https://github.com/pluralsh/scaffolds.git if not set.
     artifactsUrl: ~
 
+    # assetsProxyUrl use this if you need to proxy downloads of new compatibility matrices or other live updated information from our datasets
+    assetsProxyUrl: ~
+
   additionalContainers: ~
   containerSecurityContext:
     capabilities:

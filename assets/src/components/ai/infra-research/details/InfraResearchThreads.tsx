@@ -11,7 +11,7 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useChatbot } from '../AIContext'
+import { useChatbot } from '../../AIContext'
 import { InfraResearchContextType } from './InfraResearch'
 
 export function InfraResearchThreads() {

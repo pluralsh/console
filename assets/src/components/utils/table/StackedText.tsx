@@ -47,8 +47,8 @@ const SecondSC = styled.div<{
 
 export const StackedText = memo(
   ({
-    first,
-    second,
+    first: firstProp,
+    second: secondProp,
     truncate,
     firstPartialType,
     secondPartialType,
@@ -71,40 +71,45 @@ export const StackedText = memo(
     loading?: boolean
     icon?: ReactNode
     iconGap?: SpacingType
-  } & ComponentProps<typeof StackedTextSC>) => (
-    <WrapWithIf
-      condition={!!icon}
-      wrapper={
-        <IconWrapper
-          icon={icon}
-          gap={iconGap}
-        />
-      }
-    >
-      <StackedTextSC
-        $truncate={truncate}
-        $gap={loading ? 'xsmall' : gap}
-        {...props}
+  } & ComponentProps<typeof StackedTextSC>) => {
+    const first = typeof firstProp === 'number' ? `${firstProp}` : firstProp
+    const second = typeof secondProp === 'number' ? `${secondProp}` : secondProp
+
+    return (
+      <WrapWithIf
+        condition={!!icon}
+        wrapper={
+          <IconWrapper
+            icon={icon}
+            gap={iconGap}
+          />
+        }
       >
-        <FirstSC
-          $partialType={firstPartialType}
+        <StackedTextSC
           $truncate={truncate}
-          $color={firstColor}
+          $gap={loading ? 'xsmall' : gap}
+          {...props}
         >
-          {loading ? <RectangleSkeleton $width={120} /> : first}
-        </FirstSC>
-        {(second || loading) && (
-          <SecondSC
+          <FirstSC
+            $partialType={firstPartialType}
             $truncate={truncate}
-            $partialType={secondPartialType}
-            $color={secondColor}
+            $color={firstColor}
           >
-            {loading ? <RectangleSkeleton $width={150} /> : second}
-          </SecondSC>
-        )}
-      </StackedTextSC>
-    </WrapWithIf>
-  )
+            {loading ? <RectangleSkeleton $width={120} /> : first}
+          </FirstSC>
+          {(second || loading) && (
+            <SecondSC
+              $truncate={truncate}
+              $partialType={secondPartialType}
+              $color={secondColor}
+            >
+              {loading ? <RectangleSkeleton $width={150} /> : second}
+            </SecondSC>
+          )}
+        </StackedTextSC>
+      </WrapWithIf>
+    )
+  }
 )
 
 function IconWrapper({

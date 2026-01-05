@@ -7,7 +7,8 @@ defmodule Console.AI.Tool do
     Stack,
     Cluster,
     AiInsight,
-    AgentSession
+    AgentSession,
+    ChatThread
   }
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings}
@@ -23,10 +24,11 @@ defmodule Console.AI.Tool do
       stack: Stack.t,
       cluster: Cluster.t,
       service: Service.t,
-      session: AgentSession.t
+      session: AgentSession.t,
+      thread: ChatThread.t
     }
 
-    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session]
+    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread]
 
     def new(args), do: struct(__MODULE__, args)
   end
@@ -91,6 +93,13 @@ defmodule Console.AI.Tool do
   def insight() do
     case Process.get(@ctx) do
       %Context{insight: %AiInsight{} = insight} -> insight
+      _ -> nil
+    end
+  end
+
+  def thread() do
+    case Process.get(@ctx) do
+      %Context{thread: %ChatThread{} = thread} -> thread
       _ -> nil
     end
   end

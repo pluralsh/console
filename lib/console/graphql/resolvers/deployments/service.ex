@@ -209,6 +209,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
       do: {:ok, true}
   end
 
+  def service_files(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.service_files(id, user)
+
   def raw_resource(svc, args, %{context: %{current_user: user}}) do
       with {:ok, component} <- fetch_component(args),
            {:ok, %Service{cluster: cluster}} <- Services.authorized(svc, component, user),

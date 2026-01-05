@@ -3,27 +3,29 @@ services:
     image: postgres:14
     restart: always
     ports:
-    - 5432:5432
+      - 5432:5432
     environment:
       POSTGRES_PASSWORD: postgres
     volumes:
-    - database_data:/var/lib/postgresql/data
+      - database_data:/var/lib/postgresql/data
   es:
     image: elasticsearch:8.11.4
     restart: always
     ports:
-    - 9200:9200
+      - 9200:9200
     environment:
-    - node.name=es01
-    - cluster.name=docker-es-cluster
-    - cluster.initial_master_nodes=es01
-    - xpack.security.enabled=false
+      - node.name=es01
+      - cluster.name=docker-es-cluster
+      - cluster.initial_master_nodes=es01
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    mem_limit: 1g
     volumes:
-    - es_data:/usr/share/elasticsearch/data
+      - es_data:/usr/share/elasticsearch/data
   mcp:
     image: ghcr.io/pluralsh/supergateway:sha-04d2627
     ports:
-    - 3001:8000
+      - 3001:8000
     command:
       - "--stdio"
       - "npx -y @modelcontextprotocol/server-everything"
@@ -32,44 +34,44 @@ services:
   opensearch:
     image: opensearchproject/opensearch:latest
     ports:
-    # elasticsearch already uses port 9200 on host, so let opensearch use 9300
-    - 9300:9200
+      # elasticsearch already uses port 9200 on host, so let opensearch use 9300
+      - 9300:9200
     environment:
-    - node.name=opensearch
-    - cluster.name=opensearch-docker-cluster
-    - discovery.type=single-node
-    - bootstrap.memory_lock=true
-    - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-    - "DISABLE_SECURITY_PLUGIN=true"
+      - node.name=opensearch
+      - cluster.name=opensearch-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "DISABLE_SECURITY_PLUGIN=true"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-    - opensearch_data:/usr/share/opensearch/data
+      - opensearch_data:/usr/share/opensearch/data
   localstack:
     container_name: localstack-main
     image: localstack/localstack
     ports:
-    - 4566:4566
+      - 4566:4566
     environment:
-    - SERVICES=opensearch
-    - OPENSEARCH_CUSTOM_BACKEND=http://opensearch:9200
+      - SERVICES=opensearch
+      - OPENSEARCH_CUSTOM_BACKEND=http://opensearch:9200
     volumes:
-    - localstack_data:/usr/share/localstack/data
-    - /var/run/docker.sock:/var/run/docker.sock
+      - localstack_data:/usr/share/localstack/data
+      - /var/run/docker.sock:/var/run/docker.sock
   sigv4-proxy:
     container_name: sigv4-proxy
     image: public.ecr.aws/aws-observability/aws-sigv4-proxy:latest
     ports:
-    # host port 4567 must match the port in --endpoint-url in the aws opensearch create-domain command (see Makefile)
-    - 4567:8080
+      # host port 4567 must match the port in --endpoint-url in the aws opensearch create-domain command (see Makefile)
+      - 4567:8080
     environment:
-    # access key id, secret access key, session token must be the same values as in Makefile
-    - AWS_REGION=us-east-1
-    - AWS_ACCESS_KEY_ID=test-access-key
-    - AWS_SECRET_ACCESS_KEY=test-secret-key
-    - AWS_SESSION_TOKEN=test-session-token
+      # access key id, secret access key, session token must be the same values as in Makefile
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test-access-key
+      - AWS_SECRET_ACCESS_KEY=test-secret-key
+      - AWS_SESSION_TOKEN=test-session-token
     command:
       - "--name"
       - "es"
@@ -83,7 +85,7 @@ services:
       - "http"
       - "--verbose"
     depends_on:
-    - localstack
+      - localstack
 
 volumes:
   database_data:

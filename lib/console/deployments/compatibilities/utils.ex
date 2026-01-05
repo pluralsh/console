@@ -1,6 +1,13 @@
 defmodule Console.Deployments.Compatibilities.Utils do
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
 
+  def proxy_config() do
+    case Console.conf(:assets_proxy_url) do
+      url when is_binary(url) and byte_size(url) > 0 -> [proxy: url]
+      _ -> []
+    end
+  end
+
   def versions_greater([_ | _] = versions, from) when is_binary(from) do
     clean_version(from)
     |> Version.parse()

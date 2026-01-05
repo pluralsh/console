@@ -229,6 +229,8 @@ type RootQueryType {
 
   kubernetesVersionInfo(distro: ClusterDistro): [KubernetesVersionInfo]
 
+  kubernetesChangelog(version: String!): KubernetesChangelog
+
   serviceDeployments(
     after: String
 
@@ -293,6 +295,8 @@ type RootQueryType {
 
   "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
   fetchManifests(id: ID!): [String]
+
+  serviceTarball(id: ID!): [ServiceFile]
 
   pipelines(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): PipelineConnection
 
@@ -2000,6 +2004,9 @@ type SentinelRun {
   "the results of the run"
   results: [SentinelRunResult]
 
+  "the errors of the run"
+  errors: [ServiceError]
+
   "the checks that were run"
   checks: [SentinelCheck]
 
@@ -3435,6 +3442,9 @@ input TerraformConfigurationAttributes {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -3833,6 +3843,9 @@ type TerraformConfiguration {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 type AnsibleConfiguration {
@@ -4544,11 +4557,26 @@ input ViolationAttributes {
 
 input VulnerabilityReportAttributes {
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
   os: VulnOsAttributes
+
   summary: VulnSummaryAttributes
+
   artifact: VulnArtifactAttributes
+
   vulnerabilities: [VulnerabilityAttributes]
+
   services: [ServiceVulnAttributes]
+
   namespaces: [NamespaceVulnAttributes]
 }
 
@@ -4699,15 +4727,36 @@ type Violation {
 
 type VulnerabilityReport {
   id: ID!
+
+  "the URL of the artifact"
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
   os: VulnOs
+
   summary: VulnSummary
+
   artifact: VulnArtifact
+
+  "the grade of the vulnerability report"
   grade: VulnReportGrade
+
   vulnerabilities: [Vulnerability]
+
   services: [ServiceVuln]
+
   namespaces: [NamespaceVuln]
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -6559,6 +6608,12 @@ type ResourceEdge {
   to: String!
 }
 
+"a file in a service's fully realized gitops tarball"
+type ServiceFile {
+  path: String!
+  content: String!
+}
+
 type ServiceDeploymentConnection {
   pageInfo: PageInfo!
   edges: [ServiceDeploymentEdge]
@@ -7748,11 +7803,28 @@ type AddonVersion {
   "the version of the helm chart to install for this version"
   chartVersion: String
 
+  "a summary of what changed in this version of the addon"
+  summary: AddonVersionSummary
+
   "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
   releaseUrl(version: String): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+type AddonVersionSummary {
+  "a summary of any helm changes required for this version"
+  helmChanges: String
+
+  "a summary of any chart updates involved in updating to this version"
+  chartUpdates: [String]
+
+  "a summary of any features added in this version"
+  features: [String]
+
+  "a summary of any application-level breaking changes in this version"
+  breakingChanges: [String]
 }
 
 type UpgradePlanSummary {
@@ -8182,6 +8254,33 @@ type KubernetesVersionInfo {
   extended: Boolean
 }
 
+"the changelog for a given kubernetes version"
+type KubernetesChangelog {
+  "the kubernetes version"
+  version: String
+
+  "the major changes in this version"
+  majorChanges: [String]
+
+  "the breaking changes in this version"
+  breakingChanges: [String]
+
+  "the deprecations in this version"
+  deprecations: [String]
+
+  "the removals in this version"
+  removals: [String]
+
+  "the features in this version"
+  features: [String]
+
+  "the bug fixes in this version"
+  bugFixes: [String]
+
+  "the api updates in this version"
+  apiUpdates: [String]
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -8484,6 +8583,7 @@ input ScmConnectionAttributes {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
   url: String!
+  noproxy: String
 }
 
 "Requirements to perform Github App authentication"
@@ -8531,6 +8631,9 @@ input PrAutomationAttributes {
   patch: Boolean
 
   branchPrefix: String
+
+  "a proxy to use for external vendoring"
+  proxy: HttpProxyAttributes
 
   updates: PrAutomationUpdateSpecAttributes
 
@@ -9110,6 +9213,9 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a proxy to use for git requests"
+  proxy: HttpProxyConfiguration
+
   "software vendoring logic to perform in this PR"
   vendor: PrVendorSpec
 
@@ -9520,6 +9626,7 @@ type ObserverPipelineAction {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
   url: String!
+  noproxy: String
 }
 
 "A catalog is an organized collection of PR Automations used for permissioning and discovery"

@@ -124,6 +124,10 @@ spec:
                 description: Configures usage of an HTTP proxy for all requests involving
                   this SCM connection.
                 properties:
+                  noproxy:
+                    description: The comma-separated list of hosts that should not
+                      be proxied, will behave equivalently to a NOPROXY env var.
+                    type: string
                   url:
                     description: The url of your HTTP proxy.
                     type: string

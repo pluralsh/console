@@ -173,6 +173,21 @@ defmodule Console.Deployments.Services do
     |> Console.sha()
   end
 
+
+  @doc """
+  Fetches the files in the tarball for a service that will be delivered to the deployment operator
+
+  Only allowed if the user has write access to the service
+  """
+  @spec service_files(binary, User.t) :: {:ok, [%{path: binary, content: binary}]} | Console.error
+  def service_files(id, %User{} = user) do
+    svc = get_service!(id)
+    with {:ok, svc} <- allow(svc, user, :write),
+         {:ok, f} <- tarstream(svc),
+         {:ok, contents} <- Tar.tar_stream(f),
+      do: {:ok, Enum.map(contents, fn {k, v} -> %{path: k, content: v} end)}
+  end
+
   @doc """
   Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
   before sending it upstream to the given client.
@@ -843,14 +858,14 @@ defmodule Console.Deployments.Services do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
     new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
-    |> Map.put(:errors, stabilize_errors(attrs[:errors], svc.errors))
+    |> stabilize_errors(attrs[:errors], svc.errors)
   end
   def stabilize(attrs, _), do: attrs
 
-  defp stabilize_errors(nil, _), do: []
-  defp stabilize_errors([], _), do: []
-  defp stabilize_errors(errors, old_errors) when is_list(errors) and is_list(old_errors),
-    do: _stabilize_errors(errors, old_errors, [])
+  defp stabilize_errors(attrs, [], _), do: Map.put(attrs, :errors, [])
+  defp stabilize_errors(attrs, errors, old_errors) when is_list(errors) and is_list(old_errors),
+    do: Map.put(attrs, :errors, _stabilize_errors(errors, old_errors, []))
+  defp stabilize_errors(attrs, _, _), do: Map.delete(attrs, :errors)
 
   defp _stabilize_errors([], _, acc), do: acc
   defp _stabilize_errors(res, [], acc), do: acc ++ res
@@ -870,7 +885,7 @@ defmodule Console.Deployments.Services do
     old_children = Map.new(old_children, fn %ServiceComponentChild{id: id, uid: uid} -> {uid, id} end)
     Map.put(component, :children, Enum.map(children, &Map.put(&1, :id, old_children[&1.uid])))
   end
-  defp maybe_stabilize_children(component, _), do: component
+  defp maybe_stabilize_children(component, _), do: Map.put(component, :children, [])
 
   defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {nilify(g), v, k, nilify(ns), n}
   defp component_key(_), do: nil

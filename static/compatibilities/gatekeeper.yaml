@@ -8,150 +8,1053 @@ versions:
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart values / config changes to review\n- **New `extraEnvs`\
+      \ support**: chart can now inject additional env vars into Gatekeeper pods (PR\
+      \ #4185). If you previously used chart patching or extra container args for\
+      \ envs, you can migrate to `extraEnvs`.\n- **Automount SA token & deployment\
+      \ annotations configurable**: chart now allows configuring `automountServiceAccountToken`\
+      \ and adding deployment annotations, plus **extra volumes/volumeMounts** (PR\
+      \ #4124). Review your existing values/patches and move them into these supported\
+      \ knobs.\n- **Mutating/validating webhook surface changes**:\n  - Webhook service\
+      \ **dual-stack** support (PR #4043) may change Service fields (e.g., `ipFamilies`/`ipFamilyPolicy`)\
+      \ depending on cluster networking.\n  - **PodSecurityPolicy removed from the\
+      \ chart** (PR #4131). If you relied on PSPs, ensure your cluster uses Pod Security\
+      \ Admission (PSA) or another mechanism.\n\n### Gatekeeper runtime flags to review\n\
+      - **New flag `--sync-vap-enforcement-scope`** (v3.21.0 notable change): optional\
+      \ in 3.21.0 but will **default to true in v3.22** and later be removed. Decide\
+      \ now whether to enable it in 3.21.0 to match future behavior and avoid a surprise\
+      \ scope change.\n"
+    chart_updates: [PodSecurityPolicy manifests were removed from the Helm chart (PSP
+        is deprecated/removed upstream)., 'Chart adds configuration hooks for automounting
+        SA tokens, deployment annotations, and injecting extra volumes/volumeMounts.',
+      Chart adds `extraEnvs` support for injecting environment variables into Gatekeeper
+        components., Chart includes changes to support dual-stack webhook Service
+        behavior in clusters using dual-stack networking.]
+    features: ["`--sync-vap-enforcement-scope` flag introduced to align ValidatingAdmissionPolicy\
+        \ (VAP) enforcement scope with Gatekeeper\u2019s webhook/config/namespace\
+        \ exemptions for consistent enforcement.", 'ConstraintTemplates can now specify
+        which operations (CREATE/UPDATE/DELETE) they apply to, enabling operation-level
+        enforcement granularity.', External Data / Provider API gains new metrics
+        and status reporting for improved observability., Webhook Service adds dual-stack
+        support for IPv4/IPv6 clusters., 'Helm chart supports configurable automountServiceAccountToken,
+        deployment annotations, extra volumes/volumeMounts, and `extraEnvs` injection.']
+    breaking_changes: [Helm chart removes PodSecurityPolicy resources; clusters or
+        installs depending on PSP must transition to Pod Security Admission or alternative
+        controls., 'VAP behavior is trending toward a breaking change in v3.22+: if
+        you currently set `--sync-vap-enforcement-scope=false`, future versions will
+        change how Gatekeeper generates/scopes VAP resources (flag will default true
+        then be removed).']
   chart_version: 3.21.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0', 'openpolicyagent/gatekeeper:v3.21.0']
 - version: 3.20.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Patch/minor app release update from Gatekeeper v3.20.0 to v3.20.1;
+        no functional chart behavior changes called out in the provided notes., 'Component/toolchain
+        refresh: kubectl and Go versions bumped via cherry-picks; internal frameworks
+        dependency bumped to v0.18.1.']
+    features: []
+    breaking_changes: []
   chart_version: 3.20.1
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.1', 'openpolicyagent/gatekeeper:v3.20.1']
 - version: 3.20.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/chart values & manifest behavior to review\n\n- **Operations\
+      \ flag**: v3.19.0 introduced a requirement that the **`generate` operation**\
+      \ be enabled for **CRD generation** and **VAP/VAPB generation**. Ensure your\
+      \ Gatekeeper deployments that do generation include `--operation=generate` (notably\
+      \ **controller-manager**, and **audit** if you run a singleton audit deployment).\
+      \ If you previously relied on default operations, verify your chart values still\
+      \ render the `--operation` args you expect.\n\n- **Mutating subresources**:\
+      \ v3.20.0 includes Helm work to add an option for **mutating subresources**\
+      \ (release notes mention adding `pods/resize` to webhook rules and a Helm variable\
+      \ for mutating subresources). If your cluster uses subresources like `pods/resize`,\
+      \ confirm the rendered **MutatingWebhookConfiguration** includes the subresources\
+      \ you need and that any new value defaults match your policy.\n\n- **Readiness\
+      \ probe change**: v3.20.0 removes/adjusts the **webhook readinessProbe at pod\
+      \ start**. If you had custom probe overrides in values, re-check them after\
+      \ upgrade.\n\n- **Export backend config**: v3.20.0 replaces a prior **ConfigMap-based**\
+      \ connection mechanism with a **`Connection` CRD** for export backends. If you\
+      \ configured violation export via ConfigMaps, plan to migrate to the new CRD-based\
+      \ configuration.\n\n- **VAP integration default**: v3.20.0 makes **VAP integration\
+      \ beta and enabled by default**, generating **VAP/VAPB resources by default**\
+      \ for ConstraintTemplates/Constraints using the `K8sNativeValidation` engine\
+      \ with CEL. If you do *not* want automatic VAP resource generation, you\u2019\
+      ll likely need to set the relevant flags/values to disable it (and validate\
+      \ your operations include `generate` only where desired).\n"
+    chart_updates: [Introduces/uses a new `Connection` CRD to configure connections
+        to violation export backends (replacing a ConfigMap-based approach)., Webhook
+        rules updated to include the `pods/resize` subresource; Helm templating gained
+        a knob/variable to manage mutating subresources., Webhook startup behavior
+        changed by removing the webhook readinessProbe at pod start (affects rendered
+        Deployment/Pod spec).]
+    features: [New driver to export violations to disk (useful for local retention
+        or sidecar pickup)., VAP (Validating Admission Policy) integration is now
+        beta and enabled by default; Gatekeeper can generate VAP/VAPB resources for
+        CEL-based native validation., Export connections are now modeled via a `Connection`
+        custom resource instead of a ConfigMap.]
+    breaking_changes: ['If you previously configured export connections via a ConfigMap,
+        you must migrate to the new `Connection` CRD or exports may stop working.',
+      "Because VAP generation is enabled by default in v3.20.0, new VAP/VAPB resources\
+        \ may be created automatically (and require appropriate RBAC/operations configuration),\
+        \ which can change admission behavior if you weren\u2019t previously using\
+        \ VAP."]
   chart_version: 3.20.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.0', 'openpolicyagent/gatekeeper:v3.20.0']
 - version: 3.19.1
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **New required flag for generation:** Starting with **v3.19.0**\
+      \ (and therefore still required in **v3.19.1**), Gatekeeper requires `--operation=generate`\
+      \ for CRD and VAP/VAPB generation. Update your singleton deployment (typically\
+      \ `gatekeeper-audit`) to include `--operation=generate`. If you **do not run\
+      \ audit**, add `--operation=generate` to the **controller-manager** deployment\
+      \ instead.\n  - Reference: https://open-policy-agent.github.io/gatekeeper/website/docs/operations/#generation\n\
+      \n- **Optional behavior toggle:** A flag was added to enable/disable **referential\
+      \ constraints** (introduced in v3.19.0). If you rely on referential constraints,\
+      \ confirm the default behavior in your current values/manifests and set the\
+      \ flag explicitly if needed."
+    chart_updates: [v3.19.1 is a patch release with no user-facing feature additions;
+        it primarily contains a bug fix related to deleting Gatekeeper resources when
+        the delete operation is enabled., 'CI/test updates only: v3.19.1 bumps Kubernetes
+        versions used in testing/CRD Dockerfile; no direct runtime impact expected.']
+    features: [(v3.19.0) Gatekeeper ConstraintTemplates can use OPA **Rego v1** syntax
+        via the updated Rego driver., '(v3.19.0) Pub/Sub was generalized into an **export
+        mechanism**, enabling additional violation export backends (e.g., disk).',
+      (v3.19.0) `gator test` gained a `--deny-only` flag to focus on deny results.]
+    breaking_changes: ['(v3.19.0) **Breaking/behavioral change:** `--operation=generate`
+        is now required for CRD and VAP/VAPB generation. Missing this flag can prevent
+        expected generation behavior and may impact upgrades/installations that depended
+        on implicit generation.']
   chart_version: 3.19.1
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1', 'openpolicyagent/gatekeeper:v3.19.1']
 - version: 3.19.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [No Helm chart-specific changelog was provided in the notes; treat
+        this as an application upgrade summary only., v3.19.0 adds/adjusts operational
+        flags and mechanisms (notably generation operations and export mechanism changes)
+        that may require deployment arg updates in your Helm values if you set extraArgs/extraContainers.]
+    features: [OPA Rego v1 syntax support is now available for ConstraintTemplates
+        (via updated Rego driver)., 'Pub/Sub violation distribution has been generalized
+        into an export mechanism to enable additional backends (e.g., disk) for exporting
+        violations.', '`gator test` gained a `--deny-only` flag to focus tests on
+        deny outcomes.']
+    breaking_changes: ["`--operation=generate` is now required to guard CRD and VAP/VAPB\
+        \ generation; ensure your singleton deployment (commonly gatekeeper-audit)\
+        \ includes `--operation=generate`, and if you don\u2019t run audit you must\
+        \ add it to the controller-manager deployment."]
   chart_version: 3.19.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0', 'openpolicyagent/gatekeeper:v3.19.0']
 - version: 3.18.3
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Required flag change:** Ensure at least one Gatekeeper Pod\
+      \ that performs *generation* is started with `--operation=generate`.\n  - If\
+      \ you run the singleton `gatekeeper-audit` deployment, add `--operation=generate`\
+      \ there.\n  - If you **do not** run audit, add `--operation=generate` to the\
+      \ `gatekeeper-controller-manager` deployment.\n  - This is required to guard\
+      \ **CRD generation** and **ValidatingAdmissionPolicy / ValidatingAdmissionPolicyBinding\
+      \ (VAP/VAPB) generation**.\n- **Values that exist since 3.18.0:** Helm chart\
+      \ supports `logStatsAdmission` and `logStatsAudit` values (new in 3.18.0). No\
+      \ additional values changes were called out in the 3.18.3 notes you provided."
+    chart_updates: ['3.18.0 chart: added Helm values for `logStatsAdmission` and `logStatsAudit`.',
+      '3.18.x: no chart template changes were explicitly listed in the 3.18.3 snippet
+        beyond cherry-picked bugfixes; treat as patch-level maintenance update.']
+    features: [(3.18.0) CEL-based policies enforced through Gatekeeper (ValidatingAdmissionPolicy
+        support) reached GA., (3.18.0) Added support for `generate` operation and
+        waiting for VAPB generation (generation controller behavior)., (3.18.0) Added
+        config pod status reporting (observability/status improvements)., (3.18.0)
+        Helm chart gained `logStatsAdmission` / `logStatsAudit` toggles for stats
+        logging.]
+    breaking_changes: ['`--operation=generate` is now required on a singleton deployment
+        to handle CRD and VAP/VAPB generation; without it, generated artifacts may
+        not be created/guarded as expected. This impacts deployments that previously
+        relied on default operations behavior.']
   chart_version: 3.18.3
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.3', 'openpolicyagent/gatekeeper:v3.18.3']
 - version: 3.18.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / deployment changes to plan for\n\n- **New required\
+      \ `--operation=generate` for generation** (CRDs + VAP/VAPB): Gatekeeper now\
+      \ requires the `generate` operation to be enabled on the component that performs\
+      \ generation.\n  - If you run a **singleton** deployment (commonly `gatekeeper-audit`)\
+      \ you must add `--operation=generate` there.\n  - If you **do not** run audit,\
+      \ add `--operation=generate` to the **controller-manager**.\n  - Doc: https://open-policy-agent.github.io/gatekeeper/website/docs/operations/#generation\n\
+      \n- **New Helm chart values for logging stats**:\n  - `logStatsAdmission`\n\
+      \  - `logStatsAudit`\n\n- **Labeling enhancements in the Helm chart**:\n  -\
+      \ `commonLabels` added to Deployments.\n\n- **(From 3.17.0 notes, relevant if\
+      \ you use VAP generation)**: VAP generation configuration moved from annotations\
+      \ to explicit fields.\n  - ConstraintTemplates/Constraints should use the **`generateVAP`\
+      \ field** (annotations removed).\n\n- **Optional chart behavior change**: \u201C\
+      removing alpha flags out of the box\u201D / \u201Cnot setting alpha flags unless\
+      \ explicitly set through Helm\u201D. If you previously relied on alpha feature\
+      \ gates being enabled implicitly, you may need to set the corresponding Helm\
+      \ flags explicitly."
+    chart_updates: [CEL-based policies (Kubernetes native validation / VAP integration)
+        moved from **beta** to **GA** in 3.18.0., 'A new operations model requirement
+        was introduced: generation (CRDs, VAP/VAPB) is now gated behind the explicit
+        `generate` operation.', 'Helm chart gained new knobs for stats logging (`logStatsAdmission`,
+        `logStatsAudit`) and added `commonLabels` support on Deployments.', 'Several
+        chart/manifest quality fixes: PDB lint fix; NetworkPolicy ingress rule Helm
+        warning fix.', Internal refactors around CEL driver/framework extraction;
+        OPA bumped to 0.68.0; CI now pushes images to ghcr.io as well.]
+    features: ['CEL-based policy enforcement via ValidatingAdmissionPolicy (VAP) is
+        now GA, making the Kubernetes-native validation path a first-class, production-ready
+        option.', 'Gatekeeper now supports an explicit `generate` operation and can
+        wait for ValidatingAdmissionPolicyBinding (VAPB) generation, improving determinism
+        around generated resources.', 'Helm chart adds `logStatsAdmission` and `logStatsAudit`
+        to control stats logging in admission/audit components, and adds `commonLabels`
+        for consistent labeling across Deployments.', Gator gains additional capabilities
+        (sync test support and expansion in `gator verify`) useful for policy testing
+        workflows.]
+    breaking_changes: ['**Generation is now opt-in via operations**: you must enable
+        `--operation=generate` on whichever Gatekeeper deployment is responsible for
+        generating CRDs and VAP/VAPB resources, or generation will not occur.', "If\
+        \ you were using Gatekeeper\u2019s VAP generation via annotations (older behavior\
+        \ highlighted in 3.17.0 notes), you must migrate to the `generateVAP` fields\
+        \ in ConstraintTemplates/Constraints; annotations are no longer the mechanism."]
   chart_version: 3.18.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.0', 'openpolicyagent/gatekeeper:v3.18.0']
 - version: 3.17.2
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Gatekeeper 3.17 introduces/solidifies Kubernetes-native validation
+        (CEL/VAP) support and related manifest/chart wiring: CEL-based policies via
+        ValidatingAdmissionPolicy are beta; VAP/VAPBinding generation moved from annotations
+        to explicit fields in ConstraintTemplate/Constraint; and constraint enforcement
+        can now be scoped per enforcement point via `spec.scopedEnforcementActions`.',
+      Helm chart gains knobs to make the ServiceAccount name configurable and optionally
+        disable SA creation (useful when binding to pre-created RBAC/IRSA/GSA)., 'Helm
+        chart adds optional RollingUpdate strategy parameters for the controller-manager/audit
+        deployments, enabling finer control of maxUnavailable/maxSurge during upgrades.',
+      'Controller-manager and audit deployments can now receive separate podLabels,
+        improving labeling/selection and observability alignment.', 'Various CEL/VAP
+        wiring fixes: include CEL flags on audit deployment; only set webhook matchConditions
+        when non-empty; updated VAP/VAPBinding API generation behavior (0.30 API;
+        create v1 or v1beta1 VAP/VAPB) and avoid setting alpha flags unless explicitly
+        enabled via Helm.', '3.17.2 is a patch release with a key bugfix: fixes a
+        nil-pointer when converting VAPBinding from v1beta1 to v1, plus security/library
+        updates (crypto/net).']
+    features: ["CEL-based policies enforced via Gatekeeper\u2019s ValidatingAdmissionPolicy\
+        \ integration (beta in 3.17.0).", 'Constraints can now specify different enforcement
+        actions per enforcement point (webhook, audit, gator, VAP) using `spec.scopedEnforcementActions`.',
+      Support for Kubernetes CONNECT operations in request matching., 'More flexible
+        Helm operations: configurable ServiceAccount (and ability to opt out of creating
+        it), plus optional RollingUpdate strategy tuning, and separate podLabels for
+        controller-manager vs audit.']
+    breaking_changes: ['If you previously generated VAP/VAPBinding via annotations,
+        3.17.0 changes this to use explicit fields in ConstraintTemplate and Constraint;
+        you must update those resources or VAP generation may stop working/behave
+        differently.', 'VAP/VAPBinding generation behavior and API versions are more
+        strict/explicit in 3.17.x (v1 vs v1beta1 selection and alpha flags only when
+        configured), so clusters/templates relying on prior implicit defaults may
+        need review.']
   chart_version: 3.17.2
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.2', 'openpolicyagent/gatekeeper:v3.17.2']
-- version: 3.17.1
+- version: 3.17.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  chart_version: 3.17.1
-  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.1', 'openpolicyagent/gatekeeper:v3.17.1']
-- version: 3.17.0
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to watch\n\n- **VAP generation config\
+      \ moved from annotations to fields**: If you enabled Gatekeeper\u2019s ValidatingAdmissionPolicy\
+      \ (VAP) generation in 3.16 via annotations on `ConstraintTemplate`/`Constraint`,\
+      \ **update your policy manifests** to use the new explicit fields (e.g., `generateVAP`\
+      \ and related config) rather than annotations.\n- **ServiceAccount is now configurable**:\
+      \ Chart now supports choosing an existing ServiceAccount and **opting out of\
+      \ SA creation**. If you currently manage SA/RBAC outside Helm, set the new values\
+      \ accordingly.\n- **RollingUpdate strategy knobs added**: Optional parameters\
+      \ were added to control `rollingUpdate` behavior for Gatekeeper Deployments;\
+      \ you can now tune surge/unavailable if desired.\n- **Pod labels split per component**:\
+      \ Values/templating allow **separate pod labels** for `controller-manager` vs\
+      \ `audit` Deployment; if you relied on one shared label block, verify the rendered\
+      \ labels after upgrade.\n- **VAP/VAPB API version & flags behavior**:\n  - Gatekeeper\
+      \ updated its VAP/VAPBinding generation to newer APIs (v1 or v1beta1 depending\
+      \ on cluster).\n  - Gatekeeper **no longer sets alpha flags for VAP/VAPB generation\
+      \ by default**; if you previously relied on Helm enabling those feature gates\
+      \ implicitly, you may now need to set them explicitly (or ensure your cluster\
+      \ supports the beta/stable API you want).\n"
+    chart_updates: [Expose configurable ServiceAccount name + allow disabling SA creation.,
+      Add optional `rollingUpdate` strategy parameters to the Helm chart., Split pod
+        label configuration between controller-manager and audit Deployments., Stop
+        enabling alpha VAP/VAPB feature-gates implicitly unless explicitly set via
+        Helm., 'Update generated manifests to include YAML document separators (affects
+        rendered output, not behavior).']
+    features: [CEL-based policies enforced through Gatekeeper (via Kubernetes ValidatingAdmissionPolicy
+        integration) are **beta** in 3.17; Gatekeeper can generate/enforce CEL/VAP
+        resources., 'New `scopedEnforcementActions` lets you enforce different actions
+        per enforcement point (webhook, audit, gator, VAP) within the same Constraint.',
+      Support for Kubernetes `CONNECT` operations was added to admission handling.,
+      'Improved control over VAP generation intent: Gatekeeper checks template intent
+        before generating VAPBindings.']
+    breaking_changes: ["If you used VAP generation via **annotations**, those are\
+        \ no longer the mechanism in 3.17\u2014policy manifests must be updated to\
+        \ the new fields-based configuration.", 'If you depended on Helm implicitly
+        setting **alpha** feature flags for VAP/VAPB generation, that default behavior
+        is removed; you may need to explicitly configure feature gates or rely on
+        the appropriate Kubernetes API version support.']
   chart_version: 3.17.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.0', 'openpolicyagent/gatekeeper:v3.17.0']
 - version: 3.16.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm chart / values changes to plan for
+
+      - **New value: `disableAudit`** (added in v3.16.0). Use this if you need to
+      **turn off the audit component** (e.g., reduce load or you only care about admission
+      enforcement). Default behavior is unchanged unless you set it.
+
+      - **VAP integration can be enabled via Helm** (alpha): v3.16.0 adds Helm support
+      to **enable Kubernetes Validating Admission Policy (VAP)** integration.
+
+      - **Webhook `matchConditions` support**: chart now supports configuring `matchConditions`
+      on the **ValidatingWebhookConfiguration and MutatingWebhookConfiguration**.
+
+
+      ### Upgrade checklist for Helm values
+
+      - Review your current values for anything related to template Rego validation
+      (see breaking change below). There is **no replacement Helm flag**; use Gator
+      instead.
+
+      - If adopting VAP, plan values changes to enable it (alpha) and test in non-prod
+      first.
+
+      - If you have custom webhook matching/namespace exclusions, consider whether
+      moving to/adding `matchConditions` improves correctness or performance.
+
+      '
+    chart_updates: ['Helm: added `disableAudit` option to disable the audit deployment/job/component.',
+      'Helm: added ability to enable/configure VAP integration (alpha).', 'Helm: added
+        `matchConditions` support in ValidatingWebhookConfiguration and MutatingWebhookConfiguration
+        manifests.']
+    features: ['Alpha: integration with Kubernetes Validating Admission Policy (VAP),
+        including support for generating VAP artifacts and enabling it via Helm.',
+      'Operational flexibility: ability to disable Gatekeeper audit via a Helm option
+        (`disableAudit`).', 'Webhook configurability: support for Kubernetes webhook
+        `matchConditions` to refine when Gatekeeper webhooks trigger.']
+    breaking_changes: ['`validate-template-rego` flag has been removed; Gatekeeper
+        will no longer validate ConstraintTemplate Rego via that flag. Use Gator for
+        shift-left template validation to avoid unexpected failures/behavior changes
+        in CI/CD or admission workflows.']
   chart_version: 3.16.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.0', 'openpolicyagent/gatekeeper:v3.16.0']
 - version: 3.15.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **PodSecurityPolicy no longer enabled by default**: v3.15.0 includes\
+      \ a change to *disable PSP by default* (`#3179`). If your cluster is pre-1.25\
+      \ and you still rely on PSP, you may need to explicitly re-enable the chart\u2019\
+      s PSP resources (if your chart version still supports it) or migrate to Pod\
+      \ Security Admission.\n- **Helm value defaults related to Pub/Sub audit**: v3.15.0\
+      \ adds default Helm values for the Pub/Sub audit connection/channel (`#3097`).\
+      \ Review your `values.yaml` for new pubsub-related keys so you don\u2019t unintentionally\
+      \ change audit behavior.\n\n_No other explicit Helm values changes were called\
+      \ out in the provided notes for v3.15.0. (Some Helm-related exposure was in\
+      \ v3.14.0, e.g. external data provider cache TTL, but that\u2019s already in\
+      \ your current version.)"
+    chart_updates: [Adds/introduces **SyncSets** support (alpha) including a new SyncSet
+        controller and readiness tracking (`#3030`)., 'Switches telemetry/instrumentation
+        plumbing: **moving to OpenTelemetry from OpenCensus** (`#3011`). This may
+        impact how metrics/traces are emitted/collected depending on your setup.',
+      'CI/build change: **drops arm/v7 builds for the CRD image** (`#3074`), which
+        can affect users running Gatekeeper components on 32-bit ARM nodes.', 'Validation
+        hardening: Gatekeeper now **only validates Gatekeeper resources**, adds support
+        for validating DELETE config operations, and adds name length checks/limits
+        for certain resources (e.g., ExpansionTemplate names <64).']
+    features: ['**SyncSets (alpha)**: New mechanism to replicate/sync data into Gatekeeper
+        via SyncSets, plus readiness reporting so you can tell when required data
+        has been replicated.', '**Improved resource validation behaviors**: Additional
+        validation around Gatekeeper resources and operations (including DELETE validation
+        and stricter naming constraints) to prevent invalid configs from being accepted.']
+    breaking_changes: ['**PodSecurityPolicy default behavior changed**: PSP is disabled
+        by default in v3.15.0; clusters relying on Gatekeeper-created PSP objects
+        will need to adjust installation/values or move to PSA.', "**arm/v7 CRD image\
+        \ no longer built**: If you deploy the CRD image on 32-bit ARM (arm/v7), you\u2019\
+        ll need an alternative architecture or image strategy after upgrading."]
   chart_version: 3.15.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.15.0', 'openpolicyagent/gatekeeper:v3.15.0']
-- version: 3.14.0
+- version: 3.14.2
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v3.14.1: Audit and controller-manager pods gained updated labels,
+        which may affect label selectors used by monitoring/NetworkPolicies.', 'v3.14.2:
+        No new functional features; this patch release is primarily security dependency
+        updates addressing multiple CVEs/advisories.']
+    breaking_changes: []
+  chart_version: 3.14.2
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.2', 'openpolicyagent/gatekeeper:v3.14.2']
+- version: 3.14.1
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to consider
+
+      - **New pod labels added by default** in `v3.14.1`: audit and controller-manager
+      pods get additional labels (PRs #3240/#3284). If you have tooling that matches
+      on exact labels/selectors (e.g., NetworkPolicies, PodMonitors, log/metric relabeling),
+      verify it still works.
+
+      - **Recommended Helm/Kubernetes labels introduced** in `v3.14.0` (PR #2788).
+      Expect more standardized `app.kubernetes.io/*` labels on Gatekeeper resources;
+      adjust any custom label-based automation if it assumes older labels.
+
+      - **Revision history limit configurable** in `v3.14.0` (PR #2920): a new chart
+      value likely controls `revisionHistoryLimit` for Deployments. Set explicitly
+      if you need to constrain ReplicaSet history.
+
+      - **External data provider cache TTL exposed** in `v3.14.0` (PR #2978) and **TTL=0
+      disables cache** (PR #3028 + fix #3134). Review/set the new value if you use
+      external data providers and need deterministic behavior.
+
+      - **Webhook name flag handling fixed** in `v3.14.0` (PR #2879). If you override
+      webhook names via values/flags, re-test after upgrade.
+
+      - **Audit cert rotation enabled by default** in `v3.14.0` (PR #2875). If your
+      environment has strict cert/secret management expectations, confirm the generated/rotated
+      cert behavior is acceptable.'
+    chart_updates: ['`v3.14.1` is a patch release with a small surface area: adds
+        pod labels and includes a panic-logging fix.', '`v3.14.0` contains the bulk
+        of chart/app changes for this upgrade path, including label standardization
+        and new/changed flags exposed via Helm.', 'Default behaviors to note from
+        `v3.14.0`: audit cert rotation enabled by default; external data provider
+        caching behavior clarified/fixed.']
+    features: [(v3.14.1) Audit and controller-manager pods updated to include additional
+        pod labels; mainly affects observability/selection/label-based policies.,
+      (v3.14.0) Improved experimental Validating Admission Policy (VAP) support and
+        updated bundled OPA to v0.57.1., (v3.14.0) Support multiple sync sources and
+        enhancements to replay/testing output., (v3.14.0) External data provider response
+        cache TTL configurable; TTL=0 disables caching.]
+    breaking_changes: ['No explicit breaking changes are called out in the provided
+        notes for v3.14.0 or v3.14.1. However, label changes (recommended labels +
+        new pod labels) can be *operationally breaking* if you rely on exact label
+        matches/selectors in policies, monitoring, or automation.']
+  chart_version: 3.14.1
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.1', 'openpolicyagent/gatekeeper:v3.14.1']
+- version: 3.14.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to review\n- **New standard\
+      \ labels:** chart now adds the recommended Helm/Kubernetes app labels (`app.kubernetes.io/*`,\
+      \ `helm.sh/chart`, etc.). If you have tooling that matches/selects by labels\
+      \ (NetworkPolicies, PodMonitors/ServiceMonitors, log scraping, RBAC selectors,\
+      \ custom scripts), verify it still works and that any label-based selectors\
+      \ aren\u2019t overly restrictive.\n- **`revisionHistoryLimit` is now configurable:**\
+      \ you can set the Deployment\u2019s `revisionHistoryLimit` via values (new option).\
+      \ Consider pinning it explicitly if you rely on a specific rollout history behavior.\n\
+      - **External data provider cache TTL exposed:** the controller flag `--external-data-provider-response-cache-ttl`\
+      \ is now configurable through Helm values. Also note behavior: **TTL=0 disables\
+      \ the cache**.\n\nNo explicit breaking Helm values removals/renames were present\
+      \ in the provided notes; treat the above as additive changes and validate with\
+      \ `helm diff`."
+    chart_updates: [Updated OPA dependency to **v0.57.1**., Improved experimental
+        **Validating Admission Policy (VAP)** support (CEL-based / native validation
+        demo and driver improvements)., Constraint framework upgraded to include a
+        new **Kubernetes Native Validation** driver schema., Support for **multiple
+        sync sources** (sync subsystem enhancements)., Audit certificate rotation
+        enabled by default (bug fix) and other chart/controller flag fixes around
+        webhook name flags.]
+    features: ['Adds recommended Helm/Kubernetes application labels to resources,
+        improving consistency with common tooling and dashboards.', Allows configuring
+        the controller-manager Deployment `revisionHistoryLimit` through Helm values.,
+      'Adds support for multiple sync sources, improving how Gatekeeper syncs external
+        or cluster objects into OPA.', Upgrades the constraint framework with a new
+        Kubernetes Native Validation driver schema (relevant to VAP/CEL workflows).,
+      Exposes external data provider response cache TTL via Helm; TTL can be tuned
+        or set to 0 to disable caching.]
+    breaking_changes: []
   chart_version: 3.14.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0', 'openpolicyagent/gatekeeper:v3.14.0']
-- version: 3.13.0
-  kube: ['1.29', '1.28', '1.27']
+- version: 3.13.2
+  kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **v3.13.2 is the first 3.13.x tag that ships a Helm chart**;\
+      \ v3.13.1 did not include one.\n- **No Helm values changes were called out**\
+      \ in the v3.13.2 application release notes; expect the same behavior as v3.13.1.\n\
+      - For the 3.13.0 jump, note the new/updated Helm-facing knobs implied by the\
+      \ release notes:\n  - `webhookURL` Helm option added.\n  - Ability to choose\
+      \ **deployment strategy** for `controller-manager`.\n  - Support adding **PriorityClass**\
+      \ to Jobs.\n  - Pre-upgrade hook job: retries configured (helps reliability\
+      \ during upgrades).\n"
+    chart_updates: ['v3.13.2 release is functionally identical to v3.13.1, but **adds/publishes
+        the Helm chart artifact** for the release tag.', 'In 3.13.0 line, chart-related
+        fixes/robustness improvements mentioned include webhook retry logic for Helm
+        probes and retry configuration on the pre-upgrade hook job.']
+    features: ['Audit: added PubSub support for audit eventing/integration.', ExpansionTemplates
+        graduated to **beta** (more stable API/behavior expectations)., Added an experimental
+        **ValidatingAdmissionPolicy (VAP) driver** prototype., Added support for **External
+        Data Provider audit response cache** (performance/availability improvement).,
+      'Added **observability statistics/metrics** for admission, audit, and gator
+        CLI.']
+    breaking_changes: []
+  chart_version: 3.13.2
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2', 'openpolicyagent/gatekeeper:v3.13.2']
+- version: 3.13.0
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '### Helm / values changes to check
+
+      - **New `webhookURL` Helm value**: v3.13.0 adds a `webhookURL` Helm option (PR
+      #2722). If you use non-standard networking / external webhook endpoints, review
+      whether you should set this; otherwise defaults should keep working.
+
+      - **Controller-manager deployment strategy is now configurable** (PR #2777):
+      chart supports choosing a deployment strategy. If you previously relied on default
+      rolling update behavior, confirm the default matches your expectations and set
+      explicitly if needed.
+
+      - **Helm hook reliability improvements**: pre-upgrade/probe webhook retry logic
+      was improved (PRs #2710, #2873). No values change required, but upgrades may
+      behave differently (more resilient rather than failing fast).
+
+      '
+    chart_updates: [Adds support for configuring the controller-manager Deployment
+        strategy (chart-level capability)., Adds `webhookURL` configuration option
+        to the chart., Improves Helm hook jobs/probe-webhook behavior with retries
+        (more robust upgrades).]
+    features: ['Audit gained PubSub support, enabling external event-driven integrations
+        for audit output/processing.', 'ExpansionTemplate moved to beta and expansion
+        gained recursive expansion capabilities, improving workload validation workflows.',
+      Experimental Kubernetes ValidatingAdmissionPolicy (VAP) driver/prototype was
+        added as a step toward CEL-based admission integration., 'External Data Provider
+        Audit Cache was added to cache external data responses during audit, reducing
+        repeated calls and improving performance.', 'New observability statistics
+        are available for admission, audit, and the gator CLI for improved monitoring
+        and troubleshooting.']
+    breaking_changes: [ExpansionTemplate CRD graduation to **beta** may involve CRD
+        schema/behavior changes; verify your existing ExpansionTemplates against the
+        new CRD and re-apply CRDs during upgrade., 'Gatekeeper dependencies were upgraded
+        to Kubernetes v1.27.2 / controller-runtime v0.15.0; if you run very old Kubernetes
+        versions, confirm compatibility before upgrading.']
   chart_version: 3.13.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0', 'openpolicyagent/gatekeeper:v3.13.0']
 - version: 3.12.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart / values considerations\n- **NetworkPolicy added\
+      \ for controller-manager**: v3.12.0 introduces a Helm-managed NetworkPolicy\
+      \ for the controller manager. If your clusters enforce default-deny, this may\
+      \ help; if you already manage policies, verify it doesn\u2019t conflict and\
+      \ decide whether to enable/disable/override it.\n- **Webhook probe container\
+      \ change**: the Helm chart switches `probeWebhook` to use **`curl` as the ENTRYPOINT**.\
+      \ If you had customizations around that container/image/command, re-check them.\n\
+      - **WebhookConfiguration naming is configurable**: bug fix adds support to **change\
+      \ the `WebhookConfiguration` name** and also changes the **pre-install CRD image**\
+      \ behavior. If you rely on a fixed name (RBAC, automation, monitoring), validate\
+      \ after upgrade.\n- **Template/namespace fixes**: Helm templates now include\
+      \ missing namespaces in \u201Cstatic\u201D templates; this can show up as resource\
+      \ diffs on upgrade.\n\n_No explicit breaking Helm values removals are called\
+      \ out in the provided notes, but expect diffs due to the above additions/templating\
+      \ fixes._"
+    chart_updates: [Adds a NetworkPolicy manifest for the controller-manager (Helm
+        chart feature)., Probe webhook job/container behavior updated to run with
+        `curl` as entrypoint., Fixes Helm static templates to include missing namespaces
+        (may change rendered manifests)., Adds support to configure the WebhookConfiguration
+        name; updates pre-install CRD image handling.]
+    features: ['New `AssignImage` mutator enables image mutation use-cases (e.g.,
+        rewriting images to an approved registry).', "Gatekeeper can emit admission/audit\
+        \ events into the **involved object\u2019s namespace**, improving discoverability\
+        \ during debugging.", OPA dependency updated to **v0.49.2** (behavior/performance/security
+        changes come from OPA)., Multi-engine groundwork added to support future integration
+        with Kubernetes CEL `ValidatingAdmissionPolicy`., New `--exempt-namespace-suffix`
+        flag allows exempting namespaces by suffix pattern., 'Logging improvements:
+        ability to write logs to a custom file and more verbose audit logging.']
+    breaking_changes: []
   chart_version: 3.12.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.12.0', 'openpolicyagent/gatekeeper:v3.12.0']
-- version: 3.11.0
-  kube: ['1.29', '1.28', '1.27']
+- version: 3.11.1
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart / values changes\n- No explicit **values.yaml**\
+      \ changes are called out in the provided notes for `v3.11.1`.\n- For `v3.11.0`,\
+      \ two Helm-related fixes may affect installs/upgrades:\n  - Post-install/post-upgrade\
+      \ jobs are allowed again (fix for Helm hook/job behavior).\n  - Chart avoids\
+      \ mixing `pod-security.kubernetes.io/*` labels with `ignore` labels (may change\
+      \ rendered namespace labels if you set either).\n\n### Upgrade implications\n\
+      - If you rely on Helm hooks/jobs (CRD install jobs, certgen jobs, etc.), `v3.11.0`\
+      \ includes a fix that may change whether those run as expected during upgrade.\n\
+      - If you set Pod Security Admission (PSA) labels on the Gatekeeper namespace\
+      \ via values, verify the resulting labels after upgrade to ensure you\u2019\
+      re not depending on the previously mixed/invalid combination.\n"
+    chart_updates: ['Helm: allow installation of post-install and post-upgrade jobs
+        (fixes hook/job install behavior).', 'Helm: avoid mixing Pod Security `ignore`
+        labels with PSA podSecurity labels (label rendering/validation fix).', 'Chart
+        metadata: adds an icon to Chart.yaml (cosmetic).']
+    features: [External Data is promoted to beta; external data providers now require
+        TLS/mTLS., 'Gator CLI is promoted to beta and now supports tracing, AdmissionReview
+        input, and specifying an OCI image.', Audit logs can include resource labels
+        to improve log context and filtering.]
+    breaking_changes: [External Data providers must be accessed over TLS/mTLS starting
+        in v3.11.0; plaintext providers will stop working until updated.]
+  chart_version: 3.11.1
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.1', 'openpolicyagent/gatekeeper:v3.11.1']
+- version: 3.11.0
+  kube: ['1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart configuration changes to review\n\nFrom\
+      \ the notes you provided, there are several **new/changed Helm knobs** introduced\
+      \ around v3.10 and a couple of Helm behavior fixes in v3.11. When upgrading\
+      \ from **Gatekeeper 3.10.0 \u2192 3.11.0**, the *must-review* item is external\
+      \ data TLS; the rest are optional improvements.\n\n### v3.10 chart/value additions\
+      \ (you may want to adopt)\n- `controllerManager.tlsMinVersion`: new value to\
+      \ set the minimum TLS version for the controller manager webhook server.\n-\
+      \ **Webhook config annotations**: new options to set annotations on **ValidatingWebhookConfiguration**\
+      \ and **MutatingWebhookConfiguration**.\n- **Probe timeout configuration**:\
+      \ options to configure readiness/liveness/startup probe timeouts in the chart.\n\
+      - **Hook jobs options**: chart adds options for Helm hook jobs (install/upgrade\
+      \ hooks) and extends/unifies hook job pod labels.\n- `controllerManager.topologySpreadConstraints`\
+      \ (or similar): topology spread support added to the controller deployment.\n\
+      - **External certificates injection**: values/options to allow injecting externally-provided\
+      \ TLS certs (useful if you manage certs outside of the chart).\n\n### v3.11\
+      \ chart-related fixes (may affect existing installs)\n- **Helm hooks**: chart\
+      \ bugfix to allow installation of **post-install** and **post-upgrade** jobs\
+      \ (if you rely on these hooks, verify they now run as expected).\n- **Pod security\
+      \ labeling logic**: fix to not mix `pod-security.kubernetes.io/*` labels with\
+      \ `ignore` labels; review your namespace labels/values if you set either.\n\n\
+      ### External data: TLS/mTLS requirement (app-level, but impacts Helm values)\n\
+      - In **v3.11**, when using **External Data providers**, it is now **required**\
+      \ to use **TLS/mTLS**. If you have external data enabled, you will likely need\
+      \ to provide CA bundles and client certs/keys (via chart values or secrets)\
+      \ and ensure the provider endpoints are HTTPS with proper trust.\n"
+    chart_updates: [Gatekeeper migrated away from PodSecurityPolicy (PSP) toward Pod
+        Security Admission (PSA) in the v3.10 timeframe; ensure your chart install
+        no longer expects PSP resources on Kubernetes >=1.25., 'Helm chart includes
+        enhancements for scheduling (topology spread), hook jobs configurability/labels,
+        and better webhook/probe configurability from v3.10.', v3.11 chart bugfixes
+        improve Helm hook job installation behavior and correct pod security label
+        handling.]
+    features: [External Data promoted to beta; external data providers must now be
+        accessed with TLS/mTLS., 'Gator CLI promoted to beta; adds tracing support,
+        AdmissionReview support, and the ability to specify an OCI image for test/expand
+        workflows.', Audit logs can include resource labels (helpful for correlating
+        violations).]
+    breaking_changes: ['If you use External Data, TLS/mTLS is now required for provider
+        communication; non-TLS provider endpoints/configs will stop working until
+        updated.', 'If you previously depended on PSP objects being installed by the
+        chart, Kubernetes v1.25+ clusters will require PSA-based configuration instead
+        (PSP removal may require policy/process changes).']
   chart_version: 3.11.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.0', 'openpolicyagent/gatekeeper:v3.11.0']
 - version: 3.10.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart / values changes to review\n\n* **PodSecurityPolicy\
+      \ removed / Pod Security Admission migration**: if you\u2019re on **Kubernetes\
+      \ v1.25+**, PSP is gone. Ensure the chart is **not relying on PSP** and that\
+      \ your namespaces have the appropriate **Pod Security Admission labels** (or\
+      \ your cluster policy allows Gatekeeper pods to run). This release includes\
+      \ chart updates to support disabling PSP.\n* **New Helm values added/expanded\
+      \ (v3.10.0):**\n  * `controllerManager.tlsMinVersion` (new): lets you set the\
+      \ minimum TLS version used by the controller manager.\n  * **Webhook configuration\
+      \ annotations**: values to set annotations on mutating/validating `WebhookConfiguration`\
+      \ objects.\n  * **Probe timeouts**: values to configure readiness/liveness probe\
+      \ timeouts.\n  * **Controller topology spread**: add `topologySpreadConstraints`-style\
+      \ config to the controller.\n  * **Hook jobs options/labels**: more options\
+      \ for Helm hook jobs and unified/extended pod labels.\n  * **External certificate\
+      \ injection options**: expose knobs to inject external certs.\n\n* **Behavioral/value\
+      \ default change to be aware of:**\n  * `--max-serving-threads` now defaults\
+      \ to `GOMAXPROCS` (performance-related). If you explicitly tuned serving threads\
+      \ previously, revalidate.\n\n### Upgrade action items (values.yaml)\n* If you\
+      \ run k8s v1.25+, **verify PSA compliance** for the `gatekeeper-system` namespace\
+      \ and any constraints around privileged settings.\n* Decide whether to set `controllerManager.tlsMinVersion`\
+      \ (e.g., `1.2`).\n* If you need to add org-required metadata, configure **webhook\
+      \ annotations** via the new values.\n* If you experienced probe-related restarts/timeouts,\
+      \ consider tuning the new **probe timeout** values.\n* If you run multiple replicas\
+      \ across zones/nodes, consider enabling **topology spread** for HA.\n"
+    chart_updates: [Chart updates to support Kubernetes v1.25+ by removing PodSecurityPolicy
+        resources and aligning with Pod Security Admission (PSA)., 'Helm chart enhancements
+        to make operational settings configurable: probe timeout configuration, webhook
+        configuration annotations, controller topology spread constraints, and more
+        hook-job options/standardized labels.', Chart fixes related to labeling exempted
+        namespaces and general helm upgrade reliability (helm upgrade test additions).,
+      'Chart changes to explicitly specify `curl` usage in webhook probing job, improving
+        portability across images/environments.']
+    features: [PodSecurityPolicy removal and migration guidance toward Pod Security
+        Admission for Kubernetes v1.25+ clusters., 'Mutation promoted to stable (v1),
+        indicating API/behavior stability for mutation features.', 'Alpha feature
+        introduced: validation of workload resources (new workload-focused validation
+        capability).', 'Operational and security hardening knobs: ability to inject
+        external certs and configure minimum TLS version for the controller manager.',
+      'Helm usability improvements: configurable webhook annotations, probe timeout
+        tuning, and topology spread constraints for controller scheduling.', New audit
+        metric `audit_last_run_end_time` to improve observability of audit execution.]
+    breaking_changes: [Clusters relying on PodSecurityPolicy (especially Kubernetes
+        v1.25+) must migrate to Pod Security Admission; PSP resources are removed
+        in this release and will no longer be applied/created by the chart.]
   chart_version: 3.10.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.10.0', 'openpolicyagent/gatekeeper:v3.10.0']
 - version: 3.9.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart/value changes to review\n- **Webhook uninstall ordering**:\
+      \ chart supports removing webhooks *before* uninstalling Gatekeeper (from v3.8.0\
+      \ notes). If you previously had trouble uninstalling due to dangling webhook\
+      \ configs, check the chart value/flag introduced by that change.\n- **Webhook\
+      \ configuration flexibility**:\n  - v3.8.0: support **custom rules** for ValidatingWebhookConfiguration/MutatingWebhookConfiguration.\n\
+      \  - v3.8.0: add **reinvocationPolicy** option for the MutatingWebhookConfiguration.\n\
+      \  - v3.9.0: chart adds **objectSelector** support for webhooks.\n- **Namespace\
+      \ exemption behavior**:\n  - v3.8.0: additional labels can be exempted in webhooks.\n\
+      \  - v3.9.0: introduces/uses **labeling of exempted namespaces** and includes\
+      \ a **post-upgrade job** to label namespaces; also fixes templating for the\
+      \ exempt-namespace label.\n  - Action: if you use namespace exemptions, verify\
+      \ your label keys/values and confirm the upgrade job has permissions and runs\
+      \ successfully.\n- **SecurityContext overrides** (v3.8.0): chart allows overriding\
+      \ securityContexts; v3.9.0 adds a **pod security context variable**. Action:\
+      \ reconcile any custom pod/container securityContext you set in values.\n- **Upgrade\
+      \ jobs configuration**:\n  - v3.9.0: allow setting **affinity for upgradeCRDs**\
+      \ jobs.\n  - v3.9.0: adds **job annotations** support.\n- **Metrics/exporters\
+      \ configuration**:\n  - v3.9.0: adds a **metrics backend flag** to the Helm\
+      \ chart (to support OpenCensus/Stackdriver exporters). Action: confirm your\
+      \ metrics setup and any additional flags/values required.\n\n> Note: The provided\
+      \ notes don\u2019t include exact Helm value keys; use `helm show values` for\
+      \ the target chart version and diff your current `values.yaml` against it."
+    chart_updates: [Adds post-upgrade job to label exempted namespaces (and fixes
+        templating for that label)., Adds webhook `objectSelector` support in chart
+        templates., Adds gatekeeper-webhook post-install hook., Allows overriding
+        securityContexts; adds podSecurityContext value support., Adds ability to
+        configure affinity for `upgradeCRDs` jobs and to set job annotations., Adds
+        Helm chart support for selecting metrics backend / exporters.]
+    features: [External Data gains TLS/mTLS support for calling external providers.,
+      Gatekeeper can validate Kubernetes subresources (more granular admission control).,
+      Adds OpenCensus and Stackdriver exporters for metrics/telemetry., Performance
+        improvements including automaxprocs integration and earlier compilation/memory
+        optimizations from 3.8.x., 'Helm chart gains richer webhook targeting controls
+        (objectSelector, custom rules, reinvocationPolicy) and improved upgrade/uninstall
+        hooks.']
+    breaking_changes: ['Avoid deploying **Gatekeeper v3.8.0**: it is marked **DO NOT
+        USE** due to a bug that can cause unenforced violations when using the `config`
+        resource without sync; upgrade via **v3.8.1+** before moving to v3.9.0.',
+      'If you rely on namespace exemption behavior, the introduction of namespace
+        labeling and related hooks/jobs may change how exemptions are applied; verify
+        labels and RBAC for the upgrade job/webhook hooks before upgrading.']
   chart_version: 3.9.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.9.0', 'openpolicyagent/gatekeeper:v3.9.0']
 - version: 3.8.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm / chart values to review
+
+      - **Webhook uninstall ordering**: Chart can now **remove validating/mutating
+      webhook configurations before Gatekeeper is uninstalled**. If you want this
+      behavior, look for/enable the new Helm value introduced by this feature (PR
+      **#1770**).
+
+      - **Webhook rule customization**: You can now set **custom `rules`** on `ValidatingWebhookConfiguration`
+      / `MutatingWebhookConfiguration` (PR **#1806**). Review if you previously relied
+      on chart defaults.
+
+      - **Mutating webhook reinvocationPolicy**: New chart config for `reinvocationPolicy`
+      on the `MutatingWebhookConfiguration` (PR **#1844**).
+
+      - **Webhook service health port**: Chart adds a **health port on the webhook
+      Service** (PR **#1839**). Ensure any NetworkPolicies / firewalls / ServiceMonitors
+      allow it if relevant.
+
+      - **Security context overrides**: Chart now allows **overriding securityContexts**
+      (PR **#1938**). If you had to patch manifests previously, migrate to values.
+
+      - **Default webhook TLS minimum version**: Gatekeeper v3.8.0 updates the **default
+      minimum TLS to 1.3** (PR **#1866**). If your API server cannot negotiate TLS
+      1.3 to the webhook, set the controller flag/value to keep TLS 1.2.
+
+      - **Mutation-status webhook operation**: Deployment updated to include the `mutation-status`
+      operation (PR **#1966**). If you pin/customize webhook rules, make sure this
+      operation remains included.
+
+
+      > Note: v3.8.0 is marked **DO NOT USE** upstream due to an enforcement bug when
+      using `config` without sync; prefer **v3.8.1+** for the upgrade.'
+    chart_updates: ["Performance-focused release: significant improvements to constraint\
+        \ template compilation (~16%) and major reductions in webhook CPU/memory (1.5x\u2013\
+        4x) plus audit memory (~2x).", Adds a TLS checker for the webhook and bumps
+        default TLS min version to 1.3., Adds metric and operational improvements
+        around mutation (conflicting mutators metric; mutation-status operation).,
+      Improves matching capabilities (suffix-based matching; additional webhook label
+        exemptions)., 'CLI/tooling changes: `gktest` renamed to `gator`; `gator test`
+        renamed to `gator verify` (docs/UX updates).', Dependency updates include
+        upgrading embedded OPA to **v0.39.0**.]
+    features: ['External Data now supports **mutation**, enabling mutation responses
+        driven by external providers.', 'New Prometheus metric for **conflicting mutators**,
+        improving observability of mutation configuration issues.', Customizable webhook
+        configuration rules and reinvocation policy allow tighter integration with
+        cluster admission policies., Suffix-based resource matching expands how constraints/targets
+        can match resource kinds/names.]
+    breaking_changes: ['**Do not deploy v3.8.0**: upstream warns of a bug that can
+        cause **unenforced violations** when using the `config` resource without sync;
+        upgrade to **v3.8.1+** instead.', Default minimum TLS for webhooks changes
+        to **TLS 1.3**; clusters/components that only support TLS 1.2 may fail webhook
+        calls unless you explicitly configure the min TLS version., 'CLI rename: `gator
+        test` becomes `gator verify` (and `gktest` renamed to `gator`), which can
+        break scripts/CI pipelines relying on old command names.']
   chart_version: 3.8.0
   images: ['openpolicyagent/gatekeeper-crds:v3.8.0', 'openpolicyagent/gatekeeper:v3.8.0']
 - version: 3.7.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **RBAC resources are now conditional**: RBAC manifests are wrapped
+      behind `values.rbac.create` (PR #1625). If you previously relied on the chart
+      always creating Roles/RoleBindings/ClusterRoles, ensure `rbac.create=true` (default
+      may vary by your chart version) or provide your own RBAC.
+
+      - **External Data (alpha) Helm flag**: Helm can now enable the external data
+      validation feature via a chart value/flag (PR #1633). Only enable if you intend
+      to use it and have reviewed networking/security implications.
+
+      - **Audit cache disk/RAM-disk options**: New chart options added for audit to
+      write cache to disk and optionally to a RAM disk (`writeToRAMDisk`) to reduce
+      memory (PRs #1634, #1660).
+
+      - No explicit value key removals were called out in the provided notes; validate
+      your existing `values.yaml` against the new chart defaults before upgrading.'
+    chart_updates: ['Mutation feature status updated: mutation is now **Beta** in
+        v3.7.0 (was earlier stage in v3.6.x).', 'New mutator type: **ModifySet** mutator
+        added.', 'New alpha feature: **External Data** for validation added (gated
+        behind a flag).', 'Webhook TLS hardening: minimum TLS version raised to **1.2**;
+        configurable via `--tls-min-version` (with TLS 1.3 planned as default in v3.8.0).',
+      'Audit memory improvements: audit can write cache to disk to reduce memory usage;
+        Helm adds knobs for RAM-disk option.', 'New alpha tooling: **Gator CLI** introduced
+        for local testing of ConstraintTemplates/Constraints without a Kubernetes
+        cluster.']
+    features: ['Mutation is now Beta, making mutation capabilities more production-ready
+        and supported than prior versions.', 'ModifySet mutator added, enabling set-style
+        modifications as part of mutation.', External Data for validation (alpha)
+        allows Gatekeeper policies to consult out-of-process providers for decisions.,
+      Gator CLI (alpha) provides a way to test templates/constraints locally without
+        Kubernetes., Audit memory usage reduced via cache-to-disk capability; optional
+        RAM-disk support via Helm values.]
+    breaking_changes: [Webhook TLS minimum version is now TLS 1.2; clients using TLS
+        1.0/1.1 will fail to connect unless updated. (You can configure the minimum
+        via `--tls-min-version`.)]
   chart_version: 3.7.0
   images: ['openpolicyagent/gatekeeper-crds:v3.7.0', 'openpolicyagent/gatekeeper:v3.7.0']
 - version: 3.6.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **CRD upgrade handling:** v3.6.0 adds **Helm hooks to upgrade\
+      \ CRDs**. If you previously managed CRDs manually (or via separate tooling),\
+      \ review how your chart handles CRDs during `helm upgrade` so you don\u2019\
+      t end up with competing ownership/upgrade paths.\n- **Configurable ports via\
+      \ Helm:** Helm can now **configure controller-manager and audit ports**. If\
+      \ you set custom ports or scrape metrics, align your values with the new options.\n\
+      - **PDB API version auto-selection:** Helm chart dynamically selects the **PodDisruptionBudget\
+      \ API version** based on cluster version; remove any workarounds/overrides you\
+      \ carried for older/newer K8s.\n"
+    chart_updates: [ConstraintTemplate CRD moves to **v1** (requires CRD update in
+        the cluster)., Gatekeeper and controller-runtime metrics are unified into
+        a **single endpoint** (affects scraping/ServiceMonitor/Prometheus config).,
+      'Mutation subsystem improvements: large **System.Mutate runtime reduction**,
+        watch/constraint controller **race condition fixes**, and new mutation features
+        (namespace prefix matching; integer `keyValue` support in mutation path parser).',
+      Removed **non-specific webhook request metrics**; request duration metric buckets
+        updated (upper limit 3s)., Adds metrics reporting for mutation., Updates Kubernetes
+        dependency/support matrix (notably K8s v1.22 updates).]
+    features: ['ConstraintTemplate CRD is now served as v1, modernizing the API and
+        aligning with newer Kubernetes CRD versions.', Mutation performance improved
+        significantly (reported ~87% reduction for System.Mutate runtime)., Namespace
+        and excludedNamespaces matching now supports prefix-based matching for more
+        flexible scoping., 'Mutation path parser/mutators support integer keyValue,
+        enabling more precise mutations on numeric keys.', 'Helm chart improvements:
+        configurable controller-manager/audit ports and hooks to upgrade CRDs.', 'Metrics
+        enhancements: unified metrics endpoint and mutation metrics reporting.']
+    breaking_changes: ['**ConstraintTemplate CRD moves to v1**; clusters must have
+        updated CRDs before/with the upgrade, and any tooling expecting the older
+        CRD version may need adjustment.', 'Metrics surface changes: **non-specific
+        webhook request metrics removed** and metrics endpoint behavior changes (unified
+        endpoint), which can break existing dashboards/alerts/scrape configs.']
   chart_version: 3.6.0
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper-crds:v3.6.0',
     'openpolicyagent/gatekeeper:v3.6.0']
 - version: 3.5.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **Helm 2 is removed as of v3.4.0**: ensure you are using the
+      Helm v3 chart/repo; Helm 2-based installs cannot be upgraded in-place.
+
+      - **CRD install hook removed** (v3.4.0): the chart no longer relies on the `crd-install`
+      hook; manage CRDs using Helm v3 CRD behavior or apply CRDs separately as part
+      of your upgrade workflow.
+
+      - **Mutation (alpha) can be enabled via Helm** (v3.4.0): set `experimentalEnableMutation=true`
+      if you intend to deploy the mutation components.
+
+      - **v3.5.0 webhook defaults**: v3.5.0 adds default configs to the `MutatingWebhookConfiguration`;
+      review any custom webhook settings/overrides to ensure they still match your
+      desired behavior.'
+    chart_updates: [Helm v2 chart removed; Helm v3 chart is the supported path (v3.4.0).,
+      'Helm: removed `crd-install` hook (v3.4.0).', 'Helm: mutation components added
+        to chart behind `experimentalEnableMutation` flag (v3.4.0).', 'Helm: removed
+        duplicate `affinity` key (bugfix in v3.4.0).', MutatingWebhookConfiguration
+        now ships with default configuration values (v3.5.0).]
+    features: [Kubernetes v1.22+ compatibility (v3.5.0)., Mutation support available
+        as an alpha feature and deployable via Helm with `experimentalEnableMutation`
+        (introduced in v3.4.0)., Improved user feedback for invalid inputs (v3.4.0).]
+    breaking_changes: [Helm v2 chart removed starting in v3.4.0; you must use Helm
+        v3 for install/upgrade going forward., Validation metrics `request_count`
+        and `request_duration_seconds` are deprecated in favor of `validation_request_count`
+        and `validation_request_duration_seconds` (introduced in v3.4.0); update dashboards/alerts
+        before the old names are removed in a future release.]
   chart_version: 3.5.0
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.5.0']
 - version: 3.4.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to account for
+
+      - **Helm v2 chart removed** in Gatekeeper **v3.4.0**. Upgrades must use the
+      **Helm v3 chart** from the Helm repo.
+
+      - **Mutation (alpha) can be enabled via Helm** using `experimentalEnableMutation:
+      true`.
+
+      - **CRD install hook removed**: the chart **removes the `crd-install` Helm hook**.
+      Ensure CRDs are installed/managed in a Helm v3-compatible way (e.g., CRDs in
+      the chart `crds/` directory, or applied separately in your pipeline) before/with
+      the upgrade.
+
+
+      ## Notes for monitoring
+
+      - Validation metrics `request_count` and `request_duration_seconds` are **planned
+      for deprecation** in favor of `validation_request_count` and `validation_request_duration_seconds`;
+      update dashboards/alerts accordingly (not an immediate break in 3.4.0, but plan
+      ahead).'
+    chart_updates: [Helm v2 chart support removed; Helm v3 chart is the supported
+        install/upgrade path., Helm chart gains support for mutation (alpha) behind
+        `experimentalEnableMutation`., 'Helm chart fix: removed duplicate `affinity`
+        key.', 'Helm chart change: removed `crd-install` hook (Helm v3 CRD handling).']
+    features: [Mutation is available as an alpha feature and can be deployed via experimental
+        manifests or enabled in the Helm v3 chart with `experimentalEnableMutation`.,
+      "Added better \u201Cinvalid input\u201D feedback to help users diagnose bad\
+        \ policy/constraint inputs."]
+    breaking_changes: [Helm v2 chart has been removed as of v3.4.0; any Helm v2-based
+        install/upgrade process must be migrated to Helm v3.]
   chart_version: 3.4.0
   images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.4.0']
 - version: 3.3.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to review
+
+      - **Namespace creation can be optional**: Chart adds a toggle to control whether
+      it creates the Gatekeeper namespace (PR #981). If you previously relied on the
+      chart to create the namespace, verify the new default and set the value accordingly
+      (commonly something like `namespace.create: true/false`).
+
+      - **PriorityClass is now configurable** for both `controller-manager` and `audit`
+      workloads (PR #1008). If you want non-default scheduling priority, set the new
+      values (often `controllerManager.priorityClassName` / `audit.priorityClassName`).
+
+      - **`readOnlyRootFilesystem` support** in the chart (PR #1048). If your cluster
+      enforces restricted PodSecurity/PSP-like policies, consider enabling it; if
+      you have custom sidecars/volumes needing write access, test first.
+
+      - **Webhook delete operations/timeout are parameterized** (PR #1051). If you
+      hit webhook timeouts during upgrades or policy rollouts, tune the new values.
+
+      - **Validation webhook max worker threads is configurable** (PR #1021). Useful
+      if you need to throttle/scale admission throughput.
+
+      - **Audit vs controller settings can diverge** (PR #1006). If you previously
+      set shared values, you may now need to set both blocks explicitly depending
+      on your desired behavior.
+
+      '
+    chart_updates: ['Helm chart feature additions focused on configurability: optional
+        namespace creation, configurable PriorityClass, read-only root filesystem
+        option, tunable webhook timeouts/delete behavior, configurable validation
+        webhook workers, and ability to set different settings for audit vs controller
+        components.']
+    features: ['Helm chart can optionally create the namespace, improving compatibility
+        with GitOps or pre-provisioned namespaces.', PriorityClass can be set for
+        controller-manager and audit deployments to control scheduling precedence.,
+      New `readiness-retries` flag allows tuning how many readiness checks/retries
+        Gatekeeper performs before declaring failure., 'Config resource is now validated
+        to be named `config`, reducing misconfiguration drift.', 'Audit and controller
+        can now have different settings, enabling more precise performance vs enforcement
+        tuning.', Admission validation webhook worker count is configurable to control
+        concurrency and throughput., 'Experimental mutation system improvements: CRD
+        validation, mutation cache, assign/assignmetadata controllers, and better
+        mutation webhook behavior.']
+    breaking_changes: []
   chart_version: 3.3.0
   images: ['openpolicyagent/gatekeeper:v3.3.0']
-- version: 3.2.2
-  kube: ['1.29', '1.28', '1.27']
+- version: 3.2.0
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  chart_version: 3.2.2
-  images: ['openpolicyagent/gatekeeper:v3.2.2']
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Gatekeeper library was moved out of the main Gatekeeper repository
+        into its own repository: https://github.com/open-policy-agent/gatekeeper-library.']
+    breaking_changes: ['If you relied on Gatekeeper constraint templates/constraints
+        from the in-repo library or referenced it as part of your upgrade process,
+        you now need to pull those artifacts from the separate gatekeeper-library
+        repository instead.']
+  chart_version: 3.2.0
+  images: ['openpolicyagent/gatekeeper:v3.2.0']
+- version: 3.1.0
+  kube: ['1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 3.1.0
+  images: ['openpolicyagent/gatekeeper:v3.1.0']

@@ -3,81 +3,194 @@ git_url: https://github.com/traefik/traefik
 release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 versions:
-- version: 3.6.2
-  kube: ['1.34', '1.33', '1.32', '1.31']
+- version: 3.6.5
+  kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  chart_version: 37.4.0
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['From v3.6.0 (baseline): added new ACME certificatesResolvers options;
+        added least-time and HighestRandomWeight load-balancing strategies; added
+        TCP (active) healthchecks and passive health checks; added Knative provider
+        and improvements to Kubernetes/Gateway API and Ingress publishing (including
+        ExternalName services); added multi-layer routing; added HTTP/2 HPACK table
+        size options; and several dashboard/UI tweaks.', v3.6.5 is a patch release
+        with no new features called out in the notes you provided; it focuses on fixes/behavior
+        clarifications.]
+    breaking_changes: ['Access logs will now also be printed for rejected requests;
+        the release note explicitly warns about this new behavior, so log volume/content
+        may change and could affect log-based alerts/costs.']
+  chart_version: 38.0.1
   images: []
 - version: 3.6.0
-  kube: ['1.34', '1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ACME: new certificate resolver options, following earlier v3.5 OCSP
+        stapling and HTTP challenge delay/timeout improvements.', 'Health checks:
+        adds TCP health checks and passive health checks (in addition to v3.5 healthcheck
+        improvements).', 'Load balancing: adds "least time" strategy and HighestRandomWeight
+        algorithm (plus CRD support for HighestRandomWeight).', 'Kubernetes: Gateway
+        API bumped to v1.4.0; Ingress can publish ExternalName services; adds a Knative
+        provider.', 'Docker/ECS: can discover non-running Docker containers; ECS gains
+        IPv6 support.', "Middleware/server: multi-layer routing; warning when maxBodySize\
+        \ isn\u2019t set.", 'Plugins: adds syscall support; earlier v3.5 allowed enabling
+        unsafe yaegi via plugin manifest.', 'HTTP/2: adds HPACK table size tuning
+        options.', 'Web UI: dashboard continues React migration and adds Hub demo
+        plus layout tweaks.']
+    breaking_changes: ['Potential behavior change risk: multi-layer routing and new
+        load-balancing/healthcheck features may alter request routing/traffic patterns
+        if enabled.', Gateway API bump may expose/require updated CRDs or behavior
+        differences depending on cluster/controller versions., 'Ingress prefix-matching
+        behavior was made consistent with Kubernetes docs in v3.5; if you rely on
+        the old behavior, routes may match differently after upgrading to >=3.5 (including
+        3.6).']
   chart_version: 37.3.0
   images: ['docker.io/traefik:v3.6.0']
 - version: 3.5.0
-  kube: ['1.34', '1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ACME improvements: OCSP stapling support plus new tuning options for
+        HTTP-01 challenge delay and ACME HTTP client timeout.', 'Kubernetes-related
+        additions: new NGINX Ingress provider and Gateway API dependency bumped to
+        v1.3.0.', 'Ingress behavior change: Prefix path matching is now consistent
+        with Kubernetes documentation (may affect which Ingress rules match).', 'Observability
+        improvements for OpenTelemetry: more resource attribute detectors, automatic
+        k8s resource attributes, new resourceAttributes option for OTel metrics, and
+        reduced default tracing span volume with trace verbosity control.', 'Dashboard
+        updates: UI migrated to React and improved visualization for Errors middleware
+        StatusRewrites.', 'TLS enhancement: adds X25519MLKEM768 (post-quantum) key
+        exchange option.', 'Plugin system: plugin manifests can now allow enabling
+        unsafe mode in Yaegi.', 'ForwardAuth middleware: better handling of context-canceled
+        scenarios.']
+    breaking_changes: ['Potential behavioral change for Kubernetes Ingress Prefix
+        matching; verify your Ingress rules/routes still match as expected after upgrade,
+        especially for overlapping prefixes.', Trace output may change because Traefik
+        produces fewer spans by default due to new trace verbosity behavior; dashboards/alerts
+        based on span counts may need adjustment.]
   chart_version: 37.0.0
   images: ['docker.io/traefik:v3.5.0']
 - version: 3.4.0
-  kube: ['1.34', '1.33', '1.32', '1.31']
+  kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Security hardening in v3.3.6: request path is now sanitized (collapses
+        /../, /./ and duplicate slashes) before router matching and before forwarding
+        to backends.', v3.4.0 adds ACME options `acme.profile` and `acme.emailAddresses`.,
+      v3.4.0 adds a Redis-backed rate limiter middleware., v3.4.0 adds `p2c` (power-of-two-choices)
+        load-balancing strategy for services., v3.4.0 extends forwardAuth to optionally
+        preserve the original request method., 'v3.4.0 improves Kubernetes support:
+        better CRD CEL validations, Gateway API TLSRoute rule priority, and ingress
+        status for ClusterIP/NodePort services.', 'v3.4.0 adds TLS features: add root
+        CAs via ConfigMaps and ability to disable TLS session tickets.', v3.4.0 adds
+        sticky-session cookie domain configuration and WebUI auto theme option.]
+    breaking_changes: ['Potential behavior change starting v3.3.6: request path sanitization
+        can change routing/backends for paths containing dot-segments or duplicate
+        slashes; validate against your existing router rules and any apps that rely
+        on raw paths.', 'v3.4.0 removes the default load-balancing strategy from Kubernetes
+        IngressRoute/CRD resources; if you relied on the implicit default, you may
+        need to set an explicit strategy.', '`defaultRuleSyntax` and `ruleSyntax`
+        are deprecated in v3.4.0 (plan to remove/avoid using them going forward).']
   chart_version: 35.4.0
   images: ['docker.io/traefik:v3.4.0']
 - version: 3.3.6
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 35.2.0
   images: ['docker.io/traefik:v3.3.6']
 - version: 3.3.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 3.2.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 33.0.0
   images: ['docker.io/traefik:v3.2.0']
 - version: 3.1.7
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 3.1.4
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Datadog metrics output now better handles `unix://` endpoints by guessing
+        the socket type when the prefix is `unix` (improves compatibility for Datadog
+        socket configurations).']
+    breaking_changes: []
   chart_version: 31.1.1
   images: ['docker.io/traefik:v3.1.4']
 - version: 3.1.3
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Security fixes included in this upgrade: v3.0.2 addressed GHSA-7jmw-8259-q9jx
+        (CVE-2024-24790 related) and v3.1.3 includes CVE-2024-45410 (GHSA-62c8-mh53-4cqv).',
+      'Kubernetes Ingress improvements: you can configure rule syntax via Ingress
+        annotation, and empty configuration for the Kubernetes Ingress provider is
+        allowed again.', 'Observability improvements and fixes: updated OpenTelemetry
+        dependencies, fixed Grafana label_replace for service-name in metrics, and
+        multiple tracing/OTLP documentation + stability fixes.', 'Compression middleware
+        behavior improvements: better Accept-Encoding handling (including weights)
+        and correct status code forwarding when Brotli compression is disabled.',
+      'Plugins internal change: removed goexport dependency and added _initialize
+        (plugin loading/runtime change).']
+    breaking_changes: ["Potentially breaking for monitoring: the v3 migration guide\
+        \ notes missing metrics removal\u2014verify any dashboards/alerts that rely\
+        \ on Traefik metrics that may have been removed/renamed in v3.x.", 'Kubernetes
+        API version expectations: documentation removes mentions of traefik.io/v1;
+        ensure your CRDs/manifests align with the supported API versions for Traefik
+        v3 (commonly traefik.io/v1alpha1 depending on resource).']
   chart_version: 31.1.0
   images: ['docker.io/traefik:v3.1.3']
 - version: 3.0.2
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 28.3.0
   images: ['docker.io/traefik:v3.0.2']
 - version: 2.11.13
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 2.11.10
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 2.11.4
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 2.10.3
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null

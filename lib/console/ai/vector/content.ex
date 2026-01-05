@@ -2,7 +2,7 @@ defmodule Console.AI.Vector.Content do
   alias Console.AI.Vector.Storable
   alias Console.AI.VectorStore.Response
   alias Console.Deployments.Pr.File
-  alias Console.Schema.{AlertResolution, StackState, ServiceComponent, PrAutomation, Catalog}
+  alias Console.Schema.{AlertResolution, StackState, ServiceComponent, PrAutomation, Catalog, Cluster}
 
   def content(data), do: {Storable.id(data), Storable.datatype(data), Storable.content(data)}
 
@@ -23,6 +23,9 @@ defmodule Console.AI.Vector.Content do
 
   def decode("catalog", data), do: %Response{type: :catalog, catalog: Catalog.Mini.new(data)}
   def decode(:catalog, data), do: %Response{type: :catalog, catalog: Catalog.Mini.new(data)}
+
+  def decode("cluster", data), do: %Response{type: :cluster, cluster: Cluster.Mini.new(data)}
+  def decode(:cluster, data), do: %Response{type: :cluster, cluster: Cluster.Mini.new(data)}
 
   def decode(_, _), do: nil
 end

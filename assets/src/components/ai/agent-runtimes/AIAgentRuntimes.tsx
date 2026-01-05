@@ -15,6 +15,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ClusterNameAndIcon } from '../../cd/services/ServicesColumns.tsx'
 import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal.tsx'
+import { AgentRuntimeIconFrame } from './AiAgentRuntimeIcon.tsx'
 
 export function AIAgentRuntimes() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -27,6 +28,8 @@ export function AIAgentRuntimes() {
     () => mapExistingNodes(data?.agentRuntimes),
     [data?.agentRuntimes]
   )
+
+  console.log(runtimes)
 
   if (error) return <GqlError error={error} />
 
@@ -55,9 +58,22 @@ export function AIAgentRuntimes() {
 const columnHelper = createColumnHelper<AgentRuntimeFragment>()
 
 const columns = [
-  columnHelper.accessor((runtime) => truncate(runtime.name, { length: 60 }), {
+  columnHelper.accessor((runtime) => runtime.name, {
     id: 'name',
     header: 'Name',
+    cell: ({
+      row: {
+        original: { name, type },
+      },
+    }) => (
+      <Flex
+        align="center"
+        gap="xsmall"
+      >
+        <AgentRuntimeIconFrame type={type} />
+        <span>{truncate(name, { length: 60 })}</span>
+      </Flex>
+    ),
   }),
   columnHelper.accessor((runtime) => runtime.default, {
     id: 'default',

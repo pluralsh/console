@@ -101,10 +101,23 @@ type AddonVersion struct {
 	Images []*string `json:"images,omitempty"`
 	// the version of the helm chart to install for this version
 	ChartVersion *string `json:"chartVersion,omitempty"`
+	// a summary of what changed in this version of the addon
+	Summary *AddonVersionSummary `json:"summary,omitempty"`
 	// the release page for a runtime service at a version, this is a heavy operation not suitable for lists
 	ReleaseURL *string `json:"releaseUrl,omitempty"`
 	// checks if this is blocking a specific kubernetes upgrade
 	Blocking *bool `json:"blocking,omitempty"`
+}
+
+type AddonVersionSummary struct {
+	// a summary of any helm changes required for this version
+	HelmChanges *string `json:"helmChanges,omitempty"`
+	// a summary of any chart updates involved in updating to this version
+	ChartUpdates []*string `json:"chartUpdates,omitempty"`
+	// a summary of any features added in this version
+	Features []*string `json:"features,omitempty"`
+	// a summary of any application-level breaking changes in this version
+	BreakingChanges []*string `json:"breakingChanges,omitempty"`
 }
 
 type AgentAnalysis struct {
@@ -3514,12 +3527,14 @@ type HTTPIngressRule struct {
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyAttributes struct {
-	URL string `json:"url"`
+	URL     string  `json:"url"`
+	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyConfiguration struct {
-	URL string `json:"url"`
+	URL     string  `json:"url"`
+	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // A representation of an AI generated deep investigation of your infrastructure
@@ -3812,6 +3827,26 @@ type KnowledgeEvidence struct {
 
 type KubeconfigAttributes struct {
 	Raw *string `json:"raw,omitempty"`
+}
+
+// the changelog for a given kubernetes version
+type KubernetesChangelog struct {
+	// the kubernetes version
+	Version *string `json:"version,omitempty"`
+	// the major changes in this version
+	MajorChanges []*string `json:"majorChanges,omitempty"`
+	// the breaking changes in this version
+	BreakingChanges []*string `json:"breakingChanges,omitempty"`
+	// the deprecations in this version
+	Deprecations []*string `json:"deprecations,omitempty"`
+	// the removals in this version
+	Removals []*string `json:"removals,omitempty"`
+	// the features in this version
+	Features []*string `json:"features,omitempty"`
+	// the bug fixes in this version
+	BugFixes []*string `json:"bugFixes,omitempty"`
+	// the api updates in this version
+	APIUpdates []*string `json:"apiUpdates,omitempty"`
 }
 
 type KubernetesUnstructured struct {
@@ -5483,6 +5518,8 @@ type PrAutomation struct {
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// a proxy to use for git requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// software vendoring logic to perform in this PR
 	Vendor *PrVendorSpec `json:"vendor,omitempty"`
 	// a set of lua scripts to use to preprocess the PR automation
@@ -5535,11 +5572,13 @@ type PrAutomationAttributes struct {
 	Message       *string `json:"message,omitempty"`
 	Branch        *string `json:"branch,omitempty"`
 	// whether to generate a patch for this pr instead of a full pr
-	Patch        *bool                             `json:"patch,omitempty"`
-	BranchPrefix *string                           `json:"branchPrefix,omitempty"`
-	Updates      *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
-	Creates      *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
-	Deletes      *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	Patch        *bool   `json:"patch,omitempty"`
+	BranchPrefix *string `json:"branchPrefix,omitempty"`
+	// a proxy to use for external vendoring
+	Proxy   *HTTPProxyAttributes              `json:"proxy,omitempty"`
+	Updates *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
+	Creates *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
+	Deletes *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
 	// a specification for vendoring software in this PR
 	Vendor *PrVendorSpecAttributes `json:"vendor,omitempty"`
 	// a specification for sourcing lua scripts to preprocess the PR automation
@@ -6717,6 +6756,8 @@ type SentinelRun struct {
 	Sentinel *Sentinel `json:"sentinel,omitempty"`
 	// the results of the run
 	Results []*SentinelRunResult `json:"results,omitempty"`
+	// the errors of the run
+	Errors []*ServiceError `json:"errors,omitempty"`
 	// the checks that were run
 	Checks     []*SentinelCheck          `json:"checks,omitempty"`
 	Jobs       *SentinelRunJobConnection `json:"jobs,omitempty"`
@@ -7082,6 +7123,12 @@ type ServiceErrorAttributes struct {
 	Source  string `json:"source"`
 	Message string `json:"message"`
 	Warning *bool  `json:"warning,omitempty"`
+}
+
+// a file in a service's fully realized gitops tarball
+type ServiceFile struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
 }
 
 // Import of stack data into a service's context
@@ -7864,6 +7911,8 @@ type TerraformConfiguration struct {
 	Parallelism *int64 `json:"parallelism,omitempty"`
 	// equivalent to the -refresh flag in terraform
 	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 type TerraformConfigurationAttributes struct {
@@ -7871,6 +7920,8 @@ type TerraformConfigurationAttributes struct {
 	Parallelism *int64 `json:"parallelism,omitempty"`
 	// equivalent to the -refresh flag in terraform
 	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state
@@ -8256,11 +8307,19 @@ type VulnerabilityAttributes struct {
 }
 
 type VulnerabilityReport struct {
-	ID              string           `json:"id"`
-	ArtifactURL     *string          `json:"artifactUrl,omitempty"`
-	Os              *VulnOs          `json:"os,omitempty"`
-	Summary         *VulnSummary     `json:"summary,omitempty"`
-	Artifact        *VulnArtifact    `json:"artifact,omitempty"`
+	ID string `json:"id"`
+	// the URL of the artifact
+	ArtifactURL *string `json:"artifactUrl,omitempty"`
+	// the Git URL of the codebase defining this artifact
+	ArtifactRepoURL *string `json:"artifactRepoUrl,omitempty"`
+	// the language the artifact is written in
+	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
+	// the language version of the artifact, if applicable
+	ArtifactLanguageVersion *string       `json:"artifactLanguageVersion,omitempty"`
+	Os                      *VulnOs       `json:"os,omitempty"`
+	Summary                 *VulnSummary  `json:"summary,omitempty"`
+	Artifact                *VulnArtifact `json:"artifact,omitempty"`
+	// the grade of the vulnerability report
 	Grade           *VulnReportGrade `json:"grade,omitempty"`
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
 	Services        []*ServiceVuln   `json:"services,omitempty"`
@@ -8270,13 +8329,19 @@ type VulnerabilityReport struct {
 }
 
 type VulnerabilityReportAttributes struct {
-	ArtifactURL     *string                    `json:"artifactUrl,omitempty"`
-	Os              *VulnOsAttributes          `json:"os,omitempty"`
-	Summary         *VulnSummaryAttributes     `json:"summary,omitempty"`
-	Artifact        *VulnArtifactAttributes    `json:"artifact,omitempty"`
-	Vulnerabilities []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
-	Services        []*ServiceVulnAttributes   `json:"services,omitempty"`
-	Namespaces      []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
+	ArtifactURL *string `json:"artifactUrl,omitempty"`
+	// the Git URL of the codebase defining this artifact
+	ArtifactRepoURL *string `json:"artifactRepoUrl,omitempty"`
+	// the language the artifact is written in
+	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
+	// the language version of the artifact, if applicable
+	ArtifactLanguageVersion *string                    `json:"artifactLanguageVersion,omitempty"`
+	Os                      *VulnOsAttributes          `json:"os,omitempty"`
+	Summary                 *VulnSummaryAttributes     `json:"summary,omitempty"`
+	Artifact                *VulnArtifactAttributes    `json:"artifact,omitempty"`
+	Vulnerabilities         []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
+	Services                []*ServiceVulnAttributes   `json:"services,omitempty"`
+	Namespaces              []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
 }
 
 type VulnerabilityReportConnection struct {

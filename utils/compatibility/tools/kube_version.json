@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "properties": {
+    "confident": {
+        "type": "boolean",
+        "description": "Whether you're confident in the accuracy of the summary"
+    },
+    "major_changes": {
+      "type": "array",
+      "description": "Major changes and highlights for this release.  This should be a coherent one-sentence description of each major change that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "breaking_changes": {
+      "type": "array",
+      "description": "List of breaking changes.  This should be a coherent one-sentence description of each breaking change that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deprecations": {
+      "type": "array",
+      "description": "APIs and features deprecated in this release.  This should be a coherent one-sentence description of each deprecation that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "removals": {
+      "type": "array",
+      "description": "APIs and features removed in this release.  This should be a coherent one-sentence description of each removal that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "features": {
+      "type": "array",
+      "description": "New features added in this release.  This should be a coherent one-sentence description of each feature that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bug_fixes": {
+      "type": "array",
+      "description": "Significant bug fixes in this release.  This should be a coherent one-sentence description of each fix that would be useful for an engineer",
+      "items": {
+        "type": "string"
+      }
+    },
+    "api_updates": {
+      "type": "object",
+      "description": "Updates to any kubernetes apis that an engineer should be aware of",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Version or highlight of the update"
+      }
+    }
+  },
+  "required": [
+    "major_changes",
+    "features",
+    "bug_fixes",
+    "api_updates",
+    "confident"
+  ]
+}

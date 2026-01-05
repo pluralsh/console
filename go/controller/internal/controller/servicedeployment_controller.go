@@ -578,14 +578,9 @@ func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secre
 
 func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	logger := log.FromContext(ctx)
-	if service.Spec.ConfigurationRef != nil {
-		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
-		if err != nil {
-			return err
-		}
-		if err := utils.TryAddOwnerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
-			return err
-		}
+
+	if err := r.addConfigurationSecretRefs(ctx, service); err != nil {
+		return err
 	}
 
 	if service.Spec.Helm != nil && service.Spec.Helm.ValuesFrom != nil {
@@ -642,6 +637,26 @@ func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, se
 	}
 
 	return nil
+}
+
+func (r *ServiceDeploymentReconciler) addConfigurationSecretRefs(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+	if service.Spec.ConfigurationRef == nil {
+		return nil
+	}
+
+	configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
+	if err != nil {
+		return err
+	}
+
+	// Remove existing owner references from configuration secrets.
+	// It's for the backward compatibility.
+	if err = controllerutil.RemoveOwnerReference(service, configurationSecret, r.Scheme); err != nil {
+		log.FromContext(ctx).V(5).Info(err.Error())
+	}
+
+	// Ensure that the owner ref annotation is set on the configuration secret.
+	return utils.AddOwnerRefAnnotation(ctx, r.Client, service, configurationSecret)
 }
 
 func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
@@ -722,6 +737,7 @@ func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
+		Watches(&corev1.Secret{}, OnSecretChange(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
@@ -750,5 +766,11 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 		}
 
 		return requests
+	})
+}
+
+func OnSecretChange[T client.Object](c client.Client, obj T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, secret client.Object) []reconcile.Request {
+		return utils.GetOwnerRefsAnnotationRequests(ctx, c, secret, obj)
 	})
 }

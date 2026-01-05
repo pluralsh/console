@@ -52,8 +52,9 @@ defmodule Console.Schema.Stack do
       end
 
       embeds_one :terraform, Terraform, on_replace: :update do
-        field :parallelism, :integer
-        field :refresh,     :boolean
+        field :parallelism,   :integer
+        field :refresh,       :boolean
+        field :approve_empty, :boolean
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
@@ -87,7 +88,7 @@ defmodule Console.Schema.Stack do
 
     def terraform_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallelism refresh)a)
+      |> cast(attrs, ~w(parallelism refresh approve_empty)a)
     end
 
     def ansible_changeset(model, attrs) do
@@ -339,6 +340,12 @@ defmodule Console.Schema.Stack do
     |> cast(attrs, ~w(deleted_at delete_run_id)a)
   end
 
+  def sha_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(sha)a)
+    |> fix_status()
+  end
+
   def lock_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(locked_at)a)
@@ -347,5 +354,13 @@ defmodule Console.Schema.Stack do
   defp determine_runnable(cs) do
     significant = Enum.any?(~w(files environment variables git job_spec configuration)a, &get_change(cs, &1))
     put_change(cs, :runnable, significant)
+  end
+
+  defp fix_status(cs) do
+    case {get_field(cs, :status), get_change(cs, :sha)} do
+      {status, sha} when is_binary(sha) and status in ~w(successful failed)a ->
+        put_change(cs, :status, :queued)
+      _ -> cs
+    end
   end
 end

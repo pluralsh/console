@@ -34,7 +34,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   end
 
   def handle_continue(:boot, %State{run: run, source_pid: source_pid} = state) do
-    run = Repo.preload(run, [sentinel: :repository])
+    run = Repo.preload(run, [:errors, sentinel: :repository])
     Logger.info "booting sentinel run #{run.id}"
     with %SentinelRun{checks: [_ | _] = checks} <- run,
          {:ok, rules} <- rule_files(run) do
@@ -47,14 +47,17 @@ defmodule Console.Deployments.Sentinel.Runner do
 
       {:noreply, %{state | run: run, checks: check_runners}}
     else
-      {:error, _} ->
-        do_update(%{status: :failed}, run, source_pid)
+      {:error, err} ->
+        do_update(%{status: :failed, errors: svc_errors(err)}, run, source_pid)
         {:stop, :normal, state}
       _ ->
         do_update(%{status: :success}, run, source_pid)
         {:stop, :normal, state}
     end
   end
+
+  defp svc_errors(err) when is_binary(err), do: [%{source: "rules", message: err}]
+  defp svc_errors(err), do: [%{source: "rules", message: inspect(err)}]
 
   def handle_info({:DOWN, _, :process, pid, _}, %State{checks: checks, results: results} = state) do
     case Map.pop(checks, pid) do
@@ -115,7 +118,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       |> Repo.update()
     end)
     |> add_operation(:run, fn _ ->
-      SentinelRun.changeset(run, attrs)
+      SentinelRun.changeset(run, Map.put(attrs, :errors, []))
       |> Repo.update()
     end)
     |> execute(extract: :run)
