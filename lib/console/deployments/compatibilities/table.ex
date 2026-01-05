@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Compatibilities.Table do
   use GenServer
   import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
+  import Console.Deployments.Compatibilities.Utils, only: [proxy_config: 0]
   alias Console.Deployments.{Compatibilities.AddOn, Static}
   alias Console.Schema.{RuntimeService}
   alias ETS.KeyValueSet
@@ -77,7 +78,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   defp fetch_addons(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url, [], proxy_config()),
          {:ok, %{"addons" => addons}} <- YamlElixir.read_from_string(body),
       do: addons
   end

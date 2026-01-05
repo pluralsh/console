@@ -68,6 +68,7 @@ function Table({
   loose = false,
   padCells = true,
   expandedRowType = 'default',
+  expandedBgColor,
   fullHeightWrap = false, // TODO: default this to true after regression testing
   fillLevel = 0,
   rowBg = 'stripes',
@@ -445,6 +446,7 @@ function Table({
                             data-expander-row
                             $fillLevel={fillLevel}
                             $raised={isRaised(i)}
+                            $expandedBgColor={expandedBgColor}
                           >
                             {expandedRowType === 'default' ? (
                               <>

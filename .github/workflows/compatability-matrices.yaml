@@ -49,6 +49,11 @@ jobs:
           aws s3 cp ./static/versions.yml s3://plural-www-assets/matrices/compatability/static/versions.yml
         if: hashFiles('static/versions.yml') != ''
 
+      - name: Upload static/kube_changelog.yaml to S3
+        run: |
+          aws s3 cp ./static/kube_changelog.yaml s3://plural-www-assets/matrices/compatability/static/kube_changelog.yaml
+        if: hashFiles('static/kube_changelog.yaml') != ''
+
       - name: Upload static/extended directory to S3
         run: |
           aws s3 sync ./static/extended s3://plural-www-assets/matrices/extended

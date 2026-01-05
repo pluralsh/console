@@ -31,7 +31,7 @@ import styled from 'styled-components'
 import {
   getInfraResearchesBreadcrumbs,
   InfraResearchStatusChip,
-} from './InfraResearches'
+} from '../InfraResearches'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
 
 const directory = [

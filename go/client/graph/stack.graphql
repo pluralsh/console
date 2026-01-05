@@ -193,6 +193,7 @@ fragment StackConfigurationFragment on StackConfiguration {
     terraform {
         parallelism
         refresh
+        approveEmpty
     }
 }
 

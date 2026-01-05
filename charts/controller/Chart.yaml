@@ -1,6 +1,6 @@
 apiVersion: v2
 name: controller
 description: deploys the deployment operator for plural cd
-appVersion: 0.11.57
-version: 0.0.161
+appVersion: 0.11.59
+version: 0.0.163
 type: application

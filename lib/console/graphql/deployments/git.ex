@@ -113,7 +113,8 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   input_object :http_proxy_attributes do
-    field :url, non_null(:string)
+    field :url,     non_null(:string)
+    field :noproxy, :string
   end
 
   @desc "Requirements to perform Github App authentication"
@@ -141,6 +142,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :branch,        :string
     field :patch,         :boolean, description: "whether to generate a patch for this pr instead of a full pr"
     field :branch_prefix, :string
+    field :proxy,         :http_proxy_attributes, description: "a proxy to use for external vendoring"
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
@@ -541,6 +543,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
+    field :proxy,         :http_proxy_configuration, description: "a proxy to use for git requests"
     field :vendor,        :pr_vendor_spec, description: "software vendoring logic to perform in this PR"
     field :lua,           :pr_lua_spec, description: "a set of lua scripts to use to preprocess the PR automation"
     field :git,           :git_ref, description: "location in git for external templates and scripts"
@@ -843,9 +846,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   object :http_proxy_configuration do
-    field :url, non_null(:string)
+    field :url,     non_null(:string)
+    field :noproxy, :string
   end
-
 
   @desc "A catalog is an organized collection of PR Automations used for permissioning and discovery"
   object :catalog do

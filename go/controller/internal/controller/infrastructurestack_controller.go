@@ -469,8 +469,9 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 
 	if conf.Terraform != nil {
 		attrs.Terraform = &console.TerraformConfigurationAttributes{
-			Parallelism: conf.Terraform.Parallelism,
-			Refresh:     conf.Terraform.Refresh,
+			Parallelism:  conf.Terraform.Parallelism,
+			Refresh:      conf.Terraform.Refresh,
+			ApproveEmpty: conf.Terraform.ApproveEmpty,
 		}
 	}
 

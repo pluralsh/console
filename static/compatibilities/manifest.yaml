@@ -9,6 +9,7 @@ names:
 - cilium
 - contour
 - coredns
+- cloudnative-pg
 - external-dns
 - flux
 - ingress-nginx
@@ -31,3 +32,6 @@ names:
 - argo-cd
 - vector
 - volcano-controller
+- victoria-metrics-operator
+- gpu-operator
+- elastic-agent

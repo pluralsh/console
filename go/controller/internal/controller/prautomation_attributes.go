@@ -89,6 +89,7 @@ func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.
 		Deletes:       pra.Spec.Deletes.Attributes(),
 		Lua:           pra.Spec.Lua.Attributes(),
 		Vendor:        pra.Spec.Vendor.Attributes(),
+		Proxy:         pra.Spec.Proxy.Attributes(),
 		Addon:         pra.Spec.Addon,
 		ClusterID:     clusterID,
 		ServiceID:     serviceID,

@@ -46,6 +46,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   onSelectedTabChange?: (key: string) => void
   isStreaming?: boolean // currently just used to block mermaid from rendering mid-stream, but might have other uses later on
   setMermaidError?: (error: Nullable<Error>) => void
+  fillLevel?: FillLevel
 }
 
 type TabInterfaceT = 'tabs' | 'dropdown'
@@ -388,9 +389,11 @@ function CodeUnstyled({
   onSelectedTabChange,
   isStreaming = false,
   setMermaidError,
+  fillLevel: fillLevelProp,
   ...props
 }: CodeProps) {
   const parentFillLevel = useFillLevel()
+  const inferredFillLevel = fillLevelProp ?? parentFillLevel
   const tabStateRef = useRef(undefined)
   const [selectedTabKey, setSelectedTabKey] = useState<string>(
     tabs?.[0]?.key || ''
@@ -429,9 +432,9 @@ function CodeUnstyled({
   const content = (
     <Card
       ref={ref}
-      fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}
+      fillLevel={toFillLevel(Math.min(inferredFillLevel + 1, 2))}
       borderColor={
-        parentFillLevel >= 1
+        inferredFillLevel >= 1
           ? theme.colors['border-fill-three']
           : theme.colors['border-fill-two']
       }
@@ -445,14 +448,14 @@ function CodeUnstyled({
         {showHeader && (
           <>
             <CodeHeader
-              fillLevel={parentFillLevel}
+              fillLevel={inferredFillLevel}
               $visuallyHidden={tabInterface === 'dropdown'}
             >
               {titleArea}
               {tabs && <CodeTabs />}
             </CodeHeader>
             {tabInterface === 'dropdown' && (
-              <CodeHeader fillLevel={parentFillLevel}>
+              <CodeHeader fillLevel={inferredFillLevel}>
                 {titleArea}
                 <CodeSelect />
               </CodeHeader>

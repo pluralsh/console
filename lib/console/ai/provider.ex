@@ -52,6 +52,14 @@ defmodule Console.AI.Provider do
 
   @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
 
+  @doc """
+  Built-in system prompts
+  """
+  @spec system(:summary | :default) :: binary
+  def system(type \\ :default)
+  def system(:summary), do: @summary
+  def system(_), do: elem(@preface, 1)
+
   def enabled?() do
     case Settings.cached() do
       %DeploymentSettings{ai: %{enabled: true}} -> true

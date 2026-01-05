@@ -1,14 +1,18 @@
+import re
 import yaml
 import requests
 import semantic_version
 import subprocess
-import os
+import traceback
+
 
 from functools import lru_cache
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
+from summarizer import helm_summary
+from typing import Any, List, Set
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -24,7 +28,7 @@ def print_success(message):
 def print_warning(message):
     print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
-
+@lru_cache(maxsize=None)
 def fetch_page(url):
     response = requests.get(url)
     if response.status_code != 200:
@@ -165,7 +169,7 @@ def get_chart_images(url, chart, version, values=None):
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
-        subprocess.run(["helm", "repo", "add", chart, url], check=True)
+        subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
         subprocess.run(["helm", "repo", "update"], check=True)
         IMPORTED_REPOS.add((chart, url))
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
@@ -183,22 +187,80 @@ def get_chart_images(url, chart, version, values=None):
     if result.returncode != 0:
         print_error(f"Failed to template helm chart: {result.stderr}")
         return None
-    
-    result = list(yaml.safe_load_all(result.stdout))
-    return sorted(list(set(find_nested_images(result))))
 
-def find_nested_images(objs):
-    if isinstance(objs, list):
-        for obj in objs:
-            for result in find_nested_images(obj):
-                yield result
-    elif isinstance(objs, dict):
-        for key, value in objs.items():
-            if key == "image" and isinstance(value, str):
-                yield value
-            else:
-                for result in find_nested_images(value):
-                    yield result
+    objects = list(yaml.safe_load_all(result.stdout))
+    
+    # Verify app.kubernetes.io/name labels
+    expected_name = chart
+    found_names = set()
+    for obj in objects:
+        if not obj or 'metadata' not in obj:
+            continue
+        labels = obj.get('metadata', {}).get('labels', {})
+        name_label = labels.get('app.kubernetes.io/name')
+        if name_label:
+            found_names.add(name_label)
+
+    if found_names and expected_name not in found_names:
+        print_warning(f"Chart {chart} (v{version}) renders labels {found_names}, but expected '{expected_name}'. Check if 'chart_name' or 'helm_values' in YAML is correct.")
+        return None
+
+    return sorted(list(set(find_nested_images(objects))))
+
+_IMAGE_RE = re.compile(
+    r"""
+    ^
+    (?:[a-z0-9.-]+(?::\d+)?/)?        # optional registry (with optional port)
+    [a-z0-9._-]+(?:/[a-z0-9._-]+)+    # repo path must contain at least one '/'
+    (?:                               
+        :[A-Za-z0-9._-]+              # optional tag
+      | @sha256:[a-f0-9]{64}          # or digest
+    )
+    $
+    """,
+    re.IGNORECASE | re.VERBOSE,
+    )
+
+def _looks_like_image(s: str) -> bool:
+    s = s.strip()
+    # Fast rejects for common false positives
+    if not s or " " in s or s.startswith(("-", "_")):
+        return False
+    return bool(_IMAGE_RE.match(s))
+
+def find_nested_images(objs: Any) -> List[str]:
+    """
+    Recursively walk nested dict/list structures and extract container image references.
+
+    Important behavior:
+    - Traverses dict VALUES only (not keys), to avoid collecting component names.
+    - Only returns strings that look like real image references (repo/name:tag or @sha256 digest).
+    """
+    images: Set[str] = set()
+
+    def walk(x: Any) -> None:
+        if x is None:
+            return
+
+        if isinstance(x, str):
+            if _looks_like_image(x):
+                images.add(x)
+            return
+
+        if isinstance(x, dict):
+            for v in x.values():
+                walk(v)
+            return
+
+        if isinstance(x, (list, tuple, set)):
+            for item in x:
+                walk(item)
+            return
+
+        # ignore other scalar types (int/bool/float/etc.)
+
+    walk(objs)
+    return sorted(images)
     
 
 def get_github_releases(repo_owner, repo_name):
@@ -221,12 +283,18 @@ def get_kube_release_info():
     seen = set()
     result = []
     for kube_release in reversed(list(get_github_releases_timestamps("kubernetes", "kubernetes"))):
+        if "-" in kube_release[0]:
+            continue
         cleaned = clean_kube_version(kube_release[0])
         if cleaned and cleaned not in seen:
             seen.add(cleaned)
             result.append(kube_release)
 
-    return result
+    def sorter(tupe):
+        validated = validate_semver(tupe[0].lstrip("v"))
+        return (validated.major, validated.minor, validated.patch, tupe[1])
+
+    return sorted(result, key=sorter, reverse=False)
 
 def get_github_releases_timestamps(repo_owner, repo_name):
     for page in range(1, 3):
@@ -235,7 +303,12 @@ def get_github_releases_timestamps(repo_owner, repo_name):
         if response.status_code == 200:
             releases = response.json()
             for release in releases:
-                yield (release["tag_name"], datetime.fromisoformat(release["created_at"]))
+                created_at = release.get("created_at")
+                if not created_at:
+                    continue
+                print(created_at)
+                # created_at = created_at.replace("Z", "+00:00")
+                yield (release["tag_name"], datetime.fromisoformat(created_at))
         else:
             return
 
@@ -361,12 +434,16 @@ def sort_versions(versions):
     # Ensure all versions are strings before sorting
     for v in versions:
         v["version"] = str(v["version"])
-    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
+        if v.get("chart_version"):
+            v["chart_version"] = str(v["chart_version"])
+    return sorted(versions, key=lambda v: (Version(v["version"]), Version(v["chart_version"]) if v.get("chart_version") else None), reverse=True)
 
 
 def merge_versions(existing_versions, new_versions):
     for new_version in new_versions:
         version_num = new_version["version"]
+        if existing_versions.get(version_num):
+            new_version["summary"] = existing_versions[version_num].get("summary")
         existing_versions[version_num] = new_version
     return existing_versions
 
@@ -418,6 +495,7 @@ def reduce_versions(versions):
                     ("kube", kube),
                     ("requirements", data.get("requirements", [])),
                     ("incompatibilities", data.get("incompatibilities", [])),
+                    ("summary", data.get("summary")),
                 ]
             )
 
@@ -432,8 +510,7 @@ def reduce_versions(versions):
 
 
 def clean_kube_version(vsn):
-    if vsn.startswith("v"):
-        vsn = vsn[1:]
+    vsn = vsn.lstrip("v")
     as_semver = validate_semver(vsn)
     if not as_semver:
         return None
@@ -464,7 +541,17 @@ def update_compatibility_info(filepath, new_versions):
                     [ensure_keys(v) for v in new_versions]
                 )
             }
+        
+        for i in range(len(data["versions"]) - 1):
+            to_vsn = data["versions"][i] # in reverse order
+            from_vsn = data["versions"][i+1]
+            if to_vsn.get('summary'):
+                continue
 
+            print(f"summarizing application updates for {app_name} from {from_vsn['version']} to {to_vsn['version']}")
+            summary = helm_summary(app_name, data, from_vsn, to_vsn)
+            if summary:
+                data["versions"][i]["summary"] = summary
         
         if write_yaml(filepath, data):
             print_success(
@@ -473,4 +560,4 @@ def update_compatibility_info(filepath, new_versions):
         else:
             print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")
+        traceback.print_exc()

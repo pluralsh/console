@@ -226,6 +226,10 @@ type TerraformConfiguration struct {
 	// equivalent to the -refresh flag in Terraform.
 	// +kubebuilder:validation:Optional
 	Refresh *bool `json:"refresh,omitempty"`
+
+	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
+	// +kubebuilder:validation:Optional
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 type AnsibleConfiguration struct {

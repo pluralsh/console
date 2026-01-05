@@ -7,6 +7,52 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes (actionable)\n\n- **`global.rbac.disableHTTPChallengesRole`\
+      \ was added in 1.18, then *reverted* in 1.19.0**.\n  - If you set this value\
+      \ in 1.18.x, **remove it before/when upgrading to 1.19.0** (it will no longer\
+      \ exist / have effect in 1.19.0).\n  - Background: the value was meant to drop\
+      \ permissions for creating pods when HTTP-01 isn\u2019t used, but it was rolled\
+      \ back.\n\n- **New Helm value: `global.nodeSelector` (1.19.0)**\n  - Lets you\
+      \ set a single nodeSelector applied across cert-manager components.\n  - If\
+      \ you currently set nodeSelector separately per component, you can optionally\
+      \ consolidate to this.\n\n- **Helm template change:** tokenrequest `RoleBinding`\
+      \ naming template fixed for consistency (1.19.0).\n  - Typically no action required,\
+      \ but expect **resource name changes** which can show up as replace/rename in\
+      \ diff.\n\n- **Helm chart quoting change (1.18.0):** nodeSelector values are\
+      \ quoted.\n  - Mostly transparent, but can affect strict YAML/value types if\
+      \ you relied on non-string types.\n"
+    chart_updates: [Default NetworkPolicy now includes IPv6 rules (1.19.0)., Pods
+        now support an experimental `hostUsers` field (not enabled by default) (1.19.0).,
+      Services/ServiceMonitors switched to using **named ports** instead of numeric
+        ports (1.18.0)., 'Ingress-shim: new `--extra-certificate-annotations` option
+        to copy selected annotations from Ingress-like resources to resulting Certificates
+        (1.18.0).', 'Metrics changes: certificate metrics moved to a collector approach
+        (1.19.0); new `certmanager_certificate_challenge_status` metric (1.19.0);
+        new notBefore/notAfter timestamp metrics (1.18.0).', 'ACME HTTP-01: added
+        feature gate to default solver Ingress `pathType` to `Exact` (1.19.0); also
+        earlier change set pathType to `Exact` for reliability/security (1.18.0).']
+    features: [Global `nodeSelector` Helm value to pin cert-manager components to
+        specific nodes (deployment flexibility)., Configurable resource requests/limits
+        for ACME HTTP-01 solver pods via Issuer/ClusterIssuer (overrides global `--acme-http01-solver-resource-*`).,
+      CAInjectorMerging promoted to **BETA** and enabled by default (more robust CA
+        bundle injection behavior)., 'Improved observability: version + git commit
+        logged on startup; new certificate challenge status metric; additional certificate
+        issuance/expiry timestamp metrics.', 'Platform/compatibility improvements:
+        default NetworkPolicy adds IPv6 rules; increased ACME authorization timeout
+        to reduce flakiness.']
+    breaking_changes: ["**Potential incident risk / known issue:** v1.19.0 has a known\
+        \ issue causing **unexpected certificate renewal** after upgrade; it\u2019\
+        s fixed in **v1.19.1**. Strongly prefer upgrading to 1.19.1+ if possible.",
+      "Monitoring breaking change: **removed the `path` label** from core ACME client\
+        \ metrics\u2014dashboards/alerts that filter/group by `path` must be updated.",
+      "Behavioral breaking changes introduced in 1.18 (still relevant if you\u2019\
+        re coming from 1.18.0): default `Certificate.spec.privateKey.rotationPolicy`\
+        \ changed to **`Always`** (can trigger key rotation on renewals), and default\
+        \ `Certificate.spec.revisionHistoryLimit` set to **1** (fewer historical CertificateRequest\
+        \ revisions retained).", "Access-control/values breaking change: `global.rbac.disableHTTPChallengesRole`\
+        \ was **reverted** in 1.19.0\u2014config relying on it must be removed and\
+        \ you may need an alternative approach if you were using it to reduce privileges."]
   chart_version: 1.19.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.19.0', 'quay.io/jetstack/cert-manager-controller:v1.19.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.19.0', 'quay.io/jetstack/cert-manager-webhook:v1.19.0']
@@ -14,6 +60,46 @@ versions:
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart config changes to review\n- **New value:**\
+      \ `global.rbac.disableHTTPChallengesRole` \u2014 when set, cert-manager will\
+      \ **not create the RBAC needed for HTTP-01** (notably permissions to create\
+      \ Pods), reducing privileges if you *only* use DNS-01/TLS-ALPN-01.\n- Existing\
+      \ (from 1.17) Helm knobs remain relevant: `webhook.extraEnv`, `cainjector.extraEnv`,\
+      \ `startupapicheck.extraEnv` (useful if you previously templated env vars).\n\
+      - **Chart templating fix:** nodeSelector values are now quoted; if you relied\
+      \ on unquoted numeric/bool-looking values, rendering/behavior may change slightly.\n"
+    chart_updates: [RBAC can now be tightened via `global.rbac.disableHTTPChallengesRole`
+        (drops Pod-creation permissions when HTTP-01 is disabled)., Service/ServiceMonitor
+        ports are now defined using **named ports** instead of numeric ports (may
+        affect scraping or any tooling selecting ports by number)., 'Ingress-shim
+        related additions: supports copying selected annotations via new flag `--extra-certificate-annotations`.',
+      'Helm template fixes: nodeSelector quoting; ServiceAccount annotations handling
+        boolean values correctly.']
+    features: ['ACME: **Support for ACME Profiles** (draft ACME profiles extension)
+        allowing more profile-driven issuance behavior when your ACME CA supports
+        it.', 'Observability: new certificate validity metrics for NotBefore/NotAfter
+        timestamps (`certmanager_certificate_not_before_timestamp_seconds`, `certmanager_certificate_not_after_timestamp_seconds`).',
+      'Security hardening option: ability to disable HTTP-01 RBAC permissions via
+        Helm when not using HTTP-01 challenges.', "Vault Issuer: option to specify\
+        \ the expected server name when validating Vault\u2019s presented TLS certs.",
+      'Ingress-shim: can copy a configured list of annotations from Ingress-like resources
+        onto the generated Certificate.', 'Resource UX: new kubectl shortnames `iss`
+        (Issuer) and `ciss` (ClusterIssuer).', 'Crypto: ability to customize the certificate
+        signature algorithm.', 'Features promoted to GA: `UseDomainQualifiedFinalizer`;
+        `AdditionalCertificateOutputFormats` always enabled.']
+    breaking_changes: ["Default `Certificate.spec.privateKey.rotationPolicy` changes\
+        \ from **`Never` \u2192 `Always`**. This can trigger private key rotation\
+        \ on renewals/issuance unless you explicitly set it back.", Default `Certificate.spec.revisionHistoryLimit`
+        effectively becomes **1** (CertificateRequest revision history). This may
+        surprise users relying on multiple historical CertificateRequests for debugging/auditing.,
+      "Ingress HTTP-01 solver Ingress `pathType` changes from **ImplementationSpecific\
+        \ \u2192 Exact**, which can change matching behavior on some ingress controllers.",
+      "Feature gate **`ValidateCAA` removed** (setting it becomes a no-op with a warning);\
+        \ if you depended on it, behavior won\u2019t be enforced by that gate anymore.",
+      'Known issue: ingress-nginx validating webhook may reject ACME HTTP-01 challenge
+        paths (see cert-manager #7791); plan mitigations if you use ingress-nginx
+        + HTTP-01.']
   chart_version: 1.18.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.18.0', 'quay.io/jetstack/cert-manager-controller:v1.18.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.18.0', 'quay.io/jetstack/cert-manager-webhook:v1.18.0']
@@ -21,6 +107,46 @@ versions:
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to account for\n- **New\
+      \ env injection values** (v1.17 chart):\n  - `webhook.extraEnv`\n  - `cainjector.extraEnv`\n\
+      \  - `startupapicheck.extraEnv`\n  Use these if you previously patched Deployments\
+      \ to add env vars.\n\n- **Keystore password config change (API-level, but impacts\
+      \ manifests you deploy):**\n  - In `Certificate.spec.keystores.{jks,pkcs12}`\
+      \ you can now set `password: \"...\"` directly.\n  - `password` is **mutually\
+      \ exclusive** with `passwordSecretRef`; ensure only one is set.\n\n- **PDB percentages\
+      \ supported**: `podDisruptionBudget.minAvailable` and `podDisruptionBudget.maxAvailable`\
+      \ now accept percentage strings.\n\n- **ServiceAccount annotations templating**:\
+      \ Helm now runs `tpl` on ServiceAccount annotation keys/values, which can change\
+      \ rendering if you used Helm template syntax there.\n\n- **Image pull secrets\
+      \ behavior**: when service accounts aren't created, imagePullSecrets can be\
+      \ added to Deployments; verify if you rely on custom SA creation.\n\n- **If\
+      \ you used `ValidateCAA` feature gate via Helm flags/env**: it is deprecated\
+      \ in 1.17 and will warn; plan removal before 1.18.\n"
+    chart_updates: [Feature gates `NameConstraints` and `UseDomainQualifiedFinalizer`
+        are now **enabled by default** (promoted to Beta). Expect behavior changes
+        without explicitly setting flags., Optional new feature gate `CAInjectorMerging`
+        available for ca-injector; enabling changes CA bundle rotation behavior (merge
+        vs replace)., Some log lines are now structured; log formats may differ from
+        1.16.]
+    features: ["RSA signing compliance: CA and SelfSigned issuers select hash based\
+        \ on RSA key size (3072\u2192SHA-384, 4096\u2192SHA-512).", 'Keystore passwords
+        (JKS/PKCS#12) can be set as a literal string in the `Certificate` resource,
+        not only via Secret reference.', Feature gates `NameConstraints` and `UseDomainQualifiedFinalizer`
+        are now enabled by default (Beta)., New `CAInjectorMerging` feature gate to
+        make CA bundle rotation safer by merging new CAs instead of replacing., 'Helm
+        improvements: extra env var injection for webhook/cainjector/startupapicheck
+        and `tpl` support for ServiceAccount annotations.', 'AzureDNS: new `tenantID`
+        option for managed identity with service principals; Venafi username/password
+        client ID customization.', 'Larger trust bundles supported: increased PEM
+        parsing capacity.']
+    breaking_changes: ['Potentially breaking cryptography change: CA/SelfSigned issuers
+        now use stronger hashes for larger RSA keys (3072/4096+). Verify downstream
+        consumers support SHA-384/SHA-512 with your chosen RSA key sizes.', 'Potentially
+        breaking operational change: some previously unstructured log messages are
+        now structured; any tooling that greps/matches exact log strings may break.',
+      '`ValidateCAA` feature gate is deprecated and will be removed in 1.18; enabling
+        it now emits warnings (plan to stop using it).']
   chart_version: 1.17.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.17.0', 'quay.io/jetstack/cert-manager-controller:v1.17.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.17.0', 'quay.io/jetstack/cert-manager-webhook:v1.17.0']
@@ -28,6 +154,49 @@ versions:
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to account for\n- **CRD\
+      \ lifecycle behavior changed (introduced in 1.15)**: the Helm chart **keeps\
+      \ CRDs on uninstall by default** to prevent data loss. If you *do* want CRDs\
+      \ removed on uninstall, install/upgrade with:\n  - `crds.keep=false`\n  - Prefer\
+      \ the new options **`crds.enabled`** and **`crds.keep`** instead of the older\
+      \ `installCRDs` value.\n- **startupapicheck image reference (since 1.15)**:\
+      \ ensure any overrides point at **`quay.io/jetstack/cert-manager-startupapicheck`**.\n\
+      - **New in 1.16: Helm values JSON schema validation** (`values.schema.json`).\
+      \ This can cause upgrades to fail if your values file contains **typos or unknown\
+      \ keys**. Run a dry-run/template locally and clean up values.\n- **New Helm\
+      \ values in 1.16**:\n  - `webhook.extraEnv`, `cainjector.extraEnv`, `startupapicheck.extraEnv`\
+      \ (inject custom env vars)\n- **Helm chart defaults in 1.16**:\n  - `config.apiVersion`\
+      \ and `config.kind` now default in the chart (you may be able to remove explicit\
+      \ settings unless you intentionally override).\n- **Helm values that appeared\
+      \ in 1.15 but matter for upgrades**:\n  - `disableAutoApproval`, `approveSignerNames`\n\
+      \  - `extraObjects` (install extra manifests with the release)\n  - optional\
+      \ `hostAliases` support for cert-manager pod DNS self-check scenarios"
+    chart_updates: ['Helm chart adds a JSON schema for values (1.16), making `helm
+        install/upgrade` stricter and more likely to fail on invalid/unknown values.',
+      Helm chart now supports adding extra environment variables to webhook/cainjector/startupapicheck
+        pods via new `*.extraEnv` values (1.16)., 'Chart behavior around CRDs changed
+        (1.15): CRDs are no longer removed on uninstall by default; `crds.enabled`/`crds.keep`
+        replace `installCRDs`.', startupapicheck image repository reference changed
+        (1.15) to `quay.io/jetstack/cert-manager-startupapicheck`.]
+    features: ['More Prometheus metrics: new metrics servers for webhook and cainjector;
+        controller now exposes process and Go runtime metrics.', Certificate renewal
+        can now be expressed as `renewBeforePercentage` as an alternative to `renewBefore`.,
+      'Gateway API HTTP01 solver now supports a user-provided Pod template, similar
+        to the Ingress HTTP01 solver.', 'Route53 ACME DNS01 improvements: better region
+        handling (ambient/IRSA), regional STS endpoints, and improved debug logging/user-agent
+        tagging for AWS requests.', 'Vault and Venafi improvements: Vault supports
+        client certificate auth; Venafi adds SecretRef for CA bundle and improved
+        duration handling; TPP OAuth with username/password support.']
+    breaking_changes: [Helm schema validation in 1.16 may reject existing values files
+        that contain unknown keys/typos; you may need to clean up `values.yaml` before
+        upgrading., 'Venafi Issuer behavior changes in 1.16 can break renewals if
+        requested durations violate Venafi policy min/max, or if using TPP username/password
+        auth in certain configurations.', 'Venafi TPP: API Key authentication (deprecated/removed
+        in recent TPP versions) is no longer used; environments relying on it must
+        migrate to supported auth methods.', Old cert-manager API versions were removed
+        from the codebase (v1alpha2/v1alpha3/v1beta1 for acme.cert-manager.io and
+        cert-manager.io); ensure no manifests/CRs still use those versions.]
   chart_version: 1.16.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.16.0', 'quay.io/jetstack/cert-manager-controller:v1.16.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.16.0', 'quay.io/jetstack/cert-manager-webhook:v1.16.0']
@@ -35,6 +204,50 @@ versions:
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart / values changes to apply or review\n- **CRD uninstall\
+      \ behavior changed**: from v1.15 the chart **will not uninstall CRDs by default**\
+      \ when the chart is removed. If you *want* CRDs removed on uninstall, set:\n\
+      \  - `crds.keep=false`\n  - Note: new CRD knobs exist: `crds.keep` and `crds.enabled`.\n\
+      - **`installCRDs` is superseded**: use the new options instead:\n  - `crds.enabled`\
+      \ (whether Helm installs CRDs)\n  - `crds.keep` (whether CRDs are retained on\
+      \ uninstall)\n- **startupapicheck image reference**: update any pinned/airgapped\
+      \ mirrors or image allowlists to use:\n  - `quay.io/jetstack/cert-manager-startupapicheck`\n\
+      \  (cmctl is no longer the startupapicheck image.)\n- **New Helm values / chart\
+      \ features**:\n  - `extraObjects`: list of arbitrary YAML manifests to install/uninstall\
+      \ alongside cert-manager.\n  - Optional `hostAliases` for the cert-manager Pod\
+      \ (to help DNS01 self-check in custom DNS scenarios).\n  - New chart options:\
+      \ `disableAutoApproval` and `approveSignerNames` (controls auto-approval behavior\
+      \ for CertificateRequests / signers).\n"
+    chart_updates: [CRDs are now retained by default on Helm uninstall to prevent
+        accidental data loss; introduced `crds.keep`/`crds.enabled` to manage this
+        behavior., Helm chart adds `extraObjects` to let you ship additional manifests
+        with the release., Helm chart supports optional `hostAliases` on the cert-manager
+        Pod., 'Fixed/adjusted Helm behaviors noted in release notes: logic distinguishing
+        `0` vs empty values; restored default Prometheus Service resource behavior;
+        corrected cainjector image value; ensured cainjector ConfigMap mounts correctly.',
+      Added Helm options `disableAutoApproval` and `approveSignerNames`., 'Operational
+        note: `cmctl` and `kubectl cert-manager` moved to the separate `cert-manager/cmctl`
+        repo and are versioned independently (affects where you fetch the binary,
+        not the Helm chart directly).']
+    features: [Gateway API integration is now Beta; enable it with `--enable-gateway-api`
+        (was previously experimental)., '`LiteralCertificateSubject` and `AdditionalCertificateOutputFormats`
+        feature gates are now Beta; additional output formats are enabled by default.',
+      'Helm can now install extra Kubernetes objects via `extraObjects`, and can set
+        `hostAliases` to help DNS self-checks in custom environments.', 'Vault integration
+        enhancements: mTLS support when Vault requires strict client certs, plus ability
+        to configure additional Kubernetes auth audiences.', AWS Route53 provider
+        supports AssumeRoleWithWebIdentity for credential retrieval; JKS keystore
+        can now set a custom key alias.]
+    breaking_changes: ['**CRD lifecycle change on uninstall**: Helm uninstall will
+        no longer remove cert-manager CRDs by default; adjust your uninstall/runbook
+        (set `crds.keep=false` only if you explicitly want CRDs deleted).', '**ACME
+        `preferredChain` behavior fix**: if you relied on the previously unintended
+        chain selection when `preferredChain` is set, certificate chain selection
+        may change after upgrading (now uses the intended chain).', 'Tooling packaging
+        change: `cmctl` moved to a separate repository and is versioned independently;
+        update any automation that downloads `cmctl` from the main cert-manager release
+        assets.']
   chart_version: 1.15.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.15.0', 'quay.io/jetstack/cert-manager-controller:v1.15.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.15.0', 'quay.io/jetstack/cert-manager-webhook:v1.15.0']
@@ -42,6 +255,51 @@ versions:
   kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Helm values split for feature gates (introduced in 1.13):**\
+      \ if you set `.Values.featureGates`, those gates now apply **only to the controller**.\
+      \ To enable gates on the webhook, use `.Values.webhook.featureGates`.\n- **ConfigMap\
+      \ creation is now conditional (1.14):**\n  - Controller ConfigMap is created\
+      \ **only if** `.Values.config` is set.\n  - Webhook ConfigMap is created **only\
+      \ if** `.Values.webhook.config` is set.\n  If you previously relied on these\
+      \ ConfigMaps existing, ensure the corresponding values are set.\n- **Startup\
+      \ API check image change (1.14):** the `startupapicheck` Job now uses a **new\
+      \ OCI image** named `startupapicheck` instead of the `ctl` image. If you pre-pull\
+      \ / mirror images, add this new image.\n- **Service links / enableServiceLinks:**\
+      \ service links were disabled across chart deployments in 1.13, and `enableServiceLinks`\
+      \ became configurable; ACME HTTP solver pods specifically have it disabled to\
+      \ avoid crashloops in clusters with many Services.\n- **Monitoring:** a Helm\
+      \ value was added in 1.13 for ServiceMonitor endpoint extra fields: `prometheus.servicemonitor.endpointAdditionalProperties`\
+      \ (e.g., relabelings).\n- **Known issue warning (1.14.0):** 1.14.0\u2019s chart\
+      \ was manually corrected during release due to a wrong `cainjector` image reference;\
+      \ upstream recommends installing **>= 1.14.2** instead of 1.14.0/1.14.1."
+    chart_updates: ['Security hardening defaults: pods now run with `readOnlyRootFilesystem:
+        true` by default (including the ACME HTTP01 solver pod).', Controller liveness
+        probe enabled by default; additional clock-skew detector liveness probe added.,
+      Webhook timeout default increased to 30s (max) to improve error visibility.,
+      Webhook can be restricted via custom `spec.namespaceSelector` support., Metrics
+        endpoint can now be served over TLS (static cert files or dynamically issued
+        certs)., 'ACME HTTP01 solver pods gain a default `cluster-autoscaler.kubernetes.io/safe-to-evict:
+        "true"` annotation (overridable in podTemplate).']
+    features: ['X.509: Certificate spec can now include certain `otherName` SANs (alpha;
+        requires enabling `OtherName` feature gate on controller and webhook).', 'CA
+        Issuer: support for Name Constraints in CA certs and Authority Information
+        Accessors (AIA) URLs for issued certificates.', 'Security: more secure HTTP
+        server defaults (DoS mitigations), optional HTTPS metrics, and read-only root
+        filesystem by default for pods.', 'Operational: controller liveness probe
+        enabled by default plus clock-skew restart detection; configurable dynamic
+        serving leaf certificate duration.', 'PKCS#12: new `.spec.keystores.pkcs12.algorithms`
+        to control encryption/MAC algorithms.']
+    breaking_changes: ['If you set Helm `.Values.featureGates`, those gates no longer
+        get passed to the webhook (controller only). Use `.Values.webhook.featureGates`
+        for webhook gates.', '`startupapicheck` job now uses a new `startupapicheck`
+        image instead of `ctl`; environments that mirror/preload images must include
+        it.', 'Potential compatibility change: KeyUsage and BasicConstraints are now
+        encoded as **critical** in the CSR blob inside CertificateRequests; any downstream
+        tooling expecting non-critical encoding may be affected.', 'Webhook validation
+        is stricter (from 1.13): CertificateRequest KeyUsages/ExtendedKeyUsages must
+        be explicitly declared on the resource and must not be exceeded by the CSR
+        contents.']
   chart_version: 1.14.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.14.0', 'quay.io/jetstack/cert-manager-controller:v1.14.0',
     'quay.io/jetstack/cert-manager-startupapicheck:v1.14.0', 'quay.io/jetstack/cert-manager-webhook:v1.14.0']
@@ -49,6 +307,52 @@ versions:
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart config changes to check\n- **Breaking:**\
+      \ Helm `.featureGates` is now **controller-only**. If you previously set:\n\
+      \  ```yaml\n  featureGates:\n    SomeGate: true\n  ```\n  those gates will **no\
+      \ longer be passed to the webhook** in v1.13.0. To enable gates on the webhook,\
+      \ move/add them under:\n  ```yaml\n  webhook:\n    featureGates:\n      SomeGate:\
+      \ true\n  ```\n  (PR #6093)\n\n- New/updated Helm knobs introduced in/around\
+      \ v1.13.0:\n  - `prometheus.servicemonitor.endpointAdditionalProperties`: add\
+      \ extra ServiceMonitor endpoint fields (e.g., `relabelings`).\n  - `enableServiceLinks`\
+      \ is now configurable for all Deployments and the `startupapicheck` Job; additionally,\
+      \ service links were disabled broadly in the chart and ACME HTTP solver pods\
+      \ specifically to avoid crash loops in clusters with many Services.\n\n### Upgrade\
+      \ sequencing note (operational, but matters for Helm rollouts)\n- If coming\
+      \ from **< v1.12**, upgrade to the **latest v1.12 patch** first before moving\
+      \ to v1.13, to avoid unexpected certificate re-issuance (release note #6494\
+      \ comment)."
+    chart_updates: ['Webhook helm template behavior changed so controller feature
+        gates are no longer inadvertently applied to the webhook (fix in #6093).',
+      'NetworkPolicy templating fix: corrected indentation for webhook `matchLabels`
+        (#6220).', 'Adds configurability / defaults around `enableServiceLinks` for
+        deployments and `startupapicheck` job (#6292, plus follow-up changes disabling
+        service links more broadly).', Adds ServiceMonitor endpoint extension point
+        via `prometheus.servicemonitor.endpointAdditionalProperties` (#6110)., Adds
+        Apache 2.0 license annotation in chart metadata (#6225).]
+    features: ["DNS-over-HTTPS (DoH) support for ACME DNS-01 self-checks (use `--dns01-recursive-nameservers-only=true`\
+        \ with an `https://\u2026/dns-query` endpoint).", Controller options can now
+        be provided via a versioned configuration file (useful for managing controller
+        settings declaratively)., 'Feature gates **StableCertificateRequestName**
+        and **SecretsFilteredCaching** promoted to **Beta** and enabled by default
+        (note known issue for StableCertificateRequestName in 1.13.0, fixed in 1.13.1+).',
+      CertificateRequest / CSR validation tightened when using pki CertificateTemplate
+        functions to ensure signed certs match requested usages and CA-ness., 'Helm:
+        can add extra properties to Prometheus ServiceMonitor endpoints; `enableServiceLinks`
+        can be configured across deployments; logging options can be set via webhook
+        config file.']
+    breaking_changes: ["**Helm breaking change:** `.featureGates` no longer applies\
+        \ to the webhook; use `webhook.featureGates` instead. If you relied on controller\
+        \ gates being passed through to the webhook\u2019s `--feature-gates`, that\
+        \ will now fail unless the webhook actually supports those gates.", '**Potentially
+        breaking:** webhook validation of CertificateRequest is stricter: all `keyUsages`/`extendedKeyUsages`
+        must be explicitly declared on the CertificateRequest, and the CSR must not
+        contain additional usages beyond those declared.', '**Known issue in 1.13.0:**
+        StableCertificateRequestName (now Beta, enabled by default) has a name-collision
+        bug; upgrade to **v1.13.1+** to avoid it.', 'Upgrade path warning: if upgrading
+        from <1.12, you must first upgrade to latest 1.12 patch before 1.13 or some
+        certs may be unexpectedly re-issued.']
   chart_version: 1.13.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.13.0', 'quay.io/jetstack/cert-manager-controller:v1.13.0',
     'quay.io/jetstack/cert-manager-ctl:v1.13.0', 'quay.io/jetstack/cert-manager-webhook:v1.13.0']
@@ -57,6 +361,52 @@ versions:
     '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n- **New PodDisruptionBudgets\
+      \ (PDBs)** added for cert-manager components, **disabled by default**. If you\
+      \ want disruption protection, enable and size these appropriately.\n- **Webhook\
+      \ NetworkPolicy**: chart now also allows **egress to the API server on 6443/TCP**\
+      \ (needed for OpenShift/OKD where apiserver listens on 6443).\n- **New volume/volumeMount\
+      \ hooks via values** for **cainjector, webhook, and startupapicheck** (useful\
+      \ for custom CA bundles, extra files, etc.).\n- **New controller flags exposed\
+      \ via Helm values**: `--dns01-recursive-nameservers`, `--dns01-recursive-nameservers-only`,\
+      \ and `--enable-certificate-owner-ref` can now be configured through values.\n\
+      - **ACME solver image override precedence clarified**: `acmesolver.extraArgs`\
+      \ (specifically `--acme-http01-solver-image`) takes precedence over `acmesolver.image`.\n\
+      - **Controller liveness probe support**: controller now has `/livez` endpoint\
+      \ and a **liveness probe is available but disabled by default** in the chart/manifest.\n\
+      \n## Values/flags to double-check if you customize\n- If you rely on cainjector\u2019\
+      s old `--watch-certs` flag, it was **renamed** to `--enable-certificates-data-source`.\n\
+      - ACME HTTP-01 solver can now be configured with `ingressClassName`; if you\
+      \ previously relied on the deprecated ingress.class annotation behavior, consider\
+      \ moving to the field.\n"
+    chart_updates: [Added optional PodDisruptionBudgets for cert-manager components
+        (off by default)., Webhook NetworkPolicy updated to permit egress to Kubernetes
+        API on 6443/TCP (OpenShift/OKD compatibility)., Helm chart now supports adding
+        extra volumes and volumeMounts to cainjector/webhook/startupapicheck pods
+        via values., Helm chart exposes additional controller flags for DNS01 recursion
+        and certificate owner refs., Chart behavior updated so `--acme-http01-solver-image`
+        in `acmesolver.extraArgs` overrides `acmesolver.image`., 'Chart documentation:
+        fixed dead links in values.yaml.']
+    features: [JSON logging is now supported via `--logging-format=json` (handy for
+        log aggregation/parsing)., New `--concurrent-workers` flag lets you tune controller
+        concurrency per controller., 'HTTP-01 solver can now set `ingressClassName`
+        on created Ingresses, improving compatibility with clusters that require it.',
+      Vault issuer supports ephemeral Kubernetes service account tokens via `serviceAccountRef`
+        (short-lived auth to Vault)., Significant memory footprint reductions (controller
+        and cainjector) through filtered/metadata-only caching and other optimizations.,
+      cainjector now has flags to disable unneeded injectable kinds to reduce memory
+        usage.]
+    breaking_changes: ['Gateway API integration (introduced in 1.11) moved to a more
+        stable API; if you use the experimental Gateway API support, ensure the required
+        Gateway API version is installed (1.11 notes).', 'cainjector behavior change:
+        if the `certificates.cert-manager.io` CRD is not installed and you relied
+        on cainjector running anyway, you now must pass `--watch-certificates=false`
+        or cainjector will not start.', 'ACME Challenge naming calculation changed;
+        to avoid duplicate issuances, ensure there is **no in-progress ACME issuance**
+        during the upgrade.', 'POTENTIALLY BREAKING for Go consumers only: cert-manager
+        binaries/tests were split into separate Go modules; code changes may be required
+        if you import these modules.']
   chart_version: 1.12.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.12.0', 'quay.io/jetstack/cert-manager-controller:v1.12.0',
     'quay.io/jetstack/cert-manager-ctl:v1.12.0', 'quay.io/jetstack/cert-manager-webhook:v1.12.0']
@@ -64,6 +414,49 @@ versions:
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm chart / values changes to check
+
+      - **ACME HTTP-01 solver image is now configurable** via Helm values (new options
+      added). If you previously relied on default `acmesolver` image settings, review
+      the new value keys and ensure they match your registry/mirroring policy.
+
+      - **New controller flag exposed in the chart:** `--max-concurrent-challenges`
+      (added as a Helm value). Consider setting this if you need to rate-limit ACME
+      challenge processing.
+
+      - **Feature gates via Helm now apply to the webhook too** (bug fix). If you
+      used `extraArgs`/feature gate values, verify webhook args align with controller
+      after upgrade.
+
+      - **`extraArgs` precedence fix:** if you set `extraArgs`, it now correctly overrides
+      the new ACME solver image options.
+
+      - **Cainjector namespace scoping bug fixed:** the `--namespace` flag now works.
+      If you want lower memory usage / fewer RBAC reads, consider setting cainjector
+      to watch only the cert-manager namespace.
+
+      '
+    chart_updates: ['Reduced runtime memory usage (notably: controller secret caching
+        fixed; cainjector namespace scoping works).', Gateway API integration moved
+        to **v1beta1** for the experimental feature; requires Gateway API v1beta1
+        CRDs installed if you use it., Security and dependency updates (Go minor bumps;
+        `golang/x/net` and `x/text` vulns fixed)., Improved AzureDNS integration (Workload
+        Identity support + a fix for misconfigured WI setups)., 'Venafi issuer improvements:
+        vcert bumped; renewal and Ed25519 issues fixed; TLS renegotiation support
+        for certain TPP setups.', Certificate secrets will refresh when keystore format
+        changes; secrets get an additional label for troubleshooting/ownership.]
+    features: [Significant reduction in runtime memory usage (fixing duplicate Secret
+        caching and enabling cainjector namespace scoping)., Helm chart can now configure
+        the ACME HTTP-01 solver image and expose `--max-concurrent-challenges` for
+        tuning challenge throughput., 'AzureDNS solver gains Workload Identity support,
+        improving AKS/Azure integrations.', Issuers can specify a custom CA bundle
+        when connecting to an ACME server., Experimental Gateway API integration now
+        targets the more stable v1beta1 API.]
+    breaking_changes: ["**Gateway API breaking change (experimental):** cert-manager\u2019\
+        s `ExperimentalGatewayAPISupport` now uses **Gateway API v1beta1**. Clusters\
+        \ must have v1beta1 Gateway API CRDs installed; v1alpha2-only installs will\
+        \ break."]
   chart_version: 1.11.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.11.0', 'quay.io/jetstack/cert-manager-controller:v1.11.0',
     'quay.io/jetstack/cert-manager-ctl:v1.11.0', 'quay.io/jetstack/cert-manager-webhook:v1.11.0']
@@ -71,6 +464,45 @@ versions:
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n- **Container\
+      \ name changes (breaking for automation):** cert-manager 1.10 changes the *container\
+      \ names* in the controller and webhook (and other) Pods (e.g., `cert-manager`\
+      \ \u2192 `cert-manager-controller`, `cert-manager` \u2192 `cert-manager-webhook`).\
+      \ If you have scripts/alerts that target container names, update them before\
+      \ upgrading.\n- **Pod securityContext change (can affect OpenShift):** 1.10\
+      \ sets `securityContext.seccompProfile.type: RuntimeDefault` on Pods. On some\
+      \ OpenShift setups this can be rejected by SCC; you may need SCC updates/allowances\
+      \ before the upgrade.\n- **New Helm values:**\n  - `commonLabels`: add labels\
+      \ to all chart resources.\n  - NetworkPolicy support is added (new values will\
+      \ exist to enable/configure it).\n  - ServiceMonitor annotations support added\
+      \ (new values/fields related to ServiceMonitor metadata).\n- **Release namespace\
+      \ handling:** chart avoids hard-coding the release namespace; if you previously\
+      \ relied on older behavior, validate resources render into the intended namespace.\n\
+      \n*(From 1.9: note that `securityContext.enabled` was removed earlier; ensure\
+      \ you are not still setting it in values.)*"
+    chart_updates: [Add NetworkPolicy support in the Helm chart., Add `commonLabels`
+        to apply consistent labels across chart resources., Add support for ServiceMonitor
+        annotations in the chart., Avoid hard-coding release namespace in chart templates.,
+      'Rename containers in Pods to unique, role-reflecting names (breaking for scripts/CI).',
+      Set Pod seccomp profile to `RuntimeDefault` to improve PSS/restricted compliance
+        (may require OpenShift SCC changes).]
+    features: ['Certificate metrics now include `issuer_name`, `issuer_kind`, and
+        `issuer_group` labels for better attribution in monitoring.', Vault Issuer
+        supports `caBundleSecretRef` (mutually exclusive with inline `caBundle`) to
+        source CA bundle from a Secret., Gateway API dependency bumped to v0.5.0 (relevant
+        if you use Gateway-related integrations)., New (disabled-by-default) feature
+        gate `StableCertificateRequestName` to generate deterministic CertificateRequest
+        names and reduce "multiple CertificateRequests found" errors., 'Improved SelfSigned
+        issuance behavior: CertificateRequests/CSRs will re-reconcile when referenced
+        private key Secrets appear or become valid.', 'Chart-level quality-of-life:
+        ability to set global `commonLabels`, plus optional NetworkPolicy resources.']
+    breaking_changes: ['**Container name changes in cert-manager Pods** (Helm/static
+        manifests): update any automation/monitoring that references container names
+        (e.g., `kubectl logs -c cert-manager ...`, Prometheus scrape relabeling, log
+        collection configs).', '**OpenShift SCC compatibility risk**: new `seccompProfile:
+        RuntimeDefault` may cause Pods to be rejected until SCCs are adjusted/approved
+        for the service accounts.']
   chart_version: 1.10.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.10.0', 'quay.io/jetstack/cert-manager-controller:v1.10.0',
     'quay.io/jetstack/cert-manager-ctl:v1.10.0', 'quay.io/jetstack/cert-manager-webhook:v1.10.0']
@@ -78,6 +510,39 @@ versions:
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n- **New value:**\
+      \ `namespace` \u2014 allows overriding the namespace where chart resources are\
+      \ created (useful when cert-manager is a subchart). If you previously relied\
+      \ on `.Release.Namespace` implicitly, verify behavior with this override.\n\
+      - **New capability:** disable automounting of service account tokens (value\
+      \ name not included in the pasted notes; check current chart values for the\
+      \ relevant `automountServiceAccountToken`/`serviceAccount.automountServiceAccountToken`\
+      \ knobs).\n- **Removed value:** `securityContext.enabled` was removed from the\
+      \ chart; if you still set it in `values.yaml`, Helm will warn/fail depending\
+      \ on your tooling. Remove it and set security context fields directly.\n- **Chart\
+      \ scheduling fix:** `startupapicheck` is now scheduled only on **Linux** nodes\
+      \ by default; ensure this matches your cluster node OS mix and any custom node\
+      \ selectors/tolerations.\n"
+    chart_updates: [Adds `namespace` override for resource creation (supports subchart
+        use)., Option to disable auto-mounting service account tokens., Removes deprecated
+        `securityContext.enabled` chart value., startupapicheck job scheduling constrained
+        to Linux nodes.]
+    features: ['Alpha: `Certificate.spec.literalSubject` to preserve ordered X.509
+        subject RDN sequence (requires `--feature-gates=LiteralCertificateSubject=true`
+        on controller and webhook; mutually exclusive with `spec.subject`/`spec.commonName`).',
+      'ingress-shim: configure `Certificate.spec.privateKey` and `Certificate.spec.revisionHistoryLimit`
+        via Ingress annotations (enables rotationPolicy best practices like `Always`).',
+      'AWS credentials: can load both access key ID and secret access key from Kubernetes
+        Secrets for AWS-based integrations/solvers.', 'Observability: new (alpha)
+        Prometheus summary metric for Venafi API request latency.']
+    breaking_changes: ['ingress-shim: **drops support for `networking.k8s.io/v1beta1`
+        Ingress**. Clusters/manifests must use `networking.k8s.io/v1` (Kubernetes
+        1.22+).', "Helm chart: `securityContext.enabled` value removed\u2014must be\
+        \ deleted from your values and replaced with explicit securityContext fields\
+        \ if needed.", 'Feature-gated field: using `spec.literalSubject` requires
+        enabling the feature gate on both controller and webhook; otherwise applies/updates
+        will fail validation.']
   chart_version: 1.9.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.9.0', 'quay.io/jetstack/cert-manager-controller:v1.9.0',
     'quay.io/jetstack/cert-manager-ctl:v1.9.0', 'quay.io/jetstack/cert-manager-webhook:v1.9.0']
@@ -85,6 +550,46 @@ versions:
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n- **Default\
+      \ `nodeSelector` now `kubernetes.io/os: linux`**. If your nodes don\u2019t have\
+      \ this label (or you run Windows nodes), override `nodeSelector` in values or\
+      \ add the label. (v1.8)\n- **ServiceAccount labels are now configurable** via:\n\
+      \  - `serviceAccount.labels`\n  - `cainjector.serviceAccount.labels`\n  - `webhook.serviceAccount.labels`\n\
+      \  - `startupapicheck.serviceAccount.labels` (v1.8)\n- **Security hardening\
+      \ defaults**: chart sets `securityContext.allowPrivilegeEscalation=false` by\
+      \ default for controller/cainjector/webhook and the `startupapicheck` Job; ACME\
+      \ solver pods also default to `allowPrivilegeEscalation=false`. If you had custom\
+      \ securityContext overrides, re-check them. (v1.8)\n- If you use **alpha `additionalOutputFormats`**,\
+      \ you must enable the feature gate on **both** controller and webhook in v1.8\
+      \ (`--feature-gates=AdditionalCertificateOutputFormats=true`), not only controller.\
+      \ (v1.8)\n"
+    chart_updates: ['Default nodeSelector changed to linux (`kubernetes.io/os: linux`).',
+      New values to add labels to ServiceAccounts across components., 'Chart sets
+        `allowPrivilegeEscalation: false` by default for core pods and startupapicheck
+        job.']
+    features: ['Alpha server-side-apply support behind `ServerSideApply=true` feature
+        gate on Kubernetes 1.22+, reducing optimistic-locking conflicts and log noise.',
+      "Exponential backoff for failed certificate issuances (1h \u2192 2h \u2192 4h\
+        \ \u2026 up to 32h) plus a new `failedIssuanceAttempts` field on Certificates.",
+      'Support for Kubernetes CSR `spec.expirationSeconds` (Kubernetes 1.22+), retaining
+        the existing duration annotation with a minimum of 600s.', 'Ingress/Gateway
+        shim enhancements: override whitelist-source-range via Issuer `ingressTemplate`,
+        and ability to use an external issuer resource as default for ingress-shim.',
+      'Operational tooling improvements: `cmctl experimental uninstall` and build
+        system transition from Bazel to Make (primarily developer-facing).']
+    breaking_changes: ['Cert-manager API removals already landed in v1.7: v1alpha2/v1alpha3/v1beta1
+        CRDs removed; all resources must be stored as v1 prior to upgrade (run `cmctl
+        upgrade migrate-api-version`).', "v1.8 validates `spec.privateKey.rotationPolicy`\
+        \ on Certificates; only `Never` and `Always` are allowed\u2014invalid manifests\
+        \ will be rejected by the API/webhook and can break GitOps syncs.", 'If enabling
+        `ServerSideApply=true` when upgrading to v1.8, pre-1.8 Challenge resources
+        may not be cleaned up; ensure no Challenges exist or delete them once `valid`.',
+      "Container internal binary paths changed due to Bazel\u2192Make container layout;\
+        \ scripts or init containers that referenced old deep Bazel paths will break.",
+      Leader election now uses only Lease objects; old ConfigMap-based leader election
+        objects may remain and require manual cleanup (upgrade-from-very-old versions
+        not supported).]
   chart_version: 1.8.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.8.0', 'quay.io/jetstack/cert-manager-controller:v1.8.0',
     'quay.io/jetstack/cert-manager-ctl:v1.8.0', 'quay.io/jetstack/cert-manager-webhook:v1.8.0']
@@ -92,6 +597,47 @@ versions:
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '### Helm values / chart behavior changes
+
+      - **New value:** `prometheus.servicemonitor.honorLabels` to set `honor_labels`
+      on the ServiceMonitor scrape config.
+
+      - **Bugfix:** Helm chart service annotations handling for the controller and
+      webhook Services was fixed; if you had workarounds/patches, re-check your rendered
+      manifests.
+
+      - **Operational note (CRDs):** If you manage cert-manager CRDs with `kubectl
+      apply --server-side`, upgrading to 1.7 can fail due to managedFields/conversionWebhook
+      changes. Prefer Helm/client-side apply for CRDs, or patch CRD `managedFields`
+      as described in the release notes before retrying.
+
+      '
+    chart_updates: ['CRDs shipped/installed by the chart no longer include deprecated
+        API versions (`v1alpha2`, `v1alpha3`, `v1beta1`); CRD manifests are smaller
+        and no longer require a conversion webhook.', Chart includes the service-annotation
+        handling fix for controller/webhook Services.]
+    features: [New `Certificate.spec.additionalOutputFormats` supports `CombinedPEM`
+        (key+chain bundle) and `DER` outputs in addition to existing secret data formats.,
+      Webhook can now be configured via a mounted configuration file (ConfigMap) instead
+        of only CLI flags., 'Server-Side Apply is now used to manage Secret labels/annotations
+        and reconcile `secretTemplate`, improving drift correction.', New flag `--acme-http01-solver-nameservers`
+        allows custom nameservers for ACME HTTP-01 propagation checks., 'New `cmctl
+        upgrade migrate-api-version` command helps migrate stored CRs to `apiVersion:
+        v1` before upgrading.']
+    breaking_changes: ['**Deprecated APIs removed:** cert-manager no longer serves
+        `v1alpha2`, `v1alpha3`, or `v1beta1`. All cert-manager CRs must be stored
+        in etcd as `v1` and CRDs must have only `v1` as the stored version before
+        upgrading (use `cmctl upgrade migrate-api-version`).', '**Ingress class semantics
+        changed (reverted):** HTTP-01 solver Ingresses go back to using the `kubernetes.io/ingress.class`
+        annotation (instead of `spec.ingressClassName`). If you relied on the newer
+        behavior or use non-default classes/controllers, validate HTTP-01 behavior
+        after upgrade.', '**Upgrading with Server-Side Apply:** SSA upgrades can produce
+        invalid CRD configs due to CRD spec changes (conversion webhook removal).
+        Use client-side apply/Helm for CRDs or patch CRD managedFields.', '**Flags:**
+        `--dns01-self-check-nameservers` removed; use `--dns01-recursive-nameservers`
+        instead.', '**Kubernetes compatibility:** cert-manager 1.7 requires Kubernetes
+        >= 1.18 (due to reliance on Server-Side Apply).']
   chart_version: 1.7.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.7.0', 'quay.io/jetstack/cert-manager-controller:v1.7.0',
     'quay.io/jetstack/cert-manager-ctl:v1.7.0', 'quay.io/jetstack/cert-manager-webhook:v1.7.0']
@@ -99,6 +645,37 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **(Helm chart)** `startupapicheck` post-install hook now **cleans
+      up leftover hook resources** from prior failed installs, so `helm install` can
+      be re-run without manual deletion.
+
+      - **(Helm chart)** Added support to **set annotations on chart Services** (useful
+      for cloud-provider/LB integrations).
+
+      - **(Helm chart)** Added a **PodSecurityPolicy** for the `startupapicheck` Job
+      (only relevant on clusters where PSP is enabled).
+
+
+      _No explicit values key renames/removals were called out in the provided notes;
+      validate against your current `values.yaml` and run `helm diff` before applying._'
+    chart_updates: ["Startup API check hook behavior improved: deletes leftover hook\
+        \ resources after failed installs (reduces \u201Calready exists\u201D/hook\
+        \ collision issues on retry).", PodSecurityPolicy added for the startup API
+        check job (legacy PSP environments)., Service templates updated to allow custom
+        annotations via chart values.]
+    features: ['API no longer serves deprecated cert-manager resource versions `v1alpha2`,
+        `v1alpha3`, `v1beta1` (upgrade enforces using `cert-manager.io/v1`).', New
+        Prometheus metric exposing Certificate `renewBefore` behavior for monitoring
+        and alerting., Azure DNS solver can specify a managed identity ID (improves
+        support for multiple identities)., 'CLI improvements in `cmctl`: shell completion
+        + better Kubernetes flag exposure, plus build-time configurable command name.']
+    breaking_changes: ["Deprecated cert-manager API versions `v1alpha2`, `v1alpha3`,\
+        \ and `v1beta1` are **not served** in 1.6; manifests using them will fail\
+        \ after upgrade\u2014convert resources/manifests to `cert-manager.io/v1` before\
+        \ upgrading.", 'JKS keystores enforce a minimum password length of 6 characters
+        in 1.6.0 due to a dependency upgrade; this is fixed in 1.6.1, so avoid 1.6.0
+        if you rely on shorter JKS passwords.']
   chart_version: 1.6.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.6.0', 'quay.io/jetstack/cert-manager-controller:v1.6.0',
     'quay.io/jetstack/cert-manager-ctl:v1.6.0', 'quay.io/jetstack/cert-manager-webhook:v1.6.0']
@@ -106,6 +683,40 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [cert-manager 1.5 is the first release to support Kubernetes 1.22
+        (ensure your cluster version/PSPs/security policies are compatible)., cert-manager
+        now only accepts AdmissionReviewVersion v1 and ConversionReviewVersion v1
+        (requires Kubernetes >=1.16; webhook/API server must support v1)., 'Added
+        a startup API check Job that waits for the cert-manager API to become ready,
+        plus a `kubectl cert-manager check api` command (may create an extra Job during
+        startup/upgrade).', New optional controller `gateway-shim` for Gateway API
+        (can be enabled/disabled; adds additional reconciler behavior if enabled).,
+      'Helm-chart level improvements: ability to configure labels on the cert-manager
+        webhook Service via a Helm value; service port for Prometheus scraping now
+        has a name (may affect ServiceMonitor scraping selectors); and support for
+        configuring which annotations are copied from Certificate to CertificateRequest
+        (with some keys excluded by default).']
+    features: [Kubernetes 1.22 support., 'Gateway API support: optional gateway-shim
+        to auto-create ACME certs for annotated Gateways and Gateway API HTTP01 solver
+        support.', 'TLS Secret customization: add custom annotations/labels to the
+        Secret containing the issued key pair.', 'Crypto: Ed25519 private keys/signatures
+        supported for Certificates.', 'Experimental CSR signing support for ACME,
+        SelfSigned, Vault, and Venafi issuers behind `--feature-gates=ExperimentalCertificateSigningRequestControllers=true`,
+        plus a CLI command to create Kubernetes CSRs from Certificate manifests.',
+      'Observability/ops: named Prometheus scrape port, new `clock_time_seconds` metric,
+        improved shutdown/leader election behavior, and new kubectl plugin commands
+        (`version`, `check api`, `x install`).']
+    breaking_changes: [cert-manager webhooks now only support AdmissionReview and
+        ConversionReview API version v1 (v1beta1 removed); clusters must be Kubernetes
+        >=1.16 and any integrations expecting v1beta1 will break., "Pre-v1 cert-manager\
+        \ resource requests must be convertible to v1 to be validated/mutated by admission\
+        \ webhooks; if conversion isn\u2019t in place, older manifests may be rejected\
+        \ (relevant if you still apply deprecated API versions).", 'Forward-looking:
+        APIs deprecated in 1.4 (v1alpha2/v1alpha3/v1beta1) will stop being served
+        in 1.6; you should complete CRD/resource migration to v1 during/after this
+        upgrade to avoid being blocked later.']
   chart_version: 1.5.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.5.0', 'quay.io/jetstack/cert-manager-controller:v1.5.0',
     'quay.io/jetstack/cert-manager-ctl:v1.5.0', 'quay.io/jetstack/cert-manager-webhook:v1.5.0']
@@ -113,6 +724,36 @@ versions:
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Security context default change:** `runAsNonRoot` is now **enabled\
+      \ by default** via Helm values. If you inject **custom containers** (e.g., extra\
+      \ sidecars) that must run as root, explicitly set it back to `false` (or set\
+      \ an appropriate `runAsUser`/`fsGroup` etc. for non-root operation).\n- **New\
+      \ chart value:** `serviceLabels` (controller Service) lets you add custom labels\
+      \ to the cert-manager controller Service.\n- (From prior 1.3.0 urgent note,\
+      \ still relevant if you\u2019re on 1.3.0) **Helm upgrade path:** upgrade to\
+      \ **v1.3.1 first** to avoid a CRD type conversion issue, then proceed to v1.4.0."
+    chart_updates: [Controller leader election lock type changed to `ConfigMapsLeasesResourceLock`
+        (internal behavior; may affect required RBAC in locked-down clusters)., Base
+        image updated (distroless/static) and Kubernetes libraries updated to v1.21.0
+        (generally transparent but can surface compatibility issues in very old clusters/tools).,
+      Webhook can be configured to be reachable from outside the cluster (new capability;
+        requires conscious networking configuration if enabled).]
+    features: ['Helm: add `serviceLabels` to apply custom labels to the controller
+        Service.', 'Security: `runAsNonRoot` enabled by default (hardening); requires
+        adjustments if any container needs root.', 'Issuers: CA/Vault/Venafi now build
+        and expose a proper certificate chain and set `CertificateRequest.Status.CA`
+        to the root-most certificate when available.', New option to implement the
+        CA Issuer via the Kubernetes `CertificateSigningRequest` controller., Webhook
+        can be exposed outside the cluster (useful for external API server/webhook
+        reachability scenarios)., Akamai issuer updated to EdgeDNS v2 API; kubectl
+        plugin built for darwin/arm64.]
+    breaking_changes: ['CA Issuer behavior change: `ca.crt` on issued Secrets now
+        stores the **root CA** (when available) rather than the issuing/intermediate
+        CA; the intermediate should now appear in `tls.crt` chain. Consumers that
+        assumed `ca.crt` contained the intermediate may need updates.', 'Helm default
+        security context change: `runAsNonRoot=true` can break deployments that add
+        custom root-running containers unless values are overridden.']
   chart_version: 1.4.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.4.0', 'quay.io/jetstack/cert-manager-controller:v1.4.0',
     'quay.io/jetstack/cert-manager-webhook:v1.4.0']
@@ -120,6 +761,45 @@ versions:
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **Helm users:** avoid upgrading to **v1.3.0** due to a **CRD
+      type conversion issue**; upgrade directly to **v1.3.1** instead (ref. #3880).
+
+      - If you previously set `--renew-before-expiration-duration` via Helm values/extraArgs
+      for the controller, **remove it**: the flag was deprecated in v1.2 and **removed
+      in v1.3**. Use `Certificate.spec.renewBefore` (or ingress-shim annotations `cert-manager.io/renew-before`)
+      instead.
+
+      - New chart option: `automountServiceAccountToken` on cert-manager service accounts
+      (consider setting to `false` for least-privilege).
+
+      - Service `targetPort` behavior now uses the port from Helm values (verify if
+      you override webhook/service ports).
+
+      '
+    chart_updates: ['Helm chart: add `automountServiceAccountToken` field to service
+        accounts.', 'Helm chart: fix/adjust Helm upgrade behaviors (v1.2 had a type
+        conversion bug fix; v1.3 notes include additional Helm upgrade fix).', 'Helm
+        chart/service: ensure `targetPort` uses the value-defined port (may affect
+        custom port overrides).']
+    features: [CertificateRequests now support an `Approved` condition and include
+        requester `UserInfo` fields (username/groups/uid/extra) for auditing., 'New
+        kubectl plugin commands: `kubectl cert-manager approve|deny` and improved
+        default output for `kubectl get certificaterequest`.', Issuers and Certificates
+        now publish `observedGeneration` in conditions to make status vs. spec drift
+        easier to detect., Certificates gain `revisionHistoryLimit` to garbage-collect
+        old CertificateRequests and reduce clutter., 'Controller can selectively disable
+        specific controllers via `--controllers=\*,-foo`.', Venafi issuer updated
+        for Venafi Cloud OutagePREDICT compatibility.]
+    breaking_changes: [Controller flag `--renew-before-expiration-duration` was **removed**
+        in v1.3; move to `Certificate.spec.renewBefore` / ingress-shim annotations
+        or manifests will fail to start if still set., "CertificateRequests are now\
+        \ **immutable**: `spec` and `metadata.annotations` can\u2019t be changed after\
+        \ creation; workflows that patch CertificateRequests must be adjusted.", 'Venafi
+        Cloud zone syntax changed due to OutagePREDICT migration: zone is now `<<Application
+        Name>>\\<<Issuing Template Alias>>` (e.g., `My Application\\My CIT`).', "Helm\
+        \ upgrade pitfall: v1.3.0 has a CRD type conversion issue\u2014**upgrade to\
+        \ v1.3.1** instead of v1.3.0."]
   chart_version: 1.3.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.3.0', 'quay.io/jetstack/cert-manager-controller:v1.3.0',
     'quay.io/jetstack/cert-manager-webhook:v1.3.0']
@@ -127,6 +807,37 @@ versions:
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **New chart values / knobs:**\n  - `webhook.podLabels` and `cainjector.podLabels`\
+      \ can now be set (added in v1.1.0).\n  - Webhook call timeout is configurable\
+      \ (added in v1.1.0).\n- **Chart bugfix:**\n  - v1.2.0 fixes a Helm chart type\
+      \ conversion issue; if you had workarounds (e.g., quoting numeric/bool values\
+      \ unusually), re-test and simplify.\n\n> Note: the provided notes don\u2019\
+      t include a full chart values diff; review your existing values file for any\
+      \ custom flags/args that may now be deprecated (e.g., `--renew-before-expiration-duration`)."
+    chart_updates: [Minimum supported Kubernetes version is now **v1.16.0** (v1.2.0).,
+      Admissionregistration resources now use `admissionregistration.k8s.io/v1` (v1.2.0).,
+      Ingress-related work moved to newer API group (`networking.k8s.io/v1beta1`)
+        in code paths (v1.2.0)., User-Agent changed to reflect CNCF ownership transfer
+        (v1.2.0)., 'Vault issuer secret contents changed: `ca.crt` now stores the
+        **root CA** instead of the issuing CA (v1.2.0).']
+    features: [Ingress-shim can now set key usages via `cert-manager.io/usages` and
+        includes Server Auth by default., 'New plugin: `kubectl cert-manager inspect
+        secret` to print certificate info from a Secret.', CRDs now include category
+        names so you can list them with `kubectl get cert-manager` / `kubectl get
+        cert-manager-acme`., Controller can generate a PKCS12 truststore (`truststore.p12`)
+        from a CA., Controller can expose pprof profiling when enabled via `--enable-profiling`.,
+      CA issuer can set a custom OCSP server for issued certificates., Cainjector
+        leader election timing can be tuned via new flags (lease duration / renew
+        deadline / retry period)., Ingress-shim now honors `cert-manager.io/duration`
+        and `cert-manager.io/renew-before` annotations.]
+    breaking_changes: [Kubernetes **v1.16.0** is now the minimum supported version;
+        clusters on v1.15 or below must upgrade Kubernetes first or stay on cert-manager
+        v1.1.x., The controller flag `--renew-before-expiration-duration` is **deprecated**
+        in favor of `Certificate.spec.renewBefore` and will be removed in the next
+        release (plan to migrate now)., 'Vault issuer output changed: `ca.crt` now
+        contains the **root CA** (not the issuing CA), which may break consumers that
+        expect the previous CA chain behavior.']
   chart_version: 1.2.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.2.0', 'quay.io/jetstack/cert-manager-controller:v1.2.0',
     'quay.io/jetstack/cert-manager-webhook:v1.2.0']
@@ -135,6 +846,26 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes (v1.0.0 \u2192 v1.1.0)\n\
+      - **New:** `webhook.podLabels` and `cainjector.podLabels` to add custom pod\
+      \ labels to those Deployments.\n- **New:** Configurable **webhook call timeout**\
+      \ (Helm option added; check your values for a new `webhook.timeoutSeconds`-style\
+      \ key depending on your chart version).\n\n**Action:** If you rely on labels\
+      \ for monitoring/PSP/policy selection or you need longer webhook admission timeouts,\
+      \ consider setting these new values. Otherwise no required values changes are\
+      \ called out in the provided notes."
+    chart_updates: ['Helm chart: allow setting custom `podLabels` on `webhook` and
+        `cainjector` Deployments.', 'Helm chart: allow configuring the webhook timeout
+        for admission calls.']
+    features: ['Certificate spec: `encodeUsagesInRequest` allows disabling encoding
+        key usages in the CSR.', "ACME: can pass Certificate `duration` to the ACME\
+        \ server (not supported by Let\u2019s Encrypt at the time).", 'ACME: support
+        issuing certificates with IP Subject Alternative Names.', 'ACME DNS-01: propagation
+        check period is now configurable.', 'Controller tuning: Kubernetes client
+        QPS throttling is now configurable.', 'Venafi TPP issuer: now supports access-token
+        credentials.']
+    breaking_changes: []
   chart_version: 1.1.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.1.0', 'quay.io/jetstack/cert-manager-controller:v1.1.0',
     'quay.io/jetstack/cert-manager-webhook:v1.1.0']
@@ -143,6 +874,54 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm chart / values changes to plan for
+
+      - **Webhook host networking (new option):** `webhook.hostNetwork` can be enabled
+      to run the webhook Pod with `hostNetwork: true`.
+
+      - **Webhook probes configurable (new options):** Chart now allows configuring
+      the webhook health probes (liveness/readiness/startup as exposed by the chart).
+
+      - **Webhook annotations (new values):** Extra custom annotations can be set
+      on the **mutating** and **validating** webhook configurations.
+
+      - **Image pinning via digest (new values):** Chart supports specifying an **image
+      digest** in addition to tags (useful for supply-chain pinning).
+
+      - (From 0.16.0 era chart) **Per-deployment securityContext:** Ability to set
+      container `securityContext` for each deployment in the chart.
+
+
+      ## Upgrade tooling prerequisites
+
+      - **Use modern `kubectl` and `helm`:** Older versions may fail to update cert-manager
+      CRDs correctly (called out as urgent in both v0.16.0 and v1.0.0 notes).'
+    chart_updates: [Introduces the stable **v1 API** and makes it the **storage version**
+        for cert-manager resources; CRDs now include `apiextensions.k8s.io/v1` variants
+        and controllers are updated accordingly., 'Moves to newer/stable Kubernetes
+        APIs across the board: admissionregistration.k8s.io/v1 for webhooks and rbac.authorization.k8s.io/v1
+        for RBAC.', Improved logging via klog v2 and log-level usage; internal refactors
+        like cainjector leader election simplification., 'Enhances kubectl/ctl UX,
+        especially `kubectl cert-manager status certificate`, adding more related
+        resource and event output for debugging.', ACME improvements including preferred
+        chain support and better handling of Retry-After backoff; better error surfacing
+        for Orders/Challenges.]
+    features: ['Stable `v1` API is introduced and becomes the default/storage version,
+        improving long-term compatibility expectations.', '`kubectl cert-manager status
+        certificate` gains richer output (related Secret, Issuer, Orders/Challenges,
+        and Events) for faster troubleshooting.', 'Helm chart gains options for webhook
+        host networking, configurable probes, extra webhook annotations, and image
+        digests for pinning.', 'ACME enhancements: support for `preferredChain` and
+        improved rate-limit backoff handling via Retry-After.', 'Issuer/provider improvements:
+        async Venafi issuance (0.16), Vault issuer namespace support (1.0), and additional
+        HTTP01 podTemplate fields (serviceAccountName/priorityClassName).']
+    breaking_changes: ['**Kubernetes version compatibility:** Kubernetes < **v1.16**
+        requires special upgrade instructions for 0.16 -> 1.0 (per urgent notes).',
+      '**API removals:** Support for `AuditSink` resources in `auditregistration.k8s.io/v1alpha1`
+        was removed (v0.16.0).', '**CRD upgrade sensitivity:** Upgrading CRDs can
+        fail with old `kubectl`/`helm`; treat CRD updates as a critical step and follow
+        the documented upgrade guides.']
   chart_version: 1.0.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.0.0', 'quay.io/jetstack/cert-manager-controller:v1.0.0',
     'quay.io/jetstack/cert-manager-webhook:v1.0.0']
@@ -151,6 +930,36 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Helm chart**: v0.15 introduced `installCRDs` (disabled by default).\
+      \ If you want Helm to manage CRDs, set `installCRDs=true`.\n- **Helm chart**:\
+      \ v0.16 added the ability to set **per-deployment container `securityContext`**\
+      \ via values (for cert-manager, webhook, and cainjector).\n- **Tooling caution**:\
+      \ v0.16 notes that **older `kubectl`/`helm` struggle to update CRDs**; follow\
+      \ the 0.15\u21920.16 upgrade doc and ensure your client tooling is new enough.\n"
+    chart_updates: ['v0.15: Helm chart can optionally install/manage CRDs via `installCRDs`
+        (was previously external/static-manifest managed).', 'v0.15: ServiceAccount
+        customization added for webhook and cainjector (chart options).', 'v0.16:
+        Helm chart exposes container-level `securityContext` configuration per deployment.']
+    features: ['Optional Helm-managed CRDs via `installCRDs`, reducing manual CRD
+        lifecycle steps when installing/upgrading with Helm.', 'Webhook startup is
+        more reliable because it can bootstrap/manage its own CA/certs (dynamic authority),
+        reducing dependency on the controller being ready.', JKS and PKCS#12 keystore
+        support is GA and configurable per-Certificate via `spec.keystores`., 'New
+        `kubectl cert-manager` (ctl) plugin features: status output improvements,
+        manual renewal support (0.15 feature-gated; more commands in 0.16), and creation
+        of CertificateRequests from Certificate YAML.', 'New `v1beta1` API version
+        is introduced in 0.16, preparing for API stabilization/migrations.', 'Experimental
+        certificate controller implementations become enabled for all users in 0.16,
+        bringing features like private key rotation closer to default behavior.']
+    breaking_changes: ["v0.15: Default KeyUsage no longer includes `serverAuth`; if\
+        \ you rely on it and your issuer doesn\u2019t set it, you must explicitly\
+        \ add `serverAuth` to Certificate/CertificateRequest `usages` to avoid behavior\
+        \ changes.", 'v0.16: Support for `AuditSink` (`auditregistration.k8s.io/v1alpha1`)
+        as a cainjector target is removed; any setups relying on injecting CA bundles
+        into AuditSink will stop working.', 'v0.16: CRD upgrade can fail with older
+        Helm/kubectl clients; using outdated tooling may break the upgrade until clients
+        are updated and CRDs are applied per the documented procedure.']
   chart_version: 0.16.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.16.0', 'quay.io/jetstack/cert-manager-controller:v0.16.0',
     'quay.io/jetstack/cert-manager-webhook:v0.16.0']
@@ -159,6 +968,42 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes\n- **New chart value:**\
+      \ `installCRDs` (default **false**). When set to `true`, Helm will install/manage\
+      \ cert-manager CRDs as part of the release.\n  - Use via `values.yaml` or `--set\
+      \ installCRDs=true`.\n  - Decide explicitly whether you want Helm to own CRDs;\
+      \ if you already manage CRDs separately, leave this off.\n- **Feature gates\
+      \ via values:** experimental certificate controllers can be enabled with:\n\
+      \  - `featureGates: \"ExperimentalCertificateControllers=true\"`\n\n### Important\
+      \ carryover from v0.14.0 (if you haven\u2019t already done it)\n- v0.14.0 required\
+      \ updating Deployment selectors to Helm best practices; upgrading required **deleting\
+      \ the three cert-manager Deployments before upgrading** (controller/cainjector/webhook).\
+      \ If your 0.14 install came from Helm and you didn\u2019t perform this, validate\
+      \ your current resources/selectors before the 0.15 upgrade."
+    chart_updates: [Helm chart gained the `installCRDs` switch to optionally manage
+        CRDs with Helm (disabled by default)., 'Webhook deployment/process was improved
+        in 0.15 (DynamicAuthority / self-managed CA for serving certs), reducing dependency
+        on the controller for webhook startup reliability.', 'Chart supports additional
+        customization around service accounts (webhook and cainjector), and a narrower-scoped
+        RBAC role for leader-election configmaps (operational hardening).']
+    features: ['Optional Helm-managed CRDs via `installCRDs`, simplifying installations
+        that want CRDs lifecycle tied to the Helm release.', Experimental new Certificate
+        controller architecture (feature-gated) to enable capabilities like private
+        key rotation and manual renewal triggering., Webhook startup is more reliable
+        and faster because the webhook now bootstraps/maintains its own CA and serving
+        certs without waiting on the controller., General availability of per-Certificate
+        JKS and PKCS#12 keystore output via `certificate.spec.keystores` (no global
+        experimental flags needed)., New `kubectl cert-manager` (cert-manager-ctl)
+        plugin adds `convert` (API version conversion) and `renew` (manual renewal;
+        requires experimental certificate controllers).]
+    breaking_changes: ['**Urgent:** `serverAuth` key usage was removed from the default
+        usages set. If your Issuer does not automatically include it and you require
+        it, you must explicitly add `serverAuth` to `Certificate` and `CertificateRequest`
+        `usages` to avoid unexpected behavior after upgrade.', "If you previously\
+        \ relied on v0.14\u2019s global experimental JKS/PKCS12 flags, v0.15\u2019\
+        s recommended approach is per-Certificate `spec.keystores`; plan a migration\
+        \ of configuration/expectations accordingly."]
   chart_version: 0.15.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.15.0', 'quay.io/jetstack/cert-manager-controller:v0.15.0',
     'quay.io/jetstack/cert-manager-webhook:v0.15.0']
@@ -167,6 +1012,43 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to account for\n\n- **Webhook\
+      \ is now mandatory**: the Helm value `webhook.enabled` was **removed**; you\
+      \ can no longer disable the webhook. Plan networking/RBAC so the API server\
+      \ can reach the webhook.\n- **`isOpenShift` value removed** from the Helm chart;\
+      \ use the appropriate manifest/variant for OpenShift/Kubernetes version instead\
+      \ of toggling this flag.\n- **Deployment selector change (breaking for Helm\
+      \ upgrades)**: the Deployments\u2019 `spec.selector` was updated to follow Helm\
+      \ best practices. **You must delete the existing Deployments (`cert-manager`,\
+      \ `cert-manager-webhook`, `cert-manager-cainjector`) before upgrading** or the\
+      \ upgrade will fail because selectors are immutable.\n- If you previously disabled\
+      \ cainjector: a bug fix indicates `cainjector.enabled=false` now works correctly;\
+      \ re-check your values to ensure your intended state is applied post-upgrade.\n"
+    chart_updates: [Webhook component is required starting v0.14 (no-webhook variant
+        removed; webhook enable toggle removed in chart)., "Installation manifests\
+        \ reworked into two variants: `cert-manager.yaml` (standard) and `cert-manager-legacy.yaml`\
+        \ (for Kubernetes 1.11\u20131.14 / OpenShift 3.11).", 'CRD distribution changed:
+        `00-crds.yaml` replaced by a release-published CRD manifest; CRD conversion
+        webhook enabled to serve v1alpha3 alongside v1alpha2.', Deployment selectors
+        updated (requires deleting existing Deployments prior to Helm upgrade)., Webhook
+        leader-election RoleBinding now uses leader election namespace rather than
+        hard-coded `kube-system`., Flags/params added around webhook TLS cipher suites
+        and improved webhook startup time.]
+    features: ['CRD conversion webhook enabled and new `v1alpha3` API served alongside
+        `v1alpha2`, easing future API transitions.', Experimental certificate bundle
+        output support for **JKS** and **PKCS#12** via controller flags (global enable).,
+      'Venafi issuer enhancements: custom fields via `venafi.cert-manager.io/custom-fields`
+        annotation (TPP 19.2+ required for TPP).', New `emailSANs` field on Certificate
+        resources., 'Improved install compatibility: support extended to Kubernetes
+        1.11 and OpenShift 3.11 (via legacy manifests).']
+    breaking_changes: ['**Helm upgrade requires manual intervention**: delete the
+        three cert-manager Deployments before upgrading due to immutable selector
+        changes.', '**Webhook cannot be disabled anymore**; environments that relied
+        on `webhook.enabled=false` or no-webhook installs must now run the webhook
+        and ensure API server-to-webhook connectivity.', 'API evolution begins (`v1alpha3`
+        + conversion webhook): while intended to be seamless, any hardcoded assumptions
+        about field locations/serialization in clients may need validation.']
   chart_version: 0.14.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.14.0', 'quay.io/jetstack/cert-manager-controller:v0.14.0',
     'quay.io/jetstack/cert-manager-webhook:v0.14.0']
@@ -175,6 +1057,33 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **New chart values available (optional):**\n  - `volumes` / `volumeMounts`\
+      \ for cert-manager pods.\n  - `deploymentAnnotations`, `webhook.deploymentAnnotations`,\
+      \ `cainjector.deploymentAnnotations`.\n  - Arbitrary `securityContext` support;\
+      \ plus optional `webhook.securityContext` and `cainjector.securityContext`.\n\
+      \  - PodSecurityPolicy-related toggle to **disable AppArmor** when PSPs are\
+      \ enabled.\n- **Chart rendering fix:** handles \u201Cfalse-y\u201D values better\
+      \ to mitigate kubernetes/kubernetes#66450.\n- **Chart manifest detail:** explicitly\
+      \ sets `containerPort` protocol.\n\n_No mandatory Helm values changes are called\
+      \ out for 0.12\u21920.13; v0.13 is described as not requiring special upgrade\
+      \ steps._"
+    chart_updates: [Helm chart now supports configuring additional pod `volumes` and
+        `volumeMounts`., Helm chart supports configurable deployment annotations for
+        controller/webhook/cainjector., Helm chart supports setting pod securityContext
+        for controller and separately for webhook/cainjector., Helm chart can disable
+        AppArmor when using PodSecurityPolicies., Helm chart fixes templating of false-y
+        values (kubernetes/kubernetes#66450)., Helm chart explicitly defines `containerPort`
+        protocol.]
+    features: ['ACME External Account Binding (EAB) support via `spec.acme.externalAccountBinding`
+        on ACME Issuer/ClusterIssuer, enabling use with ACME providers that require
+        EAB.', 'Certificate subject supports the full set of standard X.509 subject
+        fields (e.g., OU, province, serialNumber, country, etc.).', New `InvalidRequest`
+        status condition on `CertificateRequest` lets external issuers signal a non-retriable
+        invalid CSR/request to avoid endless retries/quota burn.]
+    breaking_changes: ["No breaking changes or special upgrade steps are indicated\
+        \ for v0.13.0 relative to v0.12.0 in the provided notes (it\u2019s described\
+        \ as a minor, incremental update)."]
   chart_version: 0.13.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.13.0', 'quay.io/jetstack/cert-manager-controller:v0.13.0',
     'quay.io/jetstack/cert-manager-webhook:v0.13.0']
@@ -183,6 +1092,45 @@ versions:
     '1.11']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **cainjector subchart removed/flattened:** v0.12.0 removes the
+      nested `cainjector` subchart and includes it in the main chart. If you had values
+      under a subchart key, re-check and migrate any `cainjector`-scoped values to
+      the new location as required by your chart version.
+
+      - **Service ports now specify protocol explicitly:** the Helm chart explicitly
+      defines `ContainerPort` protocol; usually no action required unless you patched
+      templates or depended on implicit defaults.
+
+      - **Chart metadata fix:** `apiVersion` missing in `Chart.yaml` was fixed; no
+      user action.
+
+      '
+    chart_updates: ['Webhook component deployment was redesigned to no longer rely
+        on an `APIService`, reducing risk of cluster-wide issues if the webhook is
+        unavailable.', Multi-architecture image support is now automatic via Docker
+        manifest lists (no need for arch-specific images/manifests)., Improved ACME
+        Challenge diagnostics; more information surfaced on Challenge resources (`kubectl
+        describe challenge ...`)., 'Various bug fixes: PSP compatibility, OwnerReferencesPermissionEnforcement
+        admission controller compatibility, leader election signal handling, and solver/docs
+        fixes.', 'Defaults/behavioral tweaks: webhook listen address default changed
+        to **10250** for better GKE private cluster compatibility.', 'Schema/validation
+        tightened: `CertificateRequest.spec.csr` marked required; additional API resource
+        validation for `status` subresource; immutability enforced on multiple Order
+        fields.']
+    features: [Automatic multi-architecture image selection using Docker manifest
+        lists (arm/arm64 etc.) without changing manifests., Much better debugging
+        for ACME authorization failures via richer status/details on Challenge resources.,
+      Webhook simplified (no `APIService`) and now includes support for CRD API conversion
+        groundwork for future v1beta1., Cloudflare issuer supports API token authentication.,
+      Certificates now include `serverAuth` extended key usage by default.]
+    breaking_changes: ['**Vault Kubernetes auth path change:** if you set a custom
+        Kubernetes Auth Mount Path, you must now specify the full mount path; cert-manager
+        appends `/login` automatically. Default changed from `kubernetes` to `/v1/auth/kubernetes`.',
+      'Order resource fields made immutable; if you have automation that mutates these
+        fields after creation, it will now fail and must be updated.', '`CertificateRequest.spec.csr`
+        is now required by schema; any manifests missing it (for CRs you create directly)
+        will be rejected.']
   chart_version: 0.12.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.12.0', 'quay.io/jetstack/cert-manager-controller:v0.12.0',
     'quay.io/jetstack/cert-manager-webhook:v0.12.0']
@@ -190,6 +1138,7 @@ versions:
   kube: ['1.9']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.11.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v0.11.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
     'quay.io/jetstack/cert-manager-webhook:v0.11.0']

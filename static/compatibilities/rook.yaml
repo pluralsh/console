@@ -7,81 +7,373 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Minimum Helm version:** Helm **3.13+** is now explicitly supported/tested\
+      \ (Rook now supports the six most recent Helm minor versions).\n- **New default\
+      \ behavior (Helm):** The **Ceph CSI Operator is installed/enabled by default**\
+      \ when deploying via Helm.\n  - New value in `rook-ceph` chart: `csi.rookUseCsiOperator:\
+      \ true` (default).\n  - To revert to the previous \u201CRook-managed CSI\u201D\
+      \ mode (e.g., if you hit a blocker): set `csi.rookUseCsiOperator: false`.\n\
+      - **Install-time manifest note:** If you deploy with raw manifests, you now\
+      \ need `csi-operator.yaml`. With Helm, this is handled automatically when `csi.rookUseCsiOperator`\
+      \ is enabled."
+    chart_updates: [Ceph CSI Operator integration is now the default/recommended path
+        for configuring CSI drivers (RBD/CephFS/NFS). Rook will auto-convert existing
+        Rook CSI settings to Ceph CSI Operator CRs during the v1.18 upgrade and throughout
+        v1.18.x., Operator supports Kubernetes v1.29+ minimum (v1.17 required v1.28+).,
+      Operator validates node topology labels at CephCluster creation to prevent invalid
+        CRUSH hierarchies; failures occur for new clusters with duplicated child topology
+        labels across zones unless the check is skipped., Adds `clusterID` support
+        fields for certain CRDs (CephBlockPoolRadosNamespace and CephFilesystemSubVolumeGroup).,
+      'Mon failover behavior improved: if the assigned node no longer exists, failover
+        is immediate (no 20-minute wait).']
+    features: [Ceph CSI Operator becomes the default/recommended way to manage CSI
+        (RBD/CephFS/NFS); Rook v1.18 auto-migrates existing CSI settings to the operator
+        CRs transparently during upgrade., Ceph CSI v3.15 support (via CSI operator
+        or legacy mode for now); note that the CSI operator will become required in
+        the next release., Experimental CephX key rotation support with new `spec.security.cephx`
+        settings; requires Ceph v19.2.3+ (admin/mon keys not yet rotatable)., Support
+        specifying `clusterID` in CephBlockPoolRadosNamespace and CephFilesystemSubVolumeGroup
+        CRs., Faster mon failover when the target node is gone (immediate instead
+        of waiting 20 minutes).]
+    breaking_changes: [Kubernetes **v1.29** is now the minimum supported version (v1.17
+        was v1.28)., 'New clusters only: CephCluster creation now validates topology
+        labels to prevent misconfigured CRUSH hierarchies; creation can fail if child
+        labels (e.g., `topology.rook.io/rack`) are duplicated across zones unless
+        `ROOK_SKIP_OSD_TOPOLOGY_CHECK=true` is set.', 'Object storage changes introduced
+        in v1.17 (relevant when coming from 1.17.0): OBC additional config fields
+        are disabled by default unless `ROOK_OBC_ALLOW_ADDITIONAL_CONFIG_FIELDS` is
+        enabled; CephObjectStoreUser credential management may purge undeclared extra
+        S3 credentials; Kafka bucket notifications now default Kafka auth mechanism
+        to `PLAIN` and cannot be set via `opaqueData` mechanism param.']
   chart_version: 1.18.0
   images: []
 - version: 1.17.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Rook v1.17 raises the supported Kubernetes floor to v1.28 (v1.16
+        was v1.27). Ensure your cluster/control-plane and any constrained environments
+        (e.g., managed K8s versions) meet this before upgrading.', ObjectBucketClaim
+        (OBC) flexibility introduced in v1.16 is now disabled by default in v1.17
+        for safer defaults; enabling it requires setting the operator env var `ROOK_OBC_ALLOW_ADDITIONAL_CONFIG_FIELDS`.
+        This may require updating the operator deployment/Helm values to add the env
+        var if you rely on those OBC fields., 'CephObjectStoreUser behavior changes
+        due to new first-class credential management: Rook will purge undeclared extra
+        S3 credentials on existing users; plan to migrate to declarative credential
+        management if you previously rotated credentials manually.', CephBucketTopic
+        Kafka notifications now default `PLAIN` auth mechanism and no longer allow
+        overriding the mechanism via `spec.endpoint.kafka.opaqueData` using `&mechanism=<auth
+        type>`; update affected CephBucketTopic manifests explicitly if you use another
+        mechanism.]
+    features: ['OBCs can optionally set a pre-existing Ceph RGW user as bucket owner
+        (via CephObjectStoreUser), avoiding one-user-per-bucket and allowing re-linking
+        existing buckets to a specified owner.', 'Ceph CSI updated to v3.14 with multiple
+        improvements across RBD/CephFS, snapshots, and other areas (review ceph-csi
+        3.14 release notes for specifics relevant to your workloads).', Experimental
+        support for external monitors (mons) to place a mon outside the Kubernetes
+        cluster for certain two-datacenter/stretch-like scenarios., 'DNS-based mon
+        endpoint tracking for clients outside the cluster via `rook-ceph-active-mons.<ns>.svc.cluster.local`,
+        reducing manual mon endpoint updates when mon IPs change.', 'Per-node ceph.conf
+        overrides: node-specific ConfigMaps can override `ceph.conf` for OSDs and
+        OSD prepare jobs on that node.']
+    breaking_changes: [Minimum supported Kubernetes version is now v1.28 (was v1.27
+        in v1.16)., OBC additionalConfig options that allow user-controlled bucket
+        policy/etc. are now disabled by default; you must opt in with `ROOK_OBC_ALLOW_ADDITIONAL_CONFIG_FIELDS`
+        if you depend on them., 'CephObjectStoreUser now has first-class credential
+        management; Rook will remove (purge) any extra S3 credentials not declared
+        in the resource, which can break setups where admins manually added/rotated
+        credentials on the RGW user.', 'Kafka notification auth mechanism defaults
+        to `PLAIN`, and overriding the mechanism via `opaqueData` query string is
+        no longer supported; manifests must be adjusted for non-PLAIN auth.']
   chart_version: 1.17.0
   images: []
 - version: 1.16.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Ceph-CSI driver updated to v3.13, adding volume group snapshots plus
+        various CephFS/RBD improvements and sidecar updates.', 'CephBlockPoolRadosNamespace
+        now supports mirroring, including optional periodic status monitoring when
+        the parent pool has statusCheck enabled.', PVC-based OSDs can be migrated
+        to enable/disable encryption., Ceph object storage gains multiple RGW instances
+        support and more advanced configuration options (extra CLI params/ceph.conf
+        settings)., ObjectBucketClaims can manage S3 bucket policy via additionalConfig.bucketPolicy;
+        RGW admin ops logging can be enabled via opsLogSidecar., Kubernetes support
+        is extended up to v1.32.]
+    breaking_changes: [Ceph Quincy (v17) support is removed; only Ceph Reef (v18)
+        and Squid (v19) are supported in Rook v1.16., "CSI network \u201Cholder\u201D\
+        \ pods are removed; clusters still using csi-*plugin-holder-* must disable/remove\
+        \ them before upgrading.", Minimum supported Kubernetes version increases
+        to v1.27.]
   chart_version: 1.16.0
   images: []
 - version: 1.15.0
   kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Kubernetes minimum supported version increases to 1.26 in v1.15.0
+        (was 1.25 in v1.14.0); verify cluster version before upgrading., 'Rook now
+        uses fully-qualified image names (e.g., docker.io/rook/ceph) in operator manifests
+        and Helm charts; if you mirror images or use private registries, ensure overrides
+        still work as expected.', Ceph-CSI sidecars/images updated with Ceph-CSI v3.12;
+        expect rolling restarts of CSI components during upgrade.]
+    features: [Adds support for Ceph Squid (v19) in addition to Reef (v18) and Quincy
+        (v17); note Quincy support will be removed in Rook v1.16., 'Ceph-CSI driver
+        updated to v3.12, bringing new RBD options, log rotation, and updated sidecar
+        images.', 'New cluster options to allow updating OSD device class (allowDeviceClassUpdate:
+        true) and OSD weight (allowOsdCrushWeightUpdate: true) via the CephCluster
+        CR.']
+    breaking_changes: [Minimum supported Kubernetes version is now v1.26; upgrade
+        Kubernetes before upgrading Rook if needed., CephBlockPool updates now error
+        when an invalid deviceClass is specified; existing pools with invalid device
+        class settings may fail until corrected., "CSI network \u201Cholder\u201D\
+        \ pods are now deprecated and should be disabled if present; this becomes\
+        \ required before upgrading to Rook v1.16.", Ceph COSI driver image changes
+        can impact existing COSI Buckets/BucketClaims/BucketAccesses; follow the upstream
+        migration guide before/after upgrade., Object store endpoint behavior changes
+        when spec.hosting is set; use the new spec.hosting.advertiseEndpoint to get
+        the desired endpoint behavior.]
   chart_version: 1.15.0
   images: []
 - version: 1.14.0
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values changes (v1.13.0 \u279C v1.14.0)\n- **CSI image\
+      \ values format changed (breaking):** if you previously set CSI images using\
+      \ a single `image` value, you must now set **`repository`** and **`tag`** **separately**\
+      \ for the CSI images in `values.yaml`.\n- **Removed operator env var (breaking):**\
+      \ `CSI_ENABLE_READ_AFFINITY` was removed from the operator config. If you relied\
+      \ on it (especially if set to `\"true\"`), configure the equivalent **per-`CephCluster`\
+      \ CSI driver options** before upgrading (see the v1.14 docs for `csi.driverOptions`).\n"
+    chart_updates: [Kubernetes minimum version raised to **v1.25** (cluster must be
+        upgraded first)., Ceph daemon pods that used the `default` service account
+        now use **`rook-ceph-default`** (review any RBAC/PSA/PodSecurity policies
+        or tooling that assumed `default`)., CSI network *plugin holder* pods are
+        being deprecated; optional migration in v1.14 but plan to disable/migrate
+        ahead of a future required removal.]
+    features: ["Supports Kubernetes **v1.25\u2013v1.29** (v1.30 planned once released).",
+      CephBlockPool CR can set a custom Ceph `application` value., RGW object stores
+        can share metadata/data pools using RADOS namespaces to reduce pool count
+        when multiple object stores exist., Adds VolumeSnapshotGroup support for RBD
+        and CephFS CSI drivers., Adds S3 virtual-host-style bucket access via `hosting.dnsNames`
+        in CephObjectStore., Allows configuring a static prefix for CSI drivers and
+        the OBC provisioner (default prefix is the `rook-ceph` namespace)., Adds Azure
+        Key Vault KMS integration for storing OSD encryption keys., Adds additional
+        status columns for `kubectl get` output on Rook CRDs.]
+    breaking_changes: [Minimum supported Kubernetes version is now **v1.25**; upgrade
+        Kubernetes before upgrading Rook., Helm CSI image configuration changed from
+        a single `image` to separate `repository` + `tag` fields; existing values
+        must be updated., CSI network *holder* pods are deprecated; v1.14 migration
+        is optional but will be required in a future release (plan remediation).,
+      Operator config `CSI_ENABLE_READ_AFFINITY` removed; configure read-affinity
+        via each `CephCluster` CSI driver options before upgrading if you previously
+        enabled it.]
   chart_version: 1.14.0
   images: []
 - version: 1.13.0
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Default Ceph-CSI driver moves from v3.9 (in 1.12) to v3.10 in 1.13.,
+      Added experimental `cephConfig` in the `CephCluster` CR to set Ceph config options
+        via the CR; these settings override existing ceph.conf override mechanisms.,
+      CSI read-affinity settings are now configured per-cluster in the `CephCluster`
+        CR instead of the operator ConfigMap., CephFS default SubvolumeGroup now enables
+        pinning by default to spread load predictably across MDS ranks., Ceph exporter
+        now uses a reduced-privilege keyring instead of the admin keyring., MONs will
+        automatically fail over when `hostNetwork` is changed in the `CephCluster`
+        CR., Rook will honor the label `ceph.rook.io/do-not-reconcile` on all Ceph
+        daemons to allow advanced maintenance/debug workflows.]
+    breaking_changes: [Ceph Pacific (v16) support is removed; only Ceph Quincy (v17)
+        and Reef (v18) are supported in 1.13., Minimum Kubernetes version increases
+        to v1.23 (from v1.22 in 1.12)., 'Minimum supported Ceph-CSI driver increases
+        to 3.9 (1.12 already required 3.8+, but 1.13 requires 3.9+).', 'Rook admission
+        controller is removed; if you had enabled it, disable it before upgrading
+        per the 1.13 upgrade guide.']
   chart_version: 1.13.0
   images: []
 - version: 1.12.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Support for Ceph Reef (v18)., Ceph CSI default version bumped to v3.9
+        (minimum supported v3.8)., Experimental Ceph COSI driver added to provision
+        object buckets., Automation to recover RBD (RWO) volumes after node loss (requires
+        CSI-addons and K8s v1.26 non-graceful node shutdown feature)., Multus network
+        validation tool and improvements to external Ceph cluster configuration script.,
+      Security hardening by dropping container capabilities., Ability to disable ObjectBucketClaim
+        and ObjectBucketNotification controllers., 'NFS enhancements: experimental
+        RGW backend for CephNFS, NFS-Ganesha v5.1 monitoring endpoint support, and
+        kerberos bug fixes.']
+    breaking_changes: [Minimum supported Kubernetes version is now v1.22 (was v1.21
+        in v1.11)., 'Minimum supported Ceph-CSI driver is now 3.8; if you pin CSI
+        images/versions, update them accordingly.', 'For CephObjectStores, a manually-set
+        `rgw_run_sync_thread` (via `ceph config set`) will be overridden based on
+        `disableMultisiteSyncTraffic`; validate multisite/sync behavior after upgrade.']
   chart_version: 1.12.0
   images: []
 - version: 1.11.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **PodSecurityPolicy defaults changed:** the Helm value `pspEnable`\
+      \ now defaults to **`false`** (and docs for enabling PSP were removed). If you\
+      \ still rely on PSP on older clusters, refer to the v1.10 docs and explicitly\
+      \ set `pspEnable=true` during the upgrade.\n- **Removed values/CR fields:**\
+      \ settings related to **MachineDisruptionBudgets** were removed (see breaking\
+      \ changes). If you previously set these via chart values/CR, remove them before\
+      \ upgrading:\n  - `manageMachineDisruptionBudgets`\n  - `machineDisruptionBudgetNamespace`\n"
+    chart_updates: [Charts should no longer assume/enable PodSecurityPolicy by default
+        (`pspEnable` default is `false`)., Any chart templating/values that referenced
+        MachineDisruptionBudgets-related settings must be removed/updated accordingly.,
+      Expect updated manifests/images for the new default Ceph-CSI version (now v3.8).]
+    features: ['Ceph-CSI default version is now v3.8, bringing new storage features
+        and fixes compared to v3.7.', 'New `requireMsgr2` option on `CephCluster`
+        allows enforcing msgr2-only communication (kernel 5.11+), enabling wire features
+        like encryption/compression.', RGW bucket notifications and topics are now
+        considered stable., 'Ceph exporter daemon becomes the preferred metrics source
+        (performance counters), reducing load on the Ceph mgr and improving scalability.',
+      RBD read affinity is available via krbd map options to prefer nearby OSDs based
+        on CRUSH/topology labels., 'Multi-cluster mirroring with overlapping networks
+        is supported via MCS-compatible solutions (e.g., Submariner globalnet) for
+        Ceph v17.2.6+.', 'Standby Ceph mgr readiness is now handled via readiness
+        probes (active passes, standby fails) instead of a sidecar.']
+    breaking_changes: [Kubernetes minimum supported version increased to **v1.21**
+        (ensure the cluster control plane and nodes meet this before upgrading).,
+      'Minimum supported Ceph-CSI version is **v3.7**; Rook 1.11 deploys **v3.8**
+        by default, so pinning older CSI versions will not be supported.', 'MachineDisruptionBudgets
+        support was removed; delete/stop using related `CephCluster` fields (`manageMachineDisruptionBudgets`,
+        `machineDisruptionBudgetNamespace`) and any dependent automation.', 'If you
+        relied on PodSecurityPolicy being enabled by default, you must now explicitly
+        enable it (older K8s only) or migrate to Pod Security Standards/admission
+        alternatives.']
   chart_version: 1.11.0
   images: []
 - version: 1.10.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to account for\n- **MDS\
+      \ probes moved to `CephFilesystem`**: If you previously set MDS liveness/startup\
+      \ probes on `CephCluster`, move them into each `CephFilesystem` CR under the\
+      \ metadata server settings.\n- **Default pod resources now set in Helm charts**:\
+      \ Rook Ceph components will get default requests/limits from the chart. If you\
+      \ had tuned resources implicitly (or relied on \u201Cno defaults\u201D), review\
+      \ and override/remove resource settings in `values.yaml` as needed.\n- **Prometheus\
+      \ rules creation moved to Helm values**: If you relied on `CephCluster.spec.monitoring.enabled`\
+      \ to create Prometheus rules, you now must enable them via the cluster chart\
+      \ value `monitoring.createPrometheusRules`.\n\n### Version prerequisites that\
+      \ impact cluster/helm upgrade planning\n- **Ceph Octopus removed (v1.10)**:\
+      \ Ensure your Ceph cluster is **>= v16 (Pacific)** before upgrading to Rook\
+      \ **v1.10**.\n- **Kubernetes minimum version**: Rook **v1.10** requires **Kubernetes\
+      \ >= 1.19**."
+    chart_updates: [Prometheus alerting rules are now installed/managed by the **cluster
+        Helm chart** when enabled via `monitoring.createPrometheusRules` (instead
+        of being created via the `CephCluster` CR setting)., Helm charts now ship
+        with **default resource requests/limits** for Ceph component pods (review
+        and tune for your environment).]
+    features: [Ceph-CSI **v3.7** becomes the default CSI driver version with Rook
+        v1.10 (brings CSI feature updates per upstream v3.7 notes)., 'RGW adds support
+        for **AWS Server Side Encryption** (AWS-SSE:S3) configuration.', '`customEndpoints`
+        added for Object Multi-site connections in `CephObjectZone`.', Host-based
+        clusters can use OSDs on **logical volumes (LVM)** in addition to raw devices/partitions.,
+      'Toolbox pod now uses the **Ceph image directly**, matching the Ceph version
+        running in your cluster.', (From v1.9) Network **encryption** and **compression**
+        settings are configurable via `CephCluster` (with kernel/Ceph version prerequisites).]
+    breaking_changes: ['MDS liveness/startup probes must be configured on **`CephFilesystem`**,
+        not `CephCluster` (update your CR manifests accordingly).', Ceph Octopus (v15)
+        is **no longer supported** in v1.10; upgrade Ceph to **>= v16** first., Rook
+        v1.10 requires **Kubernetes >= 1.19**., 'If you depended on `CephCluster.spec.monitoring.enabled`
+        to create Prometheus rules, switch to Helm value **`monitoring.createPrometheusRules`**.',
+      Helm charts now apply **default pod resources** for Ceph components; this can
+        change scheduling/limits if you were not explicitly setting them.]
   chart_version: 1.10.0
   images: []
 - version: 1.9.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart changes to plan for\n- **Default pod resources now\
+      \ set for all Ceph components** in the Helm charts (new defaults in `values.yaml`).\
+      \ If you previously relied on \u201Cno requests/limits\u201D (or set them via\
+      \ custom templates), review and override/remove these defaults to match your\
+      \ cluster sizing.\n- **Prometheus rules installation moved to the cluster Helm\
+      \ chart.** If you previously enabled rules via `CephCluster.spec.monitoring.enabled`,\
+      \ you must now enable them via the chart value **`monitoring.createPrometheusRules`**.\n\
+      \n## CRD/manifest configuration changes that affect Helm users\n- **MDS probes\
+      \ moved:** MDS liveness/startup probes are no longer configured via `CephCluster`;\
+      \ they are configured via the **`CephFilesystem` CR**. If you set or tuned MDS\
+      \ probes, migrate those settings accordingly."
+    chart_updates: [Prometheus alerting rules are now deployed by the rook-ceph-cluster
+        Helm chart (when enabled) rather than being created based on `CephCluster.spec.monitoring.enabled`.,
+      Helm charts now include default CPU/memory resource requests/limits (or requests)
+        for all Ceph component pods; these may change scheduling behavior and should
+        be reviewed before upgrade.]
+    features: [Example clusters now run **2 mgr daemons** (active + standby) for higher
+        availability; services labeled `app=rook-ceph-mgr` will be updated to point
+        to the new active mgr after failover., '**Network encryption** can be configured
+        via `CephCluster` network settings (requires Linux kernel 5.11+).', '**Network
+        compression** can be configured via `CephCluster` network settings (requires
+        Ceph Quincy/v17 plus a newer kernel, similar to encryption requirements).',
+      CSI pods can be configured with a **custom `ceph.conf`**., Updated/added **Ceph
+        Prometheus rules** aligned with upstream Ceph recommendations; can be created
+        via Helm with `monitoring.createPrometheusRules`., RGW pods now use a dedicated
+        **`rook-ceph-rgw` service account**., New **`CephBlockPoolRadosNamespace`
+        CRD** to manage RADOS namespaces within a pool.]
+    breaking_changes: [MDS liveness/startup probes configuration moved from `CephCluster`
+        to `CephFilesystem`; existing `CephCluster` probe settings will no longer
+        apply until migrated., 'Helm charts now set default pod resources for Ceph
+        components, which can cause scheduling/admission changes (e.g., pods may not
+        schedule on small nodes) unless values are adjusted.', Prometheus rules are
+        no longer created by `CephCluster.spec.monitoring.enabled`; Helm users must
+        enable rule creation with `monitoring.createPrometheusRules` (or manage rules
+        externally)., 'The obsolete cross-build container was removed (mostly impacts
+        CI/build workflows, not runtime clusters).']
   chart_version: 1.9.0
   images: []
 - version: 1.8.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.8.0
   images: []
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.6.0
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.5.0
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.4.0
   kube: ['1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14']
   requirements: []
   incompatibilities: []
+  summary: null

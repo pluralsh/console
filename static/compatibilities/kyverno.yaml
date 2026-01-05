@@ -7,6 +7,45 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm/chart actions required
+
+      - **CRDs packaging changed**: Kyverno now provides a **standalone CRDs chart**.
+      Plan how you manage CRDs during the upgrade (install/upgrade CRDs separately
+      from the main chart, and ensure your GitOps/Helm flow accounts for this).
+
+      - **Helm hooks cleanup/rename**: Several **helm hooks were cleaned up and hook
+      names shortened**. If you have automation that depends on specific hook names
+      or hook resources, re-validate it.
+
+      - **Test pod customization**: New option to set **podAnnotations for test pods**.
+
+      - **Migration job updated**: The **migration job includes new policy types**;
+      ensure it runs successfully during upgrade.
+
+      - **Templating scope change**: A fix made a helm templating value **global**;
+      if you had workarounds for scoping issues, re-check your values overrides.
+
+      '
+    chart_updates: ['Introduced a standalone CRDs subchart/package for Kyverno CRDs,
+        changing how CRDs may be installed/managed during upgrades.', 'Helm hooks
+        were cleaned up and hook names shortened (less clutter, but may affect scripts
+        that referenced them).', Helm chart gained configurable podAnnotations for
+        Kyverno test pods., Migration job template updated to include new policy types.,
+      Fixed/adjusted helm templating to make a value global (scoping fix).]
+    features: ['New namespaced policy types were introduced: NamespacedValidatingPolicy,
+        NamespacedImageValidatingPolicy, and NamespacedDeletingPolicy (useful for
+        delegating policy ownership to namespaces).', CEL policy API surface expanded
+        with v1beta1 versions for ValidatingPolicy/ImageValidatingPolicy/MutatingPolicy/GeneratingPolicy/DeletingPolicy
+        and fine-grained CEL exceptions support., 'Webhooks can now be built using
+        matchLabels defined in policy, and CEL policy performance metrics were added
+        for observability.', 'Kyverno can bind to a hostIP when running in hostNetwork
+        mode, improving flexibility for networking constraints.']
+    breaking_changes: ['Deprecated webhook was removed; if you relied on it (or had
+        network policies/allowlists targeting it), you must update to the supported
+        webhook endpoints/configuration.', UpdateRequest v1beta1 is now unserved;
+        any clients/manifests still using that version must be updated to a served
+        version before/with the upgrade.]
   chart_version: 3.6.0
   images: ['curlimages/curl:8.10.1', 'reg.kyverno.io/kyverno/background-controller:v1.16.0',
     'reg.kyverno.io/kyverno/cleanup-controller:v1.16.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.16.0',
@@ -16,12 +55,131 @@ versions:
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to check
+
+
+      - **ServiceMonitor annotations:** chart now supports setting annotations on
+      Kyverno `ServiceMonitor` resources. If you rely on custom annotations for scraping/tenant
+      routing, review/enable the new values.
+
+      - **New CRDs shipped by the chart:** chart adds **MutatingPolicy (mpol)** and
+      **GeneratingPolicy (gpol)** CRDs. Ensure CRD installation/upgrade is handled
+      in your process (Helm CRD install, GitOps CRD sync, or separate CRD pipeline).
+
+      - **PDB enhancement:** chart adds support to set `unhealthyPodEvictionPolicy`
+      on PodDisruptionBudgets; review if you manage PDB behavior during node drains.
+
+      - **ServiceAccount token mounting controls:** chart adds ability to disable
+      SA token automount and adds `automountServiceAccountToken` support for Kyverno
+      controllers. If your cluster hardens SA tokens, set these explicitly.
+
+      - **Service trafficDistribution:** chart adds `trafficDistribution` support
+      for Services on Kubernetes **1.31+**; verify cluster version and whether you
+      want this set.
+
+      - **Test pod template scheduling knobs:** chart adds `nodeSelector` and `tolerations`
+      support for test pod templates.
+
+      - **OpenReports rendering:** chart adds OpenReports resources and propagates
+      the relevant value to controller flags. If you enable OpenReports, ensure your
+      downstream tooling consumes it.
+
+      '
+    chart_updates: [Adds ServiceMonitor annotation support., Includes `mpol` and `gpol`
+        CRDs in the Helm chart (and related CRD packaging updates)., Adds PDB `unhealthyPodEvictionPolicy`
+        support., Adds ability to disable ServiceAccount token automount; adds `automountServiceAccountToken`
+        for Kyverno controllers., Adds Service `trafficDistribution` support (K8s
+        1.31+)., Adds nodeSelector/tolerations support for test pod templates., Renders
+        OpenReports resources and wires values to flags., 'Tooling bumps: helm/helm-docs
+        version updates.']
+    features: ['Introduces new policy types/flows: **MutatingPolicy**, **GeneratingPolicy**,
+        and **DeletingPolicy** with admission flow, background reporting, and CLI
+        support (mutate existing, generate existing, cleanup).', 'Policy reports can
+        be emitted in **OpenReports** format (alpha), replacing/transitioning from
+        prior report mechanisms.', 'CLI improvements: `skipColor`, more test output
+        formats (json/yaml/markdown/junit), improved apply/test behaviors, and support
+        for additional admission policy types.']
+    breaking_changes: ['**ValidatingAdmissionPolicy generation is enabled by default**
+        in v1.15.0; this can create additional Kubernetes resources and requires cluster
+        permissions and API availability.', "CEL function/operator rename: `image()`\
+        \ \u2192 `parseImageReference`, which can break existing CEL expressions in\
+        \ policies.", CLI deprecated APIs removed; older scripts/automation invoking
+        removed flags/APIs may need updates., Context is disabled when using CEL expressions
+        in `validate` rules; policies that depended on context + CEL together may
+        behave differently.]
   chart_version: 3.5.0
   images: []
 - version: 1.14.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart values / config changes to check\n\n### 1) **Policy\
+      \ Exceptions default behavior (security hardening)** *(introduced in Kyverno\
+      \ v1.13.0)*\nOlder Helm chart versions enabled exceptions by default for all\
+      \ namespaces. In v1.13 this default was changed due to **CVE-2024-48921**.\n\
+      \n**What to do:**\n- If you rely on `PolicyException` broadly, explicitly configure\
+      \ which namespaces should allow exceptions per the Kyverno install customization\
+      \ docs.\n- Validate that expected exceptions still apply post-upgrade (especially\
+      \ in non-system namespaces).\n\n### 2) **RBAC: wildcard \u201Cview everything\u201D\
+      \ removed** *(introduced in Kyverno v1.13.0)*\nKyverno removed wildcard view\
+      \ permissions and instead binds to the standard `view` role.\n\n**What to do:**\n\
+      - If you have mutate/generate policies operating on **custom resources**, reports,\
+      \ or any feature that requires Kyverno to *list/get/watch* those CRDs, you may\
+      \ need to add extra RBAC to let controllers read those resources.\n- Pay special\
+      \ attention to reporting controllers and custom resource targets.\n\n### 3)\
+      \ **Removed Helm keys: `cleanupJobs.*`** *(v1.13.0)*\nThe chart removed `cleanupJobs`\
+      \ keys.\n\n**What to do:**\n- Remove/replace any values overrides referencing\
+      \ `cleanupJobs`.\n- Note: cleanup jobs were also disabled by default around\
+      \ the reporting changes; confirm desired cleanup behavior.\n\n### 4) Reporting\
+      \ / metrics / dashboards changes *(v1.13.0)*\n- Default metrics set updated.\n\
+      - Grafana dashboard metric rename: `kyverno_policy_results_total` \u2192 `kyverno_policy_results`.\n\
+      \n**What to do:**\n- Update Prometheus recording rules / Grafana dashboards\
+      \ if they reference the old metric name.\n\n### 5) New Helm options added in\
+      \ v1.13 (may require no change but are useful)\n- `global.tolerations` (global\
+      \ tolerations)\n- `global.image.imagePullSecrets`\n- Configurable `hostNetwork`\
+      \ for admission- and cleanup-controller\n- Webhook pod annotations\n- Custom\
+      \ ports for background- and reports-controller\n- Resync period configuration\
+      \ for informers\n- Reporting configuration per rule type\n\n### 6) Helm changes\
+      \ in v1.14.0\n- Added toggle to enable/disable aggregating user-facing roles\
+      \ with Kyverno RBAC.\n- Admission-controller HPA support.\n- Switched to `serviceAccountName`\
+      \ (instead of deprecated `serviceAccount`).\n- Added `dnsconfig` for deployments.\n\
+      \n**What to do:**\n- If you previously used `serviceAccount` in values, migrate\
+      \ to `serviceAccountName`.\n- If you use custom RBAC patterns, review the new\
+      \ \u201Caggregate roles\u201D toggle.\n- If you want autoscaling for admission-controller,\
+      \ evaluate the new HPA values.\n"
+    chart_updates: ['Kyverno v1.13.0: chart removed wildcard view permissions and
+        changed default exception settings; multiple reporting/cleanup/report-type
+        changes landed including removal of old report types and disabling cleanup
+        jobs by default.', 'Kyverno v1.13.0: Helm chart removed `cleanupJobs` values
+        keys; added multiple new configuration knobs (hostNetwork, global tolerations,
+        imagePullSecrets, resync periods, ports, annotations).', 'Kyverno v1.14.0:
+        Helm chart added admission-controller HPA support, added `dnsconfig`, switched
+        to `serviceAccountName`, and introduced a toggle for aggregating user-facing
+        roles with Kyverno RBAC.']
+    features: ['v1.14: Introduced new policy types `ValidatingPolicy` and `ImageValidatingPolicy`,
+        including JSON payload support and auto-generation of Kubernetes `ValidatingAdmissionPolicy`
+        where applicable.', 'v1.14: Extended CEL support (libraries and the ability
+        to reference `PolicyException` in CEL), increasing expressiveness for validation
+        logic.', 'v1.13: Significant enhancements to image verification (Cosign features
+        like TSA chain, signature algorithms, OCI 1.1 signatures, bundle verification)
+        and policy authoring (new `validate.assert`, `foreach` for generate, labelSelectors
+        for mutate targets).', 'v1.13: Reporting enhancements including richer results
+        (custom data, more rule types covered), new controller circuit breaker, and
+        additional tunables for report aggregation workers.']
+    breaking_changes: ['v1.13: RBAC hardening removed wildcard view permissions; Kyverno
+        may no longer be able to read all resources/CRDs by default. This can affect
+        reports and mutate/generate on custom resources unless additional RBAC is
+        granted.', 'v1.13: Policy Exceptions are no longer enabled by default for
+        all namespaces due to CVE-2024-48921. If you relied on cluster-wide exceptions,
+        you must explicitly configure allowed namespaces.', 'v1.13: Several API migrations/deprecations
+        occurred (e.g., moving validationFailureAction fields into per-rule `validate.failureAction`
+        and removal of `validatingadmissionpolicies` v1alpha1). Validate CRDs and
+        policy manifests against the new schema.', 'v1.13: Report types and cleanup
+        behavior changed (old intermediate report types removed; cleanup jobs disabled
+        by default; some cleanup cronjobs removed). If you had automation depending
+        on those objects/jobs, update it.']
   chart_version: 3.4.0
   images: ['bitnami/kubectl:1.32.3', 'busybox:1.35', 'reg.kyverno.io/kyverno/background-controller:v1.14.0',
     'reg.kyverno.io/kyverno/cleanup-controller:v1.14.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.14.0',
@@ -31,6 +189,71 @@ versions:
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart / values changes to review\n\n### 1) **Policy Exceptions\
+      \ default scope changed (security fix / CVE-2024-48921)**\n* **Behavior change:**\
+      \ Prior chart versions enabled exceptions by default for **all namespaces**.\
+      \ In 1.13.0, **defaults are tightened**.\n* **Upgrade action:** If you rely\
+      \ on exceptions being available cluster-wide \u201Cby default\u201D, you must\
+      \ **explicitly set the exception-related values** to restore prior behavior.\n\
+      * **Impact area:** Admission behavior shouldn\u2019t change, but **exception-driven\
+      \ skips** may stop working in namespaces you didn\u2019t explicitly enable.\n\
+      \n### 2) **RBAC change: wildcard view permissions removed**\n* **Behavior change:**\
+      \ Kyverno no longer has broad wildcard \u201Cview\u201D permissions; chart now\
+      \ binds to the standard `view` ClusterRole.\n* **Upgrade action:** If Kyverno\
+      \ needs to **read custom resources** for your mutate/generate policies, background\
+      \ scans, or reporting, you may need to **add explicit RBAC** (additional rules/clusterroles)\
+      \ granting `get/list/watch` on those CRDs.\n\n### 3) **`cleanupJobs` keys removed\
+      \ from the chart**\n* **Behavior change:** Helm values under `cleanupJobs` are\
+      \ **no longer recognized**.\n* **Upgrade action:** Remove any `cleanupJobs.*`\
+      \ from your values and re-check how report/UR cleanup is configured in the new\
+      \ chart.\n\n### 4) Reporting / metrics / dashboards updates\n* **Default metrics\
+      \ updated** in the Helm chart.\n* Grafana dashboard changes include:\n  * Dashboard\
+      \ updated for **Grafana 11**.\n  * Metric rename in dashboard config: `kyverno_policy_results_total`\
+      \ \u2192 `kyverno_policy_results`.\n* **Upgrade action:** If you import the\
+      \ bundled dashboards or rely on metric names, update your Grafana queries/alerts\
+      \ accordingly.\n\n### 5) New/expanded chart configurability you may want to\
+      \ adopt\n* `hostNetwork` configurable for **admission-controller** and **cleanup-controller**.\n\
+      * Webhook pod annotations configurable.\n* Custom ports for **background-controller**\
+      \ and **reports-controller**.\n* Global tolerations + `global.image.imagePullSecrets`.\n\
+      * Sleep duration config to manage deployments (rollout pacing).\n* Custom annotations\
+      \ on Kyverno deployments.\n* Resync period configuration for informers.\n* Helm\
+      \ configuration for **reporting in different rules**.\n\n> Note: exact value\
+      \ key names aren\u2019t present in the snippet; compare your current `values.yaml`\
+      \ to the 1.13 chart `values.yaml` and run `helm diff upgrade` to confirm the\
+      \ precise paths."
+    chart_updates: ['Security posture tightened: exceptions default scope reduced
+        (CVE-2024-48921 guidance).', 'RBAC hardening: wildcard view permissions removed;
+        binding to default `view` role added.', 'Removed intermediate report types
+        (`admissionreports`, `backgroundscanreports`) and older report artifacts removed
+        from the chart; cleanup jobs disabled by default and several cleanup cronjobs
+        removed.', 'Reports architecture changed: removed report chunking and other
+        report aggregation behaviors; reports controller gains circuit breaker and
+        new worker configuration flag.', 'Helm templates updated: flowcontrol API
+        updated to v1; Grafana dashboards updated (Grafana 11 support, metric rename);
+        Service/port and annotations configurability expanded.']
+    features: ['Policy reporting improvements: `validate.podSecurity` now records
+        control names/images in reports and custom data can be added to policy reports.',
+      'Image verification expanded: supports multiple attestations/context entries,
+        TSA cert chain support, signature algorithm selection, full regexp support,
+        Sigstore bundle verification, and OCI 1.1 signatures.', 'Policy Exceptions
+        enhancements: can be generated from policy reports; CLI supports inline exceptions
+        and apply can continue-on-failure.', 'Admission experience: warnings for policy
+        violations/mutations can be emitted during admission reviews.', 'Generate/mutate
+        enhancements: `foreach` support for generate policies, labelSelectors for
+        mutate targets, `dumpPatch` option, and reporting added for mutate/generate
+        rules.']
+    breaking_changes: ['RBAC breaking change: wildcard view permissions removed; Kyverno
+        may no longer be able to read some custom resources, affecting reports and
+        some mutate/generate policies unless you grant explicit RBAC.', 'Helm breaking
+        change: exception defaults changed (no longer enabled for all namespaces by
+        default); clusters relying on broad exception enablement must explicitly configure
+        it.', 'Helm breaking change: `cleanupJobs` values keys removed; existing values
+        will be ignored and must be migrated/removed.', 'API migrations in policy
+        schema: `spec.validationFailureAction` and overrides moved down to rule-level
+        fields; other API fields migrated (generateExisting, mutateExistingOnPolicyUpdate,
+        webhookTimeoutSeconds, failurePolicy), and VAP v1alpha1 removed in favor of
+        v1beta1.']
   chart_version: 3.3.2
   images: ['bitnami/kubectl:1.30.2', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.13.0',
     'ghcr.io/kyverno/cleanup-controller:v1.13.0', 'ghcr.io/kyverno/kyverno-cli:v1.13.0',
@@ -39,6 +262,58 @@ versions:
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart values/behavior changes to review\n- **New values**\n\
+      \  - `revisionHistoryLimit`: chart parameters to control Deployment `revisionHistoryLimit`.\n\
+      \  - **CA bundle injection**: option to define a **ca-certificates bundle**\
+      \ for Kyverno deployments.\n  - **Global `extraEnvVars`**: set extra env vars\
+      \ globally across Kyverno components.\n  - **Performance profiling support**:\
+      \ chart option to enable profiling endpoints.\n  - **Global `nodeSelector`**:\
+      \ apply a nodeSelector to all Kyverno pods.\n  - **Webhook labels**: ability\
+      \ to apply custom labels to Kyverno webhooks (often needed for Argo CD sync/ownership\
+      \ patterns).\n  - **Jobs backoffLimit**: configure `backoffLimit` for hook/cleanup\
+      \ jobs.\n  - **Cleanup job pod labels**: ability to add pod labels to Helm hook\
+      \ jobs.\n  - `config.resourceFilters` enhancements:\n    - can **exclude resources**\
+      \ from `resourceFilters`\n    - can **add additional resources** to be excluded\
+      \ via `resourceFilters`\n- **Changed defaults**\n  - Chart will **omit policy\
+      \ applied and skipped events by default** (less Event noise; if you relied on\
+      \ Events for auditing/alerts you may want to re-enable).\n  - **Default webhook\
+      \ exclusions** added (may change which requests Kyverno evaluates out-of-the-box).\n\
+      - **RBAC/chart structure**\n  - Refined permissions by removing wildcards (RBAC\
+      \ is stricter; check for any custom controller behaviors that previously relied\
+      \ on broad access).\n  - Grafana dashboard file renamed from `dashboard.json`\
+      \ to `kyverno-dashboard.json` (update any automation referencing the old name).\n\
+      - **CRD/data migrations in Helm**\n  - Chart adds **CRD migration hooks** to\
+      \ migrate existing CRs to new storage versions. Ensure hook jobs can run (RBAC,\
+      \ imagePull, PodSecurity, network policies) and that Argo CD/Flux allow hooks.\n\
+      \  - Sanity checks added for **CRD/controller mismatch** when deploying specific\
+      \ controllers/CRDs.\n"
+    chart_updates: [Introduces CRD migration hooks to move existing Kyverno custom
+        resources to new storage versions (aligns with multiple APIs graduating to
+        v2)., Tightens RBAC by removing wildcard permissions; expect more granular
+        ClusterRoles/RoleBindings., Adds defaults and knobs to reduce Event and webhook
+        scope noise (omit certain Events by default; default webhook exclusions).,
+      'Multiple chart ergonomics improvements: global nodeSelector/extraEnvVars, CA
+        bundle support, job backoff tuning, webhook labeling, profiling enablement,
+        revisionHistoryLimit.', Renames bundled Grafana dashboard artifact to `kyverno-dashboard.json`.]
+    features: ['Global resource caching via new `GlobalContextEntry` CRD, enabling
+        reuse of cached resources across policy evaluations.', 'More flexible and
+        narrower webhook scope configuration, including support for Kubernetes 1.27+
+        CEL-based `matchConditions`.', 'Policy Exceptions enhanced: support conditions,
+        exclude specific Pod Security controls, and be applied to existing resources
+        when created (behavioral change).', 'New ephemeral report kinds (`EphemeralReports`,
+        `ClusterEphemeralReports`) under new `reports.kyverno.io` API group to support
+        the revamped reports pipeline.', 'CLI additions: `migrate` command to upgrade
+        Kyverno resources to current APIs; experimental `json` command; improved `test/apply`
+        support for Policy Exceptions and VAP bindings.']
+    breaking_changes: ["Policies using long-deprecated/invalid operators in conditions\
+        \ (e.g., `In`, `NotIn`) will now be blocked\u2014validate and update policies\
+        \ before upgrading.", 'Multiple Kyverno CRDs/APIs graduate to **v2** (Policy
+        Exceptions, Cleanup Policies, Reports APIs, UpdateRequests). Existing CRs
+        may need migration; use Helm hook migrations or `kyverno cli migrate` and
+        plan for CRD updates.', 'Operational caution: Kyverno 1.12.0 had known critical
+        issues; upstream recommends upgrading to at least **v1.12.1** (and for ephemeralreports
+        piling up, **v1.12.4**) rather than staying on 1.12.0.']
   chart_version: 3.2.0
   images: ['bitnami/kubectl:1.28.5', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.12.0',
     'ghcr.io/kyverno/cleanup-controller:v1.12.0', 'ghcr.io/kyverno/kyverno-cli:v1.12.0',
@@ -47,6 +322,64 @@ versions:
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart changes you must account for (1.10.0 \u2192 1.11.0)\n\
+      \n### Chart structure / packaging\n- **CRDs moved to a subchart**: `kyverno-crds`\
+      \ is now a dependency/subchart instead of being managed directly in the main\
+      \ chart.\n  - **Upgrade impact**: verify how you manage CRDs today (Helm-managed\
+      \ vs GitOps/apply). If you were relying on the old chart behavior for CRDs,\
+      \ ensure your upgrade process installs/updates the CRDs via the new subchart\
+      \ (or disable CRDs in Helm and manage them separately).\n- **Grafana dashboard\
+      \ moved to a subchart**: the dashboard content is split out to reduce the size\
+      \ of the main chart.\n  - **Upgrade impact**: if you enabled Grafana dashboards\
+      \ via the Kyverno chart, confirm the new values path/subchart settings and that\
+      \ your dashboard provisioning still works.\n\n### New/updated values\n- **Global\
+      \ image registry value added** (`global.image.registry` style capability).\n\
+      \  - **Upgrade impact**: if you used per-controller image registry overrides,\
+      \ consider migrating to the global setting for consistency.\n\n### New resources\
+      \ installed by the chart\n- **API Priority and Fairness resources** (`FlowSchema`\
+      \ and `PriorityLevelConfiguration`) added.\n  - **Upgrade impact**: these require\
+      \ cluster-level permissions and may conflict with existing APF configuration.\
+      \ Review and decide whether to enable/disable/override them to match your cluster\
+      \ governance.\n\n### Controller pod security options\n- Webhook cleanup Pod\
+      \ can now have configurable security contexts.\n  - **Upgrade impact**: if you\
+      \ run under strict PSS/OPA policies, set these explicitly to meet your cluster\
+      \ requirements.\n\n### Helm fixes to be aware of during upgrade\n- Pre-delete\
+      \ hook now targets only Kyverno deployments (less risk of scaling unrelated\
+      \ workloads).\n- Replica fields validated more safely (non-integer handling).\n\
+      - RBAC fixes for PolicyExceptions and Secrets access in background controller.\n\
+      - Added/adjusted PDB enablement values.\n"
+    chart_updates: [CRDs moved to a dedicated subchart to reduce main chart size and
+        change how CRDs are installed/managed during upgrades., Grafana dashboard
+        content moved to its own subchart to avoid Helm secret size issues and reduce
+        main chart footprint., Chart now includes Kubernetes API Priority & Fairness
+        objects (FlowSchema/PriorityLevelConfiguration)., Introduced a global image
+        registry value to simplify image overrides across controllers., 'Webhook cleanup
+        job supports configurable security contexts; multiple Helm fixes around hooks,
+        RBAC, replicas, and PDB enablement.']
+    features: ['ValidatingAdmissionPolicy (VAP) support (alpha): Kyverno can work
+        with Kubernetes VAPs, including generating VAPs from compatible `validate.cel`
+        rules and producing PolicyReports from VAP evaluations.', 'CEL-based validation
+        rules: you can author Kyverno validate rules using CEL, with autogen support,
+        and optionally have Kyverno generate/manage matching VAPs.', 'PolicyReports
+        are now generated per-resource (UID-named) instead of per-policy, reducing
+        API server/etcd pressure and improving scalability.', 'New cleanup mechanism
+        via reserved label `cleanup.kyverno.io/ttl`, allowing resources to be cleaned
+        up based on a TTL label rather than scheduled CronJobs.', 'Image verification
+        updates: Cosign 2.0 support, Notary/OCI 1.1 updates, signature verification
+        caching, and improved registry credential configuration via `imageRegistryCredentials`.',
+      'CLI improvements: major refactor, formal test manifest schema, ability to test
+        VAPs, new `create` commands to scaffold test resources, and improved `apply`
+        output.']
+    breaking_changes: ['PolicyReports behavior change: reports are now per-resource
+        and named by UID rather than per-policy; any tooling/alerts/dashboards that
+        assumed old naming or aggregation may break.', 'Cosign policy requirement
+        change: Rekor URL must be present (may be empty string). If you previously
+        did not use Rekor, you may need to explicitly disable transparency log and
+        SCT verification via `rekor.ignoreTlogs` and `ctlog.IgnoreSCT` in policies
+        to avoid failures.', '(Operational/behavioral change) Cleanup policies no
+        longer use CronJobs; cleanup is handled internally, which can affect expectations
+        around CronJob presence and scheduling visibility.']
   chart_version: 3.1.0
   images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.11.0',
     'ghcr.io/kyverno/cleanup-controller:v1.11.0', 'ghcr.io/kyverno/kyverno:v1.11.0',
@@ -55,6 +388,73 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart upgrade notes (Kyverno chart v2 -> v3, required for\
+      \ Kyverno 1.10)\n\n- **No in-place upgrade without manual intervention**: Kyverno\
+      \ 1.10 decomposes the single Deployment into multiple controllers, and the Helm\
+      \ chart moves from **v2 to v3**. Plan a **maintenance window and downtime**.\n\
+      - **Required Helm value when upgrading**: set `upgrade.fromV2=true` during the\
+      \ Helm upgrade. Without this, the chart will not perform the v2\u2192v3 transition.\n\
+      - **Deployment split & per-component values**: the chart is now structured around\
+      \ separate components (admission/reports/background, plus cleanup if enabled).\
+      \ Expect to move old global settings into the right component sections.\n- **New\
+      \ values abstractions**:\n  - New `features:` section to enable/configure common\
+      \ behaviors without knowing which controller needs which flag.\n  - New `logging.verbosity`\
+      \ value and also `features.logging` helpers for consistent verbosity across\
+      \ controllers.\n  - `omit-events` is surfaced in `features` for easier configuration.\n\
+      - **Key renames / structure changes**:\n  - `webhooksCleanup.enable` \u2192\
+      \ `webhooksCleanup.enabled`\n  - `namespace` \u2192 `namespaceOverride`\n  -\
+      \ `extraArgs` changed from **arrays** to **objects/maps** (easier per-flag overrides,\
+      \ but your values file must change).\n- **Controller naming change**: the primary\
+      \ Deployment name becomes `kyverno-admission-controller`.\n- **RBAC / aggregation\
+      \ changes**: Helm refactored RBAC and role aggregation; custom aggregated ClusterRoles\
+      \ may need new label selectors (see breaking changes).\n- **CRD management changed**:\
+      \ the chart changed how it manages CRDs; review your GitOps/Helm CRD installation\
+      \ approach.\n- **Label/name behavior changes**:\n  - Chart no longer overuses\
+      \ `kyverno.fullname`; uses `.Release.Name`/instance labels more consistently.\n\
+      \  - Ensure any custom selectors/NetworkPolicies/ServiceMonitors that referenced\
+      \ the old labels/names are updated.\n"
+    chart_updates: [Chart migrates from v2 to v3 to support Kyverno 1.10 architectural
+        split (single Deployment -> multiple controllers)., Chart values are reorganized
+        per controller (admission/reports/background) and supplemented with a higher-level
+        `features` configuration section., 'Helm templates/refactoring: configmap
+        management, RBAC/role aggregation, tests, labels, network policies, and CRD
+        handling were substantially reworked.', 'Deployment naming updates: admission
+        controller Deployment renamed to `kyverno-admission-controller`; additional
+        controllers added.', 'Operational hardening: chart enforces at least 1 replica
+        for the admission controller.', 'Improved configurability: ServiceAccount
+        annotations supported for all SAs; configurable Grafana ConfigMap name; configurable
+        PDB API version; configurable Sigstore TUF root volume.', 'Monitoring fixes/additions:
+        missing ServiceMonitor for background controller added; various Helm hook/imagePullSecret
+        propagation fixes.']
+    features: ['Kyverno is split into three controllers (admission, background, reports),
+        improving separation of responsibilities and scaling options.', 'Kyverno policies
+        can now make authenticated calls to in-cluster Services (with verb control),
+        enabling richer external-data and integration patterns.', VerifyImages gains
+        Notary signature verification support in addition to existing Cosign flows.,
+      'Mutate-existing rules now support context variables and preconditions, enabling
+        more expressive background mutations.', PolicyExceptions now support background
+        scanning and wildcard ruleNames for broader exception handling., 'New JMESPath
+        helpers (e.g., `image_normalize()`, `to_boolean()`, `trim_prefix()`, enhanced
+        `sum()`) expand policy authoring options.', Performance improvements to reporting
+        aggregation (higher workers/QPS/burst and new cleanup jobs) reduce delays
+        in large clusters.]
+    breaking_changes: ["**No direct in-place upgrade path** from 1.9 to 1.10 due to\
+        \ controller decomposition; plan downtime and use Helm v2\u2192v3 migration\
+        \ steps (backup/restore policies or scale Kyverno to 0 first).", "Aggregated\
+        \ ClusterRoles may need updates to match **new label selectors** for the decomposed\
+        \ controllers\u2019 RBAC aggregation.", 'Policies matching subresources must
+        use the standardized `Parent/subresource` form (e.g., `Pod/exec`); some subresource
+        matches will be rejected when background scanning is enabled.', 'Generate
+        rules: several fields are now **immutable** after creation and certain variable
+        usages are disallowed; additionally `generate.apiVersion` is now **required**.',
+      'Generate-existing behavior changes: `spec.generateExistingOnPolicyUpdate` is
+        deprecated in favor of `spec.generateExisting`; update policies accordingly.',
+      'Mutate existing enforcement: when `mutateExistingOnPolicyUpdate=true`, `mutate.targets[]`
+        must be defined or policy creation is blocked.', 'VerifyImages in Audit mode:
+        policy creation is rejected unless `mutateDigest=false`.', 'Mutation behavior
+        change: Kyverno no longer implicitly adds `docker.io` to image context; adjust
+        policies to use `images.*.registry` or `image_normalize()` instead.']
   chart_version: 3.0.0
   images: ['bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.10.0',
     'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'ghcr.io/kyverno/kyverno:v1.10.0',
@@ -63,6 +463,66 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/chart upgrade notes (kyverno 1.8.x chart \u2192 1.9.x chart)\n\
+      \n- **Chart registry URL changed in 1.8**: charts moved from `ghcr.io/kyverno/kyverno/kyverno`\
+      \ to **`ghcr.io/kyverno/charts/kyverno`**. Ensure your Helm repo/OCI reference\
+      \ is updated.\n- **Chart versions follow SemVer and omit the leading `v`**.\
+      \ If you were pinning `v1.8.0` style chart versions, update to `1.9.0` format.\n\
+      - **Deprecated flag removed**: `--splitPolicyReport` is removed in 1.9 (was\
+      \ already deprecated in 1.8). If you set `extraArgs: [\"--splitPolicyReport=...\"\
+      ]` or similar, remove it.\n- **`--autogenInternals` removed**: in 1.9 this deprecated\
+      \ flag is removed; autogen no longer mutates `spec` and is automatic. Remove\
+      \ any explicit `--autogenInternals` usage.\n- **New controller added via chart**:\
+      \ 1.9 introduces the **cleanup controller** (alpha feature) and includes Helm\
+      \ support for it. Expect new Deployments/ServiceAccounts/RBAC/ServiceMonitor\
+      \ options and consider whether to enable/size it.\n- **ImagePullSecrets support\
+      \ for verifyImages**: Helm now supports consuming existing `imagePullSecrets`\
+      \ for verifyImages. If you verify images from private registries, consider configuring\
+      \ this.\n- **Helm fixes you may hit on upgrade**:\n  - Selector-related fix\
+      \ specifically mentioned for upgrading from 1.8 \u2192 1.9.\n  - CRD labels\
+      \ corrected to match the Helm release name; if you manage CRDs separately, ensure\
+      \ labels/ownership are consistent.\n  - `Chart.Version` label uses `_` instead\
+      \ of `+` to avoid Flux reconciliation failures (relevant if you use Flux and\
+      \ versions with build metadata).\n  - Helm test pod busybox image is pinned;\
+      \ initContainer extraArgs handling fixed.\n"
+    chart_updates: ['Reports system and CRDs were overhauled in 1.8: `ReportChangeRequest`/`ClusterReportChangeRequest`
+        removed and replaced with `AdmissionReport`, `ClusterAdmissionReport`, `BackgroundScanReport`,
+        `ClusterBackgroundScanReport` CRDs. Ensure CRDs are updated as part of the
+        upgrade and any tooling consuming old CRDs is updated.', 'Kyverno introduced/advanced
+        the **v2beta1** API for Kyverno resources, intended to remove deprecated fields/types.
+        Plan a migration path for policies using deprecated fields.', 'Autogen behavior
+        changed: in 1.8 autogen moved to `status` (not `spec`) and is enabled by default;
+        in 1.9 the deprecated `--autogenInternals` flag is removed and the behavior
+        is automatic.', 'Webhooks behavior changed in 1.9: separate webhook rules
+        per GVK; AdmissionReview v1 is used instead of v1beta1. This may affect clusters/components
+        expecting v1beta1 AdmissionReview.', 'New alpha CRDs/resources added in 1.9:
+        **PolicyException** and **CleanupPolicy** (and associated cleanup controller
+        components when enabled).']
+    features: [PolicyException (alpha) to define exceptions to policy enforcement
+        without editing the policy itself., 'CleanupPolicy (alpha) to automate cleanup/removal
+        of resources matching criteria, delivered with an optional cleanup controller.',
+      'Distributed tracing improvements building on OpenTelemetry support, enabling
+        better end-to-end request visibility.', Nested `foreach` loops in policies
+        for more complex iteration logic., Extended subresource support in webhook
+        and CLI for validation/mutation across more Kubernetes subresources., ConfigMap
+        caching to improve performance and reduce API load for repeated ConfigMap
+        lookups., 'CLI enhancements: dump AdmissionReview payload, audit/warn flags,
+        accept policies via stdin/pipes, git repo policy sources, and experimental
+        OCI push/pull of policies.', 'verifyImages enhancements: key signature algorithm
+        selection, attestations attestors, and (Helm) support for existing imagePullSecrets.',
+      'Kubernetes version support extended (1.25 in 1.8, 1.26 in 1.9).']
+    breaking_changes: ['JMESPath behavior change (introduced in 1.8): unresolved expressions
+        now evaluate to `null` instead of empty string; some policies may need explicit
+        existence checks to avoid unexpected denies/mutations.', 'Reporting CRDs changed
+        (1.8): old RCR CRDs removed and replaced; any automation querying old CRDs
+        will break until updated.', 'CLI/flags: `--splitPolicyReport` and `--autogenInternals`
+        are removed in 1.9; deployments using these flags will fail to start until
+        removed.', 'verifyImages attestations: new `verifyImages.attestations.attestors`
+        is for attestations while existing `verifyImages.attestors` remains for signatures;
+        misconfiguration can cause verification failures.', 'Operational change (1.9):
+        if Kyverno is down, new/changed policies are blocked until Kyverno returns,
+        which can impact GitOps rollouts during outages.']
   chart_version: 2.7.0
   images: ['busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
     'ghcr.io/kyverno/kyvernopre:v1.9.0']
@@ -70,17 +530,98 @@ versions:
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart changes to account for in the upgrade\n\n- **Chart\
+      \ repository/registry moved**: chart OCI URL changed from `ghcr.io/kyverno/kyverno/kyverno`\
+      \ to `ghcr.io/kyverno/charts/kyverno`.\n- **Chart versions follow SemVer**:\
+      \ the chart version no longer includes a leading `v`.\n- **Reporting system\
+      \ changes impact CRDs installed by the chart**:\n  - `ReportChangeRequest` and\
+      \ `ClusterReportChangeRequest` CRDs removed.\n  - New CRDs introduced: `AdmissionReport`,\
+      \ `ClusterAdmissionReport`, `BackgroundScanReport`, `ClusterBackgroundScanReport`.\n\
+      \  - (Cluster)PolicyReport CRDs updated.\n- **Flag removals/changes may affect\
+      \ chart values**:\n  - `maxReportChangeRequests` container flag removed.\n \
+      \ - Deprecated flags removed earlier in the 1.7 line; if you set any extraArgs/extraEnv\
+      \ for removed flags, they must be cleaned up.\n- **Autogen behavior change**:\
+      \ autogeneration now lives in policy `status` (not `spec`) and is enabled by\
+      \ default; if you had chart settings/assumptions around autogen mutations, re-check\
+      \ after upgrade.\n- **Note**: upstream release notes mention \u201Cseveral Helm\
+      \ chart changes with both kyverno and kyverno-policies\u201D; review the chart\
+      \ changelog for your exact chart versions (not provided here).\n"
+    chart_updates: [New reporting system v2 (ground-up refactor) which changes/renames
+        reporting CRDs., 'Aggregated ClusterRoles are now used, simplifying adding
+        custom permissions but changing RBAC shape.', 'Improved certificate management:
+        dynamic certificate fetching and more graceful rotation; CA key is now included
+        in the Kyverno Secret; self-signed certs no longer need annotation.', Autogen
+        internals enabled by default; autogen results stored in policy status rather
+        than spec., 'Build/distribution changes: Kyverno images built with `ko` by
+        default and use a distroless base image.', Support added for Kubernetes 1.25.,
+      Event RBAC tightened (reduced permissions).]
+    features: [New validate subrule `podSecurity` integrates Pod Security Admission
+        libraries to validate workloads against PSA controls., New validate subrule
+        `manifests` supports YAML manifest signature validation., Generate rules can
+        now generate multiple resources in a single rule (including selection via
+        labels)., OpenTelemetry support for traces/metrics export., New policy field
+        `applyRules` controls whether one or all rules are applied., New JMESPath
+        functions including `x509_decode` (decode X.509 certs) and `random` (composable
+        random strings).]
+    breaking_changes: ['Unresolved JMESPath expressions now evaluate to `null` instead
+        of empty string (`''''`), which can change preconditions/deny logic; policies
+        may need existence checks to avoid unintended denies/mutations.', Reporting
+        CRDs `ReportChangeRequest` and `ClusterReportChangeRequest` were removed and
+        replaced by Admission/BackgroundScan report CRDs; any tooling relying on the
+        old CRDs must be updated.]
   chart_version: 2.6.0
   images: [busybox, 'ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **PodDisruptionBudget behavior changed**: Helm charts now **enforce\
+      \ a PDB for multi-replica installs**, and the **PDB was removed from the plain\
+      \ install manifests**. If you were applying the upstream YAML manifests directly,\
+      \ you may need to manage your own PDB; with Helm, ensure your values align with\
+      \ the new behavior.\n- **Some settings moved to Helm values / chart options**\
+      \ (noted across the notes):\n  - `priorityClassName` added to `values.yaml`.\n\
+      \  - `affinity` can be managed via Helm values.\n- **Chart/config flags removed**:\
+      \ Several flags were removed when they overlapped with ConfigMap-based configuration.\
+      \ In particular, `filterK8sResources`, `excludeGroupRole`, and `excludeUsername`\
+      \ must now be configured **via the Kyverno ConfigMap** rather than CLI flags.\n\
+      - **Resource filters / namespace ignore defaults**: There were fixes around\
+      \ `config.resourceFilters` and Helm release name/namespace interactions; review\
+      \ your custom `config.resourceFilters` to ensure Kyverno isn\u2019t unintentionally\
+      \ processing or skipping resources (especially in the Kyverno namespace)."
+    chart_updates: [Policy status representation updated to use `status.conditions`
+        internally; `status.ready` is deprecated (kept for a couple of releases).,
+      Deprecated flags removed (and some config moved to ConfigMap-only)., 'Policy
+        schema/behavior changes around autogen internals: Kyverno reduces/stops mutating
+        policies in some cases when autogen internals are enabled.', 'CRD lifecycle/compat:
+        drop `v1alpha1` PolicyReport CRD (noted as an enhancement).', UpdateRequest/GenerateRequest
+        work evolved (UR controller changes; backward compatibility noted where GenerateRequest
+        converts to UpdateRequest)., 'Security/operability hardening: seccomp profile
+        and various controller refactors; improved webhook/config controller behavior
+        and cache sync handling.']
+    features: ['Major expansion of image verification capabilities: support for certificate
+        chains, multiple keys, required signed images, digest enforcement/mutation,
+        and better CLI testing for image verification rules.', 'Policy authoring improvements:
+        inline variables in context, richer `foreach` support (including broader request.*
+        JMESPath usage), and new JMESPath functions.', 'Operational features: webhooks
+        object selector support and ability to disable leader election for the UpdateRequest
+        controller in certain scenarios.']
+    breaking_changes: ['`mutate.overlay` and `mutate.patches` (deprecated since 1.4)
+        were **removed in v1.6.0**; any policies still using them must be migrated
+        before/while upgrading.', 'In v1.7.0, **deprecated CLI flags were removed**,
+        and some options (`filterK8sResources`, `excludeGroupRole`, `excludeUsername`)
+        can now be configured **only via the Kyverno ConfigMap**. This can break existing
+        deployments relying on those flags.', '`status.ready` on policies is **deprecated**
+        in v1.7.0 in favor of `status.conditions`/`policy.IsReady()`; if you have
+        tooling/scripts reading `status.ready`, plan to migrate.']
   chart_version: 2.4.0
   images: [busybox, 'ghcr.io/kyverno/kyverno:v1.7.0', 'ghcr.io/kyverno/kyvernopre:v1.7.0']
 - version: 1.6.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 2.2.0
   images: [busybox, 'ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0']

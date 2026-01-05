@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "properties": {
+        "confident": {
+            "type": "boolean",
+            "description": "Whether you're confident in the accuracy of the summary"
+        },
+        "helm_changes": {
+            "type": "string",
+            "description": "A description of any helm values changes required for updating the chart to this version.  Should be in markdown format, and is sourced from the helm changelog.  *If there are no notes, leave this blank.*"
+        },
+        "chart_updates": {
+            "type": "array",
+            "description": "A description of any updates to the chart itself.  Should be in markdown format, and is sourced from the helm changelog. *If there are no notes, leave this empty.*",
+            "items": {
+                "type": "string"
+            }
+        },
+        "features": {
+            "type": "array",
+            "description": "A list of features that were added in this version.  Each should be at most two sentences, will likely be in the application release notes.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "breaking_changes": {
+            "type": "array",
+            "description": "A list of breaking changes that were introduced in this version, each should be at most two sentences, will likely be in the application release notes.",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": ["features"]
+}

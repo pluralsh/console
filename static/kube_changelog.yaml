@@ -1,0 +1,1210 @@
+kube_changelog:
+- version: '1.20'
+  summary:
+    major_changes: ["Kubernetes v1.20 is a feature-heavy minor release (with 1.20.1\u2013\
+        1.20.15 as patch hardening) highlighted by dockershim deprecation, GA promotions\
+        \ (RuntimeClass, BoundServiceAccountToken/TokenRequest, CSI Volume Snapshots,\
+        \ PID limits), APF enabled-by-default (beta), and significant networking/storage/controller\
+        \ improvements plus multiple security fixes in later patches."]
+    breaking_changes: [Dockershim is deprecated in 1.20 (not removed yet) and clusters
+        should plan migration to a CRI-native runtime (containerd/CRI-O) and validate
+        tooling/operations that assume Docker runtime APIs., API Priority and Fairness
+        (APF) is enabled by default; do not run 1.19 apiservers with APF enabled in
+        the same HA control plane as 1.20+ apiservers due to incompatibilities (upgrade
+        control plane together)., 'Dual-stack Service API (alpha) changed shape: `ipFamily`
+        replaced by `ipFamilyPolicy`, `ipFamilies`, and `clusterIPs` (gated by IPv6DualStack);
+        manifests/tools targeting the old alpha fields need updating.', kube-apiserver
+        insecure serving is effectively removed (insecure port/address flags no longer
+        work; insecure port can only be 0) which can break legacy setups relying on
+        unsecured local endpoints., Garbage collector behavior is made deterministic
+        for invalid ownerReferences; objects that previously lingered may now be deleted
+        (run ownerReference validation tooling pre-upgrade)., 'For CSI drivers, kubelet
+        no longer pre-creates `target_path` for NodePublishVolume and no longer checks
+        mount/corruption for staging/target; CSI drivers must be idempotent and perform
+        their own verification.', Exec probe timeout handling was fixed; workloads
+        relying on the previous buggy behavior may see changed probe outcomes unless
+        temporarily disabling `ExecProbeTimeout` feature gate (future removal planned).,
+      kubectl debug becomes a built-in command; any existing kubectl plugin named
+        `debug` will be shadowed and must be renamed.]
+    deprecations: [Dockershim (Docker runtime integration in kubelet) is deprecated;
+        begin migration planning for runtime and operational processes., kubeadm control-plane
+        label/taint `node-role.kubernetes.io/master` is deprecated in favor of `node-role.kubernetes.io/control-plane`;
+        update automation and tolerations accordingly., kubelet `metrics/resource/v1alpha1`
+        endpoint removed/deprecated in favor of `metrics/resource` (client scraping/config
+        updates needed)., EgressSelectorConfiguration type `Master` deprecated in
+        favor of `controlplane` (removed in 1.22)., Windows Hyper-V container feature
+        gate deprecated in 1.20 (removed in 1.21)., 'Various kubectl/kubeadm deprecated
+        flags removed or slated for removal (e.g., kubeadm `--experimental-kustomize`
+        removed; kubectl `--delete-local-data` deprecated).']
+    removals: [PodPreset (v1alpha1) API and admission plugin removed; use mutating
+        admission webhooks for equivalent behavior., kube-apiserver insecure port
+        functionality removed (legacy flags no longer effective; will be cleaned up
+        further in later releases)., Some deprecated scheduler metrics removed; migrate
+        dashboards/alerts to replacement framework metrics., kube-proxy user-space
+        mode no longer supports EndpointSlice (impacts niche configurations).]
+    features: [Dockershim deprecation (strategic shift toward CRI runtimes) with no
+        immediate image compatibility impact., 'APF (API Priority and Fairness) graduates
+        to beta and is enabled by default, improving apiserver multi-tenancy and protecting
+        control-plane health endpoints (probes are exempted from APF in a later patch).',
+      'ServiceAccount TokenRequest/TokenRequestProjection graduates to GA; kubeadm
+        defaults include issuer/signing flags and RootCAConfigMap is published to
+        every namespace (beta, enabled by default).', RuntimeClass graduates to GA;
+        node.k8s.io API promoted to v1 (v1beta1 deprecated)., CSI Volume Snapshot
+        and VolumeSnapshotDataSource graduate to GA; snapshot controller/CRDs/webhook
+        must be installed by the distro/operator., 'Non-recursive FSGroup change policy
+        (PodFSGroupChangePolicy) and CSIDriver FSGroup policy move forward (beta),
+        improving pod start times on large volumes.', Graceful Node Shutdown introduced
+        (alpha) enabling kubelet to coordinate pod termination during host shutdowns.,
+      kubectl debug graduates to beta providing copy-pod debugging and node troubleshooting
+        workflows (ephemeral containers still gated)., Dual-stack Services reimplemented
+        (alpha) with more flexible Service IP family policy model., 'Scheduler performance
+        improvements: fewer preemption candidates, new default plugin ordering, better
+        cache behavior, improved handling of invalid selectors, and better behavior
+        under churn.', 'EndpointSlice enhancements: mirroring controller behavior
+        fixes, new conditions (`serving`, `terminating`), higher port limits, and
+        improved synchronization behavior.', 'Windows improvements: better HostPort/DSR
+        behavior, higher disk mount counts, and operational knobs for kubelet priority.',
+      'Build/tooling updates across patch releases (Go 1.15.x bumps, base image CVE
+        refreshes, konnectivity-client updates).']
+    bug_fixes: ['Security: CVE-2021-25735 fixed in 1.20.6 (ValidatingAdmissionWebhook
+        for Node updates could miss previous object fields under certain conditions).',
+      'Security: CVE-2021-25741 fixed in 1.20.11 (subPath symlink race allowing potential
+        host filesystem escape).', 'API machinery stability: fixes for panics/races
+        in apiserver logging and request timeout handling (e.g., concurrent map access,
+        rare timeout races).', 'Scheduler stability: fixes for panics with invalid
+        selectors, ensuring cache cleanup on missed deletion events, and avoiding
+        regressions from resource-balancing scoring changes (including a revert in
+        1.20.12).', 'Networking: kube-proxy conntrack cleanup for UDP NodePort/LB
+        ingress, Service replace now preserves allocated ClusterIP/NodePorts automatically,
+        EndpointSlice mirroring cleanup when Service selectors change, and improved
+        ILB IPv6 support on cloud providers.', 'Storage: CSI volume relabeling fix
+        with SELinux, better handling of CSI migrated volumes/attachments, Windows
+        SMB mount fixes, and improved volume cleanup/orphan directory cleanup in kubelet.',
+      'Cloud provider robustness: numerous Azure/vSphere/AWS fixes for VMSS/LB edge
+        cases, instance-not-found handling, tag updates, and performance improvements
+        in provisioning paths.', 'kubeadm usability: improved cert expiration checks
+        without CA keys, better CoreDNS migration behavior, and reduced runtime detection
+        where unnecessary.']
+- version: '1.21'
+  summary:
+    major_changes: ['v1.21 introduces multiple GA/Beta feature graduations (EndpointSlice
+        GA, Immutable Secrets/ConfigMaps GA, storage capacity tracking beta, BoundServiceAccountTokenVolume
+        beta) plus notable operational changes in kube-proxy/kubeadm that impact node
+        provisioning and cluster behavior.', "Patch releases 1.21.1\u20131.21.14 are\
+        \ largely stability/security updates, with several important scheduler/network/storage\
+        \ fixes and periodic Go toolchain bumps."]
+    breaking_changes: [kube-proxy IPVS mode no longer sets net.ipv4.conf.all.route_localnet;
+        clusters relying on route_localnet=1 must manage it explicitly (mitigates
+        CVE-2020-8558)., kubeadm init defaults kubelet cgroupDriver to systemd when
+        unspecified; mismatched runtime cgroup driver can break node registration
+        unless aligned., New PV topology labels are used by in-tree provisioners (EBS/OpenStack
+        Cinder/gce-pd) switching from failure-domain.beta.kubernetes.io/* to topology.kubernetes.io/*;
+        workloads/automation depending on old labels should be updated., OpenStack
+        Cinder CSI migration is enabled by default in 1.21; Cinder CSI driver must
+        be installed for existing Cinder volumes to keep working., Service topologyKeys
+        field is deprecated (replacement via topology-aware subsetting / internal
+        traffic policy); plan migration away from topologyKeys usage., policy/v1 PodDisruptionBudget
+        is introduced; v1beta1 behavior differs in strategic merge patch selector
+        semantics (fixed in 1.21.11) and v1 empty selector selects all pods in namespace;
+        validate tooling that patches selectors., 'EndpointSlice GA removes the topology
+        field and changes how topology info is represented (zone/nodeName); ensure
+        consumers use discovery.k8s.io/v1 fields, not deprecated topology.', The API
+        query parameter export is fully removed; requests with export=true now return
+        HTTP 400., kubectl run removed deprecated generator/replicas/service-generator/service-overrides/schedule
+        flags; some kubectl run flags are deprecated and should be removed from automation.,
+      Kubeadm no longer supports kube-dns as a DNS type; configurations specifying
+        kube-dns will error., 'Structured logging migrations in kubelet components
+        change some exit codes from 255 to 1; if you alert on exit codes, adjust expectations.']
+    deprecations: [PodSecurityPolicy (policy/v1beta1 PodSecurityPolicy) is deprecated
+        in 1.21 and will be removed in 1.25; plan migration to Pod Security Admission
+        / alternative policy enforcement., discovery.k8s.io/v1beta1 EndpointSlices
+        deprecated in favor of discovery.k8s.io/v1; removal targeted for 1.25., audit.k8s.io/v1alpha1
+        and v1beta1 audit events/policy deprecated in favor of audit.k8s.io/v1; apiserver
+        flags and tooling must be updated prior to 1.24., policy/v1beta1 PodDisruptionBudget
+        deprecated and will be removed in 1.25+ (policy/v1 is the replacement)., In-tree
+        vSphere diskformat StorageClass parameter and multi-vCenter support deprecated;
+        vSphere <67u3 and VM HW <15 deprecated (support through 1.24)., kubelet dockershim-related
+        flags emit deprecation warnings (dockershim removal occurs in later releases).]
+    removals: [batch/v2alpha1 CronJob types/clients are removed; CronJob is promoted
+        to batch/v1 (use batch/v1 APIs)., kubeadm alpha selfhosting pivot and kubeadm
+        alpha certs commands removed; use kubeadm certs and kubeadm kubeconfig user.,
+      kubectl alpha debug removed; use kubectl debug., The export query parameter
+        removed (hard removal).]
+    features: ["Security: fix for CVE-2021-25741 in 1.21.5 (subPath symlink exchange\
+        \ allowing host filesystem access) \u2014 1.21.5+ is the safe baseline for\
+        \ 1.21 clusters.", 'Networking: Topology Aware Hints introduced (alpha) and
+        later fixes to kube-proxy and scheduler behavior; Service InternalTrafficPolicy
+        added for node-local vs cluster-wide internal routing.', 'Storage: Generic
+        Ephemeral Volumes promoted to beta; CSIStorageCapacity (storage capacity tracking)
+        beta and enabled by default; CSI ServiceAccount Token beta; multiple CSI migration
+        improvements (notably AzureFile/Cinder/gce-pd) and Windows storage scaling
+        improvements.', 'Node: Kubelet Graceful Node Shutdown promoted to beta and
+        enabled by default; structured logging adoption in kubelet; CRIContainerLogRotation
+        GA.', 'CLI: kubectl kustomize updated (v4 series), default-container/default-exec-container
+        annotations supported; kubectl get omits managedFields by default; kubectl
+        version skew warning.']
+    bug_fixes: ['Scheduler: fixes to plugin event registration and requeueing behavior
+        (1.21.13) and avoiding nomination of deleted/already scheduled pods (1.21.12),
+        reducing scheduling delays and phantom nominations.', 'Network/API: EndpointSlice
+        controller performance improvements and correctness fixes (nodeName retention,
+        metrics lock contention) and server-side apply list-merge order changes (1.21.9).',
+      'API machinery: konnectivity client bumps to fix goroutine leaks in apiserver
+        (1.21.11) and other race/timeout handling fixes; improved error handling in
+        kubectl methods used by downstream packages.', 'Storage/CSI migration: AzureFile
+        PV secret namespace resolution under CSI migration (1.21.13), Azure disk/file
+        fixes, FibreChannel cleanup/corruption mitigations, and mount-utils stale
+        file handle detection.', 'Node: kubelet inotify memory usage fix (1.21.11)
+        and various panics/race condition fixes across kubelet and kubectl secret
+        creation paths.', 'Networking: kube-proxy conntrack cleanup fixes and service
+        replace behavior preserving allocated clusterIP/nodePort without read-modify-write
+        (1.21.5).']
+- version: '1.22'
+  summary:
+    major_changes: ['kubeadm and kubelet default image registries shift from k8s.gcr.io
+        to registry.k8s.io (including pause image), requiring registry/network allowlist
+        updates and mirroring changes during upgrades.', 'Kubernetes 1.22 is a major
+        API cleanup release: multiple long-deprecated beta API versions stop being
+        served, requiring clients/manifests to use GA equivalents before upgrading.',
+      'Server-Side Apply (SSA) becomes GA and always-on, affecting field ownership/merge
+        semantics and improving declarative management consistency.', 'etcd is updated
+        to 3.5.0 in 1.22, bringing performance/monitoring changes but also known data-corruption
+        risk in early 3.5.x releases (3.5.[0-2]).', 'Security posture and defaults
+        evolve: optional cluster-wide seccomp defaults (alpha) and kubeadm rootless
+        control-plane (alpha) are introduced, plus multiple high/medium CVEs are fixed
+        in patch releases.']
+    breaking_changes: ['Removed serving of several beta APIs (eg, v1beta1 for Ingress,
+        CRD, webhook configurations, APIService, SAR/TAR/CSR/Lease, etc.); workloads/controllers
+        using those versions will fail against 1.22 API servers.', Aggregated API
+        server redirects are no longer forwarded by default (can restore with --aggregator-reject-forwarding-redirect=false);
+        may break clients relying on redirect behavior., "Kubeadm no longer auto-detects\
+        \ Docker cgroup driver and tightens flag usage (e.g., --cri-socket cannot\
+        \ be mixed with --config), which can break automation and node joins if configs\
+        \ aren\u2019t updated.", Ephemeral containers API changed (pods/ephemeralcontainers
+        now returns/expects a Pod); older kubectl versions may not work for kubectl
+        debug against 1.22+ clusters., Controller-manager insecure port flags are
+        effectively disabled and probes/metrics access patterns must use HTTPS/10257;
+        tooling relying on old insecure endpoints will break.]
+    deprecations: [In-tree cloud auth plugins for Azure and GCP are deprecated in
+        favor of exec credential plugins (kubelogin/gcloud) and should be migrated.,
+      Dynamic Kubelet Configuration is deprecated; usage of --dynamic-config-dir will
+        warn and the feature is effectively on a path to removal., 'Several in-tree
+        volume plugins are deprecated (storageos, quobyte, flocker) and should be
+        replaced with CSI equivalents.', kubectl --record is deprecated in favor of
+        kubectl command headers mechanism.]
+    removals: [In-tree ScaleIO volume plugin support is removed (1.22); clusters still
+        depending on it must migrate to CSI/alternative., Service topologyKeys (alpha)
+        is removed along with kube-proxy support; use topology-aware hints and/or
+        internalTrafficPolicy instead., Kube-scheduler deprecated flags like --algorithm-provider
+        are removed; must use ComponentConfig for plugin configuration., Legacy beta
+        API versions for many core resources stop being served as part of 1.22 API
+        removals (see breaking changes).]
+    features: ['Security fixes in patch releases: CVE-2021-25741 (subPath symlink
+        escape), CVE-2022-3172 (aggregator redirect/SSRF), CVE-2022-3162 (unauthorized
+        CR read across types), and CVE-2022-3294 (node proxy address validation).',
+      "API server performance tuning: gzip compression level reduced (4\u21921) to\
+        \ lower latency for large LISTs at the cost of higher bandwidth; APF improvements\
+        \ and watch handling tweaks reduce resource pressure.", 'Networking behavior
+        improvements: EndpointSlice and service endpoint handling hardened (termination/readiness
+        semantics, kube-proxy regressions fixed), and Windows kube-proxy performance
+        improvements.', 'kubeadm enhancements: etcd static pod initial corrupt check
+        flag, broader key format acceptance, improved cert expiration checks, and
+        optional rootless control-plane (alpha).', Build/toolchain updates across
+        the line (Go 1.16.x updates in patches; dependency bumps like konnectivity/cAdvisor)
+        that can matter for downstream builds and embedded consumers.]
+    bug_fixes: ['API server: fixed regression treating 304 responses from aggregated
+        API servers as internal errors; improved shutdown by allowing endpoint reconciler
+        to delete apiserver lease.', 'API server: fixed connection management bug
+        that could exhaust ephemeral ports in kubectl workflows when exec auth is
+        used; reduced memory when many CRDs are present.', 'Scheduler: fixed memory
+        leak on preemption, avoided potential crash with PodTopologySpread, and improved
+        re-queue latency by correcting plugin event registration.', 'Node/kubelet:
+        multiple fixes around pod terminal state/reporting, static pod restarts, and
+        correctness of readiness during termination; updates to Windows privilege
+        checks.', 'Cloud provider/storage: multiple Azure and CSI migration related
+        fixes (LB updates, disk/azurefile migration edge cases), plus volume attach/detach
+        and mount stability improvements.']
+- version: '1.23'
+  summary:
+    major_changes: ['Kubernetes 1.23 patchline updates focus on security fixes (multiple
+        CVEs in apiserver/kubelet), operational tuning in apiserver/kubelet, and supply-chain/runtime
+        compatibility updates (notably Go toolchain bumps).', 'Notable behavioral
+        shifts during the 1.23 lifecycle include defaulting image registries away
+        from k8s.gcr.io toward registry.k8s.io, and several kube-apiserver/kubelet
+        behavior changes that can affect clients, probes, and node proxying.']
+    breaking_changes: [kube-apiserver node proxy hardening (CVE-2022-3294 fix) can
+        break nodes/proxy clients if Nodes advertise localhost or link-local addresses;
+        validate node address advertisement and any proxy/egress architecture., kube-apiserver
+        no longer forwards redirect responses from aggregated API servers by default
+        (CVE-2022-3172 fix); set --aggregator-reject-forwarding-redirect=false only
+        if you fully understand the risk/need., 'Go 1.19.x rebuild in later 1.23 patches
+        changes apiserver defaults to preserve prior behavior: apiserver forces GOGC=63
+        and GODEBUG x509sha1=1 by default; if you rely on different GC/tls behavior,
+        explicitly configure/validate.']
+    deprecations: [(1.23 feature-line note) kube-proxy userspace proxier was deprecated
+        (planned removal in 1.25); ensure you are on iptables/ipvs and not userspace.,
+      (1.23 feature-line note) klog-specific flags were deprecated; plan migration
+        to supported logging config and consider kube-log-runner for log file handling
+        where applicable., (1.23 feature-line note) FlexVolume deprecated; plan migration
+        to CSI drivers.]
+    removals: ['(1.23 feature-line note) Several legacy/alpha APIs and feature gates
+        removed in 1.23 baseline (e.g., rbac.authorization.k8s.io/v1alpha1, scheduling.k8s.io/v1alpha1;
+        IPv6DualStack gate removed after GA).']
+    features: ['Kubelet improves TCP/HTTP probe resource usage by reducing TIME-WAIT
+        to 1s, lowering ephemeral port/conntrack pressure in probe-heavy nodes (1.23.17).',
+      'Kubeadm migrates default image registry to registry.k8s.io for new clusters
+        and upgrades, and kubelet defaults pause image pulls to registry.k8s.io (1.23.15+).',
+      API server gzip compression level reduced to improve large LIST latency at the
+        cost of increased bandwidth (1.23.12)., Security hardening for aggregated
+        API servers and node proxying (redirect suppression and node address verification)
+        reduces SSRF/control-plane exposure (1.23.11/1.23.14)., 'Etcd updated in the
+        1.23 patchline (notably to 3.5.5 in 1.23.14), improving stability and picking
+        up upstream fixes.']
+    bug_fixes: ['CVE-2022-41723 fixed via golang.org/x/net v0.7.0 bump (1.23.17),
+        reducing exposure to HTTP/2-related issues in Go networking stack.', 'CVE-2022-3162
+        fixed: unauthorized cross-kind reads of CRs within a namespaced API group
+        when list/watch permissions were too broad (1.23.14); review CRD RBAC assumptions.',
+      'CVE-2022-3294 fixed: enforce node proxy address validation to prevent proxying
+        to unexpected control-plane endpoints (1.23.14).', 'CVE-2022-3172 fixed: aggregated
+        API servers can no longer cause client redirects by default; mitigates SSRF/credential
+        leakage (1.23.11).', 'Multiple controller/scheduler/kubelet regressions fixed
+        across patches: Job controller backoff and finalizer tracking reliability,
+        scheduler memory leak and event requeue delays, kubelet cAdvisor/metrics correctness,
+        CSI ephemeral volume reconstruction, and Service LB update triggers on appProtocol
+        changes.']
+- version: '1.24'
+  summary:
+    major_changes: ['Kubernetes 1.24 is a major release whose headline change is the
+        removal of dockershim from kubelet, requiring a CRI runtime (containerd/CRI-O
+        or cri-dockerd) and associated kubeadm defaults/behavior changes.', 'Security
+        posture was tightened across the 1.24 patch line with multiple fixed CVEs
+        (notably Windows node privilege escalations and several kube-apiserver issues),
+        making later 1.24 patches strongly preferable for production.', 'Image distribution
+        defaults shifted from k8s.gcr.io to registry.k8s.io (kubeadm and kubelet pause
+        image), impacting air-gapped/mirrored registries and upgrade procedures.',
+      'API machinery and server behavior changed in ways that can affect clients and
+        integrations (OpenAPI v3 enabled by default, proxy redirect handling hardened,
+        and some deprecated/legacy flags and APIs removed).']
+    breaking_changes: [Dockershim is removed in v1.24; nodes using Docker via dockershim
+        will fail unless migrated to containerd/CRI-O or configured with cri-dockerd.,
+      kubeadm defaults the CRI socket to containerd and removes Docker-specific preflight
+        checks; clusters/scripts assuming Docker sockets or docker service checks
+        may break., 'kube-apiserver no longer forwards aggregated API server redirect
+        responses by default (unless --aggregator-reject-forwarding-redirect=false),
+        which can change behavior of aggregated APIs and clients.', 'client-go metrics
+        changed to reduce label cardinality by replacing url labels with host labels,
+        which can break dashboards/alerts that depend on the old labels.', 'Kubernetes
+        removed/disabled various deprecated flags/APIs in 1.24 (e.g., client.authentication.k8s.io/v1alpha1
+        ExecCredential removed; node.k8s.io/v1alpha1 RuntimeClass no longer served;
+        multiple insecure serving flags removed).', 'Kubeadm label/taint migration
+        continues: control plane nodes move away from the legacy master label/taint;
+        upgrades may modify labels/taints, impacting scheduling/tolerations and automation.',
+      'Some storage behavior changes (e.g., CSI staging path changes noted in 1.24
+        development notes require draining nodes before kubelet update in those scenarios)
+        can impact CSI/mount behavior during upgrade if applicable.', kube-apiserver
+        tightened node proxy address validation fixes (CVE-2022-3294) can break clients
+        depending on nodes/proxy if kubelets advertise localhost/link-local addresses.]
+    deprecations: [Service.spec.loadBalancerIP is deprecated; prefer implementation-specific
+        annotations/classes., kube-apiserver --master-count and --endpoint-reconciler-type=master-count
+        are deprecated in favor of the lease reconciler., kubelet --pod-infra-container-image
+        and --container-runtime flags are deprecated (future removal)., Legacy kubeadm
+        API kubeadm.k8s.io/v1beta2 is deprecated; migrate to v1beta3., v1beta1 CSIStorageCapacity
+        is deprecated in favor of v1 (removal planned in v1.27).]
+    removals: [Dockershim removed from kubelet (core 1.24.0)., client.authentication.k8s.io/v1alpha1
+        ExecCredential removed; must use v1 ExecCredential., node.k8s.io/v1alpha1
+        RuntimeClass API no longer served (use node.k8s.io/v1)., Various insecure
+        serving flags removed from control plane components (kube-apiserver/kube-controller-manager/kube-scheduler)
+        and deprecated feature gates removed.]
+    features: [OpenAPI v3 publication enabled by default (beta) and related client
+        tooling improvements for schema discovery., NonPreemptingPriority and several
+        scheduling/behavioral features graduated to GA; gRPC probes graduated to beta
+        and enabled by default., 'Kubelet credential provider graduated to beta, improving
+        registry auth plugin workflows.', 'Service enhancements: .spec.loadBalancerClass
+        GA; Service IP allocator supports an opt-in static subrange strategy; Topology
+        Aware Hints enabled by default as an opt-in via service annotation.', 'Storage:
+        CSI storage capacity tracking and volume expansion are GA in 1.24; continued
+        CSI migration work (AzureDisk/OpenStack Cinder GA; AzureFile migration enabled
+        by default).', 'Kubeadm improvements: new dry-run for reset, stricter config
+        parsing warnings, and ongoing taint/label migration tooling.']
+    bug_fixes: ['Multiple security fixes across the patch line, including: CVE-2022-3172
+        (aggregated API redirect/SSRF), CVE-2022-3162 (CRD unauthorized read), CVE-2022-3294
+        (node proxy address validation), and CVE-2023-2728 (ephemeral containers bypassing
+        enforce-mountable-secrets), plus Windows kubelet fixes (CVE-2021-25749 and
+        later CVE-2023-3676/CVE-2023-3955).', 'kube-apiserver performance/latency
+        fixes (e.g., gzip compression level change to improve large list call latency;
+        deletecollection timeout regression fix; konnectivity hung connection fixes;
+        cert rotation handling for kubelet auth connections).', 'Job controller fixes
+        (finalizers/orphan pod handling) and scheduler stability fixes (data races,
+        memory leaks).', Windows networking/proxier fixes for LoadBalancer/dual-stack
+        behavior and rule leaks., 'Storage reliability fixes including volume detach/detach
+        edge cases, CSI raw block staging behavior, and mount/unmount behavior improvements.',
+      "Patch line toolchain updates (Go 1.18\u21921.19\u21921.20 series) and dependency\
+        \ bumps (runc/cAdvisor/etcd/x/net) addressing runtime stability and CVEs."]
+- version: '1.25'
+  summary:
+    major_changes: ["Kubernetes 1.25 is a major release centered on security and platform\
+        \ maturity\u2014removing PodSecurityPolicy in favor of stable Pod Security\
+        \ Admission, graduating cgroups v2 and Ephemeral Containers to stable, introducing\
+        \ KMS v2, and shifting official image distribution to registry.k8s.io\u2014\
+        while 1.25.1\u20131.25.16 deliver a long tail of security patches, Go toolchain\
+        \ bumps, and targeted controller/kubelet/scheduler fixes."]
+    breaking_changes: [PodSecurityPolicy (PSP) is removed in v1.25; clusters using
+        PSP must migrate to Pod Security Admission or a policy webhook before upgrading.,
+      "Deprecated beta APIs scheduled for removal in v1.25 are no longer served; verify\
+        \ clients/controllers and CRDs aren\u2019t using removed API versions (see\
+        \ the v1.25 deprecation guide).", kube-apiserver stops forwarding redirect
+        responses from aggregated API servers by default; set --aggregator-reject-forwarding-redirect=false
+        only if you explicitly need legacy behavior., "Partial removal of legacy seccomp\
+        \ alpha annotations: kubelets no longer honor them and static pods can\u2019\
+        t rely on them; use securityContext.seccompProfile fields instead.", 'If you
+        rely on nodes/proxy and any kubelet advertises localhost or link-local addresses,
+        the CVE-2022-3294 fix in 1.25.4 can break proxying because apiserver now enforces
+        stricter node address validation.', 'kubeadm feature gate UnversionedKubeletConfigMap
+        is locked on (GA): if previously disabled, you must copy kube-system/kubelet-config-x.yy
+        to kube-system/kubelet-config before upgrading to 1.25.', 'kube-controller-manager
+        removed flags deleting-pods-qps, deleting-pods-burst, and register-retry-count;
+        update automation/manifests accordingly.', 'The gcp/azure auth plugins were
+        removed in 1.25.0 then temporarily restored due to compatibility issues; validate
+        your kubectl/client-go auth path for your distro/managed service and plan
+        to use provider-specific replacements (e.g., kubelogin).', Windows winkernel
+        kube-proxy drops support for HNS v1 APIs; ensure Windows networking stack
+        is compatible (HNS v2).]
+    deprecations: [GlusterFS in-tree provisioner (kubernetes.io/glusterfs) is deprecated
+        in v1.25; plan migration to CSI or other storage., kube-controller-manager
+        --enable-taint-manager flag is deprecated (taint-based eviction remains enabled
+        by default) and slated for removal in 1.26., kube-scheduler ComponentConfig
+        v1beta2 is deprecated in v1.25 (v1 is GA); update scheduler config API version
+        in config files., 'Linux/Windows kube-proxy userspace mode is deprecated;
+        Windows default changes to kernelspace in 1.26, so validate mode and behavior
+        ahead of time.', "EphemeralContainers feature gate is effectively always-on\
+        \ (GA) and is deprecated for eventual removal; don\u2019t rely on toggling\
+        \ it via --feature-gates."]
+    removals: [PodSecurityPolicy admission plugin is removed in v1.25., 'Several in-tree
+        volume plugins are removed (flocker, quobyte, storageos); ensure you are not
+        using them and migrate if you are.', kubelet deprecated flag --experimental-kernel-memcg-notification
+        is removed; use --kernel-memcg-notification instead., kube-apiserver deprecated
+        --service-account-api-audiences flag is removed; use --api-audiences., Various
+        GA feature gates from <=1.23 that were unconditionally enabled are removed;
+        do not reference them in component --feature-gates.]
+    features: ['Pod Security Admission is GA and enabled by default, providing namespace-scoped
+        baseline/restricted/enforce controls as the replacement for PSP.', "Ephemeral\
+        \ Containers are GA for live-debug workflows when exec isn\u2019t possible\
+        \ (e.g., crashed containers).", 'cgroups v2 support is GA, improving compatibility
+        with modern Linux distros and enabling newer resource-accounting behavior.',
+      'KMS v2alpha1 is introduced, improving encryption-at-rest performance/rotation/observability;
+        Kubernetes also switches KMS DEK encryption to AES-GCM (backward-compatible
+        reads).', 'Core CSI migration is GA (including AWS EBS and GCE PD), with vSphere
+        migration enabled by default; CSI Ephemeral Volumes are GA.', NetworkPolicy
+        endPort is GA (provider support required); enables port ranges per policy
+        rule., DaemonSet MaxSurge and StatefulSet minReadySeconds are GA; CronJob
+        TimeZone support is beta., 'Operational changes: official images move from
+        k8s.gcr.io to registry.k8s.io; kube-proxy images move to distroless base,
+        impacting debugging/exec expectations.', Patch releases add an opt-in kube-apiserver
+        mitigation for HTTP/2 DoS (UnauthenticatedHTTP2DOSMitigation feature gate)
+        to complement Go x/net fixes.]
+    bug_fixes: ["Security: multiple CVE fixes landed across the series\u2014SSRF via\
+        \ aggregated API redirects (1.25.1), CR unauthorized read and node proxy address\
+        \ validation (1.25.4), ServiceAccount mountable-secrets bypass via ephemeral\
+        \ containers (1.25.11), Windows kubelet privilege escalations (1.25.13 and\
+        \ 1.25.16), and HTTP/2 DoS mitigations and dependency bumps (1.25.15).", 'Scheduler:
+        fixes for queueing behavior that could delay pods up to ~5 minutes, plus data
+        race and preemption-related stability improvements.', 'Controllers: CronJob
+        correctness improvements (complex schedules; job status missing jobs), Job
+        controller correctness around finalizers and completion, and a StatefulSet
+        scale-up crash regression fix (1.25.15).', 'Networking: fixes for service
+        resource allocation leakage with finalizers, load balancer update triggers,
+        endpoint validation, and Topology Aware Hints race/label timing issues.',
+      'Node/kubelet: fixes for stuck pod termination on unmount, preventing GC of
+        runtime-pinned images, device-related pod termination on kubelet restart regression,
+        and improved prober/metrics behaviors; cAdvisor bumps address CRI-O metrics
+        issues.', "Performance/stability: apiserver gzip compression tuning for large\
+        \ list latencies, avoidance of unnecessary etcd writes (creationTimestamp\
+        \ null), and etcd dependency updates (3.5.5\u21923.5.9 in the series)."]
+- version: '1.26'
+  summary:
+    major_changes: ["Security/maintenance patchline for 1.26: multiple CVE fixes (API\
+        \ server http/2 DoS, Windows kubelet/storage privilege escalations, protobuf\
+        \ CVE), plus periodic toolchain bumps (Go 1.19\u21921.20\u21921.21) and a\
+        \ handful of scheduler/storage correctness fixes that reduce upgrade risk\
+        \ but can change edge-case behavior.", 'Kubernetes v1.26.0 introduced several
+        behavioral and API-surface changes (notably removal of deprecated beta APIs,
+        removal of in-tree OpenStack and GlusterFS providers, kube-proxy userspace
+        removal, and new/GA feature gates) which are the primary upgrade considerations
+        if you are coming from <=1.25.']
+    breaking_changes: [v1.26 stops serving deprecated beta APIs scheduled for removal
+        (must migrate manifests/clients per the v1.26 deprecation guide)., In-tree
+        OpenStack cloud provider (and Cinder volume plugin) removed; must use external
+        cloud-provider-openstack + Cinder CSI before upgrading., In-tree GlusterFS
+        storage driver removed; workloads must migrate off GlusterFS volumes prior
+        to upgrading., "kube-proxy \u201Cuserspace\u201D mode removed on Linux/Windows;\
+        \ clusters must use iptables/ipvs (Linux) or kernelspace (Windows).", "kube-proxy\
+        \ no longer silently falls back from ipvs\u2192iptables when ipvs is misconfigured;\
+        \ it exits with error instead (can break node networking if you relied on\
+        \ fallback).", GCE LoadBalancer Services with mixed TCP/UDP ports are not
+        supported (API behavior clarified/enforced in 1.26.7)., 'client-go/kubectl
+        removed legacy gcp/azure auth plugins; users must move to provider-specific
+        replacements (kubelogin, gcloud auth plugin changes).']
+    deprecations: [kube-apiserver flag --master-service-namespace deprecated (removal
+        targeted for 1.27)., Controller-manager/taint-manager flag --pod-eviction-timeout
+        deprecated (together with enable-taint-manager removal in 1.27)., kubectl
+        apply --prune-whitelist renamed/deprecated in favor of --prune-allowlist.,
+      apiserver_request_slo_duration_seconds metric deprecated in favor of apiserver_request_sli_duration_seconds
+        (removal in 1.27).]
+    removals: [Deprecated beta APIs scheduled for removal in v1.26 are no longer served.,
+      In-tree OpenStack cloud provider and Cinder volume plugin removed., In-tree
+        GlusterFS volume plugin removed., kube-proxy userspace mode removed., DynamicKubeletConfig
+        feature gate removed from apiserver (cannot be used with older nodes)., ServiceLoadBalancerClass
+        and ServiceLBNodePortControl feature gates removed (were locked on)., Legacy
+        klog CLI flags removed (only -v and -vmodule remain)., CRI v1alpha2 support
+        dropped (runtimes must implement CRI v1).]
+    features: ['v1.26.14+: process_start_time_seconds added to /metrics/slis across
+        components; process_start_time_seconds also added to /metrics/slis for consistent
+        SLI reporting.', 'v1.26.0: kubectl auth whoami and SelfSubjectReviews API
+        added.', 'v1.26.0: Pod .spec.schedulingGates added to control scheduling readiness.',
+      "v1.26.0: API Priority & Fairness \u201Cborrowing\u201D (lendablePercent/borrowingLimitPercent)\
+        \ plus new flowcontrol metrics.", 'v1.26.0: ServiceInternalTrafficPolicy graduated
+        to GA; MixedProtocolLBService graduated to GA; EndpointSliceTerminatingCondition
+        graduated to GA (gate locked, removed later).', 'v1.26.0: kubelet external
+        credential provider GA (API v1), and kubelet CPU Manager + Device Manager
+        GA.', 'v1.26.0: Optional Component SLIs endpoints (/metrics/slis) available
+        behind ComponentSLIs feature gate across components; later patches add additional
+        metrics like process_start_time_seconds.', "v1.26.0: gzip compression level\
+        \ lowered (4\u21921) to improve large list performance; clients can opt out\
+        \ via kubeconfig DisableCompression / kubectl --disable-compression.", 'v1.26.0:
+        APIServerIdentity promoted to beta (leases in kube-system identify active
+        apiservers).']
+    bug_fixes: ['v1.26.15: update google.golang.org/protobuf to v1.33.0 to fix CVE-2024-24786.',
+      'v1.26.10: optional API server mitigation for unauthenticated HTTP/2 DoS (CVE-2023-44487
+        / CVE-2023-39325) via UnauthenticatedHTTP2DOSMitigation feature gate; also
+        bumps golang.org/x/net.', 'v1.26.11 and v1.26.8: Windows privilege escalation
+        fixes (CVE-2023-5528, CVE-2023-3955, CVE-2023-3676) affecting kubelet/in-tree
+        storage paths on Windows nodes.', 'v1.26.6: fix for ServiceAccount enforce-mountable-secrets
+        bypass with ephemeral containers (CVE-2023-2728).', 'Scheduler regressions
+        fixed across patch releases: multi-point plugin override bug that could prevent
+        all pods from scheduling (1.26.13), incorrect queue placement leading to 5-minute
+        delays (1.26.10), and preemption edge cases (1.26.9).', 'Storage/node reliability
+        fixes: allow deletion of pods using raw block volumes after node reboot (1.26.13),
+        CSI staging/publish/mount behaviors after reboot (1.26.13), SMB stale mount
+        fixes (1.26.12), and volume attach/detach state handling fixes (1.26.10).',
+      'Controller fixes: cronjob controller status/requeue timing fixes (1.26.10/1.26.11)
+        and DaemonSet rolling update behavior fixes to avoid stuck updates (1.26.10).',
+      'Networking fixes: restore readiness predicate for externalTrafficPolicy: Local
+        services (1.26.11) and reduce Windows winkernel proxier issues across early
+        1.26 patches.', "Build/packaging: periodic Go toolchain updates (1.19.x\u2192\
+        1.20.x\u21921.21.x) and distroless-iptables bumps; kubeadm CA NotBefore offset\
+        \ mitigation for clock skew (1.26.8)."]
+- version: '1.27'
+  summary:
+    major_changes: ['Security fixes across the 1.27 patch line, including multiple
+        Windows-specific kubelet privilege/permission issues and ServiceAccount mountable-secrets
+        bypasses in kube-apiserver, make upgrading to at least v1.27.16 strongly recommended.',
+      'Scheduler behavior/performance was tuned repeatedly in these patches (especially
+        around PreFilter/PostFilter semantics, extenders, and affinity edge cases),
+        reducing latency and avoiding crash/unschedulable corner cases.', "The Kubernetes\
+        \ build toolchain was updated multiple times (Go 1.20.x \u2192 1.21.x \u2192\
+        \ 1.22.x), which can affect custom builds, downstream patches, and CVE exposure\
+        \ via the Go stdlib/tooling.", 'API machinery/watch behavior was adjusted
+        to restore watch stability by default for watch requests without resourceVersion
+        (mitigating etcd watch issues), with an opt-in feature gate to re-enable the
+        newer behavior.', 'Cloud/provider and storage integrations saw targeted fixes
+        (Azure Disk topology labels with external cloud provider, service controller
+        behavior around ProviderID / externalTrafficPolicy local readiness, CSI NodeStageVolume
+        retry), improving correctness in common managed/on-prem scenarios.']
+    breaking_changes: ["Scheduler framework: for out-of-tree PostFilter plugin developers,\
+        \ the semantics of NodeToStatusMap changed\u2014an absent entry must now be\
+        \ interpreted as UnschedulableAndUnresolvable, which can alter plugin behavior\
+        \ if you relied on \u201Cmissing == success/unknown\u201D.", 'If you rely
+        on watch requests without resourceVersion being served from underlying storage
+        (the 1.27 change), note that v1.27.13 reverted the default back to serving
+        them from watch cache for stability; re-enable the newer behavior with the
+        WatchFromStorageWithoutResourceVersion feature gate if needed.']
+    deprecations: []
+    removals: []
+    features: ['v1.27.16: Kubernetes built with Go 1.22.4/1.22.5 (toolchain uplift).',
+      'v1.27.15: Go 1.21.10/1.21.11 builds; scheduler performance optimization when
+        prefilter narrows to very few nodes (e.g., DaemonSets).', 'v1.27.11: Added
+        process_start_time_seconds to /metrics/slis and updated distroless-iptables
+        base.', 'v1.27.x line: Multiple Go build bumps and image base updates (distroless-iptables),
+        impacting supply-chain and compatibility for anyone building Kubernetes from
+        source.']
+    bug_fixes: ["v1.27.16: Fix CVE-2024-5321\u2014corrects Windows container log file\
+        \ permissions to prevent BUILTIN\\Users reading and Authenticated Users modifying\
+        \ container logs.", "v1.27.13: Fix CVE-2024-3177\u2014prevents bypass of ServiceAccount\
+        \ mountable-secrets policy via envFrom on containers/init/ephemeral containers\
+        \ in kube-apiserver.", "v1.27.3: Fix CVE-2023-2728\u2014prevents bypass of\
+        \ enforce-mountable-secrets policy via ephemeral containers when ServiceAccount\
+        \ admission + annotation are used.", 'v1.27.5 and v1.27.8: Fix high-severity
+        Windows privilege escalation vulnerabilities (CVE-2023-3955/3676 and CVE-2023-5528)
+        affecting Windows nodes (especially with in-tree storage plugins).', 'Scheduler
+        stability: fixes for crashes with invalid affinity node references, pods stuck
+        unscheduled when PreFilter returned non-existent nodes, extender failure requeue
+        behavior, and negative slice capacity bug when scoring plugins were skipped.',
+      'Networking: kube-proxy iptables-mode race fix preventing lost service endpoint
+        updates; service controller readiness predicate reintroduced for externalTrafficPolicy:
+        Local; improved LB host updates when ProviderID changes.', 'Storage/node:
+        fixes for volume mount cleanup via subPath, attach/detach state correctness
+        after detach errors, and various node reboot / volume reconstruction regressions
+        mitigated or reverted via feature-gate defaults.', 'kubeadm: fixes for cert
+        expiration command panics, kubelet config handling changes, and improved robustness
+        around etcd member removal/readability edge cases.', 'Apps/controllers: fixes
+        for CronJob status and scheduling edge cases, StatefulSet restart behavior
+        after eviction/node failure, PDB status synchronization correctness, and DaemonSet
+        rolling update stuck scenarios.']
+- version: '1.28'
+  summary:
+    major_changes: ['v1.28 refreshes several core control-plane/node components with
+        stability and scale fixes, plus security patches (notably affecting Windows
+        nodes) and changes to scheduling/plugin semantics and metrics that may require
+        operator or extension updates.', "Patch releases in the 1.28 line primarily\
+        \ update the Go toolchain (1.20\u21921.21\u21921.22) and deliver targeted\
+        \ fixes for scheduler, kube-proxy, apiserver watch/cache behavior, kubeadm/etcd\
+        \ membership handling, endpoints, and storage edge cases."]
+    breaking_changes: ['Scheduler framework breaking change for custom scheduler plugin
+        developers: `EnqueueExtension.EventsToRegister` now returns `ClusterEventWithHint`
+        (with optional `QueueingHintFn`); plugins must adapt to the new semantics
+        to avoid behavior/perf issues.', kube-scheduler ComponentConfig `kubescheduler.config.k8s.io/v1beta2`
+        is removed in v1.28; configs must be migrated to `kubescheduler.config.k8s.io/v1`.,
+      'kubectl: `kubectl version` default output changed to what `--short` used to
+        print and the `--short` flag was removed.', "For out-of-tree scheduler PostFilter\
+        \ plugins: `NodeToStatusMap` semantics changed\u2014absent entries should\
+        \ be interpreted as `UnschedulableAndUnresolvable`.", 'Metrics label change:
+        `apiserver_storage_size_bytes` label for etcd changed from `cluster` to `storage_cluster_id`,
+        which can break dashboards/alerts relying on the old label.']
+    deprecations: [CephFS in-tree volume plugin (`kubernetes.io/cephfs`) is deprecated;
+        migrate to CephFS CSI., RBD in-tree volume plugin (`kubernetes.io/rbd`) is
+        deprecated; migrate to RBD CSI., Support for CSI migration of Ceph RBD volumes
+        is deprecated; complete migration to out-of-tree CSI drivers before removal.,
+      KMSv1 (encryption at rest) is deprecated and will only receive security updates;
+        plan migration to KMSv2 (and note KMSv2KDF optional behavior)., kube-controller-manager
+        flags `--volume-host-cidr-denylist` and `--volume-host-allow-local-loopback`
+        are deprecated., kubelet flag `--azure-container-registry-config` is deprecated;
+        use image credential provider config/bin dir instead., kube-scheduler deprecated
+        leader-election lock flags `--lock-object-namespace`/`--lock-object-name`
+        removed in v1.28 (use `--leader-elect-resource-*` or ComponentConfig).]
+    removals: [Support for cgroup v1 is removed; cgroup v2 swap support is added (feature-gated
+        behavior depends on kubelet config)., Removed deprecated in-tree AzureFile
+        volume plugin (`azureFile`)., 'Removed several GA feature gates that are now
+        always enabled (and must not be referenced): `DevicePlugins`, `KubeletCredentialProviders`,
+        `DelegateFSGroupToCSIDriver`, `CSIStorageCapacity`, plus network/service related
+        GA gates such as `MixedProtocolLBService`, `ServiceInternalTrafficPolicy`,
+        `ServiceIPStaticSubrange`, `EndpointSliceTerminatingCondition`.', Removed
+        withdrawn feature `NetworkPolicyStatus` and removed legacy NetworkPolicy e2e
+        suite in favor of newer tests.]
+    features: ['Security/Windows hardening in the 1.28 line: fixes for Windows privilege
+        escalation issues (CVE-2023-3676, CVE-2023-3955, CVE-2023-5528) and Windows
+        container log ACL issue (CVE-2024-5321); plus scheduler/apiserver fixes for
+        CVE-2023-44487/39325 mitigations and dependency bumps (x/net, protobuf) tied
+        to CVEs.', 'Scheduler improvements: introduction of SchedulerQueueingHints
+        framework and the `ClusterEventWithHint` mechanism for finer-grained rescheduling
+        (plugin authors can supply `QueueingHintFn` to reduce useless retries).',
+      'API machinery: ValidatingAdmissionPolicy/Binding promoted to v1beta1 and feature
+        gate to beta (off by default), with several stability fixes; new CEL capabilities
+        including optionals groundwork and CRD validation ratcheting (alpha).', 'Networking:
+        kube-proxy enhancements including structured logging flag, connection draining
+        for terminating nodes, and better handling of terminating EndpointSlices for
+        ExternalTrafficPolicy=Local; multiple kube-proxy race fixes across patch releases.',
+      'Observability: new and promoted metrics (e.g., /metrics/slis process_start_time_seconds;
+        apiserver etcd request/error metrics; encryption config controller reload
+        metrics; metric/label adjustments) and more contextual logging across controllers/scheduler
+        components.', 'Storage/volume behavior: PV LastPhaseTransitionTime; NodeStageVolume
+        retry when CSI node driver missing; improvements around static PV deletion
+        with CSI/migration annotations; StatefulSet PVC autodelete respecting controlling
+        owners; and multiple mount/cleanup bug fixes.', 'Cluster lifecycle/kubeadm:
+        new config validate command, better config validation/migration; multiple
+        fixes around etcd member add/remove, join/reset robustness, and cert check
+        behavior; later patch releases remove legacy preflight checks for socat/ebtables.']
+    bug_fixes: ['Apiserver watch/cache reliability and scale: mitigations for etcd
+        watch instability by defaulting watches without resourceVersion to watch-cache,
+        reduced watchcache critical sections, optional SeparateCacheWatchRPC behavior,
+        and fixes for aggregated discovery/OpenAPI regressions and APIService-related
+        panics/crashes.', 'Scheduler correctness and stability: fixes for preemption
+        failures (QoS status patching), pods stuck in unschedulable pool/backoff queue
+        edge cases, scheduler crash on invalid affinity nodes, and improved latency
+        under gated pods or certain plugin behaviors.', 'kube-proxy correctness: fixed
+        UDP blackholing race during initialization, iptables update-loss race in 1.27+,
+        and IPv6 single-stack startup regression on dual-stack nodes.', 'Endpoints/Service
+        correctness: fixed endpoints controller truncation reconciliation (>1000 addresses)
+        and rapid pod state changes causing endpoint status drift; restored readiness
+        predicate behavior for ExternalTrafficPolicy=Local services in some environments.',
+      'Node/kubelet correctness: prevent re-admission of terminated pods after kubelet
+        restart (avoids Completed pods flipping to Failed), fix cgroupv2 swap-disabled
+        container start regression, and Windows UUID retrieval/CPU usage fixes.',
+      'Storage robustness: fixes for volume expansion when node expansion not required,
+        mount cleanup issues (subPath, orphaned pods after node downtime), and attach/detach
+        edge cases after errors or node reboot.', 'StatefulSet/DaemonSet behavior:
+        DaemonSet rolling update logic improvements (avoid getting stuck due to tolerations/constraints)
+        and counting old unhealthy pods toward maxUnavailable; removal of certain
+        noisy StatefulSet recreating events.', 'kubeadm/etcd membership: fixes for
+        incorrect member list reporting, avoiding duplicate member URL addition, and
+        safer member removal behavior during reset/upgrade workflows.']
+- version: '1.29'
+  summary:
+    major_changes: ["Go toolchain updates across the patch line (1.21.x\u21921.22.x\u2192\
+        1.23) affect build reproducibility and downstream distro/tooling expectations,\
+        \ but do not change cluster behavior directly.", 'Two Windows-specific security
+        fixes land in this patch line (CVE-2024-5321 and CVE-2024-9042), making 1.29.7+
+        and 1.29.13+ important targets for clusters with Windows nodes.', Scheduling
+        behavior and extensibility saw multiple fixes and one API semantics clarification
+        (NodeToStatusMap handling for PostFilter) that can impact out-of-tree scheduler
+        plugins and large-cluster scheduling stability., 'API server watch/cache stability
+        and performance received multiple fixes and behavior changes (watchcache starvation
+        mitigation, watch stability regression mitigations, list scalability improvements),
+        affecting controllers/operators that rely heavily on watches.', 'Operational
+        tooling changes in kubeadm (preflight checks, external CA upgrade messaging,
+        etcd member handling) reduce upgrade friction and avoid edge-case failures.']
+    breaking_changes: ['Scheduler framework semantics change for out-of-tree PostFilter
+        plugins: an absent entry in NodeToStatusMap should be interpreted as UnschedulableAndUnresolvable
+        (v1.29.6), which may require plugin updates.', 'Minor API output compatibility:
+        apiserver list responses for empty ValidatingAdmissionPolicies now always
+        include an `items` field (v1.29.8), which could affect strict JSON schema
+        consumers expecting previous buggy behavior.', 'Metrics label rename: `apiserver_storage_size_bytes`
+        label for etcd renamed from `cluster` to `storage_cluster_id` (v1.29.5), which
+        can break dashboards/alerts.', 'StatefulSet event emission changed: removal
+        of RecreatingFailedPod/RecreatingTerminatedPod events (v1.29.6) can affect
+        event-driven automations or monitoring rules.']
+    deprecations: ['No new API deprecations are introduced in these 1.29.x patch releases
+        beyond the 1.29.0 baseline; patch notes primarily contain fixes, security
+        updates, and build/tooling changes.']
+    removals: [No feature/API removals are introduced in these 1.29.x patch releases
+        beyond the 1.29.0 baseline.]
+    features: ["Build chain updates: Kubernetes 1.29 patch releases roll forward Go\
+        \ versions (1.21.6\u21921.21.11 in early patches, then 1.22.4+ through 1.22.12,\
+        \ and finally Go 1.23 in v1.29.15).", 'Security hardening: default masked
+        paths expanded to include `/sys/devices/virtual/powercap` to reduce side-channel
+        exposure on shared kernels (v1.29.7).', 'Kubeadm preflight relaxation: removed
+        `socat` and `ebtables` from kubeadm preflight checks (v1.29.10), which can
+        simplify host prerequisites depending on CNI/iptables requirements.']
+    bug_fixes: ['Windows security: CVE-2024-5321 fixes incorrect permissions on Windows
+        container logs (fixed in kubelet 1.29.7).', 'Windows security: CVE-2024-9042
+        fixes command injection via nodes/*/logs/query on Windows nodes (fixed in
+        kubelet 1.29.13).', 'Scheduler correctness: fixes PV nodeAffinity hostname
+        mismatches that could schedule pods to the wrong node when node hostname label
+        != node name (v1.29.11).', 'Scheduler behavior: improved preemption handling
+        to better respect PodDisruptionBudgets and fixed multiple preemption edge
+        cases (v1.29.11 and v1.29.9).', 'Networking: fixed kube-proxy UDP blackholing
+        race and conntrack cleanup regression that could cause DNS issues after pod
+        restarts (v1.29.9).', 'API server stability/perf: fixed kube-apiserver and
+        kubelet tracing-related memory leaks in default 1.29 configs (v1.29.10) and
+        reduced watchcache contention to improve list scalability under heavy load
+        (v1.29.6).', 'API machinery: fixed watch delivery regression for deprecated
+        namespace watch endpoint and prevented potential crashes with invalid CRD
+        schema + CEL rules (v1.29.8).', 'Storage: fixed multipath iSCSI/FC partition
+        resolution, volume manager detach state tracking to prevent pods stuck Terminating,
+        and various mount/path handling issues (v1.29.13).', 'Apps: daemonset maxUnavailable
+        budgeting includes old unhealthy pods (v1.29.10), endpoints controller reconciliation
+        after truncation (v1.29.10), endpoints status sync under rapid pod changes
+        (v1.29.7), and StatefulSet revisionHistoryLimit negative panic fix (v1.29.13).',
+      'Kubeadm: fixed etcd member add/remove idempotency issues and corrected member
+        list reporting (v1.29.10); improved external CA upgrade messaging and fixed
+        upgrade/init kubeconfig handling in earlier patches (v1.29.5).']
+- version: '1.30'
+  summary:
+    major_changes: ["Kubernetes 1.30 patch releases (v1.30.0 \u2192 v1.30.14) focus\
+        \ on security fixes (notably multiple kubelet Windows and read\u2011only endpoint\
+        \ CVEs), stability/performance regressions in apiserver/scheduler/kubelet/kube-proxy,\
+        \ and a steady toolchain bump from Go 1.21/1.22 to Go 1.23 across the series."]
+    breaking_changes: ['1.30.0 removes the deprecated SecurityContextDeny admission
+        plugin (use Pod Security Admission) and removes several GA feature gates (now
+        always-on or fully removed), which can break automation that still references
+        those gates or relies on the old admission plugin.', kubelet swap configuration
+        drops the previously accepted UnlimitedSwap value; NoSwap becomes the default
+        when unspecified (requires config review if you depended on swap behavior).,
+      "kube-proxy --nodeport-addresses default changes from \u201Call node IPs\u201D\
+        \ to \u201Cprimary node IP(s) only\u201D, which can change NodePort reachability\
+        \ on multi-homed nodes.", 'PersistentVolume controller no longer auto-assigns
+        a default StorageClass to PVCs with empty storageClassName, potentially changing
+        provisioning behavior in clusters relying on implicit defaulting.', 'Scheduler
+        framework semantics for NodeToStatusMap change for out-of-tree PostFilter
+        plugins: missing entries should be treated as UnschedulableAndUnresolvable.',
+      API server watch behavior changes around watch cache / resourceVersion handling
+        and APIServingWithRoutine being demoted/off-by-default can alter performance
+        characteristics and some edge-case watch behavior.]
+    deprecations: ['kubectl: deprecated prune-whitelist flag removed in favor of prune-allowlist
+        (v1.30.0).', In-tree azureFile storage plugin is deprecated (v1.30.0) and
+        in-tree Azure cloud provider is removed; migrate to external cloud provider
+        + CSI drivers., In-tree vSphere cloud provider is removed; migrate to external
+        cloud provider + CSI drivers., kube-controller-manager --cidr-allocator-type=CloudAllocator
+        marked for future deprecation/removal; prefer external cloud-provider options.]
+    removals: [SecurityContextDeny admission plugin removed (deprecated since v1.27).,
+      In-tree Azure cloud provider removed (must use external cloud-provider-azure).,
+      In-tree vSphere cloud provider removed (must use external cloud-provider-vsphere).,
+      'Multiple GA feature gates removed (feature now unconditional or deleted), e.g.,
+        RemoveSelfLink, ExpandedDNSConfig, MinimizeIPTablesRestore, ProxyTerminatingEndpoints,
+        APISelfSubjectReview (now unconditional), LegacyServiceAccountTokenTracking
+        (now unconditional).']
+    features: ['ValidatingAdmissionPolicy promoted to GA and enabled by default; admission
+        webhook match conditions promoted to GA (stable behavior, locked gates).',
+      'Structured Authentication/Authorization configuration promoted to beta, supports
+        multiple JWT authenticators, dynamic reload on file changes, and optional
+        DiscoveryURL override; API server fails fast on conflicting issuers.', Pod
+        scheduling gates and MinDomains topology spread fields are GA (feature gates
+        no longer effective)., RemoteCommand (kubectl exec/cp/attach) over WebSockets
+        is beta and enabled by default (with env var to disable); optional kubectl
+        port-forward over websockets remains alpha., User namespaces support is beta
+        with kubelet configurability; kubelet can set custom podLogsDir; concurrent
+        log rotation improvements; image GC behavior enhancements (ImageMaximumGCAge
+        beta)., 'Service spec.trafficDistribution added (alpha, gate-controlled) and
+        Jobs gain alpha managedBy and SuccessPolicy fields for external controller
+        delegation and success criteria.']
+    bug_fixes: ['Security: fixed CVE-2025-0426 (node DoS via unauthenticated kubelet
+        read-only checkpoint API by filling disk) in v1.30.10; fixed CVE-2024-9042
+        (Windows command injection via nodes/*/logs/query) in v1.30.9; fixed CVE-2024-5321
+        (Windows container log permissions) in v1.30.3.', 'API server: improved watch
+        stability and correctness (encryption/decryption watch edge cases, namespace
+        watch regression, CRD schema+CEL crash avoidance, watch cache starvation mitigations)
+        and reverted/disabled goroutine-per-watch optimization by default (APIServingWithRoutine
+        demoted/off).', 'kubectl: fixed exec/cp/attach regressions with HTTPS proxies
+        and websocket client stability for exec/attach/portforward; improved output/describe
+        formatting in several commands.', 'kubelet: fixed volume handling regressions
+        (PVC deletion unmounts, terminating pod volume detachment state checks, mount
+        corruption handling, init container restart edge cases, terminated pod re-admission
+        on restart), and ensured /metrics/slis is always available.', 'Scheduler:
+        fixed preemption and status patching issues, PDB-violating victim selection
+        behavior, crash on invalid affinity, and node hostname label/nodeAffinity
+        PV scheduling correctness; improved performance in several scheduling paths.',
+      'kube-proxy/networking: fixed UDP blackhole race during kube-proxy init, iptables
+        update loss race, nftables LoadBalancerSourceRanges bug, and conntrack cleanup
+        regression affecting UDP/DNS.', 'kubeadm: multiple upgrade/join/reset robustness
+        fixes (timeouts respected, panics avoided, better health check behavior, retries
+        for apiserver requests, cleanup of upgrade jobs, etcd member operations correctness).']
+- version: '1.31'
+  summary:
+    major_changes: ['Kubernetes 1.31 is a major release with significant API and behavioral
+        changes (notably in storage plugins, kubeadm, kube-proxy, scheduler behavior,
+        and admission/validation), and the later 1.31.x patch releases are primarily
+        security and stability updates including two medium-severity CVE fixes.']
+    breaking_changes: ['Storage: in-tree CephFS (`kubernetes.io/cephfs`) and CephRBD
+        (`kubernetes.io/rbd`) volume plugins are removed in 1.31 (and RBD CSI migration
+        support removed), making those volume types non-functional; workloads must
+        be redeployed to use the Ceph CSI drivers.', 'Kubelet: the long-deprecated
+        `--keep-terminated-pod-volumes` flag is removed in 1.31; remove it from automation
+        and configs before upgrading.', 'kubectl: legacy `kubectl exec POD COMMAND`
+        without `--` is no longer supported; scripts must use `kubectl exec POD --
+        COMMAND`.', 'Scheduler extensibility: custom scheduler plugins must update
+        interfaces when `SchedulerQueueingHints` is enabled (QueueingHint for Pod/Update
+        events) and when `EnqueueExtensions.EventsToRegister` gains a `context` parameter
+        and returns `(events, error)`.', 'DRA (Dynamic Resource Allocation): v1alpha2
+        kubelet gRPC API is no longer supported; drivers must be updated, and DRA
+        v1alpha3 API introduces incompatible changes from prior versions.', 'kube-proxy:
+        the deprecated/non-functional `--proxy-port-range` flag is removed; and NodePort
+        address handling gains `primary` semantics with nftables defaulting to more
+        restrictive behavior unless overridden.', 'kubeadm: v1beta4 config API becomes
+        the default and introduces breaking schema changes (eg `extraArgs` becomes
+        list of name/value pairs, and several timeout fields move/rename); migrate
+        configs with `kubeadm config migrate`.']
+    deprecations: ['kubeadm: `--experimental-output` is deprecated in favor of `--output`,
+        and several upgrade-related flags are deprecated/no-op (eg `--feature-gates`
+        for upgrade apply/plan).', 'Scheduler: non-CSI volume limit plugins are deprecated/removed
+        from default config (AzureDiskLimits, CinderLimits, EBSLimits, GCEPDLimits)
+        in favor of NodeVolumeLimits; removals follow in 1.32.', 'Kubelet CSR behavior:
+        `AllowDNSOnlyNodeCSR` is deprecated to allow opting back into older serving
+        cert request behavior until 1.33.', 'kube-apiserver: `--enable-logs-handler`
+        remains deprecated and is switched off by default (scheduled removal in 1.33).']
+    removals: ['Storage: removed in-tree CephFS and CephRBD volume plugins (and CephRBD
+        CSI migration support) in 1.31; also removes multiple GA feature gates (e.g.
+        APIPriorityAndFairness gate, ReadWriteOncePod, ConsistentHTTPGetHandlers,
+        CSINodeExpandSecret, ServiceNodePortStaticSubrange, and several in-tree CSI
+        plugin unregister gates).', 'Cloud provider: removes last in-tree GCP cloud
+        provider and credential provider code paths; clusters must use external providers
+        (e.g. `kubernetes/cloud-provider-gcp`).']
+    features: ['Security fixes in 1.31.x: CVE-2025-0426 mitigates node DoS via unauthenticated
+        kubelet read-only checkpoint API (fixed in 1.31.6) and CVE-2025-5187 blocks
+        nodes from modifying OwnerReferences to prevent self-deletion via garbage
+        collection (fixed in 1.31.12).', 'kube-proxy: nftables mode is beta/available
+        by default; NodePort address selection supports `primary` and defaults are
+        safer in nftables unless explicitly widened.', "Scheduler: expanded \u201C\
+        queueing hints\u201D machinery and improved event handling to avoid unnecessary\
+        \ requeueing of unschedulable pods, plus additional scheduling hints for storage-related\
+        \ plugins and improved DaemonSet scheduling throughput.", 'Workload APIs:
+        Job-related enhancements (successPolicy beta, JobPodFailurePolicy GA, ElasticIndexedJob
+        GA, PodDisruptionConditions GA, PDB unhealthyPodEvictionPolicy GA).', 'User
+        namespaces & security posture: AppArmor support is GA (no longer disable-able)
+        and related user-namespace-aware behaviors mature; kubelet can gate certain
+        behaviors based on runtime capability reporting.', 'API machinery: strict
+        decoding for encryption provider config to prevent silent misconfigurations;
+        custom resource field selectors become beta and enabled by default; multiple
+        OpenAPI correctness fixes.', 'kubectl UX: `kubectl wait --for=create`, `kubectl
+        logs --all-pods`, improved completions/autocomplete, and `kubectl debug` enhancements.']
+    bug_fixes: ['Windows networking reliability: multiple kube-proxy/HNS fixes across
+        1.31.x, including preventing intermittent deletion of ClusterIP load balancers
+        with `internalTrafficPolicy=Local` (1.31.14) and addressing HNS endpoint creation
+        regressions (1.31.9/1.31.8).', 'API server stability/performance: fixes around
+        watch/cache behavior (including conversion/webhook interactions and event
+        emission edge cases) and a regression with ConsistentListFromCache-related
+        latency in default 1.31+ configurations (1.31.7).', 'kubeadm stability: fixes
+        for IPv6 hostname preflight construction (1.31.14), timeout handling and config
+        migration edge cases, and etcd member management/promotion issues (1.31.11/1.31.10).',
+      'Storage/node lifecycle: fixes for kubelet restart unmount behavior with PVC
+        deletion (1.31.8), iSCSI/FC multipath device resolution (1.31.5), scheduler/PV
+        node affinity hostname mismatch issues (1.31.3), and other volume manager
+        edge cases.', 'Jobs/pods: fixes for delayed pod creation for new Jobs (1.31.11)
+        and other controller regressions affecting service-lb-controller and endpoints
+        reconciliation.']
+- version: '1.32'
+  summary:
+    major_changes: ['Kubernetes 1.32.x is a patch series dominated by security fixes
+        and stability/performance improvements, with notable behavior and tooling
+        changes introduced in 1.32.0 (APIs/feature gates, cloud-provider removal,
+        DRA updates, scheduler/kubelet behavior), and subsequent patches mainly delivering
+        CVE remediations plus targeted regressions fixes (notably Windows kube-proxy,
+        kubeadm, kubelet).', Security posture improves materially across the series
+        via multiple NodeRestriction and kubelet endpoint fixes; upgrading to at least
+        1.32.8/1.32.6/1.32.2/1.32.1 addresses important CVEs affecting node integrity
+        and DoS risks., "Build/toolchain updates across the series (Go 1.23.x in 1.32.0\u2013\
+        1.32.9, then Go 1.24.x in 1.32.10\u20131.32.11) may affect downstream build\
+        \ pipelines, distroless/base images, and any modules/plugins compiled against\
+        \ Kubernetes.", 'Networking on Windows and UDP-heavy clusters receives multiple
+        fixes (conntrack/UDP cleanup, HNS load balancer stability, endpoint cleanup),
+        reducing CPU/memory leaks and improving service reliability.', 'kubeadm upgrade
+        ergonomics and correctness improved (phase subcommands, better validation,
+        fewer panics, IPv6 and node-name correctness), reducing upgrade risk and making
+        staged upgrades easier.']
+    breaking_changes: ['Legacy in-tree cloud provider integration has been removed;
+        kube-apiserver/kube-controller-manager/kubelet must use `--cloud-provider=external`
+        or empty string, and clusters must rely on external cloud controllers for
+        node/service/route management (#128197).', flowcontrol.apiserver.k8s.io/v1beta3
+        FlowSchema/PriorityLevelConfiguration is no longer served; clients/manifests
+        must move to flowcontrol.apiserver.k8s.io/v1 (#127017)., coordination.k8s.io/v1alpha1
+        is dropped and replaced by v1alpha2; existing v1alpha1 objects must be deleted
+        before upgrade (#127857)., 'Scheduler plugin API changes: custom preemption
+        plugins must update `PodEligibleToPreemptOthers` signature to include ctx,
+        and out-of-tree PostFilter plugins must adapt to NodeToStatusMap becoming
+        a struct with accessors (#126465, #126022).', kubelet `--runonce` mode is
+        removed; specifying the flag or config option is now an error (#126336).,
+      kube-proxy deprecated flags `--healthz-port` and `--metrics-port` have been
+        removed (#126889)., 'If you explicitly enabled removed scheduler plugins (AzureDiskLimits/CinderLimits/EBSLimits/GCEPDLimits),
+        you must remove them from scheduler config (#124003).', 'Downgrade caveat:
+        DRA v1beta1 becomes storage version in 1.32; downgrading to 1.31 with DRA
+        resources present is unsupported (#127511).', 'Kubelet image credential provider
+        config and several control-plane config files (admission-control, egress-selector,
+        tracing, leader-migration) are now strictly validated; unknown/duplicate fields
+        will cause startup errors (#128062, #128013, #128011, #128073, #128009).',
+      'API behavior changes can impact clients: streaming list requests reject Table
+        output (406) when using JSON Table accept headers (#126996); PodLogOptions
+        adds Stream and disallows Stream+TailLines combinations (#127360); new /resize
+        subresource for pod resizing requires client updates (#128266).']
+    deprecations: [ServiceAccount annotation `kubernetes.io/enforce-mountable-secrets`
+        is deprecated (no removal deadline); prefer namespace isolation for secret
+        mount control (#128396)., '`DisableNodeKubeProxyVersion` feature gate default
+        reverted to off (policy-driven timing), signaling ongoing deprecation/cleanup
+        of kube-proxy version coupling (#126720).', "Several older GA feature gates\
+        \ were removed/locked (e.g., ComponentSLIs removed as a gate, others removed);\
+        \ ensure automation isn\u2019t toggling removed gates (multiple PRs in 1.32.0\
+        \ notes)."]
+    removals: [Removed legacy cloud provider controllers from kube-controller-manager
+        and invalidated non-external `--cloud-provider` values (#128197)., 'Removed
+        GA feature gates: HPAContainerMetrics (#126862), ValidatingAdmissionPolicy
+        gate (#126645), CloudDualStackNodeIPs (#126840), LegacyServiceAccountTokenCleanUp
+        (#126839), MinDomainsInPodTopologySpread (#126863), NewVolumeManagerReconstruction
+        (#126775), NodeOutOfServiceVolumeDetach (#127019), StableLoadBalancerNodeSet
+        (#126841), ServerSideApply/ServerSideFieldValidation gates (#127058), KMSv2/KMSv2KDF
+        gates (#126698), PodHostIPs gate (#128634), and AllowServiceLBStatusOnNonLB
+        gate (#126786).', Removed support for classic Dynamic Resource Allocation
+        (DRAControlPlaneController gate); clusters that used classic DRA must remove
+        dependent workloads and PodSchedulingContext objects before upgrade (#128003).,
+      kubelet `--runonce` removed (#126336)., kube-proxy `--healthz-port` and `--metrics-port`
+        removed (#126889).]
+    features: ['New kube-apiserver endpoints `/statusz` and `/flagz` improve operability
+        and debugging; `/flagz` stability improved in later patches (#125577, #127581,
+        #130332).', 'Dynamic Resource Allocation: core promoted to beta (v1beta1),
+        significant scheduling performance improvements, stricter CEL cost enforcement
+        and parameter size limits, and richer status reporting for allocated devices
+        (#127511, #127277, #128101, #128601, #128240).', 'Scheduler enhancements:
+        SchedulerQueueingHints promoted to beta and enabled by default, improving
+        requeue efficiency and memory use; optional async preemption (alpha) available
+        behind feature gate (#128472, #128170).', 'Pod-level resource resizing support
+        adds `/resize` subresource and pod spec-level resources fields (enables in-place
+        vertical scaling workflows, with some constraints) (#128266, #128407).', 'Security/auth
+        enhancements: StructuredAuthorizationConfiguration GA; optional fine-grained
+        kubelet authz subresources (feature gate); improved audit credential IDs for
+        cert/JWT tokens; ClusterTrustBundle publishing for apiserver serving certs
+        (#128172, #126347, #125634, #127010, #127326).', 'Kubelet/node: systemd watchdog
+        integration, device plugin registration health check, optional CrashLoopBackOff
+        max backoff tuning, strict-cpu-reservation option for CPUManager, singleProcessOOMKill
+        config knob (cgroup v2), Windows memory manager support, and improved node
+        status update spreading (#127566, #128432, #128374, #127483, #126096, #128560,
+        #128640).', 'Client-side: client-go metadata List() can use streaming lists
+        when WatchListClient is enabled; CBOR serving/storage added behind feature
+        gate for performance experimentation (#127388, #128539).', 'kubeadm UX: upgrade
+        phase subcommands for apply/node; NodeLocalCRISocket feature gate; improved
+        validation/panic avoidance (#126032, #127242, #128031, #130313, #134725).']
+    bug_fixes: ['Security fixes (CVE): CVE-2025-5187 NodeRestriction prevented nodes
+        from patching OwnerReferences to self-delete via GC (fixed in 1.32.8); CVE-2025-4563
+        closed a NodeRestriction/DRA authz bypass on mirror pod creation (fixed in
+        1.32.6); CVE-2025-0426 mitigated kubelet checkpoint API disk-fill DoS (fixed
+        in 1.32.2); CVE-2024-9042 fixed Windows command injection via nodes/*/logs/query
+        (fixed in 1.32.1).', "API machinery: fixed spurious \u201Cnamespace not found\u201D\
+        \ with admission policies in newly-created namespaces (1.32.11); improved\
+        \ exec/attach/portforward websocket stability (1.32.3); fixed latency regression\
+        \ related to ConsistentListFromCache under high churn (1.32.3).", 'kubelet
+        stability: avoided watchdog kills during slow runtime init and tightened readiness
+        of Device Manager health (1.32.11); fixed 1.32 regressions with postStart
+        hooks and kubelet status/cert renewal after restart (1.32.3); addressed volume
+        unmount and PVC deletion edge cases across patches.', "Networking: fixed kube-proxy\
+        \ UDP CPU/memory issues and stale conntrack cleanup (1.32.3 and 1.32.0); multiple\
+        \ Windows kube-proxy/HNS fixes for endpoint cleanup, ClusterIP LB stability,\
+        \ and endpoint creation regressions (1.32.5\u20131.32.10).", 'Workloads/controllers:
+        fixed Job controller timing/status edge cases including suspend/resume and
+        pod creation delays (1.32.7, 1.32.10).', 'kubeadm: fixed multiple panics and
+        correctness issues during upgrade (UpgradeConfiguration missing, malformed
+        kubeconfig, node name vs hostname, IPv6 hostname construction, etcd member
+        ops) across 1.32.3/1.32.7/1.32.10.', "Storage: reduced event spam and fixed\
+        \ Portworx migration behavior and volume expansion handling; fixed multipath\
+        \ device resolution; improved PVC protection scalability and volume attachment\
+        \ memory usage (1.32.2\u20131.32.10)."]
+- version: '1.33'
+  summary:
+    major_changes: [Security hardening/fixes in NodeRestriction admission (CVE-2025-4563
+        and CVE-2025-5187) and policy engine reliability fixes (ValidatingAdmissionPolicy/MutatingAdmissionPolicy)
+        are the most upgrade-relevant changes across the v1.33 patch line shown.,
+      "Kubernetes 1.33 introduces/GA\u2019s several operational features (kube-proxy\
+        \ nftables GA, SidecarContainers GA, InPlacePodVerticalScaling beta-on by\
+        \ default, MultiCIDR ServiceCIDR allocator GA) alongside multiple admission/authn/authz\
+        \ and observability endpoint additions (/statusz,/flagz)."]
+    breaking_changes: ['[Action required for sched-ext developers] Scheduler framework
+        action type renamed from `UpdatePodTolerations` to `UpdatePodToleration` (custom
+        scheduler plugins must update code).', '[Action required for some CSI drivers]
+        CSI drivers using `IsLikelyNotMountPoint` must not assume `false` implies
+        a mount point; incorrect assumptions can break mount logic for irregular files.',
+      "DRA semantic change: requests for \u201CAll\u201D devices no longer schedule\
+        \ onto nodes with zero devices; use prioritized \u201Cone-of\u201D request\
+        \ with a `count: 0` fallback if you need the old behavior.", 'DRA limit change:
+        ResourceClaims can now be reserved by up to 256 pods (was 32); downgrading
+        to 1.32 is not supported if you exceed the older limit.', 'NodeRestriction
+        tightening: nodes are disallowed from changing `ownerReferences` on their
+        Node objects (impacts any automation relying on that behavior).']
+    deprecations: ['`Endpoints` v1 API is officially deprecated (still supported);
+        migrate controllers/clients to `EndpointSlice`.', EndpointSlice `hints` graduated
+        to GA; the `service.kubernetes.io/topology-mode` annotation is deprecated
+        in favor of `Service.spec.trafficDistribution`., '`pod.status.resize` is deprecated
+        and no longer set; use `PodResizeInProgress`/`PodResizePending` conditions.',
+      '`resource.k8s.io/v1beta1` is deprecated and scheduled for removal in 1.36;
+        migrate to `v1beta2`.', '`WatchFromStorageWithoutResourceVersion` and related
+        watch/cache feature gates (e.g., `SeparateCacheWatchRPC`) are deprecated/disabled
+        and cannot be re-enabled; plan for their removal.']
+    removals: [Removed support for `ValidatingAdmissionPolicy` and `ValidatingAdmissionPolicyBinding`
+        `v1alpha1` APIs; use the stable/beta versions available in 1.33., 'Removed/cleaned
+        up multiple GA feature gates and legacy flags (e.g., `CPUManager`, `AppArmor`,
+        `KubeProxyDrainingTerminatingNodes`, deprecated cloud-provider flags), which
+        can break clusters that still explicitly set them.']
+    features: ['kube-proxy nftables mode is GA (still not default); if you opt in,
+        ensure kernel capability checks and behavior differences are understood.',
+      SidecarContainers feature is GA (feature gate locked on; remove any explicit
+        gate settings) and Services now properly route to named ports exposed by restartable
+        init containers., 'In-place Pod vertical scaling is beta and enabled by default
+        (`InPlacePodVerticalScaling`), including support for sidecars; memory limit
+        decreases require `RestartContainer` policy.', Service traffic distribution
+        (`spec.trafficDistribution` / PreferClose) is GA; improved/alternate values
+        (PreferSameNode/PreferSameZone alias) exist behind feature gates., MultiCIDR
+        Service allocator is GA with the `ServiceCIDR` API; consider admission controls
+        to prevent overlapping/unauthorized CIDR additions., 'Authz/Authn additions:
+        RemoteRequestHeaderUID beta-on (UID propagation to aggregated apiservers),
+        ServiceAccountTokenNodeBinding GA locked on, and kubelet credential provider
+        can pass pod-bound service account tokens via `tokenAttribute`.', 'Observability
+        endpoints expanded: `/statusz` and `/flagz` added across components (apiserver/kcm/scheduler/kubelet/kube-proxy)
+        and audit annotations for authn/authz latency; apiserver list responses stream
+        elements to reduce memory.', 'Node features: user namespaces support enabled
+        by default, PSI metrics added, swap capacity reported in node system info,
+        and CPU manager policy options improvements (incl. `strict-cpu-reservation`).']
+    bug_fixes: ['[Security] Fixed CVE-2025-4563: NodeRestriction gap allowing nodes
+        to bypass DRA authorization checks on pod creation (mirror pods).', '[Security]
+        Fixed CVE-2025-5187: NodeRestriction allowed nodes to patch `ownerReferences`
+        enabling self-deletion via GC and recreation with modified labels/taints.',
+      "[API machinery] Fixed multiple issues in ValidatingAdmissionPolicy/MutatingAdmissionPolicy:\
+        \ data race causing nondeterminism and a spurious \u201Cnamespace not found\u201D\
+        \ error when intercepting objects in newly-created namespaces.", '[API machinery]
+        kube-apiserver: fixed potential panic when validating CRs where CRD declares
+        `status` subresource but schema lacks a `status` property.', '[Network] kube-proxy
+        nftables fixes: correct interface matching (`iifname`), align ExternalIP handling
+        with iptables/IPVS for `externalTrafficPolicy: Local`, and reduce log/event
+        spam and IP allocation race warnings.', '[Windows] kube-proxy winkernel fixes
+        for stale RemoteEndpoints, intermittent ClusterIP LB deletion with `internalTrafficPolicy=Local`,
+        and HNS endpoint creation regressions.', '[Scheduling] scheduler/nodeports
+        plugin now accounts for hostPorts used by restartable init containers; fixed
+        kube-scheduler nil panic regression in resource aggregation and restored max
+        devices per ResourceClaim to 32.', '[Node/Kubelet] Prevent watchdog from killing
+        kubelet during slow runtime init; fixed startup probe race leaving pods stuck
+        in Initializing with sidecar startup probes; improved reboot event reporting
+        and reduced noisy logs.', '[Cluster lifecycle/kubeadm] Multiple robustness
+        fixes (panic avoidance on malformed kubeconfig/context, better local-apiserver
+        waiting in local mode, etcd join phase unhidden, etcd promotion edge case),
+        and updated supported etcd for v1.33 skew (3.5.24).']
+- version: '1.34'
+  summary:
+    major_changes: ['Kubernetes 1.34 is a feature-rich minor release that promotes
+        several capabilities to GA (notably Dynamic Resource Allocation core, multiple
+        watch-cache/list improvements, and tracing/auth config features), introduces
+        new alpha/beta functionality (pod-level resources default-on beta, env-from-files,
+        container restart rules), updates core dependencies (etcd 3.6.x, Go 1.24.x),
+        and includes important observability/metric label changes plus some kubelet/kubeadm
+        behavioral and flag removals impacting upgrades.']
+    breaking_changes: ["Monitoring/alerting dashboards and recording rules may break\
+        \ due to widespread API server and etcd metric label changes (e.g., `resource_prefix`\u2192\
+        `group`/`resource`, `type`\u2192`group`/`resource`, and splitting `resource`\
+        \ into `group`+`resource` for many series).", Kubelet no longer supports the
+        deprecated `--cloud-config` flag and also removes `--register-schedulable`;
+        node bootstraps or managed service configs referencing these flags must be
+        updated., "Static pods that reference API objects can now be denied admission\
+        \ by kubelet if mirror pod creation fails, changing behavior from \u201Csilently\
+        \ running\u201D to \u201Cfail fast\u201D in those error scenarios.", 'Scheduler
+        framework API is changed for PreFilter plugins: plugins must accept the `NodeInfo`
+        list via arguments (and several framework types moved to `k8s.io/kube-scheduler/framework`),
+        impacting out-of-tree scheduler plugins and builds.', 'If you manually manage
+        aggregated API server endpoints, kube-apiserver now relies on `EndpointSlice`
+        for proxying; you must create EndpointSlice objects (not just Endpoints) for
+        aggregation to work reliably.', AppArmor security context values are no longer
+        copied into deprecated AppArmor annotations; tooling that reads annotations
+        must switch to `securityContext` fields., "Client-go 1.34 had an informer\
+        \ transformer regression fixed in 1.34.3; if you relied on transformer behavior\
+        \ and are on early 1.34 patch levels, ensure you pick \u22651.34.3."]
+    deprecations: [Kubeconfig `preferences` field is deprecated in favor of `kuberc`
+        (kubectl runtime configuration)., Apimachinery `MessageCountMap` and `CreateAggregateFromMessageCountMap`
+        are deprecated., Kubelet config `StreamingConnectionIdleTimeout` is deprecated.,
+      DRA kubelet gRPC API v1beta1 is deprecated starting in 1.34 (v1 is the new stable
+        target); DRA driver authors should ensure compatibility., '`apiserver_storage_objects`
+        metric is deprecated in favor of `apiserver_resource_objects` with standardized
+        labels.']
+    removals: [LegacySidecarContainers feature gate is removed., 'Support for API
+        streaming `List()` has been removed from multiple client implementations (typed,
+        dynamic, metadata, REST client); callers must use standard list/watch mechanisms.',
+      Deprecated gogo/protobuf protocol definitions removed from multiple k8s components
+        in favor of `google.golang.org/protobuf`., 'Kubelet deprecated flags removed:
+        `--cloud-config` and `--register-schedulable` (flag removals are user-visible
+        removals during upgrade).']
+    features: ['Dynamic Resource Allocation (DRA) core functionality graduates to
+        GA (structured parameters flavor), with additional DRA enhancements (prioritized
+        lists default-on, admin access default-on, device health reporting behind
+        `ResourceHealthStatus`, shareable capacities, uniqueness constraints, and
+        extended resources backed by DRA).', 'Pod-level resources (`pod.spec.resources`)
+        graduates to beta and is enabled by default, including HPA support for pod-level
+        resources; Windows validation explicitly rejects pods using pod-level resources.',
+      'Observability and API server performance: watch-cache/list improvements (ConsistentListFromCache
+        GA, ResilientWatchCacheInitialization GA, WatchList beta, ListFromCacheSnapshot
+        beta, compact watch-cache snapshots on etcd compaction, DetectCacheInconsistency
+        feature gate, SizeBasedListCostEstimate enabled by default for APF seat calculation,
+        and resource size estimate metrics).', 'Authentication/authorization config
+        maturity: StructuredAuthenticationConfiguration GA (and `apiserver.config.k8s.io/v1`),
+        optional egress selector type for JWT authenticators, and ability to disable
+        authorization webhook decision caching via authorization-config.', 'Tracing
+        features promoted to GA for both API server and kubelet (APIServerTracing
+        GA, KubeletTracing GA) with stable config API versions.', 'kubectl enhancements:
+        `kuberc` support beta, `kubectl api-resources` JSON/YAML output, new `kyaml`
+        output format, `kubectl top --show-swap`, `kubectl autoscale --cpu/--memory`
+        (with `--cpu-precent` deprecation), improved `kubectl version` skew detection,
+        and better output in several commands.', 'Scheduling enhancements: new PreBindPreFlight
+        hook, NodePorts plugin accounts for hostPorts used by restartable init containers,
+        queueing hints GA, and changes around nominatedNodeName handling to support
+        external schedulers/autoscalers.', 'kubeadm improvements: NodeLocalCRISocket
+        beta default-on (per-node CRI socket config), WaitForAllControlPlaneComponents
+        GA (locked on), named `probe-port` in generated static pod manifests, and
+        updated supported etcd version skew guidance.', 'Networking/service improvements:
+        PreferSameTrafficDistribution enabled by default (PreferSameNode), multiple
+        Windows kube-proxy fixes and WinOverlay/WinDSR GA-by-default, and nftables
+        kube-proxy correctness fixes.', 'Storage enhancements: VolumeAttributesClass
+        GA (`storage.k8s.io/v1`), Recover from volume expansion failure GA, and multiple
+        kubelet/CSI expansion behavior fixes.']
+    bug_fixes: ["1.34.2 includes a critical fix preventing spurious StatefulSet rollouts\
+        \ when upgrading control plane from 1.33\u21921.34 (guarded by `StatefulSetSemanticRevisionComparison`,\
+        \ enabled by default).", '1.34.3 fixes a regression where client-go informers
+        could not apply configured transformer functions, which can affect controllers/operators
+        using custom transformations.', "Admission policies (ValidatingAdmissionPolicy/MutatingAdmissionPolicy)\
+        \ no longer produce spurious \u201Cnamespace not found\u201D errors on objects\
+        \ in newly-created namespaces (default configs 1.30+).", 'Kubelet stability
+        improved: slow container runtime initialization should not trigger System
+        Watchdog kills; DRA driver idle-connection deadlock fixed; multiple pod startup
+        probe and resize-condition correctness issues addressed in 1.34.2.', 'kube-proxy
+        fixes include nftables local-source detection, behavior when services have
+        no endpoints, and substantial Windows HNS/load balancer correctness fixes
+        (stale endpoints, internalTrafficPolicy=Local, EndpointSlice port honoring).',
+      'Scheduler performance/regression mitigations: SchedulerAsyncAPICalls feature
+        gate disabled due to performance degradation under load, plus fixes to preemption
+        queue behavior and taint failure status redaction.']
+- version: '1.35'
+  summary:
+    major_changes: ['Kubelet breaking startup changes: `--pod-infra-container-image`
+        flag removed (must be deleted from kubelet args/kubeadm extraArgs) and cgroup
+        v1 now fails kubeadm preflight by default unless `failCgroupV1: false` is
+        explicitly set.', 'Security/RBAC tightening: `pods/exec|attach|portforward`
+        over WebSocket now requires `create` verb (feature gate on-by-default), and
+        constrained impersonation (KEP-5284) is implemented.', 'Resource management
+        and scheduling evolve: In-place pod vertical scaling is GA, pod-level resizing
+        is enabled (CPU/memory only), and scheduler gains new workload-level APIs/plugins
+        (Workload API + GangScheduling) plus multiple throughput/perf improvements.',
+      'DRA (Dynamic Resource Allocation) continues maturing: core DRA gate is locked
+        on, new device taint rules and scheduling/scoring enhancements land, and resource.k8s.io
+        v1 becomes default storage version (no downgrade to 1.33).', 'Networking and
+        kube-proxy direction: kube-proxy ipvs mode is deprecated (migrate to nftables);
+        Service `trafficDistribution` PreferSameZone/PreferSameNode is GA and PreferClose
+        is deprecated.', 'API machinery/observability improvements: CRD conditions
+        add `ObservedGeneration`, `flagz/statusz` gain structured v1alpha1 responses,
+        and various metrics/validation behaviors change (including hiding deprecated
+        metrics per policy).']
+    breaking_changes: ['ACTION REQUIRED: Remove kubelet `--pod-infra-container-image`
+        flag prior to upgrading kubelet v1.35 (non-kubeadm clusters: remove from service/args;
+        kubeadm clusters: remove from kubelet extraArgs/env file) or kubelet will
+        fail to start.', 'ACTION REQUIRED: kubeadm SystemVerification now errors on
+        cgroup v1 for kubelet v1.35+; to continue using cgroup v1 you must ignore
+        the preflight error and set `failCgroupV1: false` in the `kube-system/kubelet-config`
+        ConfigMap before upgrade.', 'ACTION REQUIRED: `StorageVersionMigration` v1alpha1
+        API is removed; delete/replace any v1alpha1 resources before upgrading (v1beta1
+        is available).', 'ACTION REQUIRED (potential outage): RBAC for `pods/exec`,
+        `pods/attach`, `pods/portforward` via WebSocket now requires `create` verb;
+        audit and update custom Roles/ClusterRoles that previously granted only `get`.',
+      'kubectl behavior change: `kubectl exec POD COMMAND` is no longer supported;
+        must use `kubectl exec POD -- COMMAND`.', 'Backwards-incompatible alpha: Partitionable
+        Devices feature changes require removing any related ResourceSlices before
+        upgrading or downgrading between v1.34 and v1.35.', 'Feature-gate semantics
+        change: feature gate dependencies are enforced at startup; `AllAlpha=true`
+        may fail unless dependent (including disabled-by-default beta) gates are also
+        enabled.']
+    deprecations: ["cgroup v1 is effectively deprecated: `failCgroupV1` defaults true\
+        \ in 1.35 so nodes won\u2019t start on cgroup v1 without explicit opt-out,\
+        \ and kubeadm will block by default.", kube-proxy `ipvs` mode is deprecated
+        and slated for removal; plan migration to `nftables`., 'Service `trafficDistribution:
+        PreferClose` is deprecated in favor of `PreferSameZone`.', AggregatedDiscoveryRemoveBetaType
+        feature gate is deprecated and locked true; plan for its eventual removal.]
+    removals: [Removed kubelet `--pod-infra-container-image` flag (startup will fail
+        if still present)., Removed `StorageVersionMigration` v1alpha1 API (v1beta1
+        is the supported version)., Removed `storage.k8s.io/v1alpha1` `VolumeAttributesClass`
+        from being served in v1.35., 'Removed several feature gates already locked-on/stable:
+        `ComponentSLIs`, `SizeMemoryBackedVolumes`, `StrictCostEnforcementForVAP`,
+        `StrictCostEnforcementForWebhooks`, and kubeadm `WaitForAllControlPlaneComponents`;
+        `KUBECTL_OPENAPIV3_PATCH` env var is removed.', 'kubectl drops support for
+        legacy/beta resources: `certificates/v1beta1` CSR, `discovery/v1beta1` EndpointSlice,
+        `networking/v1beta1` Ingress, and `policy/v1beta1` PodDisruptionBudget.']
+    features: ['InPlacePodVerticalScaling is GA, and pod resize status reporting is
+        enhanced (new PodStatus fields and more events); pod resize is restricted
+        to CPU/memory only.', 'DRA enhancements: device taint rules (including `None`
+        effect for dry-run/health taints), extended resource scoring improvements,
+        new metrics, configurable device health timeouts, and scheduler binding timeout
+        configuration for dynamic resources.', 'Scheduler improvements: opportunistic
+        batching, nominatedNodeName clearing behavior, re-enabled SchedulerAsyncAPICalls
+        after fixes, and introduction of Workload API + GangScheduling plugin (alpha).',
+      'Security/auth improvements: CSIServiceAccountTokenSecrets (beta) to deliver
+        SA tokens via secrets rather than volume context, plus new JWT authenticator
+        metrics under StructuredAuthenticationConfiguration.', 'CLI improvements:
+        `kubectl get -o kyaml` enabled by default, `kubectl --profile=trace` tracing
+        support, new `kubectl kuberc view/set`, `--as-user-extra`, `-n` shorthand
+        for set-context, and stable command headers/chunk-size.', 'Node/runtime improvements:
+        Image volume source feature is beta and enabled by default; fine-grained supplemental
+        groups policy is GA; kubelet image GC maximum age is stable; multiple kubelet
+        metrics added for Ensure Secret Pulled Images (beta and enabled by default).',
+      'Control-plane lifecycle: new `--min-compatibility-version` flag for apiserver/controller-manager/scheduler;
+        kubeadm adds ExternalEtcd `HTTPEndpoints` support; Kubernetes build/tooling
+        updates (Go 1.25.x, simplified build process).']
+    bug_fixes: ["Fixed multiple kube-apiserver regressions (CRD schema warnings, spurious\
+        \ JWKS \u2018Error getting keys\u2019 logs, object size stats performance\
+        \ regression, and high-CPU issue triggered by malformed Service without name).",
+      'Fixed scheduler performance and correctness issues under load (preemption thrash,
+        binding-phase stale occupancy, async preemption coordination, and throughput
+        degradation with high apiserver latency).', 'Fixed kubelet stability issues
+        (stale informer cache causing NodeAffinityFailed rejections, watchdog killing
+        kubelet during slow runtime init, DRA driver idle deadlock, and configz cgroupDriver
+        reporting).', "Fixed admission/controller crashes and correctness (ValidatingAdmissionPolicy\
+        \ crash with additionalProperties:true, MutatingAdmissionPolicy failure with\
+        \ duplicate list items, and \u2018namespace not found\u2019 errors for admission\
+        \ policies in new namespaces).", 'Fixed networking issues (kube-proxy nftables
+        local-traffic detection, Windows winkernel stale endpoints, IPv6 ServiceCIDR
+        allocation out of range, and removed incorrect SessionAffinity warning on
+        headless services).', 'Improved storage behavior (pod can reference same PVC
+        across multiple volumes, occasional PV scheduling delay fixes, missing kubelet
+        volume stats metrics restored, and reduced event spam in some in-tree drivers).']

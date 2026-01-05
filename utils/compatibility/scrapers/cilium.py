@@ -16,7 +16,6 @@ app_name = "cilium"
 def scrape():
     kube_releases = get_kube_release_info()
     cilium_releases = list(reversed(list(get_github_releases_timestamps("cilium", "cilium"))))
-
     chart_versions = get_chart_versions(app_name)
     versions = []
     for cilium_release in cilium_releases:

@@ -1,4 +1,5 @@
 import { type ComponentPropsWithRef } from 'react'
+import { SemanticColorKey } from 'src/theme/colors'
 import styled, { keyframes, useTheme } from 'styled-components'
 
 const rotateAnim = keyframes`
@@ -57,7 +58,7 @@ export function SpinnerAlt({
   color,
   size = 16,
   ...props
-}: { color?: string; size?: number } & ComponentPropsWithRef<'svg'>) {
+}: { color?: SemanticColorKey; size?: number } & ComponentPropsWithRef<'svg'>) {
   const { mode, colors } = useTheme()
   const gapColor = mode === 'dark' ? colors.grey[750] : colors.grey[200]
   const strokeWidth = size * 0.138
@@ -87,7 +88,7 @@ export function SpinnerAlt({
         cx={size / 2}
         cy={size / 2}
         r={radius}
-        stroke={color ?? colors['icon-info']}
+        stroke={colors[color] ?? colors['icon-info']}
         strokeWidth={strokeWidth}
         fill="none"
         strokeDasharray={`${circumference * 0.33} ${circumference * 0.8}`}

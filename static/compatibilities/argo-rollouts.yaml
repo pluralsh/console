@@ -7,35 +7,133 @@ versions:
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog was provided in the notes you pasted\
+        \ (only application GitHub release notes). Treat this as an application-only\
+        \ summary; verify the Helm chart version you\u2019ll deploy and diff `values.yaml`\
+        \ separately."]
+    features: ['Prometheus metric provider: adds range query support, enabling analyses
+        over a time range instead of single-point queries.', 'Analysis/New Relic:
+        can now set a timeout and the provider returns the resolved query as metadata
+        (useful for debugging/traceability).', 'Datadog metric provider: supports
+        multi-account configurations and adds support for providing credentials to
+        download plugins.', 'Controller: adds an (alpha) canary steps plugin mechanism
+        for extending canary step behavior.', 'Controller: canary ingress support
+        allows specifying full annotations for nginx canary ingresses (more flexibility
+        for NGINX users).', 'Controller: enables pprof profiling support for debugging
+        performance issues.', 'Analysis: adds ConsecutiveSuccessLimit to Analysis
+        (lets you require N consecutive successful measurements).', 'Metrics/observability:
+        new Prometheus `build_info` metric is emitted.']
+    breaking_changes: []
   chart_version: 2.40.5
   images: ['quay.io/argoproj/argo-rollouts:v1.8.3']
 - version: 1.8.0
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Prometheus metric provider: adds Prometheus range query support for
+        Analysis metrics (enables querying over a time window instead of only instant
+        queries).', 'Controller: introduces an (alpha) canary steps plugin mechanism,
+        allowing canary step behavior/logic to be extended via plugins.', 'Controller:
+        allows specifying full annotations for NGINX canary ingresses (not just limited/filtered
+        subsets).', 'Metrics/Analysis providers: expands New Relic provider (adds
+        timeout support and returns resolved queries as metadata) and adds multi-account
+        support for Datadog metrics provider; also adds support for providing credentials
+        to download metric provider plugins.', 'Observability: adds pprof profiling
+        support in the controller for performance troubleshooting.', 'Monitoring:
+        adds a new Prometheus build_info metric to expose version/build metadata.']
+    breaking_changes: []
   chart_version: 2.39.1
   images: ['quay.io/argoproj/argo-rollouts:v1.8.0']
 - version: 1.7.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Support multiple ALB ingresses for ALB traffic routing (useful when
+        a rollout needs to manage traffic across more than one ALB resource)., 'Prometheus
+        metric provider enhancements: configurable request timeout, optional TLS verification
+        disable (insecure), and support for custom HTTP headers when querying Prometheus.',
+      'AnalysisRun/AnalysisTemplate enhancements: support custom metadata on AnalysisRun,
+        allow setting job metadata via metrics.provider.job.metadata, include Rollout
+        selector MatchLabels in generated AnalysisRuns, and add a merge key to AnalysisTemplate.',
+      'UI/UX: refreshed Rollouts dashboard.', 'Events/notifications: controller can
+        emit Kubernetes events on informer add; adds self-service notification support.']
+    breaking_changes: ['No explicit breaking changes were called out in the provided
+        notes for v1.7.0; however, verify any custom traffic router plugins and ALB
+        configuration fields against your current manifests because several ALB-related
+        behaviors changed in 1.7.0.']
   chart_version: 2.36.0
   images: ['quay.io/argoproj/argo-rollouts:v1.7.0']
 - version: 1.6.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog/values information was provided in the\
+        \ notes you pasted (these are Argo Rollouts *application* release notes).\
+        \ Treat the Helm upgrade as potentially requiring chart value review (RBAC,\
+        \ container args, extraVolumes/extraArgs, dashboard/service) but confirm against\
+        \ the chart\u2019s own CHANGELOG/values.yaml for the versions you\u2019re\
+        \ moving between."]
+    features: [Dashboard UI refresh in v1.6.0 improves Rollouts dashboard look/UX.,
+      'AnalysisRun supports custom metadata, plus additional context/merge behavior
+        (e.g., merge key) to help manage metric/analysis configuration.', 'Prometheus
+        metric provider enhancements: configurable timeout, optional insecure TLS,
+        and support for custom HTTP headers.', 'Traffic routing/ingress improvements:
+        support multiple ALB ingresses and retain TLS config for NGINX canary ingresses;
+        additional docs/plugins for routers like Contour and guidance for other ingress
+        controllers.', 'Operational/observability improvements: controller emits additional
+        Kubernetes events and logging improvements (klog/logrus bridge).']
+    breaking_changes: ['Traffic router plugin naming pattern was standardized/changed;
+        if you use trafficrouter plugins (or custom plugins), verify plugin names/identifiers
+        and update any references accordingly.']
   chart_version: 2.32.0
   images: ['quay.io/argoproj/argo-rollouts:v1.6.0']
 - version: 1.2.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog was provided in the notes; summary below\
+        \ covers application/controller changes only. If you are upgrading via Helm,\
+        \ also review the chart\u2019s own CHANGELOG/values for your chart version\
+        \ bump (image tag, CRDs install/upgrade behavior, RBAC, ServiceAccount, leaderElection\
+        \ settings, ingress apiVersion handling)."]
+    features: ['HA (active-passive) leader election support for rollouts-controller,
+        enabling higher availability controller deployments.', 'Networking.k8s.io/v1
+        Ingress support (Kubernetes v1.22+), improving compatibility with newer clusters.',
+      "Analysis \u201Cdry-run\u201D mode (also for experiments), allowing you to validate\
+        \ analysis definitions without enforcing failures.", Support for weighted
+        experiment steps and richer experiment traffic routing behavior., Ping-pong
+        service management to simplify blue/green-style service swapping patterns.,
+      'Customizable metric/measurement retention limits for AnalysisRuns/metrics,
+        improving resource usage control.', AWS App Mesh traffic routing support as
+        an additional provider., Support for multiple traffic routing providers simultaneously
+        via multiple TrafficRoutingReconcilers., 'Web metric providers now support
+        POST/PUT requests (not just GET), enabling more flexible integrations.', Additional
+        metadata surfaced from analysis providers (useful for debugging) and Argo
+        Rollouts version exported on the /metrics endpoint., Scalability/performance
+        improvements including higher default Kubernetes client QPS/Burst (and making
+        them tunable).]
+    breaking_changes: ['Canary rollout calculation/approximation behavior was changed
+        to improve accuracy and to honor maxSurge (marked as a breaking fix in the
+        release notes). This can change how many pods are created at each step compared
+        to v1.1, so watch capacity and rollout pacing during the first upgrades.']
   chart_version: 2.12.0
   images: ['quay.io/argoproj/argo-rollouts:v1.2.0']
 - version: 1.1.0
   kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 2.2.0
   images: ['quay.io/argoproj/argo-rollouts:v1.1.0']
