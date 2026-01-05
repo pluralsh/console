@@ -10404,6 +10404,9 @@
       }
     },
     "error": {},
+    "handler.JSON": {
+      "type": "object"
+    },
     "handler.TerminalResponse": {
       "required": ["id"],
       "properties": {
