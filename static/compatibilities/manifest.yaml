@@ -34,3 +34,4 @@ names:
 - victoria-metrics-operator
 - gpu-operator
 - elastic-agent
+- rabbitmq-cluster-operator
