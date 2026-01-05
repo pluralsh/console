@@ -1,8 +1,8 @@
+import re
 import yaml
 import requests
 import semantic_version
 import subprocess
-import os
 import traceback
 
 
@@ -12,6 +12,7 @@ from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
 from summarizer import helm_summary
+from typing import Any, List, Set
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -168,7 +169,7 @@ def get_chart_images(url, chart, version, values=None):
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
-        subprocess.run(["helm", "repo", "add", chart, url], check=True)
+        subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
         subprocess.run(["helm", "repo", "update"], check=True)
         IMPORTED_REPOS.add((chart, url))
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
@@ -186,22 +187,80 @@ def get_chart_images(url, chart, version, values=None):
     if result.returncode != 0:
         print_error(f"Failed to template helm chart: {result.stderr}")
         return None
-    
-    result = list(yaml.safe_load_all(result.stdout))
-    return sorted(list(set(find_nested_images(result))))
 
-def find_nested_images(objs):
-    if isinstance(objs, list):
-        for obj in objs:
-            for result in find_nested_images(obj):
-                yield result
-    elif isinstance(objs, dict):
-        for key, value in objs.items():
-            if key == "image" and isinstance(value, str):
-                yield value
-            else:
-                for result in find_nested_images(value):
-                    yield result
+    objects = list(yaml.safe_load_all(result.stdout))
+    
+    # Verify app.kubernetes.io/name labels
+    expected_name = chart
+    found_names = set()
+    for obj in objects:
+        if not obj or 'metadata' not in obj:
+            continue
+        labels = obj.get('metadata', {}).get('labels', {})
+        name_label = labels.get('app.kubernetes.io/name')
+        if name_label:
+            found_names.add(name_label)
+
+    if found_names and expected_name not in found_names:
+        print_warning(f"Chart {chart} (v{version}) renders labels {found_names}, but expected '{expected_name}'. Check if 'chart_name' or 'helm_values' in YAML is correct.")
+        return None
+
+    return sorted(list(set(find_nested_images(objects))))
+
+_IMAGE_RE = re.compile(
+    r"""
+    ^
+    (?:[a-z0-9.-]+(?::\d+)?/)?        # optional registry (with optional port)
+    [a-z0-9._-]+(?:/[a-z0-9._-]+)+    # repo path must contain at least one '/'
+    (?:                               
+        :[A-Za-z0-9._-]+              # optional tag
+      | @sha256:[a-f0-9]{64}          # or digest
+    )
+    $
+    """,
+    re.IGNORECASE | re.VERBOSE,
+    )
+
+def _looks_like_image(s: str) -> bool:
+    s = s.strip()
+    # Fast rejects for common false positives
+    if not s or " " in s or s.startswith(("-", "_")):
+        return False
+    return bool(_IMAGE_RE.match(s))
+
+def find_nested_images(objs: Any) -> List[str]:
+    """
+    Recursively walk nested dict/list structures and extract container image references.
+
+    Important behavior:
+    - Traverses dict VALUES only (not keys), to avoid collecting component names.
+    - Only returns strings that look like real image references (repo/name:tag or @sha256 digest).
+    """
+    images: Set[str] = set()
+
+    def walk(x: Any) -> None:
+        if x is None:
+            return
+
+        if isinstance(x, str):
+            if _looks_like_image(x):
+                images.add(x)
+            return
+
+        if isinstance(x, dict):
+            for v in x.values():
+                walk(v)
+            return
+
+        if isinstance(x, (list, tuple, set)):
+            for item in x:
+                walk(item)
+            return
+
+        # ignore other scalar types (int/bool/float/etc.)
+
+    walk(objs)
+    return sorted(images)
     
 
 def get_github_releases(repo_owner, repo_name):

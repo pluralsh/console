@@ -31,3 +31,6 @@ names:
 - tigera-operator
 - argo-cd
 - vector
+- victoria-metrics-operator
+- gpu-operator
+- elastic-agent
