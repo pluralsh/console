@@ -13257,6 +13257,7 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 25.10.1
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.1', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13265,6 +13266,7 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 25.10.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13273,6 +13275,7 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 25.3.2
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13281,6 +13284,7 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 25.3.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13289,6 +13293,7 @@ addons:
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 24.9.1
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13297,6 +13302,7 @@ addons:
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 24.9.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13305,6 +13311,7 @@ addons:
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 24.6.1
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13313,6 +13320,7 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 24.6.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13321,6 +13329,7 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 24.3.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.8', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13329,6 +13338,7 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.9.2
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.5', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13337,14 +13347,16 @@ addons:
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.9.1
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
       'nvcr.io/nvidia/gpu-operator:v23.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
   - version: 23.9.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.9.0
     images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
@@ -13353,90 +13365,104 @@ addons:
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.6.2
     images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
       'nvcr.io/nvidia/gpu-operator:v23.6.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
   - version: 23.6.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.6.0
     images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
       'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
       'nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
   - version: 23.3.1
-    kube: ['1.27', '1.26', '1.23']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.3.1
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
   - version: 23.3.0
-    kube: ['1.26', '1.25', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 23.3.0
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
   - version: 22.9.1
-    kube: ['1.26', '1.25', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 22.9.1
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.1']
+    images: []
   - version: 22.9.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 22.9.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.0']
+    images: []
   - version: 1.11.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.11.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.0']
+    images: []
   - version: 1.10.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.10.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
+    images: []
   - version: 1.9.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.9.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.0']
+    images: []
   - version: 1.8.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.8.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.0']
+    images: []
   - version: 1.7.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.7.0
-    images: ['nvcr.io/nvidia/gpu-operator:v1.7.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    images: []
   - version: 1.6.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.6.0
-    images: ['nvcr.io/nvidia/gpu-operator:1.6.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    images: []
   - version: 1.5.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.5.0
-    images: ['nvcr.io/nvidia/gpu-operator:1.5.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    images: []
   - version: 1.4.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 1.4.0
-    images: ['nvcr.io/nvidia/gpu-operator:1.4.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    images: []
   name: gpu-operator
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/elasticsearch/plural/icons/elastic.png?raw=true
   git_url: https://github.com/elastic/elasticsearch
@@ -13444,82 +13470,81 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 8.5.1
-    kube: ['1.26', '1.25', '1.23']
+  - version: 9.2.3
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 8.5.1
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:8.5.1']
-  - version: 7.17.1
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.2.3
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.2.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.2.0
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 7.17.1
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.17.1']
-  - version: 7.16.1
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.2.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.2.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.1.4
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 7.16.1
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.16.1']
-  - version: 7.15.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.1.4
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.1.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.1.0
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 7.15.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.15.0']
-  - version: 7.14.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.1.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.1.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 9.0.7
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 7.14.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.14.0']
-  - version: 7.13.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.0.7
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.0.7', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.0.0
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 7.13.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.13.0']
-  - version: 7.12.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 9.0.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.0.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 8.19.3
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 7.12.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.12.0']
-  - version: 7.11.1
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 8.19.3
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.19.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 8.19.0
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 7.11.1
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.11.1']
-  - version: 7.10.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 8.19.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.19.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 8.18.7
+    kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    chart_version: 7.10.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.10.0']
-  - version: 7.9.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 8.18.7
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.18.7', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 8.18.1
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    chart_version: 7.9.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.9.0']
-  - version: 7.8.0
-    kube: ['1.26', '1.25', '1.23']
+    summary: null
+    chart_version: 8.18.1
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.18.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 8.18.0
+    kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    chart_version: 7.8.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.8.0']
-  - version: 7.7.0
-    kube: ['1.26', '1.25', '1.23']
-    requirements: []
-    incompatibilities: []
-    chart_version: 7.7.0
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:7.7.0']
-  - version: 6.8.10
-    kube: ['1.26', '1.25', '1.23']
-    requirements: []
-    incompatibilities: []
-    chart_version: 6.8.10
-    images: ['docker.elastic.co/elasticsearch/elasticsearch:6.8.10']
-  name: elasticsearch
+    summary: null
+    chart_version: 8.18.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.18.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  name: elastic-agent

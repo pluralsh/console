@@ -12,7 +12,7 @@ from utils import (
     get_chart_versions,
 )
 
-app_name = "elasticsearch"
+app_name = "elastic-agent"
 
 def scrape():
     kube_releases = get_kube_release_info()

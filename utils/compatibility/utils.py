@@ -169,7 +169,7 @@ def get_chart_images(url, chart, version, values=None):
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
-        subprocess.run(["helm", "repo", "add", chart, url], check=True)
+        subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
         subprocess.run(["helm", "repo", "update"], check=True)
         IMPORTED_REPOS.add((chart, url))
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
