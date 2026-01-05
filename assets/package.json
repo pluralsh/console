@@ -31,7 +31,7 @@
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
-    "k8s:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:assets/src/generated/axios-client.ts /template:Axios",
+    "k8s:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:./src/generated/axios-client.ts /template:Axios",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
