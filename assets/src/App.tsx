@@ -17,6 +17,8 @@ import {
 
 import DocSearchStyles from 'components/help/DocSearchStyles'
 
+import { setAxiosFactory } from './generated/axios-client/helpers'
+import { getAxiosInstance } from './helpers/axios'
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
 
@@ -29,6 +31,9 @@ if (process.env.NODE_ENV === 'development') {
   loadDevMessages()
   loadErrorMessages()
 }
+
+setAxiosFactory(getAxiosInstance)
+
 const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 

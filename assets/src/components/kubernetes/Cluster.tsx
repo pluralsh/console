@@ -13,6 +13,7 @@ import {
   useKubernetesClustersQuery,
 } from '../../generated/graphql'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
+import { setClusterId } from '../../helpers/axios'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
@@ -159,6 +160,10 @@ export default function Cluster() {
   useEffect(() => {
     refetchNamespaces()
   }, [refetchNamespaces, cluster])
+
+  useEffect(() => {
+    setClusterId(clusterId ?? null)
+  }, [clusterId])
 
   if (error)
     return (

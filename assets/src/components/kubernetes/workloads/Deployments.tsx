@@ -1,6 +1,7 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { useHandleGetDeploymentsQuery } from '../../../generated/axios-client/Query'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
@@ -70,6 +71,17 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 
 export default function Deployments() {
   const cluster = useCluster()
+
+  // TODO: This is proof of concept, remove when real data is wired up.
+  const { data: deploymentsData } = useHandleGetDeploymentsQuery(
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  )
+  console.log('deployments', deploymentsData?.deployments)
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
