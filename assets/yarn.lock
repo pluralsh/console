@@ -8058,6 +8058,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.90.16":
+  version: 5.90.16
+  resolution: "@tanstack/query-core@npm:5.90.16"
+  checksum: 2aadc3ba9af6625a440f1794e3f75eeab4845c42aa02b17d31fb7324c193329c33fb24620748335c257dcd64bf6a37b46245ee421f508010a52910150f3254bf
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.90.16":
+  version: 5.90.16
+  resolution: "@tanstack/react-query@npm:5.90.16"
+  dependencies:
+    "@tanstack/query-core": 5.90.16
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 412a729821f3f9945a70a1f350ac0945509d1b35f6ead79ad83881c5648ba4589fed8c7324ffda3f543f56d686ed7d9e008a041f521b2bfe00e8b6f4072a0144
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:8.20.5":
   version: 8.20.5
   resolution: "@tanstack/react-table@npm:8.20.5"
@@ -12124,6 +12142,7 @@ __metadata:
     "@saas-ui/use-hotkeys": 1.1.3
     "@sentry/react": 10.10.0
     "@sentry/vite-plugin": 4.3.0
+    "@tanstack/react-query": ^5.90.16
     "@tanstack/react-table": 8.20.5
     "@testing-library/dom": 10.4.0
     "@testing-library/jest-dom": 5.16.5
