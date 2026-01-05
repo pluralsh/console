@@ -187,9 +187,25 @@ def get_chart_images(url, chart, version, values=None):
     if result.returncode != 0:
         print_error(f"Failed to template helm chart: {result.stderr}")
         return None
+
+    objects = list(yaml.safe_load_all(result.stdout))
     
-    result = list(yaml.safe_load_all(result.stdout))
-    return sorted(list(set(find_nested_images(result))))
+    # Verify app.kubernetes.io/name labels
+    expected_name = chart
+    found_names = set()
+    for obj in objects:
+        if not obj or 'metadata' not in obj:
+            continue
+        labels = obj.get('metadata', {}).get('labels', {})
+        name_label = labels.get('app.kubernetes.io/name')
+        if name_label:
+            found_names.add(name_label)
+
+    if found_names and expected_name not in found_names:
+        print_warning(f"Chart {chart} (v{version}) renders labels {found_names}, but expected '{expected_name}'. Check if 'chart_name' or 'helm_values' in YAML is correct.")
+        return None
+
+    return sorted(list(set(find_nested_images(objects))))
 
 _IMAGE_RE = re.compile(
     r"""

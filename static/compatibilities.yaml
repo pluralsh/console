@@ -11729,402 +11729,1521 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['v0.66.0 adds `spec.managedMetadata` support for VMUser (including
+          Secrets), an `incident.io` receiver in VMAlertmanagerConfig, HTTPRoute support
+          for VMAuthorization, an IPv6 mode toggle via `VM_ENABLETCP6`, and config-reloader
+          now defaults its image tag to the operator version.', v0.66.0 updates default
+          bundled VictoriaMetrics app versions to v1.131.0 and VictoriaTraces defaults
+          to v0.5.0., 'v0.66.1 is primarily a patch/security release: Go builder updated
+          to 1.25.5 plus bugfixes for RBAC cleanup and VMAnomaly config parsing/robustness.']
+      breaking_changes: [v0.66.0 removes deprecated labels/annotations inheritance;
+          you must move required metadata to `spec.managedMetadata` fields., 'v0.66.0
+          removes deprecated status fields: `VMCluster.status.clusterStatus` and `VMSingle.status.singleStatus`
+          (may break dashboards/scripts that read them).']
     chart_version: 0.57.1
     images: ['victoriametrics/operator:config-reloader-v0.66.1', 'victoriametrics/operator:v0.66.1']
   - version: 0.66.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Config reloader now defaults its image tag to the operator version,
+          reducing drift between operator and reloader images.', VMAuth gains HTTPRoute
+          (Gateway API) support and can override the default path for its embedded
+          ingress., VMAlertmanagerConfig adds an incident.io receiver integration.,
+        VMOperator can run all managed CR workloads in IPv6 mode via the VM_ENABLETCP6
+          environment variable., VMUser introduces spec.managedMetadata for adding
+          labels/annotations to the generated Secret and adds query_args for appending
+          query parameters to backend URL generation., VMAgent in ingestOnly mode
+          no longer sets promscrape.cluster.membersCount and promscrape.cluster.memberNum
+          flags.]
+      breaking_changes: [Removed labels/annotations inheritance (deprecated since
+          v0.51.0). You must move any relied-upon labels/annotations into the spec.managedMetadata
+          fields on the relevant CRs., Removed VMCluster status.clusterStatus and
+          VMSingle status.singleStatus fields (deprecated since v0.51.0). Any tooling
+          that reads these status fields must be updated to use the current status
+          structure.]
     chart_version: 0.57.0
     images: ['victoriametrics/operator:config-reloader-v0.66.0', 'victoriametrics/operator:v0.66.0']
   - version: 0.65.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMAuth: adds HorizontalPodAutoscaler support via new `spec.hpa`
+          field on the VMAuth CRD.', 'Converter: now supports Prometheus Operator
+          `ServiceMonitor.spec.role` / ServiceDiscoveryRole during object conversion.']
+      breaking_changes: ['Scrape CRDs now use `int` (instead of `uint64`) for `seriesLimit`
+          and `sampleLimit` on VMPodScrape, VMNodeScrape, VMServiceScrape, VMScrapeConfig,
+          VMProbe (and related). This is a schema/type change that may require updating
+          manifests/clients or re-applying CRDs if validation fails.']
     chart_version: 0.56.4
     images: ['victoriametrics/operator:config-reloader-v0.65.0', 'victoriametrics/operator:v0.65.0']
   - version: 0.64.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "### Helm values / deployment changes to check\n- **Config reloader\
+        \ default changed**: v0.64.0 switches the operator\u2019s default to its own\
+        \ sidecar `victoriametrics/operator:config-reloader` by setting `VM_USECUSTOMCONFIGRELOADER=true`\
+        \ by default.\n  - If your Helm values previously referenced **3rd-party reloaders**\
+        \ (`jimmidyson/configmap-reload` or `quay.io/prometheus-operator/prometheus-config-reloader`),\
+        \ expect a behavioral/image change after upgrade.\n  - To revert to the old\
+        \ behavior, set operator env var: `VM_USECUSTOMCONFIGRELOADER=false`.\n- **PodDisruptionBudget\
+        \ schema**: new `unhealthyPodEvictionPolicy` field supported under the operator-managed\
+        \ PDB spec; no action needed unless you want to use it.\n- **Update strategy\
+        \ knobs**: new `rollingUpdate` / `updateStrategy` fields for `VMAuth.spec`\
+        \ and `*.spec.requestsLoadBalancer.spec` across VM/VL/VT clusters; again optional\
+        \ unless you want to tune rollouts.\n"
+      chart_updates: [Operator now prefers its bundled config-reloader implementation;
+          this can change the sidecar image and how reloads are performed across managed
+          resources., "Controller reconcile behavior changed to **preserve third\u2011\
+          party labels** on objects (previously it tended to drop non-managed labels\
+          \ unless in `managedMetadata.labels`).", Service reconciliation improvements
+          around `Service.spec.loadBalancerClass` tracking to prevent errors/loops.]
+      features: [Operator-bundled config reloader is now the default (can be disabled
+          via `VM_USECUSTOMCONFIGRELOADER=false`)., New `podDisruptionBudget.unhealthyPodEvictionPolicy`
+          support for finer control of eviction behavior., New rollout tuning fields
+          (`updateStrategy`/`rollingUpdate`) added to `VMAuth` and requests load balancer
+          specs for VM/VL/VT clusters., "Label preservation during reconcile: operator\
+          \ keeps third\u2011party labels rather than pruning them to only managed\
+          \ labels.", '`VLCluster.spec.vlselect.extraStorageNodes` and `VTCluster.spec.vtselect.extraStorageNodes`
+          allow select components to read from additional storage nodes.', vmagent
+          scraping can now use `scrapeClass` / `scrapeClassName` across multiple scrape
+          CRDs., vmanomaly adds UI preset mode and supports `vlogs` reader type.]
+      breaking_changes: ['**Default config reloader changed** from 3rd-party images
+          to `victoriametrics/operator:config-reloader`. If you relied on the old
+          reloader behavior/image (e.g., policies, allowlists, image pinning, compliance
+          scanning), you must either accept the new image or set `VM_USECUSTOMCONFIGRELOADER=false`
+          to keep prior behavior.']
     chart_version: 0.55.2
     images: ['victoriametrics/operator:v0.64.0']
   - version: 0.63.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Bumped bundled default VictoriaMetrics app versions from **v1.123.0\
+          \ \u2192 v1.125.0**.", "Bumped bundled default VictoriaLogs app versions\
+          \ from **v1.28.0 \u2192 v1.33.0**.", 'Operator behavior fixes: VMAlert finalizer
+          is now reliably released on delete; Service reconciliation now handles `loadBalancerClass`
+          changes without hitting the immutable-field error.', VMUser routing logic
+          was simplified for `src_paths` when targeting `VMCluster/vminsert` or `VMCluster/vmselect`.]
+      features: ['VMUser `targetRef.crd.kind` now supports VictoriaLogs (VLSingle,
+          VLAgent, VLCluster components) and VictoriaTraces (VTSingle, VTCluster components)
+          resources, enabling VMUser to reference these CRDs directly.', 'New CRDs/resources
+          are introduced: `VLSingle` and `VTCluster` for managing VictoriaLogs single-node
+          and VictoriaTraces cluster deployments via the operator.', 'VMAgent stream
+          aggregation gains `ignore_first_sample_interval` support, improving aggregation
+          behavior right after restarts/rollouts.', 'VMAlert admission webhook adds
+          validation to ensure notifier configuration options are mutually exclusive,
+          catching misconfigurations earlier.', VMAlertmanager adds `enforcedNamespaceLabel`
+          to customize the label key used in the top-route namespace matcher for VMAlertmanagerConfig.]
+      breaking_changes: []
     chart_version: 0.54.1
     images: ['victoriametrics/operator:v0.63.0']
   - version: 0.62.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Default component versions were bumped: VictoriaMetrics apps to
+          v1.123.0, VictoriaLogs apps to v1.28.0, and VMAnomaly to v1.25.2.', "PrometheusRule\u2192\
+          VMRule converter now supports converting `spec.limit`, `spec.labels`, `spec.query_offset`,\
+          \ and `spec.group[*].keep_firing_for`.", 'Operator reconcile latency was
+          reduced, improving responsiveness during sync/redeploy cycles.', 'Operator
+          now exposes its configuration as Prometheus metrics (`flag` and `config_parameter`
+          with `name`, `is_set`, `value` labels).']
+      breaking_changes: []
     chart_version: 0.52.1
     images: ['victoriametrics/operator:v0.62.0']
   - version: 0.61.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / install-time changes to plan for\n- **RBAC:**\
+        \ add permission for `pods/eviction` to the operator\u2019s ClusterRole/Role\
+        \ (Update Note 2). If you deploy the operator via Helm, ensure the chart version\
+        \ you use includes this; otherwise patch your RBAC.\n- **CRDs:** upgrade/apply\
+        \ updated CRDs before/with the operator upgrade (Update Note 3). New CustomResource\
+        \ **`VLAgent`** is introduced, which requires CRD updates.\n- **VLogs migration:**\
+        \ `VLogs` becomes **read-only** in v0.61.0 (Update Note 1). Plan migration\
+        \ to **`VLSingle`** following the upstream docs: https://docs.victoriametrics.com/operator/resources/vlsingle/#migration-from-vlogs\n\
+        - **Image tag behavior:** if you set `license` on a CustomResource, the operator\
+        \ may now default image tags with an `-enterprise` suffix. Validate you\u2019\
+        re explicitly pinning `spec.image.tag` where required.\n\n## Version bumps\
+        \ (defaults managed by operator)\n- Default VictoriaMetrics apps: **v1.120.0\
+        \ \u2192 v1.121.0**.\n- Default VictoriaLogs apps: **v1.24.0 \u2192 v1.25.1**."
+      chart_updates: [Introduces new CRD/resource **VLAgent** (apply new CRDs)., Transitions
+          **VLogs** CR to read-only; operator ignores create/update for it; migration
+          path is to **VLSingle**., Operator now requires **pods/eviction** RBAC to
+          respect PDB during StatefulSet updates., Fixes/changes rolling update behavior
+          controls by adding `maxUnavailable` fields for VMCluster/VLCluster storage/select
+          components., 'Adds `persistentVolumeClaimRetentionPolicy` support for StatefulSet-mode
+          CRs (VMAnomaly, VMCluster, VMAlertmanager, VMAgent).']
+      features: [VLogs is now treated as read-only by the operator; migration support
+          guidance is provided to move to VLSingle., 'New CustomResource/CRD: VLAgent
+          for VictoriaLogs agent functionality.', VMCluster and VLCluster now support
+          `maxUnavailable` on key components to tune rolling update disruption., VLSingle
+          adds `spec.syslogSpec` to configure syslog ingestion., VMAgent adds a global
+          scrape config and an AWS section for remoteWrite; also adjusts default `remoteWrite.maxDiskUsagePerURL`
+          when using stateful storage., StatefulSet-mode CRs gain `persistentVolumeClaimRetentionPolicy`
+          for PVC retention behavior control., 'If a license is configured on a CR,
+          the operator can default image tags with an `-enterprise` suffix.']
+      breaking_changes: ['**VLogs CR becomes read-only** in v0.61.0; create/update
+          requests are ignored, so existing GitOps flows managing VLogs will effectively
+          stop applying changes until migrated to VLSingle.', '**CRD update required**
+          due to new `VLAgent` resource; upgrading the operator without CRDs may break
+          reconciliation or fail validation.', '**Additional RBAC needed** (`pods/eviction`);
+          without it, operator actions involving evictions/PDB-respecting StatefulSet
+          updates may fail.']
     chart_version: 0.51.2
     images: ['victoriametrics/operator:v0.61.0']
   - version: 0.60.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['(v0.59.0) New CRDs: `VLSingle` (replacement for deprecated `VLogs`)
+          and `VLCluster` for VictoriaLogs deployments.', (v0.59.0) `VMagent.remoteWriteSpec`
+          gains `proxyURL` support; leader-election config gains new flags for lease
+          duration and renew deadline., '(v0.59.0) GitHub release manifests add `app.kubernetes.io/instance:
+          default` and rename `app.kubernetes.io/name` to `victoria-metrics-operator`.',
+        '(v0.60.0) New CRD: `VMAnomaly` plus vmanomaly feature: online models now
+          support the `decay` field.', '(v0.60.0) Default bundled app versions bumped:
+          VM apps to v1.120.0; VictoriaLogs apps to v1.24.0 (victorialogs).']
+      breaking_changes: ['`VLogs` is deprecated as of v0.59.0 and will become read-only
+          after v0.61.0; migrate to `VLSingle` before then.', 'Metric rename in v0.60.0:
+          `operator_vmagent_config_fetch_secret_errors_total` -> `operator_fetch_errors_total`
+          (and semantics broaden to all secret/configmap fetch failures), which can
+          break dashboards/alerts.']
     chart_version: 0.52.0
     images: ['victoriametrics/operator:v0.60.0']
   - version: 0.59.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Default VM app versions bumped from v1.117.0 (operator v0.58.0)
+          to v1.118.0 (operator v0.59.0)., 'Manifests distributed via GitHub release
+          artifacts now include label `app.kubernetes.io/instance: default`, and `app.kubernetes.io/name`
+          value changed to `victoria-metrics-operator`.', Operator adds new leader
+          election flags `leader-elect-lease-duration` and `leader-elect-renew-deadline`
+          (in addition to the v0.58.0 flags `leader-elect-namespace` and `leader-elect-id`).,
+        Config-reloader now excludes hidden directories from watch to avoid errors
+          with hidden symlinks., '`spec.configMaps` are now mounted as `volumeMounts`
+          and watched by config-reloader for VMAgent and VMAlert.', 'New API fields/resources:
+          `proxyURL` for VMagent `remoteWriteSpec`; new CRDs/resources `VLSingle`
+          and `VLCluster`; `VLogs` deprecated with migration guidance to VLSingle.',
+        Removed alerting rule `BadObjects` because metric `operator_controller_bad_objects_count`
+          is no longer exposed., 'HPA validation fixed: `metrics` and `behaviour`
+          are optional fields.', "VMCluster defaulting typo fixed to avoid panic when\
+          \ VMInsert isn\u2019t configured."]
+      features: ['New log storage CRDs: `VLSingle` (replacement for `VLogs`) and `VLCluster`
+          for clustered logs deployments.', VMagent `remoteWriteSpec` gains `proxyURL`
+          to route remote write traffic via an HTTP proxy., 'Additional leader election
+          tuning flags (`leader-elect-lease-duration`, `leader-elect-renew-deadline`)
+          for better HA behavior.', 'Config-reloader improvements: ignores hidden
+          directories and can watch ConfigMaps mounted via `spec.configMaps` for VMAgent/VMAlert.']
+      breaking_changes: ['`VLogs` is deprecated in v0.59.0 and will become read-only
+          after v0.61.0; plan migration to `VLSingle` before that cutoff.', "If you\
+          \ rely on the `BadObjects` alert or the `operator_controller_bad_objects_count`\
+          \ metric, they\u2019re no longer available and any dashboards/alerts must\
+          \ be updated.", 'GitHub release artifact manifests change standard labels
+          (`app.kubernetes.io/name` and add `app.kubernetes.io/instance`); if you
+          select resources by these labels in tooling/policies, update selectors accordingly.']
     chart_version: 0.49.0-rc1
     images: ['victoriametrics/operator:v0.59.0']
   - version: 0.58.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Leader election configuration: new operator flags `leader-elect-namespace`
+          and `leader-elect-id` allow controlling where the leader election Lease
+          lives and how it is identified.', 'Prometheus config reloader image was
+          bumped from 0.68.0 to 0.82.1, which may change reloader behavior and should
+          be validated in your environment.']
+      breaking_changes: ['Operational risk: v0.58.0 defaults to deploying a vmagent
+          version with a known bug (VictoriaMetrics#8941). Recommended to skip this
+          release; if you must upgrade, override vmagent to `v1.117.1` via `VM_VMAGENTDEFAULT_VERSION=v1.117.1`.']
     chart_version: 0.47.0
     images: ['victoriametrics/operator:v0.58.0']
   - version: 0.57.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Introduced FIPS-compliant builds for the operator and config-reloader
+          images (use images tagged with the -fips prefix when required)., Added spec.configReloadAuthKeySecret
+          to VMAgent/VMAlert/VMAuth to supply a secret value used as the -configReload
+          auth key., Converter now supports msteamsv2_configs conversion from Prometheus
+          AlertmanagerConfig., VMAlertmanagerConfig webhook_configs gained a timeout
+          field (requires Alertmanager v0.28.0+)., VMSingle Service now exposes an
+          additional named port/alias for 8428., 'VMSingle and VMCluster retentionPeriod
+          is now optional and defaults to 1 month; retentionPeriod is validated against
+          ^[0-9]+(h|d|y)?$.', 'Operator default component versions updated: VictoriaMetrics
+          apps to v1.116.0, VictoriaLogs to v1.21.0, Alertmanager to v0.28.1.', 'Build
+          tooling updated: Go builder upgraded from Go 1.24.0 to Go 1.24.4.']
+      breaking_changes: [retentionPeriod in VMSingle/VMCluster now has strict validation
+          and defaults to 1 month when omitted; previously accepted values may now
+          be rejected by the webhook/CRD validation.]
     chart_version: 0.46.0
     images: ['victoriametrics/operator:v0.57.0']
   - version: 0.56.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Default VM component images bumped: VictoriaMetrics -> v1.115.0;
+          VLogs -> v1.18.0 (from prior v1.114.0/v1.17.0).', New support for env vars
+          `VM_METRICS_VERSION` and `VM_LOGS_VERSION` to control images for all VM/VL-related
+          CRs., 'Config-reloader behavior change: it no longer uses proxy-protocol
+          for its internal web-server even when `reload-use-proxy-protocol` is set
+          (plus a bugfix around that flag).', 'Added additional validations: vmalertmanager
+          runtime config validation; StatefulSet volumeMount name validation; stricter
+          vmalertmanagerconfig validation for unknown fields; shard count bounds fix.']
+      features: ['Can set all VM and VLogs image versions via `VM_METRICS_VERSION`
+          and `VM_LOGS_VERSION` environment variables, reducing per-CR version pinning.',
+        vmauth can now serve internal routes on a separate port (`internalListenPort`)
+          for improved security/isolation., vmauth can optionally enable HAProxy PROXY
+          protocol support via `useProxyProtocol`., 'vmalertmanager now validates
+          runtime configuration, catching invalid configs earlier.']
+      breaking_changes: ['Config-reloader no longer uses proxy-protocol for its internal
+          web server even if `reload-use-proxy-protocol` is enabled; if you relied
+          on proxy-protocol on that internal endpoint, adjust your setup or remove
+          the expectation.']
     chart_version: 0.45.0
     images: ['victoriametrics/operator:v0.56.0']
   - version: 0.55.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Default VictoriaMetrics app versions updated to VM v1.114.0 (from
+          v1.113.0) and VictoriaLogs (VLogs) to v1.17.0 (from v1.15.0)., Scrape target
+          OAuth2 configs now support `tls_config` and `proxy_url` fields., All VM
+          apps now support `extraEnvsFrom` to source env vars from a Secret or ConfigMap.,
+        'Services for vmstorage/vmselect/vmalertmanager now set `publishNotReadyAddresses:
+          true` to improve discovery/cluster formation during rollouts.', Operator
+          now logs a diff of field changes for key objects (Deployment/StatefulSet/Service/PDB/HPA/VMServiceScrape)
+          during reconcile for easier debugging., 'New global env vars control config-reloader
+          resources: `VM_CONFIG_RELOADER_LIMIT_CPU/MEMORY` (default `unlimited`) and
+          `VM_CONFIG_RELOADER_REQUEST_CPU/MEMORY` (default empty); per-resource request
+          env vars are deprecated.', VMAgent adds beta `daemonSetMode` for running
+          as a DaemonSet., VMAgent reduces Kubernetes API load by removing selectors
+          from VMPodScrape kubernetes_sd_configs; original behavior can be restored
+          with `VMAgent.spec.enableKubernetesAPISelectors`., 'VMAgent remote write
+          disk usage fields improved: `remoteWrite.MaxDiskUsage` can be integer with
+          validation; `remoteWriteSettings.maxDiskUsagePerURL` supports byte-suffix
+          strings with validation.', 'Alertmanager config CRD gains new/updated receivers:
+          Discord adds `content`, `username`, `avatar_url`; new `jira_configs`, `rocketchat_configs`,
+          `msteamsv2_configs` (Alertmanager v0.28.0+).']
+      breaking_changes: ['VMPodScrape-generated kubernetes_sd_configs no longer include
+          `selectors` by default, which can change scrape target selection; set `VMAgent.spec.enableKubernetesAPISelectors=true`
+          to restore the prior behavior.', 'Per-resource config-reloader request env
+          vars are now deprecated in favor of the new global `VM_CONFIG_RELOADER_REQUEST_CPU/MEMORY`
+          controls (not an immediate break, but update values/automation accordingly).']
     chart_version: 0.44.0
     images: ['victoriametrics/operator:v0.55.0']
   - version: 0.54.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['vmalertmanagerconfig: added `thread_message_id` to `telegram_configs`
+          (requires Alertmanager v0.28.0+).', VMUser `targetRefs` can now reference
+          VLogs resources (VLogs support in VMUser).]
+      breaking_changes: []
     chart_version: 0.43.1
     images: ['victoriametrics/operator:v0.54.1']
   - version: 0.53.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds `thread_message_id` to `telegram_configs` in `VMAlertmanagerConfig`
+          (requires Alertmanager v0.28.0+)., Adds support for VLogs as a targetRef
+          in `VMUser` (VLogs can now be referenced in VMUser targetRefs)., "Updates\
+          \ the operator\u2019s default VictoriaMetrics application versions to v1.110.0\
+          \ (from v1.109.1).", Rebuilds operator with Go 1.23.5 (security patch upgrade).]
+      breaking_changes: []
     chart_version: 0.42.5
     images: ['victoriametrics/operator:v0.53.0']
   - version: 0.52.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Default component versions bumped: VictoriaMetrics apps to v1.109.1
+          and VictoriaLogs to v1.6.1 (if you rely on chart/operator defaults, workloads
+          may roll to these images).', 'VMScrapeConfig: GCE SD `zone` now supports
+          multiple values (may broaden discovery if you previously had to workaround).',
+        'Operator performance/scale improvements: faster config regeneration (decoupled
+          from child status updates), reduced prometheus-converter API load, and higher
+          default Kubernetes client limits (`client.qps=50`, `client.burst=100`).',
+        New operator flag `controller.statusLastUpdateTimeTTL` (default 1h) to control
+          staleness detection for `status.conditions`; increase for very large fleets
+          (>>5k objects)., 'Richer failure diagnostics: `failed` status now includes
+          reason and crashed container logs.', 'VMServiceScrape generation: now exposes
+          only the well-known `http` port; job name for vmbackupmanager gets `-vmbackupmanager`
+          suffix.']
+      breaking_changes: ['Metadata inheritance removal: `labels`/`annotations` inheritance
+          from CRD metadata is removed in v0.52.0. Move required labels/annotations
+          to `spec.managedMetadata`; after upgrade, inherited labels will be dropped
+          and annotation changes may be ignored (except preserved).', 'Potential scrape/job
+          changes: VMServiceScrape port exposure and job naming changes may affect
+          dashboards/alerts that match on port names or job names (especially vmbackupmanager).',
+        'Behavioral change for large installs: new staleness detection may mark conditions
+          stale if `controller.statusLastUpdateTimeTTL` too low for your object count;
+          tune accordingly.']
     chart_version: 0.41.2
     images: ['victoriametrics/operator:v0.52.0']
   - version: 0.51.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Default VictoriaMetrics component versions bumped (v0.50.0
+          -> VM 1.106.1; v0.51.1 -> VM apps 1.108.1, and VL default 1.3.2 as shown
+          in release notes).', Operator now supports generating manifests without
+          the admission webhook (useful for restricted clusters / simpler installs).,
+        'Operator logging changed: structured logging fields moved into msg; logger
+          field adjusted to show controller.CRD name; new loggerJSONFields option
+          (introduced in v0.50.0) lets you customize JSON encoder field names.', 'Security
+          context handling adjusted: when useStrictSecurity=false, securityContext
+          is now properly applied; when useStrictSecurity=true, default privileged:false
+          is set for containers.', 'Generated object metadata improvements: VMCluster-generated
+          objects get label app.kubernetes.io/part-of=vmcluster; PodDisruptionBudget
+          and HorizontalPodAutoscaler generated by operator now include annotations.',
+        'Scrape config generation/selection bugfixes for VMAgent selectors and namespaceSelectors,
+          especially around selectAllByDefault true/false and VMScrapeConfig inclusion
+          rules.', 'License options support added: license.forceOffile and license.reloadInterval.',
+        'VMServiceScrape endpointSlice discovery enhancements: missing container labels
+          added to discovered metrics; new env var VM_VMSERVICESCRAPEDEFAULT_ENFORCEENDPOINTSLICES
+          to default to endpointslices discovery role instead of endpoints.', 'API/CRDs
+          updated: new managedMetadata field added to several specs to control labels/annotations
+          on generated objects; status subresource reworked for multiple CRDs adding
+          conditions; new observedGeneration status field; updateStatus field unified
+          for some CRDs (replacing status/clusterStatus/singleStatus in VLogs/VMCluster/VMSingle).',
+        VMAuth/VMUser config generation improvements and new fields (unauthorizedUserAccessSpec;
+          dump_request_on_errors; fixed missing src_headers/src_query_args/discover_backend_ips
+          when using targetRefs).]
+      features: ['Option to enforce EndpointSlice-based discovery for VMServiceScrape
+          via VM_VMSERVICESCRAPEDEFAULT_ENFORCEENDPOINTSLICES, plus added container
+          labels in discovered metrics.', New operator logger configuration flag loggerJSONFields
+          and updated structured logging output., managedMetadata field in multiple
+          CRDs to explicitly manage labels/annotations applied to operator-generated
+          resources., VMAuth gains unauthorizedUserAccessSpec (new structured way
+          to define unauthorized access behavior) and VMUser adds dump_request_on_errors;
+          VMUser targetRefs config generation fixes., Support for enterprise license
+          options license.forceOffile and license.reloadInterval., Ability to deploy
+          operator manifests without webhook., 'Security hardening defaults: privileged:false
+          when useStrictSecurity=true, plus corrected securityContext application
+          when not strict.']
+      breaking_changes: ['CRD/API surface changes: new status/conditions/observedGeneration
+          and updateStatus unification may require updating any automation that reads/writes
+          status fields or relies on old status field names.', 'Deprecations introduced
+          (not removed yet): labels/annotations inheritance from CRD metadata is deprecated
+          in favor of spec.managedMetadata and will be removed in v0.52.0; VMAuth.spec.unauthorizedAccessConfig
+          and several inlined VMAuth.spec fields are deprecated in favor of unauthorizedUserAccessSpec
+          (supported until v1.0).']
     chart_version: 0.40.1
     images: ['victoriametrics/operator:v0.51.1']
   - version: 0.50.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Added missing `container` labels for metrics discovered via `VMServiceScrape`
+          when using `endpointslices` discovery, improving metric labeling consistency.',
+        Operator now defaults VictoriaMetrics component images/versions to v1.106.1
+          (from v1.106.0)., New env var `VM_VMSERVICESCRAPEDEFAULT_ENFORCEENDPOINTSLICES`
+          to force `endpointslices` (instead of `endpoints`) as the discovery role
+          for `VMServiceScrape` when generating VMAgent scrape config., New operator
+          logger option/flag `loggerJSONFields` to customize JSON encoder field names
+          in logs., CRDs now expose `status.observedGeneration` to help clients understand
+          whether status reflects the latest spec generation., 'CRD status fields
+          were unified: `status` / `clusterStatus` / `singleStatus` for `VLogs`, `VMCluster`,
+          `VMSingle` replaced by a generic `updateStatus` field.']
+      breaking_changes: ['CRD status schema change: `VLogs`, `VMCluster`, and `VMSingle`
+          status fields (`status`, `clusterStatus`, `singleStatus`) are replaced by
+          `updateStatus`. Anything reading these old fields (dashboards, scripts,
+          controllers) must be updated accordingly.', "`VMAuth` spec change (already\
+          \ in v0.49.0 but relevant if you\u2019re upgrading across it): `spec.configSecret`\
+          \ moved to `spec.externalConfig.secretRef.name`, and `spec.externalConfig.localPath`\
+          \ was added. Existing manifests must be updated or they will fail validation/behavior\
+          \ will change."]
     chart_version: 0.39.1
     images: ['victoriametrics/operator:v0.50.0']
   - version: 0.49.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator behavior/security fix: `useStrictSecurity: true` is
+          now properly applied to initContainers for VMAuth, VMAgent, and VMAlertmanager
+          (may cause previously-working permissive initContainers to become restricted).',
+        'VMAuth CRD schema change: `spec.configSecret` moved to `spec.externalConfig.secretRef.name`;
+          new `spec.externalConfig.localPath` added for providing custom configs via
+          sidecar.', 'VMCluster CRD enhancement: add `spec.requestsLoadBalancer` configuration.',
+        'VMCluster monitoring: fixes/adjustments when `backup` is enabled so monitoring
+          is configured correctly.', 'VMAlertmanager: config reload now triggers when
+          a ConfigMap referenced via `.spec.configMap` changes.', 'Operator reconciliation
+          fixes: handles storage size changes correctly; fixes conversion from AlertmanagerConfig
+          to VMAlertmanagerConfig.', Default VictoriaMetrics component versions bumped
+          to 1.106.0 (release tag referenced 1.106.6).]
+      features: ['InitContainers now honor strict security settings (`useStrictSecurity`)
+          for VMAuth/VMAgent/VMAlertmanager, improving hardening consistency.', VMAuth
+          can consume external config via `externalConfig` (secretRef + optional localPath)
+          enabling sidecar-driven config delivery., VMCluster can be configured with
+          `requestsLoadBalancer` to influence service/load balancer request behavior.,
+        Improved monitoring wiring for VMCluster deployments that enable backups.,
+        'VMAlertmanager now reloads when the referenced ConfigMap changes, reducing
+          need for manual restarts.']
+      breaking_changes: ["VMAuth spec change: `spec.configSecret` is replaced by `spec.externalConfig.secretRef.name`\
+          \ (you must migrate manifests/Helm values or VMAuth config won\u2019t be\
+          \ found).", 'Security behavior change: enabling `useStrictSecurity: true`
+          now affects initContainers too; clusters relying on more permissive initContainer
+          security settings may see pods fail to start until securityContext/permissions
+          are adjusted.']
     chart_version: 0.37.0
     images: ['victoriametrics/operator:v0.49.0']
   - version: 0.48.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator now supports enabling/disabling use of VM config-reloader
+          per resource (VMAgent/VMAlert/VMAuth/VMAlertmanager) and configuring reloader
+          image tag/resources via CRD fields (`useVMConfigReloader`, `configReloaderImageTag`,
+          `configReloaderResources`).', Webhook port is now configurable (ensure your
+          Helm values/Service/NetworkPolicy match if you override defaults)., 'Operator
+          enables controller-runtime cache for Secrets/ConfigMaps again; can be disabled
+          via flag `-controller.disableCacheFor=seccret,configmap` (spelling per release
+          note).', Operator now trims spaces from Secret/ConfigMap values by default;
+          can be disabled via flag `disableSecretKeySpaceTrim`., Default VictoriaMetrics
+          app versions bumped to v1.103.0 (expect downstream image tag changes if
+          you rely on chart defaults)., PVCs for VMSingle/VLogs gain ownerReferences
+          to improve Argo CD compatibility (may affect GitOps drift/garbage-collection
+          behavior)., PDB enabled status is now respected (behavior change if you
+          previously relied on operator creating PDBs even when disabled).]
+      features: ['Per-resource control over using VM config-reloader and its image/resources
+          for VMAgent, VMAlert, VMAuth, and VMAlertmanager.', VMAlertmanager can enforce
+          top-level route matchers via `enforcedTopRouteMatchers` applied to all VMAlertmanagerConfig
+          objects., 'New/extended API knobs: `host_aliases` (underscore form prioritized),
+          per-app `useDefaultResources` and `disableSelfServiceScrape`, `clusterDomainName`
+          for VMCluster/VMAlertmanager, and expanded securityContext propagation to
+          containers.', 'Operational improvements: reduced reconcile latency and lower
+          kube-apiserver load; re-enabled caching for Secrets/ConfigMaps to improve
+          performance.']
+      breaking_changes: [Default behavior now trims whitespace in Secret/ConfigMap
+          values used for generated configs; this can change credentials/URLs if they
+          relied on trailing/leading spaces., 'If you deploy behind strict NetworkPolicies/firewalls,
+          the webhook port being configurable may require you to adjust any policies/services
+          if you change it from the default.', 'PVC ownerReferences added for VMSingle/VLogs
+          can change deletion/GC semantics in GitOps setups (e.g., Argo CD pruning)
+          if you previously managed PVCs separately.']
     chart_version: 0.35.0
     images: ['victoriametrics/operator:v0.48.0']
   - version: 0.47.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator behavior changes for VMAlertmanagerConfig: forbids
+          cross-resource or global receiver references; config must only reference
+          local receivers.', 'VMAlertmanagerConfig API change: removed deprecated
+          `spec.mute_time_intervals`; use `spec.time_intervals` instead.', 'VMAlertmanager
+          default routing change: if root route receiver is empty, operator now sets
+          `blackhole` receiver instead of choosing the first VMAlertmanagerConfig
+          receiver.', 'New CRD/resource support: adds `VLogs` for managing VictoriaLogs
+          via the operator.', 'Config reloader: new TLS flags for securing the reload
+          endpoint (`tlsCaFile`, `tlsCertFile`, `tlsKeyFile`, `tlsServerName`, `tlsInsecureSkipVerify`).',
+        'VMUser: adds `status.lastSyncError`; adds validation for `spec.targetRefs.crd.kind`;
+          can skip generating VMAuth config for invalid VMUser refs (recommended to
+          enable validation webhook).', 'Scrape objects: adds `status` and `lastSyncError`
+          to `VMServiceScrape`, `VMPodScrape`, `VMNodeScrape`, `VMStaticScrape`, and
+          `VMScrapeConfig` to track vmagent config generation.', VMAgent config builder
+          refactor; fixes incorrect skipping logic for scrape objects with bad Secret/ConfigMap
+          refs., 'Operator metrics endpoint: can secure `metrics-bind-address` with
+          TLS/mTLS via flags (`tls.*`, `mtls.*`).', 'TLS asset naming fix: adds `configmap`
+          prefix to ConfigMap-referenced TLS assets to avoid Secret/ConfigMap name
+          clashes.', 'PodDisruptionBudget finalizer fix: properly releases PDB finalizer
+          (previously could stick due to typo); plus general finalizer refactor.',
+        'Auto-created VMServiceScrape for CRD objects from `extraArgs`: adds `tls_config`
+          and `authKey` settings.', 'VMAlertmanagerConfig: improved validation and
+          adds `status`/`lastSyncError` fields.', 'VMAlertmanager: adds `webConfig`
+          for easier TLS configuration and correct probe/URL generation; adds `gossipConfig`
+          for client/server TLS on gossip.', 'VMAgent/VMSingle: stream aggregation
+          options synced with upstream (`dropInputLabels`, `ignoreFirstIntervals`,
+          `ignoreOldSamples`) and supports configMap as aggregation rules source.',
+        'Operator: adds `-client.qps` and `-client.burst` flags to tune Kubernetes
+          API client behavior.']
+      features: [Adds a new `VLogs` custom resource to manage VictoriaLogs through
+          the operator., Adds TLS configuration options to the config-reloader so
+          reload endpoints can be secured., Adds status and lastSyncError fields across
+          scrape-related resources to help troubleshoot vmagent config generation.,
+        Adds operator TLS/mTLS support for the metrics endpoint and improves TLS asset
+          handling to avoid naming clashes., Enhances VMAlertmanager with webConfig
+          and gossipConfig for simpler TLS and secure gossip communication., Adds
+          additional stream aggregation options and supports configMap-based aggregation
+          rules for vmagent/vmsingle., 'Adds Kubernetes client tuning flags (`client.qps`,
+          `client.burst`) for large clusters or API rate limiting scenarios.']
+      breaking_changes: [VMAlertmanagerConfig can no longer reference receivers across
+          other VMAlertmanagerConfig objects or use global receiver references; receivers
+          must be local to the object., '`VMAlertmanagerConfig.spec.mute_time_intervals`
+          has been removed; migrate to `VMAlertmanagerConfig.spec.time_intervals`.',
+        'If a VMAlertmanager root route has an empty receiver, the operator now sets
+          it to `blackhole` (previously it picked the first VMAlertmanagerConfig receiver),
+          which can change alert delivery until you set an explicit receiver.']
     chart_version: 0.34.0
     images: ['victoriametrics/operator:v0.47.0']
   - version: 0.46.4
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator base image switched from distroless to scratch (v0.46.4);
+          this can affect debugging/exec tooling and image scanning expectations.,
+        Operator manifests no longer set an explicit `runAsUser`; it must be defined
+          via image defaults or pod security context/profile (v0.46.4)., Config-reloader
+          container no longer specifies `command`; it is defined in the image now
+          (v0.46.4)., 'OperatorHub bundle change: `VMAgent` deployment `ServiceAccount
+          vmagent` is no longer shipped; operator will recreate a new SA with required
+          permissions after removal (v0.46.4).', 'OperatorHub manifests: `webhook.enable`
+          is properly wired for OperatorHub deployments (v0.46.4).', "kubebuilder\
+          \ upgrade v2 \u2192 v4 (v0.46.0) and Kubernetes code-generator upgrade v0.27.11\
+          \ \u2192 v0.30.0 (v0.46.0) \u2014 implies regenerated CRDs/webhooks and\
+          \ potential RBAC/manager flag changes.", "cert-manager API upgrade `certificates.cert-manager.io/v1alpha2`\
+          \ \u2192 `certificates.cert-manager.io/v1` (v0.46.0).", 'Selector behavior
+          fix: `xxNamespaceSelector` and `xxSelector` were previously inverted and
+          are corrected (v0.46.0).', 'VMNodeScrape scrape_config generation fix: de-dup
+          `series_limit` / `sample_limit` fields (v0.46.0).']
+      features: [VMUser service discovery can now be configured to use HTTPS via a
+          TLS flag check in `AsURL` (v0.46.0)., 'VMRule supports syncing group attributes
+          `eval_offset`, `eval_delay`, and `eval_alignment` from upstream vmalert
+          group settings (v0.46.0).', VMAlertmanagerConfig reconcile loop now includes
+          a `handleReconcileErr` callback to better handle errors and deregister objects
+          (v0.46.0).]
+      breaking_changes: ["Operator flag deprecations: `--metrics-addr` \u2192 `--metrics-bind-address`,\
+          \ `--enable-leader-election` \u2192 `--leader-elect`, `--http.readyListenAddr`\
+          \ \u2192 `--health-probe-bind-address` (v0.46.0).", 'Remote write multitenancy
+          change: when using `remoteWriteSettings.useMultiTenantMode`, `remoteWrite.url`
+          must include `/insert/multitenant/<suffix>` because upstream vmagent deprecated
+          `-remoteWrite.multitenantURL` (v0.46.0).', "OperatorHub VMAgent deployment\
+          \ change: remove the `vmagent` ServiceAccount since it\u2019s no longer\
+          \ shipped; operator will create a new SA with needed permissions (v0.46.4).",
+        Manifests no longer pin `runAsUser`; you must set user at image or security
+          context/profile level if required by your policies (v0.46.4)., 'Container
+          entrypoints changed: operator base image is now `scratch` and config-reloader
+          no longer sets `command` explicitly; any assumptions about shell/tools/command
+          overrides may break (v0.46.4).']
     chart_version: 0.33.6
     images: ['victoriametrics/operator:v0.46.4']
   - version: 0.46.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Operator CLI flags deprecated/renamed: `--metrics-addr`\u2192\
+          `--metrics-bind-address`, `--enable-leader-election`\u2192`--leader-elect`,\
+          \ `--http.readyListenAddr`\u2192`--health-probe-bind-address` (update your\
+          \ deployment/Helm chart args if you set these).", 'vmagent multitenancy:
+          when `remoteWriteSettings.useMultiTenantMode` is enabled, `remoteWrite.url`
+          must include the `/insert/multitenant/<suffix>` path (upstream vmagent deprecated
+          `-remoteWrite.multitenantURL` since v1.102.0).', 'VMUser service discovery:
+          operator now checks `tls` flag in `AsURL`, enabling `https` config for VMUser
+          SD.', "Kubebuilder upgraded v2\u2192v4 (operator scaffolding/tooling change;\
+          \ may affect CRDs generation/behavior).", Operator images switched to distroless
+          base (may impact debugging/exec into container; ensure tooling expectations).,
+        "cert-manager API upgraded `certificates.cert-manager.io/v1alpha2`\u2192`certificates.cert-manager.io/v1`\
+          \ (update CRDs/manifests if you use cert-manager resources).", "code-generator\
+          \ upgraded v0.27.11\u2192v0.30.0.", "Fix selector logic: VM CRs\u2019 `xxNamespaceSelector`\
+          \ and `xxSelector` were inverted previously; behavior changes after upgrade\
+          \ (may alter which targets/rules are selected).", 'VMAlertmanagerConfig
+          reconcile loop: adds missing `handleReconcileErr` to properly handle errors/deregister
+          objects.', 'VMRule: group attributes `eval_offset`, `eval_delay`, `eval_alignment`
+          synced with upstream vmalert.', 'VMNodeScrape: remove duplicated `series_limit`
+          and `sample_limit` fields in generated `scrape_config`.']
+      features: [VMUser service discovery can now be configured for HTTPS via `tls`
+          handling in URL generation., 'VMRule supports additional group scheduling
+          attributes (`eval_offset`, `eval_delay`, `eval_alignment`) aligned with
+          upstream vmalert.', Improved reconciliation robustness for VMAlertmanagerConfig
+          via proper error handling and object deregistration.]
+      breaking_changes: ['Operator flag names have changed (old flags are deprecated);
+          Helm values/args must be updated if you set metrics address, leader election,
+          or readiness/health probe listen address flags.', 'vmagent multitenancy
+          configuration changes: multitenant write URLs must include `/insert/multitenant/<suffix>`
+          when `useMultiTenantMode` is enabled, otherwise remote write may fail or
+          write to wrong endpoint.', 'Selector inversion fix changes behavior: resources
+          selected by `xxSelector`/`xxNamespaceSelector` may differ after upgrade,
+          potentially adding/removing scrape targets or rules.']
     chart_version: 0.33.1
     images: ['victoriametrics/operator:v0.46.0']
   - version: 0.45.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator CLI surface changed: only operator-related flags are
+          exposed; transitive dependency flags removed (may affect Helm chart values
+          that pass extra args).', 'Finalizer handling adjusted: uses Patch for finalizer
+          set/unset (0.44.0) and removes finalizers for child objects with non-empty
+          DeletionTimestamp (0.45.0) to avoid stuck deletions.', "PVC/storageClass\
+          \ reconciliation logic changed: storageClass checks are skipped when PVC\
+          \ size doesn\u2019t change (0.45.0).", 'VMAgent status enhancements: status.selector
+          is set to better support VPA; new streamAggrConfig fields added (requires
+          vmagent v1.100+ to use).', 'Pause support added: spec.pause field added
+          across multiple CRDs to suspend reconciliation.', "VMAlertmanager secret-name\
+          \ collision behavior changed: if cr.spec.configSecret name clashes with\
+          \ operator-managed secret, the CR\u2019s secret content is ignored to prevent\
+          \ overwriting.", 'VMAuth fixes: targetRef URL building when default http
+          port changes; deployment fix when using custom reloader.', 'Converters improved:
+          ScrapeConfig converter copies only spec and fixes ownerRef type; AlertmanagerConfig
+          converter fix for opsgenie_configs; reduced API discovery scope to monitoring.coreos.com/*
+          only.', 'VMScrapeConfig: authorization.type defaulting to Bearer works with
+          empty type.']
+      features: [New `spec.pause` field on multiple VictoriaMetrics CRDs to suspend
+          operator reconciliation when needed., 'Additional `vmagent.streamAggrConfig`
+          tuning fields (dedup interval, ignore old samples, keep metric names, no-align
+          flush) available when running vmagent v1.100+.', '`vmagent` now populates
+          `status.selector`, improving compatibility with Vertical Pod Autoscaler
+          (VPA).', Improved and safer conversion tooling for Prometheus Operator resources
+          and AlertmanagerConfig (including opsgenie receiver configs)., Reduced cluster
+          API discovery footprint for prometheus-converter by querying only required
+          API groups.]
+      breaking_changes: ['Operator command-line flags exposed by the container changed:
+          transitive dependency flags were removed. Helm charts that set extraArgs/flags
+          may fail to start if they pass now-unknown flags.', 'VMAlertmanager behavior
+          change on configSecret name collision: if you previously relied on using
+          the same secret name as the operator-managed secret, your provided config
+          may now be ignored.']
     chart_version: 0.32.3
     images: ['victoriametrics/operator:v0.45.0']
   - version: 0.44.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Adds `spec.pause` to multiple CRDs (VMAgent, VMAlert, VMAuth, VMCluster,
+          VMAlertmanager, VMSingle) to suspend reconciliation.', 'Extends `VMAgent.spec.streamAggrConfig`
+          with new options (`dedup_interval`, `ignore_old_samples`, `keep_metric_names`,
+          `no_align_flush_to_interval`); requires vmagent v1.100+.', Sets `VMAgent.status.selector`
+          to support correct integration with Vertical Pod Autoscaler (VPA)., 'Syncs
+          VMAuth/VMUser config fields with upstream vmauth (e.g., `src_query_args`,
+          `discover_backend_ips`).', Fixes prometheus-operator ScrapeConfig converter
+          behavior and corrects VMScrapeConfig owner reference handling., Improves
+          VMScrapeConfig SD `authorization` handling when `type` is empty (defaults
+          to Bearer).]
+      breaking_changes: [New `streamAggrConfig` fields are only usable with vmagent
+          v1.100+; using older vmagent versions will prevent using these options (upgrade
+          vmagent first or avoid setting them)., 'If you relied on older operator
+          behavior around finalizer updates, behavior changes to Patch-based operations
+          may affect custom automation that assumes full-object updates (generally
+          a fix, but verify).']
     chart_version: 0.31.2
     images: ['victoriametrics/operator:v0.44.0']
   - version: 0.43.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Removes deprecated `VMClusterSpec.VMInsert.Name`, `VMClusterSpec.VMStorage.Name`,
+          and `VMClusterSpec.VMSelect.Name` fields (deprecated since v0.21.0).', PodSecurityPolicy
+          (PSP) support removed; operator no longer creates PSP objects., PodDisruptionBudget
+          API switched from `policy/v1beta1` to stable `policy/v1`., Alertmanager
+          versions < v0.22.0 are no longer supported; default bumped to v0.27.0.,
+        'ServiceAccount reconcile behavior changed: operator only creates/updates
+          ServiceAccounts when SA field is omitted in CRD; avoids ownership race conditions.',
+        'Operator watches fewer owned resources (no longer watches Service/Secret/ConfigMap
+          changes), reducing log/CPU/memory usage.', 'Config-reloader: exposes HTTP
+          port 8435; new `configReloaderExtraArgs` field for several CRDs; adds new
+          config-reloader container for VMAlertmanagerConfig and adds metrics.', 'Reconcile
+          behavior improved: Kubernetes Events emitted on reconcile errors; retries
+          on conflict errors.', '`serviceSpec.useAsDefault=true` allows adjusting
+          operator-generated Services.', 'VMAgent statefulMode service behavior changed:
+          now headless; `serviceName` customizable for custom Service.', 'Scrape CRDs
+          updated: add `attach_metadata`; add `series_limit`; fix `disable_keep_alive`
+          field name; deprecate `relabel_debug` and `metric_relabel_debug`.', Adds
+          new CRD `VMScrapeConfig` for arbitrary SD-based scrape configs., 'Other
+          CRD additions: VMUser `targetRefBasicAuth`, VMProbe `proxy_url`, VMAgent
+          multiline regex relabeling; Sigv4Config tag fix.', Base images/dependencies
+          updated for CVE fixes; VictoriaMetrics images bumped to v1.100.1.]
+      features: [New `VMScrapeConfig` CRD enables defining scrape configs with any
+          SD mechanism supported by VictoriaMetrics., Scrape CRDs gained `attach_metadata`
+          (Prometheus-like) and `series_limit` to control label metadata attachment
+          and cap per-target series., 'Config reloader improvements: dedicated reloader
+          for VMAlertmanagerConfig, new error/health metrics, exposed HTTP port 8435,
+          and per-CRD extra args via `configReloaderExtraArgs`.', VMUser can now configure
+          basic auth for `target_url` via `targetRefBasicAuth`; VMProbe supports `proxy_url`.,
+        VMAgent relabeling supports multi-line regex; stateful mode service can be
+          customized.]
+      breaking_changes: [Removed deprecated `Name` fields from VMCluster component
+          specs; manifests using them must be updated/removed., PodSecurityPolicy
+          objects are no longer managed/created by the operator; clusters relying
+          on PSP must migrate to Pod Security Admission/other policy controls., PodDisruptionBudget
+          `policy/v1beta1` is no longer supported; ensure your cluster and any custom
+          manifests use `policy/v1`., Alertmanager versions below v0.22.0 are unsupported;
+          upgrade Alertmanager (or use operator defaults) before/with this operator
+          upgrade., VMAgent statefulMode Service changed to headless; any consumers
+          assuming a ClusterIP Service may need updates (DNS/discovery/load-balancing
+          behavior changes).]
     chart_version: 0.30.0
     images: ['victoriametrics/operator:v0.43.0']
   - version: 0.42.4
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.29.6
     images: ['victoriametrics/operator:v0.42.4']
   - version: 0.42.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator now supports watching multiple namespaces via comma-separated
+          `WATCH_NAMESPACE` (enables multi-namespace mode without cluster-wide permissions);
+          requires appropriate namespace-scoped RBAC (see `config/examples/operator_rbac_for_single_namespace.yaml`).,
+        'Logging: operator adds more context to log messages to improve debugging
+          and log quality.', 'Runtime dependencies updated (controller-runtime, controller-gen);
+          may affect build/runtime behavior if you vendor/pin these elsewhere.', All
+          pod-producing CRs now expose a `status.updateStatus` field to better track
+          rollouts., All pod-producing CRs now get annotation `operator.victoriametrics/last-applied-spec`
+          to track applied spec and enable proper resource cleanup later., VictoriaMetrics
+          component image tags updated to v1.99.0 (from v1.97.1 in 0.41.1)., 'vmalertmanager:
+          default router changes to `blackhole` when no config is provided (previously
+          dummy webhook).', 'vmalertmanager: template path assignment fixed when templates
+          are set both in config file and via `spec.templates`.', 'vmauth: new `spec.configSecret`
+          to load external config from a Secret key `config.yaml`; changes can be
+          watched with `extraArgs.configCheckInterval` or a config-reloader sidecar.',
+        'vmagent: `streamAggrConfig.flush_on_shutdown` added.', 'vmagent: experimental
+          `spec.ingestOnlyMode` added (runs without scrape config/config reloaders;
+          currently also disables TLS and auth for remoteWrites).', "vmcluster/vmstorage:\
+          \ PVC resize disabling annotation `operator.victoriametrics.com/pvc-allow-volume-expansion`\
+          \ behavior changed\u2014now evaluated at StatefulSet storage spec level\
+          \ (not per-PVC); enables adding a PVC autoscaler.", 'APIs: missing static
+          config relabeling added with tests.']
+      features: [Multi-namespace watch support via comma-separated `WATCH_NAMESPACE`
+          without needing cluster-wide permissions (with namespace RBAC)., Improved
+          rollout observability via `status.updateStatus` on all resources that create
+          pods., Spec change tracking via `operator.victoriametrics/last-applied-spec`
+          annotation on pod-producing resources., 'New vmagent options: `flush_on_shutdown`
+          for stream aggregation, and experimental `ingestOnlyMode` to run without
+          scrapes/config reloaders.', New vmauth `spec.configSecret` to source config
+          from a Secret and optionally reload/check periodically., vmstorage/vmcluster
+          gains better control of PVC expansion policy at storage spec level and supports
+          PVC autoscaler workflows.]
+      breaking_changes: ["vmalertmanager default routing behavior changes: if no configuration\
+          \ is provided, it now uses `blackhole` instead of a dummy webhook\u2014\
+          could change how unconfigured alerts are handled (dropped vs previously\
+          \ sent somewhere).", PVC expansion disabling check moved from per-PVC to
+          StatefulSet storage spec level; clusters relying on the old per-PVC annotation
+          behavior may see different resize outcomes after upgrade., "`vmagent.spec.ingestOnlyMode`\
+          \ is experimental and currently disables TLS/auth for remoteWrite endpoints\
+          \ when enabled\u2014treat as a behavioral change if you plan to use it."]
     chart_version: 0.29.0
     images: ['victoriametrics/operator:v0.42.0']
   - version: 0.41.1
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Operator-managed VictoriaMetrics component image tags are updated
+          to VictoriaMetrics v1.97.1 (via operator v0.41.1), which may pull in changes
+          from the VictoriaMetrics application release.', '(From the starting version
+          v0.40.0) VMUser gained new fields: drop_src_path_prefix_parts, tls_insecure_skip_verify,
+          metric_labels, and load_balancing_policy (note: metric_labels requires VMAuth
+          >= v1.97.0).', (From the starting version v0.40.0) Added revisionHistoryLimitCount
+          and MinReadySeconds parameters for VictoriaMetrics workload CRDs., '(From
+          the starting version v0.40.0) VMAlertmanagerConfig gained additional receiver
+          type support: discord_configs, msteams_configs, sns_configs, webex_configs.',
+        (From the starting version v0.40.0) Added alerting rules for the operator
+          itself.]
+      breaking_changes: []
     chart_version: 0.28.0
     images: ['victoriametrics/operator:v0.41.1']
   - version: 0.40.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Fix VMAlertmanagerConfig discovery to match documented behavior.,
+        Add optional built-in alerting rules for vmoperator itself (operator self-monitoring).,
+        'Add new CRD fields for workloads: `revisionHistoryLimitCount` and `minReadySeconds`
+          across Victoriametrics workload CRDs.', 'Extend VMAlertmanagerConfig CRD
+          to support additional receiver types: `discord_configs`, `msteams_configs`,
+          `sns_configs`, `webex_configs`.', 'Extend VMUser CRD with new fields: `drop_src_path_prefix_parts`,
+          `tls_insecure_skip_verify`, `metric_labels`, `load_balancing_policy`.']
+      features: ['Operator can now ship alerting rules for itself, improving observability
+          of operator health and reconciliation issues.', 'VMUser adds new auth/routing
+          knobs (drop path prefix parts, TLS skip verify, metric label injection,
+          load balancing policy); note `metric_labels` requires VMAuth >= v1.97.0.',
+        'VMAlertmanagerConfig supports more receiver integrations (Discord, MS Teams,
+          AWS SNS, Webex) and has corrected discovery behavior.', Workload CRDs gain
+          `minReadySeconds` and `revisionHistoryLimitCount` to control rollout readiness
+          and ReplicaSet history retention.]
+      breaking_changes: ['`VMAlertmanagerConfig` discovery behavior is fixed to match
+          docs; if you relied on the previous (incorrect) discovery semantics, existing
+          AlertmanagerConfig objects selected/discovered by vmalertmanager may change
+          and should be revalidated after upgrade.']
     chart_version: 0.27.10
     images: ['victoriametrics/operator:v0.40.0']
   - version: 0.39.4
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.27.9
     images: ['victoriametrics/operator:v0.39.3']
   - version: 0.39.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [vmagent/vmauth default config-reloader image was upgraded (impacts
+          the sidecar/init behavior and image pull)., 'VMUser gained new vmauth options:
+          `retry_status_codes`, `max_concurrent_requests`, and `response_headers`
+          (requires vmauth >= v1.94.0).', New per-component `useStrictSecurity` flag
+          allows gradual migration from insecure to strict security without breaking
+          all components at once., Operator can now accept/provide an enterprise license
+          key for VictoriaMetrics enterprise components.]
+      breaking_changes: []
     chart_version: 0.27.3
     images: ['victoriametrics/operator:v0.39.0']
   - version: 0.38.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds the ability for vmoperator to print the default values for all
+          operator environment variables (useful for debugging/config discovery).]
+      breaking_changes: []
     chart_version: 0.27.1
     images: ['victoriametrics/operator:v0.38.0']
   - version: 0.37.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMAlert/VMRule/VMagent/VMSingle: streaming aggregation enhancements
+          introduced in v0.36.0 (dropInput, list support for match, staleness_interval).',
+        'VMRule: new rule fields update_entries_limit and keep_firing_for supported
+          (v0.36.0).', 'Operator: new VM_ENABLESTRICTSECURITY env var; strict security
+          context enabled by default (v0.36.0).', 'VMagent: multiple `if` conditions
+          for relabeling supported (v0.37.0).']
+      breaking_changes: ['VMAlert CRD: field `OAuth2` renamed to `oauth2` in several
+          VMAlert spec sections; manifests must be updated and reapplied after upgrade
+          (v0.36.0).', 'VMAlert CRD: field `bearerTokenFilePath` renamed to `bearerTokenFile`
+          in several VMAlert spec sections; manifests must be updated and reapplied
+          after upgrade (v0.36.0).']
     chart_version: 0.26.0
     images: ['victoriametrics/operator:v0.37.0']
   - version: 0.36.0
-    kube: ['1.28', '1.27', '1.23']
+    kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: "- No Helm chart changelog was provided in the notes you pasted.\
+        \ Only application/operator release notes are available here, so Helm values\
+        \ changes can\u2019t be confirmed from this input.\n- If your Helm chart exposes\
+        \ operator env vars, note new/changed operator parameters in v0.36.0:\n  -\
+        \ `VM_ENABLESTRICTSECURITY`: **new**, and **strict security context is enabled\
+        \ by default**.\n  - `VM_PSPAUTOCREATEENABLED`: default changed from `true`\
+        \ -> `false` (PSP is deprecated since k8s v1.25).\n"
+      chart_updates: []
+      features: ['Streaming aggregation support updates for vmagent/vmsingle: `streamAggr.dropInput`,
+          list support for `match`, and `staleness_interval`.', VMRule supports `update_entries_limit`
+          and `keep_firing_for` fields (vmalert rule features)., 'New example manifests:
+          vmagent stateful mode with sharding; vmcluster with additional/custom storage
+          claims.', Operator can run with strict security context by default via new
+          `VM_ENABLESTRICTSECURITY` parameter.]
+      breaking_changes: ['VMAlert CRD field rename: `OAuth2` -> `oauth2` across datasource/notifier/notifiers/remoteRead/remoteWrite;
+          any existing configs must be reapplied with the new field name after upgrade.',
+        'VMAlert CRD field rename: `bearerTokenFilePath` -> `bearerTokenFile` across
+          datasource/notifier/notifiers/remoteRead/remoteWrite; any existing configs
+          must be reapplied with the new field name after upgrade.']
     chart_version: 0.25.0
     images: ['victoriametrics/operator:v0.36.0']
   - version: 0.35.0
-    kube: ['1.27', '1.26', '1.23']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['vmagent: adds validation when generating static scrape config (may
+          reject previously accepted invalid configs).', 'vmalertmanagerconfig: adds
+          validation for Slack receiver URL.', 'vmauth/vmagent: implement config initiation
+          flow for a custom config reloader (changes how custom reloader is bootstrapped).',
+        Adds more generators (additional supported config/resource generation options).,
+        'vmsingle: adds a status field to the CR status (more observable state).']
+      breaking_changes: []
     chart_version: 0.24.0
     images: ['victoriametrics/operator:v0.35.0']
   - version: 0.34.0
-    kube: ['1.27', '1.26', '1.23']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [VMAlertmanager now defaults/bundles Alertmanager v0.25.0., VMCluster
+          adds `clusterNativePort` on VMSelect/VMInsert to support multi-level cluster
+          topologies., VMRule gains `notifierHeader` to attach custom headers for
+          notifications., VMPodScrape adds `FilterRunning` option (similar to Prometheus)
+          to scrape only running pods., VMAuth incorporates latest upstream VMAuth
+          feature set (behavior depends on VMAuth version used).]
+      breaking_changes: ['If you run the operator in single-namespace mode via `WATCH_NAMESPACE`,
+          behavior changes: it will no longer access cluster-wide resources and will
+          only create single-namespace config for VMAgent. This may require revisiting
+          RBAC/ClusterRole assumptions and any setups relying on cluster-wide discovery.']
     chart_version: 0.23.0
     images: ['victoriametrics/operator:v0.34.0']
   - version: 0.33.0
-    kube: ['1.27', '1.26', '1.23']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMAlertmanager: new option to disable route `continue` enforcement
+          (lets you keep Alertmanager-style routing semantics if you rely on `continue:
+          true`).', 'VMAlertmanagerConfig: can now set `require_tls: false` for email
+          receivers and adds sanity checks to validate configs earlier.', 'VMAlertmanagerConfig:
+          adds `sound` field support for Pushover notifications.', 'VMAgent/VMAuth:
+          can download initial config via an initContainer, improving first-start
+          reliability when config is generated/served externally.', 'Build: Alpine
+          base image bumped to v3.17.3 (security/patch updates).']
+      breaking_changes: []
     chart_version: 0.21.0
     images: ['victoriametrics/operator:v0.33.0']
   - version: 0.32.1
-    kube: ['1.27', '1.26', '1.23']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No new features in v0.32.1; it is a patch release focused on fixes.,
+        "v0.32.1 makes vmsingle\u2019s stream aggregation config conditional, preventing\
+          \ it from being injected when not configured/needed."]
+      breaking_changes: []
     chart_version: 0.20.1
     images: ['victoriametrics/operator:v0.32.1']
   - version: 0.32.0
-    kube: ['1.26', '1.25', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['**vmauth**: `config-reloader` is now auto-configured with `proxy-protocol`
+          client support and `reloadAuthKey` handling, reducing manual config for
+          auth reload behavior.', '**vmagent**: new global `scrapeTimeout` setting
+          can be set via the VMAgent CR to control scrape timeouts consistently.',
+        '**vmagent remoteWrite**: adds support for streaming aggregation configuration
+          for remoteWrite targets (see VictoriaMetrics stream aggregation docs).',
+        '**vmsingle**: adds global streaming aggregation configuration for the database,
+          enabling server-side aggregation pipelines.']
+      breaking_changes: []
     chart_version: 0.20.0
     images: ['victoriametrics/operator:v0.32.0']
   - version: 0.31.0
-    kube: ['1.26', '1.25', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['vmalertmanager: adds support for `vmalertmanager.spec.templates`,
+          including auto-reload directories for templates and configmaps.', 'vmagent:
+          adds support for the `%SHARD_NUM%` placeholder when generating/templating
+          vmagent StatefulSet/Deployment (useful for sharded setups).']
+      breaking_changes: ['HPA API handling changed to avoid deprecated autoscaling
+          v2beta on Kubernetes 1.26+; if you have custom manifests/overrides expecting
+          v2beta, they may need adjustment.']
     chart_version: 0.19.0
     images: ['victoriametrics/operator:v0.31.0']
   - version: 0.30.3
-    kube: ['1.26', '1.25', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['v0.30.0 added the Scaling subresource for `VMAgent`, enabling use
+          of the Kubernetes scale API (e.g., `kubectl scale`) against the CRD.', 'v0.30.0
+          introduced optional namespace label matching for inhibit rules, improving
+          alert inhibition scoping.', 'v0.30.0 started publishing CRDs YAML as a release
+          asset, making CRD management outside Helm easier.', v0.30.0 added child
+          labels filtering to control which labels propagate to generated child resources.,
+        v0.30.0 added OAuth2 and bearer auth support for vmalert remote DB connections.]
+      breaking_changes: ['Kubernetes 1.26+ deprecates `autoscaling/v2beta2`; v0.30.3
+          adds an API-availability check, which may change HPA behavior if your cluster
+          only supports certain autoscaling API versions.', 'PVC resize logic in v0.30.3
+          now uses corrected selector labels; if you relied on the previous (incorrect)
+          labels for automation/monitoring, behavior/metrics selection may differ.']
     chart_version: 0.17.2
     images: ['victoriametrics/operator:v0.30.3']
   - version: 0.30.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Adds a Scaling subresource for `VMAgent`, enabling kubectl/HPA-style
+          scaling interactions without editing the full spec.', 'Adds an optional
+          namespace label matcher to inhibit rules (Alertmanager config), giving finer
+          control over inhibition behavior across namespaces.', 'Publishes CRDs YAML
+          as a release asset, simplifying CRD installation/updates outside of Helm
+          or Git checkout.', Introduces child labels filtering to better control which
+          labels propagate from parent/owner resources to generated objects., '`vmalert`
+          controller adds OAuth2 and bearer-token auth support for remote read/query
+          databases, improving secured integrations.']
+      breaking_changes: []
     chart_version: 0.17.0
     images: ['victoriametrics/operator:v0.30.0']
   - version: 0.29.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator fix: VMCluster now reconciles VMStorage even when
+          the PodDisruptionBudget object is missing.', Fix for Kubernetes 1.25 crash.,
+        'vmagent/vmalert: reduce/handle throttling issues more safely.', 'vmalertmanagerconfig:
+          fixes for parsing nested routes plus correct OwnerReference handling.',
+        'vmagent: allow maxDiskUsage values > 1GB.', 'vmagent: correctly merge ports
+          when using an additional Service.', 'vmprobe: correctly set labels for ingress
+          targets.', 'PodDisruptionBudget: add configurable selectors (new capability
+          in how PDBs are generated/selected).']
+      features: ['PodDisruptionBudget support gains configurable selectors, allowing
+          more control over which pods a PDB targets.']
+      breaking_changes: []
     chart_version: 0.15.0
     images: ['victoriametrics/operator:v0.29.0']
   - version: 0.28.3
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [TLS endpoint support for the vmauth config reloader (improves secure
+          reload hookups)., 'New/expanded CRD capabilities: `claimTemplates` supported
+          for `VMCluster`, `VMAlertmanager`, and `VMAgent`; `readinessGates` supported
+          on CRD objects; health checks now respect TLS settings on CRDs.', Option
+          to add ArgoCD ignore annotations when converting Prometheus CRDs via `VM_PROMETHEUSCONVERTERADDARGOCDIGNOREANNOTATIONS=true`
+          to reduce drift/noise in ArgoCD-managed clusters.]
+      breaking_changes: []
     chart_version: 0.14.0
     images: ['victoriametrics/operator:v0.28.3']
   - version: 0.27.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Adds support for `claimTemplates` on `VMCluster`, `VMAlertmanager`,
+          and `VMAgent` to simplify PVC templating for stateful workloads.', 'Adds
+          `readinessGates` support across CRD objects, enabling integration with custom
+          readiness conditions.', 'HealthChecks now respect TLS settings defined on
+          CRD objects, improving correctness for secured endpoints.', Adds an env
+          var `VM_PROMETHEUSCONVERTERADDARGOCDIGNOREANNOTATIONS=true` to ignore Argo
+          CD objects converted from Prometheus CRDs., Adds TLS endpoint support for
+          the `vmauth` config reloader for secured reload operations.]
+      breaking_changes: []
     chart_version: 0.12.0
     images: ['victoriametrics/operator:v0.27.0']
   - version: 0.26.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMUser: adds `name` field (v0.25.0) and `tokenRef` (v0.26.0) for
+          improved user identification and secret-based token management.', 'VMAgent:
+          adds `StatefulMode` to run as a StatefulSet, plus new per-remote-storage
+          `headers` configuration and multitenant mode support.', 'VMRule: adds a
+          validation webhook to catch rule errors at admission time.', 'Scrape/target
+          config: adds `authorization` support and `headers` fields for passing custom
+          headers to targets.', 'vmauth/ingress: adds `host` parameter for ingress
+          configuration.', 'VMCluster: reworks/expands cluster volume expansion behavior
+          and improves expansion handling overall.', 'Operator/ops: adds new operator
+          metrics (log messages, controller object counts, throttling, app version/uptime/start
+          timestamp) and introduces/adjusts reconciliation rate limiting.', 'Global:
+          adds a setting to override the container registry globally for images.']
+      breaking_changes: ["VMRule API change (v0.25.0): `expr` must be a string; integer\
+          \ expressions are no longer supported\u2014existing rules with numeric `expr`\
+          \ will fail validation/apply.", v0.26.0 is flagged by upstream as containing
+          breaking changes that were fixed in v0.26.2; upgrading directly to 0.26.0
+          is not recommended (use 0.26.2+ instead).]
     chart_version: 0.11.1
     images: ['victoriametrics/operator:v0.26.0']
   - version: 0.25.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMUser CRD: added a `name` field (useful for explicitly naming VMUser
+          objects).', 'VMAgent CRD: added `statefulMode` to run VMAgent as a StatefulSet
+          instead of a Deployment.', 'VMRule: added a validation webhook to catch
+          rule errors at admission time (fails fast on invalid rules).', 'Operator
+          metrics: added additional metrics such as `operator_log_messages_total`,
+          `operator_controller_objects_count`, `operator_reconcile_throttled_events_total`,
+          and app info metrics (`vm_app_version`, `vm_app_uptime_seconds`, `vm_app_start_timestamp`).',
+        'Reconciliation: added rate limiting for VMAgent and VMAlert reconciliations
+          to reduce churn under frequent updates.']
+      breaking_changes: ['VMRule API change: `expr` must be a string; integer values
+          are no longer accepted. Audit and update any VMRule manifests or generated
+          rules that used numeric expressions.']
     chart_version: 0.10.0
     images: ['victoriametrics/operator:v0.25.0']
   - version: 0.24.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Operator can filter converted Prometheus CRD objects, helping control
+          which migrated resources are reconciled.', 'Default CLI args/params can
+          be overridden via configuration, enabling per-install tuning without patching
+          manifests.', "Operator-generated VMServiceScrape objects can now be customized\
+          \ for the operator\u2019s managed resources.", CRD-managed workloads can
+          set `terminationGracePeriodSeconds` and `dnsConfig` for finer pod-level
+          behavior control., VMAlertmanagerConfig adds support for `telegram_configs`
+          notification receiver blocks., Retention period can be set to less than
+          one month (previously constrained).]
+      breaking_changes: ['From v0.23.0, the `job` name label for scrape/probe resources
+          changed to include a CRD-type prefix (probe, podScrape, serviceScrape, nodeScrape,
+          staticScrape). This can affect alerting/recording rules and dashboards that
+          match on the old job label value.']
     chart_version: 0.9.0
     images: ['victoriametrics/operator:v0.24.0']
   - version: 0.23.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Operator now checks the Kubernetes API server version and automatically
+          uses the appropriate API versions for deprecated objects (notably PodSecurityPolicy
+          and PodDisruptionBudget)., Fixes include correcting bearerToken handling
+          for VMAgent remoteWriteSpec and adjusting job name labeling to avoid collisions.]
+      breaking_changes: ['Job name label format changed: a CRD-type prefix is added
+          (probe, podScrape, serviceScrape, nodeScrape, staticScrape), which can affect
+          dashboards/alerts/relabeling that depend on the old job label values.']
     chart_version: 0.7.1
     images: ['victoriametrics/operator:v0.23.0']
   - version: 0.22.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Operator API objects were moved into a separate Go package, allowing
+          consumers to use the API without importing the whole operator codebase.',
+        "Support was added to configure `rollingUpdateStrategy` for StatefulSets;\
+          \ when set to `rollingUpdate`, Kubernetes\u2019 native controller-manager\
+          \ handles rolling updates, enabling `kubectl rollout restart` for both Deployments\
+          \ and StatefulSets.", VMAlertmanager gained a global option `disableNamespaceMatcher`
+          to disable the namespace label matcher behavior.]
+      breaking_changes: []
     chart_version: 0.6.0
     images: ['victoriametrics/operator:v0.22.0']
   - version: 0.21.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Alertmanager ServiceScrape auto-generation was added, reducing manual
+          scrape configuration when alertmanager is managed by the operator.', 'VMUser
+          now automatically adds routing for VMCluster components (vminsert and vmselect),
+          simplifying multi-tenant access setup.', 'VMAgent can now have its default
+          disk space usage adjusted, making it easier to tune persistent storage behavior.',
+        'VMUser target references can now include custom HTTP headers, enabling additional
+          auth/metadata to be passed to upstreams.']
+      breaking_changes: ["Selector default behavior changed again: v0.21.0 rolls back\
+          \ the v0.20.x \u201Cselect all when selector is nil\u201D behavior unless\
+          \ you explicitly set `spec.selectAllByDefault: true`. This can silently\
+          \ reduce what gets scraped/selected after upgrade if you relied on nil selectors\
+          \ selecting everything.", 'VMAuth Ingress API moved to `networking.k8s.io/v1`,
+          which effectively raises the minimum Kubernetes version for VMAuth Ingress
+          usage to 1.19. Clusters older than 1.19 (or manifests still using v1beta1)
+          will fail to apply.']
     chart_version: 0.5.1
     images: ['victoriametrics/operator:v0.21.0']
   - version: 0.20.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Custom headers can be set on the VMUser targetRef (useful when integrating
+          with auth/proxies that require extra headers).]
+      breaking_changes: ["CR selector defaults changed (e.g., vmagent.spec.serviceScrapeSelector\
+          \ and similar): if a selector field is omitted, it now selects *all* matching\
+          \ objects rather than selecting none. This can drastically increase scrape\
+          \ targets if you relied on the old implicit \u2018select nothing\u2019 behavior.",
+        Operator no longer appends the cluster domain name for in-cluster communication;
+          the cluster domain value is now empty by default. This fixes clusters with
+          non-standard DNS domains but may break setups that depended on the previous
+          explicit domain concatenation.]
     chart_version: 0.4.0
     images: ['victoriametrics/operator:v0.20.0']
   - version: 0.19.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Single-namespace mode for the operator, allowing it to watch and
+          reconcile resources only in a specified namespace instead of cluster-wide.',
+        'VMAlert Notifier service discovery support, enabling discovery of notifier
+          endpoints for vmalert integrations.', VMRule updates to support vmalert-specific
+          features (expanded rule capabilities when managed by vmalert)., 'Reduced
+          operator memory usage by disabling client-side caching for Pods, Deployments,
+          and StatefulSets.', 'Improved end-to-end tests (internal quality improvement,
+          no expected user-facing config change).']
+      breaking_changes: []
     chart_version: 0.3.0
     images: ['victoriametrics/operator:v0.19.0']
   - version: 0.18.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [CRDs are now generated for `apiextensions.k8s.io/v1`; `apiextensions.k8s.io/v1beta1`
+          is deprecated/legacy. Ensure your cluster is on a Kubernetes version that
+          supports v1 CRDs and that your Helm upgrade applies the updated CRDs (often
+          via `crds/` or a separate `kubectl apply -f` step)., 'Major API updates
+          to CRDs: `VMServiceScrape`, `VMPodScrape`, `VMProbe`, `VMStaticScrape`,
+          `VMNodeScrape` gained additional fields (e.g., `sampleLimit` and other missing
+          scrape config params) and new `vm_scrape_params` options; manifests may
+          need to be adjusted to use the new schema/fields.', '`spec.selector` is
+          now optional for `VMPodScrape` and `VMServiceScrape`; review existing resources
+          if you were relying on selector-required validation or admission behavior.',
+        "New CRD `VMAlertmanagerConfig` introduced; it only supports Alertmanager\
+          \ v0.22+\u2014plan component version alignment if you intend to use it."]
+      features: [OAuth2 configuration added for `VMagent` remoteWrite and scrape endpoints;
+          you can now authenticate outbound remote writes and protected scrape targets
+          via OAuth2., '`TLSConfig` support added for `VMProbe`, enabling TLS settings
+          for blackbox-style probing targets.', 'New `vm_scrape_params` options and
+          expanded scrape config surface (e.g., `sampleLimit`, proxy authentication)
+          across multiple scrape-related CRDs, bringing them closer to vmagent configuration
+          capabilities.', New `VMAlertmanagerConfig` CRD for managing Alertmanager
+          config via Kubernetes resources (requires Alertmanager >= v0.22).]
+      breaking_changes: ["CRD API versioning shifts to `apiextensions.k8s.io/v1` as\
+          \ the primary format; clusters relying on `v1beta1` CRDs must treat them\
+          \ as legacy and may fail upgrades on newer Kubernetes if CRDs aren\u2019\
+          t migrated/applied correctly.", "The \u201Cmajor API update\u201D to several\
+          \ CRDs can break upgrades if existing custom resources no longer validate\
+          \ against the updated OpenAPI schema; validate your existing `VMServiceScrape`/`VMPodScrape`/`VMProbe`/`VMStaticScrape`/`VMNodeScrape`\
+          \ manifests against the new CRDs before upgrading."]
     chart_version: 0.2.0
     images: ['victoriametrics/operator:v0.18.0']
   - version: 0.17.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds an experimental custom config reloader to mitigate long configuration
+          sync; enable it via env var `VM_USECUSTOMCONFIGRELOADER=true`., Reduces
+          Kubernetes API server load when handling `VMPodScrape` resources., 'Exposes
+          a `/debug/pprof` endpoint on `0.0.0.0:8435` for profiling/troubleshooting.',
+        Updates default versions for VictoriaMetrics apps to v1.63.0., Documentation
+          updates.]
+      breaking_changes: ['`VMAgent` `RemoteWriteSpec` was changed: some options were
+          moved into `RemoteWriteSettings`, so existing CRs may need field/path updates
+          before/after upgrade.']
     chart_version: 0.1.18
     images: ['victoriametrics/operator:v0.17.1']
   - version: 0.16.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Experimental custom config-reloader to mitigate long config sync;
+          enable with env var `VM_USECUSTOMCONFIGRELOADER=true`., Reduced Kubernetes
+          API server load when handling `VMPodScrape` resources., 'Added `/debug/pprof`
+          handler served on `0.0.0.0:8435` for profiling/debugging.']
+      breaking_changes: ['`VMAgent` `RemoteWriteSpec` changed: some options moved
+          into `RemoteWriteSettings`; existing manifests may need updates to match
+          the new schema.']
     chart_version: 0.1.17
     images: ['victoriametrics/operator:v0.16.0']
   - version: 0.15.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['All CRD-backed resources now support `nodeSelector`, allowing you
+          to pin operator-managed workloads to specific nodes.', '`vminsert` and `vmselect`
+          can now be autoscaled via HorizontalPodAutoscaler (HPA).', 'Two new CRDs
+          were added: `VMAuth` and `VMUser`, enabling operator-managed auth/user resources.',
+        'HostPath volumes are now supported, and you can override the `storageDataPath`
+          setting when using them.']
+      breaking_changes: []
     chart_version: 0.1.14
     images: ['victoriametrics/operator:v0.15.0']
   - version: 0.14.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.13
     images: ['victoriametrics/operator:v0.14.2']
   - version: 0.13.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Adds probe customization via CRD, allowing you to tune readiness/liveness/startup
+          probes for managed components without patching generated manifests.']
+      breaking_changes: []
     chart_version: 0.1.12
     images: ['victoriametrics/operator:v0.13.0']
   - version: 0.12.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.10
     images: ['victoriametrics/operator:v0.12.2']
   - version: 0.11.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.9
     images: ['victoriametrics/operator:v0.11.0']
   - version: 0.9.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['VMPodScrape: basic auth, bearer token, and TLS connection support
+          were added, enabling secure scraping configurations.', 'VMSingle/VMCluster:
+          new `insertPorts` option allows configuring ingestion ports for OpenTSDB,
+          Graphite, and Influx protocols.', 'vmalert: support for `externalLabels`
+          was added to attach extra labels to generated alerts/metrics.']
+      breaking_changes: ['RBAC changes: role/namespace handling was adjusted; verify
+          the operator has the expected permissions in the target namespace(s) after
+          upgrade.']
     chart_version: 0.1.8
     images: ['victoriametrics/operator:v0.9.1']
   - version: 0.8.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator v0.8.0 includes additional VMPodScrape connection/auth
+          options (basic auth, bearer token, TLS) and new ingestion port configuration
+          via `insertPorts` for VMSingle and VMCluster.', Includes minor documentation
+          fixes (operator-hub broken links) and stability fixes (panic fixes around
+          VMCluster).]
+      features: ['VMPodScrape now supports basic auth, bearer token authentication,
+          and TLS configuration for scraping endpoints.', 'VMSingle and VMCluster
+          add `insertPorts` to configure ingestion ports for OpenTSDB, Graphite, and
+          Influx protocols.']
+      breaking_changes: []
     chart_version: 0.1.7
     images: ['victoriametrics/operator:v0.8.0']
   - version: 0.7.3
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.5
     images: ['victoriametrics/operator:v0.7.3']
   - version: 0.6.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.4
     images: ['victoriametrics/operator:v0.6.1']
   - version: 0.2.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
+    summary: null
     chart_version: 0.1.1
     images: ['victoriametrics/operator:v0.2.1']
   name: victoria-metrics-operator
