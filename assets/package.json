@@ -31,6 +31,7 @@
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
+    "k8s:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:assets/src/generated/axios-client.ts /template:Axios",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
@@ -97,6 +98,7 @@
     "react-error-boundary": "4.0.11",
     "react-focus-lock": "2.13.5",
     "react-merge-refs": "2.1.1",
+    "react-query-swagger": "^15.13.1",
     "react-resize-detector": "9.1.0",
     "react-router-dom": "6.28.1",
     "react-virtualized-auto-sizer": "1.0.26",

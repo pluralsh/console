@@ -12197,6 +12197,7 @@ __metadata:
     react-error-boundary: 4.0.11
     react-focus-lock: 2.13.5
     react-merge-refs: 2.1.1
+    react-query-swagger: ^15.13.1
     react-resize-detector: 9.1.0
     react-router-dom: 6.28.1
     react-virtualized-auto-sizer: 1.0.26
@@ -20280,6 +20281,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nswag-portable@npm:13.20.0-v.17":
+  version: 13.20.0-v.17
+  resolution: "nswag-portable@npm:13.20.0-v.17"
+  bin:
+    nswag-portable: nswag-portable.js
+  checksum: aab160cf02d1e5de85b39a28153d29bdc44327b4c2a260d369938d6e76fa850aad31f6533ca5932f28a74335a7e5a12f3148560314ebef3d4d7349c51a05065d
+  languageName: node
+  linkType: hard
+
 "nullthrows@npm:^1.1.1":
   version: 1.1.1
   resolution: "nullthrows@npm:1.1.1"
@@ -21947,6 +21957,22 @@ __metadata:
   peerDependencies:
     react: "*"
   checksum: f61a261b8a82e4ddd5a4a156de3e31993fc8800d53c50ea6fcfeec8818c4df3e8aa1cafb5effd405a324dfebb8dc184b015a6533305a8c5c86e2d761157bf9b6
+  languageName: node
+  linkType: hard
+
+"react-query-swagger@npm:^15.13.1":
+  version: 15.13.1
+  resolution: "react-query-swagger@npm:15.13.1"
+  dependencies:
+    nswag-portable: 13.20.0-v.17
+  peerDependencies:
+    "@tanstack/react-query": "> 4.0"
+    "@tanstack/react-query-persist-client": ">4.2.0"
+    react: 17.x || 18.x || 19.x
+    typescript: "> 3.0"
+  bin:
+    react-query-swagger: cli.js
+  checksum: c43cc0a96404b725fe76f1a752ae4cc5125f9368d8c3aa3326b2e6c927778bdd06b7ea5c891cfae6dc3ae3ede8919749baf76143b061a879512e71afe22732bf
   languageName: node
   linkType: hard
 
