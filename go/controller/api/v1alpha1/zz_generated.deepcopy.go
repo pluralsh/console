@@ -7378,6 +7378,11 @@ func (in *ServiceAccountSpec) DeepCopyInto(out *ServiceAccountSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.TokenExpiry != nil {
+		in, out := &in.TokenExpiry, &out.TokenExpiry
+		*out = new(string)
+		**out = **in
+	}
 	if in.TokenSecretRef != nil {
 		in, out := &in.TokenSecretRef, &out.TokenSecretRef
 		*out = new(v1.SecretReference)

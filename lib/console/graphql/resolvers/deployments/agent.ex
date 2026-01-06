@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   use Console.GraphQl.Resolvers.Deployments.Base
   import Console.Deployments.Policies, only: [allow: 3]
   alias Console.Deployments.Agents
-  alias Console.Schema.{AgentRuntime, AgentRun, Cluster}
+  alias Console.Schema.{AgentRuntime, AgentRun, Cluster, AgentRunRepository}
 
   def agent_runtimes(args, %{context: %{current_user: user}}) do
     AgentRuntime.ordered()
@@ -27,6 +27,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def agent_run(%{id: id}, ctx) do
     Agents.get_agent_run!(id)
     |> allow(actor(ctx), :read)
+  end
+
+  def agent_run_repositories(args, _) do
+    AgentRunRepository.ordered()
+    |> maybe_search(AgentRunRepository, args)
+    |> paginate(args)
   end
 
   def session_runs(%{id: id}, args, _) do

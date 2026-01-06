@@ -227,7 +227,7 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def create_access_token(%{id: id} = args, _) do
     case Users.get_user!(id) do
-      %User{service_account: true} = user -> Users.create_access_token(Map.take(args, [:scopes]), user)
+      %User{service_account: true} = user -> Users.create_access_token(Map.take(args, [:scopes, :expiry]), user)
       _ -> {:error, "forbidden"}
     end
   end

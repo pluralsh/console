@@ -404,6 +404,27 @@ type AgentRunEdge struct {
 	Cursor *string   `json:"cursor,omitempty"`
 }
 
+// A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns
+type AgentRunRepository struct {
+	ID string `json:"id"`
+	// the url of the repository
+	URL string `json:"url"`
+	// the last time the repository was used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type AgentRunRepositoryConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*AgentRunRepositoryEdge `json:"edges,omitempty"`
+}
+
+type AgentRunRepositoryEdge struct {
+	Node   *AgentRunRepository `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
+}
+
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`

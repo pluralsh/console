@@ -241,7 +241,7 @@ type ConsoleClient interface {
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
-	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
+	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
@@ -40850,8 +40850,8 @@ func (c *Client) UpdateServiceAccount(ctx context.Context, id string, attributes
 	return &res, nil
 }
 
-const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes]) {
-	createServiceAccountToken(id: $id, scopes: $scopes) {
+const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes], $expiry: String) {
+	createServiceAccountToken(id: $id, scopes: $scopes, expiry: $expiry) {
 		... AccessTokenFragment
 	}
 }
@@ -40861,10 +40861,11 @@ fragment AccessTokenFragment on AccessToken {
 }
 `
 
-func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
+func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
 	vars := map[string]any{
 		"id":     id,
 		"scopes": scopes,
+		"expiry": expiry,
 	}
 
 	var res CreateServiceAccountToken

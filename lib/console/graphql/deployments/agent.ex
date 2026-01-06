@@ -251,8 +251,18 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :output, :string, description: "the output of the tool"
   end
 
+  @desc "A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns"
+  object :agent_run_repository do
+    field :id, non_null(:id)
+    field :url, non_null(:string), description: "the url of the repository"
+    field :last_used_at, :datetime, description: "the last time the repository was used"
+
+    timestamps()
+  end
+
   connection node_type: :agent_runtime
   connection node_type: :agent_run
+  connection node_type: :agent_run_repository
 
   delta :agent_message
   delta :agent_run
@@ -352,6 +362,16 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :runtime_id, :id
 
       resolve &Deployments.agent_runs/2
+    end
+
+    connection field :agent_run_repositories, node_type: :agent_run_repository do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :read
+      arg :q, :string
+
+      resolve &Deployments.agent_run_repositories/2
     end
   end
 

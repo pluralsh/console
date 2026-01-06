@@ -200,10 +200,6 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
-      - name: update byok
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
       - name: helm-dependencies
         run: make helm-dependencies
       - name: Create Pull Request

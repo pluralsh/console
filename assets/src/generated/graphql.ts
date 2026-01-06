@@ -497,6 +497,30 @@ export enum AgentRunMode {
   Write = 'WRITE'
 }
 
+/** A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns */
+export type AgentRunRepository = {
+  __typename?: 'AgentRunRepository';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time the repository was used */
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url of the repository */
+  url: Scalars['String']['output'];
+};
+
+export type AgentRunRepositoryConnection = {
+  __typename?: 'AgentRunRepositoryConnection';
+  edges?: Maybe<Array<Maybe<AgentRunRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRunRepositoryEdge = {
+  __typename?: 'AgentRunRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRunRepository>;
+};
+
 export enum AgentRunStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
@@ -8011,6 +8035,7 @@ export type RootMutationTypeConsumeSecretArgs = {
 
 
 export type RootMutationTypeCreateAccessTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
@@ -8224,6 +8249,7 @@ export type RootMutationTypeCreateServiceAccountArgs = {
 
 
 export type RootMutationTypeCreateServiceAccountTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
@@ -9118,6 +9144,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   agentRun?: Maybe<AgentRun>;
+  agentRunRepositories?: Maybe<AgentRunRepositoryConnection>;
   agentRuns?: Maybe<AgentRunConnection>;
   agentRuntime?: Maybe<AgentRuntime>;
   agentRuntimes?: Maybe<AgentRuntimeConnection>;
@@ -9344,6 +9371,15 @@ export type RootQueryTypeAccessTokensArgs = {
 
 export type RootQueryTypeAgentRunArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRunRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 

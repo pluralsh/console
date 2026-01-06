@@ -363,6 +363,13 @@ defmodule Console do
 
   @duration_regex ~r/^(?<d>([0-9]+)d)?(?<h>([0-9]+)h)?(?<ms>([0-9]+)ms)?(?<m>([0-9]+)m)?(?<s>([0-9]+)s)?$/i
 
+  def convert_duration!(str) do
+    case convert_duration(str) do
+      {:ok, val} -> val
+      {:error, err} -> raise err
+    end
+  end
+
   def convert_duration(str) do
     case Regex.run(@duration_regex, str, capture: :all_names) do
       [d, h, m, ms, s] ->
@@ -371,7 +378,8 @@ defmodule Console do
         |> Timex.Duration.add(Timex.Duration.from_minutes(parse_dur_str(m)))
         |> Timex.Duration.add(Timex.Duration.from_seconds(parse_dur_str(s)))
         |> Timex.Duration.add(Timex.Duration.from_milliseconds(parse_dur_str(ms)))
-      _ -> raise "invalid duration: #{str}"
+        |> then(& {:ok, &1})
+      _ -> {:error, "invalid duration: #{str}"}
     end
   end
 

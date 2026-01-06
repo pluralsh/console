@@ -1269,9 +1269,9 @@ func (_c *ConsoleClientMock_CreateServiceAccount_Call) RunAndReturn(run func(con
 	return _c
 }
 
-// CreateServiceAccountToken provides a mock function with given fields: ctx, id, scopes
-func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id string, scopes []*client.ScopeAttributes) (*client.AccessTokenFragment, error) {
-	ret := _m.Called(ctx, id, scopes)
+// CreateServiceAccountToken provides a mock function with given fields: ctx, id, scopes, expiry
+func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id string, scopes []*client.ScopeAttributes, expiry *string) (*client.AccessTokenFragment, error) {
+	ret := _m.Called(ctx, id, scopes, expiry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateServiceAccountToken")
@@ -1279,19 +1279,19 @@ func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id s
 
 	var r0 *client.AccessTokenFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes) (*client.AccessTokenFragment, error)); ok {
-		return rf(ctx, id, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes, *string) (*client.AccessTokenFragment, error)); ok {
+		return rf(ctx, id, scopes, expiry)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes) *client.AccessTokenFragment); ok {
-		r0 = rf(ctx, id, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes, *string) *client.AccessTokenFragment); ok {
+		r0 = rf(ctx, id, scopes, expiry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*client.AccessTokenFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, []*client.ScopeAttributes) error); ok {
-		r1 = rf(ctx, id, scopes)
+	if rf, ok := ret.Get(1).(func(context.Context, string, []*client.ScopeAttributes, *string) error); ok {
+		r1 = rf(ctx, id, scopes, expiry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1308,13 +1308,14 @@ type ConsoleClientMock_CreateServiceAccountToken_Call struct {
 //   - ctx context.Context
 //   - id string
 //   - scopes []*client.ScopeAttributes
-func (_e *ConsoleClientMock_Expecter) CreateServiceAccountToken(ctx interface{}, id interface{}, scopes interface{}) *ConsoleClientMock_CreateServiceAccountToken_Call {
-	return &ConsoleClientMock_CreateServiceAccountToken_Call{Call: _e.mock.On("CreateServiceAccountToken", ctx, id, scopes)}
+//   - expiry *string
+func (_e *ConsoleClientMock_Expecter) CreateServiceAccountToken(ctx interface{}, id interface{}, scopes interface{}, expiry interface{}) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	return &ConsoleClientMock_CreateServiceAccountToken_Call{Call: _e.mock.On("CreateServiceAccountToken", ctx, id, scopes, expiry)}
 }
 
-func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Run(run func(ctx context.Context, id string, scopes []*client.ScopeAttributes)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Run(run func(ctx context.Context, id string, scopes []*client.ScopeAttributes, expiry *string)) *ConsoleClientMock_CreateServiceAccountToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]*client.ScopeAttributes))
+		run(args[0].(context.Context), args[1].(string), args[2].([]*client.ScopeAttributes), args[3].(*string))
 	})
 	return _c
 }
@@ -1324,7 +1325,7 @@ func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Return(_a0 *client.A
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) RunAndReturn(run func(context.Context, string, []*client.ScopeAttributes) (*client.AccessTokenFragment, error)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) RunAndReturn(run func(context.Context, string, []*client.ScopeAttributes, *string) (*client.AccessTokenFragment, error)) *ConsoleClientMock_CreateServiceAccountToken_Call {
 	_c.Call.Return(run)
 	return _c
 }

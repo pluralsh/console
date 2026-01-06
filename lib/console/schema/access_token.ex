@@ -5,6 +5,7 @@ defmodule Console.Schema.AccessToken do
   schema "access_tokens" do
     field :token,        :string
     field :last_used_at, :utc_datetime_usec
+    field :expires_at,   :utc_datetime_usec
 
     embeds_many :scopes, Scope, on_replace: :delete do
       field :apis,       {:array, :string}
@@ -22,6 +23,10 @@ defmodule Console.Schema.AccessToken do
     from(t in query, where: t.user_id == ^user_id)
   end
 
+  def expired(query \\ __MODULE__) do
+    from(t in query, where: t.expires_at < ^Timex.now())
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(t in query, order_by: ^order)
   end
@@ -34,6 +39,7 @@ defmodule Console.Schema.AccessToken do
     |> foreign_key_constraint(:user_id)
     |> cast_embed(:scopes, with: &scope_changeset/2)
     |> put_new_change(:token, fn -> "console-#{Console.rand_alphanum(30)}" end)
+    |> save_expiry(attrs)
     |> validate_required(~w(user_id token)a)
   end
 
@@ -41,4 +47,14 @@ defmodule Console.Schema.AccessToken do
     model
     |> cast(attrs, ~w(api apis ids identifier)a)
   end
+
+  defp save_expiry(cs, %{expiry: expiry}) when is_binary(expiry) do
+    case Console.convert_duration(expiry) do
+      {:ok, expiry} ->
+        put_change(cs, :expires_at, Timex.add(Timex.now(), expiry))
+      {:error, err} ->
+        add_error(cs, :expires_at, err)
+    end
+  end
+  defp save_expiry(cs, _), do: cs
 end
