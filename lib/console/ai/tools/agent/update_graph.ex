@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Agent.UpdateGraph do
   use Console.AI.Tools.Agent.Base
   alias Console.AI.Research.Graph
+  alias Console.Schema.InfraResearch
 
   embedded_schema do
     embeds_many :vertices, Vertex, on_replace: :delete do
@@ -49,9 +50,36 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
   def description(), do: "Updates the knowledge graph with the provided vertices, edges, notes, service ids, and stack ids"
 
   def implement(%__MODULE__{} = model) do
+    case Tool.parent() do
+      %InfraResearch{} = r -> implement_db(model, r)
+      _ -> implement_local(model)
+    end
+  end
+
+  defp implement_db(%__MODULE__{} = model, %InfraResearch{} = r) do
+    with {:ok, json} <- Console.mapify(model) |> Jason.encode(),
+         {:ok, graph} <- Poison.decode(json, as: Graph.spec()),
+         g = Graph.update(graph, Graph.convert(r)),
+         {:ok, result} <- Graph.encode(g),
+         {:ok, g} <- update_research(g, r) do
+      Tool.upsert(research: g)
+      {:ok, result}
+    end
+  end
+
+  defp implement_local(%__MODULE__{} = model) do
     with {:ok, json} <- Console.mapify(model) |> Jason.encode(),
          {:ok, graph} <- Poison.decode(json, as: Graph.spec()),
          _ <- Graph.update(graph),
       do: Graph.encode()
+  end
+
+  defp update_research(%Graph{} = g, %InfraResearch{} = r) do
+    InfraResearch.changeset(r, %{
+      analysis: %{
+        graph: Graph.graph_data(g) |> Console.mapify()
+      }
+    })
+    |> Console.Repo.update()
   end
 end

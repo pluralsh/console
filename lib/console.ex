@@ -360,6 +360,14 @@ defmodule Console do
     end)
   end
 
+  def project(%{} = resource, schema) do
+    Enum.map(schema, fn
+      field when is_atom(field) -> {field, Map.get(resource, field)}
+      {field, subtype} -> {field, project(Map.get(resource, field), subtype)}
+    end)
+    |> Map.new()
+  end
+  def project(l, schema) when is_list(l), do: Enum.map(l, &project(&1, schema))
 
   @duration_regex ~r/^(?<d>([0-9]+)d)?(?<h>([0-9]+)h)?(?<ms>([0-9]+)ms)?(?<m>([0-9]+)m)?(?<s>([0-9]+)s)?$/i
 

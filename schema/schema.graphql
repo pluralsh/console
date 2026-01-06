@@ -9882,6 +9882,12 @@ input ChatThreadAttributes {
   "the flow this thread was created in"
   flowId: ID
 
+  "the service this thread was created for"
+  serviceId: ID
+
+  "the research this thread was created for"
+  researchId: ID
+
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
 
@@ -9998,11 +10004,15 @@ type ChatThread {
 
   flow: Flow
 
+  service: ServiceDeployment
+
   user: User
 
   insight: AiInsight
 
   session: AgentSession
+
+  research: InfraResearch
 
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]

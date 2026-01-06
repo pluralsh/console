@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "file": {
+            "type": "string",
+            "description": "The file path name to read"
+        }
+    },
+    "required": ["file"]
+}

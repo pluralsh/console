@@ -49,6 +49,8 @@ defmodule Console.GraphQl.AI do
     field :messages,   list_of(:chat_message), description: "a list of messages to add initially when creating this thread"
     field :insight_id, :id, description: "an ai insight this thread was created from"
     field :flow_id,    :id, description: "the flow this thread was created in"
+    field :service_id, :id, description: "the service this thread was created for"
+    field :research_id, :id, description: "the research this thread was created for"
     field :settings,   :chat_thread_settings_attributes, description: "the settings for this thread"
     field :session,    :agent_session_attributes, description: "the session to use for this thread"
   end
@@ -129,10 +131,12 @@ defmodule Console.GraphQl.AI do
 
     field :last_message_at, :datetime
 
-    field :flow,     :flow,          resolve: dataloader(Deployments)
-    field :user,     :user,          resolve: dataloader(User)
-    field :insight,  :ai_insight,    resolve: dataloader(AI)
-    field :session,  :agent_session, resolve: dataloader(AI)
+    field :flow,     :flow,               resolve: dataloader(Deployments)
+    field :service,  :service_deployment, resolve: dataloader(Deployments)
+    field :user,     :user,               resolve: dataloader(User)
+    field :insight,  :ai_insight,         resolve: dataloader(AI)
+    field :session,  :agent_session,      resolve: dataloader(AI)
+    field :research, :infra_research,     resolve: dataloader(AI)
 
     @desc "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
     field :tools, list_of(:mcp_server_tool) do

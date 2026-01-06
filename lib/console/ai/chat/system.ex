@@ -2,7 +2,7 @@ defmodule Console.AI.Chat.System do
   @moduledoc """
   System prompt for the AI chat
   """
-  alias Console.Schema.{ChatThread, AgentSession, AiInsight}
+  alias Console.Schema.{ChatThread, AgentSession, AiInsight, Service}
 
   @chat Console.priv_file!("prompts/chat.md")
   @agent_pre Console.priv_file!("prompts/agent_pre.md")
@@ -17,7 +17,9 @@ defmodule Console.AI.Chat.System do
   @kubernetes_code_pr_agent Console.priv_file!("prompts/kubernetes_pr.md")
   @insight_chat Console.priv_file!("prompts/insight_chat.md")
   @research Console.priv_file!("prompts/research.md")
+  @service Console.priv_file!("prompts/service.md.eex")
 
+  def prompt(%ChatThread{service: %Service{} = svc}), do: EEx.eval_string(@service, svc: svc_context(svc))
   def prompt(%ChatThread{research_id: id}) when is_binary(id), do: @research
   def prompt(%ChatThread{insight: %AiInsight{text: t}}),
     do: "#{@insight_chat}\n\nThis is the insight you will be working on: #{t}"
@@ -35,4 +37,27 @@ defmodule Console.AI.Chat.System do
   def prompt(%ChatThread{session: %AgentSession{type: :chat}}), do: @agent_chat
   def prompt(%ChatThread{session: %AgentSession{}}), do: @agent_pre
   def prompt(_), do: @chat
+
+  defp svc_context(%Service{} = svc) do
+    Console.Repo.preload(svc, [:cluster, :repository, imports: [:stack]])
+    |> Console.project([
+      :id,
+      :name,
+      cluster: [:id, :name, :handle, :metadata],
+      repository: [:id, :url],
+      sources: [:repository_id, :path],
+      helm: [:url, :chart, :version, :values, :values_file, :lua_script, :lua_file, :lua_folder],
+      imports: [
+        stack: [:name]
+      ],
+      sync_config: [
+        :enforce_namespace,
+        :create_namespace,
+        :delete_namespace,
+        :require_ownership,
+        namespace_metadata: [:labels, :annotations]
+      ],
+      kustomize: [:path]
+    ])
+  end
 end

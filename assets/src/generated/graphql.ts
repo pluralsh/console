@@ -1644,6 +1644,8 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  research?: Maybe<InfraResearch>;
+  service?: Maybe<ServiceDeployment>;
   session?: Maybe<AgentSession>;
   settings?: Maybe<ChatThreadSettings>;
   summary: Scalars['String']['output'];
@@ -1671,6 +1673,10 @@ export type ChatThreadAttributes = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  /** the research this thread was created for */
+  researchId?: InputMaybe<Scalars['ID']['input']>;
+  /** the service this thread was created for */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
   /** the session to use for this thread */
   session?: InputMaybe<AgentSessionAttributes>;
   /** the settings for this thread */

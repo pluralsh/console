@@ -1325,9 +1325,11 @@ type ChatThread struct {
 	Settings      *ChatThreadSettings `json:"settings,omitempty"`
 	LastMessageAt *string             `json:"lastMessageAt,omitempty"`
 	Flow          *Flow               `json:"flow,omitempty"`
+	Service       *ServiceDeployment  `json:"service,omitempty"`
 	User          *User               `json:"user,omitempty"`
 	Insight       *AiInsight          `json:"insight,omitempty"`
 	Session       *AgentSession       `json:"session,omitempty"`
+	Research      *InfraResearch      `json:"research,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -1346,6 +1348,10 @@ type ChatThreadAttributes struct {
 	InsightID *string `json:"insightId,omitempty"`
 	// the flow this thread was created in
 	FlowID *string `json:"flowId,omitempty"`
+	// the service this thread was created for
+	ServiceID *string `json:"serviceId,omitempty"`
+	// the research this thread was created for
+	ResearchID *string `json:"researchId,omitempty"`
 	// the settings for this thread
 	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
 	// the session to use for this thread
