@@ -61,19 +61,19 @@ export function JUnitTable({ testSuites }: { testSuites: TestSuites }) {
           <span>All</span>
           <Chip size="small">{testSuites.tests}</Chip>
         </FilterSubTabSC>
-        {Object.entries(JUnitTestStatus).map(([key, value]) => (
+        {Object.entries(JUnitTestStatus).map(([key, status]) => (
           <FilterSubTabSC
             key={key}
-            active={selectedFilter === value}
-            onClick={() => setSelectedFilter(value)}
+            active={selectedFilter === status}
+            onClick={() => setSelectedFilter(status)}
           >
-            {testStatusToIcon(value)}
+            {testStatusToIcon({ status })}
             <span>{key}</span>
             <Chip
               size="small"
-              severity={testStatusToSeverity[value]}
+              severity={testStatusToSeverity[status]}
             >
-              {getCountFromStatus(testSuites, value)}
+              {getCountFromStatus(testSuites, status)}
             </Chip>
           </FilterSubTabSC>
         ))}
@@ -116,13 +116,14 @@ function JUnitStatusChip({
         clickable
         size="small"
         fillLevel={2}
+        inactive={value === 0 ? 'keep-fill' : false}
         severity={testStatusToSeverity[status]}
       >
         <Flex
           gap="xsmall"
           align="center"
         >
-          {testStatusToIcon(status)}
+          {testStatusToIcon({ status, inactive: value === 0 })}
           <span>{value}</span>
         </Flex>
       </Chip>
