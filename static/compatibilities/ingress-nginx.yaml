@@ -25,8 +25,7 @@ versions:
     breaking_changes: [No explicit breaking changes are documented for controller-v1.14.1
         in the provided notes. (Most changes are image and dependency bumps.)]
   chart_version: 4.14.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.1@sha256:f95a79b85fb93ac3de752c71a5c27d5ceae10a18b61904dec224c1c6a4581e47',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5@sha256:03a00eb0e255e8a25fa49926c24cde0f7e12e8d072c445cdf5136ec78b546285']
+  images: []
 - version: 1.14.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
@@ -90,8 +89,7 @@ versions:
         \ paste). Validate your cluster version meets the supported matrix for controller\
         \ v1.14.0 before upgrading."]
   chart_version: 4.14.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.0@sha256:e4127065d0317bd11dc64c4dd38dcf7fb1c3d72e468110b4086e636dbaac943d',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.4@sha256:bcfc926ed57831edf102d62c5c0e259572591df4796ef1420b87f9cf6092497f']
+  images: []
 - version: 1.13.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
@@ -164,8 +162,7 @@ versions:
         was removed from the deployment packaging; OTel must be configured using the
         built-in module approach.]
   chart_version: 4.13.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.13.0@sha256:dc75a7baec7a3b827a5d7ab0acd10ab507904c7dad692365b3e3b596eca1afd2',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0@sha256:c9f76a75fd00e975416ea1b73300efd413116de0de8570346ed90766c5b5cefb']
+  images: []
 - version: 1.12.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
@@ -229,8 +226,7 @@ versions:
         init container/image removed from the chart; if you relied on it, update your
         values and validate OTel configuration.']
   chart_version: 4.12.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.12.0@sha256:e6b8de175acda6ca913891f0f727bca4527e797d52688cbe9fec9040d6f6b6fa',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.0@sha256:aaafd456bda110628b2d4ca6296f38731a3aaf0bf7581efae824a41c770a8fc4']
+  images: []
 - version: 1.11.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
   requirements: []
@@ -276,8 +272,7 @@ versions:
         those protocols will no longer connect.', Minimum Kubernetes version requirement
         is stated as 1.21; clusters older than that are unsupported.]
   chart_version: 4.11.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.11.0@sha256:a886e56d532d1388c77c8340261149d974370edca1093af4c97a96fb1467cb39',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366']
+  images: []
 - version: 1.10.1
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
   requirements: []
@@ -311,8 +306,7 @@ versions:
       'From **v1.10.0**: PodSecurityPolicy support was dropped.', 'From **v1.10.0**:
         Legacy GeoIP was dropped; only GeoIP2 is supported.']
   chart_version: 4.10.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.10.1@sha256:e24f39d3eed6bcc239a56f20098878845f62baa34b9f2be2fd2c38ce9fb0f29e',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366']
+  images: []
 - version: 1.10.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
@@ -342,8 +336,7 @@ versions:
         to alternatives (e.g., PSA + RBAC).', '**Legacy GeoIP removed:** GeoIP (legacy)
         support is dropped; only GeoIP2 is supported.']
   chart_version: 4.10.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.10.0@sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0@sha256:44d1d0e9f19c63f58b380c5fddaca7cf22c7cee564adeff365225a5df5ef3334']
+  images: []
 - version: 1.9.6
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
@@ -371,8 +364,7 @@ versions:
         sidecars, or debug workflows that exec into the controller pod expecting curl
         will fail.']
   chart_version: 4.9.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']
+  images: []
 - version: 1.9.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
@@ -415,8 +407,7 @@ versions:
         to be rejected or ignored; test your Ingress manifests against the new validation
         behavior.]
   chart_version: 4.8.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.9.0@sha256:c15d1a617858d90fb8f8a2dd60b0676f2bb85c54e3ed11511794b86ec30c8c60',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407@sha256:543c40fd093964bc9ab509d3e791f9989963021f1e9e4c9c7b6700b02bfb227b']
+  images: []
 - version: 1.8.4
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
@@ -441,8 +432,7 @@ versions:
         notes; however, expect behavioral differences due to ModSecurity handling
         changes and auth log defaults if you relied on previous implicit behavior.']
   chart_version: 4.7.3
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80']
+  images: []
 - version: 1.7.1
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
@@ -475,8 +465,7 @@ versions:
         \ integration.", The deprecated `secure-upstream` annotation was removed;
         any Ingresses using it must be updated to supported annotations/configuration.]
   chart_version: 4.6.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.7.1@sha256:7244b95ea47bddcb8267c1e625fb163fc183ef55448855e3ac52a7b260a60407',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230312-helm-chart-4.5.2-28-g66a760794@sha256:01d181618f270f2a96c04006f33b2699ad3ccb02da48d0f89b22abce084b292f']
+  images: []
 - version: 1.6.4
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
@@ -524,8 +513,7 @@ versions:
       RBAC reduction (removal of some ConfigMap permissions) can break custom automation
         that expected the controller service account to have broader access.]
   chart_version: 4.5.2
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: []
 - version: 1.5.1
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -566,8 +554,7 @@ versions:
         \ longer supported by the chart by v1.5.1; upgrading on 1.21 may fail or be\
         \ unsupported."]
   chart_version: 4.4.2
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.5.1@sha256:4ba73c697770664c1e00e9f968de14e08f606ff961c76e5d7033a4a9c593c629',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: []
 - version: 1.4.0
   kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []
@@ -597,13 +584,11 @@ versions:
         in 1.3.1 to Lease-only; if you ever skipped 1.3.0 during the earlier migration
         window, validate no legacy ConfigMap lock assumptions remain.']
   chart_version: 4.3.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: []
 - version: 1.3.1
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 4.2.5
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47']
+  images: []
