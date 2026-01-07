@@ -32,7 +32,7 @@
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "react-query-swagger:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:./src/generated/axios-client.ts /template:Axios",
-    "openapi-ts:codegen": "openapi-ts -i ./schema/kubernetes-swagger.json -o ./src/generated/openapi",
+    "openapi-ts:codegen": "openapi-ts -i ./schema/kubernetes-swagger.json -o ./src/generated/openapi -p @tanstack/react-query",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
