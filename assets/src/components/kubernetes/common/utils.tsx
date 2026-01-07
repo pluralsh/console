@@ -30,7 +30,7 @@ import { Kind, Resource } from './types'
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
-  itemsPerPage: `${ITEMS_PER_PAGE}`,
+  itemsPerPage: `3`,
   page: '1',
 }
 

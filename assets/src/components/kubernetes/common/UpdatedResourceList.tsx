@@ -5,9 +5,9 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
-import uniqWith from 'lodash/uniqWith'
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
@@ -66,7 +66,6 @@ export function UpdatedResourceList<
   })
 
   const [page, setPage] = useState(0)
-  const [dataCombined, setDataCombined] = useState<TResource[]>([])
 
   const { data, isFetching } = queryHook(
     {
@@ -89,19 +88,6 @@ export function UpdatedResourceList<
   const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
 
   useEffect(() => {
-    if (page === 0) {
-      setDataCombined(items)
-    } else {
-      setDataCombined((prev) =>
-        uniqWith(
-          [...prev, ...items],
-          (a, b) => a.objectMeta.name === b.objectMeta.name
-        )
-      )
-    }
-  }, [items, page])
-
-  useEffect(() => {
     // Reset page when filters change
     setPage(0)
   }, [filter, sortBy, namespace])
@@ -120,9 +106,9 @@ export function UpdatedResourceList<
       <ErrorToast errors={resourceList?.errors as any} />
       <Table
         fullHeightWrap
-        data={dataCombined}
+        data={items}
         columns={columns}
-        loading={isFetching && page === 0 && dataCombined.length === 0}
+        loading={isFetching && page === 0 && items.length === 0}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetching}
