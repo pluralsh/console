@@ -23,10 +23,10 @@ import { capitalize, isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
+import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getAIBreadcrumbs } from '../AI'
-import { getInfraResearchDefaultTab } from './details/InfraResearch'
 import { exampleCards, InfraResearchExampleCard } from './InfraResearchExamples'
 import { InfraResearchInput } from './InfraResearchInput'
 
@@ -53,11 +53,7 @@ export function InfraResearches() {
       gap="xlarge"
       overflow="auto"
     >
-      <Flex
-        direction="column"
-        gap="large"
-        paddingRight={160}
-      >
+      <PromptSectionSC>
         <StackedText
           first={
             <Flex
@@ -84,7 +80,11 @@ export function InfraResearches() {
           <Title2H1>What is your investigation question?</Title2H1>
         )}
         <InfraResearchInput />
-        <Flex gap="xsmall">
+        <Flex
+          gap="xsmall"
+          overflow="auto"
+          css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
+        >
           {exampleCards.map((card) => (
             <InfraResearchExampleCard
               key={card.title}
@@ -92,7 +92,7 @@ export function InfraResearches() {
             />
           ))}
         </Flex>
-      </Flex>
+      </PromptSectionSC>
       {!isEmpty(infraResearches) && !error && (
         <Flex
           direction="column"
@@ -124,10 +124,8 @@ export function InfraResearches() {
               onVirtualSliceChange={setVirtualSlice}
               emptyStateProps={{ message: 'No infra research runs found.' }}
               getRowLink={({ original }) => {
-                const { id, status } = original as InfraResearchFragment
-                return (
-                  <Link to={`${id}/${getInfraResearchDefaultTab(status)}`} />
-                )
+                const { id } = original as InfraResearchFragment
+                return <Link to={id} />
               }}
             />
           )}
@@ -200,3 +198,13 @@ export function InfraResearchStatusChip({
     </Chip>
   )
 }
+
+const PromptSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
+  paddingRight: 160,
+  [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
+    paddingRight: theme.spacing.small,
+  },
+}))

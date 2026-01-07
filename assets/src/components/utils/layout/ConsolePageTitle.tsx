@@ -1,9 +1,9 @@
-import { ComponentPropsWithRef, CSSProperties, ReactNode } from 'react'
-import styled from 'styled-components'
+import { ComponentPropsWithRef, ReactNode } from 'react'
+import styled, { StyledObject } from 'styled-components'
 
 export type PageTitleProps = {
   heading?: ReactNode
-  headingProps?: CSSProperties
+  headingProps?: StyledObject
 } & ComponentPropsWithRef<typeof WrapperSC>
 
 export default function ConsolePageTitle({

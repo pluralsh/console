@@ -29,8 +29,6 @@ export function AIAgentRuntimes() {
     [data?.agentRuntimes]
   )
 
-  console.log(runtimes)
-
   if (error) return <GqlError error={error} />
 
   return (
