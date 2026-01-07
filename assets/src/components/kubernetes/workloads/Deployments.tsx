@@ -1,14 +1,11 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { Deployment, DeploymentList } from '../../../generated/axios-client.ts'
 import { useHandleGetDeploymentsQuery } from '../../../generated/axios-client/Query'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
-import {
-  Deployment_Deployment as DeploymentT,
-  Deployment_DeploymentList as DeploymentListT,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { Deployment_Deployment as DeploymentT } from '../../../generated/graphql-kubernetes'
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
@@ -88,7 +85,7 @@ export default function Deployments() {
   )
 
   return (
-    <UpdatedResourceList<DeploymentListT, DeploymentT>
+    <UpdatedResourceList<DeploymentList, Deployment>
       namespaced
       columns={columns}
       queryHook={useHandleGetDeploymentsQuery}

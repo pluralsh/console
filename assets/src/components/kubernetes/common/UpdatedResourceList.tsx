@@ -1,11 +1,13 @@
 import { Table } from '@pluralsh/design-system'
-import { UseQueryResult } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  type UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 import uniqWith from 'lodash/uniqWith'
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
@@ -19,7 +21,7 @@ import {
   ResourceList as ResourceListT,
   ResourceListItemsKey,
   toKind,
-} from './types'
+} from './updatedtypes.ts'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -32,7 +34,7 @@ interface ResourceListProps<TResourceList> {
   initialSort?: SortingState
   queryHook: (
     variables: any,
-    options?: any
+    options?: Partial<UseQueryOptions<TResourceList>>
   ) => UseQueryResult<TResourceList, unknown>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
@@ -75,8 +77,7 @@ export function UpdatedResourceList<
       page: String(page + 1),
     },
     {
-      pollInterval: 30_000,
-      client: KubernetesClient(cluster?.id ?? ''),
+      placeholderData: keepPreviousData,
     }
   )
 
@@ -116,7 +117,7 @@ export function UpdatedResourceList<
 
   return (
     <>
-      <ErrorToast errors={resourceList?.errors} />
+      <ErrorToast errors={resourceList?.errors as any} />
       <Table
         fullHeightWrap
         data={dataCombined}
