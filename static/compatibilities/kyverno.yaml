@@ -181,7 +181,7 @@ versions:
         by default; some cleanup cronjobs removed). If you had automation depending
         on those objects/jobs, update it.']
   chart_version: 3.4.0
-  images: ['bitnami/kubectl:1.32.3', 'busybox:1.35', 'reg.kyverno.io/kyverno/background-controller:v1.14.0',
+  images: ['bitnami/kubectl:1.32.3', 'reg.kyverno.io/kyverno/background-controller:v1.14.0',
     'reg.kyverno.io/kyverno/cleanup-controller:v1.14.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.14.0',
     'reg.kyverno.io/kyverno/kyverno:v1.14.0', 'reg.kyverno.io/kyverno/kyvernopre:v1.14.0',
     'reg.kyverno.io/kyverno/reports-controller:v1.14.0']
@@ -255,7 +255,7 @@ versions:
         webhookTimeoutSeconds, failurePolicy), and VAP v1alpha1 removed in favor of
         v1beta1.']
   chart_version: 3.3.2
-  images: ['bitnami/kubectl:1.30.2', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.13.0',
+  images: ['bitnami/kubectl:1.30.2', 'ghcr.io/kyverno/background-controller:v1.13.0',
     'ghcr.io/kyverno/cleanup-controller:v1.13.0', 'ghcr.io/kyverno/kyverno-cli:v1.13.0',
     'ghcr.io/kyverno/kyverno:v1.13.0', 'ghcr.io/kyverno/kyvernopre:v1.13.0', 'ghcr.io/kyverno/reports-controller:v1.13.0']
 - version: 1.12.0
@@ -315,7 +315,7 @@ versions:
         issues; upstream recommends upgrading to at least **v1.12.1** (and for ephemeralreports
         piling up, **v1.12.4**) rather than staying on 1.12.0.']
   chart_version: 3.2.0
-  images: ['bitnami/kubectl:1.28.5', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.12.0',
+  images: ['bitnami/kubectl:1.28.5', 'ghcr.io/kyverno/background-controller:v1.12.0',
     'ghcr.io/kyverno/cleanup-controller:v1.12.0', 'ghcr.io/kyverno/kyverno-cli:v1.12.0',
     'ghcr.io/kyverno/kyverno:v1.12.0', 'ghcr.io/kyverno/kyvernopre:v1.12.0', 'ghcr.io/kyverno/reports-controller:v1.12.0']
 - version: 1.11.0
@@ -381,7 +381,7 @@ versions:
         longer use CronJobs; cleanup is handled internally, which can affect expectations
         around CronJob presence and scheduling visibility.']
   chart_version: 3.1.0
-  images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.11.0',
+  images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'ghcr.io/kyverno/background-controller:v1.11.0',
     'ghcr.io/kyverno/cleanup-controller:v1.11.0', 'ghcr.io/kyverno/kyverno:v1.11.0',
     'ghcr.io/kyverno/kyvernopre:v1.11.0', 'ghcr.io/kyverno/reports-controller:v1.11.0']
 - version: 1.10.0
@@ -456,7 +456,7 @@ versions:
         change: Kyverno no longer implicitly adds `docker.io` to image context; adjust
         policies to use `images.*.registry` or `image_normalize()` instead.']
   chart_version: 3.0.0
-  images: ['bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.10.0',
+  images: ['bitnami/kubectl:1.26.4', 'ghcr.io/kyverno/background-controller:v1.10.0',
     'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'ghcr.io/kyverno/kyverno:v1.10.0',
     'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0']
 - version: 1.9.0
@@ -524,7 +524,7 @@ versions:
         if Kyverno is down, new/changed policies are blocked until Kyverno returns,
         which can impact GitOps rollouts during outages.']
   chart_version: 2.7.0
-  images: ['busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
+  images: ['ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
     'ghcr.io/kyverno/kyvernopre:v1.9.0']
 - version: 1.8.0
   kube: ['1.25', '1.24', '1.23']
@@ -571,7 +571,7 @@ versions:
         replaced by Admission/BackgroundScan report CRDs; any tooling relying on the
         old CRDs must be updated.]
   chart_version: 2.6.0
-  images: [busybox, 'ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
+  images: ['ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
@@ -617,11 +617,11 @@ versions:
         in v1.7.0 in favor of `status.conditions`/`policy.IsReady()`; if you have
         tooling/scripts reading `status.ready`, plan to migrate.']
   chart_version: 2.4.0
-  images: [busybox, 'ghcr.io/kyverno/kyverno:v1.7.0', 'ghcr.io/kyverno/kyvernopre:v1.7.0']
+  images: ['ghcr.io/kyverno/kyverno:v1.7.0', 'ghcr.io/kyverno/kyvernopre:v1.7.0']
 - version: 1.6.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 2.2.0
-  images: [busybox, 'ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0']
+  images: ['ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0']

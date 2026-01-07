@@ -259,7 +259,7 @@ versions:
     breaking_changes: ['PostgreSQL 10 is no longer supported; CloudNativePG now supports
         PostgreSQL 11+ (plan migrations accordingly, ideally toward PostgreSQL 15).']
   chart_version: 0.17.0
-  images: ['busybox:latest', 'ghcr.io/cloudnative-pg/cloudnative-pg:1.19.0']
+  images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.19.0']
 - version: 1.18.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
@@ -283,7 +283,7 @@ versions:
         behavior and resource usage compared to manual slot management; review settings/monitoring
         if you previously managed physical slots yourself.]
   chart_version: 0.16.0
-  images: ['busybox:latest', 'ghcr.io/cloudnative-pg/cloudnative-pg:1.18.0']
+  images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.18.0']
 - version: 1.17.0
   kube: ['1.24', '1.23', '1.22']
   requirements: []

@@ -19,9 +19,7 @@ versions:
         gained a periodic resync to improve eventual consistency.]
     breaking_changes: []
   chart_version: 1.18.5
-  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1765374555-6a93b0bbba8d6dc75b651cbafeedb062b2997716@sha256:3108521821c6922695ff1f6ef24b09026c94b195283f8bfbfc0fa49356a156e1',
-    'quay.io/cilium/cilium:v1.18.5@sha256:2c92fb05962a346eaf0ce11b912ba434dc10bd54b9989e970416681f4a069628',
-    'quay.io/cilium/operator-generic:v1.18.5@sha256:36c3f6f14c8ced7f45b40b0a927639894b44269dd653f9528e7a0dc363a4eb99']
+  images: []
 - version: 1.18.2
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -57,9 +55,7 @@ versions:
         (previously accepted but ignored). This can break installs that unknowingly
         relied on the old behavior; fix policies before/with the upgrade.']
   chart_version: 1.18.2
-  images: ['quay.io/cilium/cilium-envoy:v1.34.7-1757592137-1a52bb680a956879722f48c591a2ca90f7791324@sha256:7932d656b63f6f866b6732099d33355184322123cfe1182e6f05175a3bc2e0e0',
-    'quay.io/cilium/cilium:v1.18.2@sha256:858f807ea4e20e85e3ea3240a762e1f4b29f1cb5bbd0463b8aa77e7b097c0667',
-    'quay.io/cilium/operator-generic:v1.18.2@sha256:cb4e4ffc5789fd5ff6a534e3b1460623df61cba00f5ea1c7b40153b5efb81805']
+  images: []
 - version: 1.18.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -104,9 +100,7 @@ versions:
         v1.33, Envoy v1.34, LLVM 19.1, CNI v1.1), which can surface compatibility
         constraints with older clusters or custom integrations.']
   chart_version: 1.18.0
-  images: ['quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
-    'quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
-    'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+  images: []
 - version: 1.17.8
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -145,9 +139,7 @@ versions:
         flexibility.']
     breaking_changes: []
   chart_version: 1.17.8
-  images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
-    'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636',
-    'quay.io/cilium/operator-generic:v1.17.8@sha256:5468807b9c31997f3a1a14558ec7c20c5b962a2df6db633b7afbe2f45a15da1c']
+  images: []
 - version: 1.17.4
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -175,9 +167,7 @@ versions:
         exposing enabled features.']
     breaking_changes: []
   chart_version: 1.17.4
-  images: ['quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
-    'quay.io/cilium/cilium:v1.17.4@sha256:24a73fe795351cf3279ac8e84918633000b52a9654ff73a6b0d7223bcff4a67a',
-    'quay.io/cilium/operator-generic:v1.17.4@sha256:a3906412f477b09904f46aac1bed28eb522bef7899ed7dd81c15f78b7aa1b9b5']
+  images: []
 - version: 1.17.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -217,9 +207,7 @@ versions:
         release-note excerpts; review the full v1.17.0 CHANGELOG.md for any required
         config/behavior changes before upgrading.]
   chart_version: 1.17.0
-  images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
-    'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
-    'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+  images: []
 - version: 1.16.15
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -244,9 +232,7 @@ versions:
         L7 failures during rollout.']
     breaking_changes: []
   chart_version: 1.16.15
-  images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
-    'quay.io/cilium/cilium:v1.16.15@sha256:c0fa87d70a7ba624fbe581d40a7b7e9e8773a6efd4bb17d0bd14ff854039ec75',
-    'quay.io/cilium/operator-generic:v1.16.15@sha256:fea37022f858272c27cefe6b4959d45e2ca03d957decbfa210ce35931f346ecd']
+  images: []
 - version: 1.16.10
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -268,9 +254,7 @@ versions:
         rules are now correctly reported as invalid.']
     breaking_changes: []
   chart_version: 1.16.10
-  images: ['quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
-    'quay.io/cilium/cilium:v1.16.10@sha256:fc4ccc494c4a381439162fd3684c07ba9c26d3c2670a2b2e1623acee99097461',
-    'quay.io/cilium/operator-generic:v1.16.10@sha256:05e5f5e676aa51ae5e3bf6be3594ecf52958f46f07f9f55368a7a952012a13c1']
+  images: []
 - version: 1.16.5
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -320,9 +304,7 @@ versions:
         binaries (1.16.5). If you run Hubble components on 32-bit architectures, this
         is effectively breaking.']
   chart_version: 1.16.5
-  images: ['quay.io/cilium/cilium-envoy:v1.30.8-1733837904-eaae5aca0fb988583e5617170a65ac5aa51c0aa8@sha256:709c08ade3d17d52da4ca2af33f431360ec26268d288d9a6cd1d98acc9a1dced',
-    'quay.io/cilium/cilium:v1.16.5@sha256:758ca0793f5995bb938a2fa219dcce63dc0b3fa7fc4ce5cc851125281fb7361d',
-    'quay.io/cilium/operator-generic:v1.16.5@sha256:f7884848483bbcd7b1e0ccfd34ba4546f258b460cb4b7e2f06a1bcc96ef88039']
+  images: []
 - version: 1.16.1
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -365,9 +347,7 @@ versions:
         is deprecated in 1.16.1; future chart versions may remove this path, so migrate
         to Kubernetes Secrets/references now.']
   chart_version: 1.16.1
-  images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
-    'quay.io/cilium/cilium:v1.16.1@sha256:0b4a3ab41a4760d86b7fc945b8783747ba27f29dac30dd434d94f2c9e3679f39',
-    'quay.io/cilium/operator-generic:v1.16.1@sha256:3bc7e7a43bc4a4d8989cb7936c5d96675dd2d02c306adf925ce0a7c35aa27dc4']
+  images: []
 - version: 1.16.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -414,9 +394,7 @@ versions:
         it). Review the full v1.16.0 CHANGELOG.md for any explicit breaking changes
         that apply to your deployment.']
   chart_version: 1.16.0
-  images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
-    'quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058',
-    'quay.io/cilium/operator-generic:v1.16.0@sha256:d6621c11c4e4943bf2998af7febe05be5ed6fdcf812b27ad4388f47022190316']
+  images: []
 - version: 1.15.17
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -435,8 +413,7 @@ versions:
         Helm default `apiKey` being set to `true` in 1.15.17 if you relied on the
         previous default.]
   chart_version: 1.15.17
-  images: ['quay.io/cilium/cilium:v1.15.17@sha256:8824313a6f17d934b4e63902fee71e6ca36be6f69d68ae174df28f1b0705e587',
-    'quay.io/cilium/operator-generic:v1.15.17@sha256:a0f5b5dc8cecd4e5ead7d3bddb3756e4b34beba8e7aa089e7e2fb761725defe1']
+  images: []
 - version: 1.15.12
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -477,8 +454,7 @@ versions:
         series are expected to be non-breaking, but Helm schema validation may block
         upgrades if you still use removed/deprecated values.']
   chart_version: 1.15.12
-  images: ['quay.io/cilium/cilium:v1.15.12@sha256:d1793b67d976e1bc0a4ab01b34c94adfcd35a8be7612d04c6d618bf25f50f0d1',
-    'quay.io/cilium/operator-generic:v1.15.12@sha256:e48d863367bfd39843917400aa7454ca6a4af74f995cf29a2edb81d7d13c7277']
+  images: []
 - version: 1.15.8
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -509,8 +485,7 @@ versions:
         previously deprecated and are now removed; you must remove/replace them before
         upgrading.]
   chart_version: 1.15.8
-  images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
-    'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
+  images: []
 - version: 1.15.5
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -570,8 +545,7 @@ versions:
         expected type/value.', A deprecated tunnel option (and its Helm value) was
         removed; remove/replace any legacy tunnel-related values before upgrading.]
   chart_version: 1.15.5
-  images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
-    'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
+  images: []
 - version: 1.15.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -638,8 +612,7 @@ versions:
         changed (single image); custom image overrides and deployment assumptions
         may need adjustment.]
   chart_version: 1.15.0
-  images: ['quay.io/cilium/cilium:v1.15.0@sha256:9cfd6a0a3a964780e73a11159f93cc363e616f7d9783608f62af6cfdf3759619',
-    'quay.io/cilium/operator-generic:v1.15.0@sha256:e26ecd316e742e4c8aa1e302ba8b577c2d37d114583d6c4cdd2b638493546a79']
+  images: []
 - version: 1.14.18
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -664,8 +637,7 @@ versions:
     breaking_changes: ["None called out in the provided release note excerpts for\
         \ these patch versions (1.14.14 \u2192 1.14.18)."]
   chart_version: 1.14.18
-  images: ['quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123',
-    'quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e']
+  images: []
 - version: 1.14.14
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -687,8 +659,7 @@ versions:
         reason when packets are dropped by `bpf_lxc`.']
     breaking_changes: []
   chart_version: 1.14.14
-  images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
-    'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
+  images: []
 - version: 1.14.11
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -709,8 +680,7 @@ versions:
         noisy logs, safer taint handling in chained CNI mode).']
     breaking_changes: []
   chart_version: 1.14.11
-  images: ['quay.io/cilium/cilium:v1.14.11@sha256:2b2118042dc6efe88dbc40c78909b6afd72b369896782ce38d132435724ee269',
-    'quay.io/cilium/operator-generic:v1.14.11@sha256:df76f71a06f1c681848bfa86fdd99243af593d33034c9e2057c6af969bc25109']
+  images: []
 - version: 1.14.6
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -740,8 +710,7 @@ versions:
         for easier troubleshooting.']
     breaking_changes: []
   chart_version: 1.14.6
-  images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
-    'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
+  images: []
 - version: 1.14.2
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -790,8 +759,7 @@ versions:
         to boolean in 1.14.0; existing values files may fail template rendering or
         silently misconfigure if not updated.']
   chart_version: 1.14.2
-  images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
-    'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+  images: []
 - version: 1.14.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -875,8 +843,7 @@ versions:
       '**Value type change**: `enableEndpointCRD` Helm value changed from string to
         boolean; incorrect type may break templating or behavior.']
   chart_version: 1.14.0
-  images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
-    'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
+  images: []
 - version: 1.13.16
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -894,8 +861,7 @@ versions:
         \ proxying, IPAM, and Envoy/xDS behavior."]
     breaking_changes: []
   chart_version: 1.13.16
-  images: ['quay.io/cilium/cilium:v1.13.16@sha256:f1f26a973419ba449a47a08e8c4c8e280d8941bb4fd77d1e992e2721425c0629',
-    'quay.io/cilium/operator-generic:v1.13.16@sha256:a2711d5b891da9fd66c2116b77782b58a1a428eb4abdab2dd3ac1221937d846b']
+  images: []
 - version: 1.13.11
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -913,8 +879,7 @@ versions:
         trace/monitor event volume when aggregation is enabled.']
     breaking_changes: []
   chart_version: 1.13.11
-  images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
-    'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
+  images: []
 - version: 1.13.7
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -936,8 +901,7 @@ versions:
         fast-forward (BPF host routing) can work on L2-less devices (1.13.2).']
     breaking_changes: []
   chart_version: 1.13.7
-  images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
-    'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+  images: []
 - version: 1.13.2
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -972,8 +936,7 @@ versions:
         the ENI postStart workflow moved from nodeinit to the agent pod, which can
         change troubleshooting and ordering expectations around node initialization.']
   chart_version: 1.13.2
-  images: ['quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6',
-    'quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab']
+  images: []
 - version: 1.13.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1023,8 +986,7 @@ versions:
         it long-term); expect future removal and validate if any workload depends
         on sockops-based features.]
   chart_version: 1.13.0
-  images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
-    'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
+  images: []
 - version: 1.12.18
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -1048,8 +1010,7 @@ versions:
         with strict PodSecurity/ResourceQuota environments).']
     breaking_changes: []
   chart_version: 1.12.18
-  images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
-    'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
+  images: []
 - version: 1.12.14
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -1065,8 +1026,7 @@ versions:
     features: []
     breaking_changes: []
   chart_version: 1.12.14
-  images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
-    'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
+  images: []
 - version: 1.12.9
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -1092,8 +1052,7 @@ versions:
         configuring an issuer, the v1.12.9 Helm chart upgrade can fail or block deployment
         until issuer settings are supplied.']
   chart_version: 1.12.9
-  images: ['quay.io/cilium/cilium:v1.12.9@sha256:677e7a906506b8a13fecb6f0f783ed647b36036786c8c640ff98e25ec2f2ab1f',
-    'quay.io/cilium/operator-generic:v1.12.9@sha256:cc8d7b222f63812c691a685b32fedab8a805d243da720653cdc2ff0c4a562673']
+  images: []
 - version: 1.12.6
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1144,8 +1103,7 @@ versions:
         ports changed in 1.12.0; monitoring configs, NetworkPolicies, and firewalls
         that assume the old ports may break scraping until updated.']
   chart_version: 1.12.6
-  images: ['quay.io/cilium/cilium:v1.12.6@sha256:454134506b0448c756398d3e8df68d474acde2a622ab58d0c7e8b272b5867d0d',
-    'quay.io/cilium/operator-generic:v1.12.6@sha256:eec4430d222cb2967d42d3b404d2606e66468de47ae85e0a3ca3f58f00a5e017']
+  images: []
 - version: 1.12.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -1204,8 +1162,7 @@ versions:
         `native-routing-cidr` option and prefilter-* options); if you still use old
         flags, the agent may fail to start after upgrade.']
   chart_version: 1.12.0
-  images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
-    'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
+  images: []
 - version: 1.11.16
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -1228,8 +1185,7 @@ versions:
         paths (URLs not starting at `/`).]
     breaking_changes: []
   chart_version: 1.11.16
-  images: ['quay.io/cilium/cilium:v1.11.16@sha256:d2f2632c997a027ee4e540432edb4d8594e78e33315427e7ec3c06b473ec1e4e',
-    'quay.io/cilium/operator-generic:v1.11.16@sha256:ea3fbe5ab65efc41228d716a64804b6fca9e2299835c3d39ae1cb248c1594c55']
+  images: []
 - version: 1.11.13
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1247,8 +1203,7 @@ versions:
         to ensure correct scheduling/eviction behavior on affected environments such
         as GKE; this can change how pods are handled while the agent is not ready.']
   chart_version: 1.11.13
-  images: ['quay.io/cilium/cilium:v1.11.13@sha256:cc5212dd709d1fadf19ffeae602d2af54d03634791f0f1a7e3bab0bd263918a1',
-    'quay.io/cilium/operator-generic:v1.11.13@sha256:a34fc3d5007201bdfe7fc3a469351dc6b9f190720ea54622f94cdfb0b28c6726']
+  images: []
 - version: 1.11.2
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -1280,8 +1235,7 @@ versions:
         may still see pods get IPs from the default CNI because `cilium-node-init`
         runs later; subsequent reboots should behave correctly.']
   chart_version: 1.11.2
-  images: ['quay.io/cilium/cilium:v1.11.2@sha256:4332428fbb528bda32fffe124454458c9b716c86211266d1a03c4ddf695d7f60',
-    'quay.io/cilium/operator-generic:v1.11.2@sha256:4c8bea6818ee3e4932f99e9c1d7efa88b8c0f3cd516160caec878406531e45e7']
+  images: []
 - version: 1.11.1
   kube: ['1.26', '1.25', '1.23']
   requirements: []
@@ -1411,8 +1365,7 @@ versions:
         the need for post-render patches.']
     breaking_changes: []
   chart_version: 1.10.19
-  images: ['quay.io/cilium/cilium:v1.10.19@sha256:63c76e5c2317b22f9e11c5d30f1b799cd19eb88649c03941f66dbd9b8f487f15',
-    'quay.io/cilium/operator-generic:v1.10.19@sha256:d09f5ca4738bb9190c977f4ffed77e2aec2eae50db2a75368cbcc3f8f7ab6708']
+  images: []
 - version: 1.10.8
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -1434,8 +1387,7 @@ versions:
         Operator setups (scrape configs, relabeling, tenant metadata, etc.).']
     breaking_changes: []
   chart_version: 1.10.8
-  images: ['quay.io/cilium/cilium:v1.10.8@sha256:e6147e39a03c685e5f1225c5642e1358dcd4899bbd94e8a043bb4be52cd2f008',
-    'quay.io/cilium/operator-generic:v1.10.8@sha256:a77dff6103d047d8810ea5e80067b2fade6d099771c8dda197bdba5e4e2f0255']
+  images: []
 - version: 1.10.7
   kube: ['1.26', '1.25', '1.23']
   requirements: []
