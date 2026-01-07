@@ -1,16 +1,17 @@
 defmodule Cloudquery.AwsCredentials do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :access_key_id, 1, type: :string, json_name: "accessKeyId"
   field :secret_access_key, 2, type: :string, json_name: "secretAccessKey"
+  field :region, 3, proto3_optional: true, type: :string
 end
 
 defmodule Cloudquery.AzureCredentials do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :subscription_id, 1, type: :string, json_name: "subscriptionId"
   field :tenant_id, 2, type: :string, json_name: "tenantId"
@@ -21,15 +22,16 @@ end
 defmodule Cloudquery.GcpCredentials do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :service_account_json_b64, 1, type: :string, json_name: "serviceAccountJsonB64"
+  field :project, 2, type: :string
 end
 
 defmodule Cloudquery.Connection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   oneof :credentials, 0
 
@@ -42,7 +44,7 @@ end
 defmodule Cloudquery.QueryInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :connection, 1, type: Cloudquery.Connection
   field :query, 2, type: :string
@@ -51,7 +53,7 @@ end
 defmodule Cloudquery.SchemaInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :connection, 1, type: Cloudquery.Connection
   field :table, 2, proto3_optional: true, type: :string
@@ -60,7 +62,7 @@ end
 defmodule Cloudquery.ExtractInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :connection, 1, type: Cloudquery.Connection
 end
@@ -68,7 +70,7 @@ end
 defmodule Cloudquery.QueryResult do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :result, 2, type: :string
 end
@@ -76,7 +78,7 @@ end
 defmodule Cloudquery.SchemaColumn do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :column, 1, type: :string
   field :type, 2, type: :string
@@ -85,7 +87,7 @@ end
 defmodule Cloudquery.SchemaOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :result, 1, repeated: true, type: Cloudquery.SchemaResult
 end
@@ -93,7 +95,7 @@ end
 defmodule Cloudquery.SchemaResult do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :table, 1, type: :string
   field :columns, 2, repeated: true, type: Cloudquery.SchemaColumn
@@ -102,7 +104,7 @@ end
 defmodule Cloudquery.ExtractOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.14.0", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :type, 1, type: :string
   field :result, 2, type: :string
@@ -113,7 +115,7 @@ end
 defmodule Cloudquery.CloudQuery.Service do
   @moduledoc false
 
-  use GRPC.Service, name: "cloudquery.CloudQuery", protoc_gen_elixir_version: "0.14.0"
+  use GRPC.Service, name: "cloudquery.CloudQuery", protoc_gen_elixir_version: "0.15.0"
 
   rpc :Query, Cloudquery.QueryInput, Cloudquery.QueryResult
 

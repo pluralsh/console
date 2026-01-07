@@ -12980,6 +12980,7 @@ export enum VulnUserInteraction {
 
 export type Vulnerability = {
   __typename?: 'Vulnerability';
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   class?: Maybe<Scalars['String']['output']>;
   cvss?: Maybe<CvssBundle>;
   cvssSource?: Maybe<Scalars['String']['output']>;
@@ -13004,6 +13005,7 @@ export type Vulnerability = {
 };
 
 export type VulnerabilityAttributes = {
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   class?: InputMaybe<Scalars['String']['input']>;
   cvss?: InputMaybe<CvssBundleAttributes>;
   cvssSource?: InputMaybe<Scalars['String']['input']>;
@@ -13027,6 +13029,8 @@ export type VulnerabilityAttributes = {
 
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   artifact?: Maybe<VulnArtifact>;
   /** the language the artifact is written in */
   artifactLanguage?: Maybe<AgentRunLanguage>;
@@ -13049,6 +13053,8 @@ export type VulnerabilityReport = {
 };
 
 export type VulnerabilityReportAttributes = {
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   artifact?: InputMaybe<VulnArtifactAttributes>;
   /** the language the artifact is written in */
   artifactLanguage?: InputMaybe<AgentRunLanguage>;

@@ -4601,6 +4601,9 @@ input VulnerabilityReportAttributes {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOsAttributes
 
   summary: VulnSummaryAttributes
@@ -4644,6 +4647,7 @@ input VulnerabilityAttributes {
   severity: VulnSeverity
   score: Float
   repositoryUrl: String
+  agentRuntime: String
   title: String
   description: String
   cvssSource: String
@@ -4774,6 +4778,9 @@ type VulnerabilityReport {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOs
 
   summary: VulnSummary
@@ -4823,6 +4830,7 @@ type Vulnerability {
   fixedVersion: String
   installedVersion: String
   severity: VulnSeverity
+  agentRuntime: String
   score: Float
   title: String
   description: String
