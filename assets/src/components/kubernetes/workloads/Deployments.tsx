@@ -1,11 +1,7 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { Deployment, DeploymentList } from '../../../generated/axios-client.ts'
-import {
-  __handleGetDeployments,
-  handleGetDeploymentsQueryKey,
-} from '../../../generated/axios-client/Query'
+
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
 import { Deployment_Deployment as DeploymentT } from '../../../generated/graphql-kubernetes'
@@ -21,6 +17,17 @@ import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import {
+  handleGetDeployments2InfiniteOptions,
+  handleGetDeploymentsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+
+import { isEmpty } from 'lodash'
+import { useDataSelect } from '../common/DataSelect.tsx'
+import {
+  DeploymentDeployment,
+  DeploymentDeploymentList,
+} from '../../../generated/kubernetes'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -68,6 +75,8 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 
 export default function Deployments() {
   const cluster = useCluster()
+  const { namespace } = useDataSelect()
+  const isNamespaceFilterActive = !isEmpty(namespace)
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -88,11 +97,14 @@ export default function Deployments() {
   )
 
   return (
-    <UpdatedResourceList<DeploymentList, Deployment>
+    <UpdatedResourceList<DeploymentDeploymentList, DeploymentDeployment>
       namespaced
       columns={columns}
-      queryHook={__handleGetDeployments}
-      queryKey={handleGetDeploymentsQueryKey}
+      queryOptions={
+        isNamespaceFilterActive
+          ? handleGetDeployments2InfiniteOptions
+          : handleGetDeploymentsInfiniteOptions
+      }
       itemsKey="deployments"
     />
   )

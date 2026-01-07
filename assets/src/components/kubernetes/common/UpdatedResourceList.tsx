@@ -1,12 +1,12 @@
 import { Table } from '@pluralsh/design-system'
 import {
-  QueryFunction,
-  QueryKey,
+  AnyUseInfiniteQueryOptions,
   useInfiniteQuery,
 } from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 import { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Options } from '../../../generated/kubernetes'
 
 import {
   getCustomResourceDetailsAbsPath,
@@ -22,17 +22,12 @@ import {
   toKind,
 } from './updatedtypes.ts'
 
-import {
-  DEFAULT_DATA_SELECT,
-  ITEMS_PER_PAGE,
-  useSortedTableOptions,
-} from './utils'
+import { useSortedTableOptions } from './utils'
 
 interface ResourceListProps<TResourceList> {
   columns: Array<object>
   initialSort?: SortingState
-  queryHook: QueryFunction<TResourceList, readonly unknown[], unknown>
-  queryKey: (...params: any) => QueryKey
+  queryOptions: (options: Options<any>) => AnyUseInfiniteQueryOptions
   itemsKey?: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
   customResource?: boolean
@@ -47,8 +42,7 @@ export function UpdatedResourceList<
 >({
   columns,
   initialSort,
-  queryHook,
-  queryKey,
+  queryOptions,
   namespaced = false,
   customResource = false,
   itemsKey,
@@ -58,7 +52,7 @@ export function UpdatedResourceList<
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
-  const { setNamespaced, namespace, filter } = useDataSelect()
+  const { setNamespaced, filter } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
     meta: { cluster, ...tableOptions },
   })
@@ -66,32 +60,37 @@ export function UpdatedResourceList<
   const [page, setPage] = useState(0)
 
   const { data, isFetching, hasNextPage, fetchNextPage } =
-    useInfiniteQuery<TResourceList>(
-      {
-        queryKey: queryKey(
+    useInfiniteQuery<TResourceList>({
+      initialPageParam: 0,
+      ...queryOptions(
+        {
           `name,${filter}`,
-          sortBy,
-          DEFAULT_DATA_SELECT.itemsPerPage,
-          DEFAULT_DATA_SELECT.page
-        ),
-        queryFn: queryHook,
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages) => {
-          const pages = allPages.length
-          const totalItems = lastPage.listMeta?.totalItems ?? 0
-          const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-          return pages < totalPages ? pages + 1 : undefined
-        },
-        // filterBy: `name,${filter}`,
-        // sortBy,
-        // ...(namespaced ? { namespace } : {}),
-        // ...DEFAULT_DATA_SELECT,
-        // page: String(page + 1),
-      }
-      // {
-      //   placeholderData: keepPreviousData,
-      // }
-    )
+        sortBy,
+        DEFAULT_DATA_SELECT.itemsPerPage,
+        DEFAULT_DATA_SELECT.page
+        }
+      ),
+    })
+  // {
+  //   queryKey: queryKey(
+  //   ),
+  //   queryFn: queryHook,
+  //   getNextPageParam: (lastPage, allPages) => {
+  //     const pages = allPages.length
+  //     const totalItems = lastPage.listMeta?.totalItems ?? 0
+  //     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+  //     return pages < totalPages ? pages + 1 : undefined
+  //   },
+  // filterBy: `name,${filter}`,
+  // sortBy,
+  // ...(namespaced ? { namespace } : {}),
+  // ...DEFAULT_DATA_SELECT,
+  // page: String(page + 1),
+  // }
+  // {
+  //   placeholderData: keepPreviousData,
+  // }
+  // )
 
   console.log(data)
   const items =
