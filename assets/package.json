@@ -31,7 +31,8 @@
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
-    "k8s:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:./src/generated/axios-client.ts /template:Axios",
+    "react-query-swagger:codegen": "react-query-swagger /tanstack /input:./schema/kubernetes-swagger.json /output:./src/generated/axios-client.ts /template:Axios",
+    "openapi-ts:codegen": "openapi-ts -i ./schema/kubernetes-swagger.json -o ./src/generated/openapi",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
@@ -128,6 +129,7 @@
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-codegen/typescript-react-apollo": "4.1.0",
+    "@hey-api/openapi-ts": "0.90.2",
     "@pluralsh/stylelint-config": "2.0.10",
     "@react-types/shared": "3.25.0",
     "@replit/graphql-codegen-persisted-queries": "0.1.2",
