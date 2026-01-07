@@ -2,7 +2,10 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { Deployment, DeploymentList } from '../../../generated/axios-client.ts'
-import { useHandleGetDeploymentsQuery } from '../../../generated/axios-client/Query'
+import {
+  __handleGetDeployments,
+  handleGetDeploymentsQueryKey,
+} from '../../../generated/axios-client/Query'
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
 import { Deployment_Deployment as DeploymentT } from '../../../generated/graphql-kubernetes'
@@ -88,7 +91,8 @@ export default function Deployments() {
     <UpdatedResourceList<DeploymentList, Deployment>
       namespaced
       columns={columns}
-      queryHook={useHandleGetDeploymentsQuery}
+      queryHook={__handleGetDeployments}
+      queryKey={handleGetDeploymentsQueryKey}
       itemsKey="deployments"
     />
   )

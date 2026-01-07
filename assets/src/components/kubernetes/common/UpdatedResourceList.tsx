@@ -1,11 +1,11 @@
 import { Table } from '@pluralsh/design-system'
 import {
-  keepPreviousData,
-  type UseQueryOptions,
-  UseQueryResult,
+  QueryFunction,
+  QueryKey,
+  useInfiniteQuery,
 } from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -15,7 +15,6 @@ import {
 import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
-import { ErrorToast } from './errors'
 import {
   Resource as ResourceT,
   ResourceList as ResourceListT,
@@ -25,18 +24,16 @@ import {
 
 import {
   DEFAULT_DATA_SELECT,
-  usePageInfo,
+  ITEMS_PER_PAGE,
   useSortedTableOptions,
 } from './utils'
 
 interface ResourceListProps<TResourceList> {
   columns: Array<object>
   initialSort?: SortingState
-  queryHook: (
-    variables: any,
-    options?: Partial<UseQueryOptions<TResourceList>>
-  ) => UseQueryResult<TResourceList, unknown>
-  itemsKey: ResourceListItemsKey<TResourceList>
+  queryHook: QueryFunction<TResourceList, readonly unknown[], unknown>
+  queryKey: (...params: any) => QueryKey
+  itemsKey?: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
   customResource?: boolean
   disableOnRowClick?: boolean
@@ -51,6 +48,7 @@ export function UpdatedResourceList<
   columns,
   initialSort,
   queryHook,
+  queryKey,
   namespaced = false,
   customResource = false,
   itemsKey,
@@ -67,35 +65,59 @@ export function UpdatedResourceList<
 
   const [page, setPage] = useState(0)
 
-  const { data, isFetching } = queryHook(
-    {
-      filterBy: `name,${filter}`,
-      sortBy,
-      ...(namespaced ? { namespace } : {}),
-      ...DEFAULT_DATA_SELECT,
-      page: String(page + 1),
-    },
-    {
-      placeholderData: keepPreviousData,
-    }
-  )
+  const { data, isFetching, hasNextPage, fetchNextPage } =
+    useInfiniteQuery<TResourceList>(
+      {
+        queryKey: queryKey(
+          `name,${filter}`,
+          sortBy,
+          DEFAULT_DATA_SELECT.itemsPerPage,
+          DEFAULT_DATA_SELECT.page
+        ),
+        queryFn: queryHook,
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+          const pages = allPages.length
+          const totalItems = lastPage.listMeta?.totalItems ?? 0
+          const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+          return pages < totalPages ? pages + 1 : undefined
+        },
+        // filterBy: `name,${filter}`,
+        // sortBy,
+        // ...(namespaced ? { namespace } : {}),
+        // ...DEFAULT_DATA_SELECT,
+        // page: String(page + 1),
+      }
+      // {
+      //   placeholderData: keepPreviousData,
+      // }
+    )
 
-  const resourceList = data as TResourceList
-  const items = useMemo(
-    () => (resourceList?.[itemsKey] as Array<TResource>) ?? [],
-    [itemsKey, resourceList]
-  )
-  const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
+  console.log(data)
+  const items =
+    data?.pages.flatMap((value) => value?.[itemsKey] as Array<TResource>) ?? []
 
-  useEffect(() => {
-    // Reset page when filters change
-    setPage(0)
-  }, [filter, sortBy, namespace])
+  // const resourceList = data as TResourceList
+  // const items = useMemo(
+  //   () => (resourceList?.[itemsKey] as Array<TResource>) ?? [],
+  //   [itemsKey, resourceList]
+  // )
+  // const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
 
-  const fetchNextPage = useCallback(() => {
-    if (!hasNextPage) return
-    setPage((p) => p + 1)
-  }, [hasNextPage])
+  // console.log(items)
+  // console.log(resourceList?.listMeta)
+  // console.log(page)
+  // console.log(hasNextPage)
+
+  // useEffect(() => {
+  //   // Reset page when filters change
+  //   setPage(0)
+  // }, [filter, sortBy, namespace])
+  //
+  // const fetchNextPage = useCallback(() => {
+  //   if (!hasNextPage) return
+  //   setPage((p) => p + 1)
+  // }, [hasNextPage])
 
   useEffect(() => {
     setNamespaced(namespaced)
@@ -103,7 +125,7 @@ export function UpdatedResourceList<
 
   return (
     <>
-      <ErrorToast errors={resourceList?.errors as any} />
+      {/*<ErrorToast errors={resourceList?.errors as any} />*/}
       <Table
         fullHeightWrap
         data={items}

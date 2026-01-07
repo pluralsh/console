@@ -14,8 +14,8 @@ import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  Types_ListMeta as ListMetaT,
   Maybe,
+  Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
 } from '../../../generated/graphql-kubernetes'
@@ -30,7 +30,7 @@ import { Kind, Resource } from './types'
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
-  itemsPerPage: `3`,
+  itemsPerPage: ITEMS_PER_PAGE,
   page: '1',
 }
 
