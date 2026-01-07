@@ -193,4 +193,20 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       """, %{"id" => run.id}, %{current_user: user})
     end
   end
+
+  describe "agentRunRepositories" do
+    test "a user can list their repositories" do
+      user = insert(:user)
+      repos = insert_list(3, :agent_run_repository)
+
+      {:ok, %{data: %{"agentRunRepositories" => found}}} = run_query("""
+        query AgentRunRepositories {
+          agentRunRepositories(first: 5) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(repos)
+    end
+  end
 end

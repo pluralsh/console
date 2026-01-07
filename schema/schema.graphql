@@ -452,6 +452,8 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
+  agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
+
   agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
@@ -583,9 +585,21 @@ type RootMutationType {
 
   deleteRole(id: ID!): Role
 
-  createAccessToken(scopes: [ScopeAttributes]): AccessToken
+  createAccessToken(
+    scopes: [ScopeAttributes]
 
-  createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
+
+  createServiceAccountToken(
+    id: ID!
+
+    scopes: [ScopeAttributes]
+
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
 
   deleteAccessToken(id: ID, token: String): AccessToken
 
@@ -1691,6 +1705,21 @@ type AgentMessageTool {
   output: String
 }
 
+"A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns"
+type AgentRunRepository {
+  id: ID!
+
+  "the url of the repository"
+  url: String!
+
+  "the last time the repository was used"
+  lastUsedAt: DateTime
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type AgentRuntimeConnection {
   pageInfo: PageInfo!
   edges: [AgentRuntimeEdge]
@@ -1699,6 +1728,11 @@ type AgentRuntimeConnection {
 type AgentRunConnection {
   pageInfo: PageInfo!
   edges: [AgentRunEdge]
+}
+
+type AgentRunRepositoryConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRunRepositoryEdge]
 }
 
 type AgentMessageDelta {
@@ -4567,6 +4601,9 @@ input VulnerabilityReportAttributes {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOsAttributes
 
   summary: VulnSummaryAttributes
@@ -4610,6 +4647,7 @@ input VulnerabilityAttributes {
   severity: VulnSeverity
   score: Float
   repositoryUrl: String
+  agentRuntime: String
   title: String
   description: String
   cvssSource: String
@@ -4740,6 +4778,9 @@ type VulnerabilityReport {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOs
 
   summary: VulnSummary
@@ -4789,6 +4830,7 @@ type Vulnerability {
   fixedVersion: String
   installedVersion: String
   severity: VulnSeverity
+  agentRuntime: String
   score: Float
   title: String
   description: String
@@ -7490,6 +7532,20 @@ type Cluster {
 
   auditLogs(after: String, first: Int, before: String, last: Int): ClusterAuditLogConnection
 
+  "lists all deprecated custom resources for this cluster with optional filtering"
+  deprecatedCrds(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "a search query to filter on group, kind, namespace or name"
+    q: String
+  ): DeprecatedCustomResourceConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -8339,6 +8395,11 @@ type ClusterIsoImageConnection {
 type ProjectUsageHistoryConnection {
   pageInfo: PageInfo!
   edges: [ProjectUsageHistoryEdge]
+}
+
+type DeprecatedCustomResourceConnection {
+  pageInfo: PageInfo!
+  edges: [DeprecatedCustomResourceEdge]
 }
 
 enum AuthMethod {
@@ -9848,6 +9909,12 @@ input ChatThreadAttributes {
   "the flow this thread was created in"
   flowId: ID
 
+  "the service this thread was created for"
+  serviceId: ID
+
+  "the research this thread was created for"
+  researchId: ID
+
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
 
@@ -9964,11 +10031,15 @@ type ChatThread {
 
   flow: Flow
 
+  service: ServiceDeployment
+
   user: User
 
   insight: AiInsight
 
   session: AgentSession
+
+  research: InfraResearch
 
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
@@ -11765,6 +11836,11 @@ type GitRepositoryEdge {
   cursor: String
 }
 
+type DeprecatedCustomResourceEdge {
+  node: DeprecatedCustomResource
+  cursor: String
+}
+
 type ProjectUsageHistoryEdge {
   node: ProjectUsageHistory
   cursor: String
@@ -12002,6 +12078,11 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type AgentRunRepositoryEdge {
+  node: AgentRunRepository
   cursor: String
 }
 

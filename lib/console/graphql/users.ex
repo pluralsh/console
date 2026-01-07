@@ -737,6 +737,7 @@ defmodule Console.GraphQl.Users do
     field :create_access_token, :access_token do
       middleware Authenticated
       arg :scopes, list_of(:scope_attributes)
+      arg :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
 
       safe_resolve &User.create_access_token/2
     end
@@ -746,6 +747,7 @@ defmodule Console.GraphQl.Users do
       middleware AdminRequired
       arg :id,     non_null(:id)
       arg :scopes, list_of(:scope_attributes)
+      arg :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
 
       resolve &User.create_access_token/2
     end

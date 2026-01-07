@@ -404,6 +404,27 @@ type AgentRunEdge struct {
 	Cursor *string   `json:"cursor,omitempty"`
 }
 
+// A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns
+type AgentRunRepository struct {
+	ID string `json:"id"`
+	// the url of the repository
+	URL string `json:"url"`
+	// the last time the repository was used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type AgentRunRepositoryConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*AgentRunRepositoryEdge `json:"edges,omitempty"`
+}
+
+type AgentRunRepositoryEdge struct {
+	Node   *AgentRunRepository `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
+}
+
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
@@ -1304,9 +1325,11 @@ type ChatThread struct {
 	Settings      *ChatThreadSettings `json:"settings,omitempty"`
 	LastMessageAt *string             `json:"lastMessageAt,omitempty"`
 	Flow          *Flow               `json:"flow,omitempty"`
+	Service       *ServiceDeployment  `json:"service,omitempty"`
 	User          *User               `json:"user,omitempty"`
 	Insight       *AiInsight          `json:"insight,omitempty"`
 	Session       *AgentSession       `json:"session,omitempty"`
+	Research      *InfraResearch      `json:"research,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -1325,6 +1348,10 @@ type ChatThreadAttributes struct {
 	InsightID *string `json:"insightId,omitempty"`
 	// the flow this thread was created in
 	FlowID *string `json:"flowId,omitempty"`
+	// the service this thread was created for
+	ServiceID *string `json:"serviceId,omitempty"`
+	// the research this thread was created for
+	ResearchID *string `json:"researchId,omitempty"`
 	// the settings for this thread
 	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
 	// the session to use for this thread
@@ -1616,10 +1643,12 @@ type Cluster struct {
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
-	Editable   *bool                      `json:"editable,omitempty"`
-	AuditLogs  *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
-	InsertedAt *string                    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                    `json:"updatedAt,omitempty"`
+	Editable  *bool                      `json:"editable,omitempty"`
+	AuditLogs *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
+	// lists all deprecated custom resources for this cluster with optional filtering
+	DeprecatedCrds *DeprecatedCustomResourceConnection `json:"deprecatedCrds,omitempty"`
+	InsertedAt     *string                             `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                             `json:"updatedAt,omitempty"`
 }
 
 // A common kubernetes cluster add-on like cert-manager, istio, etc
@@ -2857,6 +2886,16 @@ type DeprecatedCustomResourceAttributes struct {
 	Name      string  `json:"name"`
 	// the next valid version for this resource
 	NextVersion string `json:"nextVersion"`
+}
+
+type DeprecatedCustomResourceConnection struct {
+	PageInfo PageInfo                        `json:"pageInfo"`
+	Edges    []*DeprecatedCustomResourceEdge `json:"edges,omitempty"`
+}
+
+type DeprecatedCustomResourceEdge struct {
+	Node   *DeprecatedCustomResource `json:"node,omitempty"`
+	Cursor *string                   `json:"cursor,omitempty"`
 }
 
 // Allows you to control whether a specific set of fields in a kubernetes object is drift detected
@@ -8266,6 +8305,7 @@ type Vulnerability struct {
 	FixedVersion     *string       `json:"fixedVersion,omitempty"`
 	InstalledVersion *string       `json:"installedVersion,omitempty"`
 	Severity         *VulnSeverity `json:"severity,omitempty"`
+	AgentRuntime     *string       `json:"agentRuntime,omitempty"`
 	Score            *float64      `json:"score,omitempty"`
 	Title            *string       `json:"title,omitempty"`
 	Description      *string       `json:"description,omitempty"`
@@ -8291,6 +8331,7 @@ type VulnerabilityAttributes struct {
 	Severity         *VulnSeverity         `json:"severity,omitempty"`
 	Score            *float64              `json:"score,omitempty"`
 	RepositoryURL    *string               `json:"repositoryUrl,omitempty"`
+	AgentRuntime     *string               `json:"agentRuntime,omitempty"`
 	Title            *string               `json:"title,omitempty"`
 	Description      *string               `json:"description,omitempty"`
 	CvssSource       *string               `json:"cvssSource,omitempty"`
@@ -8315,10 +8356,12 @@ type VulnerabilityReport struct {
 	// the language the artifact is written in
 	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
 	// the language version of the artifact, if applicable
-	ArtifactLanguageVersion *string       `json:"artifactLanguageVersion,omitempty"`
-	Os                      *VulnOs       `json:"os,omitempty"`
-	Summary                 *VulnSummary  `json:"summary,omitempty"`
-	Artifact                *VulnArtifact `json:"artifact,omitempty"`
+	ArtifactLanguageVersion *string `json:"artifactLanguageVersion,omitempty"`
+	// the agent runtime to use with this vulnerability report
+	AgentRuntime *string       `json:"agentRuntime,omitempty"`
+	Os           *VulnOs       `json:"os,omitempty"`
+	Summary      *VulnSummary  `json:"summary,omitempty"`
+	Artifact     *VulnArtifact `json:"artifact,omitempty"`
 	// the grade of the vulnerability report
 	Grade           *VulnReportGrade `json:"grade,omitempty"`
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
@@ -8335,13 +8378,15 @@ type VulnerabilityReportAttributes struct {
 	// the language the artifact is written in
 	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
 	// the language version of the artifact, if applicable
-	ArtifactLanguageVersion *string                    `json:"artifactLanguageVersion,omitempty"`
-	Os                      *VulnOsAttributes          `json:"os,omitempty"`
-	Summary                 *VulnSummaryAttributes     `json:"summary,omitempty"`
-	Artifact                *VulnArtifactAttributes    `json:"artifact,omitempty"`
-	Vulnerabilities         []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
-	Services                []*ServiceVulnAttributes   `json:"services,omitempty"`
-	Namespaces              []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
+	ArtifactLanguageVersion *string `json:"artifactLanguageVersion,omitempty"`
+	// the agent runtime to use with this vulnerability report
+	AgentRuntime    *string                    `json:"agentRuntime,omitempty"`
+	Os              *VulnOsAttributes          `json:"os,omitempty"`
+	Summary         *VulnSummaryAttributes     `json:"summary,omitempty"`
+	Artifact        *VulnArtifactAttributes    `json:"artifact,omitempty"`
+	Vulnerabilities []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
+	Services        []*ServiceVulnAttributes   `json:"services,omitempty"`
+	Namespaces      []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
 }
 
 type VulnerabilityReportConnection struct {

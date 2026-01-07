@@ -1,6 +1,6 @@
 defmodule Console.AI.Chat.Tools do
   alias Console.AI.Tools
-  alias Console.AI.Tools.Agent
+  alias Console.AI.Tools.{Agent, Explain}
   alias Console.Schema.{ChatThread, AgentSession, Cluster}
 
   @plrl_tools [
@@ -79,12 +79,18 @@ defmodule Console.AI.Chat.Tools do
     Agent.Stack
   ]
 
+  @service_tools [
+    Explain.Files,
+    Explain.Read
+  ]
+
   def tools(%ChatThread{} = t) do
     memory_tools(t)
     |> Enum.concat(flow_tools(t))
     |> Enum.concat(agent_tools(t))
     |> Enum.concat(cluster_tools(t))
     |> Enum.concat(insight_tools(t))
+    |> Enum.concat(service_tools(t))
     |> Enum.uniq()
   end
 
@@ -131,6 +137,9 @@ defmodule Console.AI.Chat.Tools do
 
   defp flow_tools(%ChatThread{flow_id: id}) when is_binary(id), do: @plrl_tools
   defp flow_tools(_), do: []
+
+  defp service_tools(%ChatThread{service_id: id}) when is_binary(id), do: @service_tools
+  defp service_tools(_), do: []
 
   defp cluster_tools(%ChatThread{session: %AgentSession{cluster: %Cluster{}}}),
     do: @cluster_tools

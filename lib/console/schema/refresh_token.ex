@@ -31,7 +31,7 @@ defmodule Console.Schema.RefreshToken do
 
   defp expiry() do
     case Console.conf(:refresh_token_expiry) do
-      v when is_binary(v) -> Console.convert_duration(v)
+      v when is_binary(v) -> Console.convert_duration!(v)
       _ -> Timex.Duration.from_days(7)
     end
   end

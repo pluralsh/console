@@ -56,6 +56,11 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.AI.Graph.Indexer.Supervisor,
+      {GRPC.Server.Supervisor,
+        endpoint: Console.GRPC.Endpoint,
+        port: 50051,
+        start_server: Console.conf(:initialize)
+      }
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]

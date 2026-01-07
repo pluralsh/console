@@ -497,6 +497,30 @@ export enum AgentRunMode {
   Write = 'WRITE'
 }
 
+/** A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns */
+export type AgentRunRepository = {
+  __typename?: 'AgentRunRepository';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time the repository was used */
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url of the repository */
+  url: Scalars['String']['output'];
+};
+
+export type AgentRunRepositoryConnection = {
+  __typename?: 'AgentRunRepositoryConnection';
+  edges?: Maybe<Array<Maybe<AgentRunRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRunRepositoryEdge = {
+  __typename?: 'AgentRunRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRunRepository>;
+};
+
 export enum AgentRunStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
@@ -1620,6 +1644,8 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  research?: Maybe<InfraResearch>;
+  service?: Maybe<ServiceDeployment>;
   session?: Maybe<AgentSession>;
   settings?: Maybe<ChatThreadSettings>;
   summary: Scalars['String']['output'];
@@ -1647,6 +1673,10 @@ export type ChatThreadAttributes = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  /** the research this thread was created for */
+  researchId?: InputMaybe<Scalars['ID']['input']>;
+  /** the service this thread was created for */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
   /** the session to use for this thread */
   session?: InputMaybe<AgentSessionAttributes>;
   /** the settings for this thread */
@@ -1854,6 +1884,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** lists all deprecated custom resources for this cluster with optional filtering */
+  deprecatedCrds?: Maybe<DeprecatedCustomResourceConnection>;
   /** fetches the discovered custom resources with new versions to be used */
   deprecatedCustomResources?: Maybe<Array<Maybe<DeprecatedCustomResource>>>;
   /** the distribution of kubernetes this cluster is running */
@@ -2009,6 +2041,16 @@ export type ClusterClusterNodeMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterDeprecatedCrdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3501,6 +3543,18 @@ export type DeprecatedCustomResourceAttributes = {
   /** the next valid version for this resource */
   nextVersion: Scalars['String']['input'];
   version: Scalars['String']['input'];
+};
+
+export type DeprecatedCustomResourceConnection = {
+  __typename?: 'DeprecatedCustomResourceConnection';
+  edges?: Maybe<Array<Maybe<DeprecatedCustomResourceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DeprecatedCustomResourceEdge = {
+  __typename?: 'DeprecatedCustomResourceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DeprecatedCustomResource>;
 };
 
 /** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */
@@ -8011,6 +8065,7 @@ export type RootMutationTypeConsumeSecretArgs = {
 
 
 export type RootMutationTypeCreateAccessTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
@@ -8224,6 +8279,7 @@ export type RootMutationTypeCreateServiceAccountArgs = {
 
 
 export type RootMutationTypeCreateServiceAccountTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
@@ -9118,6 +9174,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   agentRun?: Maybe<AgentRun>;
+  agentRunRepositories?: Maybe<AgentRunRepositoryConnection>;
   agentRuns?: Maybe<AgentRunConnection>;
   agentRuntime?: Maybe<AgentRuntime>;
   agentRuntimes?: Maybe<AgentRuntimeConnection>;
@@ -9344,6 +9401,15 @@ export type RootQueryTypeAccessTokensArgs = {
 
 export type RootQueryTypeAgentRunArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRunRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -12914,6 +12980,7 @@ export enum VulnUserInteraction {
 
 export type Vulnerability = {
   __typename?: 'Vulnerability';
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   class?: Maybe<Scalars['String']['output']>;
   cvss?: Maybe<CvssBundle>;
   cvssSource?: Maybe<Scalars['String']['output']>;
@@ -12938,6 +13005,7 @@ export type Vulnerability = {
 };
 
 export type VulnerabilityAttributes = {
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   class?: InputMaybe<Scalars['String']['input']>;
   cvss?: InputMaybe<CvssBundleAttributes>;
   cvssSource?: InputMaybe<Scalars['String']['input']>;
@@ -12961,6 +13029,8 @@ export type VulnerabilityAttributes = {
 
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   artifact?: Maybe<VulnArtifact>;
   /** the language the artifact is written in */
   artifactLanguage?: Maybe<AgentRunLanguage>;
@@ -12983,6 +13053,8 @@ export type VulnerabilityReport = {
 };
 
 export type VulnerabilityReportAttributes = {
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   artifact?: InputMaybe<VulnArtifactAttributes>;
   /** the language the artifact is written in */
   artifactLanguage?: InputMaybe<AgentRunLanguage>;

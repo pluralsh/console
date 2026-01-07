@@ -253,7 +253,9 @@ _Appears in:_
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
+| `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
+| `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
 
 
 #### Binding
@@ -2237,7 +2239,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this notification router.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
-| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications. Common events include deployment updates,<br />service health changes, pipeline status changes, and security alerts. |  | Optional: \{\} <br /> |
+| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications.<br />Event names are: alert.fired, alert.resolved, service.update, stack.run, stack.pending, pipeline.update, pr.close, service.insight, cluster.insight, stack.insight, cluster.insight, service.insight, stack.insight, alert.insight |  | Optional: \{\} <br /> |
 | `filters` _[RouterFilters](#routerfilters) array_ | Filters define criteria for selectively routing events.<br />These filters control which events trigger notifications, allowing teams<br />to focus on relevant events. Multiple filters can be combined. |  | Optional: \{\} <br /> |
 | `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Sinks specify the notification destinations where filtered events should be delivered.<br />Each sink represents a configured notification channel such as Slack webhooks,<br />Microsoft Teams channels, or in-app notification systems. Events matching the<br />router's criteria will be formatted and sent to all configured sinks.<br />It is a reference to the NotificationSink resource. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -4090,6 +4092,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `email` _string_ | Email address that will be bound to this service account for identification<br />and authentication purposes. This email serves as the unique identifier<br />for the service account within the Console API. |  | Required: \{\} <br />Type: string <br /> |
 | `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes define the access boundaries for this service account, controlling<br />which Console APIs and resources it can interact with. Each scope can restrict<br />access to specific API endpoints and resource identifiers, enabling fine-grained<br />permission control for automated processes. |  | Optional: \{\} <br /> |
+| `tokenExpiry` _string_ | TokenExpiry is the TTL of the access token, e.g. 1h, 1d, 1w |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef references a Kubernetes secret that should contain the<br />authentication token for this service account. This enables secure storage<br />and management of credentials within the cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 

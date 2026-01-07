@@ -1102,6 +1102,25 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_run_repository_factory do
+    %Schema.AgentRunRepository{
+      url: sequence(:agent_run_repository, & "https://github.com/pluralsh/repo-#{&1}.git"),
+      last_used_at: Timex.now()
+    }
+  end
+
+  def deprecated_custom_resource_factory do
+    %Schema.DeprecatedCustomResource{
+      cluster: build(:cluster),
+      group: "networking.k8s.io",
+      version: "v1beta1",
+      kind: "ingress",
+      namespace: "name",
+      name: sequence(:deprecated_custom_resource, & "crd-#{&1}"),
+      next_version: "v1"
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
