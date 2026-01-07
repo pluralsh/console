@@ -8,7 +8,9 @@ defmodule Console.AI.Policy do
     Chat,
     ChatThread,
     Stack,
+    StackRun,
     Service,
+    ServiceComponent,
     Cluster,
     AiPin,
     Alert,
@@ -35,7 +37,9 @@ defmodule Console.AI.Policy do
       %AiInsight{alert: %Alert{service: %Service{} = svc}} -> Deployments.can?(user, svc, action)
       %AiInsight{alert: %Alert{cluster: %Cluster{} = cluster}} -> Deployments.can?(user, cluster, action)
       %AiInsight{stack: %Stack{} = stack} -> Deployments.can?(user, stack, action)
+      %AiInsight{stack_run: %StackRun{} = stack_run} -> Deployments.can?(user, stack_run, action)
       %AiInsight{service: %Service{} = svc} -> Deployments.can?(user, svc, action)
+      %AiInsight{service_component: %ServiceComponent{} = comp} -> Deployments.can?(user, comp, action)
       _ -> {:error, "forbidden"}
     end
   end

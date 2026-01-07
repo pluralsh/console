@@ -2819,6 +2819,32 @@ export type CommitShaAttributes = {
   sha: Scalars['String']['input'];
 };
 
+export type CompatibilityMatrixSummary = {
+  __typename?: 'CompatibilityMatrixSummary';
+  /** the breaking changes for this version */
+  breakingChanges?: Maybe<Array<Scalars['String']['output']>>;
+  /** the helm changes for this version */
+  helmChanges?: Maybe<Array<Scalars['String']['output']>>;
+};
+
+export type CompatibilityMatrixSummaryAttributes = {
+  /** the breaking changes for this version */
+  breakingChanges?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** the helm changes for this version */
+  helmChanges?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type CompatibilityMatrixVersionAttributes = {
+  /** the chart version of the matrix */
+  chartVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the kube version of the matrix */
+  kube?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** the summary for this version */
+  summary?: InputMaybe<CompatibilityMatrixSummaryAttributes>;
+  /** the version of the matrix */
+  version: Scalars['String']['input'];
+};
+
 export enum ComplianceReportFormat {
   Csv = 'CSV',
   Json = 'JSON'
@@ -3227,6 +3253,51 @@ export type CrossVersionResourceTarget = {
   apiVersion?: Maybe<Scalars['String']['output']>;
   kind?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+};
+
+/** a custom compatibility matrix for a given addon */
+export type CustomCompatibilityMatrix = {
+  __typename?: 'CustomCompatibilityMatrix';
+  /** the git url of this add-on */
+  gitUrl?: Maybe<Scalars['String']['output']>;
+  /** the icon to use for this matrix */
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  /** the name of the addon this matrix applies to */
+  name: Scalars['String']['output'];
+  /** the readme url of this add-on */
+  readmeUrl?: Maybe<Scalars['String']['output']>;
+  /** the release url of this add-on */
+  releaseUrl?: Maybe<Scalars['String']['output']>;
+  /** the versions for this matrix */
+  versions?: Maybe<Array<Maybe<CustomCompatibilityMatrixVersion>>>;
+};
+
+export type CustomCompatibilityMatrixAttributes = {
+  /** the git url to use for this matrix */
+  gitUrl?: InputMaybe<Scalars['String']['input']>;
+  /** the icon to use for this matrix */
+  icon?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the matrix */
+  name: Scalars['String']['input'];
+  /** the readme url to use for this matrix */
+  readmeUrl?: InputMaybe<Scalars['String']['input']>;
+  /** the release url to use for this matrix */
+  releaseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** the versions for this matrix */
+  versions?: InputMaybe<Array<InputMaybe<CompatibilityMatrixVersionAttributes>>>;
+};
+
+export type CustomCompatibilityMatrixVersion = {
+  __typename?: 'CustomCompatibilityMatrixVersion';
+  /** the chart version of the addon this matrix applies to */
+  chartVersion?: Maybe<Scalars['String']['output']>;
+  /** the kube versions of the addon this matrix applies to */
+  kube?: Maybe<Array<Scalars['String']['output']>>;
+  /** the summary for this version */
+  summary?: Maybe<CompatibilityMatrixSummary>;
+  /** the application version of the addon this matrix applies to */
+  version: Scalars['String']['output'];
 };
 
 export type CustomRunStep = {
@@ -7773,6 +7844,7 @@ export type RootMutationType = {
   deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteClusterRegistration?: Maybe<ClusterRegistration>;
   deleteComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
+  deleteCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
   deleteFederatedCredential?: Maybe<FederatedCredential>;
   deleteFlow?: Maybe<Flow>;
@@ -7813,6 +7885,7 @@ export type RootMutationType = {
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
   deleteThread?: Maybe<ChatThread>;
+  deleteUpgradePlanCallout?: Maybe<UpgradePlanCallout>;
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
   delinkBackups?: Maybe<Cluster>;
@@ -7933,6 +8006,7 @@ export type RootMutationType = {
   upsertCatalog?: Maybe<Catalog>;
   upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
+  upsertCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
   upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
   upsertMcpServer?: Maybe<McpServer>;
@@ -7945,6 +8019,7 @@ export type RootMutationType = {
   /** upserts a governance controller */
   upsertPrGovernance?: Maybe<PrGovernance>;
   upsertPreviewEnvironmentTemplate?: Maybe<PreviewEnvironmentTemplate>;
+  upsertUpgradePlanCallout?: Maybe<UpgradePlanCallout>;
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
@@ -8369,6 +8444,11 @@ export type RootMutationTypeDeleteComplianceReportGeneratorArgs = {
 };
 
 
+export type RootMutationTypeDeleteCustomCompatibilityMatrixArgs = {
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeDeleteCustomStackRunArgs = {
   id: Scalars['ID']['input'];
 };
@@ -8562,6 +8642,11 @@ export type RootMutationTypeDeleteStackDefinitionArgs = {
 
 export type RootMutationTypeDeleteThreadArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteUpgradePlanCalloutArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -9098,6 +9183,11 @@ export type RootMutationTypeUpsertComplianceReportGeneratorArgs = {
 };
 
 
+export type RootMutationTypeUpsertCustomCompatibilityMatrixArgs = {
+  attributes: CustomCompatibilityMatrixAttributes;
+};
+
+
 export type RootMutationTypeUpsertFlowArgs = {
   attributes: FlowAttributes;
 };
@@ -9151,6 +9241,11 @@ export type RootMutationTypeUpsertPrGovernanceArgs = {
 
 export type RootMutationTypeUpsertPreviewEnvironmentTemplateArgs = {
   attributes: PreviewEnvironmentTemplateAttributes;
+};
+
+
+export type RootMutationTypeUpsertUpgradePlanCalloutArgs = {
+  attributes: UpgradePlanCalloutAttributes;
 };
 
 
@@ -10780,6 +10875,7 @@ export type RuntimeAddonReleaseUrlArgs = {
 export type RuntimeAddonUpgrade = {
   __typename?: 'RuntimeAddonUpgrade';
   addon?: Maybe<RuntimeAddon>;
+  callout?: Maybe<Scalars['String']['output']>;
   current?: Maybe<AddonVersion>;
   fix?: Maybe<AddonVersion>;
 };
@@ -12171,6 +12267,8 @@ export type StackRun = {
   cluster?: Maybe<Cluster>;
   /** version/image config for the tool you're using */
   configuration: StackConfiguration;
+  /** whether this run is a destroy run */
+  destroy?: Maybe<Scalars['Boolean']['output']>;
   /** whether this run is a dry run */
   dryRun: Scalars['Boolean']['output'];
   /** environment variables for this stack */
@@ -12676,6 +12774,40 @@ export type UpgradePlanAttributes = {
   deprecations?: InputMaybe<Scalars['Boolean']['input']>;
   /** whether all incompatibilities w/in runtime components have been cleared */
   incompatibilities?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type UpgradePlanCallout = {
+  __typename?: 'UpgradePlanCallout';
+  callouts?: Maybe<Array<Maybe<UpgradePlanCalloutCallout>>>;
+  context?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** a callout for the upgrade plan */
+export type UpgradePlanCalloutAttributes = {
+  /** the callouts for this instance */
+  callouts?: InputMaybe<Array<InputMaybe<UpgradePlanCalloutCalloutAttributes>>>;
+  /** additional context for this callout */
+  context?: InputMaybe<Scalars['Json']['input']>;
+  /** the name of the callout */
+  name: Scalars['String']['input'];
+};
+
+export type UpgradePlanCalloutCallout = {
+  __typename?: 'UpgradePlanCalloutCallout';
+  addon: Scalars['String']['output'];
+  template: Scalars['String']['output'];
+};
+
+/** a callout for a specific addon in the upgrade plan */
+export type UpgradePlanCalloutCalloutAttributes = {
+  /** the addon this callout applies to */
+  addon: Scalars['String']['input'];
+  /** the template to use for this callout */
+  template: Scalars['String']['input'];
 };
 
 export type UpgradePlanSpec = {
@@ -15572,7 +15704,7 @@ export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
 
 export type LoginInfoQueryVariables = Exact<{
   redirect?: InputMaybe<Scalars['String']['input']>;
@@ -31221,11 +31353,6 @@ export const MeDocument = gql`
       ...Role
     }
     unreadNotifications
-  }
-  clusterInfo {
-    version
-    platform
-    gitCommit
   }
   configuration {
     gitCommit

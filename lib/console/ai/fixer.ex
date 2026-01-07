@@ -5,7 +5,7 @@ defmodule Console.AI.Fixer do
   use Console.Services.Base
   import Console.AI.Evidence.Base, only: [prepend: 2, append: 2]
   import Console.AI.Policy
-  alias Console.Schema.{AiInsight, Alert, Service, Stack, Cluster, User, PullRequest}
+  alias Console.Schema.{AiInsight, Alert, Service, ServiceComponent, Stack, StackRun, Cluster, User, PullRequest}
   alias Console.AI.Fixer.Service, as: ServiceFixer
   alias Console.AI.Fixer.Stack, as: StackFixer
   alias Console.AI.Fixer.Alert, as: AlertFixer
@@ -67,8 +67,14 @@ defmodule Console.AI.Fixer do
   Generate a fix recommendation from an ai insight struct
   """
   @spec fix(AiInsight.t) :: {:ok, binary} | Console.error
-  def fix(%AiInsight{service: svc, stack: stack, alert: alert} = insight)
-      when is_map(svc) or is_map(stack) or is_map(alert) do
+  def fix(%AiInsight{
+    service: svc,
+    service_component: comp,
+    stack: stack,
+    alert: alert,
+    stack_run: stack_run
+  } = insight)
+      when is_map(svc) or is_map(comp) or is_map(stack) or is_map(alert) or is_map(stack_run) do
     with {:ok, prompt} <- fix_prompt(insight),
       do: Provider.completion(ask(prompt), client: :tool)
   end
@@ -79,11 +85,17 @@ defmodule Console.AI.Fixer do
   Generate a fix recommendation from an ai insight struct
   """
   @spec pr(binary | AiInsight.t, Provider.history, User.t) :: pr_resp
-  def pr(%AiInsight{service: svc, stack: stack, alert: alert} = insight, history, %User{} = user)
-      when is_map(svc) or is_map(stack) or is_map(alert) do
+  def pr(%AiInsight{
+    service: svc,
+    service_component: comp,
+    stack: stack,
+    alert: alert,
+    stack_run: stack_run
+  } = insight, history, %User{} = user)
+      when is_map(svc) or is_map(comp) or is_map(stack) or is_map(alert) or is_map(stack_run) do
     with {:ok, prompt} <- pr_prompt(insight, history) do
       ask(prompt, @tool)
-      |> Provider.tool_call([Pr])
+      |> Provider.simple_tool_call(Pr)
       |> handle_tool_call(pluck(insight), user)
     end
   end
@@ -91,7 +103,7 @@ defmodule Console.AI.Fixer do
   def pr(id, history, %User{} = user) when is_binary(id) do
     Console.AI.Tool.context(%{user: user})
     Repo.get!(AiInsight, id)
-    |> Repo.preload([:service, :stack, :alert])
+    |> Repo.preload([:service, :stack, :alert, stack_run: :stack, service_component: :service])
     |> allow(user, :read)
     |> when_ok(&pr(&1, history, user))
   end
@@ -104,19 +116,10 @@ defmodule Console.AI.Fixer do
   @spec fix(binary, User.t) :: {:ok, binary} | Console.error
   def fix(id, %User{} = user) do
     Repo.get!(AiInsight, id)
-    |> Repo.preload([:service, :stack, :alert])
+    |> Repo.preload([:service, :stack, :alert, stack_run: :stack, service_component: :service])
     |> allow(user, :read)
     |> when_ok(&fix/1)
   end
-
-  def handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, additional, user) do
-    %PullRequest{author_id: user.id}
-    |> PullRequest.changeset(Map.merge(pr_attrs, additional))
-    |> Repo.insert()
-  end
-  def handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _, _), do: {:error, err}
-  def handle_tool_call({:ok, msg}, _, _), do: {:error, msg}
-  def handle_tool_call(err, _, _), do: err
 
   defp ask(prompt, task \\ @prompt), do: prompt ++ [{:user, task}]
 
@@ -135,16 +138,30 @@ defmodule Console.AI.Fixer do
     end
   end
 
+  def handle_tool_call({:ok, %{} = pr_attrs}, %{} = additional, %User{} = user) do
+    %PullRequest{author_id: user.id}
+    |> PullRequest.changeset(Map.merge(pr_attrs, additional))
+    |> Repo.insert()
+  end
+  def handle_tool_call(err, _, _), do: err
+
+  defp fix_prompt(%AiInsight{stack_run: %StackRun{} = stack_run, text: text}), do: StackFixer.prompt(stack_run, text)
   defp fix_prompt(%AiInsight{stack: %Stack{} = stack, text: text}), do: StackFixer.prompt(stack, text)
-  defp fix_prompt(%AiInsight{service: %Service{} = stack, text: text}), do: ServiceFixer.prompt(stack, text)
-  defp fix_prompt(%AiInsight{alert: %Alert{} = stack, text: text}), do: AlertFixer.prompt(stack, text)
+  defp fix_prompt(%AiInsight{service: %Service{} = service, text: text}), do: ServiceFixer.prompt(service, text)
+  defp fix_prompt(%AiInsight{service_component: %ServiceComponent{} = comp, text: text}),
+    do: ServiceFixer.prompt(comp, text)
+  defp fix_prompt(%AiInsight{alert: %Alert{} = alert, text: text}), do: AlertFixer.prompt(alert, text)
 
   defp insight_scope(%AiInsight{service: %Service{}}), do: "Plural Service"
   defp insight_scope(%AiInsight{stack: %Stack{}}), do: "Plural Stack"
   defp insight_scope(%AiInsight{alert: %Alert{}}), do: "alert registered with Plural"
+  defp insight_scope(%AiInsight{stack_run: %StackRun{}}), do: "Plural Stack"
+  defp insight_scope(%AiInsight{service_component: %ServiceComponent{}}), do: "Plural Service"
 
   defp pluck(%AiInsight{service: %Service{id: id}}), do: %{service_id: id}
+  defp pluck(%AiInsight{service_component: %ServiceComponent{service_id: id}}), do: %{service_id: id}
   defp pluck(%AiInsight{stack: %Stack{id: id}}), do: %{stack_id: id}
+  defp pluck(%AiInsight{stack_run: %StackRun{stack_id: id}}), do: %{stack_id: id}
   defp pluck(%AiInsight{alert: %Alert{service_id: id}}), do: %{service_id: id}
   defp pluck(_), do: %{}
 

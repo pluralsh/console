@@ -2275,6 +2275,31 @@ type CommitShaAttributes struct {
 	Branch string `json:"branch"`
 }
 
+type CompatibilityMatrixSummary struct {
+	// the helm changes for this version
+	HelmChanges []string `json:"helmChanges,omitempty"`
+	// the breaking changes for this version
+	BreakingChanges []string `json:"breakingChanges,omitempty"`
+}
+
+type CompatibilityMatrixSummaryAttributes struct {
+	// the helm changes for this version
+	HelmChanges []string `json:"helmChanges,omitempty"`
+	// the breaking changes for this version
+	BreakingChanges []string `json:"breakingChanges,omitempty"`
+}
+
+type CompatibilityMatrixVersionAttributes struct {
+	// the version of the matrix
+	Version string `json:"version"`
+	// the chart version of the matrix
+	ChartVersion *string `json:"chartVersion,omitempty"`
+	// the kube version of the matrix
+	Kube []string `json:"kube,omitempty"`
+	// the summary for this version
+	Summary *CompatibilityMatrixSummaryAttributes `json:"summary,omitempty"`
+}
+
 type ComplianceReportGenerator struct {
 	ID     string                 `json:"id"`
 	Name   string                 `json:"name"`
@@ -2598,6 +2623,49 @@ type CrossVersionResourceTarget struct {
 	APIVersion *string `json:"apiVersion,omitempty"`
 	Kind       *string `json:"kind,omitempty"`
 	Name       *string `json:"name,omitempty"`
+}
+
+// a custom compatibility matrix for a given addon
+type CustomCompatibilityMatrix struct {
+	ID string `json:"id"`
+	// the name of the addon this matrix applies to
+	Name string `json:"name"`
+	// the icon to use for this matrix
+	Icon *string `json:"icon,omitempty"`
+	// the git url of this add-on
+	GitURL *string `json:"gitUrl,omitempty"`
+	// the release url of this add-on
+	ReleaseURL *string `json:"releaseUrl,omitempty"`
+	// the readme url of this add-on
+	ReadmeURL *string `json:"readmeUrl,omitempty"`
+	// the versions for this matrix
+	Versions []*CustomCompatibilityMatrixVersion `json:"versions,omitempty"`
+}
+
+type CustomCompatibilityMatrixAttributes struct {
+	// the name of the matrix
+	Name string `json:"name"`
+	// the icon to use for this matrix
+	Icon *string `json:"icon,omitempty"`
+	// the git url to use for this matrix
+	GitURL *string `json:"gitUrl,omitempty"`
+	// the release url to use for this matrix
+	ReleaseURL *string `json:"releaseUrl,omitempty"`
+	// the readme url to use for this matrix
+	ReadmeURL *string `json:"readmeUrl,omitempty"`
+	// the versions for this matrix
+	Versions []*CompatibilityMatrixVersionAttributes `json:"versions,omitempty"`
+}
+
+type CustomCompatibilityMatrixVersion struct {
+	// the application version of the addon this matrix applies to
+	Version string `json:"version"`
+	// the chart version of the addon this matrix applies to
+	ChartVersion *string `json:"chartVersion,omitempty"`
+	// the kube versions of the addon this matrix applies to
+	Kube []string `json:"kube,omitempty"`
+	// the summary for this version
+	Summary *CompatibilityMatrixSummary `json:"summary,omitempty"`
 }
 
 type CustomRunStep struct {
@@ -6450,6 +6518,7 @@ type RuntimeAddonUpgrade struct {
 	Addon   *RuntimeAddon `json:"addon,omitempty"`
 	Current *AddonVersion `json:"current,omitempty"`
 	Fix     *AddonVersion `json:"fix,omitempty"`
+	Callout *string       `json:"callout,omitempty"`
 }
 
 // a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api
@@ -7621,6 +7690,8 @@ type StackRun struct {
 	Git GitRef `json:"git"`
 	// whether this run is a dry run
 	DryRun bool `json:"dryRun"`
+	// whether this run is a destroy run
+	Destroy *bool `json:"destroy,omitempty"`
 	// optional k8s job configuration for the job that will apply this stack
 	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
@@ -8062,6 +8133,38 @@ type UpgradePlanAttributes struct {
 	Incompatibilities *bool `json:"incompatibilities,omitempty"`
 	// whether all deprecated apis for a cluster have been cleared
 	Deprecations *bool `json:"deprecations,omitempty"`
+}
+
+type UpgradePlanCallout struct {
+	ID         string                       `json:"id"`
+	Name       string                       `json:"name"`
+	Callouts   []*UpgradePlanCalloutCallout `json:"callouts,omitempty"`
+	Context    map[string]any               `json:"context,omitempty"`
+	InsertedAt *string                      `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                      `json:"updatedAt,omitempty"`
+}
+
+// a callout for the upgrade plan
+type UpgradePlanCalloutAttributes struct {
+	// the name of the callout
+	Name string `json:"name"`
+	// the callouts for this instance
+	Callouts []*UpgradePlanCalloutCalloutAttributes `json:"callouts,omitempty"`
+	// additional context for this callout
+	Context *string `json:"context,omitempty"`
+}
+
+type UpgradePlanCalloutCallout struct {
+	Addon    string `json:"addon"`
+	Template string `json:"template"`
+}
+
+// a callout for a specific addon in the upgrade plan
+type UpgradePlanCalloutCalloutAttributes struct {
+	// the addon this callout applies to
+	Addon string `json:"addon"`
+	// the template to use for this callout
+	Template string `json:"template"`
 }
 
 type UpgradePlanSpec struct {

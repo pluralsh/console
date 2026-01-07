@@ -378,6 +378,40 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :max, :integer
   end
 
+  @desc "a callout for the upgrade plan"
+  input_object :upgrade_plan_callout_attributes do
+    field :name, non_null(:string), description: "the name of the callout"
+    field :callouts, list_of(:upgrade_plan_callout_callout_attributes), description: "the callouts for this instance"
+    field :context, :json, description: "additional context for this callout"
+  end
+
+  @desc "a callout for a specific addon in the upgrade plan"
+  input_object :upgrade_plan_callout_callout_attributes do
+    field :addon,    non_null(:string), description: "the addon this callout applies to"
+    field :template, non_null(:string), description: "the template to use for this callout"
+  end
+
+  input_object :custom_compatibility_matrix_attributes do
+    field :name,        non_null(:string), description: "the name of the matrix"
+    field :icon,        :string, description: "the icon to use for this matrix"
+    field :git_url,     :string, description: "the git url to use for this matrix"
+    field :release_url, :string, description: "the release url to use for this matrix"
+    field :readme_url,  :string, description: "the readme url to use for this matrix"
+    field :versions,    list_of(:compatibility_matrix_version_attributes), description: "the versions for this matrix"
+  end
+
+  input_object :compatibility_matrix_version_attributes do
+    field :version,       non_null(:string), description: "the version of the matrix"
+    field :chart_version, :string, description: "the chart version of the matrix"
+    field :kube,          list_of(non_null(:string)), description: "the kube version of the matrix"
+    field :summary,       :compatibility_matrix_summary_attributes, description: "the summary for this version"
+  end
+
+  input_object :compatibility_matrix_summary_attributes do
+    field :helm_changes, list_of(non_null(:string)), description: "the helm changes for this version"
+    field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -880,6 +914,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :addon,   :runtime_addon
     field :current, :addon_version
     field :fix,     :addon_version
+    field :callout, :string
   end
 
   object :cloud_addon_upgrade do
@@ -1218,6 +1253,43 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :features, list_of(:string), description: "the features in this version"
     field :bug_fixes, list_of(:string), description: "the bug fixes in this version"
     field :api_updates, list_of(:string), description: "the api updates in this version"
+  end
+
+  object :upgrade_plan_callout do
+    field :id,       non_null(:id)
+    field :name,     non_null(:string)
+    field :callouts, list_of(:upgrade_plan_callout_callout)
+    field :context,  :map
+
+    timestamps()
+  end
+
+  object :upgrade_plan_callout_callout do
+    field :addon,    non_null(:string)
+    field :template, non_null(:string)
+  end
+
+  @desc "a custom compatibility matrix for a given addon"
+  object :custom_compatibility_matrix do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string), description: "the name of the addon this matrix applies to"
+    field :icon,        :string, description: "the icon to use for this matrix"
+    field :git_url,     :string, description: "the git url of this add-on"
+    field :release_url, :string, description: "the release url of this add-on"
+    field :readme_url,  :string, description: "the readme url of this add-on"
+    field :versions,    list_of(:custom_compatibility_matrix_version), description: "the versions for this matrix"
+  end
+
+  object :custom_compatibility_matrix_version do
+    field :version,       non_null(:string), description: "the application version of the addon this matrix applies to"
+    field :chart_version, :string, description: "the chart version of the addon this matrix applies to"
+    field :kube,          list_of(non_null(:string)), description: "the kube versions of the addon this matrix applies to"
+    field :summary,       :compatibility_matrix_summary, description: "the summary for this version"
+  end
+
+  object :compatibility_matrix_summary do
+    field :helm_changes,     list_of(non_null(:string)), description: "the helm changes for this version"
+    field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
   end
 
   connection node_type: :cluster
@@ -1706,6 +1778,46 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_cluster_iso_image/2
+    end
+
+    field :upsert_upgrade_plan_callout, :upgrade_plan_callout do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :attributes, non_null(:upgrade_plan_callout_attributes)
+
+      resolve &Deployments.upsert_upgrade_plan_callout/2
+    end
+
+    field :delete_upgrade_plan_callout, :upgrade_plan_callout do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :name, non_null(:string)
+
+      resolve &Deployments.delete_upgrade_plan_callout/2
+    end
+
+    field :upsert_custom_compatibility_matrix, :custom_compatibility_matrix do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :attributes, non_null(:custom_compatibility_matrix_attributes)
+
+      resolve &Deployments.upsert_custom_compatibility_matrix/2
+    end
+
+    field :delete_custom_compatibility_matrix, :custom_compatibility_matrix do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :name, non_null(:string)
+
+      resolve &Deployments.delete_custom_compatibility_matrix/2
     end
   end
 end
