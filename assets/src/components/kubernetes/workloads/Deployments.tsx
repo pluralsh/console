@@ -24,6 +24,7 @@ import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -102,7 +103,7 @@ export default function Deployments() {
   )
 
   return (
-    <ResourceList<
+    <UpdatedResourceList<
       DeploymentListT,
       DeploymentT,
       DeploymentsQuery,
