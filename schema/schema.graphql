@@ -7524,6 +7524,20 @@ type Cluster {
 
   auditLogs(after: String, first: Int, before: String, last: Int): ClusterAuditLogConnection
 
+  "lists all deprecated custom resources for this cluster with optional filtering"
+  deprecatedCrds(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "a search query to filter on group, kind, namespace or name"
+    q: String
+  ): DeprecatedCustomResourceConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -8373,6 +8387,11 @@ type ClusterIsoImageConnection {
 type ProjectUsageHistoryConnection {
   pageInfo: PageInfo!
   edges: [ProjectUsageHistoryEdge]
+}
+
+type DeprecatedCustomResourceConnection {
+  pageInfo: PageInfo!
+  edges: [DeprecatedCustomResourceEdge]
 }
 
 enum AuthMethod {
@@ -11806,6 +11825,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type DeprecatedCustomResourceEdge {
+  node: DeprecatedCustomResource
   cursor: String
 }
 

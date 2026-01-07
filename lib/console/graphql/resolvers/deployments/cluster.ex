@@ -16,7 +16,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterAuditLog,
     ClusterRegistration,
     ClusterISOImage,
-    DeploymentSettings
+    DeploymentSettings,
+    DeprecatedCustomResource
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -168,6 +169,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def list_cluster_audits(%Cluster{id: id}, args, _) do
     ClusterAuditLog.for_cluster(id)
     |> ClusterAuditLog.ordered()
+    |> paginate(args)
+  end
+
+  def list_deprecated_crds(%Cluster{id: id}, args, _) do
+    DeprecatedCustomResource.for_cluster(id)
+    |> maybe_search(DeprecatedCustomResource, args)
+    |> DeprecatedCustomResource.ordered()
     |> paginate(args)
   end
 

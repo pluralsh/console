@@ -1884,6 +1884,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** lists all deprecated custom resources for this cluster with optional filtering */
+  deprecatedCrds?: Maybe<DeprecatedCustomResourceConnection>;
   /** fetches the discovered custom resources with new versions to be used */
   deprecatedCustomResources?: Maybe<Array<Maybe<DeprecatedCustomResource>>>;
   /** the distribution of kubernetes this cluster is running */
@@ -2039,6 +2041,16 @@ export type ClusterClusterNodeMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterDeprecatedCrdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3531,6 +3543,18 @@ export type DeprecatedCustomResourceAttributes = {
   /** the next valid version for this resource */
   nextVersion: Scalars['String']['input'];
   version: Scalars['String']['input'];
+};
+
+export type DeprecatedCustomResourceConnection = {
+  __typename?: 'DeprecatedCustomResourceConnection';
+  edges?: Maybe<Array<Maybe<DeprecatedCustomResourceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DeprecatedCustomResourceEdge = {
+  __typename?: 'DeprecatedCustomResourceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DeprecatedCustomResource>;
 };
 
 /** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */

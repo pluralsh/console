@@ -237,8 +237,13 @@ end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated do
   alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.Alert
 
-  def message(%{item: alert}), do: {"alert.fired", Utils.filters(alert), %{alert: alert}}
+  def message(%{item: %Alert{state: :firing} = alert}),
+    do: {"alert.fired", Utils.filters(alert), %{alert: alert}}
+  def message(%{item: %Alert{state: :resolved} = alert}),
+    do: {"alert.resolved", Utils.filters(alert), %{alert: alert}}
+  def message(_), do: :ok
 
   def individual(_), do: :ok
 end

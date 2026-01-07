@@ -621,6 +621,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.list_cluster_audits/3
     end
 
+    @desc "lists all deprecated custom resources for this cluster with optional filtering"
+    connection field :deprecated_crds, node_type: :deprecated_custom_resource do
+      arg :q, :string, description: "a search query to filter on group, kind, namespace or name"
+      resolve &Deployments.list_deprecated_crds/3
+    end
+
     timestamps()
   end
 
@@ -1226,6 +1232,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_registration
   connection node_type: :cluster_iso_image
   connection node_type: :project_usage_history
+  connection node_type: :deprecated_custom_resource
   delta :cluster
   delta :cluster_provider
 

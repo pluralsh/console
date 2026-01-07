@@ -1643,10 +1643,12 @@ type Cluster struct {
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
-	Editable   *bool                      `json:"editable,omitempty"`
-	AuditLogs  *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
-	InsertedAt *string                    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                    `json:"updatedAt,omitempty"`
+	Editable  *bool                      `json:"editable,omitempty"`
+	AuditLogs *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
+	// lists all deprecated custom resources for this cluster with optional filtering
+	DeprecatedCrds *DeprecatedCustomResourceConnection `json:"deprecatedCrds,omitempty"`
+	InsertedAt     *string                             `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                             `json:"updatedAt,omitempty"`
 }
 
 // A common kubernetes cluster add-on like cert-manager, istio, etc
@@ -2884,6 +2886,16 @@ type DeprecatedCustomResourceAttributes struct {
 	Name      string  `json:"name"`
 	// the next valid version for this resource
 	NextVersion string `json:"nextVersion"`
+}
+
+type DeprecatedCustomResourceConnection struct {
+	PageInfo PageInfo                        `json:"pageInfo"`
+	Edges    []*DeprecatedCustomResourceEdge `json:"edges,omitempty"`
+}
+
+type DeprecatedCustomResourceEdge struct {
+	Node   *DeprecatedCustomResource `json:"node,omitempty"`
+	Cursor *string                   `json:"cursor,omitempty"`
 }
 
 // Allows you to control whether a specific set of fields in a kubernetes object is drift detected
