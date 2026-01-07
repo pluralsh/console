@@ -47,9 +47,7 @@ defmodule Console.AI.Chat.System do
       repository: [:id, :url],
       sources: [:repository_id, :path],
       helm: [:url, :chart, :version, :values, :values_file, :lua_script, :lua_file, :lua_folder],
-      imports: [
-        stack: [:name]
-      ],
+      imports: [stack: [:name]],
       sync_config: [
         :enforce_namespace,
         :create_namespace,
