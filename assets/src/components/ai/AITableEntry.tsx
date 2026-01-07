@@ -7,6 +7,7 @@ import {
   Flex,
   FlowIcon,
   IconFrame,
+  TelescopeIcon,
 } from '@pluralsh/design-system'
 
 import { StackedText } from 'components/utils/table/StackedText'
@@ -18,7 +19,7 @@ import {
   ChatThreadTinyFragment,
 } from 'generated/graphql'
 import { ComponentProps, ComponentPropsWithRef, useCallback } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts.tsx'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs, fromNow, isAfter } from 'utils/datetime.ts'
@@ -225,6 +226,8 @@ function TableEntryIcon({
       />
     )
 
+  if (!!thread?.research) return <TelescopeIcon size={ICON_SIZE} />
+
   // fallback to chat icon
   return isStale ? (
     <ChatOutlineIcon
@@ -304,25 +307,21 @@ export function TableEntryResourceLink({
   url?: string
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
 
   if (!path) return null
 
   return (
-    <a
-      onClick={(e) => {
-        e.stopPropagation()
-        if (url) navigate(url)
-      }}
+    <Link
+      to={url ?? ''}
       css={{
         display: 'flex',
         gap: theme.spacing.xsmall,
         cursor: 'pointer',
         width: 'fit-content',
-        '&:hover': {
-          color: theme.colors.text,
-          textDecoration: 'underline',
-        },
+        color: theme.colors['text-xlight'],
+        textDecoration: 'none',
+        transition: 'text-decoration 0.2s ease-in-out',
+        '&:hover': { color: theme.colors.text, textDecoration: 'underline' },
       }}
     >
       {path.join('  •  ')}
@@ -330,7 +329,7 @@ export function TableEntryResourceLink({
         color="icon-default"
         size={12}
       />
-    </a>
+    </Link>
   )
 }
 

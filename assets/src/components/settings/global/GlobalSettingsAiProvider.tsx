@@ -334,12 +334,14 @@ function SelectWithDisable({
   return (
     <div
       css={
-        disabled && {
-          '& div:last-child': {
-            color: theme.colors['text-input-disabled'],
-            cursor: 'unset',
-          },
-        }
+        disabled
+          ? {
+              '& div:last-child': {
+                color: theme.colors['text-input-disabled'],
+                cursor: 'unset',
+              },
+            }
+          : undefined
       }
     >
       <Select

@@ -1,11 +1,12 @@
 import {
+  ClockIcon,
   CloseIcon,
   Flex,
   HamburgerMenuCollapseIcon,
-  HistoryIcon,
   IconFrame,
   PlusIconAlt,
   Spinner,
+  TelescopeIcon,
   Toast,
 } from '@pluralsh/design-system'
 import {
@@ -14,7 +15,7 @@ import {
 } from 'components/commandpalette/CommandPaletteContext.tsx'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { useCloudConnectionsQuery } from 'generated/graphql'
-import { capitalize } from 'lodash'
+import { capitalize, truncate } from 'lodash'
 import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
@@ -25,6 +26,7 @@ import { AgentSelect } from './AgentSelect.tsx'
 import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
+import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
@@ -93,7 +95,7 @@ export function ChatbotHeader() {
           )}
           <IconFrame
             clickable
-            icon={<HistoryIcon />}
+            icon={<ClockIcon />}
             type="tertiary"
             tooltip="View chat threads"
             onClick={() => setCmdkOpen(true, CommandPaletteTab.Threads)}
@@ -109,20 +111,43 @@ export function ChatbotHeader() {
         </Flex>
       </MainHeaderSC>
       <SubHeaderSC>
-        <StackedText
-          truncate
-          first={
-            agentInitMode
-              ? `New ${capitalize(agentInitMode)} agent session`
-              : (currentThread?.summary ??
-                (currentThreadId ? '' : 'New chat with Plural AI'))
-          }
-          second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
-          firstPartialType="body2Bold"
-          firstColor="text"
-          secondPartialType="caption"
-        />
-        <AgentSessionTypeSelect />
+        {currentThread?.research ? (
+          <StackedText
+            icon={<TelescopeIcon />}
+            first="Infrastructure research"
+            firstPartialType="body1"
+            firstColor="text"
+            second={
+              <TableEntryResourceLink
+                path={[
+                  truncate(currentThread.research.prompt ?? '', { length: 50 }),
+                ]}
+                url={getInfraResearchAbsPath({
+                  infraResearchId: currentThread.research.id,
+                })}
+              />
+            }
+          />
+        ) : (
+          <>
+            <StackedText
+              truncate
+              first={
+                agentInitMode
+                  ? `New ${capitalize(agentInitMode)} agent session`
+                  : (currentThread?.summary ??
+                    (currentThreadId ? '' : 'New chat with Plural AI'))
+              }
+              second={
+                <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
+              }
+              firstPartialType="body2Bold"
+              firstColor="text"
+              secondPartialType="caption"
+            />
+            <AgentSessionTypeSelect />
+          </>
+        )}
       </SubHeaderSC>
       <Toast
         show={!!mutationError}

@@ -1,4 +1,4 @@
-import { Chip } from '@pluralsh/design-system'
+import { Chip, ChipSeverity } from '@pluralsh/design-system'
 import { ServiceDeploymentStatus } from 'generated/graphql'
 import { ComponentProps } from 'react'
 import { createMapperWithFallback } from 'utils/mapping'
@@ -19,7 +19,7 @@ export const serviceStatusToLabel = createMapperWithFallback<
 
 export const serviceStatusToSeverity = createMapperWithFallback<
   ServiceDeploymentStatus,
-  ComponentProps<typeof Chip>['severity']
+  ChipSeverity
 >(
   {
     FAILED: 'critical',
