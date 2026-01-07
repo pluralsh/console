@@ -1,37 +1,19 @@
-import axios, { AxiosInstance } from 'axios'
+import { Client, createClient } from '../generated/kubernetes/client'
 import { fetchToken } from './auth'
 
-const clients = new Map<string, AxiosInstance>()
-let currentClusterId: string | null = null
+const clients = new Map<string, Client>()
 
-export const setClusterId = (clusterId: string | null) => {
-  currentClusterId = clusterId
-}
-
-const createClient = (clusterId: string) => {
-  const instance = axios.create()
-
-  instance.interceptors.request.use((config) => {
-    const token = fetchToken()
-
-    if (token) {
-      config.headers.Authorization = `Bearer plrl:${clusterId}:${token}`
-    }
-
-    return config
-  })
-
-  return instance
-}
-
-export const getAxiosInstance = () => {
-  if (!currentClusterId) {
-    return axios.create()
+export const getAxiosInstance = (clusterID: string) => {
+  if (!clients.has(clusterID)) {
+    clients.set(
+      clusterID,
+      createClient({
+        headers: {
+          Authorization: `Bearer plrl:${clusterID}:${fetchToken()}`,
+        },
+      })
+    )
   }
 
-  if (!clients.has(currentClusterId)) {
-    clients.set(currentClusterId, createClient(currentClusterId))
-  }
-
-  return clients.get(currentClusterId)!
+  return clients.get(clusterID)!
 }
