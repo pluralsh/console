@@ -1,4 +1,4 @@
-import type { OperationVariables } from '@apollo/client/core'
+// import type { OperationVariables } from '@apollo/client/core'
 
 import {
   Types_ListMeta as ListMetaT,
@@ -17,11 +17,12 @@ interface Error {
   ErrStatus: ErrorStatus
 }
 
-interface DataSelectVariables extends OperationVariables {
+interface DataSelectVariables {
   filterBy?: Nullable<string>
   sortBy?: Nullable<string>
   itemsPerPage?: Nullable<string>
   page?: Nullable<string>
+  [key: string]: any
 }
 
 interface ResourceVariables extends DataSelectVariables {

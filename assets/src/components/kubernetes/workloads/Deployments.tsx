@@ -7,9 +7,6 @@ import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   Deployment_Deployment as DeploymentT,
   Deployment_DeploymentList as DeploymentListT,
-  DeploymentsDocument,
-  DeploymentsQuery,
-  DeploymentsQueryVariables,
   Maybe,
 } from '../../../generated/graphql-kubernetes'
 import {
@@ -19,12 +16,11 @@ import {
 import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -73,17 +69,6 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 export default function Deployments() {
   const cluster = useCluster()
 
-  // TODO: This is proof of concept, remove when real data is wired up.
-  const { data: deploymentsData } = useHandleGetDeploymentsQuery(
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  )
-  console.log('deployments', deploymentsData?.deployments)
-
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   const { colName, colNamespace, colLabels, colCreationTimestamp, colAction } =
@@ -103,16 +88,10 @@ export default function Deployments() {
   )
 
   return (
-    <UpdatedResourceList<
-      DeploymentListT,
-      DeploymentT,
-      DeploymentsQuery,
-      DeploymentsQueryVariables
-    >
+    <UpdatedResourceList<DeploymentListT, DeploymentT>
       namespaced
       columns={columns}
-      queryDocument={DeploymentsDocument}
-      queryName="handleGetDeployments"
+      queryHook={useHandleGetDeploymentsQuery}
       itemsKey="deployments"
     />
   )
