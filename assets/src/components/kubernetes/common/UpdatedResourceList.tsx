@@ -1,11 +1,13 @@
 import { Table } from '@pluralsh/design-system'
-import { UseQueryResult } from '@tanstack/react-query'
+import {
+  AnyUseQueryOptions,
+  UseQueryResult,
+  keepPreviousData,
+} from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
-import uniqWith from 'lodash/uniqWith'
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
@@ -32,7 +34,7 @@ interface ResourceListProps<TResourceList> {
   initialSort?: SortingState
   queryHook: (
     variables: any,
-    options?: any
+    options?: AnyUseQueryOptions
   ) => UseQueryResult<TResourceList, unknown>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
@@ -64,7 +66,6 @@ export function UpdatedResourceList<
   })
 
   const [page, setPage] = useState(0)
-  const [dataCombined, setDataCombined] = useState<TResource[]>([])
 
   const { data, isFetching } = queryHook(
     {
@@ -75,8 +76,8 @@ export function UpdatedResourceList<
       page: String(page + 1),
     },
     {
-      pollInterval: 30_000,
-      client: KubernetesClient(cluster?.id ?? ''),
+      queryKey: [itemsKey, page], // TODO?
+      placeholderData: keepPreviousData,
     }
   )
 
@@ -86,19 +87,6 @@ export function UpdatedResourceList<
     [itemsKey, resourceList]
   )
   const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  useEffect(() => {
-    if (page === 0) {
-      setDataCombined(items)
-    } else {
-      setDataCombined((prev) =>
-        uniqWith(
-          [...prev, ...items],
-          (a, b) => a.objectMeta.name === b.objectMeta.name
-        )
-      )
-    }
-  }, [items, page])
 
   useEffect(() => {
     // Reset page when filters change
@@ -119,9 +107,9 @@ export function UpdatedResourceList<
       <ErrorToast errors={resourceList?.errors} />
       <Table
         fullHeightWrap
-        data={dataCombined}
+        data={items}
         columns={columns}
-        loading={isFetching && page === 0 && dataCombined.length === 0}
+        loading={isFetching && page === 0 && items.length === 0}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetching}
