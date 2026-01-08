@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import { Job_Job as JobT, Maybe } from '../../../generated/graphql-kubernetes'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getWorkloadsAbsPath,
   JOBS_REL_PATH,
@@ -30,7 +30,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<JobT>()
+const columnHelper = createColumnHelper<JobJob>()
 
 const colImages = columnHelper.accessor((job) => job, {
   id: 'images',

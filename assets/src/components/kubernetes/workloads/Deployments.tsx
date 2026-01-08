@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
-import { Deployment_Deployment as DeploymentT } from '../../../generated/graphql-kubernetes'
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
@@ -36,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<DeploymentT>()
+const columnHelper = createColumnHelper<DeploymentDeployment>()
 
 const colImages = columnHelper.accessor((deployment) => deployment, {
   id: 'images',
