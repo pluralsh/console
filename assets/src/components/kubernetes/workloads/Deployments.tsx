@@ -18,8 +18,8 @@ import { useDefaultColumns } from '../common/utils'
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 import {
-  handleGetDeployments2InfiniteOptions,
-  handleGetDeploymentsInfiniteOptions,
+  getAllDeploymentsInfiniteOptions,
+  getDeploymentsInfiniteOptions,
 } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
 import { isEmpty } from 'lodash'
@@ -102,8 +102,8 @@ export default function Deployments() {
       columns={columns}
       queryOptions={
         isNamespaceFilterActive
-          ? handleGetDeployments2InfiniteOptions
-          : handleGetDeploymentsInfiniteOptions
+          ? getDeploymentsInfiniteOptions
+          : getAllDeploymentsInfiniteOptions
       }
       itemsKey="deployments"
     />
