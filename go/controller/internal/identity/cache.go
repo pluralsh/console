@@ -65,3 +65,24 @@ func (u *identityCache) GetGroupID(name string) (string, error) {
 	}
 	return lo.FromPtr(id), nil
 }
+
+// ResetCache should be used for testing purposes only.
+func ResetCache(c client.ConsoleClient) {
+	cache = &identityCache{
+		consoleClient: c,
+		userCache: pollycache.NewCache[string](args.WipeCacheInterval(), func(email string) (*string, error) {
+			id, err := c.GetUserId(email)
+			if err != nil {
+				return nil, err
+			}
+			return lo.ToPtr(id), err
+		}),
+		groupCache: pollycache.NewCache[string](args.WipeCacheInterval(), func(group string) (*string, error) {
+			id, err := c.GetGroupId(group)
+			if err != nil {
+				return nil, err
+			}
+			return lo.ToPtr(id), err
+		}),
+	}
+}

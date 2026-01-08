@@ -168,7 +168,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 			})).To(Succeed())
 
 			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			cacheConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			cacheConsoleClient.On("GetUserId", mock.Anything).Return("id", nil)
 			identity.ResetCache(cacheConsoleClient)
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
@@ -203,7 +203,7 @@ var _ = Describe("Catalog Controller", Ordered, func() {
 			})).To(Succeed())
 
 			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user"))
+			cacheConsoleClient.On("GetUserId", mock.Anything).Return("", errors.NewNotFound(schema.GroupResource{}, "user"))
 			identity.ResetCache(cacheConsoleClient)
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)

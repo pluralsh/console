@@ -86,13 +86,13 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	if err != nil {
 		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
-	if exists && !cluster.Spec.Reconciliation.DriftDetect() {
-		utils.MarkReadOnly(cluster)
-		return r.handleExisting(cluster)
+	if !exists {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "cluster not found")
+		return common.Wait(), nil
 	}
 
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "cluster not found")
-	return common.Wait(), nil
+	utils.MarkReadOnly(cluster)
+	return r.handleExisting(cluster)
 }
 
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
