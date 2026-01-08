@@ -89,8 +89,6 @@ export function UpdatedResourceList<
       },
     })
 
-  console.log(data)
-
   const { items, errors } = useMemo(
     () => ({
       items:
