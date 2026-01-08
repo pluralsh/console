@@ -37,8 +37,10 @@ interface ResourceListProps<TResourceList> {
     options: any
   ) => UseInfiniteQueryOptions<
     TResourceList,
-    Error,
-    InfiniteData<TResourceList>
+    any,
+    InfiniteData<TResourceList>,
+    any,
+    any
   >
   itemsKey?: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
