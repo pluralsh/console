@@ -2,22 +2,23 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
+import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
-  Maybe,
-  Replicaset_ReplicaSet as ReplicaSetT,
-  Replicaset_ReplicaSetList as ReplicaSetListT,
-  ReplicaSetsDocument,
-  ReplicaSetsQuery,
-  ReplicaSetsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  ReplicasetReplicaSet,
+  ReplicasetReplicaSetList,
+} from '../../../generated/kubernetes'
+import {
+  getAllReplicaSetsInfiniteOptions,
+  getReplicaSetsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getWorkloadsAbsPath,
   REPLICA_SETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect.tsx'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -31,7 +32,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ReplicaSetT>()
+const columnHelper = createColumnHelper<ReplicasetReplicaSet>()
 
 const colImages = columnHelper.accessor((rs) => rs, {
   id: 'images',
@@ -88,21 +89,20 @@ export function useReplicaSetsColumns(): Array<object> {
 
 export default function ReplicaSets() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const columns = useReplicaSetsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<
-      ReplicaSetListT,
-      ReplicaSetT,
-      ReplicaSetsQuery,
-      ReplicaSetsQueryVariables
-    >
+    <UpdatedResourceList<ReplicasetReplicaSetList, ReplicasetReplicaSet>
       namespaced
       columns={columns}
-      queryDocument={ReplicaSetsDocument}
-      queryName="handleGetReplicaSets"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getReplicaSetsInfiniteOptions
+          : getAllReplicaSetsInfiniteOptions
+      }
       itemsKey="replicaSets"
     />
   )

@@ -6,10 +6,10 @@ import {
   ContainerState,
   Common_Event as EventT,
   Maybe,
-  Common_PodInfo as PodInfoT,
 } from '../../../generated/graphql-kubernetes'
 import { Readiness, ReadinessT } from '../../../utils/status'
 import { TruncateStart } from '../../utils/table/Truncate'
+import { CommonPodInfo } from '../../../generated/kubernetes'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -70,7 +70,7 @@ export function PodStatusChip({
 }
 
 function podInfoStatus(
-  podInfo: PodInfoT
+  podInfo: CommonPodInfo
 ): [string, ComponentProps<typeof Chip>['severity']] {
   if (!podInfo) return ['Unknown', 'neutral']
   const { desired, succeeded, running, pending, failed, warnings } = podInfo
@@ -90,7 +90,7 @@ function podInfoStatus(
   return ['Unknown', 'neutral']
 }
 
-export function WorkloadStatusChip({ podInfo }: { podInfo: PodInfoT }) {
+export function WorkloadStatusChip({ podInfo }: { podInfo: CommonPodInfo }) {
   const [status, severity] = podInfoStatus(podInfo)
 
   return (
