@@ -28,11 +28,13 @@ import {
 } from 'react-router-dom'
 import { FILTER_PARAM, NAMESPACE_PARAM } from '../Navigation'
 import { NamespaceFilter } from './NamespaceFilter'
+import { isEmpty } from 'lodash'
 
 type DataSelectContextT = {
   namespaced: boolean
   setNamespaced: (namespaced: boolean) => void
   namespace: string
+  hasNamespaceFilterActive: boolean
   filter: string
   setParams: SetURLSearchParams
 }
@@ -50,6 +52,7 @@ export function DataSelectProvider({ children }: { children: ReactNode }) {
       namespaced,
       setNamespaced,
       namespace: params.get(NAMESPACE_PARAM) ?? '',
+      hasNamespaceFilterActive: !isEmpty(params.get(NAMESPACE_PARAM)),
       filter: params.get(FILTER_PARAM) ?? '',
       setParams,
     }),

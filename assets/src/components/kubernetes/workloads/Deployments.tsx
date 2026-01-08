@@ -22,7 +22,6 @@ import {
   getDeploymentsInfiniteOptions,
 } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
-import { isEmpty } from 'lodash'
 import { useDataSelect } from '../common/DataSelect.tsx'
 import {
   DeploymentDeployment,
@@ -75,8 +74,7 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 
 export default function Deployments() {
   const cluster = useCluster()
-  const { namespace } = useDataSelect()
-  const isNamespaceFilterActive = !isEmpty(namespace)
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -101,7 +99,7 @@ export default function Deployments() {
       namespaced
       columns={columns}
       queryOptions={
-        isNamespaceFilterActive
+        hasNamespaceFilterActive
           ? getDeploymentsInfiniteOptions
           : getAllDeploymentsInfiniteOptions
       }

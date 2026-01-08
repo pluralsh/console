@@ -3,25 +3,24 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Job_Job as JobT,
-  Job_JobList as JobListT,
-  JobsDocument,
-  JobsQuery,
-  JobsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { Job_Job as JobT, Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getWorkloadsAbsPath,
   JOBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { JobJob, JobJobList } from '../../../generated/kubernetes'
+import {
+  getAllJobsInfiniteOptions,
+  getJobsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { useDataSelect } from '../common/DataSelect.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -88,16 +87,20 @@ export function useJobsColumns(): Array<object> {
 
 export default function Jobs() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const columns = useJobsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<JobListT, JobT, JobsQuery, JobsQueryVariables>
+    <UpdatedResourceList<JobJobList, JobJob>
       namespaced
       columns={columns}
-      queryDocument={JobsDocument}
-      queryName="handleGetJobList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getJobsInfiniteOptions
+          : getAllJobsInfiniteOptions
+      }
       itemsKey="jobs"
     />
   )
