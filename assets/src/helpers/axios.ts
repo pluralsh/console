@@ -3,14 +3,12 @@ import { fetchToken } from './auth'
 
 const clients = new Map<string, Client>()
 
-export const getAxiosInstance = (clusterID: string) => {
+export const AxiosInstance = (clusterID: string) => {
   if (!clients.has(clusterID)) {
     clients.set(
       clusterID,
       createClient({
-        headers: {
-          Authorization: `Bearer plrl:${clusterID}:${fetchToken()}`,
-        },
+        headers: { Authorization: `Bearer plrl:${clusterID}:${fetchToken()}` },
       })
     )
   }

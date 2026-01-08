@@ -8,7 +8,7 @@ import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 import { ReactElement, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Options } from '../../../generated/kubernetes'
-import { getAxiosInstance } from '../../../helpers/axios.ts'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
   getCustomResourceDetailsAbsPath,
@@ -72,7 +72,7 @@ export function UpdatedResourceList<
   const { data, isFetching, hasNextPage, fetchNextPage } =
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
-        client: getAxiosInstance(cluster?.id ?? ''),
+        client: AxiosInstance(cluster?.id ?? ''),
         query: {
           filterBy: `name,${filter}`,
           sortBy: sortBy,
